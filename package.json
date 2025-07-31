@@ -22,6 +22,7 @@
     "typescript": "^5.7.3"
   },
   "scripts": {
+    "mirror_frontend": "rm -rf abap2UI5 && git clone https://github.com/abap2UI5/abap2UI5 && rm -rf app/z2ui5/webapp && cp -r abap2UI5/app/webapp app/z2ui5 && cp -f app/backup/index.html app/z2ui5/webapp/index.html && cp -f app/backup/manifest.json app/z2ui5/webapp/manifest.json && rm -rf abap2UI5",
     "start": "cds-serve",
     "watch-z2ui5": "cds watch --open z2ui5/webapp/index.html?sap-ui-xx-viewCache=false",
     "undeploy": "cf undeploy abap2UI5 --delete-services --delete-service-keys --delete-service-brokers",
