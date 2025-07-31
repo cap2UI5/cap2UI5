@@ -8,26 +8,23 @@ sap.ui.define(["sap/ui/core/UIComponent", "z2ui5/model/models", "z2ui5/cc/Server
             ]
         },
         async init() {
-            
-            if (typeof z2ui5 !== 'undefined') {
-                z2ui5.oConfig = {};
-            }
-
             UIComponent.prototype.init.apply(this, arguments);
 
             if (typeof z2ui5 == 'undefined') {
                 z2ui5 = {};
             }
             if (z2ui5?.checkLocal == false) {
-                z2ui5 = {};
+            z2ui5 = {};
             }
+            
+            z2ui5.oRouter = this.getRouter();
+            z2ui5.oRouter.initialize();
+            z2ui5.oRouter.stop();
 
-            if (typeof z2ui5.oConfig == 'undefined') {
-                z2ui5.oConfig = {};
-            }
             z2ui5.oDeviceModel = Models.createDeviceModel();
             this.setModel(z2ui5.oDeviceModel, "device");
 
+            z2ui5.oConfig = {};
             z2ui5.oConfig.ComponentData = this.getComponentData();
 
             try {
@@ -42,9 +39,9 @@ sap.ui.define(["sap/ui/core/UIComponent", "z2ui5/model/models", "z2ui5/cc/Server
             }
 
             if (/iPad|iPhone/.test(navigator.platform)) {
-                window.addEventListener("pagehide", this.__pagehide.bind(this));
+                window.addEventListener("__pagehide", this.__pagehide.bind(this));
             } else {
-                window.addEventListener("beforeunload", this.__beforeunload.bind(this));
+                window.addEventListener("__beforeunload", this.__beforeunload.bind(this));
             }
 
             document.addEventListener("keydown", function (zEvent) {
@@ -65,11 +62,6 @@ sap.ui.define(["sap/ui/core/UIComponent", "z2ui5/model/models", "z2ui5/cc/Server
                     z2ui5.oController.displayView(event.state.view, event.state.model);
                 }
             });
-
-            z2ui5.oRouter = this.getRouter();
-            z2ui5.oRouter.initialize();
-            z2ui5.oRouter.stop();
-            
         },
 
         __beforeunload: function () {

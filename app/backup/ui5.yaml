@@ -1,3 +1,5 @@
+# yaml-language-server: $schema=https://sap.github.io/ui5-tooling/schema/ui5.yaml.json
+
 specVersion: "3.1"
 metadata:
   name: z2ui5
@@ -12,18 +14,10 @@ server:
           path:
             - /resources
             - /test-resources
-          url: https://ui5.sap.com
-        backend:
-          - path: /sap
-            url: <<system>>
+          url: https://sapui5.hana.ondemand.com
     - name: fiori-tools-appreload
       afterMiddleware: compression
       configuration:
         port: 35729
         path: webapp
         delay: 300
-    - name: fiori-tools-preview
-      afterMiddleware: fiori-tools-appreload
-      configuration:
-        component: z2ui5
-        ui5Theme: sap_horizon

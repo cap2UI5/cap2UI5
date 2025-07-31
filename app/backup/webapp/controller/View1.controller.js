@@ -1,9 +1,9 @@
 sap.ui.define(["sap/ui/core/mvc/Controller", "sap/ui/core/mvc/XMLView", "sap/ui/model/json/JSONModel",
     "sap/ui/core/BusyIndicator", "sap/m/MessageBox", "sap/m/MessageToast", "sap/ui/core/Fragment", "sap/m/BusyDialog",
-    "sap/ui/VersionInfo", "z2ui5/cc/Server", "sap/ui/model/odata/v2/ODataModel", "sap/m/library", "sap/ui/core/routing/HashChanger", "sap/ui/util/Storage"
+    "sap/ui/VersionInfo", "z2ui5/cc/Server", "sap/ui/model/odata/v2/ODataModel", "sap/m/library",   "sap/ui/core/routing/HashChanger"
 ],
     function (Controller, XMLView, JSONModel, BusyIndicator, MessageBox, MessageToast, Fragment, mBusyDialog, VersionInfo,
-        Server, ODataModel, mobileLibrary, HashChanger, Storage) {
+        Server, ODataModel, mobileLibrary, HashChanger) {
         "use strict";
         return Controller.extend("z2ui5.controller.View1", {
 
@@ -56,7 +56,7 @@ sap.ui.define(["sap/ui/core/mvc/Controller", "sap/ui/core/mvc/XMLView", "sap/ui/
                         await this.displayPopover(S_POPOVER.XML, 'oViewPopover', S_POPOVER.OPEN_BY_ID);
                     }
 
-                   if (z2ui5.oView) {    var oState = JSON.parse(JSON.stringify({ view: z2ui5.oView.mProperties.viewContent, model: z2ui5.oView.getModel().getData(), response: z2ui5.oResponse })); }else{ oState = {}; }
+                    let oState = JSON.parse(JSON.stringify({ view: z2ui5.oView.mProperties.viewContent, model: z2ui5.oView.getModel().getData(), response: z2ui5.oResponse }));
                    if (SET_PUSH_STATE) {
                      // sap.ui.core.routing.HashChanger.getInstance().setHash("423143124");
                      // sap.ui.core.routing.HashChanger.getInstance().replaceHash("423143124");
@@ -279,9 +279,6 @@ sap.ui.define(["sap/ui/core/mvc/Controller", "sap/ui/core/mvc/XMLView", "sap/ui/
                     case 'HISTORY_BACK':
                         history.back();
                         break;
-                   case 'CLIPBOARD_COPY':
-                        copyToClipboard( args[1] );
-                        break;
                     case 'CLIPBOARD_APP_STATE':
                             function copyToClipboard(textToCopy) {
                                 if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
@@ -313,24 +310,6 @@ sap.ui.define(["sap/ui/core/mvc/Controller", "sap/ui/core/mvc/XMLView", "sap/ui/
                         var oModel = new ODataModel({ serviceUrl: args[1], annotationURI: (args.length > 3 ? args[3] : '') });
                         z2ui5.oView.setModel(oModel, args[2] ? args[2] : undefined);
                         break;
-                    case 'STORE_DATA':
-                        let storageParams = args[1];
-                        let storageType = Storage.Type.session;
-                        switch (storageParams.TYPE) {
-                            case 'session':
-                                storageType = Storage.Type.session;
-                                break;
-                            case 'local':
-                                storageType = Storage.Type.local;
-                                break;
-                        }
-                        let oStorage = new Storage(storageType, storageParams.PREFIX);
-                        if (storageParams.VALUE == "" || storageParams.VALUE == null) {
-                            oStorage.remove(storageParams.KEY);
-                        } else {
-                            oStorage.put(storageParams.KEY, storageParams.VALUE);
-                        }
-                        break;                        
                     case 'DOWNLOAD_B64_FILE':
                         var a = document.createElement("a");
                         a.href = args[1];
@@ -369,7 +348,8 @@ sap.ui.define(["sap/ui/core/mvc/Controller", "sap/ui/core/mvc/XMLView", "sap/ui/
                             })) || "";
                             if (z2ui5.args[3] === 'EXT') {
                                 let url = window.location.href.split('#')[0] + hash;
-                                sap.m.URLHelper.redirect(url, true);
+                                //todo
+                                //URLHelper.redirect(url, true);
                             } else {
                                 z2ui5.oCrossAppNavigator.toExternal({
                                     target: {
@@ -457,7 +437,7 @@ sap.ui.define(["sap/ui/core/mvc/Controller", "sap/ui/core/mvc/XMLView", "sap/ui/
                 BusyIndicator.show();
                 z2ui5.oBody = {};
                 if (args[0][3] || z2ui5.oController == this) {
-                    if (z2ui5.oResponse.PARAMS?.S_VIEW?.SWITCH_DEFAULT_MODEL_PATH) {
+                    if (z2ui5.oResponse.PARAMS.S_VIEW?.SWITCH_DEFAULT_MODEL_PATH) {
                         var oModel = z2ui5.oView.getModel("http");
                     } else {
                         oModel = z2ui5.oView.getModel();
@@ -498,12 +478,6 @@ sap.ui.define(["sap/ui/core/mvc/Controller", "sap/ui/core/mvc/XMLView", "sap/ui/
                 );
                 z2ui5.oResponseOld = z2ui5.oResponse;
                 Server.Roundtrip();
-                z2ui5.onAfterRoundtrip.forEach(item => {
-                    if (item !== undefined) {
-                        item();
-                    }
-                    }
-                    )
 
             },
 

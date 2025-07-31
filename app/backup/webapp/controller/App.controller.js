@@ -125,9 +125,6 @@ sap.ui.define("z2ui5/Focus", ["sap/ui/core/Control",], (Control) => {
       oControl.setProperty("setUpdate", false);
       setTimeout((oControl) => {
         var oElement = z2ui5.oView.byId(oControl.getProperty("focusId"));
-        if (!oElement){
-          return
-        }
         var oFocus = oElement.getFocusInfo();
         oFocus.selectionStart = parseInt(oControl.getProperty("selectionStart"));
         oFocus.selectionEnd = parseInt(oControl.getProperty("selectionEnd"));
@@ -460,74 +457,6 @@ sap.ui.define("z2ui5/Geolocation", ["sap/ui/core/Control"], (Control) => {
   });
 }
 );
-
-sap.ui.define("z2ui5/Storage", ["sap/ui/core/Control", "sap/ui/util/Storage"], (Control, Storage) => {
-  "use strict";
-
-  return Control.extend("z2ui5.Storage", {
-    metadata: {
-      properties: {
-        type: {
-          type: "string",
-          defaultValue: "session"
-        },
-        prefix: {
-          type: "string",
-          defaultValue: ""
-        },
-        key: {
-          type: "string",
-          defaultValue: ""
-        },
-        value: {
-          type: "any",
-          defaultValue: ""
-        }
-      },
-      events: {
-        "finished": {
-          parameters: {
-            type: {
-              type: "string",
-            },
-            prefix: {
-              type: "string",
-            },
-            key: {
-              type: "string",
-            },
-            value: {
-              type: "any",
-            }
-          }
-        }
-      }
-    },
-
-    async renderer(_, oControl) {
-      let storageType = oControl.getProperty("type");
-      let storageKeyPrefix = oControl.getProperty("prefix");
-      let storageKey  = oControl.getProperty("key");
-      let storageValue = oControl.getProperty("value");
-      let oStorage = new Storage(storageType, storageKeyPrefix);
-      let storedValue = oStorage.get(storageKey);
-      if (storedValue == null) {
-        storedValue = "";
-      }
-      if (storedValue !== storageValue) {
-         oControl.setProperty("value", storedValue);
-         oControl.fireFinished({
-           "type": storageType,
-           "prefix": storageKeyPrefix,
-           "key": storageKey,
-           "value": storedValue
-         });
-       }
-    },
-    onAfterRendering() { },
-    init() { }
-  });
-});
 
 sap.ui.define("z2ui5/FileUploader", ["sap/ui/core/Control", "sap/m/Button", "sap/ui/unified/FileUploader", "sap/m/HBox"], function (Control, Button, FileUploader, HBox) {
   "use strict";
@@ -922,9 +851,8 @@ sap.ui.define("z2ui5/SmartMultiInputExt", ["sap/ui/core/Control", "sap/m/Token",
 sap.ui.define("z2ui5/CameraPicture", [
   "sap/ui/core/Control",
   "sap/m/Dialog",
-  "sap/m/Button", 
-  "sap/ui/core/HTML"
-], function (Control, Dialog, Button, HTML) {
+  "sap/m/Button"
+], function (Control, Dialog, Button) {
   "use strict";
   return Control.extend("z2ui5.CameraPicture", {
     metadata: {
@@ -1034,15 +962,13 @@ sap.ui.define("z2ui5/UITableExt", ["sap/ui/core/Control"], (Control) => {
       properties: {
         tableId: {
           type: "String"
-        },
-      },
+        }
+      }
     },
 
     init() {
       z2ui5.onBeforeRoundtrip.push(this.readFilter.bind(this));
-      z2ui5.onBeforeRoundtrip.push(this.readSort.bind(this));
       z2ui5.onAfterRoundtrip.push(this.setFilter.bind(this));
-      z2ui5.onAfterRoundtrip.push(this.setSort.bind(this));
     },
 
     readFilter() {
@@ -1060,84 +986,12 @@ sap.ui.define("z2ui5/UITableExt", ["sap/ui/core/Control"], (Control) => {
           let id = this.getProperty("tableId");
           let oTable = z2ui5.oView.byId(id);
           oTable.getBinding().filter(aFilters);
-          var opSymbols = {
-  EQ: "",
-  NE: "!",
-  LT: "<",
-  LE: "<=",
-  GT: ">",
-  GE: ">=",
-  BT: "...",
-  Contains: "*",
-  StartsWith: "^",
-  EndsWith: "$"
-};
-
-aFilters.forEach(function(oFilter) {
-  var sProperty = oFilter.sPath || oFilter.aFilters?.[0]?.sPath;
-  if (!sProperty) return;
-
-  oTable.getColumns().forEach(function(oCol) {
-    if (oCol.getFilterProperty && oCol.getFilterProperty() === sProperty) {
-      var operator = oFilter.sOperator;
-      var vValue = oFilter.oValue1 !== undefined ? oFilter.oValue1 : oFilter.oValue2;
-
-      if (vValue === undefined && oFilter.aFilters && oFilter.aFilters[0].oValue1 !== undefined) {
-        vValue = oFilter.aFilters[0].oValue1;
-      }
-
-      var display;
-      if (operator === "BT") {
-        var vValue2 = oFilter.oValue2 !== undefined ? oFilter.oValue2 : "";
-        display = (vValue != null ? vValue : "") + opSymbols["BT"] + (vValue2 != null ? vValue2 : "");
-      } else if (operator === "Contains") {
-        display = "*" + (vValue != null ? vValue : "") + "*";
-      } else if (operator === "StartsWith") {
-        display = "^" + (vValue != null ? vValue : "");
-      } else if (operator === "EndsWith") {
-        display = (vValue != null ? vValue : "") + "$";
-      } else {
-        display = (opSymbols[operator] || "") + (vValue != null ? vValue : "");
-      }
-
-      oCol.setFilterValue(display);
-      oCol.setFiltered(!!display);
-    }
-  });
-});
-
         }
           , 100, this.aFilters);
       } catch (e) { }
       ;
     },
-readSort() {
-  try {
-    let id = this.getProperty("tableId");
-    let oTable = z2ui5.oView.byId(id);
-    this.aSorters = oTable.getBinding().aSorters;
-  } catch (e) {}
-},
 
-setSort() {
-  try {
-    setTimeout((aSorters) => {
-      let id = this.getProperty("tableId");
-      let oTable = z2ui5.oView.byId(id);
-      oTable.getBinding().sort(aSorters);
-
-      aSorters.forEach(function(srt, idx) {
-        oTable.getColumns().forEach(function(oCol) {
-          if (oCol.getSortProperty && oCol.getSortProperty() === srt.sPath) {
-            oCol.setSorted(true);
-            oCol.setSortOrder(srt.bDescending ? "Descending" : "Ascending");
-            if (oCol.setSortIndex) oCol.setSortIndex(idx);
-          }
-        });
-      });
-    }, 100, this.aSorters);
-  } catch (e) {}
-},
     renderer(oRM, oControl) { }
   });
 }
@@ -1181,7 +1035,7 @@ sap.ui.define("z2ui5/Favicon", ["sap/ui/core/Control"], (Control) => {
 }
 );
 
-sap.ui.define("z2ui5/Dirty", ["sap/ui/core/Control"], (Control) => {
+sap.ui.define("z2ui5/Dirty", ["sap/ui/core/Control", "sap/ushell/Container"], (Control, Container) => {
   "use strict";
   return Control.extend("z2ui5.Dirty", {
     metadata: {
@@ -1192,28 +1046,15 @@ sap.ui.define("z2ui5/Dirty", ["sap/ui/core/Control"], (Control) => {
       }
     },
     setIsDirty(val) {
-      
-      const fallback = () => {
+      if (Container) {
+        Container.setDirtyFlag(val);
+      } else {
         window.onbeforeunload = function (e) {
           if (val) {
             e.preventDefault();
           }
         }
       }
-
-      // Container can be loaded (only available in SAPUI5, not in OpenUI5) and we are in Fiori Launchpad?
-      //   Yes: We can use the containers ability to prevent data loss
-      //   No: We fallback to window.onbeforeunload event
-      sap.ui.require([ "sap/ushell/Container" ], async (Container) => {
-        
-        if (Container && z2ui5.oLaunchpadService) {          
-          Container.setDirtyFlag(val);
-        } else {
-          fallback();
-        }
-        
-      }, fallback);
-      
     },
     renderer(oRm, oControl) { }
   });

@@ -1,3 +1,5 @@
+# yaml-language-server: $schema=https://sap.github.io/ui5-tooling/schema/ui5.yaml.json
+
 specVersion: "3.1"
 metadata:
   name: z2ui5
@@ -22,8 +24,13 @@ server:
         port: 35729
         path: webapp
         delay: 300
-    - name: fiori-tools-preview
-      afterMiddleware: fiori-tools-appreload
+    - name: sap-fe-mockserver
+      beforeMiddleware: csp
       configuration:
-        component: z2ui5
-        ui5Theme: sap_horizon
+        mountPath: /
+        services:
+          - urlPath: _LOCAL_
+            metadataPath: ./webapp/localService/metadata.xml
+            mockdataPath: ./webapp/localService/data
+            generateMockData: true
+        annotations: []

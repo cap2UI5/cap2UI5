@@ -79,13 +79,14 @@ sap.ui.define(["sap/ui/core/BusyIndicator", "sap/m/MessageBox"
             },
 
             async readHttp() {
-                const response = await fetch(z2ui5.oConfig.pathname, {
+                const response = await fetch(z2ui5.oConfig.pathname , {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'sap-contextid-accept': 'header',
                         'sap-contextid': z2ui5.contextId
                     },
+                  //  body : JSON.stringify( { 'input':{   'field1': '123'  } } )
                     body: JSON.stringify( { 'value' : z2ui5.oBody } )
                 });
                 z2ui5.contextId = response.headers.get("sap-contextid");
