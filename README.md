@@ -1,6 +1,6 @@
 # 🚀 cap2UI5
 
-Bringing the [abap2UI5](https://github.com/abap2UI5/abap2UI5) concept to CAP/Node.js — a fun exploration of JavaScript, TypeScript, and CAP!
+Bringing the [abap2UI5](https://github.com/abap2UI5/abap2UI5) concept to CAP/Node.js.
 
 ### Features
 * XML creation in the backend
