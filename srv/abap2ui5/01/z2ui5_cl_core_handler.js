@@ -19,6 +19,18 @@ class z2ui5_cl_core_handler {
 
     await oApp.main(oClient);
 
+    // Speichere oApp in Tabelle z2ui5_t_01
+    const stringifiedApp = JSON.stringify(oApp);
+    const generatedId = require('crypto').randomUUID();
+    
+    const { INSERT } = req.query;
+    await INSERT.into('z2ui5_t_01').entries({
+        id: generatedId,
+        id_prev : oReq.id,
+        data: stringifiedApp
+    });
+
+    
     
     let oModel = {};
     oModel.XX = {};
@@ -33,7 +45,7 @@ class z2ui5_cl_core_handler {
     let oResponse = {
         "S_FRONT": {
             "APP": "Z2UI5_CL_CORE_APP_STARTUP",
-            "ID": "EB4A4FA1095346948E0ABF5865B5D24F",
+            "ID": generatedId,
             "PARAMS": {
                 "S_MSG_TOAST": oClient?.S_MSG_TOAST,
                 "S_VIEW": {
