@@ -4,8 +4,8 @@ class z2ui5_cl_core_handler {
 
     var oReq = req.data.value;
 
-    const z2ui5_cl_app_read_people = require("../../apps/z2ui5_cl_app_read_people");
-    const oApp = new z2ui5_cl_app_read_people();
+    const z2ui5_cl_app_hello_world = require("../../apps/z2ui5_cl_app_read_people");
+    const oApp = new z2ui5_cl_app_hello_world();
 
     for (var prop in oReq.XX) {
         oApp[prop] = oReq.XX[prop];
