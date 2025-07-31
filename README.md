@@ -1,3 +1,5 @@
+[![mirror frontend](https://github.com/cap2UI5/cap2UI5/actions/workflows/mirror_frontend.yml/badge.svg)](https://github.com/cap2UI5/cap2UI5/actions/workflows/mirror_frontend.yml)
+
 # 🚀 cap2UI5
 
 Bringing the [abap2UI5](https://github.com/abap2UI5/abap2UI5) concept to CAP/Node.js.
