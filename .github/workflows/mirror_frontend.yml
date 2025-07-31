@@ -21,7 +21,12 @@ jobs:
         npm ci
         npm run mirror_frontend
         git status
+    - name: Check for changes
+      id: changes
+      run: |
+        git diff --quiet || echo "changed=true" >> $GITHUB_OUTPUT
     - name: Create Pull Request
+      if: steps.changes.outputs.changed == 'true'
       id: cpr
       uses: peter-evans/create-pull-request@v5
       with:
@@ -31,6 +36,7 @@ jobs:
         body: "This PR contains automated changes."
         labels: "auto-merge"
     - name: Enable Pull Request Automerge
+      if: steps.changes.outputs.changed == 'true'
       uses: peter-evans/enable-pull-request-automerge@v3
       with:
         pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
