@@ -31,11 +31,9 @@
   },
   "cds": {
     "requires": {
-      "People": {
-        "kind": "odata-v4",
-        "model": "srv/external/People",
-        "csrf": true,
-        "csrfInBatch": true
+      "northwind": {
+        "kind": "odata-v2",
+        "model": "srv/external/northwind"
       }
     },
     "destinations": true,
