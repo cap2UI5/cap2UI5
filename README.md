@@ -56,19 +56,12 @@ class z2ui5_cl_app_hello_world {
 ##### App
 ```js
 class z2ui5_cl_app_read_odata {
-
   async main(client) {
-    this.client = client;
-    await this.fetchData();
-    this.displayView(client);
-  }
 
-  async fetchData() {
     const northwindAPI = await cds.connect.to("northwind");
     this.aCustomers = await northwindAPI.run(SELECT.from("Customers"));
-  }
 
-  displayView(client) {
+
     const Z2UI5_CL_XML_VIEW = require("../abap2ui5/02/z2ui5_cl_xml_view");
     var oView = new Z2UI5_CL_XML_VIEW();
     var oPage = oView.Page({ title: "abap2UI5 - Table with Data Fetched via remote OData" });
@@ -86,6 +79,7 @@ class z2ui5_cl_app_read_odata {
       .Input({ value: `{ContactName}`, enabled: true });
 
     client.display_view(oView.stringify());
+
   }
 }
 ```
@@ -138,7 +132,6 @@ class z2ui5_cl_app_read_odata {
 ###### z2ui5_cl_app_read_view
 ```js
 class z2ui5_cl_app_read_view {
-
   async main(client) {
 
     this.client = client;
@@ -147,10 +140,9 @@ class z2ui5_cl_app_read_view {
     const viewPath = path.join(__dirname, "View1.view.xml");
     const viewContent = fs.readFileSync(viewPath, "utf8");
     client.display_view(viewContent);
+
   }
 }
-
-module.exports = z2ui5_cl_app_read_view;
 
 ```
 ##### Demo
