@@ -4,10 +4,10 @@ class z2ui5_cl_core_handler {
 
     var oReq = req.data.value;
 
-    const z2ui5_cl_app_hello_world = require("../02/z2ui5_cl_app_hello_world");
+    const app = require("../02/z2ui5_cl_app_hello_world");
     //const z2ui5_cl_app_hello_world = require("../../apps/z2ui5_cl_app_read_odata");
     //const z2ui5_cl_app_hello_world = require("../../apps/z2ui5_cl_app_view_xml");
-    const oApp = new z2ui5_cl_app_hello_world();
+    const oApp = new app();
 
     for (var prop in oReq.XX) {
         oApp[prop] = oReq.XX[prop];
@@ -21,7 +21,7 @@ class z2ui5_cl_core_handler {
 
     await oApp.main(oClient);
 
-    // Speichere oApp in Tabelle z2ui5_t_01
+    
    //const stringifiedApp = JSON.stringify(oApp);
     //const generatedId = require('crypto').randomUUID();
     
