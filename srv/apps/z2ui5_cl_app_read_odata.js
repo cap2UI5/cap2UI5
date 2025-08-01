@@ -1,58 +1,32 @@
 class z2ui5_cl_app_read_odata {
-  NAME = "example class";
-  aCustomers = [];
 
   async main(client) {
     try {
       this.client = client;
 
-      switch (client.get().EVENT) {
-        case "BUTTON_POST":
-          this.fetchData();
-          client.message_toast_display(`this is a test`);
-          break;
-
-        default:
-          await this.fetchData();
-          this.displayView(client);
-          break;
-      }
+      await this.fetchData();
+      this.displayView(client);
     } catch (e) {
       client.message_toast_display(JSON.stringify(e));
     }
   }
 
   async fetchData() {
-    
-    const northwindAPI = await cds.connect.to("northwind");
-    var sPath = `/Customers`;
-    var oReturn = await northwindAPI.send({
-      method: "READ",
-      path: sPath,
-      headers: { "If-Match": "*" },
-    });
-
-    this.aCustomers = oReturn;
+    try {
+      const northwindAPI = await cds.connect.to("northwind");
+      this.aCustomers = await northwindAPI.run(SELECT.from("Customers"));
+    } catch (error) {
+      console.error("Error fetching customers:", error);
+      this.aCustomers = [];
+    }
   }
 
   displayView(client) {
     const Z2UI5_CL_XML_VIEW = require("../abap2ui5/02/z2ui5_cl_xml_view");
     var oView = new Z2UI5_CL_XML_VIEW();
-    var oPage = oView
-      .Page({ title: "abap2UI5 - Hello World" })
-      .Title({ text: "Make an input here and send it to the server..." })
-      .Input({
-        value: client._bind_edit(this.NAME),
-        enabled: true,
-      })
-      .Button({
-        press: client._event("BUTTON_POST"),
-        text: "post",
-      });
+    var oPage = oView.Page({ title: "abap2UI5 - Table with Data Fetched via remote OData" });
 
-    var oTab = oPage.Table({
-      items: client._bind_edit(this.aCustomers),
-    });
+    var oTab = oPage.Table({ items: client._bind_edit(this.aCustomers) });
     var oColumns = oTab.columns();
     oColumns.Column().Text({ text: `CompanyName` });
     oColumns.Column().Text({ text: `ContactName` });

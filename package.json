@@ -6,8 +6,8 @@
   "license": "UNLICENSED",
   "private": true,
   "dependencies": {
-    "@sap-cloud-sdk/http-client": "^3.25.0",
-    "@sap-cloud-sdk/resilience": "^3.25.0",
+    "@sap-cloud-sdk/http-client": "^3.26.4",
+    "@sap-cloud-sdk/resilience": "^3.26.4",
     "@sap/cds": "^8",
     "axios": "^1.7.9",
     "express": "^4"
@@ -33,7 +33,10 @@
     "requires": {
       "northwind": {
         "kind": "odata-v2",
-        "model": "srv/external/northwind"
+        "model": "srv/external/northwind",
+        "credentials": {
+          "url": "https://services.odata.org/V2/Northwind/Northwind.svc/"
+        }
       }
     },
     "destinations": true,

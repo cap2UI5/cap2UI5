@@ -6,7 +6,11 @@
       "request": "launch",
       "type": "node",
       "cwd": "${workspaceFolder}",
-      "runtimeExecutable": "cds w",
+      "runtimeExecutable": "npx",
+      "args": [
+        "cds",
+        "w"
+      ],
       "skipFiles": [
         "<node_internals>/**"
       ]
