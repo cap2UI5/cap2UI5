@@ -4,19 +4,19 @@
 
 Bringing the [abap2UI5](https://github.com/abap2UI5/abap2UI5) concept to CAP/Node.js.
 
-### Features
+#### Features
 * XML creation in the backend
 * Data binding and exchange
 * Persistence and session handling
 
-### Quick Demo
+#### Quick Demo
 
 Run the following command to start the project:
 ``` 
 npx cds w
 ```
 
-### Example 1 : Hello World
+## Example 1 : Hello World
 ```js
 class z2ui5_cl_app_hello_world {
   async main(client) {
