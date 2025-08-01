@@ -19,6 +19,7 @@ class z2ui5_cl_app_hello_world {
 
     client.display_view(oView.stringify());
   }
+
 }
 
 module.exports = z2ui5_cl_app_hello_world;
