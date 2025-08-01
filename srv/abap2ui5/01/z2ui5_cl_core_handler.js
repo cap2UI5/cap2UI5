@@ -1,15 +1,12 @@
 class z2ui5_cl_core_handler {
 
   async main(req) {
-    const Utility = require("./z2ui5_cl_utility");
+    const DB = require("./z2ui5_cl_db");
     var oReq = req.data.value;
 
     var oApp = {};
     if (oReq?.S_FRONT?.ID != undefined) {
-      const lastEntry = await SELECT.one
-        .from("z2ui5_t_01")
-        .where({ id: oReq?.S_FRONT?.ID });
-      oApp = Utility.deserialize(lastEntry.data);
+      oApp = await DB.loadApp(oReq?.S_FRONT?.ID);
     } else {
       const app = require("../02/z2ui5_cl_app_hello_world");
       //const z2ui5_cl_app_hello_world = require("../../apps/z2ui5_cl_app_read_odata");
@@ -27,14 +24,7 @@ class z2ui5_cl_core_handler {
     oClient.oReq = oReq;
     await oApp.main(oClient);
 
-    const generatedId = require("crypto").randomUUID();
-
-    // const { INSERT } = req.query;
-    await INSERT.into("z2ui5_t_01").entries({
-      id: generatedId,
-      id_prev: oReq?.id,
-      data: Utility.serialize(oApp),
-    });
+    const generatedId = await DB.saveApp(oApp, oReq?.id);
 
     let oModel = {};
     oModel.XX = {};
@@ -48,7 +38,7 @@ class z2ui5_cl_core_handler {
 
     let oResponse = {
       S_FRONT: {
-        APP: "Z2UI5_CL_CORE_APP_STARTUP",
+        APP: oApp.constructor.name,
         ID: generatedId,
         PARAMS: {
           S_MSG_TOAST: oClient?.S_MSG_TOAST,
