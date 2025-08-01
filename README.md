@@ -5,18 +5,23 @@
 Bringing the [abap2UI5](https://github.com/abap2UI5/abap2UI5) concept to CAP/Node.js.
 
 #### Features
-* XML creation in the backend
-* Data binding and exchange
-* Persistence and session handling
+* XML View Generation - Create UI5 views programmatically in your backend
+* Data Binding & Exchange - Seamless two-way data binding between frontend and backend
+* Session Management - Built-in persistence and session handling
+* OData Integration - Connect to external services with ease
 
 #### Quick Demo
 
-Run the following command to start the project:
+Get up and running in seconds:
 ``` 
 npx cds w
 ```
 
-## Example 1 : Hello World
+## Samples
+All samples demonstrate complete view definition and data exchange handled entirely by the CAP server, using the same and static frontend from abap2UI5.
+
+#### 1. Hello World
+###### App
 ```js
 class z2ui5_cl_app_hello_world {
   async main(client) {
@@ -39,11 +44,11 @@ class z2ui5_cl_app_hello_world {
   }
 }
 ```
-##### Demo
+###### Demo
 ![alt text](media/image-2.png)
 
-### Example 2 : Fetch Data via Remote Odata
-##### Package.json
+####  2. Fetch Data via Remote Odata
+###### Package.json
 ```json
       "northwind": {
         "kind": "odata-v2",
@@ -53,7 +58,7 @@ class z2ui5_cl_app_hello_world {
         }
       }
 ```
-##### App
+###### App
 ```js
 class z2ui5_cl_app_read_odata {
   async main(client) {
@@ -86,8 +91,8 @@ class z2ui5_cl_app_read_odata {
 ##### Demo
 ![alt text](media/image.png)
 
-### Example 3 : Display a Server Side XML
-##### View1.view.xml
+#### 3. Display a Server Side XML
+###### View1.view.xml
 ```xml
 <mvc:View
 	controllerName="Quickstart.App"
@@ -145,7 +150,7 @@ class z2ui5_cl_app_read_view {
 }
 
 ```
-##### Demo
+###### Demo
 ![alt text](media/image-1.png)
 
 ### Contribution
