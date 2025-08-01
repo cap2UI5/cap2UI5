@@ -40,7 +40,7 @@ class z2ui5_cl_app_hello_world {
 }
 ```
 ##### Demo
-![alt text](image-2.png)
+![alt text](media/image-2.png)
 
 ### Example 2 : Fetch Data via Remote Odata
 ##### Package.json
@@ -90,7 +90,7 @@ class z2ui5_cl_app_read_odata {
 }
 ```
 ##### Demo
-![alt text](image.png)
+![alt text](media/image.png)
 
 ### Example 3 : Display a Server Side XML
 ##### View1.view.xml
@@ -154,7 +154,7 @@ module.exports = z2ui5_cl_app_read_view;
 
 ```
 ##### Demo
-![alt text](image-1.png)
+![alt text](media/image-1.png)
 
 ### Contribution
 Contributions are welcome! Feel free to fork the project, submit issues, or create pull requests.
