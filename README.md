@@ -90,7 +90,7 @@ class z2ui5_cl_app_read_odata {
 }
 ```
 ##### Demo
-![alt text](media/image.png)
+![alt text](_media/image.png)
 
 #### 3. Display a Server Side XML
 ###### View1.view.xml
@@ -152,7 +152,7 @@ class z2ui5_cl_app_read_view {
 
 ```
 ###### Demo
-![alt text](media/image-1.png)
+![alt text](_media/image-1.png)
 
 ### Contribution
 Contributions are welcome! Feel free to fork the project, submit issues, or create pull requests.
