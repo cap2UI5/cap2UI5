@@ -5,15 +5,15 @@ class z2ui5_cl_core_handler {
     var oReq = req.data.value;
 
     var oApp = {};
-    if (oReq?.S_FRONT?.ID != undefined) {
-      oApp = await DB.loadApp(oReq?.S_FRONT?.ID);
-    } else {
+   // if (oReq?.S_FRONT?.ID != undefined) {
+     // oApp = await DB.loadApp(oReq?.S_FRONT?.ID);
+   // } else {
       //const app = require("../02/z2ui5_cl_app_hello_world");
       //const app = require("../../apps/z2ui5_cl_app_read_odata");
      // const app = require("../../apps/z2ui5_cl_app_view_xml");
       const app = require("../../apps/z2ui5_cl_app_messages");
       oApp = new app();
-    }
+   // }
 
     for (var prop in oReq.XX) {
       oApp[prop] = oReq.XX[prop];

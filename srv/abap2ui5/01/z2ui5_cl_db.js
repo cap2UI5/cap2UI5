@@ -36,14 +36,14 @@ class z2ui5_cl_db {
 
   static async saveApp(oApp, previousId = null) {
     const generatedId = require("crypto").randomUUID();
-    
+    return generatedId;
     await INSERT.into("z2ui5_t_01").entries({
       id: generatedId,
       id_prev: previousId,
       data: this.serialize(oApp)
     });
 
-    return generatedId;
+   
   }
 
   static async getLastEntry(id) {
