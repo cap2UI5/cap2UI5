@@ -32,6 +32,16 @@ class z2ui5_cl_core_client {
         };
     }
 
+    message_box_display(val) {
+
+        this.S_MSG_BOX = {
+            "CLOSEONNAVIGATION": "X",
+            "TEXT": val,
+            "TITLE": "Information",
+            "TYPE": "information"
+         }
+    }
+
     get() {
         return {
             EVENT: this.oReq.S_FRONT.EVENT

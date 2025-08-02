@@ -22,17 +22,6 @@
 						</FlexBox>
 					</l:BlockLayoutCell>
 				</l:BlockLayoutRow>
-				<l:BlockLayoutRow>
-					<l:BlockLayoutCell>
-						<Panel headerText="Are you ready?" expandable="true">
-							<Switch change=".onChange" customTextOn="yes" customTextOff="no"/>
-							<l:HorizontalLayout id="ready" visible="false" class="sapUiSmallMargin">
-								<Text text="Ok, let's get you started!" class="sapUiTinyMarginEnd"/>
-								<Link text="Learn more" href="https://openui5.hana.ondemand.com/"/>
-							</l:HorizontalLayout>
-						</Panel>
-					</l:BlockLayoutCell>
-				</l:BlockLayoutRow>
 			</l:BlockLayout>
 		</Page>
 	</App>

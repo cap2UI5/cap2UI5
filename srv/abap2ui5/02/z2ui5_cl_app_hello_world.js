@@ -1,4 +1,7 @@
 class z2ui5_cl_app_hello_world {
+
+  TEST = 'one time';
+
   async main(client) {
     this.NAME ??= 'testclass';
 

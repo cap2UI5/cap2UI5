@@ -1,8 +1,10 @@
 class z2ui5_cl_db {
   
   static serialize(oApp) {
+    const filePath = this._findAppFile(oApp.constructor.name);
     return JSON.stringify({
       __className: oApp.constructor.name,
+      __filePath: filePath,
       ...oApp
     });
   }
@@ -11,10 +13,12 @@ class z2ui5_cl_db {
     const parsed = JSON.parse(data);
     
     if (parsed.__className) {
-      const AppClass = require(`${basePath}/${parsed.__className}`);
+      const modulePath = parsed.__filePath || `${basePath}/${parsed.__className}`;
+      const AppClass = require(modulePath);
       const oApp = new AppClass();
       Object.assign(oApp, parsed);
       delete oApp.__className;
+      delete oApp.__filePath;
       return oApp;
     }
     return parsed;
@@ -47,6 +51,24 @@ class z2ui5_cl_db {
       .from("z2ui5_t_01")
       .where({ id: id })
       .orderBy({ createdAt: 'desc' });
+  }
+
+  static _findAppFile(className) {
+    const path = require('path');
+    const fs = require('fs');
+    
+    const searchPaths = [
+      path.join(__dirname, '../02', `${className}.js`),
+      path.join(__dirname, '../../apps', `${className}.js`),
+    ];
+    
+    for (const searchPath of searchPaths) {
+      if (fs.existsSync(searchPath)) {
+        return path.relative(__dirname, searchPath);
+      }
+    }
+    
+    return `../02/${className}`;
   }
 }
 
