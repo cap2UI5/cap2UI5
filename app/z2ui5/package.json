@@ -1,0 +1,14 @@
+{
+  "name": "z2ui5",
+  "version": "1.0.0",
+  "description": "UI5 Frontend Application",
+  "scripts": {
+    "build:cf": "ui5 build --config ui5.yaml --clean-dest --dest dist && cd dist && zip -r z2ui5.zip . && cd ..",
+    "build": "ui5 build --clean-dest --dest dist",
+    "start": "ui5 serve --config ui5-local.yaml --open index.html"
+  },
+  "devDependencies": {
+    "@ui5/cli": "^3.0.0",
+    "ui5-task-zipper": "^3.1.0"
+  }
+}
