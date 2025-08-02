@@ -45,7 +45,8 @@ class z2ui5_cl_app_hello_world {
 }
 ```
 ###### Demo
-![alt text](media/image-2.png)
+<img width="500" height="393" alt="image" src="https://github.com/user-attachments/assets/3acd8c43-3733-40b0-a6f9-27ae6beba6e7" />
+
 
 ####  2. Fetch Data via Remote Odata
 ###### Package.json
