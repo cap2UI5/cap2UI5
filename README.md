@@ -7,7 +7,7 @@ Bringing the [abap2UI5](https://github.com/abap2UI5/abap2UI5) concept to CAP/Nod
 #### Features
 * XML View Generation - Create UI5 views programmatically in your backend
 * Data Binding & Exchange - Seamless two-way data binding between frontend and backend
-* Session Management - Built-in persistence and session handling
+* Session Management - Built-in persistence and session handling (optional)
 
 #### Benefits
 * Security
