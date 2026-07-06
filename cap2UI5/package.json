@@ -11,6 +11,7 @@
     "./z2ui5_cl_xml_view": "./srv/z2ui5/02/z2ui5_cl_xml_view.js",
     "./z2ui5_cl_xml_view_cc": "./srv/z2ui5/02/z2ui5_cl_xml_view_cc.js",
     "./z2ui5_cl_pop_*": "./srv/z2ui5/02/01/z2ui5_cl_pop_*.js",
+    "./z2ui5_cl_app_*": "./srv/z2ui5/02/z2ui5_cl_app_*.js",
     "./z2ui5_cl_util": "./srv/z2ui5/00/03/z2ui5_cl_util.js",
     "./z2ui5_cl_util_*": "./srv/z2ui5/00/03/z2ui5_cl_util_*.js",
     "./z2ui5_cx_util_error": "./srv/z2ui5/00/03/z2ui5_cx_util_error.js",
@@ -21,6 +22,7 @@
     "express": "^5"
   },
   "devDependencies": {
+    "@abaplint/core": "^2.119.56",
     "@cap-js/cds-types": "^0.16",
     "@cap-js/sqlite": "^2",
     "@sap/cds-dk": "^9",
@@ -39,7 +41,8 @@
     "test:watch": "jest --watch",
     "prepare": "sh scripts/install-hooks.sh 2>/dev/null || true",
     "build": "rimraf resources mta_archives && mbt build --mtar archive",
-    "deploy": "cf deploy mta_archives/archive.mtar --retries 1"
+    "deploy": "cf deploy mta_archives/archive.mtar --retries 1",
+    "transpile": "node scripts/abap2js.js"
   },
   "cds": {
     "requires": {

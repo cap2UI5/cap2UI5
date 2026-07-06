@@ -1283,8 +1283,29 @@ class z2ui5_cl_xml_view {
   }
 
   // Aggregation accessors for DynamicPage
-  title(props = {}) {
-    return this._container({ name: "title", ns: "f", aProp: [] });
+  // sap.m/core Title control — or the `title` aggregation when ns="f".
+  // Mirrors abap: positional arg = text (PREFERRED PARAMETER), returns the
+  // PARENT for chaining; dive into the created element with .get().
+  title(args = {}) {
+    const props = typeof args === "string" ? { text: args } : args || {};
+    const { ns, text, wrapping, level, class: cssClass, id, textalign, textdirection, titlestyle, width, wrappingtype, visible } = props;
+    return this._leaf({
+      name: ns === "f" ? "title" : "Title",
+      ns: ns || "",
+      aProp: this._filterProps([
+        { n: "text", v: text },
+        { n: "class", v: cssClass },
+        { n: "id", v: id },
+        { n: "wrappingType", v: wrappingtype },
+        { n: "textAlign", v: textalign },
+        { n: "textDirection", v: textdirection },
+        { n: "titleStyle", v: titlestyle },
+        { n: "width", v: width },
+        { n: "wrapping", v: this.boolean_abap_2_json(wrapping) },
+        { n: "visible", v: this.boolean_abap_2_json(visible) },
+        { n: "level", v: level },
+      ]),
+    });
   }
 
   expandedHeading(props = {}) {
@@ -2749,7 +2770,9 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  input({ id, placeholder, type, showclearicon, valuestate, valuestatetext, showtablesuggestionvaluehelp, description, editable, enabled, suggestionitems, suggestionrows, showsuggestion, showvaluehelp, valuehelprequest, required, suggest, class: cssClass, visible, submit, valueliveupdate, autocomplete, maxsuggestionwidth, fieldwidth, valuehelponly, width, change, valuehelpiconsrc, textformatter, textformatmode, maxlength, startsuggestion, enablesuggestionshighlighting, enabletableautopopinmode, arialabelledby, ariadescribedby } = {}) {
+  // positional arg = value (abap PREFERRED PARAMETER)
+  input(args = {}) {
+    const { value, id, placeholder, type, showclearicon, valuestate, valuestatetext, showtablesuggestionvaluehelp, description, editable, enabled, suggestionitems, suggestionrows, showsuggestion, showvaluehelp, valuehelprequest, required, suggest, class: cssClass, visible, submit, valueliveupdate, autocomplete, maxsuggestionwidth, fieldwidth, valuehelponly, width, change, valuehelpiconsrc, textformatter, textformatmode, maxlength, startsuggestion, enablesuggestionshighlighting, enabletableautopopinmode, arialabelledby, ariadescribedby } = typeof args === "string" ? { value: args } : args || {};
     return this._leaf({
       name: "Input",
       aProp: this._filterProps([
@@ -3537,6 +3560,26 @@ class z2ui5_cl_xml_view {
       { n: "press", v: press },
       { n: "text", v: text },
       { n: "icon", v: icon },
+      ]),
+    });
+  }
+
+  // sap.m.Toolbar control — or the `toolbar` aggregation for ns table/form
+  toolbar({ ns, id, press, width, active, ariahaspopup, design, enabled, height, style, visible } = {}) {
+    return this._container({
+      name: ns === "table" || ns === "form" ? "toolbar" : "Toolbar",
+      ns: ns || "",
+      aProp: this._filterProps([
+        { n: "active", v: this.boolean_abap_2_json(active) },
+        { n: "ariaHasPopup", v: ariahaspopup },
+        { n: "design", v: design },
+        { n: "enabled", v: this.boolean_abap_2_json(enabled) },
+        { n: "visible", v: this.boolean_abap_2_json(visible) },
+        { n: "height", v: height },
+        { n: "style", v: style },
+        { n: "width", v: width },
+        { n: "id", v: id },
+        { n: "press", v: press },
       ]),
     });
   }
@@ -8324,6 +8367,110 @@ class z2ui5_cl_xml_view {
       ]),
     });
   }
+}
+
+// ---------------------------------------------------------------------------
+// abap PREFERRED PARAMETER semantics: `page(\`Home\`)` ≡ `page({ title: \`Home\` })`.
+// abap callers (and code transpiled 1:1 from abap) pass the preferred
+// parameter positionally; the JS methods destructure an options object.
+// This shim maps a primitive positional argument onto the preferred name.
+// Generated from z2ui5_cl_xml_view.clas.abap — regenerate with:
+//   node scripts/abap2js.js --preferred-map <path/to/z2ui5_cl_xml_view.clas.abap>
+// ---------------------------------------------------------------------------
+z2ui5_cl_xml_view.PREFERRED_PARAM = {
+    _cc_plain_xml: `val`,
+    _generic_property: `val`,
+    action_buttons: `ns`,
+    actions: `ns`,
+    analytical_column: `ns`,
+    attributes: `ns`,
+    calendar_appointment: `startdate`,
+    calendar_legend_item: `text`,
+    carousel_layout: `visiblepagescount`,
+    checkbox: `selected`,
+    column: `width`,
+    columns: `ns`,
+    content: `ns`,
+    content_areas: `ns`,
+    custom_data: `ns`,
+    custom_layout: `ns`,
+    date_picker: `value`,
+    date_range_selection: `value`,
+    date_time_picker: `value`,
+    dependents: `ns`,
+    dialog: `title`,
+    drag_drop_config: `ns`,
+    drag_info: `sourceaggregation`,
+    dynamic_page_header: `pinnable`,
+    dynamic_side_content: `id`,
+    expanded_content: `ns`,
+    fix_content: `ns`,
+    flex_content: `ns`,
+    footer: `ns`,
+    formatted_text: `htmltext`,
+    get: `name`,
+    get_child: `index`,
+    grid: `default_span`,
+    grid_data: `span`,
+    groups: `ns`,
+    header: `ns`,
+    header_content: `ns`,
+    heading: `ns`,
+    html: `content`,
+    image_editor: `src`,
+    info_label: `text`,
+    input: `value`,
+    input_list_item: `label`,
+    items: `ns`,
+    label: `text`,
+    layout_data: `ns`,
+    legend: `items`,
+    legenditem: `text`,
+    lines: `ns`,
+    list: `items`,
+    markers: `ns`,
+    message_strip: `text`,
+    mid_column_pages: `id`,
+    no_data: `ns`,
+    nodes: `ns`,
+    p_cell_selector: `id`,
+    page: `title`,
+    planning_calendar: `rows`,
+    planning_calendar_legend: `items`,
+    planning_calendar_row: `appointments`,
+    proportion_zoom_strategy: `zoomlevel`,
+    routes: `items`,
+    rowmode: `ns`,
+    scroll_container: `height`,
+    segmented_button: `selected_key`,
+    side_content: `width`,
+    simple_form: `title`,
+    snapped_content: `ns`,
+    spots: `items`,
+    statuses: `ns`,
+    sub_header: `ns`,
+    table: `items`,
+    template_elseif: `test`,
+    template_if: `test`,
+    text: `text`,
+    text_area: `value`,
+    time_picker: `value`,
+    title: `text`,
+    tokens: `ns`,
+    tree: `items`,
+    ui_column: `width`,
+    ui_table: `rows`,
+    vbox: `class`,
+    viz_flattened_dataset: `data`,
+};
+
+for (const [meth, param] of Object.entries(z2ui5_cl_xml_view.PREFERRED_PARAM)) {
+  const orig = z2ui5_cl_xml_view.prototype[meth];
+  if (typeof orig !== "function") continue;
+  z2ui5_cl_xml_view.prototype[meth] = function (args, ...rest) {
+    if (args != null && typeof args !== "object") args = { [param]: args };
+    return orig.call(this, args, ...rest);
+  };
 }
 
 module.exports = z2ui5_cl_xml_view;
