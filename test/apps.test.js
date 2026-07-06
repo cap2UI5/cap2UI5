@@ -25,8 +25,8 @@ describe("sample apps", () => {
       await app.main(client);
 
       expect(client.S_VIEW.XML).toContain("Hello World");
-      expect(client.S_VIEW.XML).toContain("<m:Input");
-      expect(client.S_VIEW.XML).toContain("<m:Button");
+      expect(client.S_VIEW.XML).toMatch(/<(m:)?Input/);
+      expect(client.S_VIEW.XML).toMatch(/<(m:)?Button/);
       expect(client.S_VIEW.XML).toContain("BUTTON_POST");
     });
 

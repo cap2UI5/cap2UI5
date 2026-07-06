@@ -8,7 +8,9 @@
     "test": "jest --verbose",
     "test:watch": "jest --watch",
     "transpile": "node scripts/abap2js.js",
-    "mirror_frontend": "rm -rf .mirror_tmp cap2UI5/app/z2ui5/webapp && git clone --depth 1 https://github.com/abap2UI5/abap2UI5 .mirror_tmp && mkdir -p cap2UI5/app/z2ui5 && cp -r .mirror_tmp/app/webapp cap2UI5/app/z2ui5/webapp && node scripts/patch-frontend.js cap2UI5/app/z2ui5/webapp && rm -rf .mirror_tmp"
+    "mirror_frontend": "node scripts/mirror-frontend.js",
+    "mirror_input": "node scripts/mirror-input.js",
+    "sync_backend": "node scripts/sync-backend.js"
   },
   "devDependencies": {
     "@abaplint/core": "^2.119.56",

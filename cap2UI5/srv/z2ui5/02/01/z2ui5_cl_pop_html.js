@@ -1,56 +1,35 @@
-const z2ui5_if_app      = require("../z2ui5_if_app");
-const z2ui5_cl_xml_view = require("../z2ui5_cl_xml_view");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
-/**
- * z2ui5_cl_pop_html — JS port of abap2UI5 z2ui5_cl_pop_html.
- *
- * Modal popup that renders a raw HTML string via sap.ui.core.HTML.
- * Single OK button. Caller passes content as `i_html`.
- */
 class z2ui5_cl_pop_html extends z2ui5_if_app {
-
   client = null;
-  title  = `HTML View`;
-  icon   = `sap-icon://hint`;
-  html   = ``;
-  button_text_confirm = `OK`;
+  title = ``;
+  icon = ``;
+  html = ``;
+  button_text_confirm = ``;
 
-  static factory({
-    i_html,
-    i_title       = `HTML View`,
-    i_icon        = `sap-icon://hint`,
-    i_button_text = `OK`,
-  } = {}) {
-    const r_result = new z2ui5_cl_pop_html();
-    r_result.title               = i_title;
-    r_result.icon                = i_icon;
-    r_result.html                = String(i_html ?? ``);
+  static factory({ i_html, i_title = `HTML View`, i_icon = `sap-icon://hint`, i_button_text = `OK` } = {}) {
+    let r_result = null;
+    r_result = new z2ui5_cl_pop_html();
+    r_result.title = i_title;
+    r_result.icon = i_icon;
+    r_result.html = i_html;
     r_result.button_text_confirm = i_button_text;
     return r_result;
   }
 
   view_display() {
-    const c = this.client;
     const popup = z2ui5_cl_xml_view.factory_popup()
-      .Dialog({
-        title:      this.title,
-        icon:       this.icon,
-        afterClose: c._event(`BUTTON_CONFIRM`),
-      })
+      .dialog({ title: this.title, icon: this.icon, afterclose: this.client._event(`BUTTON_CONFIRM`) })
       .content()
-        .VBox({ class: `sapUiMediumMargin` })
-          .HTML({ content: this.html })
-        .get_parent()
+      .vbox(`sapUiMediumMargin`)
+      .html(this.html)
+      .get_parent()
       .get_parent()
       .get_parent()
       .buttons()
-        .Button({
-          text:  this.button_text_confirm,
-          press: c._event(`BUTTON_CONFIRM`),
-          type:  `Emphasized`,
-        });
-
-    c.popup_display(popup.stringify());
+      .button({ text: this.button_text_confirm, press: this.client._event(`BUTTON_CONFIRM`), type: `Emphasized` });
+    this.client.popup_display(popup.stringify());
   }
 
   async main(client) {

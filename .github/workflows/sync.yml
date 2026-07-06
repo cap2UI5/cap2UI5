@@ -1,0 +1,22 @@
+name: sync from abap2UI5
+
+# Full pipeline: mirror input -> mirror frontend -> transpile backend.
+# The individual steps can also be run standalone via their own workflows.
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 4 * * 1" # monday 04:00 UTC
+
+permissions:
+  contents: write
+
+jobs:
+  input:
+    uses: ./.github/workflows/mirror_input.yml
+  frontend:
+    needs: input
+    uses: ./.github/workflows/mirror_frontend.yml
+  backend:
+    needs: frontend
+    uses: ./.github/workflows/sync_backend.yml

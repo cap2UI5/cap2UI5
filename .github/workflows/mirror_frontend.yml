@@ -1,0 +1,36 @@
+name: 2 mirror frontend
+
+# Takes the frontend from input/app/webapp into cap2UI5/app/z2ui5/webapp and
+# applies the two cap2UI5-specific patches (CDN bootstrap, /rest/root/z2ui5
+# data source). Requires input/ — run "1 mirror input" first.
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: write
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm run mirror_frontend
+      - name: commit frontend
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add cap2UI5/app
+          if git diff --cached --quiet; then
+            echo "frontend unchanged — nothing to commit"
+          else
+            git commit -m "mirror: update cap2UI5 frontend from input/ ($(cut -c1-12 input/UPSTREAM_COMMIT))"
+            git pull --rebase origin "${{ github.ref_name }}"
+            git push origin "HEAD:${{ github.ref_name }}"
+          fi

@@ -1,73 +1,34 @@
-const z2ui5_if_app      = require("../z2ui5_if_app");
-const z2ui5_cl_xml_view = require("../z2ui5_cl_xml_view");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
-/**
- * z2ui5_cl_pop_textedit — JS port of abap2UI5 z2ui5_cl_pop_textedit.
- *
- * TextArea-based editor popup. Cancel/Confirm buttons; result() returns
- * { text, check_confirmed }.
- *
- * Usage:
- *   const pop = z2ui5_cl_pop_textedit.factory({
- *     i_textarea: existing,
- *     i_title:    'Edit',
- *     i_check_editable: true,
- *   });
- *   client.nav_app_call(pop);
- */
 class z2ui5_cl_pop_textedit extends z2ui5_if_app {
-
-  client            = null;
-  mv_stretch_active = true;
-  mv_title          = `Editor`;
+  mv_stretch_active = false;
+  mv_title = ``;
   mv_check_editable = false;
-  ms_result         = { text: ``, check_confirmed: false };
+  ms_result = {};
+  client = null;
 
-  static factory({
-    i_textarea       = ``,
-    i_title          = `Editor`,
-    i_stretch_active = true,
-    i_check_editable = false,
-  } = {}) {
-    const r_result = new z2ui5_cl_pop_textedit();
-    r_result.mv_stretch_active = !!i_stretch_active;
-    r_result.ms_result.text    = String(i_textarea ?? ``);
-    r_result.mv_title          = i_title;
-    r_result.mv_check_editable = !!i_check_editable;
+  static factory({ i_stretch_active = true, i_textarea, i_title = `Editor`, i_check_editable = false } = {}) {
+    let r_result = null;
+    r_result = new z2ui5_cl_pop_textedit();
+    r_result.mv_stretch_active = i_stretch_active;
+    r_result.ms_result.text = i_textarea;
+    r_result.mv_title = i_title;
+    r_result.mv_check_editable = i_check_editable;
     return r_result;
   }
 
   display() {
-    const c = this.client;
     const popup = z2ui5_cl_xml_view.factory_popup()
-      .Dialog({
-        afterClose: c._event(`BUTTON_TEXTAREA_CANCEL`),
-        stretch:    this.mv_stretch_active,
-        title:      this.mv_title,
-        icon:       `sap-icon://edit`,
-      })
+      .dialog({ afterclose: this.client._event(`BUTTON_TEXTAREA_CANCEL`), stretch: this.mv_stretch_active, title: this.mv_title, icon: `sap-icon://edit` })
       .content()
-        .TextArea({
-          growing:  true,
-          editable: this.mv_check_editable,
-          value:    c._bind_edit(this.ms_result.text),
-        })
+      .text_area({ growing: true, editable: this.mv_check_editable, value: this.client._bind_edit(this.ms_result.text) })
       .get_parent()
       .buttons()
-        .Button({
-          text:  `Cancel`,
-          press: c._event(`BUTTON_TEXTAREA_CANCEL`),
-        })
-        .Button({
-          text:  `Confirm`,
-          press: c._event(`BUTTON_TEXTAREA_CONFIRM`),
-          type:  `Emphasized`,
-        });
-
-    c.popup_display(popup.stringify());
+      .button({ text: `Cancel`, press: this.client._event(`BUTTON_TEXTAREA_CANCEL`) })
+      .button({ text: `Confirm`, press: this.client._event(`BUTTON_TEXTAREA_CONFIRM`), type: `Emphasized` });
+    this.client.popup_display(popup.stringify());
   }
-
-  result() { return this.ms_result; }
 
   async main(client) {
     this.client = client;
@@ -86,6 +47,12 @@ class z2ui5_cl_pop_textedit extends z2ui5_if_app {
         client.nav_app_leave();
         break;
     }
+  }
+
+  result() {
+    let result = {};
+    result = this.ms_result;
+    return result;
   }
 }
 
