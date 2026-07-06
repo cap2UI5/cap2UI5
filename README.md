@@ -41,13 +41,15 @@ dropped silently.
 
 GitHub Actions under `.github/workflows/` — each step runs standalone via
 dispatch, `sync.yml` chains 1→6. It runs on every upstream update: the
-`trigger_cap` workflows in [abap2UI5](https://github.com/abap2UI5/abap2UI5)
-(push to `main`) and [samples](https://github.com/abap2UI5/samples) (after
-the `cloud` branch is rebuilt) send a `repository_dispatch`
-(`upstream-update`) to this repository — they need a token with write
-access here (secret `ACTION_TOKEN_CAP` in the upstream repos). Manual
-dispatch and a weekly cron (safety net) also work. The same steps run
-locally via the npm scripts.
+`trigger_cap` workflow in [abap2UI5](https://github.com/abap2UI5/abap2UI5)
+(push to `main`) refreshes `input/abap2UI5/` and pushes it here via a
+deploy key registered on this repository with write access (private half:
+secret `ACTION_KEY_CAP` in abap2UI5) — that push starts the pipeline. The
+`trigger_cap` workflow in [samples](https://github.com/abap2UI5/samples)
+(after the `cloud` branch is rebuilt) sends a `repository_dispatch`
+(`upstream-update`) — it needs a token with write access here (secret
+`ACTION_TOKEN_CAP` in the samples repo). Manual dispatch and a weekly cron
+(safety net) also work. The same steps run locally via the npm scripts.
 
 | # | Workflow | npm script | What it does |
 |---|---|---|---|
