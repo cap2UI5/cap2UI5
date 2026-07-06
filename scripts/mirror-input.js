@@ -4,10 +4,15 @@
  * transpile/copy steps work on a versioned, reviewable copy.
  *
  *   node scripts/mirror-input.js abap2UI5   → input/abap2UI5/ (src + app/webapp)
- *   node scripts/mirror-input.js samples    → input/samples/  (src)
+ *   node scripts/mirror-input.js samples    → input/samples/  (src, cloud branch)
+ *
+ * samples is taken from the cloud branch (rebuilt by its auto_cloud workflow
+ * on every push to standard) — it already excludes the on-premise-only apps
+ * under src/00, which cannot run in the CAP/Node environment anyway.
  *
  * The upstream commit is recorded in input/<name>/UPSTREAM_COMMIT.
- * Set MIRROR_SOURCE=/path/to/checkout to use a local copy instead of cloning.
+ * Set MIRROR_SOURCE=/path/to/checkout to use a local copy instead of cloning
+ * (the checkout is used as-is; the branch config is not applied then).
  */
 "use strict";
 
@@ -17,7 +22,7 @@ const { execSync } = require("child_process");
 
 const SOURCES = {
   abap2UI5: { url: "https://github.com/abap2UI5/abap2UI5", paths: ["src", "app/webapp"] },
-  samples: { url: "https://github.com/abap2UI5/samples", paths: ["src"] },
+  samples: { url: "https://github.com/abap2UI5/samples", branch: "cloud", paths: ["src"] },
 };
 
 const name = process.argv[2];
@@ -34,7 +39,8 @@ const tmp = path.join(root, ".mirror_tmp");
 let source = process.env.MIRROR_SOURCE;
 if (!source) {
   fs.rmSync(tmp, { recursive: true, force: true });
-  execSync(`git clone --depth 1 ${cfg.url} ${JSON.stringify(tmp)}`, { stdio: "inherit" });
+  const branchArg = cfg.branch ? `--branch ${cfg.branch} ` : "";
+  execSync(`git clone --depth 1 ${branchArg}${cfg.url} ${JSON.stringify(tmp)}`, { stdio: "inherit" });
   source = tmp;
 }
 

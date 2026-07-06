@@ -4,14 +4,26 @@ name: sync pipeline
 # -> 4 transpile samples -> 5 prepare app -> 6 copy into cap.
 # Every step also runs standalone via its own workflow. Manual follow-up work
 # is what the TODO reports in output/*/transpile-report.json point at.
+#
+# Runs event-driven on every upstream update: abap2UI5 (push to main) and
+# samples (cloud branch rebuilt) send a repository_dispatch via their
+# trigger_cap workflows. The weekly cron remains as a safety net.
 
 on:
   workflow_dispatch:
+  repository_dispatch:
+    types: [upstream-update]
   schedule:
     - cron: "0 4 * * 1" # monday 04:00 UTC
 
 permissions:
   contents: write
+
+# Serialize pipeline runs: abap2UI5 and samples can dispatch in quick
+# succession; overlapping runs would race on the sync commits.
+concurrency:
+  group: sync-pipeline
+  cancel-in-progress: false
 
 jobs:
   mirror_abap2ui5:

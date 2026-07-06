@@ -1,6 +1,6 @@
 name: 2 mirror samples
 
-# Step 2: snapshot abap2UI5/samples (src/) into input/samples/.
+# Step 2: snapshot abap2UI5/samples (src/, cloud branch) into input/samples/.
 
 on:
   workflow_dispatch:

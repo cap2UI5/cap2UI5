@@ -37,6 +37,21 @@ describe("z2ui5_cl_util", () => {
     expect(z2ui5_cl_util.boolean_abap_2_json("")).toBe("");
   });
 
+  test("rtti_get_class finds classes in samples subfolders (recursive lookup)", () => {
+    // z2ui5_cl_demo_app_032 lives in srv/samples/03/ — the transpiled tree
+    // mirrors the upstream src/ subfolders, so lookup must recurse.
+    const Cls = z2ui5_cl_util.rtti_get_class("z2ui5_cl_demo_app_032");
+    expect(typeof Cls).toBe("function");
+    expect(z2ui5_cl_util.rtti_check_class_exists("z2ui5_cl_demo_app_032")).toBe(true);
+    expect(z2ui5_cl_util.rtti_get_class("z2ui5_cl_does_not_exist")).toBeNull();
+  });
+
+  test("rtti_get_classes_impl_intf sees subfolder sample classes", () => {
+    const z2ui5_if_app = require("../cap2UI5/srv/z2ui5/02/z2ui5_if_app");
+    const names = z2ui5_cl_util.rtti_get_classes_impl_intf(z2ui5_if_app).map((r) => r.classname);
+    expect(names).toContain("z2ui5_cl_demo_app_032");
+  });
+
   test("rtti_get_type_kind classification", () => {
     expect(z2ui5_cl_util.rtti_get_type_kind([])).toBe("TABLE");
     expect(z2ui5_cl_util.rtti_get_type_kind("x")).toBe("STRING");

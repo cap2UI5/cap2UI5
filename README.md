@@ -40,13 +40,19 @@ dropped silently.
 ## Sync pipeline
 
 GitHub Actions under `.github/workflows/` — each step runs standalone via
-dispatch, `sync.yml` chains 1→6 (dispatch or weekly). The same steps run
+dispatch, `sync.yml` chains 1→6. It runs on every upstream update: the
+`trigger_cap` workflows in [abap2UI5](https://github.com/abap2UI5/abap2UI5)
+(push to `main`) and [samples](https://github.com/abap2UI5/samples) (after
+the `cloud` branch is rebuilt) send a `repository_dispatch`
+(`upstream-update`) to this repository — they need a token with write
+access here (secret `ACTION_TOKEN_CAP` in the upstream repos). Manual
+dispatch and a weekly cron (safety net) also work. The same steps run
 locally via the npm scripts.
 
 | # | Workflow | npm script | What it does |
 |---|---|---|---|
 | 1 | 1 mirror abap2UI5 | `mirror_abap2ui5` | snapshot abap2UI5 (src/ + app/webapp) → `input/abap2UI5/` |
-| 2 | 2 mirror samples | `mirror_samples` | snapshot abap2UI5/samples (src/) → `input/samples/` |
+| 2 | 2 mirror samples | `mirror_samples` | snapshot abap2UI5/samples (src/, `cloud` branch) → `input/samples/` |
 | 3 | 3 transpile abap2UI5 | `transpile_abap2ui5` | all abap2UI5 classes (whole `src/` tree) → `output/abap2UI5/` + report |
 | 4 | 4 transpile samples | `transpile_samples` | all sample classes → `output/samples/` + report |
 | 5 | 5 prepare app | `prepare_app` | `input/abap2UI5/app/webapp` + patches → `output/app/` |
@@ -57,8 +63,9 @@ After step 5 the `output/` folder holds the three deployable pieces —
 the backend tree `srv/z2ui5` is the hand-maintained CAP architecture
 adaptation, so transpiled classes are only **added** there and never copied
 over an existing file (promoting one is a deliberate manual step);
-`srv/samples` is fully owned by the transpiler and gets overwritten; the
-webapp is replaced 1:1. Transpiled files that do not parse are skipped and
+`srv/samples` is fully owned by the transpiler — existing files are
+overwritten and files gone upstream are removed; the webapp is replaced
+1:1. Transpiled files that do not parse are skipped and
 reported. Classes with `TODO(abap2js)` markers or `parseError` entries are
 listed in `output/*/transpile-report.json` and need manual follow-up. Jest
 runs after the copy and gates the sync commit — only a green suite is
