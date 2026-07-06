@@ -1,21 +1,18 @@
-# app-ui5
+# cap2UI5 dev
 
-Mirror of the `app/` folder from the [abap2UI5](https://github.com/abap2UI5/abap2UI5) project.
+Development repository for [cap2UI5](cap2UI5/) — bringing the
+[abap2UI5](https://github.com/abap2UI5/abap2UI5) concept to CAP/Node.js.
 
-## Sync `app/` manually
+The CAP project lives in [`cap2UI5/`](cap2UI5/), see its README for details.
 
-Run the sync script from the repo root:
+## Frontend
 
-```bash
-npm run clone
-```
-
-This clones `abap2UI5/abap2UI5`, replaces the local `app/` folder with its contents, and leaves any changes unstaged for you to review and commit.
-
-### Optional overrides
+The UI5 frontend in `cap2UI5/app/z2ui5/webapp` is a 1:1 mirror of the
+`app/webapp` folder from abap2UI5 — only `index.html` and `manifest.json`
+are cap2UI5-specific (CDN bootstrap and the `/rest/root/z2ui5` data source,
+kept in `cap2UI5/app/backup/`). Refresh it with:
 
 ```bash
-SOURCE_REPO=https://github.com/abap2UI5/abap2UI5.git \
-SOURCE_BRANCH=main \
-npm run clone
+cd cap2UI5
+npm run mirror_frontend
 ```

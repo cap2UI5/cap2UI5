@@ -43,7 +43,7 @@ class z2ui5_cl_xml_view {
     l: `sap.ui.layout`,
     u: `sap.ui.unified`,
     unified: `sap.ui.unified`,
-    z2ui5: `z2ui5`,
+    z2ui5: `z2ui5.cc`,
     layout: `sap.ui.layout`,
     networkgraph: `sap.suite.ui.commons.networkgraph`,
     nglayout: `sap.suite.ui.commons.networkgraph.layout`,
@@ -117,9 +117,9 @@ class z2ui5_cl_xml_view {
     // un-prefixed tag resolves to sap.m instead of the null namespace (which
     // UI5 would try to load as a module, e.g. `null/content.js`).
     if (this._isPopup) {
-      return `<core:FragmentDefinition xmlns="sap.m" xmlns:m="sap.m" xmlns:core="sap.ui.core" xmlns:f="sap.f" xmlns:form="sap.ui.layout.form" xmlns:l="sap.ui.layout" xmlns:mvc="sap.ui.core.mvc" xmlns:table="sap.ui.table" xmlns:unified="sap.ui.unified" xmlns:upload="sap.m.upload" xmlns:uxap="sap.uxap" xmlns:z2ui5="z2ui5"${this._renderExtraNs()}`;
+      return `<core:FragmentDefinition xmlns="sap.m" xmlns:m="sap.m" xmlns:core="sap.ui.core" xmlns:f="sap.f" xmlns:form="sap.ui.layout.form" xmlns:l="sap.ui.layout" xmlns:mvc="sap.ui.core.mvc" xmlns:table="sap.ui.table" xmlns:unified="sap.ui.unified" xmlns:upload="sap.m.upload" xmlns:uxap="sap.uxap" xmlns:z2ui5="z2ui5.cc"${this._renderExtraNs()}`;
     }
-    return `<mvc:View xmlns="sap.m" xmlns:m="sap.m" xmlns:core="sap.ui.core" xmlns:f="sap.f" xmlns:form="sap.ui.layout.form" xmlns:l="sap.ui.layout" xmlns:mvc="sap.ui.core.mvc" xmlns:table="sap.ui.table" xmlns:unified="sap.ui.unified" xmlns:upload="sap.m.upload" xmlns:uxap="sap.uxap" xmlns:z2ui5="z2ui5"${this._renderExtraNs()} displayBlock="true" height="100%"`;
+    return `<mvc:View xmlns="sap.m" xmlns:m="sap.m" xmlns:core="sap.ui.core" xmlns:f="sap.f" xmlns:form="sap.ui.layout.form" xmlns:l="sap.ui.layout" xmlns:mvc="sap.ui.core.mvc" xmlns:table="sap.ui.table" xmlns:unified="sap.ui.unified" xmlns:upload="sap.m.upload" xmlns:uxap="sap.uxap" xmlns:z2ui5="z2ui5.cc"${this._renderExtraNs()} displayBlock="true" height="100%"`;
   }
 
   _renderRootClose() {
