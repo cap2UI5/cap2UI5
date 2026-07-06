@@ -1,4 +1,4 @@
-const Client = require("../srv/z2ui5/01/02/z2ui5_cl_core_client");
+const Client = require("../cap2UI5/srv/z2ui5/01/02/z2ui5_cl_core_client");
 
 function createClient(app, { event = "", args = [] } = {}) {
   const client = new Client();
@@ -16,7 +16,7 @@ describe("sample apps", () => {
     let AppClass;
 
     beforeEach(() => {
-      AppClass = require("../srv/z2ui5/02/z2ui5_cl_app_hello_world");
+      AppClass = require("../cap2UI5/srv/z2ui5/02/z2ui5_cl_app_hello_world");
     });
 
     test("init renders view with input and button", async () => {
@@ -46,7 +46,7 @@ describe("sample apps", () => {
     let AppClass;
 
     beforeEach(() => {
-      AppClass = require("../srv/z2ui5/02/z2ui5_cl_app_startup");
+      AppClass = require("../cap2UI5/srv/z2ui5/02/z2ui5_cl_app_startup");
     });
 
     test("default event renders startup view with quickstart sections", async () => {

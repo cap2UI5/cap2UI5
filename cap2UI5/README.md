@@ -22,34 +22,9 @@ npx cds w
 
 ## Transpiling from ABAP
 
-App classes (z2ui5_if_app implementations, popups, demo apps) can be transpiled
-automatically from the abap2UI5 ABAP sources. Parsing is done by
-[@abaplint/core](https://github.com/abaplint/abaplint); the emitter produces the
-idiomatic JavaScript style used in `srv/z2ui5` and `srv/samples`:
-
-```
-npm run transpile -- path/to/z2ui5_cl_my_app.clas.abap --stdout
-npm run transpile -- path/to/abap2UI5/src/02/01 -o srv/z2ui5/02/01
-npm run transpile -- path/to/abap2UI5/src -o out   # walks recursively, mirrors 02/01/... 1:1
-```
-
-Directory inputs are walked recursively and their internal layout (the
-abap2UI5 `src/00|01|02` numbering that `srv/z2ui5` mirrors) is reproduced
-1:1 below the `-o` target.
-
-Statements outside the supported subset (dynamic `CREATE OBJECT`, field-symbol
-dereferencing, `SELECT`, ...) are emitted as `// TODO(abap2js): <original>`
-comments and reported on stderr — nothing is dropped silently. The core engine
-(handler, binding, model, draft) is a hand-maintained architecture adaptation
-and is not a transpile target.
-
-The view builder honors abap's `PREFERRED PARAMETER` semantics
-(`page(`Home`)` ≡ `page({ title: `Home` })`) via a generated shim — regenerate
-it after abap2UI5 API changes with:
-
-```
-npm run transpile -- --preferred-map path/to/z2ui5_cl_xml_view.clas.abap
-```
+App classes can be transpiled automatically from the abap2UI5 ABAP sources —
+the transpiler and all other dev tooling live at the repository root, see the
+[root README](../README.md).
 
 ## Samples
 All samples demonstrate complete view definition and data exchange handled entirely by the CAP server, using the same and static frontend from abap2UI5.

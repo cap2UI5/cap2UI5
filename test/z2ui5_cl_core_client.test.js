@@ -1,4 +1,4 @@
-const Client = require("../srv/z2ui5/01/02/z2ui5_cl_core_client");
+const Client = require("../cap2UI5/srv/z2ui5/01/02/z2ui5_cl_core_client");
 
 describe("z2ui5_cl_core_client", () => {
   let client;
@@ -516,7 +516,7 @@ describe("z2ui5_cl_core_client", () => {
     });
 
     test("CS_EVENT constants are exposed on the class", () => {
-      const Client = require("../srv/z2ui5/01/02/z2ui5_cl_core_client");
+      const Client = require("../cap2UI5/srv/z2ui5/01/02/z2ui5_cl_core_client");
       expect(Client.CS_EVENT.CLIPBOARD_COPY).toBe("CLIPBOARD_COPY");
       expect(Client.CS_EVENT.HISTORY_BACK).toBe("HISTORY_BACK");
     });

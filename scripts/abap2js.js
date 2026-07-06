@@ -326,7 +326,7 @@ let _clientSig;
 function clientSignature() {
   if (_clientSig !== undefined) return _clientSig;
   _clientSig = null;
-  const p = path.join(__dirname, "..", "srv", "z2ui5", "01", "02", "z2ui5_cl_core_client.js");
+  const p = path.join(__dirname, "..", "cap2UI5", "srv", "z2ui5", "01", "02", "z2ui5_cl_core_client.js");
   if (!fs.existsSync(p)) return _clientSig;
   _clientSig = new Map();
   const src = fs.readFileSync(p, "utf8");

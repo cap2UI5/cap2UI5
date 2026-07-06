@@ -1,11 +1,11 @@
-const DB = require("../srv/z2ui5/01/01/z2ui5_cl_core_srv_draft");
+const DB = require("../cap2UI5/srv/z2ui5/01/01/z2ui5_cl_core_srv_draft");
 
 describe("z2ui5_cl_db", () => {
   // ===== serialize / deserialize =====
 
   describe("serialize", () => {
     test("serializes app with class name and file path", () => {
-      const HelloWorld = require("../srv/z2ui5/02/z2ui5_cl_app_hello_world");
+      const HelloWorld = require("../cap2UI5/srv/z2ui5/02/z2ui5_cl_app_hello_world");
       const app = new HelloWorld();
       app.name = "Test";
 
@@ -18,7 +18,7 @@ describe("z2ui5_cl_db", () => {
     });
 
     test("serializes only data properties, not functions", () => {
-      const HelloWorld = require("../srv/z2ui5/02/z2ui5_cl_app_hello_world");
+      const HelloWorld = require("../cap2UI5/srv/z2ui5/02/z2ui5_cl_app_hello_world");
       const app = new HelloWorld();
 
       const json = DB.serialize(app);
@@ -33,7 +33,7 @@ describe("z2ui5_cl_db", () => {
 
   describe("deserialize", () => {
     test("round-trip: serialize then deserialize restores app", () => {
-      const HelloWorld = require("../srv/z2ui5/02/z2ui5_cl_app_hello_world");
+      const HelloWorld = require("../cap2UI5/srv/z2ui5/02/z2ui5_cl_app_hello_world");
       const original = new HelloWorld();
       original.name = "RoundTrip";
 
@@ -46,7 +46,7 @@ describe("z2ui5_cl_db", () => {
     });
 
     test("deserialize restores app class instance (not plain object)", () => {
-      const HelloWorld = require("../srv/z2ui5/02/z2ui5_cl_app_hello_world");
+      const HelloWorld = require("../cap2UI5/srv/z2ui5/02/z2ui5_cl_app_hello_world");
       const original = new HelloWorld();
       const json = DB.serialize(original);
       const restored = DB.deserialize(json);
@@ -65,7 +65,7 @@ describe("z2ui5_cl_db", () => {
 
   describe("serialize demo apps from /samples/ folder", () => {
     test("round-trip for z2ui5_cl_demo_app_001", () => {
-      const AppClass = require("../srv/samples/z2ui5_cl_demo_app_001");
+      const AppClass = require("../cap2UI5/srv/samples/z2ui5_cl_demo_app_001");
       const app = new AppClass();
 
       const json = DB.serialize(app);
@@ -76,7 +76,7 @@ describe("z2ui5_cl_db", () => {
     });
 
     test("round-trip for z2ui5_cl_demo_app_011 preserves table data", () => {
-      const AppClass = require("../srv/samples/z2ui5_cl_demo_app_011");
+      const AppClass = require("../cap2UI5/srv/samples/z2ui5_cl_demo_app_011");
       const app = new AppClass();
       app.t_tab = [
         { selkz: false, title: "Item A", value: "1" },
