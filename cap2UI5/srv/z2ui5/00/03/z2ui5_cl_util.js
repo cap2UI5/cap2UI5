@@ -515,12 +515,11 @@ class z2ui5_cl_util {
     const seen = new Set();
     for (const dir of z2ui5_cl_util._app_dirs()) {
       if (!fs.existsSync(dir)) continue;
-      for (const file of fs.readdirSync(dir)) {
-        if (!file.endsWith(".js")) continue;
-        const className = file.replace(/\.js$/, "");
+      for (const filePath of z2ui5_cl_util._walkClassFiles(dir)) {
+        const className = path.basename(filePath, ".js");
         if (seen.has(className)) continue;
         try {
-          const Cls = require(path.join(dir, file));
+          const Cls = require(filePath);
           let matches = false;
           if (isClassContract) {
             matches = Cls?.prototype instanceof intf;
@@ -553,6 +552,10 @@ class z2ui5_cl_util {
   //       carries them in-tree; gone after extraction to a separate repo.
   //    3. Anything registered at runtime via register_app_dir()
   //    4. Anything in the Z2UI5_APP_DIRS env var (colon-separated paths)
+  //
+  //  Each directory is searched recursively (the transpiled samples tree
+  //  mirrors the upstream src/ subfolders); within one directory a file at
+  //  the top level wins over one in a subdirectory.
   //
   //  External samples-repo lifecycle:
   //    require("abap2UI5/register-apps")(__dirname + "/samples");
@@ -591,10 +594,31 @@ class z2ui5_cl_util {
     return out;
   }
 
+  /**
+   * Recursively collects all .js files under dir — files at the top level
+   * first, then subdirectories. The transpiled samples tree mirrors the
+   * upstream src/ layout (01/, 02/, 03/, 99/, ...), so app classes may sit
+   * at any depth.
+   */
+  static _walkClassFiles(dir, out = []) {
+    const subdirs = [];
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const p = path.join(dir, entry.name);
+      if (entry.isDirectory()) subdirs.push(p);
+      else if (entry.name.endsWith(".js")) out.push(p);
+    }
+    for (const sub of subdirs) z2ui5_cl_util._walkClassFiles(sub, out);
+    return out;
+  }
+
   static _findClassFile(className) {
+    const file = `${className}.js`;
     for (const dir of z2ui5_cl_util._app_dirs()) {
-      const p = path.join(dir, `${className}.js`);
-      if (fs.existsSync(p)) return p;
+      const direct = path.join(dir, file);
+      if (fs.existsSync(direct)) return direct;
+      if (!fs.existsSync(dir)) continue;
+      const hit = z2ui5_cl_util._walkClassFiles(dir).find((p) => path.basename(p) === file);
+      if (hit) return hit;
     }
     return null;
   }

@@ -13,7 +13,10 @@
  *   classes are only ADDED for files that do not exist yet, never copied
  *   over an existing file. Promoting a transpiled class over a hand-written
  *   one is a deliberate manual step.
- * - srv/samples is fully owned by the transpiler and gets overwritten.
+ * - srv/samples is fully owned by the transpiler: existing files are
+ *   overwritten and files that no longer exist in output/samples are
+ *   removed (upstream deletions must propagate). Files whose transpiled
+ *   source does not parse keep their previous version in place.
  * - Every transpiled .js file must parse; files that don't are skipped and
  *   reported (the jest run afterwards is the behavioral gate).
  *
@@ -30,7 +33,7 @@ const root = path.join(__dirname, "..");
 
 const COPIES = [
   { name: "abap2UI5", from: path.join(root, "output", "abap2UI5"), to: path.join(root, "cap2UI5", "srv", "z2ui5"), replace: false, clobber: false, parseCheck: true },
-  { name: "samples", from: path.join(root, "output", "samples"), to: path.join(root, "cap2UI5", "srv", "samples"), replace: false, clobber: true, parseCheck: true },
+  { name: "samples", from: path.join(root, "output", "samples"), to: path.join(root, "cap2UI5", "srv", "samples"), replace: false, clobber: true, prune: true, parseCheck: true },
   { name: "app", from: path.join(root, "output", "app"), to: path.join(root, "cap2UI5", "app", "z2ui5", "webapp"), replace: true, clobber: true, parseCheck: false },
 ];
 
@@ -69,6 +72,25 @@ function copyTree(from, to, opts, stats) {
   }
 }
 
+// Remove .js files under `to` that no longer exist in `from` — used for
+// trees fully owned by the transpiler, so upstream deletions propagate.
+// Only .js files are pruned (hand-maintained docs like README.md stay);
+// emptied directories are removed as well.
+function pruneTree(from, to, stats) {
+  if (!fs.existsSync(to)) return;
+  for (const entry of fs.readdirSync(to, { withFileTypes: true })) {
+    const dest = path.join(to, entry.name);
+    const src = path.join(from, entry.name);
+    if (entry.isDirectory()) {
+      pruneTree(src, dest, stats);
+      if (!fs.readdirSync(dest).length) fs.rmdirSync(dest);
+    } else if (entry.name.endsWith(".js") && !fs.existsSync(src)) {
+      fs.rmSync(dest);
+      stats.pruned++;
+    }
+  }
+}
+
 /**
  * Backend fill-ins must not just parse but also load (unresolved requires,
  * stubbed superclasses of missing classes, ...). Files are checked in a
@@ -99,19 +121,21 @@ function loadGate(files, stats) {
 
 let total = 0;
 let broken = 0;
-for (const { name, from, to, replace, clobber, parseCheck } of COPIES) {
+for (const { name, from, to, replace, clobber, prune, parseCheck } of COPIES) {
   if (!fs.existsSync(from)) {
     console.log(`output/${name}: not found — skipped (run the transpile/prepare steps first)`);
     continue;
   }
   if (replace) fs.rmSync(to, { recursive: true, force: true });
-  const stats = { copied: 0, kept: 0, invalid: [], added: [], unloadable: [] };
+  const stats = { copied: 0, kept: 0, pruned: 0, invalid: [], added: [], unloadable: [] };
   copyTree(from, to, { clobber, parseCheck }, stats);
+  if (prune) pruneTree(from, to, stats);
   if (name === "abap2UI5" && stats.added.length) loadGate(stats.added, stats);
   total += stats.copied;
   broken += stats.invalid.length + stats.unloadable.length;
   const parts = [`${stats.copied} files copied`];
   if (stats.kept) parts.push(`${stats.kept} hand-maintained files kept`);
+  if (stats.pruned) parts.push(`${stats.pruned} removed (gone upstream)`);
   if (stats.invalid.length) parts.push(`${stats.invalid.length} skipped (parse error)`);
   if (stats.unloadable.length) parts.push(`${stats.unloadable.length} skipped (load error)`);
   console.log(`output/${name} -> ${path.relative(root, to)}: ${parts.join(", ")}`);
