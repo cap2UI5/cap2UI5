@@ -8,6 +8,7 @@ class z2ui5_cl_xml_view {
   ns;
   aProp = [];
   _isPopup = false;  // root-only flag — toggled by factory_popup()
+  _usedNs = new Set();  // root-only — every ns prefix used anywhere in the tree
 
   constructor(opts = {}) {
     this.oRoot = this;
@@ -31,11 +32,94 @@ class z2ui5_cl_xml_view {
 
   // --- Core ---
 
-  _renderRootOpen() {
-    if (this._isPopup) {
-      return `<core:FragmentDefinition xmlns:m="sap.m" xmlns:core="sap.ui.core" xmlns:f="sap.f" xmlns:form="sap.ui.layout.form" xmlns:l="sap.ui.layout" xmlns:mvc="sap.ui.core.mvc" xmlns:table="sap.ui.table" xmlns:unified="sap.ui.unified" xmlns:upload="sap.m.upload" xmlns:uxap="sap.uxap" xmlns:z2ui5="z2ui5"`;
+  // Prefix → namespace URI map, mirrored from the abap original's st_ns_map
+  // (z2ui5_cl_xml_view->xml_get_parts). Baseline prefixes (see
+  // _renderRootOpen) are always declared; any further prefix used in the tree
+  // is collected in the root's _usedNs and declared on demand from this map.
+  static NS_MAP = {
+    m: `sap.m`,
+    mvc: `sap.ui.core.mvc`,
+    core: `sap.ui.core`,
+    l: `sap.ui.layout`,
+    u: `sap.ui.unified`,
+    unified: `sap.ui.unified`,
+    z2ui5: `z2ui5`,
+    layout: `sap.ui.layout`,
+    networkgraph: `sap.suite.ui.commons.networkgraph`,
+    nglayout: `sap.suite.ui.commons.networkgraph.layout`,
+    ngcustom: `sap.suite.ui.commons.sample.NetworkGraphCustomRendering`,
+    table: `sap.ui.table`,
+    template: `http://schemas.sap.com/sapui5/extension/sap.ui.core.template/1`,
+    customData: `http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1`,
+    f: `sap.f`,
+    columnmenu: `sap.m.table.columnmenu`,
+    card: `sap.f.cards`,
+    dnd: `sap.ui.core.dnd`,
+    "dnd-grid": `sap.f.dnd`,
+    grid: `sap.ui.layout.cssgrid`,
+    form: `sap.ui.layout.form`,
+    editor: `sap.ui.codeeditor`,
+    mchart: `sap.suite.ui.microchart`,
+    smartFilterBar: `sap.ui.comp.smartfilterbar`,
+    smartVariantManagement: `sap.ui.comp.smartvariants`,
+    smartTable: `sap.ui.comp.smarttable`,
+    webc: `sap.ui.webc.main`,
+    uxap: `sap.uxap`,
+    sap: `sap`,
+    text: `sap.ui.richtexteditor`,
+    html: `http://www.w3.org/1999/xhtml`,
+    fb: `sap.ui.comp.filterbar`,
+    gantt: `sap.gantt.simple`,
+    axistime: `sap.gantt.axistime`,
+    config: `sap.gantt.config`,
+    shapes: `sap.gantt.simple.shapes`,
+    commons: `sap.suite.ui.commons`,
+    si: `sap.suite.ui.commons.statusindicator`,
+    vm: `sap.ui.comp.variants`,
+    viz: `sap.viz.ui5.controls`,
+    "viz.data": `sap.viz.ui5.data`,
+    "viz.feeds": `sap.viz.ui5.controls.common.feeds`,
+    vk: `sap.ui.vk`,
+    vbm: `sap.ui.vbm`,
+    ndc: `sap.ndc`,
+    svm: `sap.ui.comp.smartvariants`,
+    flvm: `sap.ui.fl.variants`,
+    p13n: `sap.m.p13n`,
+    upload: `sap.m.upload`,
+    fl: `sap.ui.fl`,
+    plugins: `sap.m.plugins`,
+    tnt: `sap.tnt`,
+    mdc: `sap.ui.mdc`,
+    trm: `sap.ui.table.rowmodes`,
+    smi: `sap.ui.comp.smartmultiinput`,
+    ie: `sap.suite.ui.commons.imageeditor`,
+  };
+
+  // Prefixes declared unconditionally on every root (kept from the previous
+  // hardcoded list so existing output stays stable).
+  static BASE_NS = ["m", "core", "f", "form", "l", "mvc", "table", "unified", "upload", "uxap", "z2ui5"];
+
+  _renderExtraNs() {
+    let result = "";
+    for (const prefix of [...this.oRoot._usedNs].sort()) {
+      if (z2ui5_cl_xml_view.BASE_NS.includes(prefix)) continue;
+      const uri = z2ui5_cl_xml_view.NS_MAP[prefix];
+      if (!uri) {
+        throw new Error(`XML_VIEW_ERROR_NO_NAMESPACE_FOUND_FOR: ${prefix}`);
+      }
+      result += ` xmlns:${prefix}="${uri}"`;
     }
-    return `<mvc:View xmlns:m="sap.m" xmlns:core="sap.ui.core" xmlns:f="sap.f" xmlns:form="sap.ui.layout.form" xmlns:l="sap.ui.layout" xmlns:mvc="sap.ui.core.mvc" xmlns:table="sap.ui.table" xmlns:unified="sap.ui.unified" xmlns:upload="sap.m.upload" xmlns:uxap="sap.uxap" xmlns:z2ui5="z2ui5" displayBlock="true" height="100%"`;
+    return result;
+  }
+
+  _renderRootOpen() {
+    // xmlns="sap.m" mirrors the abap original's default namespace — any
+    // un-prefixed tag resolves to sap.m instead of the null namespace (which
+    // UI5 would try to load as a module, e.g. `null/content.js`).
+    if (this._isPopup) {
+      return `<core:FragmentDefinition xmlns="sap.m" xmlns:m="sap.m" xmlns:core="sap.ui.core" xmlns:f="sap.f" xmlns:form="sap.ui.layout.form" xmlns:l="sap.ui.layout" xmlns:mvc="sap.ui.core.mvc" xmlns:table="sap.ui.table" xmlns:unified="sap.ui.unified" xmlns:upload="sap.m.upload" xmlns:uxap="sap.uxap" xmlns:z2ui5="z2ui5"${this._renderExtraNs()}`;
+    }
+    return `<mvc:View xmlns="sap.m" xmlns:m="sap.m" xmlns:core="sap.ui.core" xmlns:f="sap.f" xmlns:form="sap.ui.layout.form" xmlns:l="sap.ui.layout" xmlns:mvc="sap.ui.core.mvc" xmlns:table="sap.ui.table" xmlns:unified="sap.ui.unified" xmlns:upload="sap.m.upload" xmlns:uxap="sap.uxap" xmlns:z2ui5="z2ui5"${this._renderExtraNs()} displayBlock="true" height="100%"`;
   }
 
   _renderRootClose() {
@@ -63,6 +147,12 @@ class z2ui5_cl_xml_view {
   }
 
   _renderXml() {
+    // Raw XML/CSS/JS injection (_cc_plain_xml) — the abap original emits the
+    // VALUE untouched instead of rendering a <ZZPLAIN> tag.
+    if (this.name === "ZZPLAIN") {
+      const value = this.aProp.find((prop) => prop.n === "VALUE");
+      return value?.v ?? "";
+    }
     let result;
     if (this === this.oRoot) {
       result = this._renderRootOpen();
@@ -137,6 +227,7 @@ class z2ui5_cl_xml_view {
 
     oResult.name = val.name;
     oResult.ns = val.ns || "";
+    if (oResult.ns) this.oRoot._usedNs.add(oResult.ns);
     for (const prop of val.aProp) {
       oResult.aProp.push(prop);
     }
@@ -157,6 +248,19 @@ class z2ui5_cl_xml_view {
 
   _filterProps(props) {
     return props.filter((p) => p.v !== undefined && p.v !== null);
+  }
+
+  /**
+   * Resolves the namespace of an aggregation accessor (content, items,
+   * footer, …). Transpiled abap call sites pass the ns positionally as a
+   * string (`content(`form`)`), JS call sites pass `{ ns }`, and bare calls
+   * inherit the parent element's namespace — aggregation tags must live in
+   * the same namespace as their parent control, otherwise UI5 resolves them
+   * as controls of the null namespace and requests e.g. `null/content.js`.
+   */
+  _aggNs(args) {
+    const ns = typeof args === "string" ? args : args?.ns;
+    return ns || this.ns || "m";
   }
 
   boolean_abap_2_json(value) {
@@ -333,18 +437,6 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  content(props = {}) {
-    // Aggregations inherit the parent's namespace — Dialog/Page/Panel use "m",
-    // SimpleForm uses "form", uxap controls use "uxap", etc.
-    // Hardcoding ns="form" caused UI5 to try loading sap.ui.layout.form.content
-    // as a class when used inside a Dialog.
-    return this._container({
-      name: "content",
-      ns: this.ns || "m",
-      aProp: [],
-    });
-  }
-
   Grid({ defaultSpan, class: cssClass } = {}) {
     return this._container({
       name: "Grid",
@@ -397,14 +489,6 @@ class z2ui5_cl_xml_view {
   headerContent(props = {}) {
     return this._container({
       name: "headerContent",
-      ns: "m",
-      aProp: [],
-    });
-  }
-
-  footer(props = {}) {
-    return this._container({
-      name: "footer",
       ns: "m",
       aProp: [],
     });
@@ -898,14 +982,6 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  columns(props = {}) {
-    return this._container({
-      name: "columns",
-      ns: "m",
-      aProp: [],
-    });
-  }
-
   Column({ width, hAlign, vAlign, minScreenWidth, demandPopin, popinDisplay } = {}) {
     return this._container({
       name: "Column",
@@ -918,14 +994,6 @@ class z2ui5_cl_xml_view {
         { n: "demandPopin", v: this.boolean_abap_2_json(demandPopin) },
         { n: "popinDisplay", v: popinDisplay },
       ]),
-    });
-  }
-
-  items(props = {}) {
-    return this._container({
-      name: "items",
-      ns: "m",
-      aProp: [],
     });
   }
 
@@ -1219,24 +1287,12 @@ class z2ui5_cl_xml_view {
     return this._container({ name: "title", ns: "f", aProp: [] });
   }
 
-  header(props = {}) {
-    return this._container({ name: "header", ns: this.ns || "m", aProp: [] });
-  }
-
-  heading(props = {}) {
-    return this._container({ name: "heading", ns: this.ns || "m", aProp: [] });
-  }
-
   expandedHeading(props = {}) {
     return this._container({ name: "expandedHeading", ns: this.ns || "m", aProp: [] });
   }
 
   snappedHeading(props = {}) {
     return this._container({ name: "snappedHeading", ns: this.ns || "m", aProp: [] });
-  }
-
-  actions(props = {}) {
-    return this._container({ name: "actions", ns: this.ns || "m", aProp: [] });
   }
 
   // ========================================================
@@ -2008,12 +2064,11 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  rowmode({ ns } = {}) {
+  rowmode(args = {}) {
     return this._container({
       name: "rowMode",
-      aProp: this._filterProps([
-
-      ]),
+      ns: this._aggNs(args),
+      aProp: [],
     });
   }
 
@@ -2074,12 +2129,11 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  footer({ ns } = {}) {
+  footer(args = {}) {
     return this._container({
       name: "footer",
-      aProp: this._filterProps([
-
-      ]),
+      ns: this._aggNs(args),
+      aProp: [],
     });
   }
 
@@ -2329,39 +2383,35 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  expanded_content({ ns } = {}) {
+  expanded_content(args = {}) {
     return this._container({
       name: "expandedContent",
-      aProp: this._filterProps([
-
-      ]),
+      ns: this._aggNs(args),
+      aProp: [],
     });
   }
 
-  snapped_content({ ns } = {}) {
+  snapped_content(args = {}) {
     return this._container({
       name: "snappedContent",
-      aProp: this._filterProps([
-
-      ]),
+      ns: this._aggNs(args),
+      aProp: [],
     });
   }
 
-  heading({ ns } = {}) {
-    return this._leaf({
+  heading(args = {}) {
+    return this._container({
       name: "heading",
-      aProp: this._filterProps([
-
-      ]),
+      ns: this._aggNs(args),
+      aProp: [],
     });
   }
 
-  actions({ ns } = {}) {
+  actions(args = {}) {
     return this._container({
       name: "actions",
-      aProp: this._filterProps([
-
-      ]),
+      ns: this._aggNs(args),
+      aProp: [],
     });
   }
 
@@ -2375,12 +2425,11 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  header({ ns } = {}) {
+  header(args = {}) {
     return this._container({
       name: "header",
-      aProp: this._filterProps([
-
-      ]),
+      ns: this._aggNs(args),
+      aProp: [],
     });
   }
 
@@ -2503,7 +2552,7 @@ class z2ui5_cl_xml_view {
   }
 
   sub_sections() {
-    return this._leaf({
+    return this._container({
       name: "subSections",
       ns: "uxap",
       aProp: this._filterProps([
@@ -2587,12 +2636,11 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  layout_data({ ns } = {}) {
+  layout_data(args = {}) {
     return this._container({
       name: "layoutData",
-      aProp: this._filterProps([
-
-      ]),
+      ns: this._aggNs(args),
+      aProp: [],
     });
   }
 
@@ -2680,12 +2728,11 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  tokens({ ns } = {}) {
+  tokens(args = {}) {
     return this._container({
       name: "tokens",
-      aProp: this._filterProps([
-
-      ]),
+      ns: this._aggNs(args),
+      aProp: [],
     });
   }
 
@@ -2795,21 +2842,19 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  columns({ ns } = {}) {
+  columns(args = {}) {
     return this._container({
       name: "columns",
-      aProp: this._filterProps([
-
-      ]),
+      ns: this._aggNs(args),
+      aProp: [],
     });
   }
 
-  analytical_column({ ns } = {}) {
+  analytical_column(args = {}) {
     return this._container({
       name: "AnalyticalColumn",
-      aProp: this._filterProps([
-
-      ]),
+      ns: this._aggNs(args),
+      aProp: [],
     });
   }
 
@@ -2837,12 +2882,11 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  items({ ns } = {}) {
+  items(args = {}) {
     return this._container({
       name: "items",
-      aProp: this._filterProps([
-
-      ]),
+      ns: this._aggNs(args),
+      aProp: [],
     });
   }
 
@@ -3020,12 +3064,11 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  content_areas({ ns } = {}) {
+  content_areas(args = {}) {
     return this._container({
       name: "contentAreas",
-      aProp: this._filterProps([
-
-      ]),
+      ns: this._aggNs(args),
+      aProp: [],
     });
   }
 
@@ -3041,30 +3084,27 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  header_content({ ns } = {}) {
+  header_content(args = {}) {
     return this._container({
       name: "headerContent",
-      aProp: this._filterProps([
-
-      ]),
+      ns: this._aggNs(args),
+      aProp: [],
     });
   }
 
-  sub_header({ ns } = {}) {
+  sub_header(args = {}) {
     return this._container({
       name: "subHeader",
-      aProp: this._filterProps([
-
-      ]),
+      ns: this._aggNs(args),
+      aProp: [],
     });
   }
 
-  custom_data({ ns } = {}) {
+  custom_data(args = {}) {
     return this._container({
       name: "customData",
-      aProp: this._filterProps([
-
-      ]),
+      ns: this._aggNs(args),
+      aProp: [],
     });
   }
 
@@ -3371,21 +3411,36 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  _cc_plain_xml({ val } = {}) {
+  /**
+   * Raw XML/CSS/JS injection — mirrors abap _cc_plain_xml( val ). Transpiled
+   * call sites pass the value positionally as a string; { val } also works.
+   * Rendered as the raw VALUE (see _renderXml), never as a tag.
+   */
+  _cc_plain_xml(args = {}) {
+    const val = typeof args === "string" ? args : args?.val;
     return this._leaf({
       name: "ZZPLAIN",
-      aProp: this._filterProps([
-      { n: "VALUE", v: val },
-      ]),
+      aProp: this._filterProps([{ n: "VALUE", v: val }]),
     });
   }
 
-  content({ ns } = {}) {
+  /**
+   * Generic element — mirrors abap _generic( name, ns, t_prop ). Returns the
+   * newly created child element.
+   */
+  _generic({ name, ns, t_prop } = {}) {
+    return this._container({
+      name: name,
+      ns: ns || "",
+      aProp: this._filterProps(t_prop || []),
+    });
+  }
+
+  content(args = {}) {
     return this._container({
       name: "content",
-      aProp: this._filterProps([
-
-      ]),
+      ns: this._aggNs(args),
+      aProp: [],
     });
   }
 
@@ -5214,12 +5269,11 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  nodes({ ns } = {}) {
+  nodes(args = {}) {
     return this._container({
       name: "nodes",
-      aProp: this._filterProps([
-
-      ]),
+      ns: this._aggNs(args),
+      aProp: [],
     });
   }
 
@@ -5678,21 +5732,19 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  fix_content({ ns } = {}) {
+  fix_content(args = {}) {
     return this._container({
       name: "fixContent",
-      aProp: this._filterProps([
-
-      ]),
+      ns: this._aggNs(args),
+      aProp: [],
     });
   }
 
-  flex_content({ ns } = {}) {
+  flex_content(args = {}) {
     return this._container({
       name: "flexContent",
-      aProp: this._filterProps([
-
-      ]),
+      ns: this._aggNs(args),
+      aProp: [],
     });
   }
 
@@ -5794,21 +5846,19 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  markers({ ns } = {}) {
+  markers(args = {}) {
     return this._container({
       name: "markers",
-      aProp: this._filterProps([
-
-      ]),
+      ns: this._aggNs(args),
+      aProp: [],
     });
   }
 
-  statuses({ ns } = {}) {
+  statuses(args = {}) {
     return this._container({
       name: "statuses",
-      aProp: this._filterProps([
-
-      ]),
+      ns: this._aggNs(args),
+      aProp: [],
     });
   }
 
@@ -6869,12 +6919,11 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  dependents({ ns } = {}) {
+  dependents(args = {}) {
     return this._container({
       name: "dependents",
-      aProp: this._filterProps([
-
-      ]),
+      ns: this._aggNs(args),
+      aProp: [],
     });
   }
 
@@ -7010,12 +7059,11 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  custom_layout({ ns } = {}) {
+  custom_layout(args = {}) {
     return this._container({
       name: "customLayout",
-      aProp: this._filterProps([
-
-      ]),
+      ns: this._aggNs(args),
+      aProp: [],
     });
   }
 
@@ -7158,12 +7206,11 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  drag_drop_config({ ns } = {}) {
+  drag_drop_config(args = {}) {
     return this._container({
       name: "dragDropConfig",
-      aProp: this._filterProps([
-
-      ]),
+      ns: this._aggNs(args),
+      aProp: [],
     });
   }
 
@@ -7434,21 +7481,19 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  no_data({ ns } = {}) {
+  no_data(args = {}) {
     return this._container({
       name: "noData",
-      aProp: this._filterProps([
-
-      ]),
+      ns: this._aggNs(args),
+      aProp: [],
     });
   }
 
-  lines({ ns } = {}) {
+  lines(args = {}) {
     return this._container({
       name: "lines",
-      aProp: this._filterProps([
-
-      ]),
+      ns: this._aggNs(args),
+      aProp: [],
     });
   }
 
@@ -7476,12 +7521,11 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  groups({ ns } = {}) {
+  groups(args = {}) {
     return this._container({
       name: "groups",
-      aProp: this._filterProps([
-
-      ]),
+      ns: this._aggNs(args),
+      aProp: [],
     });
   }
 
@@ -7630,12 +7674,11 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  attributes({ ns } = {}) {
+  attributes(args = {}) {
     return this._container({
       name: "attributes",
-      aProp: this._filterProps([
-
-      ]),
+      ns: this._aggNs(args),
+      aProp: [],
     });
   }
 
@@ -7649,12 +7692,11 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  action_buttons({ ns } = {}) {
+  action_buttons(args = {}) {
     return this._container({
       name: "actionButtons",
-      aProp: this._filterProps([
-
-      ]),
+      ns: this._aggNs(args),
+      aProp: [],
     });
   }
 
