@@ -1,4 +1,4 @@
-[![mirror frontend](https://github.com/cap2UI5/cap2UI5/actions/workflows/mirror_frontend.yml/badge.svg)](https://github.com/cap2UI5/cap2UI5/actions/workflows/mirror_frontend.yml)
+[![sync pipeline](https://github.com/cap2UI5/dev/actions/workflows/sync.yml/badge.svg)](https://github.com/cap2UI5/dev/actions/workflows/sync.yml)
 
 # 🚀 cap2UI5
 
@@ -19,6 +19,12 @@ Get up and running in seconds:
 ``` 
 npx cds w
 ```
+
+## Transpiling from ABAP
+
+App classes can be transpiled automatically from the abap2UI5 ABAP sources —
+the transpiler and all other dev tooling live at the repository root, see the
+[root README](../README.md).
 
 ## Samples
 All samples demonstrate complete view definition and data exchange handled entirely by the CAP server, using the same and static frontend from abap2UI5.

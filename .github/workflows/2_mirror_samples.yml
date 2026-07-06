@@ -1,0 +1,34 @@
+name: 2 mirror samples
+
+# Step 2: snapshot abap2UI5/samples (src/) into input/samples/.
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm run mirror_samples
+      - name: commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add input/samples
+          if git diff --cached --quiet; then
+            echo "nothing to commit"
+          else
+            git commit -m "mirror: update input/samples ($(cut -c1-12 input/samples/UPSTREAM_COMMIT))"
+            git pull --rebase origin "${{ github.ref_name }}"
+            git push origin "HEAD:${{ github.ref_name }}"
+          fi

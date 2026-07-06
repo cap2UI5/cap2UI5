@@ -1,10 +1,22 @@
 {
-  "name": "app-ui5",
-  "version": "0.0.0",
+  "name": "cap2ui5-dev",
+  "version": "1.0.0",
   "private": true,
-  "description": "Mirror of the app/ folder from the abap2UI5 project.",
+  "description": "Development tooling for cap2UI5 — the deployable CAP project lives in cap2UI5/",
   "license": "MIT",
   "scripts": {
-    "clone": "./scripts/sync-app.sh"
+    "test": "jest --verbose",
+    "test:watch": "jest --watch",
+    "transpile": "node scripts/abap2js.js",
+    "mirror_abap2ui5": "node scripts/mirror-input.js abap2UI5",
+    "mirror_samples": "node scripts/mirror-input.js samples",
+    "transpile_abap2ui5": "node scripts/transpile-tree.js abap2UI5",
+    "transpile_samples": "node scripts/transpile-tree.js samples",
+    "copy_backend": "node scripts/copy-into-cap.js",
+    "copy_frontend": "node scripts/mirror-frontend.js"
+  },
+  "devDependencies": {
+    "@abaplint/core": "^2.119.56",
+    "jest": "^30.2.0"
   }
 }

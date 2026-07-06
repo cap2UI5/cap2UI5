@@ -1,6 +1,0 @@
-node_modules/
-dist/
-.ui5/
-coverage/
-*.log
-.DS_Store
