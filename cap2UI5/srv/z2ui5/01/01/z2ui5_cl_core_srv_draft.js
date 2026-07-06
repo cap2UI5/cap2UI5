@@ -1,71 +1,115 @@
-// TODO(abap2js): unresolved reference z2ui5_cl_exit — add require manually
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cx_util_error = require("abap2UI5/z2ui5_cx_util_error");
-const z2ui5_if_types = require("abap2UI5/z2ui5_if_types");
+const cds = require("@sap/cds");
+const path = require("path");
+const fs = require("fs");
 
 class z2ui5_cl_core_srv_draft {
-  static c_seconds_per_hour = 3600;
-  static c_min_exp_time_in_hours = 1;
 
-  cleanup() {
-    const ls_config = value z2ui5_if_types.ty_s_http_config_post();
-    z2ui5_cl_exit.get_instance().set_config_http_post(/* TODO(abap2js): out-params */ CHANGING cs_config = ls_config);
-    let lv_exp_time_in_hours = ls_config.draft_exp_time_in_hours;
-    if (lv_exp_time_in_hours < z2ui5_cl_core_srv_draft.c_min_exp_time_in_hours) {
-      lv_exp_time_in_hours = z2ui5_cl_core_srv_draft.c_min_exp_time_in_hours;
+  // Property names that are transient and must never be persisted —
+  // either they're rebuilt each roundtrip (client ref) or they would create
+  // cycles back into the runtime.
+  static SKIP_PROPS = new Set(["client"]);
+
+  static serialize(oApp) {
+    const filePath = this._findAppFile(oApp.constructor.name);
+    const data = {};
+    for (const prop of Object.getOwnPropertyNames(oApp)) {
+      if (typeof oApp[prop] === "function") continue;
+      if (this.SKIP_PROPS.has(prop)) continue;
+      data[prop] = oApp[prop];
     }
-    const lv_n_hours_ago = z2ui5_cl_util.time_subtract_seconds({ time: z2ui5_cl_util.time_get_timestampl(), seconds: z2ui5_cl_core_srv_draft.c_seconds_per_hour * lv_exp_time_in_hours });
-    // TODO(abap2js): DELETE FROM z2ui5_t_01 WHERE timestampl < @lv_n_hours_ago .
-    // TODO(abap2js): COMMIT WORK.
+    // Cycle-safe stringify — last-line defense against accidental back-refs
+    // from user apps (in addition to the explicit SKIP_PROPS list).
+    const seen = new WeakSet();
+    return JSON.stringify(
+      { __className: oApp.constructor.name, __filePath: filePath, ...data },
+      (_key, val) => {
+        if (typeof val === "object" && val !== null) {
+          if (seen.has(val)) return undefined;
+          seen.add(val);
+        }
+        return val;
+      },
+    );
   }
 
-  create({ draft, model_xml } = {}) {
-    if (!(draft.id)) throw new Error(`ASSERT failed`);
-    const ls_db = { id: draft.id, id_prev: draft.id_prev, id_prev_app: draft.id_prev_app, id_prev_app_stack: draft.id_prev_app_stack, timestampl: z2ui5_cl_util.time_get_timestampl(), data: model_xml };
-    // TODO(abap2js): MODIFY z2ui5_t_01 FROM @ls_db.
-    if (sy_subrc !== 0) {
-      throw new z2ui5_cx_util_error({ val: `CREATE_OF_DRAFT_ENTRY_ON_DATABASE_FAILED` });
+  static deserialize(data) {
+    const parsed = JSON.parse(data);
+
+    if (parsed.__className) {
+      const modulePath = parsed.__filePath || `../../02/${parsed.__className}`;
+      const resolvedPath = path.resolve(__dirname, modulePath);
+      const AppClass = require(resolvedPath);
+      const oApp = new AppClass();
+      delete parsed.__className;
+      delete parsed.__filePath;
+      Object.assign(oApp, parsed);
+      return oApp;
     }
-    // TODO(abap2js): COMMIT WORK AND WAIT.
+    return parsed;
   }
 
-  read({ id, check_load_app = true } = {}) {
-    let result = {};
-    if (check_load_app === true) {
-      // TODO(abap2js): SELECT SINGLE * FROM z2ui5_t_01 WHERE id = @id INTO @result .
-    } else {
-      // TODO(abap2js): SELECT SINGLE id, id_prev, id_prev_app, id_prev_app_stack FROM z2ui5_t_01 WHERE id = @id INTO CORRESPONDING FIELDS OF @result .
+  static async loadApp(id) {
+    const { z2ui5_t_01 } = cds.entities("my.domain");
+    const entry = await SELECT.one.from(z2ui5_t_01).where({ id: id });
+
+    if (!entry) return null;
+
+    return this.deserialize(entry.data);
+  }
+
+  static async saveApp(oApp, previousId = null) {
+    const generatedId = require("crypto").randomUUID();
+    const { z2ui5_t_01 } = cds.entities("my.domain");
+
+    try {
+      await INSERT.into(z2ui5_t_01).entries({
+        id: generatedId,
+        id_prev: previousId || null,
+        data: this.serialize(oApp),
+      });
+    } catch (e) {
+      console.error("DB saveApp error:", e.message);
     }
-    if (sy_subrc !== 0) {
-      throw new z2ui5_cx_util_error({ val: `NO_DRAFT_ENTRY_OF_PREVIOUS_REQUEST_FOUND` });
+
+    return generatedId;
+  }
+
+  static async loadPreviousApp(id) {
+    const { z2ui5_t_01 } = cds.entities("my.domain");
+    const entry = await SELECT.one.from(z2ui5_t_01).where({ id: id });
+    if (!entry || !entry.id_prev) return null;
+
+    const prevEntry = await SELECT.one
+      .from(z2ui5_t_01)
+      .where({ id: entry.id_prev });
+    if (!prevEntry) return null;
+
+    return this.deserialize(prevEntry.data);
+  }
+
+  static _findAppFile(className) {
+    const searchPaths = [
+      path.join(__dirname, "../../02", `${className}.js`),
+      path.join(__dirname, "../../02/01", `${className}.js`),  // pop helpers
+      path.join(__dirname, "../../../samples", `${className}.js`),
+    ];
+
+    for (const searchPath of searchPaths) {
+      if (fs.existsSync(searchPath)) {
+        return path.relative(__dirname, searchPath);
+      }
     }
-    return result;
+
+    return `../../02/${className}`;
   }
 
-  read_draft({ id } = {}) {
-    let result = {};
-    result = this.read({ id: id });
-    return result;
-  }
-
-  read_info({ id } = {}) {
-    let result = null;
-    const ls_db = this.read({ id, check_load_app: false });
-    result = ({ ...ls_db });
-    return result;
-  }
-
-  check_exists({ id } = {}) {
-    let result = false;
-    // TODO(abap2js): SELECT SINGLE id FROM z2ui5_t_01 WHERE id = @id INTO @DATA(lv_id) .
-    result = Boolean(sy_subrc === 0);
-    return result;
-  }
-
-  count_entries() {
-    let result = 0;
-    // TODO(abap2js): SELECT COUNT( * ) FROM z2ui5_t_01 INTO @result.
-    return result;
+  static findAppClass(className) {
+    const filePath = this._findAppFile(className);
+    const resolvedPath = path.resolve(__dirname, filePath);
+    if (fs.existsSync(resolvedPath)) {
+      return require(resolvedPath);
+    }
+    return null;
   }
 }
 

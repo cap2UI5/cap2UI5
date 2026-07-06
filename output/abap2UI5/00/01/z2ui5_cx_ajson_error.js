@@ -1,4 +1,4 @@
-// TODO(abap2js): unresolved reference cx_static_check — add require manually
+const cx_static_check = class {}; // TODO(abap2js): unresolved superclass — replace stub manually
 
 class z2ui5_cx_ajson_error extends cx_static_check {
   static zcx_ajson_error = { msgid: `00`, msgno: `001`, attr1: `A1`, attr2: `A2`, attr3: `A3`, attr4: `A4` };
@@ -11,31 +11,31 @@ class z2ui5_cx_ajson_error extends cx_static_check {
   a3 = null;
   a4 = null;
 
-  constructor({ !textid, !previous, !rc, !message, !location, !a1, !a2, !a3, !a4 } = {}) {
-    call method super.constructor exporting previous === previous;
-    this.rc = this.rc;
-    this.message = this.message;
-    this.location = this.location;
-    this.a1 = this.a1;
-    this.a2 = this.a2;
-    this.a3 = this.a3;
-    this.a4 = this.a4;
+  constructor({ textid, previous, rc, message, location, a1, a2, a3, a4 } = {}) {
+    // TODO(abap2js): CALL METHOD SUPER->CONSTRUCTOR EXPORTING PREVIOUS = PREVIOUS .
+    this.rc = rc;
+    this.message = message;
+    this.location = location;
+    this.a1 = a1;
+    this.a2 = a2;
+    this.a3 = a3;
+    this.a4 = a4;
     this.textid = null;
     if (!textid) {
-      if_t100_message~t100key = z2ui5_cx_ajson_error.zcx_ajson_error;
+      this.t100key = z2ui5_cx_ajson_error.zcx_ajson_error;
     } else {
-      if_t100_message~t100key = textid;
+      this.t100key = textid;
     }
   }
 
-  static raise({ !iv_msg, !iv_location, !is_node } = {}) {
+  static raise({ iv_msg, iv_location, is_node } = {}) {
     let lx = null;
     lx = null; // TODO(abap2js): create object lx exporting message = iv_msg.
     lx.set_location({ iv_location, is_node });
     throw lx;
   }
 
-  set_location({ !iv_location, !is_node } = {}) {
+  set_location({ iv_location, is_node } = {}) {
     let ls_msg = null;
     let lv_location = ``;
     let lv_tmp = ``;

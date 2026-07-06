@@ -27,11 +27,11 @@ class z2ui5_cl_pop_get_range_m extends z2ui5_if_app {
       .custom_list_item();
     const grid = item.grid({ class: `sapUiSmallMarginTop sapUiSmallMarginBottom sapUiSmallMarginBegin` });
     grid.text(`{NAME}`);
-    grid.multi_input({ tokens: `{T_TOKEN}`, enabled: false, valuehelprequest: this.client._event(`LIST_OPEN`, [`${NAME}`]) })
+    grid.multi_input({ tokens: `{T_TOKEN}`, enabled: false, valuehelprequest: this.client._event(`LIST_OPEN`, [`\${NAME}`]) })
       .tokens()
       .token({ key: `{KEY}`, text: `{TEXT}`, visible: `{VISIBLE}`, selected: `{SELKZ}`, editable: `{EDITABLE}` });
-    grid.button({ text: `Select`, press: this.client._event(`LIST_OPEN`, [`${NAME}`]) });
-    grid.button({ icon: `sap-icon://delete`, type: `Transparent`, text: `Clear`, press: this.client._event(`LIST_DELETE`, [`${NAME}`]) });
+    grid.button({ text: `Select`, press: this.client._event(`LIST_OPEN`, [`\${NAME}`]) });
+    grid.button({ icon: `sap-icon://delete`, type: `Transparent`, text: `Clear`, press: this.client._event(`LIST_DELETE`, [`\${NAME}`]) });
     lo_popup.buttons()
       .button({ text: `Clear All`, icon: `sap-icon://delete`, type: `Transparent`, press: this.client._event(`POPUP_DELETE_ALL`) })
       .button({ text: `Cancel`, press: this.client._event(`BUTTON_CANCEL`) })
@@ -46,6 +46,7 @@ class z2ui5_cl_pop_get_range_m extends z2ui5_if_app {
   }
 
   async main(client) {
+    let sy_tabix = 0;
     this.client = client;
     if (client.check_on_init()) {
       this.init();
@@ -83,7 +84,7 @@ class z2ui5_cl_pop_get_range_m extends z2ui5_if_app {
         client.nav_app_leave();
         break;
       case `POPUP_DELETE_ALL`:
-        let sy_tabix = 0;
+        sy_tabix = 0;
         for (const lr_filter of this.ms_result.t_filter) {
           sy_tabix++;
           lr_filter.t_range = null;

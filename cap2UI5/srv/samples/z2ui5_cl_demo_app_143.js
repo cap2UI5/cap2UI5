@@ -54,7 +54,7 @@ class z2ui5_cl_demo_app_143 extends z2ui5_if_app {
       .get_parent()
       .ui_row_action_template()
       .ui_row_action()
-      .ui_row_action_item({ icon: `sap-icon://add`, text: `Add`, press: this.client._event(`ROW_ACTION_ITEM_ADD`, [`${MATNR}`]) });
+      .ui_row_action_item({ icon: `sap-icon://add`, text: `Add`, press: this.client._event(`ROW_ACTION_ITEM_ADD`, [`\${MATNR}`]) });
     this.client.view_display(view.stringify());
   }
 

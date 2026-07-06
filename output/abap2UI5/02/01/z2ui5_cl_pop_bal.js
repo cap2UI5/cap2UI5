@@ -14,9 +14,10 @@ class z2ui5_cl_pop_bal extends z2ui5_if_app {
 
   static factory({ i_messages, i_title = `abap2UI5 - Business Application Log`, i_object, i_subobject, i_extnumber, i_check_save = false } = {}) {
     let r_result = null;
+    let sy_tabix = 0;
     r_result = new z2ui5_cl_pop_bal();
     r_result.mt_msg_bal = z2ui5_cl_util.msg_get_t(i_messages);
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const lr_row of r_result.mt_msg_bal) {
       sy_tabix++;
       r_result.mt_msg.push({ type: z2ui5_cl_util.ui5_get_msg_type(lr_row.type), title: lr_row.text, id: lr_row.id, number: lr_row.no, message_v1: lr_row.v1, message_v2: lr_row.v2, message_v3: lr_row.v3, message_v4: lr_row.v4, message: lr_row.text, subtitle: `${lr_row.id} ${lr_row.no}`, date: z2ui5_cl_util.time_get_date_by_stampl(lr_row.timestampl), time: z2ui5_cl_util.time_get_time_by_stampl(lr_row.timestampl) });

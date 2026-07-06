@@ -1,6 +1,5 @@
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
-const z2ui5_if_types = require("abap2UI5/z2ui5_if_types");
 
 class z2ui5_cl_demo_app_035 extends z2ui5_if_app {
   mv_type = ``;
@@ -19,7 +18,7 @@ class z2ui5_cl_demo_app_035 extends z2ui5_if_app {
       .label(`path`)
       .input(this.client._bind_edit(this.mv_path))
       .label(`Option`);
-    this.lt_types = value z2ui5_if_types.ty_t_name_value();
+    this.lt_types = {};
     this.lt_types = /* TODO(abap2js): VALUE FOR/BASE */ [];
     const temp3 = temp.input({ value: this.client._bind_edit(this.mv_type), suggestionitems: this.client._bind(this.lt_types) })
       .get();
@@ -45,7 +44,7 @@ class z2ui5_cl_demo_app_035 extends z2ui5_if_app {
     }
     switch (client.get().EVENT) {
       case `DB_LOAD`:
-        this.mv_editor = (this.mv_path.toLowerCase().includes(String(`abap`).toLowerCase()) ? lcl_file_api.read_abap() : this.mv_path.toLowerCase().includes(String(`json`).toLowerCase()) ? lcl_file_api.read_json() : this.mv_path.toLowerCase().includes(String(`yaml`).toLowerCase()) ? lcl_file_api.read_yaml() : this.mv_path.toLowerCase().includes(String(`text`).toLowerCase()) ? lcl_file_api.read_text() : this.mv_path.toLowerCase().includes(String(`js`).toLowerCase()) ? lcl_file_api.read_js() : null);
+        this.mv_editor = (String(this.mv_path).toLowerCase().includes(String(`abap`).toLowerCase()) ? lcl_file_api.read_abap() : String(this.mv_path).toLowerCase().includes(String(`json`).toLowerCase()) ? lcl_file_api.read_json() : String(this.mv_path).toLowerCase().includes(String(`yaml`).toLowerCase()) ? lcl_file_api.read_yaml() : String(this.mv_path).toLowerCase().includes(String(`text`).toLowerCase()) ? lcl_file_api.read_text() : String(this.mv_path).toLowerCase().includes(String(`js`).toLowerCase()) ? lcl_file_api.read_js() : null);
         client.message_toast_display(`Download successful`);
         client.view_model_update();
         break;

@@ -3,7 +3,7 @@ const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 class z2ui5_cl_xml_view_cc {
   mo_view = null;
 
-  approve_popover({ placement, class, text, btn_txt, btn_type, btn_icon, btn_event } = {}) {
+  approve_popover({ placement, class: class_, text, btn_txt, btn_type, btn_icon, btn_event } = {}) {
     let result = null;
     result = this.mo_view;
     this.mo_view.popover({ showheader: false, placement, class: class_ })
@@ -28,7 +28,7 @@ class z2ui5_cl_xml_view_cc {
     return result;
   }
 
-  camera_selector({ selectedkey, showclearicon, selectionchange, selecteditem, items, change, width, showsecondaryvalues, placeholder, selecteditemid, name, value, valuestate, valuestatetext, textalign, visible, showvaluestatemessage, showbutton, required, editable, enabled, filtersecondaryvalues, id, class } = {}) {
+  camera_selector({ selectedkey, showclearicon, selectionchange, selecteditem, items, change, width, showsecondaryvalues, placeholder, selecteditemid, name, value, valuestate, valuestatetext, textalign, visible, showvaluestatemessage, showbutton, required, editable, enabled, filtersecondaryvalues, id, class: class_ } = {}) {
     let result = null;
     result = this.mo_view;
     this.mo_view._generic({ name: `CameraSelector`, ns: `z2ui5`, t_prop: [{ n: `showClearIcon`, v: z2ui5_cl_util.boolean_abap_2_json(showclearicon) }, { n: `selectedKey`, v: selectedkey }, { n: `items`, v: items }, { n: `id`, v: id }, { n: `class`, v: class_ }, { n: `selectionChange`, v: selectionchange }, { n: `selectedItem`, v: selecteditem }, { n: `selectedItemId`, v: selecteditemid }, { n: `name`, v: name }, { n: `value`, v: value }, { n: `valueState`, v: valuestate }, { n: `valueStateText`, v: valuestatetext }, { n: `textAlign`, v: textalign }, { n: `showSecondaryValues`, v: z2ui5_cl_util.boolean_abap_2_json(showsecondaryvalues) }, { n: `visible`, v: z2ui5_cl_util.boolean_abap_2_json(visible) }, { n: `showValueStateMessage`, v: z2ui5_cl_util.boolean_abap_2_json(showvaluestatemessage) }, { n: `showButton`, v: z2ui5_cl_util.boolean_abap_2_json(showbutton) }, { n: `required`, v: z2ui5_cl_util.boolean_abap_2_json(required) }, { n: `editable`, v: z2ui5_cl_util.boolean_abap_2_json(editable) }, { n: `enabled`, v: z2ui5_cl_util.boolean_abap_2_json(enabled) }, { n: `filterSecondaryValues`, v: z2ui5_cl_util.boolean_abap_2_json(filtersecondaryvalues) }, { n: `width`, v: width }, { n: `placeholder`, v: placeholder }, { n: `change`, v: change }] });
@@ -51,7 +51,7 @@ class z2ui5_cl_xml_view_cc {
     let lv_style = ``;
     this.mo_view._generic({ ns: `html`, name: `style` });
     const lv_class = `Z2UI5_CL_CC_DEMO_OUT`;
-    call this.method(lv_class).( `GET_STYLE` ) receiving result === lv_style;
+    // TODO(abap2js): CALL METHOD (lv_class)=>(`GET_STYLE`) RECEIVING result = lv_style.
     result = this.mo_view._cc_plain_xml(lv_style).html(val);
     return result;
   }

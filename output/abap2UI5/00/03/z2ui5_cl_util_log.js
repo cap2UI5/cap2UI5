@@ -6,7 +6,7 @@ class z2ui5_cl_util_log {
   add({ val } = {}) {
     let result = null;
     const lt_msg = z2ui5_cl_util.msg_get_t(val);
-    this.mt_log.push(lines OF lt_msg);
+    this.mt_log.push(...lt_msg);
     result = this;
     return result;
   }
@@ -60,7 +60,7 @@ class z2ui5_cl_util_log {
 
   bal_read({ object, subobject, id } = {}) {
     const lt_msg = z2ui5_cl_util.bal_read({ object, subobject, id });
-    this.mt_log.push(lines OF lt_msg);
+    this.mt_log.push(...lt_msg);
   }
 
   bal_save({ object, subobject, id } = {}) {
@@ -88,6 +88,7 @@ class z2ui5_cl_util_log {
   to_string() {
     let result = ``;
     let sy_tabix = 0;
+    sy_tabix = 0;
     for (const ls_msg of this.mt_log) {
       sy_tabix++;
       if (result) {

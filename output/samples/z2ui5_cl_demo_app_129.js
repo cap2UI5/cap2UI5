@@ -46,7 +46,7 @@ class z2ui5_cl_demo_app_129 extends z2ui5_if_app {
     page.footer()
       .overflow_toolbar()
       .toolbar_spacer()
-      .button({ id: `ppvr`, text: `Open Popover`, press: client._event(`BUTTON_POPOVER`, [`${$source>/sId}`]), type: `Ghost` })
+      .button({ id: `ppvr`, text: `Open Popover`, press: client._event(`BUTTON_POPOVER`, [`\${$source>/sId}`]), type: `Ghost` })
       .button({ text: `Open Popup`, press: client._event(`BUTTON_SEND`), type: `Success` });
     client.view_display(page.stringify());
     client.action.gen({ val: z2ui5_if_client.cs_event.start_timer, t_arg: [client._event(`REFRESH`), `3000`] });

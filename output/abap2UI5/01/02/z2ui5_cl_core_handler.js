@@ -1,5 +1,5 @@
-// TODO(abap2js): unresolved reference z2ui5_cl_ajson — add require manually
-// TODO(abap2js): unresolved reference z2ui5_cl_ajson_mapping — add require manually
+const z2ui5_cl_ajson = require("abap2UI5/z2ui5_cl_ajson");
+const z2ui5_cl_ajson_mapping = require("abap2UI5/z2ui5_cl_ajson_mapping");
 // TODO(abap2js): unresolved reference z2ui5_cl_core_action — add require manually
 // TODO(abap2js): unresolved reference z2ui5_cl_core_client — add require manually
 // TODO(abap2js): unresolved reference z2ui5_cl_core_srv_draft — add require manually
@@ -43,27 +43,27 @@ class z2ui5_cl_core_handler {
     result.o_model = z2ui5_cl_ajson.create_empty();
     const lo_model = lo_ajson.slice(lv_model_edit_name);
     result.o_model.set({ iv_path: lv_model_edit_name, iv_val: lo_model });
-    lo_ajson.delete(lv_model_edit_name);
+    lo_ajson.delete_(lv_model_edit_name);
     lo_ajson = lo_ajson.slice(`/S_FRONT`);
-    lo_ajson.to_abap(/* TODO(abap2js): out-params */ EXPORTING iv_corresponding = abap_true IMPORTING ev_container = result - s_front);
+    // TODO(abap2js): lo_ajson->to_abap( EXPORTING iv_corresponding = abap_true IMPORTING ev_container = result-s_front ).
     result.s_front.o_comp_data = lo_ajson.slice(`/CONFIG/ComponentData`);
     const lo_device = lo_ajson.slice(`/CONFIG/S_DEVICE`);
     if (lo_device != null) {
-      lo_device.to_abap(/* TODO(abap2js): out-params */ EXPORTING iv_corresponding = abap_true IMPORTING ev_container = result - s_front - s_device);
+      // TODO(abap2js): lo_device->to_abap( EXPORTING iv_corresponding = abap_true IMPORTING ev_container = result-s_front-s_device ).
     }
     const lo_focus = lo_ajson.slice(`/CONFIG/S_FOCUS`);
     if (lo_focus != null) {
-      lo_focus.to_abap(/* TODO(abap2js): out-params */ EXPORTING iv_corresponding = abap_true IMPORTING ev_container = result - s_front - s_focus);
+      // TODO(abap2js): lo_focus->to_abap( EXPORTING iv_corresponding = abap_true IMPORTING ev_container = result-s_front-s_focus ).
     }
     const lo_scroll = lo_ajson.slice(`/CONFIG/S_SCROLL`);
     if (lo_scroll != null) {
-      lo_scroll.to_abap(/* TODO(abap2js): out-params */ EXPORTING iv_corresponding = abap_true IMPORTING ev_container = result - s_front - s_scroll);
+      // TODO(abap2js): lo_scroll->to_abap( EXPORTING iv_corresponding = abap_true IMPORTING ev_container = result-s_front-s_scroll ).
     }
     result.s_front.s_ui5.version = lo_ajson.get_string(`/CONFIG/S_UI5/VERSION`);
     result.s_front.s_ui5.build_timestamp = lo_ajson.get_string(`/CONFIG/S_UI5/BUILDTIMESTAMP`);
     result.s_front.s_ui5.gav = lo_ajson.get_string(`/CONFIG/S_UI5/GAV`);
     result.s_front.s_ui5.theme = lo_ajson.get_string(`/CONFIG/S_UI5/THEME`);
-    result.s_control.check_launchpad = Boolean(result.s_front.search.toLowerCase().includes(String(`scenario=LAUNCHPAD`).toLowerCase()) || result.s_front.pathname.toLowerCase().includes(String(`/ui2/flp`).toLowerCase()) || result.s_front.pathname.toLowerCase().includes(String(`test/flpSandbox`).toLowerCase()));
+    result.s_control.check_launchpad = Boolean(String(result.s_front.search).toLowerCase().includes(String(`scenario=LAUNCHPAD`).toLowerCase()) || String(result.s_front.pathname).toLowerCase().includes(String(`/ui2/flp`).toLowerCase()) || String(result.s_front.pathname).toLowerCase().includes(String(`test/flpSandbox`).toLowerCase()));
     return result;
   }
 
@@ -154,8 +154,9 @@ class z2ui5_cl_core_handler {
 
   check_view_update_needed() {
     let result = false;
-    let lt_slot = z2ui5_if_core_types.cs_view_slot_list.split(`,`);
     let sy_tabix = 0;
+    let lt_slot = z2ui5_if_core_types.cs_view_slot_list.split(`,`);
+    sy_tabix = 0;
     for (const lv_slot of lt_slot) {
       sy_tabix++;
       // TODO(abap2js): ASSIGN COMPONENT lv_slot OF STRUCTURE ms_response-s_front-params TO FIELD-SYMBOL(<slot>).
@@ -173,7 +174,7 @@ class z2ui5_cl_core_handler {
   }
 
   main_end() {
-    this.ms_response = (s_front.params === this.mo_action.ms_next.s_set s_front.id === this.mo_action.mo_app.ms_draft.id s_front.app === z2ui5_cl_util.rtti_get_classname_by_ref(this.mo_action.mo_app.mo_app));
+    this.ms_response = { s_front: { params: this.mo_action.ms_next.s_set, id: this.mo_action.mo_app.ms_draft.id, app: z2ui5_cl_util.rtti_get_classname_by_ref(this.mo_action.mo_app.mo_app) } };
     if (this.check_view_update_needed()) {
       this.ms_response.model = this.mo_action.mo_app.model_json_stringify();
     } else {

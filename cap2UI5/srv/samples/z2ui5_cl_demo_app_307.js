@@ -32,7 +32,7 @@ class z2ui5_cl_demo_app_307 extends z2ui5_if_app {
       .grid_list({ id: `gridList`, headertext: `GridList header`, items: client._bind_edit(this.items) })
       .drag_drop_config()
       .drag_info(`items`)
-      .grid_drop_info({ targetaggregation: `items`, dropposition: `Between`, droplayout: `Horizontal`, drop: client._event(`onDrop`, [`${$parameters>/draggedControl/oParent}.indexOfItem(${$parameters>/draggedControl})`, `${$parameters>/droppedControl/oParent}.indexOfItem(${$parameters>/droppedControl})`, `${$parameters>/dropPosition}`]) })
+      .grid_drop_info({ targetaggregation: `items`, dropposition: `Between`, droplayout: `Horizontal`, drop: client._event(`onDrop`, [`\${$parameters>/draggedControl/oParent}.indexOfItem(\${$parameters>/draggedControl})`, `\${$parameters>/droppedControl/oParent}.indexOfItem(\${$parameters>/droppedControl})`, `\${$parameters>/dropPosition}`]) })
       .get_parent()
       .custom_layout(`f`)
       .grid_box_layout({ boxminwidth: `17rem` })
@@ -65,9 +65,9 @@ class z2ui5_cl_demo_app_307 extends z2ui5_if_app {
         drop_position = drop_position - 1;
       }
       if (insert_position === `Before`) {
-        this.items index drop_position.push(item);
+        this.items.splice((drop_position) - 1, 0, item);
       } else {
-        this.items index drop_position + 1.push(item);
+        this.items.splice((drop_position + 1) - 1, 0, item);
       }
     }
     client.view_model_update();

@@ -1,9 +1,6 @@
-// TODO(abap2js): unresolved reference cl_abap_elemdescr — add require manually
 // TODO(abap2js): unresolved reference cl_abap_structdescr — add require manually
 // TODO(abap2js): unresolved reference cl_abap_typedescr — add require manually
 // TODO(abap2js): unresolved reference cx_sy_dyn_call_illegal_class — add require manually
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_util_api = require("abap2UI5/z2ui5_cl_util_api");
 const z2ui5_cx_util_error = require("abap2UI5/z2ui5_cx_util_error");
 
 class z2ui5_cl_util_api_c {
@@ -15,7 +12,7 @@ class z2ui5_cl_util_api_c {
     try {
       const lv_result = {};
       const lv_class = `CL_ABAP_CONTEXT_INFO`;
-      call this.method(lv_class).( `GET_USER_TECHNICAL_NAME` ) receiving rv_technical_name === lv_result;
+      // TODO(abap2js): CALL METHOD (lv_class)=>(`GET_USER_TECHNICAL_NAME`) RECEIVING rv_technical_name = lv_result.
       result = lv_result;
     } catch (x) {
       throw new z2ui5_cx_util_error({ previous: x });
@@ -42,6 +39,7 @@ class z2ui5_cl_util_api_c {
 
   static rtti_get_t_fixvalues({ elemdescr, langu } = {}) {
     let result = [];
+    let sy_tabix = 0;
     // TODO(abap2js): TYPES BEGIN OF fixvalue,
     // TODO(abap2js): TYPES low TYPE c LENGTH 10,
     // TODO(abap2js): TYPES high TYPE c LENGTH 10,
@@ -57,8 +55,8 @@ class z2ui5_cl_util_api_c {
     let temp2 = null;
     lv_langu = ` `;
     lv_langu = langu;
-    call method elemdescr.( `GET_DDIC_FIXED_VALUES` ) exporting p_langu === lv_langu receiving p_fixed_values === lt_values exceptions not_found === 1 no_ddic_type === 2 others === 3;
-    let sy_tabix = 0;
+    // TODO(abap2js): CALL METHOD elemdescr->(`GET_DDIC_FIXED_VALUES`) EXPORTING p_langu = lv_langu RECEIVING p_fixed_values = lt_values EXCEPTIONS not_found = 1 no_ddic_type = 2 OTHERS = 3.
+    sy_tabix = 0;
     for (const lr_fix of lt_values) {
       sy_tabix++;
       temp2 = null;
@@ -76,10 +74,10 @@ class z2ui5_cl_util_api_c {
     let classname = ``;
     try {
       lv_web_http_name = `CL_WEB_HTTP_UTILITY`;
-      call this.method(lv_web_http_name).( `DECODE_X_BASE64` ) exporting encoded === val receiving decoded === result;
+      // TODO(abap2js): CALL METHOD (lv_web_http_name)=>(`DECODE_X_BASE64`) EXPORTING encoded = val RECEIVING decoded = result.
     } catch (error) {
       classname = `CL_HTTP_UTILITY`;
-      call this.method(classname).( `DECODE_X_BASE64` ) exporting encoded === val receiving decoded === result;
+      // TODO(abap2js): CALL METHOD (classname)=>(`DECODE_X_BASE64`) EXPORTING encoded = val RECEIVING decoded = result.
     }
     return result;
   }
@@ -90,10 +88,10 @@ class z2ui5_cl_util_api_c {
     let classname = ``;
     try {
       lv_web_http_name = `CL_WEB_HTTP_UTILITY`;
-      call this.method(lv_web_http_name).( `ENCODE_X_BASE64` ) exporting unencoded === val receiving encoded === result;
+      // TODO(abap2js): CALL METHOD (lv_web_http_name)=>(`ENCODE_X_BASE64`) EXPORTING unencoded = val RECEIVING encoded = result.
     } catch (error) {
       classname = `CL_HTTP_UTILITY`;
-      call this.method(classname).( `ENCODE_X_BASE64` ) exporting unencoded === val receiving encoded === result;
+      // TODO(abap2js): CALL METHOD (classname)=>(`ENCODE_X_BASE64`) EXPORTING unencoded = val RECEIVING encoded = result.
     }
     return result;
   }
@@ -105,12 +103,12 @@ class z2ui5_cl_util_api_c {
     let conv_in_class = ``;
     try {
       conv_codepage = `CL_ABAP_CONV_CODEPAGE`;
-      call this.method(conv_codepage).create_in receiving instance === conv;
-      call method conv.( `IF_ABAP_CONV_IN~CONVERT` ) exporting source === val receiving result === result;
+      // TODO(abap2js): CALL METHOD (conv_codepage)=>create_in RECEIVING instance = conv.
+      // TODO(abap2js): CALL METHOD conv->(`IF_ABAP_CONV_IN~CONVERT`) EXPORTING source = val RECEIVING result = result.
     } catch (error) {
       conv_in_class = `CL_ABAP_CONV_IN_CE`;
-      call this.method(conv_in_class).create exporting encoding === `UTF-8` receiving conv === conv;
-      call method conv.( `CONVERT` ) exporting input === val importing data === result;
+      // TODO(abap2js): CALL METHOD (conv_in_class)=>create EXPORTING encoding = `UTF-8` RECEIVING conv = conv.
+      // TODO(abap2js): CALL METHOD conv->(`CONVERT`) EXPORTING input = val IMPORTING data = result.
     }
     return result;
   }
@@ -122,18 +120,19 @@ class z2ui5_cl_util_api_c {
     let conv_out_class = ``;
     try {
       conv_codepage = `CL_ABAP_CONV_CODEPAGE`;
-      call this.method(conv_codepage).create_out receiving instance === conv;
-      call method conv.( `IF_ABAP_CONV_OUT~CONVERT` ) exporting source === val receiving result === result;
+      // TODO(abap2js): CALL METHOD (conv_codepage)=>create_out RECEIVING instance = conv.
+      // TODO(abap2js): CALL METHOD conv->(`IF_ABAP_CONV_OUT~CONVERT`) EXPORTING source = val RECEIVING result = result.
     } catch (error) {
       conv_out_class = `CL_ABAP_CONV_OUT_CE`;
-      call this.method(conv_out_class).create exporting encoding === `UTF-8` receiving conv === conv;
-      call method conv.( `CONVERT` ) exporting data === val importing buffer === result;
+      // TODO(abap2js): CALL METHOD (conv_out_class)=>create EXPORTING encoding = `UTF-8` RECEIVING conv = conv.
+      // TODO(abap2js): CALL METHOD conv->(`CONVERT`) EXPORTING data = val IMPORTING buffer = result.
     }
     return result;
   }
 
   static source_get_method({ iv_classname, iv_methodname } = {}) {
     let result = [];
+    let sy_tabix = 0;
     let object = null;
     // TODO(abap2js): FIELD-SYMBOLS <any> TYPE any.
     let lt_source = [];
@@ -149,27 +148,27 @@ class z2ui5_cl_util_api_c {
       lv_class = iv_classname.toUpperCase();
       lv_method = iv_methodname.toUpperCase();
       xco_cp_abap = `XCO_CP_ABAP`;
-      call this.method(xco_cp_abap).( `CLASS` ) exporting iv_name === lv_class receiving ro_class === object;
+      // TODO(abap2js): CALL METHOD (xco_cp_abap)=>(`CLASS`) EXPORTING iv_name = lv_class RECEIVING ro_class = object.
       // TODO(abap2js): ASSIGN object->(`IF_XCO_AO_CLASS~IMPLEMENTATION`) TO <any>.
       if (!(sy_subrc === 0)) throw new Error(`ASSERT failed`);
       object = any;
-      call method object.( `IF_XCO_CLAS_IMPLEMENTATION~METHOD` ) exporting iv_name === lv_method receiving ro_method === object;
-      call method object.( `IF_XCO_CLAS_I_METHOD~CONTENT` ) receiving ro_content === object;
-      call method object.( `IF_XCO_CLAS_I_METHOD_CONTENT~GET_SOURCE` ) receiving rt_source === result;
+      // TODO(abap2js): CALL METHOD object->(`IF_XCO_CLAS_IMPLEMENTATION~METHOD`) EXPORTING iv_name = lv_method RECEIVING ro_method = object.
+      // TODO(abap2js): CALL METHOD object->(`IF_XCO_CLAS_I_METHOD~CONTENT`) RECEIVING ro_content = object.
+      // TODO(abap2js): CALL METHOD object->(`IF_XCO_CLAS_I_METHOD_CONTENT~GET_SOURCE`) RECEIVING rt_source = result.
     } catch (error) {
       lv_name = `CL_OO_FACTORY`;
-      call this.method(lv_name).( `CREATE_INSTANCE` ) receiving result === object;
-      call method object.( `IF_OO_CLIF_SOURCE_FACTORY~CREATE_CLIF_SOURCE` ) exporting clif_name === lv_class receiving result === object;
-      call method object.( `IF_OO_CLIF_SOURCE~GET_SOURCE` ) importing source === lt_source;
+      // TODO(abap2js): CALL METHOD (lv_name)=>(`CREATE_INSTANCE`) RECEIVING result = object.
+      // TODO(abap2js): CALL METHOD object->(`IF_OO_CLIF_SOURCE_FACTORY~CREATE_CLIF_SOURCE`) EXPORTING clif_name = lv_class RECEIVING result = object.
+      // TODO(abap2js): CALL METHOD object->(`IF_OO_CLIF_SOURCE~GET_SOURCE`) IMPORTING source = lt_source.
       lv_check_method = false;
-      let sy_tabix = 0;
+      sy_tabix = 0;
       for (const lv_source of lt_source) {
         sy_tabix++;
         lv_source_upper = lv_source.toUpperCase();
-        if (lv_source_upper.toLowerCase().includes(String(`ENDMETHOD`).toLowerCase())) {
+        if (String(lv_source_upper).toLowerCase().includes(String(`ENDMETHOD`).toLowerCase())) {
           lv_check_method = false;
         }
-        if (lv_source_upper.toLowerCase().includes(String(`METHOD ${lv_method}`).toLowerCase())) {
+        if (String(lv_source_upper).toLowerCase().includes(String(`METHOD ${lv_method}`).toLowerCase())) {
           lv_check_method = true;
           continue;
         }
@@ -184,6 +183,7 @@ class z2ui5_cl_util_api_c {
 
   static rtti_get_classes_impl_intf({ val } = {}) {
     let result = [];
+    let sy_tabix = 0;
     let obj = null;
     // TODO(abap2js): FIELD-SYMBOLS <any> TYPE any.
     let lt_implementation_names = [];
@@ -214,7 +214,7 @@ class z2ui5_cl_util_api_c {
     try {
       ls_clskey.clsname = val;
       xco_cp_abap = `XCO_CP_ABAP`;
-      call this.method(xco_cp_abap).interface exporting iv_name === ls_clskey.clsname receiving ro_interface === obj;
+      // TODO(abap2js): CALL METHOD (xco_cp_abap)=>interface EXPORTING iv_name = ls_clskey-clsname RECEIVING ro_interface = obj.
       // TODO(abap2js): ASSIGN obj->(`IF_XCO_AO_INTERFACE~IMPLEMENTATIONS`) TO <any>.
       if (sy_subrc !== 0) {
         throw new cx_sy_dyn_call_illegal_class();
@@ -225,9 +225,9 @@ class z2ui5_cl_util_api_c {
         throw new cx_sy_dyn_call_illegal_class();
       }
       obj = any;
-      call method obj.( `IF_XCO_INTF_IMPLEMENTATIONS~GET_NAMES` ) receiving rt_names === lt_implementation_names;
+      // TODO(abap2js): CALL METHOD obj->(`IF_XCO_INTF_IMPLEMENTATIONS~GET_NAMES`) RECEIVING rt_names = lt_implementation_names.
       temp3 = null;
-      let sy_tabix = 0;
+      sy_tabix = 0;
       for (const implementation_name of lt_implementation_names) {
         sy_tabix++;
         temp4.classname = implementation_name;
@@ -268,13 +268,13 @@ class z2ui5_cl_util_api_c {
       // TODO(abap2js): CREATE DATA ddic_ref TYPE HANDLE struct_desrc.
       // TODO(abap2js): ASSIGN ddic_ref->* TO <ddic>.
       if (!(sy_subrc === 0)) throw new Error(`ASSERT failed`);
-      cl_abap_elemdescr.describe_by_name(/* TODO(abap2js): out-params */ EXPORTING p_name = data_element_name RECEIVING p_descr_ref = lo_typedescr EXCEPTIONS OTHERS = 1);
+      // TODO(abap2js): cl_abap_elemdescr=>describe_by_name( EXPORTING p_name = data_element_name RECEIVING p_descr_ref = lo_typedescr EXCEPTIONS OTHERS = 1 ).
       if (sy_subrc !== 0) {
         return result;
       }
       temp8 = lo_typedescr;
       data_descr = temp8;
-      call method data_descr.( `GET_DDIC_FIELD` ) receiving p_flddescr === ddic exceptions not_found === 1 no_ddic_type === 2 others === 3;
+      // TODO(abap2js): CALL METHOD data_descr->(`GET_DDIC_FIELD`) RECEIVING p_flddescr = <ddic> EXCEPTIONS not_found = 1 no_ddic_type = 2 OTHERS = 3.
       if (sy_subrc !== 0) {
         return result;
       }
@@ -287,16 +287,16 @@ class z2ui5_cl_util_api_c {
       try {
         let lv_xco_cp_abap_dictionary = ``;
         lv_xco_cp_abap_dictionary = `XCO_CP_ABAP_DICTIONARY`;
-        call this.method(lv_xco_cp_abap_dictionary).( `DATA_ELEMENT` ) exporting iv_name === data_element_name receiving ro_data_element === data_element;
-        call method data_element.( `IF_XCO_AD_DATA_ELEMENT~EXISTS` ) receiving rv_exists === exists;
+        // TODO(abap2js): CALL METHOD (lv_xco_cp_abap_dictionary)=>(`DATA_ELEMENT`) EXPORTING iv_name = data_element_name RECEIVING ro_data_element = data_element.
+        // TODO(abap2js): CALL METHOD data_element->(`IF_XCO_AD_DATA_ELEMENT~EXISTS`) RECEIVING rv_exists = exists.
         if (exists === false) {
           return result;
         }
-        call method data_element.( `IF_XCO_AD_DATA_ELEMENT~CONTENT` ) receiving ro_content === content;
-        call method content.( `IF_XCO_DTEL_CONTENT~GET_HEADING_FIELD_LABEL` ) receiving rs_heading_field_label === result.header;
-        call method content.( `IF_XCO_DTEL_CONTENT~GET_SHORT_FIELD_LABEL` ) receiving rs_short_field_label === result.short;
-        call method content.( `IF_XCO_DTEL_CONTENT~GET_MEDIUM_FIELD_LABEL` ) receiving rs_medium_field_label === result.medium;
-        call method content.( `IF_XCO_DTEL_CONTENT~GET_LONG_FIELD_LABEL` ) receiving rs_long_field_label === result.long;
+        // TODO(abap2js): CALL METHOD data_element->(`IF_XCO_AD_DATA_ELEMENT~CONTENT`) RECEIVING ro_content = content.
+        // TODO(abap2js): CALL METHOD content->(`IF_XCO_DTEL_CONTENT~GET_HEADING_FIELD_LABEL`) RECEIVING rs_heading_field_label = result-header.
+        // TODO(abap2js): CALL METHOD content->(`IF_XCO_DTEL_CONTENT~GET_SHORT_FIELD_LABEL`) RECEIVING rs_short_field_label = result-short.
+        // TODO(abap2js): CALL METHOD content->(`IF_XCO_DTEL_CONTENT~GET_MEDIUM_FIELD_LABEL`) RECEIVING rs_medium_field_label = result-medium.
+        // TODO(abap2js): CALL METHOD content->(`IF_XCO_DTEL_CONTENT~GET_LONG_FIELD_LABEL`) RECEIVING rs_long_field_label = result-long.
       } catch (x) {
         const error = x.get_text();
       }
@@ -318,7 +318,7 @@ class z2ui5_cl_util_api_c {
     try {
       try {
         lv_classname = `CL_SYSTEM_UUID`;
-        call this.method(lv_classname).if_system_uuid_static~create_uuid_c22 receiving uuid === lv_uuid;
+        // TODO(abap2js): CALL METHOD (lv_classname)=>if_system_uuid_static~create_uuid_c22 RECEIVING uuid = lv_uuid.
       } catch (error) {
         lv_fm = `GUID_CREATE`;
         // TODO(abap2js): CALL FUNCTION lv_fm IMPORTING ev_guid_22 = lv_uuid.
@@ -342,7 +342,7 @@ class z2ui5_cl_util_api_c {
     try {
       try {
         lv_classname = `CL_SYSTEM_UUID`;
-        call this.method(lv_classname).if_system_uuid_static~create_uuid_c32 receiving uuid === lv_uuid;
+        // TODO(abap2js): CALL METHOD (lv_classname)=>if_system_uuid_static~create_uuid_c32 RECEIVING uuid = lv_uuid.
       } catch (error) {
         lv_fm = `GUID_CREATE`;
         // TODO(abap2js): CALL FUNCTION lv_fm IMPORTING ev_guid_32 = lv_uuid.
@@ -363,9 +363,9 @@ class z2ui5_cl_util_api_c {
       let xco_cp_abap = ``;
       lv_classname = i_classname;
       xco_cp_abap = `XCO_CP_ABAP`;
-      call this.method(xco_cp_abap).( `CLASS` ) exporting iv_name === lv_classname receiving ro_class === obj;
-      call method obj.( `IF_XCO_AO_CLASS~CONTENT` ) receiving ro_content === content;
-      call method content.( `IF_XCO_CLAS_CONTENT~GET_SHORT_DESCRIPTION` ) receiving rv_short_description === result;
+      // TODO(abap2js): CALL METHOD (xco_cp_abap)=>(`CLASS`) EXPORTING iv_name = lv_classname RECEIVING ro_class = obj.
+      // TODO(abap2js): CALL METHOD obj->(`IF_XCO_AO_CLASS~CONTENT`) RECEIVING ro_content = content.
+      // TODO(abap2js): CALL METHOD content->(`IF_XCO_CLAS_CONTENT~GET_SHORT_DESCRIPTION`) RECEIVING rv_short_description = result.
     } catch (x) {
       const lv_dummy = x.get_text();
     }
@@ -401,6 +401,7 @@ class z2ui5_cl_util_api_c {
 
   static context_get_callstack() {
     let result = [];
+    let sy_tabix = 0;
     if (z2ui5_cl_util_api_c.context_check_abap_cloud()) {
       let current_obj = null;
       let stack = null;
@@ -421,28 +422,28 @@ class z2ui5_cl_util_api_c {
       lv_assign = `XCO_CP_CALL_STACK=>FORMAT`;
       // TODO(abap2js): ASSIGN (lv_assign) TO <format2>.
       format_obj2 = format2;
-      call method format_obj2.( `IF_XCO_CP_CS_FORMAT_FACTORY~ADT` ) receiving ro_adt === format_obj3;
-      call method format_obj3.( `WITH_LINE_NUMBER_FLAVOR` ) exporting io_line_number_flavor === format receiving ro_me === format_source;
+      // TODO(abap2js): CALL METHOD format_obj2->(`IF_XCO_CP_CS_FORMAT_FACTORY~ADT`) RECEIVING ro_adt = format_obj3.
+      // TODO(abap2js): CALL METHOD format_obj3->(`WITH_LINE_NUMBER_FLAVOR`) EXPORTING io_line_number_flavor = <format> RECEIVING ro_me = format_source.
       lv_xco_cp = `XCO_CP`;
       // TODO(abap2js): ASSIGN (lv_xco_cp)=>(`CURRENT`) TO <current>.
       current_obj = current;
       // TODO(abap2js): ASSIGN current_obj->(`IF_XCO_CP_STD_CURRENT~CALL_STACK`) TO <call_stack>.
       stack = call_stack;
-      call method stack.( `IF_XCO_CP_STD_CUR_API_CLL_STCK~FULL` ) receiving ro_full === full_stack;
+      // TODO(abap2js): CALL METHOD stack->(`IF_XCO_CP_STD_CUR_API_CLL_STCK~FULL`) RECEIVING ro_full = full_stack.
       let r = null;
       // TODO(abap2js): CREATE DATA r TYPE REF TO (`IF_XCO_CS_FORMAT`).
       // TODO(abap2js): ASSIGN r->* TO <any>.
       any = format_source;
-      call method full_stack.( `IF_XCO_CP_CALL_STACK~AS_TEXT` ) exporting io_format === any receiving ro_text === text_obj;
-      call method text_obj.( `IF_XCO_TEXT~GET_LINES` ) receiving ro_lines === ro_lines;
+      // TODO(abap2js): CALL METHOD full_stack->(`IF_XCO_CP_CALL_STACK~AS_TEXT`) EXPORTING io_format = <any> RECEIVING ro_text = text_obj.
+      // TODO(abap2js): CALL METHOD text_obj->(`IF_XCO_TEXT~GET_LINES`) RECEIVING ro_lines = ro_lines.
       // TODO(abap2js): FIELD-SYMBOLS <lt_lines> TYPE string_table.
       // TODO(abap2js): ASSIGN ro_lines->(`IF_XCO_STRINGS~VALUE`) TO <lt_lines>.
     } else {
     }
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const text of lt_lines) {
       sy_tabix++;
-      const ls_stack = value z2ui5_cl_util_api.ty_s_stack();
+      const ls_stack = {};
       [ls_stack.class, ls_stack.include, ls_stack.method] = text.split(` `);
       result.push(ls_stack);
     }
@@ -455,7 +456,7 @@ class z2ui5_cl_util_api_c {
     return result;
   }
 
-  static conv_get_itab_by_xlsx({ val } = {}) {
+  static conv_get_itab_by_xlsx({ val, result } = {}) {
   }
 
   static bal_create({ object, subobject, id, t_log } = {}) {
@@ -465,14 +466,14 @@ class z2ui5_cl_util_api_c {
     let lv_class = ``;
     try {
       lv_class = `CL_BALI_HEADER_SETTER`;
-      call this.method(lv_class).( `CREATE` ) exporting object === object subobject === subobject external_id === id receiving header === lo_header;
+      // TODO(abap2js): CALL METHOD (lv_class)=>(`CREATE`) EXPORTING object = object subobject = subobject external_id = id RECEIVING header = lo_header.
       lv_class = `CL_BALI_LOG`;
-      call this.method(lv_class).( `CREATE` ) receiving log === lo_log;
-      call method lo_log.( `SET_HEADER` ) exporting header === lo_header;
+      // TODO(abap2js): CALL METHOD (lv_class)=>(`CREATE`) RECEIVING log = lo_log.
+      // TODO(abap2js): CALL METHOD lo_log->(`SET_HEADER`) EXPORTING header = lo_header.
       z2ui5_cl_util_api_c.bal_add_items({ log: lo_log, t_log });
       lv_class = `CL_BALI_LOG_DB`;
-      call this.method(lv_class).( `GET_INSTANCE` ) receiving db_handler === lo_db;
-      call method lo_db.( `SAVE_LOG` ) exporting log === lo_log;
+      // TODO(abap2js): CALL METHOD (lv_class)=>(`GET_INSTANCE`) RECEIVING db_handler = lo_db.
+      // TODO(abap2js): CALL METHOD lo_db->(`SAVE_LOG`) EXPORTING log = lo_log.
       // TODO(abap2js): COMMIT WORK AND WAIT.
     } catch (error) {
       return;
@@ -481,6 +482,7 @@ class z2ui5_cl_util_api_c {
 
   static bal_read({ object, subobject, id } = {}) {
     let result = [];
+    let sy_tabix = 0;
     // TODO(abap2js): TYPES BEGIN OF ty_item,
     // TODO(abap2js): TYPES log_item_number TYPE i,
     // TODO(abap2js): TYPES item TYPE REF TO object,
@@ -501,51 +503,53 @@ class z2ui5_cl_util_api_c {
     try {
       lo_filter = z2ui5_cl_util_api_c.bal_build_filter({ object, subobject, id });
       lv_class = `CL_BALI_LOG_DB`;
-      call this.method(lv_class).( `GET_INSTANCE` ) receiving db_handler === lo_db;
-      call method lo_db.( `LOAD_LOGS_VIA_FILTER` ) exporting filter === lo_filter receiving log_table === lt_logs;
-      let sy_tabix = 0;
+      // TODO(abap2js): CALL METHOD (lv_class)=>(`GET_INSTANCE`) RECEIVING db_handler = lo_db.
+      // TODO(abap2js): CALL METHOD lo_db->(`LOAD_LOGS_VIA_FILTER`) EXPORTING filter = lo_filter RECEIVING log_table = lt_logs.
+      sy_tabix = 0;
       for (const lo_log of lt_logs) {
         sy_tabix++;
         lt_items = {};
-        call method lo_log.( `GET_ALL_ITEMS` ) receiving item_table === lt_items;
-        let sy_tabix = 0;
+        // TODO(abap2js): CALL METHOD lo_log->(`GET_ALL_ITEMS`) RECEIVING item_table = lt_items.
+        const _sy_tabix_1 = sy_tabix;
+        sy_tabix = 0;
         for (const ls_item of lt_items) {
           sy_tabix++;
           if (ls_item.item != null) {
             continue;
           }
-          const ls_msg = value z2ui5_cl_util.ty_s_msg();
+          const ls_msg = {};
           lv_text = ``;
-          call method ls_item.item.( `GET_MESSAGE_TEXT` ) receiving message_text === lv_text;
+          // TODO(abap2js): CALL METHOD ls_item-item->(`GET_MESSAGE_TEXT`) RECEIVING message_text = lv_text.
           ls_msg.text = lv_text;
           try {
-            call method ls_item.item.( `GET_SEVERITY` ) receiving severity === lv_severity;
+            // TODO(abap2js): CALL METHOD ls_item-item->(`GET_SEVERITY`) RECEIVING severity = lv_severity.
             ls_msg.type = lv_severity;
           } catch (error) {
           }
           try {
-            call method ls_item.item.( `GET_MESSAGE_ID` ) receiving id === lv_msgid;
+            // TODO(abap2js): CALL METHOD ls_item-item->(`GET_MESSAGE_ID`) RECEIVING id = lv_msgid.
             ls_msg.id = lv_msgid;
           } catch (error) {
           }
           try {
-            call method ls_item.item.( `GET_MESSAGE_NUMBER` ) receiving number === lv_msgno;
+            // TODO(abap2js): CALL METHOD ls_item-item->(`GET_MESSAGE_NUMBER`) RECEIVING number = lv_msgno.
             ls_msg.no = lv_msgno;
           } catch (error) {
           }
           try {
-            call method ls_item.item.( `GET_MESSAGE_VARIABLE_1` ) receiving variable_1 === lv_msgv1;
+            // TODO(abap2js): CALL METHOD ls_item-item->(`GET_MESSAGE_VARIABLE_1`) RECEIVING variable_1 = lv_msgv1.
             ls_msg.v1 = lv_msgv1;
-            call method ls_item.item.( `GET_MESSAGE_VARIABLE_2` ) receiving variable_2 === lv_msgv2;
+            // TODO(abap2js): CALL METHOD ls_item-item->(`GET_MESSAGE_VARIABLE_2`) RECEIVING variable_2 = lv_msgv2.
             ls_msg.v2 = lv_msgv2;
-            call method ls_item.item.( `GET_MESSAGE_VARIABLE_3` ) receiving variable_3 === lv_msgv3;
+            // TODO(abap2js): CALL METHOD ls_item-item->(`GET_MESSAGE_VARIABLE_3`) RECEIVING variable_3 = lv_msgv3.
             ls_msg.v3 = lv_msgv3;
-            call method ls_item.item.( `GET_MESSAGE_VARIABLE_4` ) receiving variable_4 === lv_msgv4;
+            // TODO(abap2js): CALL METHOD ls_item-item->(`GET_MESSAGE_VARIABLE_4`) RECEIVING variable_4 = lv_msgv4.
             ls_msg.v4 = lv_msgv4;
           } catch (error) {
           }
           result.push(ls_msg);
         }
+        sy_tabix = _sy_tabix_1;
       }
     } catch (error) {
       return result;
@@ -561,15 +565,15 @@ class z2ui5_cl_util_api_c {
     try {
       lo_filter = z2ui5_cl_util_api_c.bal_build_filter({ object, subobject, id });
       lv_class = `CL_BALI_LOG_DB`;
-      call this.method(lv_class).( `GET_INSTANCE` ) receiving db_handler === lo_db;
-      call method lo_db.( `LOAD_LOGS_VIA_FILTER` ) exporting filter === lo_filter receiving log_table === lt_logs;
+      // TODO(abap2js): CALL METHOD (lv_class)=>(`GET_INSTANCE`) RECEIVING db_handler = lo_db.
+      // TODO(abap2js): CALL METHOD lo_db->(`LOAD_LOGS_VIA_FILTER`) EXPORTING filter = lo_filter RECEIVING log_table = lt_logs.
       if (!lt_logs) {
         z2ui5_cl_util_api_c.bal_create({ object, subobject, id, t_log });
         return;
       }
       const lo_log = lt_logs[(1) - 1];
       z2ui5_cl_util_api_c.bal_add_items({ log: lo_log, t_log });
-      call method lo_db.( `SAVE_LOG` ) exporting log === lo_log;
+      // TODO(abap2js): CALL METHOD lo_db->(`SAVE_LOG`) EXPORTING log = lo_log.
       // TODO(abap2js): COMMIT WORK AND WAIT.
     } catch (error) {
       z2ui5_cl_util_api_c.bal_create({ object, subobject, id, t_log });
@@ -577,6 +581,7 @@ class z2ui5_cl_util_api_c {
   }
 
   static bal_delete({ object, subobject, id } = {}) {
+    let sy_tabix = 0;
     let lo_filter = null;
     let lo_db = null;
     let lt_logs = null;
@@ -584,12 +589,12 @@ class z2ui5_cl_util_api_c {
     try {
       lo_filter = z2ui5_cl_util_api_c.bal_build_filter({ object, subobject, id });
       lv_class = `CL_BALI_LOG_DB`;
-      call this.method(lv_class).( `GET_INSTANCE` ) receiving db_handler === lo_db;
-      call method lo_db.( `LOAD_LOGS_VIA_FILTER` ) exporting filter === lo_filter receiving log_table === lt_logs;
-      let sy_tabix = 0;
+      // TODO(abap2js): CALL METHOD (lv_class)=>(`GET_INSTANCE`) RECEIVING db_handler = lo_db.
+      // TODO(abap2js): CALL METHOD lo_db->(`LOAD_LOGS_VIA_FILTER`) EXPORTING filter = lo_filter RECEIVING log_table = lt_logs.
+      sy_tabix = 0;
       for (const lo_log of lt_logs) {
         sy_tabix++;
-        call method lo_db.( `DELETE_LOG` ) exporting log === lo_log;
+        // TODO(abap2js): CALL METHOD lo_db->(`DELETE_LOG`) EXPORTING log = lo_log.
       }
       // TODO(abap2js): COMMIT WORK AND WAIT.
     } catch (error) {
@@ -598,21 +603,22 @@ class z2ui5_cl_util_api_c {
   }
 
   static bal_add_items({ log, t_log } = {}) {
+    let sy_tabix = 0;
     let lo_item = null;
     let lv_msgty = ``;
     let lv_class = ``;
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const ls_log of t_log) {
       sy_tabix++;
       lv_msgty = ls_log.type;
       if (ls_log.id && ls_log.no) {
         lv_class = `CL_BALI_MESSAGE_SETTER`;
-        call this.method(lv_class).( `CREATE` ) exporting severity === lv_msgty id === ls_log.id number === ls_log.no variable_1 === ls_log.v1 variable_2 === ls_log.v2 variable_3 === ls_log.v3 variable_4 === ls_log.v4 receiving message === lo_item;
+        // TODO(abap2js): CALL METHOD (lv_class)=>(`CREATE`) EXPORTING severity = lv_msgty id = ls_log-id number = ls_log-no variable_1 = ls_log-v1 variable_2 = ls_log-v2 variable_3 = ls_log-v3 variable_4 = ls_log-v4 RECEIVING message = lo_item.
       } else {
         lv_class = `CL_BALI_FREE_TEXT_SETTER`;
-        call this.method(lv_class).( `CREATE` ) exporting severity === lv_msgty text === ls_log.text receiving free_text === lo_item;
+        // TODO(abap2js): CALL METHOD (lv_class)=>(`CREATE`) EXPORTING severity = lv_msgty text = ls_log-text RECEIVING free_text = lo_item.
       }
-      call method log.( `ADD_ITEM` ) exporting item === lo_item;
+      // TODO(abap2js): CALL METHOD log->(`ADD_ITEM`) EXPORTING item = lo_item.
     }
   }
 
@@ -621,8 +627,8 @@ class z2ui5_cl_util_api_c {
     let lo_filter = null;
     let lv_class = ``;
     lv_class = `CL_BALI_LOG_FILTER`;
-    call this.method(lv_class).( `CREATE` ) receiving filter === lo_filter;
-    call method lo_filter.( `SET_DESCRIPTOR` ) exporting object === object subobject === subobject external_id === id;
+    // TODO(abap2js): CALL METHOD (lv_class)=>(`CREATE`) RECEIVING filter = lo_filter.
+    // TODO(abap2js): CALL METHOD lo_filter->(`SET_DESCRIPTOR`) EXPORTING object = object subobject = subobject external_id = id.
     result = lo_filter;
     return result;
   }
@@ -637,7 +643,7 @@ class z2ui5_cl_util_api_c {
     return result;
   }
 
-  static tr_check_status({ trkorr, system } = {}) {
+  static tr_check_status({ trkorr, system, imported, rc } = {}) {
     throw new z2ui5_cx_util_error({ val: `tr_check_status is not supported on ABAP Cloud` });
   }
 }

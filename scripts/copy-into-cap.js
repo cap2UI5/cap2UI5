@@ -1,58 +1,126 @@
 #!/usr/bin/env node
 /**
- * copy-into-cap — step 6: plain copy of the prepared output/ folders into
- * their positions in the CAP project. No transpiling, no gates — output/ is
- * the single source of truth:
+ * copy-into-cap — step 6: copy the prepared output/ folders into their
+ * positions in the CAP project:
  *
- *   output/abap2UI5/**  → cap2UI5/srv/z2ui5/**        (whole backend tree)
- *   output/samples/**   → cap2UI5/srv/samples/**
+ *   output/abap2UI5/**  → cap2UI5/srv/z2ui5/**        (fill-in: new files only)
+ *   output/samples/**   → cap2UI5/srv/samples/**      (overwrite)
  *   output/app/**       → cap2UI5/app/z2ui5/webapp/** (replaced 1:1)
  *
+ * Policies:
+ * - The backend tree under srv/z2ui5 contains the hand-maintained CAP
+ *   architecture adaptation (CDS/SQLite, native JSON core) — transpiled
+ *   classes are only ADDED for files that do not exist yet, never copied
+ *   over an existing file. Promoting a transpiled class over a hand-written
+ *   one is a deliberate manual step.
+ * - srv/samples is fully owned by the transpiler and gets overwritten.
+ * - Every transpiled .js file must parse; files that don't are skipped and
+ *   reported (the jest run afterwards is the behavioral gate).
+ *
  * transpile-report.json files stay in output/ and are not copied.
- * Backend folders are copied over the destination (hand-written extras like
- * register-apps.js survive); the webapp is a full mirror and gets replaced.
- * Run the jest suite afterwards (the workflows do).
  */
 "use strict";
 
 const fs = require("fs");
 const path = require("path");
+const vm = require("vm");
+const { execFileSync } = require("child_process");
 
 const root = path.join(__dirname, "..");
 
 const COPIES = [
-  { name: "abap2UI5", from: path.join(root, "output", "abap2UI5"), to: path.join(root, "cap2UI5", "srv", "z2ui5"), replace: false },
-  { name: "samples", from: path.join(root, "output", "samples"), to: path.join(root, "cap2UI5", "srv", "samples"), replace: false },
-  { name: "app", from: path.join(root, "output", "app"), to: path.join(root, "cap2UI5", "app", "z2ui5", "webapp"), replace: true },
+  { name: "abap2UI5", from: path.join(root, "output", "abap2UI5"), to: path.join(root, "cap2UI5", "srv", "z2ui5"), replace: false, clobber: false, parseCheck: true },
+  { name: "samples", from: path.join(root, "output", "samples"), to: path.join(root, "cap2UI5", "srv", "samples"), replace: false, clobber: true, parseCheck: true },
+  { name: "app", from: path.join(root, "output", "app"), to: path.join(root, "cap2UI5", "app", "z2ui5", "webapp"), replace: true, clobber: true, parseCheck: false },
 ];
 
 const skip = (p) => path.basename(p) === "transpile-report.json";
 
-function copyTree(from, to) {
-  let count = 0;
+function parses(file) {
+  try {
+    new vm.Script(fs.readFileSync(file, "utf8"), { filename: file });
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function copyTree(from, to, opts, stats) {
   for (const entry of fs.readdirSync(from, { withFileTypes: true })) {
     const src = path.join(from, entry.name);
     const dest = path.join(to, entry.name);
     if (entry.isDirectory()) {
-      count += copyTree(src, dest);
+      copyTree(src, dest, opts, stats);
     } else if (!skip(src)) {
+      const isNew = !fs.existsSync(dest);
+      if (!opts.clobber && !isNew) {
+        stats.kept++;
+        continue;
+      }
+      if (opts.parseCheck && src.endsWith(".js") && !parses(src)) {
+        stats.invalid.push(path.relative(root, src));
+        continue;
+      }
       fs.mkdirSync(to, { recursive: true });
       fs.copyFileSync(src, dest);
-      count++;
+      stats.copied++;
+      if (isNew && dest.endsWith(".js")) stats.added.push(dest);
     }
   }
-  return count;
+}
+
+/**
+ * Backend fill-ins must not just parse but also load (unresolved requires,
+ * stubbed superclasses of missing classes, ...). Files are checked in a
+ * child process from the CAP project root; failing ones are removed and the
+ * remaining set is re-checked, since fill-ins may require each other.
+ */
+function loadGate(files, stats) {
+  let candidates = [...files];
+  for (let round = 0; round < 5 && candidates.length; round++) {
+    const result = execFileSync(process.execPath, [
+      "-e",
+      `const out = [];
+       for (const f of ${JSON.stringify(candidates)}) {
+         try { require(f); } catch (e) { out.push([f, String(e.message).split("\\n")[0]]); }
+       }
+       console.log(JSON.stringify(out));`,
+    ], { cwd: path.join(root, "cap2UI5"), encoding: "utf8" });
+    const failed = JSON.parse(result.trim().split("\n").pop());
+    if (!failed.length) return;
+    for (const [f, msg] of failed) {
+      fs.rmSync(f, { force: true });
+      candidates = candidates.filter((c) => c !== f);
+      stats.copied--;
+      stats.unloadable.push(`${path.relative(root, f)}: ${msg}`);
+    }
+  }
 }
 
 let total = 0;
-for (const { name, from, to, replace } of COPIES) {
+let broken = 0;
+for (const { name, from, to, replace, clobber, parseCheck } of COPIES) {
   if (!fs.existsSync(from)) {
     console.log(`output/${name}: not found — skipped (run the transpile/prepare steps first)`);
     continue;
   }
   if (replace) fs.rmSync(to, { recursive: true, force: true });
-  const count = copyTree(from, to);
-  total += count;
-  console.log(`output/${name} -> ${path.relative(root, to)}: ${count} files copied`);
+  const stats = { copied: 0, kept: 0, invalid: [], added: [], unloadable: [] };
+  copyTree(from, to, { clobber, parseCheck }, stats);
+  if (name === "abap2UI5" && stats.added.length) loadGate(stats.added, stats);
+  total += stats.copied;
+  broken += stats.invalid.length + stats.unloadable.length;
+  const parts = [`${stats.copied} files copied`];
+  if (stats.kept) parts.push(`${stats.kept} hand-maintained files kept`);
+  if (stats.invalid.length) parts.push(`${stats.invalid.length} skipped (parse error)`);
+  if (stats.unloadable.length) parts.push(`${stats.unloadable.length} skipped (load error)`);
+  console.log(`output/${name} -> ${path.relative(root, to)}: ${parts.join(", ")}`);
+  for (const f of stats.invalid) console.error(`  SKIPPED (does not parse): ${f}`);
+  for (const f of stats.unloadable) console.error(`  SKIPPED (does not load): ${f}`);
 }
 console.log(`\n${total} files copied into cap2UI5`);
+if (broken) {
+  // not fatal: the previous version stays in place and jest gates the sync —
+  // the transpile-report.json parseError entries track the follow-up work
+  console.error(`WARNING: ${broken} file(s) skipped because they do not parse or load — fix scripts/abap2js.js`);
+}

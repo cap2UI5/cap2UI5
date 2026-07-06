@@ -1,15 +1,14 @@
 // TODO(abap2js): unresolved reference z2ui5_cl_exit — add require manually
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cx_util_error = require("abap2UI5/z2ui5_cx_util_error");
-const z2ui5_if_types = require("abap2UI5/z2ui5_if_types");
 
 class z2ui5_cl_core_srv_draft {
   static c_seconds_per_hour = 3600;
   static c_min_exp_time_in_hours = 1;
 
   cleanup() {
-    const ls_config = value z2ui5_if_types.ty_s_http_config_post();
-    z2ui5_cl_exit.get_instance().set_config_http_post(/* TODO(abap2js): out-params */ CHANGING cs_config = ls_config);
+    const ls_config = {};
+    z2ui5_cl_exit.get_instance().set_config_http_post({ cs_config: ls_config });
     let lv_exp_time_in_hours = ls_config.draft_exp_time_in_hours;
     if (lv_exp_time_in_hours < z2ui5_cl_core_srv_draft.c_min_exp_time_in_hours) {
       lv_exp_time_in_hours = z2ui5_cl_core_srv_draft.c_min_exp_time_in_hours;
@@ -58,7 +57,7 @@ class z2ui5_cl_core_srv_draft {
   check_exists({ id } = {}) {
     let result = false;
     // TODO(abap2js): SELECT SINGLE id FROM z2ui5_t_01 WHERE id = @id INTO @DATA(lv_id) .
-    result = Boolean(sy_subrc === 0);
+    result = /* TODO(abap2js) */ xsdbool(sy_subrc === 0);
     return result;
   }
 

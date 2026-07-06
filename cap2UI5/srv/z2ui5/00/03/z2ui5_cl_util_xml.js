@@ -1,172 +1,172 @@
-
+/**
+ * z2ui5_cl_util_xml — JS port of abap2UI5 z2ui5_cl_util_xml.
+ *
+ * Fluent XML builder. Mirrors the ABAP API exactly:
+ *
+ *   const root = z2ui5_cl_util_xml.factory();
+ *   root.__("Page", { p: [{n: "title", v: "Hello"}] })
+ *       ._("Button", { a: "text", v: "Click me" })
+ *       .n("Page")
+ *       ._("Footer");
+ *   const xml = root.stringify();
+ *
+ * Method semantics:
+ *   __  — append child + descend into it
+ *   _   — append child without descending (returns self)
+ *   _if / __if — conditional variants
+ *   p(n,v) — add an attribute to the current element
+ *   n(name?) — climb up; with no name returns parent, otherwise climbs until
+ *              a parent with that name, falling back to root.
+ *   n_prev — last node added anywhere in the tree
+ *   n_root — the synthetic root holder
+ *   stringify({ from_root, indent }) — serialise
+ */
 class z2ui5_cl_util_xml {
-  mv_name = ``;
-  mv_ns = ``;
-  mt_prop = [];
-  mo_root = null;
-  mo_previous = null;
-  mo_parent = null;
-  mt_child = null;
 
+  // Constructor matches abap CREATE PROTECTED — use factory().
   constructor() {
+    this.mv_name = ``;
+    this.mv_ns   = ``;
+    this.mt_prop = [];                 // [{n, v}]
+    this.mo_root     = null;
+    this.mo_previous = null;
+    this.mo_parent   = null;
+    this.mt_child    = [];             // [z2ui5_cl_util_xml]
   }
 
   static factory() {
-    let result = null;
-    result = new z2ui5_cl_util_xml();
-    result.mo_root = result;
-    result.mo_parent = result;
-    return result;
+    const r = new z2ui5_cl_util_xml();
+    r.mo_root   = r;
+    r.mo_parent = r;
+    return r;
   }
 
-  __({ n, ns, a, v, p } = {}) {
-    let result = null;
-    const lo_child = new z2ui5_cl_util_xml();
-    lo_child.mv_name = n;
-    lo_child.mv_ns = ns;
-    lo_child.mt_prop = p;
-    if (a) {
-      lo_child.mt_prop.push({ n: a, v: v });
+  /** Append child + descend. */
+  __({ n, ns = ``, a = ``, v = ``, p = [] } = {}) {
+    if (typeof arguments[0] === `string`) {
+      // overload: __("name", {…}) — convenience JS form
+      const name = arguments[0];
+      const opts = arguments[1] || {};
+      return this.__({ n: name, ns: opts.ns, a: opts.a, v: opts.v, p: opts.p });
     }
-    lo_child.mo_parent = this;
-    lo_child.mo_root = this.mo_root;
-    this.mt_child.push(lo_child);
-    this.mo_root.mo_previous = lo_child;
-    result = lo_child;
-    return result;
+    const child = new z2ui5_cl_util_xml();
+    child.mv_name   = n;
+    child.mv_ns     = ns;
+    child.mt_prop   = Array.isArray(p) ? p.slice() : [];
+    if (a) child.mt_prop.push({ n: a, v });
+    child.mo_parent = this;
+    child.mo_root   = this.mo_root;
+    this.mt_child.push(child);
+    this.mo_root.mo_previous = child;
+    return child;
   }
 
-  _({ n, ns, a, v, p } = {}) {
-    let result = null;
-    result = this;
+  /** Append child without descending. */
+  _({ n, ns = ``, a = ``, v = ``, p = [] } = {}) {
+    if (typeof arguments[0] === `string`) {
+      const name = arguments[0];
+      const opts = arguments[1] || {};
+      return this._({ n: name, ns: opts.ns, a: opts.a, v: opts.v, p: opts.p });
+    }
     this.__({ n, ns, a, v, p });
-    return result;
+    return this;
   }
 
-  _if({ when, n, ns, a, v, p } = {}) {
-    let result = null;
-    if (when === true) {
-      this.__({ n, ns, a, v, p });
-    }
-    result = this;
-    return result;
+  /** Conditional descend variant of __. */
+  _if(when, opts) {
+    if (when) return this.__(opts);
+    return this;
   }
 
-  __if({ when, n, ns, a, v, p } = {}) {
-    let result = null;
-    if (when === true) {
-      result = this.__({ n, ns, a, v, p });
-    } else {
-      result = this;
-    }
-    return result;
+  /** Conditional non-descend variant of _. */
+  __if(when, opts) {
+    if (when) this._(opts);
+    return this;
   }
 
-  p({ n, v } = {}) {
-    let result = null;
-    this.mt_prop.push({ n: n, v: v });
-    result = this;
-    return result;
+  /** Add attribute to current node. */
+  p(n, v) {
+    this.mt_prop.push({ n, v });
+    return this;
   }
 
-  n({ name } = {}) {
-    let result = null;
-    if (!name) {
-      result = this.mo_parent;
-      return result;
-    }
-    if (this.mo_parent.mv_name === name) {
-      result = this.mo_parent;
-    } else if (this === this.mo_root) {
-      result = this;
-    } else {
-      result = this.mo_parent.n(name);
-    }
-    return result;
+  /** Climb up; with no name → parent. With name → walk parents until match. */
+  n(name) {
+    if (!name) return this.mo_parent || this;
+    if (this.mo_parent?.mv_name === name) return this.mo_parent;
+    if (this === this.mo_root) return this;
+    return this.mo_parent.n(name);
   }
 
-  n_prev() {
-    let result = null;
-    result = this.mo_root.mo_previous;
-    return result;
-  }
-
-  n_root() {
-    let result = null;
-    result = this.mo_root;
-    return result;
-  }
+  n_prev() { return this.mo_root?.mo_previous || null; }
+  n_root() { return this.mo_root; }
 
   stringify({ from_root = true, indent = false } = {}) {
-    let result = ``;
-    let lt_parts = [];
-    if (indent === true) {
-      if (from_root === true) {
-        this.mo_root.xml_get_parts_indent(/* TODO(abap2js): out-params */ CHANGING ct_parts = lt_parts);
-      } else {
-        this.xml_get_parts_indent({ iv_depth: /* TODO(abap2js): out-params */ CHANGING ct_parts = lt_parts });
-      }
-      result = lt_parts.join(`\\n`);
-    } else {
-      if (from_root === true) {
-        this.mo_root.xml_get_parts(/* TODO(abap2js): out-params */ CHANGING ct_parts = lt_parts);
-      } else {
-        this.xml_get_parts(/* TODO(abap2js): out-params */ CHANGING ct_parts = lt_parts);
-      }
-      result = /* TODO(abap2js) */ concat_lines_of(lt_parts);
+    const target = from_root && this.mo_root ? this.mo_root : this;
+    const parts = [];
+    if (indent) {
+      target._xml_get_parts_indent(0, parts);
+      return parts.join(`\n`);
     }
-    return result;
+    target._xml_get_parts(parts);
+    return parts.join(``);
   }
 
-  xml_get_parts() {
+  // --- internals ---
+
+  _xml_get_parts(parts) {
     if (!this.mv_name) {
-      let sy_tabix = 0;
-      for (const lr_root of this.mt_child) {
-        sy_tabix++;
-        (lr_root).xml_get_parts(/* TODO(abap2js): out-params */ CHANGING ct_parts = ct_parts);
-      }
+      for (const c of this.mt_child) c._xml_get_parts(parts);
       return;
     }
-    const lv_tmp2 = (this.mv_ns !== `` ? `${this.mv_ns}:` : null);
-    const lv_tmp3 = /* TODO(abap2js): REDUCE */ null;
-    if (!this.mt_child) {
-      ct_parts.push(` <${lv_tmp2}${this.mv_name}${lv_tmp3}/>`);
+    const ns   = this.mv_ns ? `${this.mv_ns}:` : ``;
+    const attr = z2ui5_cl_util_xml._build_attrs(this.mt_prop);
+    if (this.mt_child.length === 0) {
+      parts.push(` <${ns}${this.mv_name}${attr}/>`);
       return;
     }
-    ct_parts.push(` <${lv_tmp2}${this.mv_name}${lv_tmp3}>`);
-    let sy_tabix = 0;
-    for (const lr_child of this.mt_child) {
-      sy_tabix++;
-      (lr_child).xml_get_parts(/* TODO(abap2js): out-params */ CHANGING ct_parts = ct_parts);
-    }
-    ct_parts.push(`</${lv_tmp2}${this.mv_name}>`);
+    parts.push(` <${ns}${this.mv_name}${attr}>`);
+    for (const c of this.mt_child) c._xml_get_parts(parts);
+    parts.push(`</${ns}${this.mv_name}>`);
   }
 
-  xml_get_parts_indent({ iv_depth = 0 } = {}) {
+  _xml_get_parts_indent(depth, parts) {
     if (!this.mv_name) {
-      let sy_tabix = 0;
-      for (const lr_root of this.mt_child) {
-        sy_tabix++;
-        (lr_root)
-          .xml_get_parts_indent(/* TODO(abap2js): out-params */ EXPORTING iv_depth = iv_depth CHANGING ct_parts = ct_parts);
-      }
+      for (const c of this.mt_child) c._xml_get_parts_indent(depth, parts);
       return;
     }
-    const lv_pad = ` `.repeat(iv_depth * 2);
-    const lv_ns = (this.mv_ns !== `` ? `${this.mv_ns}:` : null);
-    const lv_attr = /* TODO(abap2js): REDUCE */ null;
-    if (!this.mt_child) {
-      ct_parts.push(`${lv_pad}<${lv_ns}${this.mv_name}${lv_attr}/>`);
+    const pad  = ` `.repeat(depth * 2);
+    const ns   = this.mv_ns ? `${this.mv_ns}:` : ``;
+    const attr = z2ui5_cl_util_xml._build_attrs(this.mt_prop);
+    if (this.mt_child.length === 0) {
+      parts.push(`${pad}<${ns}${this.mv_name}${attr}/>`);
       return;
     }
-    ct_parts.push(`${lv_pad}<${lv_ns}${this.mv_name}${lv_attr}>`);
-    let sy_tabix = 0;
-    for (const lr_child of this.mt_child) {
-      sy_tabix++;
-      (lr_child)
-        .xml_get_parts_indent(/* TODO(abap2js): out-params */ EXPORTING iv_depth = iv_depth + 1 CHANGING ct_parts = ct_parts);
+    parts.push(`${pad}<${ns}${this.mv_name}${attr}>`);
+    for (const c of this.mt_child) c._xml_get_parts_indent(depth + 1, parts);
+    parts.push(`${pad}</${ns}${this.mv_name}>`);
+  }
+
+  static _build_attrs(props) {
+    let out = ``;
+    // Skip empties — abap impl does WHERE ( v <> `` ).
+    // ABAP also escapes for cl_abap_format=>e_xml_attr. We match the same set
+    // (& < > " '), and convert abap_true → "true".
+    for (const row of props) {
+      if (row?.v === undefined || row?.v === null || row?.v === ``) continue;
+      const v = row.v === true ? `true` : String(row.v);
+      out += ` ${row.n}="${z2ui5_cl_util_xml._xml_attr_escape(v)}"`;
     }
-    ct_parts.push(`${lv_pad}</${lv_ns}${this.mv_name}>`);
+    return out;
+  }
+
+  static _xml_attr_escape(s) {
+    return String(s)
+      .replace(/&/g,  `&amp;`)
+      .replace(/</g,  `&lt;`)
+      .replace(/>/g,  `&gt;`)
+      .replace(/"/g,  `&quot;`)
+      .replace(/'/g,  `&apos;`);
   }
 }
 

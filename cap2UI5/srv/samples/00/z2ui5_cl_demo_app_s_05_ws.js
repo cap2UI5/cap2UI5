@@ -1,5 +1,5 @@
 // TODO(abap2js): unresolved reference cl_amc_channel_manager — add require manually
-// TODO(abap2js): unresolved reference cl_apc_wsp_ext_stateless_base — add require manually
+const cl_apc_wsp_ext_stateless_base = class {}; // TODO(abap2js): unresolved superclass — replace stub manually
 
 class z2ui5_cl_demo_app_s_05_ws extends cl_apc_wsp_ext_stateless_base {
   static c_amc_application_id = `Z2UI5_SAMPLE`;

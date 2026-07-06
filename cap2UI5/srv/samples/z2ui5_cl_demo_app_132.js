@@ -1,6 +1,4 @@
 // TODO(abap2js): unresolved reference cl_abap_datadescr — add require manually
-// TODO(abap2js): unresolved reference cl_abap_structdescr — add require manually
-// TODO(abap2js): unresolved reference cl_abap_typedescr — add require manually
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -12,13 +10,14 @@ class z2ui5_cl_demo_app_132 extends z2ui5_if_app {
 
   get_comp() {
     let result = [];
+    let sy_tabix = 0;
     let index = 0;
     try {
       try {
-        cl_abap_typedescr.describe_by_name(/* TODO(abap2js): out-params */ EXPORTING p_name = `Z2UI5_T_01` RECEIVING p_descr_ref = DATA ( typedesc ) EXCEPTIONS type_not_found = 1 OTHERS = 2);
+        // TODO(abap2js): cl_abap_typedescr=>describe_by_name( EXPORTING p_name = `Z2UI5_T_01` RECEIVING p_descr_ref = DATA(typedesc) EXCEPTIONS type_not_found = 1 OTHERS = 2 ).
         const structdesc = (typedesc);
         const comp = structdesc.get_components();
-        let sy_tabix = 0;
+        sy_tabix = 0;
         for (const com of comp) {
           sy_tabix++;
           if (com.as_include === false) {
@@ -27,7 +26,7 @@ class z2ui5_cl_demo_app_132 extends z2ui5_if_app {
         }
       } catch (error) {
       }
-      const component = value cl_abap_structdescr.component_table((name === `ROW_ID` type === (cl_abap_datadescr.describe_by_data(index))));
+      const component = [{ name: `ROW_ID`, type: (cl_abap_datadescr.describe_by_data(index)) }];
       result.push(...component);
     } catch (error) {
     }

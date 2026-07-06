@@ -27,19 +27,20 @@ class z2ui5_cl_demo_app_199 extends z2ui5_if_app {
   }
 
   view_display() {
+    let sy_tabix = 0;
     const view = z2ui5_cl_xml_view.factory();
     // TODO(abap2js): FIELD-SYMBOLS <tab> TYPE data.
     // TODO(abap2js): ASSIGN mt_table->* TO <tab>.
     const page = view.page({ id: `page_main`, title: `Refresh`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack(), class: `sapUiContentPadding` });
     const table = page.table({ growing: `true`, width: `auto`, items: this.client._bind_edit(tab) });
     const columns = table.columns();
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const comp of this.mt_comp) {
       sy_tabix++;
       columns.column().text(comp.name);
     }
     const cells = columns.get_parent().items().column_list_item({ valign: `Middle`, type: `Navigation` }).cells();
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const comp of this.mt_comp) {
       sy_tabix++;
       cells.object_identifier({ text: `{${comp.name}}` });

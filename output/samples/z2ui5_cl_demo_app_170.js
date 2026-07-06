@@ -8,7 +8,7 @@ class z2ui5_cl_demo_app_170 extends z2ui5_if_app {
   simple_popup1() {
     const popup = z2ui5_cl_xml_view.factory_popup();
     const dialog = popup.dialog({ stretch: true, afterclose: this.client._event(`BTN_OK_1ND`) }).content();
-    const content = dialog.icon_tab_bar({ selectedkey: this.client._bind_edit(this.mv_selected_key), select: this.client._event_client(`POPUP_NAV_CONTAINER_TO`, [`NavCon`, `${$parameters>/selectedKey}`]), headermode: `Inline`, expanded: true, expandable: false })
+    const content = dialog.icon_tab_bar({ selectedkey: this.client._bind_edit(this.mv_selected_key), select: this.client._event_client(`POPUP_NAV_CONTAINER_TO`, [`NavCon`, `\${$parameters>/selectedKey}`]), headermode: `Inline`, expanded: true, expandable: false })
       .items()
       .icon_tab_filter({ key: `page1`, text: `Home` })
       .get_parent()

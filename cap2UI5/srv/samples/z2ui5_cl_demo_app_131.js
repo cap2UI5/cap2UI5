@@ -28,14 +28,15 @@ class z2ui5_cl_demo_app_131 extends z2ui5_if_app {
   }
 
   view_display() {
+    let sy_tabix = 0;
     const view = z2ui5_cl_xml_view.factory().shell();
     const page = view.page({ id: `page_main`, title: `Main App calling Subapps`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack(), class: `sapUiContentPadding` });
     const lo_items = page.icon_tab_bar({ class: `sapUiResponsiveContentPadding`, selectedkey: this.client._bind_edit(this.mv_selectedkey), select: this.client._event(`ONSELECTICONTABBAR`) })
       .items();
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const line of this.mt_t002) {
       sy_tabix++;
-      lo_items.icon_tab_filter({ text: line.class, count: line.count, key: line.id });
+      lo_items.icon_tab_filter({ text: line.class_, count: line.count, key: line.id });
       lo_items.icon_tab_separator();
     }
     this.mo_main_page = lo_items;
@@ -63,13 +64,13 @@ class z2ui5_cl_demo_app_131 extends z2ui5_if_app {
           this.mo_app = null; // TODO(abap2js): CREATE OBJECT mo_app TYPE (t002->class).
         }
         try {
-          call method this.mo_app.( `SET_APP_DATA` ) exporting count === t002.count table === t002.table;
+          // TODO(abap2js): CALL METHOD mo_app->(`SET_APP_DATA`) EXPORTING count = t002->count table = t002->table.
           this.view_display();
           // TODO(abap2js): ASSIGN mo_app->(`MO_PARENT_VIEW`) TO FIELD-SYMBOL(<view>).
           if (view != null) {
             view = this.mo_main_page;
           }
-          call method this.mo_app.( `Z2UI5_IF_APP~MAIN` ) exporting this.client === this.client;
+          // TODO(abap2js): CALL METHOD mo_app->(`Z2UI5_IF_APP~MAIN`) EXPORTING client = client.
         } catch (error) {
           return;
         }

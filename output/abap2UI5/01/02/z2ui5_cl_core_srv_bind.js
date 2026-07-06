@@ -12,6 +12,7 @@ class z2ui5_cl_core_srv_bind {
 
   bind_tab_cell({ iv_name, iv_val } = {}) {
     let result = ``;
+    let sy_tabix = 0;
     let lr_ref_in = null;
     // TODO(abap2js): FIELD-SYMBOLS <tab> TYPE STANDARD TABLE.
     // TODO(abap2js): FIELD-SYMBOLS <row> TYPE any.
@@ -19,7 +20,7 @@ class z2ui5_cl_core_srv_bind {
     // TODO(abap2js): ASSIGN ms_config-tab->* TO <tab>.
     // TODO(abap2js): ASSIGN <tab>[ ms_config-tab_index ] TO <row>.
     const lt_attri = z2ui5_cl_util.rtti_get_t_attri_by_any(this.ms_config.tab);
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const SYMBOL of lt_attri) {
       sy_tabix++;
       // TODO(abap2js): ASSIGN COMPONENT <comp>-name OF STRUCTURE <row> TO <ele>.
@@ -80,7 +81,7 @@ class z2ui5_cl_core_srv_bind {
     const lo_model = new z2ui5_cl_core_srv_model({ attri: this.mo_app.mt_attri, app: this.mo_app.mo_app });
     this.mr_attri = lo_model.main_attri_search(val);
     if (this.mr_attri.name_ref) {
-      this.mr_attri = (this.mo_app.mt_attri.*.find((row) => row.name === this.mr_attri.name_ref));
+      this.mr_attri = (this.mo_app.mt_attri.find((row) => row.name === this.mr_attri.name_ref));
     }
     if (this.mr_attri.bind_type) {
       this.check_raise_existing();

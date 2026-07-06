@@ -1,582 +1,484 @@
-// TODO(abap2js): unresolved reference cl_abap_datadescr — add require manually
-// TODO(abap2js): unresolved reference cl_abap_objectdescr — add require manually
-// TODO(abap2js): unresolved reference cl_abap_typedescr — add require manually
-// TODO(abap2js): unresolved reference z2ui5_cl_ajson — add require manually
-// TODO(abap2js): unresolved reference z2ui5_cl_ajson_mapping — add require manually
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cx_util_error = require("abap2UI5/z2ui5_cx_util_error");
-const z2ui5_if_ajson_types = require("abap2UI5/z2ui5_if_ajson_types");
-const z2ui5_if_client = require("abap2UI5/z2ui5_if_client");
-const z2ui5_if_core_types = require("abap2UI5/z2ui5_if_core_types");
+const z2ui5_if_core_types = require("./z2ui5_if_core_types");
+
+/**
+ * z2ui5_cl_core_srv_model — JS port of abap2UI5 z2ui5_cl_core_srv_model.
+ *
+ * Two layers:
+ *
+ *   STATIC — used by core_handler / core_app:
+ *     main_json_to_attri(oApp, xx, requireOwn?)
+ *       Apply incoming XX deltas onto the app instance.
+ *     main_json_stringify(aBind)
+ *       Build the response model from the client's aBind list.
+ *
+ *   INSTANCE — 1:1 ABAP mirror, used when the framework needs to track an
+ *   attribute table separately from aBind (e.g. delta_apply_to_table on a
+ *   nested table; dissolve-driven attribute search):
+ *
+ *     constructor(attri, app)         — store mt_attri ref + app ref
+ *     main_attri_search(val)          — find attr whose value === val
+ *     main_attri_db_save_srtti()      — JS no-op (no SRTTI XML)
+ *     main_attri_db_load*             — JS no-op (JSON-based persistence)
+ *     main_attri_refresh()            — re-dissolve, preserve bind metadata
+ *     main_json_to_attri(view, model) — instance variant (delta routing)
+ *     main_json_stringify()           — instance variant (returns string)
+ *
+ *     attri_create_new(name)          — register an attr entry
+ *     attri_search(val)               — value-equality lookup
+ *     attri_get_val_ref(path)         — resolve `field-> sub-> child` to
+ *                                       a {get(), set(v)} accessor
+ *     dissolve()                      — iterative dissolution
+ *     dissolve_run()                  — single dissolution pass
+ *     diss_struc / diss_dref / diss_oref
+ *                                     — type-specific decomposition
+ *     delta_apply_to_table(delta, name)
+ *                                     — apply __delta patch to a table attr
+ *
+ * The dissolve system is conceptually identical to abap but stays simpler
+ * because JS has no DREF/OREF distinction — both collapse to "object whose
+ * own enumerable keys point at sub-values".
+ */
+
+const MAX_DISSOLVE_DEPTH = 5;
 
 class z2ui5_cl_core_srv_model {
-  static max_dissolve_depth = 5;
 
-  mt_attri = null;
-  mo_app = null;
+  // ============================================================
+  //  STATIC API (unchanged — used by core_handler)
+  // ============================================================
 
-  main_json_to_attri({ view, model } = {}) {
-    const lv_view = (this.mt_attri.*.some((row) => row.view === view) ? view : z2ui5_if_client.cs_view.main);
-    let sy_tabix = 0;
-    for (const lr_attri of this.mt_attri.*) {
-      sy_tabix++;
-      if (!(lr_attri.bind_type === z2ui5_if_core_types.cs_bind_type.two_way && view === lv_view)) continue;
-      try {
-        let lo_val_front = model.slice(lr_attri.name_client);
-        if (lo_val_front != null) {
-          continue;
-        }
-        if (lo_val_front.exists(`/__delta`) === true) {
-          this.delta_apply_to_table({ io_val_front: lo_val_front, iv_name: lr_attri.name });
-          continue;
-        }
-        if (lr_attri.custom_mapper_back != null) {
-          lo_val_front = lo_val_front.map(lr_attri.custom_mapper_back);
-        }
-        if (lr_attri.custom_filter_back != null) {
-          lo_val_front = lo_val_front.filter(lr_attri.custom_filter_back);
-        }
-        try {
-          const lr_ref = this.attri_get_val_ref({ iv_path: lr_attri.name });
-        } catch (error) {
-          continue;
-        }
-        // TODO(abap2js): ASSIGN lr_ref->* TO FIELD-SYMBOL(<val>).
-        lo_val_front.to_abap(/* TODO(abap2js): out-params */ EXPORTING iv_corresponding = abap_true IMPORTING ev_container = <val>);
-      } catch (x) {
-        throw new z2ui5_cx_util_error({ val: `JSON_PARSING_ERROR: ${x.get_text()}` });
+  /**
+   * Apply frontend XX changes onto the given app instance.
+   *
+   * Wire shapes per property:
+   *   - Full replace:    XX[attr] = newValue        (scalar / array reassignment)
+   *   - Row-field delta: XX[attr] = { __delta: { rowIdx: { field: value } } }
+   */
+  static main_json_to_attri(oApp, xx, requireOwnProp = false) {
+    if (!xx) return;
+    for (const prop in xx) {
+      if (requireOwnProp && !Object.prototype.hasOwnProperty.call(oApp, prop)) continue;
+      const change = xx[prop];
+      if (change && typeof change === `object` && change.__delta && Array.isArray(oApp[prop])) {
+        z2ui5_cl_core_srv_model._apply_table_delta(oApp[prop], change.__delta);
+      } else {
+        oApp[prop] = change;
       }
     }
   }
 
-  main_json_stringify() {
-    let result = ``;
-    try {
-      const ajson_result = (z2ui5_cl_ajson.create_empty());
-      const ajson_default = (z2ui5_cl_ajson.create_empty({ ii_custom_mapping: z2ui5_cl_ajson_mapping.create_upper_case() }));
-      // TODO(abap2js): TYPES BEGIN OF ty_s_mapper_cache,
-      // TODO(abap2js): TYPES mapper TYPE REF TO z2ui5_if_ajson_mapping,
-      // TODO(abap2js): TYPES ajson TYPE REF TO z2ui5_if_ajson,
-      // TODO(abap2js): TYPES END OF ty_s_mapper_cache.
-      let lt_mapper_cache = [];
-      let sy_tabix = 0;
-      for (const lr_attri of this.mt_attri.*) {
-        sy_tabix++;
-        if (!(lr_attri.bind_type !== `` && lr_attri.type_kind !== cl_abap_datadescr.typekind_dref && lr_attri.type_kind !== cl_abap_datadescr.typekind_oref)) continue;
-        if (lr_attri.custom_mapper != null) {
-          // TODO(abap2js): READ TABLE lt_mapper_cache REFERENCE INTO DATA(lr_mapper_cache) WITH KEY mapper = lr_attri->custom_mapper.
-          if (sy_subrc === 0) {
-            let ajson = lr_mapper_cache.ajson;
-          } else {
-            ajson = (z2ui5_cl_ajson.create_empty({ ii_custom_mapping: lr_attri.custom_mapper }));
-            lt_mapper_cache.push({ mapper: lr_attri.custom_mapper, ajson: ajson });
-          }
-        } else {
-          ajson = ajson_default;
-        }
-        try {
-          const lr_ref = this.attri_get_val_ref({ iv_path: lr_attri.name });
-        } catch (error) {
-          continue;
-        }
-        // TODO(abap2js): ASSIGN lr_ref->* TO FIELD-SYMBOL(<val>).
-        ajson.set({ iv_ignore_empty: false, iv_path: `/`, iv_val: val });
-        if (lr_attri.custom_filter != null) {
-          ajson = ajson.filter(lr_attri.custom_filter);
-        }
-        ajson_result.set({ iv_path: lr_attri.name_client, iv_val: ajson });
-      }
-      result = ajson_result.stringify();
-      if (!result) {
-        result = `{}`;
-      }
-    } catch (x) {
-      throw new z2ui5_cx_util_error({ val: x });
-    }
-    return result;
-  }
-
-  main_attri_db_load() {
-    this.main_attri_db_load_resolve();
-    let lt_child_idx = [];
-    let sy_tabix = 0;
-    for (const lr_pre of this.mt_attri.*) {
-      sy_tabix++;
-      if (!(name_parent)) continue;
-      lt_child_idx.push({ name_parent: lr_pre.name_parent, name: lr_pre.name });
-    }
-    const lr_child_idx = (lt_child_idx);
-    let sy_tabix = 0;
-    for (const lr_attri of this.mt_attri.*) {
-      sy_tabix++;
-      if (!(name_ref)) continue;
-      switch (lr_attri.type_kind) {
-        case cl_abap_datadescr.typekind_table:
-          this.main_attri_db_load_table({ ir_attri: lr_attri });
-          break;
-        case cl_abap_datadescr.typekind_dref:
-          this.main_attri_db_load_dref({ ir_attri: lr_attri, ir_child_idx: lr_child_idx });
-          break;
-      }
+  static _apply_table_delta(tab, delta) {
+    for (const rowIdxStr in delta) {
+      const rowIdx = +rowIdxStr;
+      if (!tab[rowIdx]) continue;
+      Object.assign(tab[rowIdx], delta[rowIdxStr]);
     }
   }
 
-  main_attri_db_load_resolve() {
-    let sy_tabix = 0;
-    for (const lr_attri of this.mt_attri.*) {
-      sy_tabix++;
-      if (!(!name_ref)) continue;
-      try {
-        const lr_ref = this.attri_get_val_ref({ iv_path: lr_attri.name });
-        lr_attri.o_typedescr = cl_abap_datadescr.describe_by_data_ref(lr_ref);
-        if (lr_attri.srtti_data) {
-          // TODO(abap2js): ASSIGN lr_ref->* TO FIELD-SYMBOL(<val>).
-          val = z2ui5_cl_util.xml_srtti_parse(lr_attri.srtti_data);
-          lr_attri.srtti_data = null;
-        }
-      } catch (error) {
+  /**
+   * Build the response model from the client's aBind list.
+   * One-way bindings sit at the model root; two-way bindings live under XX.
+   */
+  static main_json_stringify(aBind) {
+    const xxKey = z2ui5_if_core_types.cs_ui5.two_way_model;
+    const oModel = { [xxKey]: {} };
+    for (const binding of aBind) {
+      if (binding.type === z2ui5_if_core_types.cs_bind_type.one_way) {
+        oModel[binding.name] = binding.val;
+      } else {
+        oModel[xxKey][binding.name] = binding.val;
       }
     }
+    return oModel;
   }
 
-  main_attri_db_load_table({ ir_attri } = {}) {
-    const lr_ref_source = this.attri_get_val_ref({ iv_path: ir_attri.name_ref });
-    ir_attri.o_typedescr = cl_abap_datadescr.describe_by_data_ref(lr_ref_source);
-    // TODO(abap2js): READ TABLE mt_attri->* REFERENCE INTO DATA(lr_attri_parent) WITH KEY name = ir_attri->name_parent.
-    if (sy_subrc !== 0) {
-      return;
-    }
-    const lv_parent_path = `MO_APP->${lr_attri_parent.name}`;
-    // TODO(abap2js): ASSIGN (lv_parent_path) TO FIELD-SYMBOL(<parent_ref>).
-    if (sy_subrc !== 0) {
-      return;
-    }
-    // TODO(abap2js): ASSIGN lr_ref_source->* TO FIELD-SYMBOL(<source_value>).
-    // TODO(abap2js): GET REFERENCE OF <source_value> INTO <parent_ref>.
-    const lr_ref_parent = (parent_ref);
-    lr_attri_parent.o_typedescr = cl_abap_datadescr.describe_by_data_ref(lr_ref_parent);
+  // ============================================================
+  //  INSTANCE API (1:1 with abap)
+  // ============================================================
+
+  constructor(attri, app) {
+    // mt_attri is by-ref in abap (REF TO ty_t_attri). We mirror that with a
+    // {value: [...]} holder so callers can pass a shared list around.
+    this.mt_attri = attri && Array.isArray(attri.value) ? attri : { value: attri || [] };
+    this.mo_app   = app;
   }
 
-  main_attri_db_load_dref({ ir_attri, ir_child_idx } = {}) {
-    const lv_source_path = `MO_APP->${ir_attri.name_ref}`;
-    // TODO(abap2js): ASSIGN (lv_source_path) TO FIELD-SYMBOL(<source_ref>).
-    if (sy_subrc !== 0) {
-      return;
-    }
-    const lv_target_path = `MO_APP->${ir_attri.name}`;
-    // TODO(abap2js): ASSIGN (lv_target_path) TO FIELD-SYMBOL(<parent_ref>).
-    if (sy_subrc !== 0) {
-      return;
-    }
-    // TODO(abap2js): GET REFERENCE OF <source_ref> INTO <parent_ref>.
-    ir_attri.o_typedescr = cl_abap_datadescr.describe_by_data_ref(parent_ref);
-    let sy_tabix = 0;
-    for (const lr_child_idx of ir_child_idx.*) {
-      sy_tabix++;
-      if (!(lr_child_idx.name_parent === ir_attri.name)) continue;
-      // TODO(abap2js): READ TABLE mt_attri->* REFERENCE INTO DATA(lr_child) WITH KEY name = lr_child_idx->name.
-      if (sy_subrc !== 0) {
-        continue;
-      }
-      const lr_child_ref = this.attri_get_val_ref({ iv_path: lr_child.name });
-      lr_child.o_typedescr = cl_abap_datadescr.describe_by_data_ref(lr_child_ref);
-    }
-  }
+  /**
+   * Find an attribute whose value === val. Falls back to running dissolve()
+   * to discover new nested attrs, then refresh, then raises.
+   */
+  main_attri_search(val) {
+    let found = this.attri_search(val);
+    if (found) return found;
 
-  main_attri_db_save_srtti() {
     this.dissolve();
-    let sy_tabix = 0;
-    for (const lr_attri of this.mt_attri.*) {
-      sy_tabix++;
-      if (!(!name_ref && lr_attri.type_kind === cl_abap_datadescr.typekind_dref)) continue;
-      const lv_name5 = `MO_APP->${lr_attri.name}`;
-      // TODO(abap2js): ASSIGN (lv_name5) TO FIELD-SYMBOL(<ref>).
-      if (sy_subrc !== 0) {
-        continue;
-      }
-      const lv_name = `MO_APP->${lr_attri.name}->*`;
-      // TODO(abap2js): ASSIGN (lv_name) TO FIELD-SYMBOL(<val1>).
-      if (sy_subrc !== 0) {
-        continue;
-      }
-      const lo_descr = cl_abap_datadescr.describe_by_data(val1);
-      switch (lo_descr.type_kind) {
-        case cl_abap_datadescr.typekind_table:
-          let sy_tabix = 0;
-          for (const lr_attri_child of this.mt_attri.*) {
-            sy_tabix++;
-            if (!(!name_ref && lr_attri_child.type_kind === cl_abap_datadescr.typekind_table && lr_attri_child.name_parent === lr_attri.name)) continue;
-            const lv_name6 = `MO_APP->${lr_attri_child.name}`;
-            // TODO(abap2js): ASSIGN (lv_name6) TO FIELD-SYMBOL(<val_ref>).
-            if (sy_subrc !== 0) {
-              continue;
-            }
-            lr_attri.srtti_data = z2ui5_cl_util.xml_srtti_stringify(val_ref);
-            val_ref = null;
-            val1 = null;
-            ref = null;
-            break;
-          }
-          break;
-        case cl_abap_datadescr.typekind_struct1:
-        case cl_abap_datadescr.typekind_struct2:
-          lr_attri.srtti_data = z2ui5_cl_util.xml_srtti_stringify(val1);
-          break;
-      }
-    }
-    let sy_tabix = 0;
-    for (const lr_attri2 of this.mt_attri.*) {
-      sy_tabix++;
-      if (!(lr_attri2.type_kind === cl_abap_datadescr.typekind_dref)) continue;
-      const lv_name8 = `MO_APP->${lr_attri2.name}`;
-      // TODO(abap2js): ASSIGN (lv_name8) TO FIELD-SYMBOL(<ref2>).
-      if (sy_subrc !== 0) {
-        continue;
-      }
-      ref2 = null;
-      if (lr_attri2.name_ref) {
-        continue;
-      }
-      const lv_name10 = `MO_APP->${lr_attri2.name}->*`;
-      // TODO(abap2js): ASSIGN (lv_name10) TO FIELD-SYMBOL(<val8>).
-      if (sy_subrc !== 0) {
-        continue;
-      }
-      val8 = null;
-    }
-  }
+    found = this.attri_search(val);
+    if (found) return found;
 
-  main_attri_search({ val } = {}) {
-    let result = null;
-    result = this.attri_search({ val: val });
-    if (result != null) {
-      return result;
-    }
-    this.dissolve();
-    result = this.attri_search({ val: val });
-    if (result != null) {
-      return result;
-    }
     this.main_attri_refresh();
-    result = this.attri_search({ val: val });
-    if (result != null) {
-      return result;
-    }
-    throw new z2ui5_cx_util_error({ val: `BINDING_ERROR - No class attribute for binding found - Please check if the bound values are public attributes of your class` });
-    return result;
+    found = this.attri_search(val);
+    if (found) return found;
+
+    const z2ui5_cx_util_error = require("../../00/03/z2ui5_cx_util_error");
+    throw new z2ui5_cx_util_error(
+      `BINDING_ERROR - No class attribute for binding found - Please check if the bound values are public attributes of your class`
+    );
   }
 
-  attri_get_val_ref({ iv_path } = {}) {
-    let result = null;
-    // TODO(abap2js): FIELD-SYMBOLS <attri> TYPE any.
+  /**
+   * Persistence hooks — abap uses these to round-trip SRTTI XML through the
+   * draft table. JS uses plain JSON, so persistence is the responsibility of
+   * core_srv_draft and these are no-ops kept for API parity.
+   */
+  main_attri_db_save_srtti() { /* JSON persistence — no SRTTI to save */ }
+  main_attri_db_load()       { /* JSON persistence — no SRTTI to load */ }
+  main_attri_db_load_resolve() { /* idem */ }
+  main_attri_db_load_table(_ir_attri) { /* idem */ }
+  main_attri_db_load_dref(_ir_attri, _ir_child_idx) { /* idem */ }
+
+  /** Drop transient attrs, dissolve again, restore bind metadata. */
+  main_attri_refresh() {
+    const old = this.mt_attri.value.slice();
+    this.mt_attri.value.length = 0;
+    this.dissolve();
+    for (const attri of this.mt_attri.value) {
+      const prev = old.find((a) => a.name === attri.name);
+      if (prev) {
+        attri.bind_type   = prev.bind_type;
+        attri.name_client = prev.name_client;
+        attri.view        = prev.view;
+      }
+    }
+  }
+
+  /**
+   * Instance variant of main_json_to_attri — applies delta IF the wire
+   * payload includes `/__delta`, else writes the value back into the path
+   * resolved by `name`. abap signature: (view, model).
+   */
+  main_json_to_attri_instance(view, model) {
+    if (!model || typeof model !== `object`) return;
+    const targetView = this.mt_attri.value.some((a) => a.view === view)
+      ? view
+      : `MAIN`;
+
+    for (const attri of this.mt_attri.value) {
+      if (attri.bind_type !== z2ui5_if_core_types.cs_bind_type.two_way) continue;
+      if (attri.view !== targetView) continue;
+
+      // Locate the slice on the wire model corresponding to this attribute.
+      const slice = z2ui5_cl_core_srv_model._slice_at_path(model, attri.name_client);
+      if (slice === undefined) continue;
+
+      if (slice && typeof slice === `object` && `__delta` in slice) {
+        this.delta_apply_to_table(slice, attri.name);
+        continue;
+      }
+
+      try {
+        const ref = this.attri_get_val_ref(attri.name);
+        ref.set(slice);
+      } catch { /* ignore — abap CONTINUEs on error */ }
+    }
+  }
+
+  /**
+   * Instance variant of main_json_stringify — walks mt_attri, builds the
+   * model object, returns it stringified. Mirrors abap's JSON output.
+   */
+  main_json_stringify_instance() {
+    const result = {};
+    for (const attri of this.mt_attri.value) {
+      if (!attri.bind_type) continue;
+      if (attri.type_kind === `DREF` || attri.type_kind === `OREF`) continue;
+      try {
+        const ref = this.attri_get_val_ref(attri.name);
+        z2ui5_cl_core_srv_model._set_at_path(result, attri.name_client, ref.get());
+      } catch { /* CONTINUE on missing */ }
+    }
+    const out = JSON.stringify(result);
+    return out === `null` ? `{}` : out;
+  }
+
+  // ----- attri helpers -----
+
+  /**
+   * Resolve a path of the form "field" or "parent->child" or
+   * "table-row" into a getter/setter pair on mo_app. Mirrors abap
+   * attri_get_val_ref's `MO_APP->{path}` ASSIGN.
+   */
+  attri_get_val_ref(iv_path) {
     if (!iv_path) {
-      // TODO(abap2js): ASSIGN mo_app TO <attri>.
-    } else {
-      const lv_name = `MO_APP->${iv_path}`;
-      // TODO(abap2js): ASSIGN (lv_name) TO <attri>.
+      return {
+        get: () => this.mo_app,
+        set: (v) => { this.mo_app = v; },
+      };
     }
-    if (!(attri != null)) {
-      throw new z2ui5_cx_util_error({ val: `ATTRI_GET_VAL_REF_ERROR` });
-    }
-    // TODO(abap2js): GET REFERENCE OF <attri> INTO result.
-    if (result != null) {
-      throw new z2ui5_cx_util_error({ val: `ATTRI_GET_VAL_REF_ERROR` });
-    }
-    return result;
-  }
-
-  constructor({ attri, app } = {}) {
-    this.mt_attri = attri;
-    this.mo_app = app;
-  }
-
-  attri_search({ val } = {}) {
-    let result = null;
-    const lo_datadescr = cl_abap_datadescr.describe_by_data_ref(val);
-    if (lo_datadescr.type_kind === cl_abap_typedescr.typekind_dref || lo_datadescr.type_kind === cl_abap_typedescr.typekind_oref) {
-      throw new z2ui5_cx_util_error({ val: `NO DATA REFERENCES FOR BINDING ALLOWED: DEREFERENCE YOUR DATA FIRST` });
-    }
-    let sy_tabix = 0;
-    for (const lr_attri of this.mt_attri.*) {
-      sy_tabix++;
-      if (!(!name_ref && lr_attri.type_kind === lo_datadescr.type_kind && lr_attri.kind === lo_datadescr.kind)) continue;
-      const lv_name_attri = lr_attri.o_typedescr.absolute_name;
-      const lv_name_val = lo_datadescr.absolute_name;
-      if (lv_name_attri !== lv_name_val && lv_name_attri NS `%` && lv_name_val NS `%`) {
-        continue;
+    const parts = String(iv_path).split(/->|-/);
+    let parent = this.mo_app;
+    for (let i = 0; i < parts.length - 1; i++) {
+      const p = parts[i];
+      if (parent == null) {
+        const z2ui5_cx_util_error = require("../../00/03/z2ui5_cx_util_error");
+        throw new z2ui5_cx_util_error(`ATTRI_GET_VAL_REF_ERROR`);
       }
+      parent = parent[p];
+    }
+    const last = parts[parts.length - 1];
+    return {
+      get: () => parent ? parent[last] : undefined,
+      set: (v) => { if (parent) parent[last] = v; },
+    };
+  }
+
+  /**
+   * attri_search — value-equality lookup over mt_attri. JS has no
+   * cl_abap_datadescr; we approximate type_kind via z2ui5_cl_util.rtti_get_type_kind.
+   */
+  attri_search(val) {
+    const z2ui5_cl_util = require("../../00/03/z2ui5_cl_util");
+    const wantedKind = z2ui5_cl_util.rtti_get_type_kind(val);
+
+    if (wantedKind === `DREF` || wantedKind === `OREF`) {
+      const z2ui5_cx_util_error = require("../../00/03/z2ui5_cx_util_error");
+      throw new z2ui5_cx_util_error(
+        `NO DATA REFERENCES FOR BINDING ALLOWED: DEREFERENCE YOUR DATA FIRST`
+      );
+    }
+
+    for (const attri of this.mt_attri.value) {
+      if (attri.name_ref) continue;
+      if (attri.type_kind && attri.type_kind !== wantedKind) continue;
       try {
-        const lr_ref = this.attri_get_val_ref({ iv_path: lr_attri.name });
-      } catch (error) {
-        continue;
-      }
-      if (lr_ref === val) {
-        result = lr_attri;
-        return result;
-      }
+        const ref = this.attri_get_val_ref(attri.name);
+        if (Object.is(ref.get(), val)) return attri;
+      } catch { /* CONTINUE */ }
     }
-    return result;
+    return null;
   }
 
-  attri_create_new({ name } = {}) {
-    let result = null;
-    const lo_descr = cl_abap_datadescr.describe_by_data_ref(this.attri_get_val_ref({ iv_path: name }));
-    result = value z2ui5_if_core_types.ty_s_attri({ name, o_typedescr: lo_descr, type_kind: lo_descr.type_kind, kind: lo_descr.kind });
-    return result;
+  /** Create a new attribute entry from a path. Mirrors abap attri_create_new. */
+  attri_create_new(name) {
+    const z2ui5_cl_util = require("../../00/03/z2ui5_cl_util");
+    const ref = this.attri_get_val_ref(name);
+    const v   = ref.get();
+    const kind = z2ui5_cl_util.rtti_get_type_kind(v);
+    return {
+      name,
+      type_kind: kind,
+      kind:      kind === `STRUCT` ? `kind_struct`
+              : kind === `TABLE`  ? `kind_table`
+              : `kind_elem`,
+      check_dissolved: false,
+    };
   }
 
-  diss_dref({ ir_attri } = {}) {
-    let result = [];
-    const lr_ref_tmp = this.attri_get_val_ref({ iv_path: ir_attri.name });
-    if (z2ui5_cl_util.check_unassign_initial(lr_ref_tmp)) {
-      return result;
-    }
-    const lr_ref = z2ui5_cl_util.unassign_data(lr_ref_tmp);
-    if (!lr_ref) {
-      return result;
-    }
-    const ls_attri2 = value z2ui5_if_core_types.ty_s_attri();
-    ls_attri2.o_typedescr = cl_abap_datadescr.describe_by_data_ref(lr_ref);
-    switch (ls_attri2.o_typedescr.kind) {
-      case cl_abap_datadescr.kind_struct:
-        const lt_attri = this.diss_struc({ ir_attri: ir_attri });
-        result.push(lines OF lt_attri);
-        break;
-      default:
-        ls_attri2.name = `${ir_attri.name}->*`;
-        ls_attri2.name_parent = ir_attri.name;
-        ls_attri2.type_kind = ls_attri2.o_typedescr.type_kind;
-        ls_attri2.kind = ls_attri2.o_typedescr.kind;
-        result.push(ls_attri2);
-        break;
-    }
-    return result;
-  }
+  // ----- dissolve -----
 
-  diss_oref({ ir_attri } = {}) {
-    let result = [];
-    const lr_val = this.attri_get_val_ref({ iv_path: ir_attri.name });
-    if (z2ui5_cl_util.check_unassign_initial(lr_val)) {
-      return result;
-    }
-    const lr_ref = z2ui5_cl_util.unassign_object(lr_val);
-    const lt_attri = z2ui5_cl_util.rtti_get_t_attri_by_oref(lr_ref);
-    const lv_prefix = (ir_attri.name ? `${ir_attri.name}->` : null);
-    let sy_tabix = 0;
-    for (const lr_attri of lt_attri) {
-      sy_tabix++;
-      if (!(lr_attri.visibility === cl_abap_objectdescr.public && lr_attri.is_interface === false && lr_attri.is_class === false && lr_attri.is_constant === false)) continue;
-      try {
-        const ls_new = this.attri_create_new({ name: lv_prefix + lr_attri.name });
-        ls_new.name_parent = ir_attri.name;
-        result.push(ls_new);
-      } catch (error) {
-      }
-    }
-    return result;
-  }
-
-  diss_struc({ ir_attri } = {}) {
-    let result = [];
-    const lr_val = this.attri_get_val_ref({ iv_path: ir_attri.name });
-    if (ir_attri.o_typedescr.kind === cl_abap_typedescr.kind_ref) {
-      let lv_name = `${ir_attri.name}->`;
-      let lr_ref = z2ui5_cl_util.unassign_data(lr_val);
-    } else {
-      lv_name = `${ir_attri.name}-`;
-      lr_ref = lr_val;
-    }
-    if (lr_ref != null) {
-      const lt_attri = z2ui5_cl_util.rtti_get_t_attri_by_any(lr_ref);
-      let sy_tabix = 0;
-      for (const ls_attri of lt_attri) {
-        sy_tabix++;
-        const ls_new = this.attri_create_new({ name: lv_name + ls_attri.name });
-        ls_new.name_parent = ir_attri.name;
-        result.push(ls_new);
-      }
-    }
-    return result;
-  }
-
+  /**
+   * Iterative dissolution. abap caps at MAX_DISSOLVE_DEPTH passes; we mirror
+   * that to bound the cost on cyclic references.
+   */
   dissolve() {
-    let lv_depth = 0;
-    while (this.mt_attri.*.some((row) => row.check_dissolved === false) || !(this.mt_attri.*)) {
-      lv_depth = lv_depth + 1;
-      if (lv_depth >= z2ui5_cl_core_srv_model.max_dissolve_depth) {
-        return;
-      }
+    if (this.mt_attri.value.length === 0) {
+      // bootstrap: walk app's own props as the seed
+      const seeds = this.diss_oref({ name: `` });
+      this.mt_attri.value.push(...seeds);
+    }
+
+    let depth = 0;
+    while (this._has_undissolved()) {
+      if (++depth >= MAX_DISSOLVE_DEPTH) break;
       try {
         this.dissolve_run();
-      } catch (error) {
+      } catch {
         this.main_attri_refresh();
+        return;
       }
     }
     this.attri_update_entry_refs();
   }
 
-  attri_update_entry_refs() {
-    let sy_tabix = 0;
-    for (const lr_attri of this.mt_attri.*) {
-      sy_tabix++;
-      if (!(lr_attri.check_dissolved === true && !name_ref)) continue;
-      try {
-        const lr_ref = this.attri_get_val_ref({ iv_path: lr_attri.name });
-      } catch (error) {
-        continue;
-      }
-      switch (lr_attri.type_kind) {
-        case cl_abap_typedescr.typekind_table:
-          let sy_tabix = 0;
-          for (const lr_attri_ref of this.mt_attri.*) {
-            sy_tabix++;
-            if (!(lr_attri_ref.check_dissolved === true && lr_attri_ref.name !== lr_attri.name && !name_ref && lr_attri_ref.type_kind === cl_abap_typedescr.typekind_table)) continue;
-            try {
-              let lr_attri_ref_ref = this.attri_get_val_ref({ iv_path: lr_attri_ref.name });
-            } catch (error) {
-              continue;
-            }
-            if (lr_ref !== lr_attri_ref_ref) {
-              continue;
-            }
-            lr_attri.name_ref = lr_attri_ref.name;
-          }
-          break;
-        case cl_abap_typedescr.typekind_dref:
-          // TODO(abap2js): ASSIGN lr_ref->* TO FIELD-SYMBOL(<ref>).
-          let sy_tabix = 0;
-          for (const lr_attri_ref of this.mt_attri.*) {
-            sy_tabix++;
-            if (!(lr_attri_ref.check_dissolved === true && lr_attri_ref.name !== lr_attri.name && !name_ref && (lr_attri_ref.type_kind === cl_abap_typedescr.typekind_struct1 || lr_attri_ref.type_kind === cl_abap_typedescr.typekind_struct2))) continue;
-            try {
-              lr_attri_ref_ref = this.attri_get_val_ref({ iv_path: lr_attri_ref.name });
-            } catch (error) {
-              continue;
-            }
-            if (ref !== lr_attri_ref_ref) {
-              continue;
-            }
-            if (lr_attri.name_ref && lr_attri.name_ref.length <= lr_attri_ref.name.length) {
-              continue;
-            }
-            lr_attri.name_ref = lr_attri_ref.name;
-            this.attri_update_refs_children({ ir_attri: lr_attri });
-          }
-          break;
-      }
-    }
+  _has_undissolved() {
+    return this.mt_attri.value.some((a) => !a.check_dissolved);
   }
 
-  attri_update_refs_children({ ir_attri } = {}) {
-    let sy_tabix = 0;
-    for (const lr_attri_child of this.mt_attri.*) {
-      sy_tabix++;
-      if (!(lr_attri_child.name_parent === ir_attri.name)) continue;
-      const lv_name = (lr_attri_child.name.startsWith(`${ir_attri.name}->`) ? lr_attri_child.name.slice((`${ir_attri.name}->`).length) : lr_attri_child.name);
-      lr_attri_child.name_ref = `${ir_attri.name_ref}-${lv_name}`;
-    }
-  }
-
+  /** Single dissolution pass — abap dissolve_run. */
   dissolve_run() {
-    if (!(this.mt_attri.*)) {
-      const ls_attri = value z2ui5_if_core_types.ty_s_attri();
-      const lt_init = this.diss_oref({ ir_attri: (ls_attri) });
-      this.mt_attri.*.push(lines OF lt_init);
-    }
-    const lt_attri_new = value z2ui5_if_core_types.ty_t_attri();
-    let sy_tabix = 0;
-    for (const lr_attri of this.mt_attri.*) {
-      sy_tabix++;
-      if (!(lr_attri.check_dissolved === false)) continue;
-      lr_attri.check_dissolved = true;
-      if (lr_attri.o_typedescr != null) {
-        const ls_entry = this.attri_create_new({ name: lr_attri.name });
-        lr_attri.o_typedescr = ls_entry.o_typedescr;
+    const newEntries = [];
+    for (const attri of this.mt_attri.value) {
+      if (attri.check_dissolved) continue;
+      attri.check_dissolved = true;
+
+      const z2ui5_cl_util = require("../../00/03/z2ui5_cl_util");
+      let val;
+      try {
+        val = this.attri_get_val_ref(attri.name).get();
+      } catch { continue; }
+      const kind = z2ui5_cl_util.rtti_get_type_kind(val);
+
+      if (kind === `STRUCT`) {
+        newEntries.push(...this.diss_struc(attri));
+      } else if (kind === `OREF`) {
+        newEntries.push(...this.diss_oref(attri));
+      } else if (kind === `DREF`) {
+        newEntries.push(...this.diss_dref(attri));
       }
-      switch (lr_attri.o_typedescr.kind) {
-        case cl_abap_typedescr.kind_struct:
-          const lt_attri_struc = this.diss_struc({ ir_attri: lr_attri });
-          lt_attri_new.push(lines OF lt_attri_struc);
-          break;
-        case cl_abap_typedescr.kind_ref:
-          switch (lr_attri.o_typedescr.type_kind) {
-            case cl_abap_typedescr.typekind_oref:
-              const lt_attri_oref = this.diss_oref({ ir_attri: lr_attri });
-              lt_attri_new.push(lines OF lt_attri_oref);
-              break;
-            case cl_abap_typedescr.typekind_dref:
-              const lt_attri_dref = this.diss_dref({ ir_attri: lr_attri });
-              lt_attri_new.push(lines OF lt_attri_dref);
-              break;
-            default:
-              if (!(1 === 0)) throw new Error(`ASSERT failed`);
-              break;
+      // primitives / arrays stay as leaf attrs
+    }
+    this.mt_attri.value.push(...newEntries);
+  }
+
+  /** STRUCT decomposition — walk own enumerable keys. */
+  diss_struc(ir_attri) {
+    let val;
+    try { val = this.attri_get_val_ref(ir_attri.name).get(); }
+    catch { return []; }
+    if (!val || typeof val !== `object`) return [];
+
+    const prefix = ir_attri.name ? `${ir_attri.name}-` : ``;
+    const out = [];
+    for (const k of Object.keys(val)) {
+      const newName = `${prefix}${k}`;
+      const ent = this.attri_create_new(newName);
+      ent.name_parent = ir_attri.name;
+      out.push(ent);
+    }
+    return out;
+  }
+
+  /** DREF decomposition — JS has no DREFs; treat as struct. */
+  diss_dref(ir_attri) {
+    return this.diss_struc(ir_attri);
+  }
+
+  /**
+   * OREF decomposition — walks an object's "public" props. Mirrors abap's
+   * RTTI walk filtering visibility=public, is_class=false, is_constant=false,
+   * is_interface=false. JS approximates this with own enumerable property
+   * keys (Object.keys); framework-private fields are filtered by a name
+   * convention (no leading underscore + not in the framework field set).
+   */
+  diss_oref(ir_attri) {
+    const obj = ir_attri.name
+      ? (() => { try { return this.attri_get_val_ref(ir_attri.name).get(); } catch { return null; } })()
+      : this.mo_app;
+    if (!obj || typeof obj !== `object`) return [];
+
+    const skip = new Set([`id_draft`, `id_app`, `check_initialized`, `check_sticky`]);
+    const out = [];
+    for (const k of Object.keys(obj)) {
+      if (skip.has(k)) continue;
+      if (k.startsWith(`_`)) continue;
+      try {
+        const newName = ir_attri.name ? `${ir_attri.name}->${k}` : k;
+        const ent = this.attri_create_new(newName);
+        ent.name_parent = ir_attri.name;
+        out.push(ent);
+      } catch { /* skip broken accessors */ }
+    }
+    return out;
+  }
+
+  /**
+   * Update name_ref pointers so attrs that reference the same underlying
+   * value share a canonical name. Mirrors abap attri_update_entry_refs.
+   */
+  attri_update_entry_refs() {
+    for (const attri of this.mt_attri.value) {
+      if (!attri.check_dissolved || attri.name_ref) continue;
+      let val;
+      try { val = this.attri_get_val_ref(attri.name).get(); } catch { continue; }
+      if (val === null || typeof val !== `object`) continue;
+
+      for (const other of this.mt_attri.value) {
+        if (other === attri) continue;
+        if (!other.check_dissolved || other.name_ref) continue;
+        if (other.type_kind !== attri.type_kind) continue;
+        try {
+          const otherVal = this.attri_get_val_ref(other.name).get();
+          if (Object.is(otherVal, val) && other.name.length < attri.name.length) {
+            attri.name_ref = other.name;
+            this.attri_update_refs_children(attri);
+            break;
           }
-          break;
-        default:
-          break;
-      }
-    }
-    this.mt_attri.*.push(lines OF lt_attri_new);
-  }
-
-  main_attri_refresh() {
-    const lt_attri = this.mt_attri.*;
-    for (let _i = lt_attri.length - 1; _i >= 0; _i--) { const row = lt_attri[_i]; if (!bind_type) lt_attri.splice(_i, 1); }
-    this.mt_attri.* = null;
-    this.dissolve();
-    let sy_tabix = 0;
-    for (const lr_attri of this.mt_attri.*) {
-      sy_tabix++;
-      // TODO(abap2js): READ TABLE lt_attri REFERENCE INTO DATA(lr_old) WITH KEY name = lr_attri->name.
-      if (sy_subrc === 0) {
-        lr_attri.bind_type = lr_old.bind_type;
-        lr_attri.name_client = lr_old.name_client;
-        lr_attri.view = lr_old.view;
+        } catch { /* skip */ }
       }
     }
   }
 
-  delta_apply_to_table({ io_val_front, iv_name } = {}) {
-    try {
-      const lr_ref_d = this.attri_get_val_ref({ iv_path: iv_name });
-    } catch (error) {
-      return;
+  attri_update_refs_children(ir_attri) {
+    for (const child of this.mt_attri.value) {
+      if (child.name_parent !== ir_attri.name) continue;
+      const tail = child.name.startsWith(`${ir_attri.name}->`)
+        ? child.name.slice(ir_attri.name.length + 2)
+        : child.name;
+      child.name_ref = `${ir_attri.name_ref}-${tail}`;
     }
-    // TODO(abap2js): FIELD-SYMBOLS <delta_tab> TYPE STANDARD TABLE.
-    // TODO(abap2js): ASSIGN lr_ref_d->* TO <delta_tab>.
-    if (sy_subrc !== 0) {
-      return;
-    }
-    const lo_delta = io_val_front.slice(`/__delta`);
-    const lt_idx = lo_delta.members(`/`);
-    let sy_tabix = 0;
-    for (const lv_idx_str of lt_idx) {
-      sy_tabix++;
-      const lv_tabix = (lv_idx_str) + 1;
-      // TODO(abap2js): FIELD-SYMBOLS <delta_row> TYPE any.
-      // TODO(abap2js): READ TABLE <delta_tab> INDEX lv_tabix ASSIGNING <delta_row>.
-      if (sy_subrc !== 0) {
-        continue;
+  }
+
+  // ----- delta -----
+
+  /**
+   * Apply a `__delta` patch from the wire payload onto the table attribute
+   * `iv_name`. Mirrors abap delta_apply_to_table — preserves boolean type
+   * coercion when the wire node was a boolean.
+   *
+   * @param {{__delta: Object<string, Object>}} io_val_front
+   * @param {string} iv_name
+   */
+  delta_apply_to_table(io_val_front, iv_name) {
+    let ref;
+    try { ref = this.attri_get_val_ref(iv_name); }
+    catch { return; }
+    const tab = ref.get();
+    if (!Array.isArray(tab)) return;
+
+    const delta = io_val_front?.__delta;
+    if (!delta || typeof delta !== `object`) return;
+
+    for (const idxStr of Object.keys(delta)) {
+      const idx = Number(idxStr);
+      const row = tab[idx];
+      if (!row || typeof row !== `object`) continue;
+      const patch = delta[idxStr];
+      for (const fld of Object.keys(patch || {})) {
+        if (!(fld in row)) continue;
+        const v = patch[fld];
+        // abap branch on get_node_type=boolean — JS already has typed values,
+        // so just assign as-is.
+        row[fld] = v;
       }
-      const lo_row_d = lo_delta.slice(`/${lv_idx_str}`);
-      const lt_fld = lo_row_d.members(`/`);
-      let sy_tabix = 0;
-      for (const lv_fld of lt_fld) {
-        sy_tabix++;
-        // TODO(abap2js): FIELD-SYMBOLS <comp> TYPE any.
-        // TODO(abap2js): ASSIGN COMPONENT lv_fld OF STRUCTURE <delta_row> TO <comp>.
-        if (sy_subrc !== 0) {
-          continue;
-        }
-        const lv_fld_path = `/${lv_fld}`;
-        if (lo_row_d.get_node_type(lv_fld_path) === z2ui5_if_ajson_types.node_type.boolean) {
-          comp = lo_row_d.get_boolean(lv_fld_path);
-        } else {
-          comp = lo_row_d.get_string(lv_fld_path);
-        }
-      }
     }
+  }
+
+  // ----- helpers -----
+
+  /**
+   * Walk a nested object via a `/a/b/c` path string. Returns undefined when
+   * any segment is missing. Used to slice the wire model by name_client.
+   */
+  static _slice_at_path(obj, path) {
+    if (!obj || !path) return obj;
+    const parts = String(path).replace(/^\//, ``).split(`/`);
+    let cur = obj;
+    for (const p of parts) {
+      if (cur == null) return undefined;
+      cur = cur[p];
+    }
+    return cur;
+  }
+
+  static _set_at_path(obj, path, val) {
+    if (!obj || !path) return;
+    const parts = String(path).replace(/^\//, ``).split(`/`);
+    let cur = obj;
+    for (let i = 0; i < parts.length - 1; i++) {
+      const p = parts[i];
+      if (typeof cur[p] !== `object` || cur[p] === null) cur[p] = {};
+      cur = cur[p];
+    }
+    cur[parts[parts.length - 1]] = val;
   }
 }
 

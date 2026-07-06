@@ -22,7 +22,7 @@ class z2ui5_cl_demo_app_162 extends z2ui5_if_app {
 
   set_data() {
     this.mt_table = [{ product: `table`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }, { product: `chair`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }, { product: `sofa`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }, { product: `computer`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }, { product: `oven`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }, { product: `table2`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }];
-    z2ui5_cl_util.filter_itab(/* TODO(abap2js): out-params */ EXPORTING filter = mt_filter CHANGING val = mt_table);
+    z2ui5_cl_util.filter_itab({ filter: this.mt_filter, val: this.mt_table });
   }
 
   view_display() {

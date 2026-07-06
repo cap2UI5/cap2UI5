@@ -58,7 +58,7 @@ class z2ui5_cl_demo_app_053 extends z2ui5_if_app {
 
   set_search() {
     if (this.mv_search_value) {
-      z2ui5_cl_util.itab_filter_by_val(/* TODO(abap2js): out-params */ EXPORTING val = mv_search_value CHANGING tab = mt_table);
+      z2ui5_cl_util.itab_filter_by_val({ val: this.mv_search_value, tab: this.mt_table });
     }
   }
 }

@@ -5,6 +5,7 @@ class z2ui5_cl_demo_app_lp_02_0 extends z2ui5_if_app {
   mv_title = `my title`;
 
   async main(client) {
+    let sy_tabix = 0;
     if (client.check_on_init()) {
       if (client.get().CHECK_LAUNCHPAD_ACTIVE === false) {
         client.message_box_display(`No Launchpad Active, Sample not working!`);
@@ -22,7 +23,7 @@ class z2ui5_cl_demo_app_lp_02_0 extends z2ui5_if_app {
       case `READ_PARAMS`:
         let lv_text = `Start Parameter: `;
         const lt_params = client.get().T_COMP_PARAMS;
-        let sy_tabix = 0;
+        sy_tabix = 0;
         for (const ls_param of lt_params) {
           sy_tabix++;
           lv_text = `${lv_text} / ${ls_param.n} = ${ls_param.v}`;

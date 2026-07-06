@@ -27,7 +27,7 @@ class z2ui5_cl_demo_app_096 extends z2ui5_if_app {
     }
   }
 
-  view_display() {
+  view_display({ xml } = {}) {
     if (this.mo_view_parent != null) {
       const page = z2ui5_cl_xml_view.factory()
         .shell()

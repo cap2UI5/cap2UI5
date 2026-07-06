@@ -19,15 +19,16 @@ class z2ui5_cl_core_srv_event {
 
   get_t_arg({ val } = {}) {
     let result = ``;
-    let lv_new = ``;
     let sy_tabix = 0;
+    let lv_new = ``;
+    sy_tabix = 0;
     for (const lr_arg of val) {
       sy_tabix++;
-      lv_new = lr_arg.*;
+      lv_new = lr_arg;
       if (!lv_new) {
         continue;
       }
-      if (lv_new (1) !== `$` && lv_new (1) !== `{` && lv_new NP `.eB(*`) {
+      if (lv_new (1) !== `$` && lv_new (1) !== `{` && !String(lv_new).includes(String(`.eB(*`).replace(/\*/g, ""))) {
         lv_new = `'${lv_new}'`;
       }
       result = `${result}, ${lv_new}`;

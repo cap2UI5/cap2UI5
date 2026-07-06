@@ -12,7 +12,7 @@ class z2ui5_cl_util_http {
       // TODO(abap2js): FIELD-SYMBOLS <any> TYPE any.
       // TODO(abap2js): ASSIGN mo_server_onprem->(`RESPONSE`) TO <any>.
       object = any;
-      call method object.( `DELETE_COOKIE` ) exporting name === lv_val;
+      // TODO(abap2js): CALL METHOD object->(`DELETE_COOKIE`) EXPORTING name = lv_val.
     } else {
     }
   }
@@ -25,7 +25,7 @@ class z2ui5_cl_util_http {
     if (this.mo_server_onprem != null) {
       // TODO(abap2js): ASSIGN mo_server_onprem->(`RESPONSE`) TO <any>.
       object = any;
-      call method object.( `GET_COOKIE` ) exporting name === lv_val importing value === result;
+      // TODO(abap2js): CALL METHOD object->(`GET_COOKIE`) EXPORTING name = lv_val IMPORTING value = result.
     } else {
     }
     return result;
@@ -39,14 +39,14 @@ class z2ui5_cl_util_http {
     if (this.mo_server_onprem != null) {
       // TODO(abap2js): ASSIGN mo_server_onprem->(`REQUEST`) TO <any>.
       object = any;
-      call method object.( `GET_HEADER_FIELD` ) exporting name === lv_val receiving value === result;
+      // TODO(abap2js): CALL METHOD object->(`GET_HEADER_FIELD`) EXPORTING name = lv_val RECEIVING value = result.
     } else {
-      call method this.mo_request_cloud.( `IF_WEB_HTTP_REQUEST~GET_HEADER_FIELD` ) exporting i_name === lv_val receiving r_value === result;
+      // TODO(abap2js): CALL METHOD mo_request_cloud->(`IF_WEB_HTTP_REQUEST~GET_HEADER_FIELD`) EXPORTING i_name = lv_val RECEIVING r_value = result.
     }
     return result;
   }
 
-  set_header_field({ !n, v } = {}) {
+  set_header_field({ n, v } = {}) {
     let object = null;
     // TODO(abap2js): FIELD-SYMBOLS <any> TYPE any.
     const lv_n = (n);
@@ -54,9 +54,9 @@ class z2ui5_cl_util_http {
     if (this.mo_server_onprem != null) {
       // TODO(abap2js): ASSIGN mo_server_onprem->(`RESPONSE`) TO <any>.
       object = any;
-      call method object.( `SET_HEADER_FIELD` ) exporting name === lv_n value === lv_v;
+      // TODO(abap2js): CALL METHOD object->(`SET_HEADER_FIELD`) EXPORTING name = lv_n value = lv_v.
     } else {
-      call method this.mo_response_cloud.( `IF_WEB_HTTP_RESPONSE~SET_HEADER_FIELD` ) exporting i_name === lv_n i_value === lv_v;
+      // TODO(abap2js): CALL METHOD mo_response_cloud->(`IF_WEB_HTTP_RESPONSE~SET_HEADER_FIELD`) EXPORTING i_name = lv_n i_value = lv_v.
     }
   }
 
@@ -82,9 +82,9 @@ class z2ui5_cl_util_http {
     if (this.mo_server_onprem != null) {
       // TODO(abap2js): ASSIGN mo_server_onprem->(`REQUEST`) TO <any>.
       object = any;
-      call method object.( `GET_CDATA` ) receiving data === result;
+      // TODO(abap2js): CALL METHOD object->(`GET_CDATA`) RECEIVING data = result.
     } else {
-      call method this.mo_request_cloud.( `IF_WEB_HTTP_REQUEST~GET_TEXT` ) receiving r_value === result;
+      // TODO(abap2js): CALL METHOD mo_request_cloud->(`IF_WEB_HTTP_REQUEST~GET_TEXT`) RECEIVING r_value = result.
     }
     return result;
   }
@@ -96,9 +96,9 @@ class z2ui5_cl_util_http {
     if (this.mo_server_onprem != null) {
       // TODO(abap2js): ASSIGN mo_server_onprem->(`REQUEST`) TO <any>.
       object = any;
-      call method object.( `IF_HTTP_REQUEST~GET_METHOD` ) receiving method === result;
+      // TODO(abap2js): CALL METHOD object->(`IF_HTTP_REQUEST~GET_METHOD`) RECEIVING method = result.
     } else {
-      call method this.mo_request_cloud.( `IF_WEB_HTTP_REQUEST~GET_METHOD` ) receiving r_value === result;
+      // TODO(abap2js): CALL METHOD mo_request_cloud->(`IF_WEB_HTTP_REQUEST~GET_METHOD`) RECEIVING r_value = result.
     }
     return result;
   }
@@ -109,28 +109,28 @@ class z2ui5_cl_util_http {
     if (this.mo_server_onprem != null) {
       // TODO(abap2js): ASSIGN mo_server_onprem->(`RESPONSE`) TO <any>.
       object = any;
-      call method object.( `SET_CDATA` ) exporting data === val;
+      // TODO(abap2js): CALL METHOD object->(`SET_CDATA`) EXPORTING data = val.
     } else {
-      call method this.mo_response_cloud.( `IF_WEB_HTTP_RESPONSE~SET_TEXT` ) exporting i_text === val;
+      // TODO(abap2js): CALL METHOD mo_response_cloud->(`IF_WEB_HTTP_RESPONSE~SET_TEXT`) EXPORTING i_text = val.
     }
   }
 
-  set_status({ !code, reason } = {}) {
+  set_status({ code, reason } = {}) {
     let object = null;
     // TODO(abap2js): FIELD-SYMBOLS <any> TYPE any.
     const lv_reason = (reason);
     if (this.mo_server_onprem != null) {
       // TODO(abap2js): ASSIGN mo_server_onprem->(`RESPONSE`) TO <any>.
       object = any;
-      call method object.( `IF_HTTP_RESPONSE~SET_STATUS` ) exporting code === code reason === lv_reason;
+      // TODO(abap2js): CALL METHOD object->(`IF_HTTP_RESPONSE~SET_STATUS`) EXPORTING code = code reason = lv_reason.
     } else {
-      call method this.mo_response_cloud.( `IF_WEB_HTTP_RESPONSE~SET_STATUS` ) exporting i_code === code i_reason === lv_reason;
+      // TODO(abap2js): CALL METHOD mo_response_cloud->(`IF_WEB_HTTP_RESPONSE~SET_STATUS`) EXPORTING i_code = code i_reason = lv_reason.
     }
   }
 
   set_session_stateful({ val } = {}) {
     if (this.mo_server_onprem != null) {
-      call method this.mo_server_onprem.( `SET_SESSION_STATEFUL` ) exporting stateful === val;
+      // TODO(abap2js): CALL METHOD mo_server_onprem->(`SET_SESSION_STATEFUL`) EXPORTING stateful = val.
     } else {
     }
   }

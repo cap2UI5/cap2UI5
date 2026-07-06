@@ -31,7 +31,7 @@ class z2ui5_cl_demo_app_327 extends z2ui5_if_app {
         .get_parent()
         .get_parent()
         ._z2ui5()
-        .storage({ finished: client._event(`LOCAL_STORAGE_LOADED`, [`${$parameters>/type}`, `${$parameters>/prefix}`, `${$parameters>/key}`, `${$parameters>/value}`]), type: client._bind_edit(this.storage.type), prefix: client._bind_edit(this.storage.prefix), key: client._bind_edit(this.storage.key), value: client._bind_edit(this.stored_value) });
+        .storage({ finished: client._event(`LOCAL_STORAGE_LOADED`, [`\${$parameters>/type}`, `\${$parameters>/prefix}`, `\${$parameters>/key}`, `\${$parameters>/value}`]), type: client._bind_edit(this.storage.type), prefix: client._bind_edit(this.storage.prefix), key: client._bind_edit(this.storage.key), value: client._bind_edit(this.stored_value) });
       client.view_display(view.stringify());
     }
     switch (client.get().EVENT) {

@@ -4,7 +4,6 @@ const z2ui5_cl_app_style_css = require("abap2UI5/z2ui5_cl_app_style_css");
 // TODO(abap2js): unresolved reference z2ui5_cl_exit — add require manually
 const z2ui5_cl_util_http = require("abap2UI5/z2ui5_cl_util_http");
 const z2ui5_cx_util_error = require("abap2UI5/z2ui5_cx_util_error");
-const z2ui5_if_types = require("abap2UI5/z2ui5_if_types");
 
 class z2ui5_cl_http_handler {
   static so_sticky_handler = null;
@@ -49,15 +48,16 @@ class z2ui5_cl_http_handler {
 
   static _http_get() {
     let result = null;
-    const ls_config = value z2ui5_if_types.ty_s_http_config();
-    z2ui5_cl_exit.get_instance().set_config_http_get(/* TODO(abap2js): out-params */ CHANGING cs_config = ls_config);
+    let sy_tabix = 0;
+    const ls_config = {};
+    z2ui5_cl_exit.get_instance().set_config_http_get({ cs_config: ls_config });
     if (!ls_config.styles_css) {
       let lv_style_css = z2ui5_cl_app_style_css.get();
     } else {
       lv_style_css = ls_config.styles_css;
     }
     result.body = `<!DOCTYPE html>` + `\\n` + `<html lang="en">` + `\\n` + `<head>` + `\\n` + `${ls_config.content_security_policy}\\n` + ` <meta charset="UTF-8">` + `\\n` + ` <meta name="viewport" content="width=device-width, initial-scale=1.0">` + `\\n` + ` <meta http-equiv="X-UA-Compatible" content="IE=edge">` + `\\n` + `<title>${ls_config.title}</title>\\n` + ` <style> html, body, body > div, #container, #container-uiarea {\\n` + ` height: 100%;\\n` + ` }</style> \\n` + `<script>` + `\\n` + ` function onInitComponent(){` + `\\n` + ` sap.ui.require.preload({` + `\\n` + z2ui5_cl_app_preload.get({ styles_css: lv_style_css, custom_js: ls_config.custom_js }) + ` });` + `\\n` + ` sap.ui.require(["sap/ui/core/ComponentSupport"], function(ComponentSupport){` + `\\n` + ` window.z2ui5 = { checkLocal : true }; ComponentSupport.run();` + `\\n` + ` });` + `\\n` + ` }` + `\\n` + `</script>` + `\\n` + `<script id="sap-ui-bootstrap" data-sap-ui-resourceroots='{ "z2ui5": "./" }' data-sap-ui-oninit="onInitComponent" ` + `\\n` + `data-sap-ui-compatVersion="edge" data-sap-ui-async="true" data-sap-ui-frameOptions="trusted" data-sap-ui-bindingSyntax="complex"` + `\\n` + `data-sap-ui-theme="${ls_config.theme}" src="${ls_config.src}"`;
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const lr_config of ls_config.t_add_config) {
       sy_tabix++;
       result.body = `${result.body} ${lr_config.n}='${lr_config.v}'`;
@@ -74,10 +74,11 @@ class z2ui5_cl_http_handler {
   }
 
   set_response() {
-    this.mo_server.set_cdata(this.ms_res.body);
-    const ls_config = value z2ui5_if_types.ty_s_http_config();
-    z2ui5_cl_exit.get_instance().set_config_http_get(/* TODO(abap2js): out-params */ CHANGING cs_config = ls_config);
     let sy_tabix = 0;
+    this.mo_server.set_cdata(this.ms_res.body);
+    const ls_config = {};
+    z2ui5_cl_exit.get_instance().set_config_http_get({ cs_config: ls_config });
+    sy_tabix = 0;
     for (const ls_header of ls_config.t_security_header) {
       sy_tabix++;
       this.mo_server.set_header_field({ n: ls_header.n, v: ls_header.v });
@@ -124,9 +125,8 @@ class z2ui5_cl_http_handler {
     } catch (x) {
       let lv_error_text = x.get_text();
       try {
-        const ls_config = value z2ui5_if_types.ty_s_http_config_post();
-        z2ui5_cl_exit.get_instance()
-          .set_config_http_post(/* TODO(abap2js): out-params */ CHANGING cs_config = ls_config);
+        const ls_config = {};
+        z2ui5_cl_exit.get_instance().set_config_http_post({ cs_config: ls_config });
         if (ls_config.check_hide_error_details === true) {
           lv_error_text = `An internal error occurred - error details are hidden by configuration (see z2ui5_if_exit->set_config_http_post)`;
         }

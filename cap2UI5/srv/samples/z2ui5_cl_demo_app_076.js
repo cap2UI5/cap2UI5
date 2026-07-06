@@ -44,11 +44,11 @@ class z2ui5_cl_demo_app_076 extends z2ui5_if_app {
       .row_settings_template()
       .gantt_row_settings({ rowid: `{ID}`, shapes1: `{path: 'TASK', templateShareable:false}`, shapes2: `{path: 'SUBTASK', templateShareable:false}` })
       .shapes1()
-      .task({ time: `{= Helper.DateCreateObject(${STARTTIME} ) }`, endtime: `{= Helper.DateCreateObject(${ENDTIME} ) }`, type: `SummaryExpanded`, color: `sapUiAccent5` })
+      .task({ time: `{= Helper.DateCreateObject(\${STARTTIME} ) }`, endtime: `{= Helper.DateCreateObject(\${ENDTIME} ) }`, type: `SummaryExpanded`, color: `sapUiAccent5` })
       .get_parent()
       .get_parent()
       .shapes2()
-      .task({ time: `{= Helper.DateCreateObject(${STARTTIME} ) }`, endtime: `{= Helper.DateCreateObject(${ENDTIME} ) }` });
+      .task({ time: `{= Helper.DateCreateObject(\${STARTTIME} ) }`, endtime: `{= Helper.DateCreateObject(\${ENDTIME} ) }` });
     this.client.view_display(view.stringify());
   }
 

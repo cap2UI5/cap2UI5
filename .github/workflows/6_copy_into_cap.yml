@@ -1,9 +1,11 @@
 name: 6 copy into cap
 
-# Step 6: plain copy of the output/ folders into the CAP project —
-# output/abap2UI5 -> cap2UI5/srv/z2ui5, output/samples -> cap2UI5/srv/samples,
-# output/app -> cap2UI5/app/z2ui5/webapp. Jest runs afterwards (non-blocking
-# visibility into what the copy did to the suite).
+# Step 6: copy the output/ folders into the CAP project —
+# output/abap2UI5 -> cap2UI5/srv/z2ui5 (fill-in only: hand-maintained files
+# win), output/samples -> cap2UI5/srv/samples (overwrite),
+# output/app -> cap2UI5/app/z2ui5/webapp (replace). Files that do not parse
+# are skipped and reported. Jest gates the commit: only a green suite is
+# pushed.
 
 on:
   workflow_dispatch:
@@ -26,6 +28,7 @@ jobs:
       - run: npm ci
       - run: npm ci --prefix cap2UI5
       - run: npm run copy_into_cap
+      - run: npm test
       - name: commit
         run: |
           git config user.name "github-actions[bot]"
@@ -38,4 +41,3 @@ jobs:
             git pull --rebase origin "${{ github.ref_name }}"
             git push origin "HEAD:${{ github.ref_name }}"
           fi
-      - run: npm test

@@ -8,6 +8,7 @@ class z2ui5_cl_demo_app_078 extends z2ui5_if_app {
   mt_tokens_removed = [];
 
   async main(client) {
+    let sy_tabix = 0;
     if (client.check_on_init()) {
       let view = z2ui5_cl_xml_view.factory();
       view = view.shell()
@@ -28,12 +29,12 @@ class z2ui5_cl_demo_app_078 extends z2ui5_if_app {
     }
     switch (client.get().EVENT) {
       case `UPDATE_BACKEND`:
-        let sy_tabix = 0;
+        sy_tabix = 0;
         for (const ls_token of this.mt_tokens_removed) {
           sy_tabix++;
           for (let _i = this.mt_token.length - 1; _i >= 0; _i--) { const row = this.mt_token[_i]; if (row.key === ls_token.key) this.mt_token.splice(_i, 1); }
         }
-        let sy_tabix = 0;
+        sy_tabix = 0;
         for (const ls_token of this.mt_tokens_added) {
           sy_tabix++;
           this.mt_token.push({ key: ls_token.key, text: ls_token.text, visible: true, editable: true });

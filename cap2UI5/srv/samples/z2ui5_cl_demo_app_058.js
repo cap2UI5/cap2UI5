@@ -41,7 +41,7 @@ class z2ui5_cl_demo_app_058 extends z2ui5_if_app {
         break;
       case `POPUP_LAYOUT_LOAD`:
         const ls_layout2 = this.mt_db_layout.find((row) => row.selkz === true);
-        z2ui5_cl_util.xml_parse(/* TODO(abap2js): out-params */ EXPORTING xml = ls_layout2 - data IMPORTING any = ms_layout);
+        // TODO(abap2js): z2ui5_cl_util=>xml_parse( EXPORTING xml = ls_layout2-data IMPORTING any = ms_layout ).
         this.app.view_popup = `POPUP_SAVE`;
         break;
       case `BUTTON_SAVE_LAYOUT`:
@@ -76,6 +76,7 @@ class z2ui5_cl_demo_app_058 extends z2ui5_if_app {
   }
 
   view_display_main() {
+    let sy_tabix = 0;
     let view = z2ui5_cl_xml_view.factory();
     view = view.shell()
       .page({ id: `page_main`, title: `abap2UI5 - Table Layout Sample`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
@@ -88,7 +89,7 @@ class z2ui5_cl_demo_app_058 extends z2ui5_if_app {
       .button({ icon: `sap-icon://action-settings`, press: this.client._event(`BUTTON_SETUP`) });
     let lv_width = 10;
     const lo_columns = tab.columns();
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const lr_field of this.ms_layout.t_cols) {
       sy_tabix++;
       if (!(lr_field.visible === true)) continue;
@@ -97,9 +98,9 @@ class z2ui5_cl_demo_app_058 extends z2ui5_if_app {
       lv_width = lv_width + 10;
     }
     const lo_cells = tab.items()
-      .column_list_item({ press: this.client._event(`DETAIL`, [`${UUID}`]), selected: `{SELKZ}` })
+      .column_list_item({ press: this.client._event(`DETAIL`, [`\${UUID}`]), selected: `{SELKZ}` })
       .cells();
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const lr_field of this.ms_layout.t_cols) {
       sy_tabix++;
       if (!(lr_field.visible === true)) continue;

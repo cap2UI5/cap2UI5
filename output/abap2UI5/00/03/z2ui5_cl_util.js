@@ -7,8 +7,7 @@
 // TODO(abap2js): unresolved reference cl_abap_tabledescr — add require manually
 // TODO(abap2js): unresolved reference cl_abap_tstmp — add require manually
 // TODO(abap2js): unresolved reference cl_abap_typedescr — add require manually
-// TODO(abap2js): unresolved reference z2ui5_cl_ajson — add require manually
-// TODO(abap2js): unresolved reference z2ui5_cl_srt_typedescr — add require manually
+const z2ui5_cl_ajson = require("abap2UI5/z2ui5_cl_ajson");
 const z2ui5_cl_util_api = require("abap2UI5/z2ui5_cl_util_api");
 const z2ui5_cl_util_msg = require("abap2UI5/z2ui5_cl_util_msg");
 const z2ui5_cx_util_error = require("abap2UI5/z2ui5_cx_util_error");
@@ -89,7 +88,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     return result;
   }
 
-  static conv_copy_ref_data({ !from } = {}) {
+  static conv_copy_ref_data({ from } = {}) {
     let result = null;
     // TODO(abap2js): FIELD-SYMBOLS <from> TYPE data.
     // TODO(abap2js): FIELD-SYMBOLS <result> TYPE data.
@@ -140,29 +139,33 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     return result;
   }
 
-  static filter_itab({ filter } = {}) {
-    let ref = null;
+  static filter_itab({ filter, val } = {}) {
     let sy_tabix = 0;
+    let ref = null;
+    sy_tabix = 0;
     for (const ref of val) {
       sy_tabix++;
-      let sy_tabix = 0;
+      const _sy_tabix_1 = sy_tabix;
+      sy_tabix = 0;
       for (const ls_filter of filter) {
         sy_tabix++;
         // TODO(abap2js): ASSIGN ref->(ls_filter-name) TO FIELD-SYMBOL(<field>).
         if (sy_subrc !== 0) {
           continue;
         }
-        if (field ! IN ls_filter.t_range) {
+        if (!((($v, $r) => !$r || !$r.length || $r.some(($x) => ($x.option === `BT` ? $v >= $x.low && $v <= $x.high : $x.option === `NE` ? $v !== $x.low : $x.option === `CP` ? String($v).includes(String($x.low).replace(/\*/g, "")) : $v === $x.low)))(field, ls_filter.t_range))) {
           // TODO(abap2js): DELETE val.
           break;
         }
       }
+      sy_tabix = _sy_tabix_1;
     }
   }
 
   static filter_get_multi_by_data({ val } = {}) {
     let result = [];
     let sy_tabix = 0;
+    sy_tabix = 0;
     for (const lr_comp of z2ui5_cl_util.rtti_get_t_attri_by_any({ val: val })) {
       sy_tabix++;
       result.push({ name: lr_comp.name });
@@ -179,27 +182,27 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
         result = { sign: `I`, option: `EQ`, low: lv_value + 1 };
         break;
       case `<`:
-        if (lv_value + this.1(1) === `=`) {
+        if (String(lv_value).substr(1, 1) === `=`) {
           result = { sign: `I`, option: `LE`, low: lv_value + 2 };
         } else {
           result = { sign: `I`, option: `LT`, low: lv_value + 1 };
         }
         break;
       case `>`:
-        if (lv_value + this.1(1) === `=`) {
+        if (String(lv_value).substr(1, 1) === `=`) {
           result = { sign: `I`, option: `GE`, low: lv_value + 2 };
         } else {
           result = { sign: `I`, option: `GT`, low: lv_value + 1 };
         }
         break;
       case `*`:
-        if (lv_value + lv_length (1) === `*`) {
+        if (String(lv_value).substr(lv_length, 1) === `*`) {
           lv_value = lv_value.substr(1, lv_length - 1);
           result = { sign: `I`, option: `CP`, low: lv_value };
         }
         break;
       default:
-        if (lv_value.toLowerCase().includes(String(`...`).toLowerCase())) {
+        if (String(lv_value).toLowerCase().includes(String(`...`).toLowerCase())) {
           [result.low, result.high] = lv_value.split(`...`);
           result.sign = `I`;
           result.option = `BT`;
@@ -211,16 +214,17 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     return result;
   }
 
-  static filter_update_tokens({ val, !name } = {}) {
+  static filter_update_tokens({ val, name } = {}) {
     let result = [];
+    let sy_tabix = 0;
     result = val;
     const lr_filter = (result.find((row) => row.name === name));
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const ls_token of lr_filter.t_token_removed) {
       sy_tabix++;
       for (let _i = lr_filter.t_token.length - 1; _i >= 0; _i--) { const row = lr_filter.t_token[_i]; if (row.key === ls_token.key) lr_filter.t_token.splice(_i, 1); }
     }
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const ls_token of lr_filter.t_token_added) {
       sy_tabix++;
       lr_filter.t_token.push({ key: ls_token.key, text: ls_token.text, visible: true, editable: true });
@@ -235,6 +239,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
   static filter_get_range_t_by_token_t({ val } = {}) {
     let result = [];
     let sy_tabix = 0;
+    sy_tabix = 0;
     for (const ls_token of val) {
       sy_tabix++;
       result.push(z2ui5_cl_util.filter_get_range_by_token({ val: ls_token.text }));
@@ -250,10 +255,11 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
 
   static filter_get_token_t_by_range_t({ val } = {}) {
     let result = [];
+    let sy_tabix = 0;
     const lt_mapping = z2ui5_cl_util.filter_get_token_range_mapping();
     const lt_tab = {};
-    z2ui5_cl_util.itab_corresponding({ val: /* TODO(abap2js): out-params */ EXPORTING val = val CHANGING tab = lt_tab });
-    let sy_tabix = 0;
+    z2ui5_cl_util.itab_corresponding({ val: { val, tab: lt_tab } });
+    sy_tabix = 0;
     for (const lr_row of lt_tab) {
       sy_tabix++;
       const lv_value = lt_mapping.find((row) => row.n === lr_row.option).v;
@@ -264,12 +270,13 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     return result;
   }
 
-  static itab_filter_by_val({ val, fields, ignore_case = false } = {}) {
+  static itab_filter_by_val({ val, fields, ignore_case = false, tab } = {}) {
+    let sy_tabix = 0;
     // TODO(abap2js): FIELD-SYMBOLS <row> TYPE any.
     // TODO(abap2js): FIELD-SYMBOLS <field> TYPE any.
     const lv_search = (ignore_case === true ? val.toUpperCase() : val);
-    let sy_tabix = 0;
-    for (const fs of tab) {
+    sy_tabix = 0;
+    for (const row of tab) {
       sy_tabix++;
       let lv_check_found = false;
       let lv_index = 1;
@@ -294,7 +301,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
         if (ignore_case === true) {
           lv_value = lv_value.toUpperCase();
         }
-        if (lv_value.toLowerCase().includes(String(lv_search).toLowerCase())) {
+        if (String(lv_value).toLowerCase().includes(String(lv_search).toLowerCase())) {
           lv_check_found = true;
           break;
         }
@@ -308,6 +315,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
 
   static itab_get_csv_by_itab({ val } = {}) {
     let result = ``;
+    let sy_tabix = 0;
     // TODO(abap2js): FIELD-SYMBOLS <tab> TYPE table.
     let lt_lines = [];
     let lv_line = ``;
@@ -315,14 +323,14 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     const tab = (cl_abap_typedescr.describe_by_data(tab));
     const struc = (tab.get_table_line_type());
     lv_line = null;
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const lr_comp of struc.get_components()) {
       sy_tabix++;
       lv_line = `${lv_line}${lr_comp.name};`;
     }
     lt_lines.push(lv_line);
     let lr_row = null;
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const lr_row of tab) {
       sy_tabix++;
       lv_line = null;
@@ -346,15 +354,16 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
 
   static itab_get_itab_by_csv({ val } = {}) {
     let result = null;
+    let sy_tabix = 0;
     let lt_comp = [];
     // TODO(abap2js): FIELD-SYMBOLS <tab> TYPE STANDARD TABLE.
     let lr_row = null;
     let lt_rows = val.split(cl_abap_char_utilities.newline);
     let lt_cols = lt_rows[(1) - 1].split(`;`);
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const lr_col of lt_cols) {
       sy_tabix++;
-      const lv_name = z2ui5_cl_util.c_trim_upper({ val: lr_col.* });
+      const lv_name = z2ui5_cl_util.c_trim_upper({ val: lr_col });
       // TODO(abap2js): REPLACE ALL OCCURRENCES OF ` ` IN lv_name WITH `_`.
       lt_comp.push({ name: lv_name, type: cl_abap_elemdescr.get_c(40) });
     }
@@ -363,13 +372,14 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     const o_table_desc = cl_abap_tabledescr.create({ p_line_type: data, p_table_kind: cl_abap_tabledescr.tablekind_std, p_unique: false });
     // TODO(abap2js): CREATE DATA result TYPE HANDLE o_table_desc.
     // TODO(abap2js): ASSIGN result->* TO <tab>.
-    for (let _i = lt_rows.length - 1; _i >= 0; _i--) { const row = lt_rows[_i]; if (!table_line) lt_rows.splice(_i, 1); }
-    let sy_tabix = 0;
+    for (let _i = lt_rows.length - 1; _i >= 0; _i--) { const row = lt_rows[_i]; if (!row.table_line) lt_rows.splice(_i, 1); }
+    sy_tabix = 0;
     for (const lr_rows of lt_rows) {
       sy_tabix++;
-      lt_cols = lr_rows.*.split(`;`);
+      lt_cols = lr_rows.split(`;`);
       // TODO(abap2js): CREATE DATA lr_row TYPE HANDLE struc.
-      let sy_tabix = 0;
+      const _sy_tabix_1 = sy_tabix;
+      sy_tabix = 0;
       for (const lr_col of lt_cols) {
         sy_tabix++;
         // TODO(abap2js): ASSIGN lr_row->* TO FIELD-SYMBOL(<row>).
@@ -377,23 +387,23 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
         if (sy_subrc !== 0) {
           break;
         }
-        field = lr_col.*;
+        field = lr_col;
       }
+      sy_tabix = _sy_tabix_1;
       tab.push(row);
     }
     return result;
   }
 
-  static json_parse({ val } = {}) {
+  static json_parse({ val, data } = {}) {
     try {
-      z2ui5_cl_ajson.parse(val)
-        .to_abap(/* TODO(abap2js): out-params */ EXPORTING iv_corresponding = abap_true IMPORTING ev_container = data);
+      // TODO(abap2js): z2ui5_cl_ajson=>parse( val )->to_abap( EXPORTING iv_corresponding = abap_true IMPORTING ev_container = data ).
     } catch (x) {
       throw new z2ui5_cx_util_error({ val: x });
     }
   }
 
-  static json_stringify({ !any } = {}) {
+  static json_stringify({ any } = {}) {
     let result = ``;
     try {
       const li_ajson = (z2ui5_cl_ajson.create_empty());
@@ -407,7 +417,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
   static rtti_check_class_exists({ val } = {}) {
     let result = false;
     try {
-      cl_abap_classdescr.describe_by_name(/* TODO(abap2js): out-params */ EXPORTING p_name = val EXCEPTIONS type_not_found = 1);
+      // TODO(abap2js): cl_abap_classdescr=>describe_by_name( EXPORTING p_name = val EXCEPTIONS type_not_found = 1 ).
       if (sy_subrc === 0) {
         result = true;
       }
@@ -434,19 +444,19 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     return result;
   }
 
-  static rtti_get_classname_by_ref({ !in } = {}) {
+  static rtti_get_classname_by_ref({ in: in_ } = {}) {
     let result = ``;
-    const lv_classname = cl_abap_classdescr.get_class_name(in);
-    result = this.substring_after({ val: lv_classname, sub: `\CLASS=` });
+    const lv_classname = cl_abap_classdescr.get_class_name(false /* TODO(abap2js): IN */);
+    result = this.substring_after({ val: lv_classname, sub: `\\CLASS=` });
     return result;
   }
 
-  static rtti_get_intfname_by_ref({ !in } = {}) {
+  static rtti_get_intfname_by_ref({ in: in_ } = {}) {
     let result = ``;
-    const rtti = cl_abap_typedescr.describe_by_data(in);
+    const rtti = cl_abap_typedescr.describe_by_data(false /* TODO(abap2js): IN */);
     const ref = (rtti);
     const name = ref.get_referenced_type().absolute_name;
-    result = this.substring_after({ val: name, sub: `\INTERFACE=` });
+    result = this.substring_after({ val: name, sub: `\\INTERFACE=` });
     return result;
   }
 
@@ -467,27 +477,30 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     return result;
   }
 
-  static rtti_get_t_attri_by_include({ !type } = {}) {
+  static rtti_get_t_attri_by_include() {
     let result = [];
+    let sy_tabix = 0;
     try {
-      cl_abap_typedescr.describe_by_name(/* TODO(abap2js): out-params */ EXPORTING p_name = type -> absolute_name RECEIVING p_descr_ref = DATA ( type_desc ) EXCEPTIONS type_not_found = 1);
+      // TODO(abap2js): cl_abap_typedescr=>describe_by_name( EXPORTING p_name = type->absolute_name RECEIVING p_descr_ref = DATA(type_desc) EXCEPTIONS type_not_found = 1 ).
     } catch (x) {
       throw new z2ui5_cx_util_error({ previous: x });
     }
     const sdescr = (type_desc);
     const comps = sdescr.get_components();
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const lr_comp of comps) {
       sy_tabix++;
       if (lr_comp.as_include === true) {
-        const incl_comps = z2ui5_cl_util.rtti_get_t_attri_by_include({ !type: lr_comp.type });
-        let sy_tabix = 0;
+        const incl_comps = z2ui5_cl_util.rtti_get_t_attri_by_include(lr_comp.type);
+        const _sy_tabix_1 = sy_tabix;
+        sy_tabix = 0;
         for (const lr_incl_comp of incl_comps) {
           sy_tabix++;
-          result.push(lr_incl_comp.*);
+          result.push(lr_incl_comp);
         }
+        sy_tabix = _sy_tabix_1;
       } else {
-        result.push(lr_comp.*);
+        result.push(lr_comp);
       }
     }
     return result;
@@ -502,6 +515,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
 
   static rtti_get_t_attri_by_any({ val } = {}) {
     let result = [];
+    let sy_tabix = 0;
     let lo_struct = null;
     let lo_type = null;
     try {
@@ -534,13 +548,13 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
       return result;
     }
     const comps = lo_struct.get_components();
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const lr_comp of comps) {
       sy_tabix++;
       if (lr_comp.as_include === false) {
-        result.push(lr_comp.*);
+        result.push(lr_comp);
       } else {
-        const lt_attri = z2ui5_cl_util.rtti_get_t_attri_by_include({ !type: lr_comp.type });
+        const lt_attri = z2ui5_cl_util.rtti_get_t_attri_by_include(lr_comp.type);
         result.push(...lt_attri);
       }
     }
@@ -559,7 +573,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
       return result;
     }
     try {
-      cl_abap_typedescr.describe_by_name(/* TODO(abap2js): out-params */ EXPORTING p_name = CONV string ( rollname ) RECEIVING p_descr_ref = DATA ( typedescr ) EXCEPTIONS type_not_found = 1 OTHERS = 2);
+      // TODO(abap2js): cl_abap_typedescr=>describe_by_name( EXPORTING p_name = CONV string( rollname ) RECEIVING p_descr_ref = DATA(typedescr) EXCEPTIONS type_not_found = 1 OTHERS = 2 ).
       if (sy_subrc !== 0) {
         return result;
       }
@@ -570,7 +584,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     return result;
   }
 
-  static rtti_tab_get_relative_name({ !table } = {}) {
+  static rtti_tab_get_relative_name() {
     let result = ``;
     // TODO(abap2js): FIELD-SYMBOLS <table> TYPE any.
     try {
@@ -584,7 +598,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
           break;
         case typedesc.kind_ref:
           // TODO(abap2js): ASSIGN table->* TO <table>.
-          result = z2ui5_cl_util.rtti_tab_get_relative_name({ !table: table });
+          result = z2ui5_cl_util.rtti_tab_get_relative_name(table);
           break;
       }
     } catch (error) {
@@ -592,7 +606,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     return result;
   }
 
-  static conv_exit({ convexit, output = false } = {}) {
+  static conv_exit({ convexit, output = false, value } = {}) {
     const conex = (output === true ? `CONVERSION_EXIT_${convexit}_OUTPUT` : `CONVERSION_EXIT_${convexit}_INPUT`);
     try {
       if (convexit === `CUNIT`) {
@@ -621,6 +635,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
   static source_method_to_file({ it_source } = {}) {
     let result = ``;
     let sy_tabix = 0;
+    sy_tabix = 0;
     for (const lv_source of it_source) {
       sy_tabix++;
       if (lv_source.length > 1) {
@@ -643,7 +658,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     [lv_tab, lv_dummy] = lv_tab.split(`WHERE`);
     result.tabname = lv_tab;
     const lv_upper = lv_sql.toUpperCase();
-    if (lv_upper.toLowerCase().includes(String(` WHERE `).toLowerCase())) {
+    if (String(lv_upper).toLowerCase().includes(String(` WHERE `).toLowerCase())) {
       const lv_pos = sy_fdpos + 7;
       result.where = z2ui5_cl_util.c_trim({ val: lv_sql.substr(lv_pos) });
       result.t_filter = z2ui5_cl_util.filter_get_multi_by_sql_where({ val: result.where });
@@ -671,7 +686,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     return result;
   }
 
-  static time_subtract_seconds({ !time, !seconds } = {}) {
+  static time_subtract_seconds({ time, seconds } = {}) {
     let result = null;
     result = cl_abap_tstmp.subtractsecs({ tstmp: time, secs: seconds });
     return result;
@@ -696,6 +711,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
   static url_param_create_url({ t_params } = {}) {
     let result = ``;
     let sy_tabix = 0;
+    sy_tabix = 0;
     for (const ls_param of t_params) {
       sy_tabix++;
       result = `${result}${ls_param.n}=${ls_param.v}&`;
@@ -708,12 +724,13 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     let result = ``;
     const lt_params = z2ui5_cl_util.url_param_get_tab({ i_val: url });
     const lv_val = z2ui5_cl_util.c_trim_lower({ val: val });
-    result = (lt_params.find((row) => row.n === lv_val).v optional);
+    result = (() => { try { return lt_params.find((row) => row.n === lv_val).v ?? null; } catch { return null; } })();
     return result;
   }
 
   static url_param_get_tab({ i_val } = {}) {
     let rt_params = [];
+    let sy_tabix = 0;
     let lv_search = i_val.replaceAll(`%3D`, `=`);
     lv_search = lv_search.replaceAll(`%26`, `&`);
     lv_search = (lv_search.startsWith(`?`) ? lv_search.slice((`?`).length) : lv_search);
@@ -724,20 +741,21 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
       lv_search = lv_search2;
     }
     let lt_param = lv_search.split(`&`);
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const lr_param of lt_param) {
       sy_tabix++;
-      let [lv_name, lv_value] = lr_param.*.split(`=`);
+      let [lv_name, lv_value] = lr_param.split(`=`);
       rt_params.push({ n: lv_name, v: lv_value });
     }
     return rt_params;
   }
 
-  static url_param_set({ url, !name, !value } = {}) {
+  static url_param_set({ url, name, value } = {}) {
     let result = ``;
+    let sy_tabix = 0;
     const lt_params = z2ui5_cl_util.url_param_get_tab({ i_val: url });
     const lv_n = z2ui5_cl_util.c_trim_lower({ val: name });
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const lr_params of lt_params) {
       sy_tabix++;
       if (!(lr_params.n === lv_n)) continue;
@@ -750,7 +768,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     return result;
   }
 
-  static xml_parse({ !xml } = {}) {
+  static xml_parse({ xml, any } = {}) {
     if (!xml) {
       any = null;
       return;
@@ -763,7 +781,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     let srtti = null;
     // TODO(abap2js): CALL TRANSFORMATION id SOURCE XML rtti_data RESULT srtti = srtti.
     let rtti_type = null;
-    call method srtti.( `GET_RTTI` ) receiving rtti === rtti_type;
+    // TODO(abap2js): CALL METHOD srtti->(`GET_RTTI`) RECEIVING rtti = rtti_type.
     let lo_datadescr = null;
     lo_datadescr = rtti_type;
     // TODO(abap2js): CREATE DATA result TYPE HANDLE lo_datadescr.
@@ -772,16 +790,16 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     return result;
   }
 
-  static xml_srtti_stringify({ !data } = {}) {
+  static xml_srtti_stringify({ data } = {}) {
     let result = ``;
     if (z2ui5_cl_util.rtti_check_class_exists({ val: `ZCL_SRTTI_TYPEDESCR` }) === true) {
       let srtti = null;
       const lv_classname = `ZCL_SRTTI_TYPEDESCR`;
-      call this.method(lv_classname).( `CREATE_BY_DATA_OBJECT` ) exporting data_object === data receiving srtti === srtti;
+      // TODO(abap2js): CALL METHOD (lv_classname)=>(`CREATE_BY_DATA_OBJECT`) EXPORTING data_object = data RECEIVING srtti = srtti.
       // TODO(abap2js): CALL TRANSFORMATION id SOURCE srtti = srtti dobj = data RESULT XML result.
     } else {
       try {
-        call method z2ui5_cl_srt_typedescr.( `CREATE_BY_DATA_OBJECT` ) exporting data_object === data receiving srtti === srtti;
+        // TODO(abap2js): CALL METHOD z2ui5_cl_srt_typedescr=>(`CREATE_BY_DATA_OBJECT`) EXPORTING data_object = data RECEIVING srtti = srtti.
         // TODO(abap2js): CALL TRANSFORMATION id SOURCE srtti = srtti dobj = data RESULT XML result.
       } catch (error) {
         const lv_text = `UNSUPPORTED_FEATURE`;
@@ -791,13 +809,13 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     return result;
   }
 
-  static xml_stringify({ !any } = {}) {
+  static xml_stringify({ any } = {}) {
     let result = ``;
     // TODO(abap2js): CALL TRANSFORMATION id SOURCE data = any RESULT XML result OPTIONS data_refs = `heap-or-create`.
     return result;
   }
 
-  static x_check_raise({ v = `CX_SY_SUBRC`, !when } = {}) {
+  static x_check_raise({ v = `CX_SY_SUBRC`, when } = {}) {
     if (when === true) {
       throw new z2ui5_cx_util_error({ val: v });
     }
@@ -823,18 +841,19 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
 
   static rtti_get_t_attri_by_table_name({ table_name } = {}) {
     let result = [];
+    let sy_tabix = 0;
     if (!table_name) {
       throw new z2ui5_cx_util_error({ val: `TABLE_NAME_INITIAL_ERROR` });
     }
     try {
-      cl_abap_structdescr.describe_by_name(/* TODO(abap2js): out-params */ EXPORTING p_name = table_name RECEIVING p_descr_ref = DATA ( lo_obj ) EXCEPTIONS type_not_found = 1 OTHERS = 2);
+      // TODO(abap2js): cl_abap_structdescr=>describe_by_name( EXPORTING p_name = table_name RECEIVING p_descr_ref = DATA(lo_obj) EXCEPTIONS type_not_found = 1 OTHERS = 2 ).
       if (sy_subrc !== 0) {
         throw new z2ui5_cx_util_error({ val: `TABLE_NOT_FOUD_NAME___${table_name}` });
       }
       let lo_struct = (lo_obj);
     } catch (error) {
       try {
-        cl_abap_structdescr.describe_by_name(/* TODO(abap2js): out-params */ EXPORTING p_name = table_name RECEIVING p_descr_ref = lo_obj EXCEPTIONS type_not_found = 1 OTHERS = 2);
+        // TODO(abap2js): cl_abap_structdescr=>describe_by_name( EXPORTING p_name = table_name RECEIVING p_descr_ref = lo_obj EXCEPTIONS type_not_found = 1 OTHERS = 2 ).
         if (sy_subrc !== 0) {
           throw new z2ui5_cx_util_error({ val: `TABLE_NOT_FOUD_NAME___${table_name}` });
         }
@@ -845,34 +864,36 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
       }
     }
     const lt_comps = lo_struct.get_components();
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const lr_comp of lt_comps) {
       sy_tabix++;
       if (lr_comp.as_include === true) {
-        const lt_attri = z2ui5_cl_util.rtti_get_t_attri_by_include({ !type: lr_comp.type });
-        result.push(lines OF lt_attri);
+        const lt_attri = z2ui5_cl_util.rtti_get_t_attri_by_include(lr_comp.type);
+        result.push(...lt_attri);
       } else {
-        result.push(lr_comp.*);
+        result.push(lr_comp);
       }
     }
     return result;
   }
 
-  static itab_corresponding({ val } = {}) {
+  static itab_corresponding({ val, tab } = {}) {
+    let sy_tabix = 0;
     // TODO(abap2js): FIELD-SYMBOLS <row_in> TYPE any.
     // TODO(abap2js): FIELD-SYMBOLS <row_out> TYPE any.
-    let sy_tabix = 0;
-    for (const fs of val) {
+    sy_tabix = 0;
+    for (const row_in of val) {
       sy_tabix++;
-      tab assigning row_out.push({});
+      tab.push({});
       // TODO(abap2js): MOVE-CORRESPONDING <row_in> TO <row_out>.
     }
   }
 
   static itab_get_by_struc({ val } = {}) {
     let result = [];
-    const lt_attri = z2ui5_cl_util.rtti_get_t_attri_by_any(val);
     let sy_tabix = 0;
+    const lt_attri = z2ui5_cl_util.rtti_get_t_attri_by_any(val);
+    sy_tabix = 0;
     for (const lr_attri of lt_attri) {
       sy_tabix++;
       // TODO(abap2js): ASSIGN COMPONENT lr_attri->name OF STRUCTURE val TO FIELD-SYMBOL(<component>).
@@ -890,12 +911,14 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     return result;
   }
 
-  static itab_filter_by_t_range({ val } = {}) {
-    let ref = null;
+  static itab_filter_by_t_range({ val, tab } = {}) {
     let sy_tabix = 0;
+    let ref = null;
+    sy_tabix = 0;
     for (const ref of tab) {
       sy_tabix++;
-      let sy_tabix = 0;
+      const _sy_tabix_1 = sy_tabix;
+      sy_tabix = 0;
       for (const ls_filter of val) {
         sy_tabix++;
         if (!ls_filter.t_range) {
@@ -905,17 +928,19 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
         if (sy_subrc !== 0) {
           continue;
         }
-        if (field ! IN ls_filter.t_range) {
+        if (!((($v, $r) => !$r || !$r.length || $r.some(($x) => ($x.option === `BT` ? $v >= $x.low && $v <= $x.high : $x.option === `NE` ? $v !== $x.low : $x.option === `CP` ? String($v).includes(String($x.low).replace(/\*/g, "")) : $v === $x.low)))(field, ls_filter.t_range))) {
           // TODO(abap2js): DELETE tab.
           break;
         }
       }
+      sy_tabix = _sy_tabix_1;
     }
   }
 
   static filter_get_data_by_multi({ val } = {}) {
     let result = [];
     let sy_tabix = 0;
+    sy_tabix = 0;
     for (const ls_filter of val) {
       sy_tabix++;
       if (ls_filter.t_range.length > 0 || ls_filter.t_token.length > 0) {
@@ -928,13 +953,15 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
   static filter_get_sql_where({ val } = {}) {
     let result = ``;
     let sy_tabix = 0;
+    sy_tabix = 0;
     for (const ls_filter of val) {
       sy_tabix++;
       if (!ls_filter.t_range) {
         continue;
       }
       let lv_field_where = ``;
-      let sy_tabix = 0;
+      const _sy_tabix_1 = sy_tabix;
+      sy_tabix = 0;
       for (const ls_range of ls_filter.t_range) {
         sy_tabix++;
         const lv_cond = z2ui5_cl_util.filter_get_sql_cond_by_range({ fieldname: ls_filter.name, range: ls_range });
@@ -947,6 +974,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
           lv_field_where = `${lv_field_where} OR ${lv_cond}`;
         }
       }
+      sy_tabix = _sy_tabix_1;
       if (!lv_field_where) {
         continue;
       }
@@ -1042,12 +1070,13 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
 
   static filter_get_multi_by_sql_where({ val } = {}) {
     let result = [];
+    let sy_tabix = 0;
     const lv_where = z2ui5_cl_util.c_trim({ val: (val) });
     if (!lv_where) {
       return result;
     }
     const lt_groups = z2ui5_cl_util.filter_sql_split_top_level({ val: lv_where, sep: ` AND ` });
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const lv_group of lt_groups) {
       sy_tabix++;
       lv_group = z2ui5_cl_util.c_trim({ val: lv_group });
@@ -1058,14 +1087,15 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
       const lt_conds = z2ui5_cl_util.filter_sql_split_top_level({ val: lv_group, sep: ` OR ` });
       let ls_filter = {};
       ls_filter = null;
-      let sy_tabix = 0;
+      const _sy_tabix_1 = sy_tabix;
+      sy_tabix = 0;
       for (const lv_cond of lt_conds) {
         sy_tabix++;
         let ls_range = {};
         let lv_fieldname = ``;
         ls_range = null;
         lv_fieldname = null;
-        z2ui5_cl_util.filter_get_range_by_sql_cond({ val: /* TODO(abap2js): out-params */ EXPORTING val = c_trim ( lv_cond ) IMPORTING fieldname = lv_fieldname range = ls_range });
+        // TODO(abap2js): filter_get_range_by_sql_cond( EXPORTING val = c_trim( lv_cond ) IMPORTING fieldname = lv_fieldname range = ls_range ).
         if (!ls_range.option) {
           continue;
         }
@@ -1074,6 +1104,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
         }
         ls_filter.t_range.push(ls_range);
       }
+      sy_tabix = _sy_tabix_1;
       if (ls_filter.name) {
         result.push(ls_filter);
       }
@@ -1081,7 +1112,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     return result;
   }
 
-  static filter_get_range_by_sql_cond({ val } = {}) {
+  static filter_get_range_by_sql_cond({ val, fieldname, range } = {}) {
     range = null;
     fieldname = null;
     const lv_cond = (val);
@@ -1090,7 +1121,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     let lv_low = ``;
     let lv_high = ``;
     let lv_like = ``;
-    if (lv_cond.toLowerCase().includes(String(` NOT BETWEEN `).toLowerCase())) {
+    if (String(lv_cond).toLowerCase().includes(String(` NOT BETWEEN `).toLowerCase())) {
       [fieldname, lv_rest] = lv_cond.split(` NOT BETWEEN `);
       [lv_low, lv_high] = lv_rest.split(` AND `);
       range.option = `NB`;
@@ -1098,7 +1129,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
       range.high = z2ui5_cl_util.filter_sql_strip_quotes({ val: lv_high });
       return;
     }
-    if (lv_cond.toLowerCase().includes(String(` BETWEEN `).toLowerCase())) {
+    if (String(lv_cond).toLowerCase().includes(String(` BETWEEN `).toLowerCase())) {
       [fieldname, lv_rest] = lv_cond.split(` BETWEEN `);
       [lv_low, lv_high] = lv_rest.split(` AND `);
       range.option = `BT`;
@@ -1106,7 +1137,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
       range.high = z2ui5_cl_util.filter_sql_strip_quotes({ val: lv_high });
       return;
     }
-    if (lv_cond.toLowerCase().includes(String(` NOT LIKE `).toLowerCase())) {
+    if (String(lv_cond).toLowerCase().includes(String(` NOT LIKE `).toLowerCase())) {
       [fieldname, lv_rest] = lv_cond.split(` NOT LIKE `);
       lv_like = z2ui5_cl_util.filter_sql_strip_quotes({ val: lv_rest });
       // TODO(abap2js): REPLACE ALL OCCURRENCES OF `%` IN lv_like WITH `*`.
@@ -1115,7 +1146,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
       range.low = lv_like;
       return;
     }
-    if (lv_cond.toLowerCase().includes(String(` LIKE `).toLowerCase())) {
+    if (String(lv_cond).toLowerCase().includes(String(` LIKE `).toLowerCase())) {
       [fieldname, lv_rest] = lv_cond.split(` LIKE `);
       lv_like = z2ui5_cl_util.filter_sql_strip_quotes({ val: lv_rest });
       // TODO(abap2js): REPLACE ALL OCCURRENCES OF `%` IN lv_like WITH `*`.
@@ -1124,37 +1155,37 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
       range.low = lv_like;
       return;
     }
-    if (lv_cond.toLowerCase().includes(String(` <> `).toLowerCase())) {
+    if (String(lv_cond).toLowerCase().includes(String(` <> `).toLowerCase())) {
       [fieldname, lv_rest] = lv_cond.split(` <> `);
       range.option = `NE`;
       range.low = z2ui5_cl_util.filter_sql_strip_quotes({ val: lv_rest });
       return;
     }
-    if (lv_cond.toLowerCase().includes(String(` <= `).toLowerCase())) {
+    if (String(lv_cond).toLowerCase().includes(String(` <= `).toLowerCase())) {
       [fieldname, lv_rest] = lv_cond.split(` <= `);
       range.option = `LE`;
       range.low = z2ui5_cl_util.filter_sql_strip_quotes({ val: lv_rest });
       return;
     }
-    if (lv_cond.toLowerCase().includes(String(` >= `).toLowerCase())) {
+    if (String(lv_cond).toLowerCase().includes(String(` >= `).toLowerCase())) {
       [fieldname, lv_rest] = lv_cond.split(` >= `);
       range.option = `GE`;
       range.low = z2ui5_cl_util.filter_sql_strip_quotes({ val: lv_rest });
       return;
     }
-    if (lv_cond.toLowerCase().includes(String(` < `).toLowerCase())) {
+    if (String(lv_cond).toLowerCase().includes(String(` < `).toLowerCase())) {
       [fieldname, lv_rest] = lv_cond.split(` < `);
       range.option = `LT`;
       range.low = z2ui5_cl_util.filter_sql_strip_quotes({ val: lv_rest });
       return;
     }
-    if (lv_cond.toLowerCase().includes(String(` > `).toLowerCase())) {
+    if (String(lv_cond).toLowerCase().includes(String(` > `).toLowerCase())) {
       [fieldname, lv_rest] = lv_cond.split(` > `);
       range.option = `GT`;
       range.low = z2ui5_cl_util.filter_sql_strip_quotes({ val: lv_rest });
       return;
     }
-    if (lv_cond.toLowerCase().includes(String(` = `).toLowerCase())) {
+    if (String(lv_cond).toLowerCase().includes(String(` = `).toLowerCase())) {
       [fieldname, lv_rest] = lv_cond.split(` = `);
       range.option = `EQ`;
       range.low = z2ui5_cl_util.filter_sql_strip_quotes({ val: lv_rest });
@@ -1180,7 +1211,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
       return result;
     }
     while (lv_pos < lv_len) {
-      const lv_char = lv_val + lv_pos (1);
+      const lv_char = String(lv_val).substr(lv_pos, 1);
       if (lv_char === `'`) {
         if (lv_in_quote === false) {
           lv_in_quote = true;
@@ -1204,7 +1235,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
         lv_pos = lv_pos + 1;
         continue;
       }
-      if (lv_depth === 0 && lv_pos + lv_sep_len <= lv_len && lv_val + lv_pos (lv_sep_len) === lv_sep) {
+      if (lv_depth === 0 && lv_pos + lv_sep_len <= lv_len && String(lv_val).substr(lv_pos, lv_sep_len) === lv_sep) {
         result.push(lv_val.substr(lv_start, lv_pos - lv_start));
         lv_pos = lv_pos + lv_sep_len;
         lv_start = lv_pos;
@@ -1290,7 +1321,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
 
   static c_contains({ val, sub } = {}) {
     let result = false;
-    result = Boolean(((val)).toLowerCase().includes(String(sub).toLowerCase()));
+    result = Boolean(String((val)).toLowerCase().includes(String(sub).toLowerCase()));
     return result;
   }
 
@@ -1318,7 +1349,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
       return result;
     }
     const lv_off = lv_len_val - lv_len_suffix;
-    result = Boolean(lv_val + lv_off (lv_len_suffix) === lv_suffix);
+    result = Boolean(String(lv_val).substr(lv_off, lv_len_suffix) === lv_suffix);
     return result;
   }
 
@@ -1331,6 +1362,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
   static c_join({ tab, sep = `` } = {}) {
     let result = ``;
     let sy_tabix = 0;
+    sy_tabix = 0;
     for (const lv_line of tab) {
       sy_tabix++;
       if (sy_tabix > 1) {
@@ -1378,20 +1410,20 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     return result;
   }
 
-  static time_add_seconds({ !time, !seconds } = {}) {
+  static time_add_seconds({ time, seconds } = {}) {
     let result = null;
     result = cl_abap_tstmp.add({ tstmp: time, secs: seconds });
     return result;
   }
 
-  static time_get_stampl_by_date_time({ !date, !time } = {}) {
+  static time_get_stampl_by_date_time({ date, time } = {}) {
     let result = null;
     const ls_sy = z2ui5_cl_util.context_get_sy();
     // TODO(abap2js): CONVERT DATE date TIME time INTO TIME STAMP result TIME ZONE ls_sy-zonlo.
     return result;
   }
 
-  static time_diff_seconds({ !time_from, !time_to } = {}) {
+  static time_diff_seconds({ time_from, time_to } = {}) {
     let result = 0;
     const lv_diff = cl_abap_tstmp.subtract({ tstmp1: time_to, tstmp2: time_from });
     result = lv_diff;
@@ -1408,7 +1440,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     let lv_clean = ``;
     let lv_i = 0;
     while (lv_i < lv_val.length) {
-      let lv_c = lv_val + lv_i (1);
+      let lv_c = String(lv_val).substr(lv_i, 1);
       if (lv_c >= `0` && lv_c <= `9`) {
         lv_clean = lv_clean + lv_c;
       }
@@ -1417,7 +1449,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     let lv_fmt_clean = ``;
     lv_i = 0;
     while (lv_i < lv_fmt.length) {
-      lv_c = lv_fmt + lv_i (1);
+      lv_c = String(lv_fmt).substr(lv_i, 1);
       if (lv_c === `Y` || lv_c === `M` || lv_c === `D`) {
         lv_fmt_clean = lv_fmt_clean + lv_c;
       }
@@ -1429,16 +1461,16 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     let lv_pos = 0;
     lv_i = 0;
     while (lv_i < lv_fmt_clean.length) {
-      lv_c = lv_fmt_clean + lv_i (1);
+      lv_c = String(lv_fmt_clean).substr(lv_i, 1);
       switch (lv_c) {
         case `Y`:
-          lv_year = lv_year + lv_clean + lv_pos (1);
+          lv_year = lv_year + String(lv_clean).substr(lv_pos, 1);
           break;
         case `M`:
-          lv_month = lv_month + lv_clean + lv_pos (1);
+          lv_month = lv_month + String(lv_clean).substr(lv_pos, 1);
           break;
         case `D`:
-          lv_day = lv_day + lv_clean + lv_pos (1);
+          lv_day = lv_day + String(lv_clean).substr(lv_pos, 1);
           break;
       }
       lv_pos = lv_pos + 1;
@@ -1453,8 +1485,8 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     const lv_fmt = (format);
     const lv_date = (val);
     const lv_year = lv_date (4);
-    const lv_month = lv_date + this.4(2);
-    const lv_day = lv_date + this.6(2);
+    const lv_month = String(lv_date).substr(4, 2);
+    const lv_day = String(lv_date).substr(6, 2);
     result = lv_fmt;
     // TODO(abap2js): REPLACE `YYYY` IN result WITH lv_year.
     // TODO(abap2js): REPLACE `MM` IN result WITH lv_month.
@@ -1464,6 +1496,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
 
   static ui5_msg_box_format({ val } = {}) {
     let result = {};
+    let sy_tabix = 0;
     const lt_msg = z2ui5_cl_util.msg_get_t(val);
     if (lt_msg.length === 1) {
       result.text = lt_msg[(1) - 1].text;
@@ -1472,7 +1505,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     } else if (lt_msg.length > 1) {
       result.text = ` ${lt_msg.length} Messages found: `;
       let lt_detail_items = [];
-      let sy_tabix = 0;
+      sy_tabix = 0;
       for (const lr_msg of lt_msg) {
         sy_tabix++;
         lt_detail_items.push(`<li>${lr_msg.text}</li>`);
@@ -1501,7 +1534,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     return result;
   }
 
-  static app_get_url({ !origin, !pathname, !search, !hash } = {}) {
+  static app_get_url({ origin, pathname, search, hash } = {}) {
     let result = ``;
     const lt_param = z2ui5_cl_util.url_param_get_tab({ i_val: search });
     for (let _i = lt_param.length - 1; _i >= 0; _i--) { const row = lt_param[_i]; if (row.n === `app_start`) lt_param.splice(_i, 1); }
@@ -1510,35 +1543,35 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     return result;
   }
 
-  static app_get_url_source_code({ !classname, !origin } = {}) {
+  static app_get_url_source_code({ classname, origin } = {}) {
     let result = ``;
     result = `${origin}/sap/bc/adt/oo/classes/${classname}/source/main`;
     return result;
   }
 
-  static cal_get_weekday({ !date } = {}) {
+  static cal_get_weekday({ date } = {}) {
     let result = 0;
     const lv_days = date - (`19000101`);
-    result = lv_days mod 7 + 1;
+    result = lv_days % 7 + 1;
     return result;
   }
 
-  static cal_is_weekend({ !date } = {}) {
+  static cal_is_weekend({ date } = {}) {
     let result = false;
-    result = Boolean(z2ui5_cl_util.cal_get_weekday({ !date: date }) >= 6);
+    result = Boolean(z2ui5_cl_util.cal_get_weekday({ date: date }) >= 6);
     return result;
   }
 
-  static cal_is_workday({ !date, !calendar_id } = {}) {
+  static cal_is_workday({ date, calendar_id } = {}) {
     let result = false;
     if (calendar_id) {
       z2ui5_cl_util.x_raise(`cal_is_workday: factory calendar support is not yet implemented`);
     }
-    result = Boolean(z2ui5_cl_util.cal_is_weekend({ !date: date }) === false);
+    result = Boolean(z2ui5_cl_util.cal_is_weekend({ date: date }) === false);
     return result;
   }
 
-  static cal_add_workdays({ !date, !days, !calendar_id } = {}) {
+  static cal_add_workdays({ date, days, calendar_id } = {}) {
     let result = null;
     let lv_remaining = this.abs(days);
     const lv_step = (days < 0 ? - 1 : 1);
@@ -1552,7 +1585,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     return result;
   }
 
-  static cal_count_workdays({ !date_from, !date_to, !calendar_id } = {}) {
+  static cal_count_workdays({ date_from, date_to, calendar_id } = {}) {
     let result = 0;
     let lv_date = date_from;
     const lv_step = (date_to < date_from ? - 1 : 1);
@@ -1565,25 +1598,27 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     return result;
   }
 
-  static zip_pack({ !files } = {}) {
+  static zip_pack({ files } = {}) {
     let result = null;
+    let sy_tabix = 0;
     let lo_zip = null;
     try {
       lo_zip = null; // TODO(abap2js): CREATE OBJECT lo_zip TYPE ('CL_ABAP_ZIP').
-      let sy_tabix = 0;
+      sy_tabix = 0;
       for (const ls_file of files) {
         sy_tabix++;
-        call method lo_zip.( `ADD` ) exporting name === ls_file.name content === ls_file.content;
+        // TODO(abap2js): CALL METHOD lo_zip->('ADD') EXPORTING name = ls_file-name content = ls_file-content.
       }
-      call method lo_zip.( `SAVE` ) receiving zip === result;
+      // TODO(abap2js): CALL METHOD lo_zip->('SAVE') RECEIVING zip = result.
     } catch (x) {
       throw new z2ui5_cx_util_error({ val: x });
     }
     return result;
   }
 
-  static zip_unpack({ !val } = {}) {
+  static zip_unpack({ val } = {}) {
     let result = [];
+    let sy_tabix = 0;
     let lo_zip = null;
     let lv_name = ``;
     let ls_result = null;
@@ -1592,15 +1627,15 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     // TODO(abap2js): FIELD-SYMBOLS <name> TYPE any.
     try {
       lo_zip = null; // TODO(abap2js): CREATE OBJECT lo_zip TYPE ('CL_ABAP_ZIP').
-      call method lo_zip.( `LOAD` ) exporting zip === val;
+      // TODO(abap2js): CALL METHOD lo_zip->('LOAD') EXPORTING zip = val.
       // TODO(abap2js): ASSIGN lo_zip->('FILES') TO <files>.
-      let sy_tabix = 0;
-      for (const fs of files) {
+      sy_tabix = 0;
+      for (const file of files) {
         sy_tabix++;
         // TODO(abap2js): ASSIGN COMPONENT `NAME` OF STRUCTURE <file> TO <name>.
         lv_name = name;
         ls_result = { name: lv_name };
-        call method lo_zip.( `GET` ) exporting name === lv_name importing content === ls_result.content;
+        // TODO(abap2js): CALL METHOD lo_zip->('GET') EXPORTING name = lv_name IMPORTING content = ls_result-content.
         result.push(ls_result);
       }
     } catch (x) {
@@ -1629,6 +1664,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
 
   static lock_call_function({ val, t_param } = {}) {
     let result = false;
+    let sy_tabix = 0;
     let lt_param = [];
     let ls_param = null;
     let ls_lock_param = {};
@@ -1637,13 +1673,13 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     let ls_exception = null;
     let lv_function = ``;
     try {
-      let sy_tabix = 0;
+      sy_tabix = 0;
       for (const ls_lock_param of t_param) {
         sy_tabix++;
         ls_param.name = ls_lock_param.name;
         ls_param.kind = abap_func_exporting;
         // TODO(abap2js): CREATE DATA lr_value.
-        lr_value.* = ls_lock_param.value;
+        lr_value = ls_lock_param.value;
         ls_param.value = lr_value;
         lt_param.push(ls_param);
       }
@@ -1652,15 +1688,16 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
       lt_exception.push(ls_exception);
       lv_function = z2ui5_cl_util.c_trim_upper({ val: val });
       // TODO(abap2js): CALL FUNCTION lv_function PARAMETER-TABLE lt_param EXCEPTION-TABLE lt_exception.
-      result = Boolean(sy_subrc === 0);
+      result = /* TODO(abap2js) */ xsdbool(sy_subrc === 0);
     } catch (error) {
       result = false;
     }
     return result;
   }
 
-  static lock_read({ lock_object, !user, client } = {}) {
+  static lock_read({ lock_object, user, client } = {}) {
     let result = [];
+    let sy_tabix = 0;
     let lr_enq = null;
     // TODO(abap2js): FIELD-SYMBOLS <lt_enq> TYPE STANDARD TABLE.
     // TODO(abap2js): FIELD-SYMBOLS <ls_enq> TYPE any.
@@ -1706,8 +1743,8 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
       if (sy_subrc !== 0) {
         throw new z2ui5_cx_util_error({ val: `LOCK_READ_FAILED` });
       }
-      let sy_tabix = 0;
-      for (const fs of lt_enq) {
+      sy_tabix = 0;
+      for (const ls_enq of lt_enq) {
         sy_tabix++;
         ls_lock = null;
         // TODO(abap2js): ASSIGN COMPONENT `GNAME` OF STRUCTURE <ls_enq> TO <lv_value>.
@@ -1748,16 +1785,23 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
         }
         result.push(ls_lock);
       }
-    } catch (lx_error) {
-      throw lx_error;
-    } catch (lx_root) {
-      throw new z2ui5_cx_util_error({ val: lx_root });
+    } catch (_caught1) {
+      if (_caught1 instanceof z2ui5_cx_util_error) {
+        const lx_error = _caught1;
+        throw lx_error;
+      } else if (true) {
+        const lx_root = _caught1;
+        throw new z2ui5_cx_util_error({ val: lx_root });
+      } else {
+        throw _caught1;
+      }
     }
     return result;
   }
 
   static lock_delete_entries({ t_lock } = {}) {
     let result = false;
+    let sy_tabix = 0;
     let lr_enq = null;
     // TODO(abap2js): FIELD-SYMBOLS <lt_enq> TYPE STANDARD TABLE.
     // TODO(abap2js): FIELD-SYMBOLS <ls_enq> TYPE any.
@@ -1776,7 +1820,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
       // TODO(abap2js): ASSIGN lr_enq->* TO <lt_enq>.
       // TODO(abap2js): CREATE DATA lr_row TYPE (`SEQG3`).
       // TODO(abap2js): ASSIGN lr_row->* TO <ls_enq>.
-      let sy_tabix = 0;
+      sy_tabix = 0;
       for (const ls_lock of t_lock) {
         sy_tabix++;
         ls_enq = null;
@@ -1831,7 +1875,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
       lt_exception.push(ls_exception);
       lv_function = `ENQUE_DELETE`;
       // TODO(abap2js): CALL FUNCTION lv_function PARAMETER-TABLE lt_param EXCEPTION-TABLE lt_exception.
-      result = Boolean(sy_subrc === 0 && lv_subrc === 0);
+      result = /* TODO(abap2js) */ xsdbool(sy_subrc === 0 && lv_subrc === 0);
     } catch (error) {
       result = false;
     }
@@ -1944,10 +1988,10 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
       let lv_count = 0;
       let lv_i = lv_integer.length - 1;
       while (lv_i >= 0) {
-        if (lv_count > 0 && lv_count mod 3 === 0) {
+        if (lv_count > 0 && lv_count % 3 === 0) {
           lv_result = sep_thousands + lv_result;
         }
-        lv_result = lv_integer + lv_i (1) + lv_result;
+        lv_result = String(lv_integer).substr(lv_i, 1) + lv_result;
         lv_count = lv_count + 1;
         lv_i = lv_i - 1;
       }
@@ -1963,7 +2007,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     let lv_clean = ``;
     let lv_i = 0;
     while (lv_i < lv_val.length) {
-      const lv_c = lv_val + lv_i (1);
+      const lv_c = String(lv_val).substr(lv_i, 1);
       if (lv_c >= `0` && lv_c <= `9`) {
         lv_clean = lv_clean + lv_c;
       } else if (lv_c === `-` && lv_i === 0) {
@@ -1972,7 +2016,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
         lv_clean = lv_clean + lv_c;
       } else if (lv_c === `,`) {
         const lv_rest = lv_val.substr(lv_i + 1);
-        if (lv_rest NA `,` && lv_rest NA `.`) {
+        if (![...String(lv_rest)].some(($c) => String(`,`).includes($c)) && ![...String(lv_rest)].some(($c) => String(`.`).includes($c))) {
           lv_clean = lv_clean + `.`;
         }
       }
@@ -2011,17 +2055,19 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     return result;
   }
 
-  static itab_sort_by({ fieldname, descending = false } = {}) {
+  static itab_sort_by({ fieldname, descending = false, tab } = {}) {
     const lv_field = (fieldname);
     if (descending === true) {
-      tab.sort((a, b) => (a.( > b.( ? 1 : a.( < b.( ? -1 : 0) * -1);
+      { const _f = String(lv_field)
+        .toLowerCase(); tab.sort((a, b) => (a[_f] > b[_f] ? 1 : a[_f] < b[_f] ? -1 : 0) * -1); }
     } else {
-      tab.sort((a, b) => (a.( > b.( ? 1 : a.( < b.( ? -1 : 0));
+      { const _f = String(lv_field).toLowerCase(); tab.sort((a, b) => (a[_f] > b[_f] ? 1 : a[_f] < b[_f] ? -1 : 0)); }
     }
   }
 
-  static itab_slice({ tab, !from = 1, !to = 0 } = {}) {
+  static itab_slice({ tab, from = 1 } = {}) {
     let result = null;
+    let sy_tabix = 0;
     const lo_tabledescr = (cl_abap_typedescr.describe_by_data(tab));
     // TODO(abap2js): CREATE DATA result TYPE HANDLE lo_tabledescr.
     // TODO(abap2js): FIELD-SYMBOLS <result> TYPE STANDARD TABLE.
@@ -2030,15 +2076,15 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     const lv_lines = tab.length;
     const lv_to = (to <= 0 || to > lv_lines ? lv_lines : to);
     const lv_from = (from < 1 ? 1 : from);
-    let sy_tabix = 0;
-    for (const lv_from of tab) {
+    sy_tabix = 0;
+    for (const row of tab) {
       sy_tabix++;
       result.push(row);
     }
     return result;
   }
 
-  static itab_paginate({ tab, page = 1, page_size = 20 } = {}) {
+  static itab_paginate({ tab, page = 1, page_size = 20, total_count, total_pages } = {}) {
     total_count = tab.length;
     total_pages = (page_size <= 0 ? 1 : (total_count + page_size - 1) / page_size);
     const lv_from = (page - 1) * page_size + 1;
@@ -2048,20 +2094,21 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
 
   static itab_to_json({ val } = {}) {
     let result = ``;
-    result = z2ui5_cl_util.json_stringify({ !any: val });
+    result = z2ui5_cl_util.json_stringify({ any: val });
     return result;
   }
 
-  static itab_from_json({ val } = {}) {
-    z2ui5_cl_util.json_parse({ val: /* TODO(abap2js): out-params */ EXPORTING val = val CHANGING data = data });
+  static itab_from_json({ val, data } = {}) {
+    z2ui5_cl_util.json_parse({ val: { val, data } });
   }
 
   static itab_count_by({ tab, fieldname } = {}) {
     let result = [];
+    let sy_tabix = 0;
     // TODO(abap2js): FIELD-SYMBOLS <row> TYPE any.
     // TODO(abap2js): FIELD-SYMBOLS <field> TYPE any.
-    let sy_tabix = 0;
-    for (const fs of tab) {
+    sy_tabix = 0;
+    for (const row of tab) {
       sy_tabix++;
       // TODO(abap2js): ASSIGN COMPONENT fieldname OF STRUCTURE <row> TO <field>.
       if (sy_subrc !== 0) {
@@ -2091,7 +2138,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
       result = false;
       return result;
     }
-    if (lv_domain NA `.`) {
+    if (![...String(lv_domain)].some(($c) => String(`.`).includes($c))) {
       result = false;
       return result;
     }
@@ -2109,7 +2156,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     let lv_i = 0;
     let lv_has_dot = false;
     while (lv_i < lv_val.length) {
-      const lv_c = lv_val + lv_i (1);
+      const lv_c = String(lv_val).substr(lv_i, 1);
       if (lv_c >= `0` && lv_c <= `9`) {
       } else if (lv_c === `-` && lv_i === 0) {
       } else if (lv_c === `+` && lv_i === 0) {
@@ -2153,7 +2200,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     const lv_upper = lv_clean.toUpperCase();
     let lv_i = 0;
     while (lv_i < 32) {
-      const lv_c = lv_upper + lv_i (1);
+      const lv_c = String(lv_upper).substr(lv_i, 1);
       if (!(((lv_c >= `0` && lv_c <= `9`) || (lv_c >= `A` && lv_c <= `F`)))) {
         result = false;
         return result;
@@ -2181,12 +2228,13 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     return result;
   }
 
-  static data_diff({ old, new } = {}) {
+  static data_diff({ old, new: new_ } = {}) {
     let result = [];
+    let sy_tabix = 0;
     // TODO(abap2js): FIELD-SYMBOLS <old_field> TYPE any.
     // TODO(abap2js): FIELD-SYMBOLS <new_field> TYPE any.
     const lt_comps = z2ui5_cl_util.rtti_get_t_attri_by_any({ val: old });
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const lr_comp of lt_comps) {
       sy_tabix++;
       // TODO(abap2js): ASSIGN COMPONENT lr_comp->name OF STRUCTURE old TO <old_field>.
@@ -2218,7 +2266,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     return result;
   }
 
-  static auth_check({ object, field, !value, activity = `03` } = {}) {
+  static auth_check({ object, field, value, activity = `03` } = {}) {
     let result = false;
     let lv_object = ``;
     let lv_field = ``;
@@ -2229,28 +2277,29 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     lv_value = value;
     lv_activity = activity;
     // TODO(abap2js): AUTHORITY-CHECK OBJECT lv_object ID lv_field FIELD lv_value ID 'ACTVT' FIELD lv_activity.
-    result = Boolean(sy_subrc === 0);
+    result = /* TODO(abap2js) */ xsdbool(sy_subrc === 0);
     return result;
   }
 
-  static enum_to_text({ domain, !value, langu = sy_langu } = {}) {
+  static enum_to_text({ domain, value, langu = sy_langu } = {}) {
     let result = ``;
     const lt_all = z2ui5_cl_util.enum_get_all({ domain, langu });
     const lv_val = (value);
-    result = (lt_all.find((row) => row.n === lv_val).v optional);
+    result = (() => { try { return lt_all.find((row) => row.n === lv_val).v ?? null; } catch { return null; } })();
     return result;
   }
 
   static enum_get_all({ domain, langu = sy_langu } = {}) {
     let result = [];
+    let sy_tabix = 0;
     try {
-      cl_abap_typedescr.describe_by_name(/* TODO(abap2js): out-params */ EXPORTING p_name = CONV string ( domain ) RECEIVING p_descr_ref = DATA ( lo_type ) EXCEPTIONS type_not_found = 1 OTHERS = 2);
+      // TODO(abap2js): cl_abap_typedescr=>describe_by_name( EXPORTING p_name = CONV string( domain ) RECEIVING p_descr_ref = DATA(lo_type) EXCEPTIONS type_not_found = 1 OTHERS = 2 ).
       if (sy_subrc !== 0) {
         return result;
       }
       const lo_elem = (lo_type);
       const lt_fix = this.rtti_get_t_fixvalues({ elemdescr: lo_elem, langu });
-      let sy_tabix = 0;
+      sy_tabix = 0;
       for (const ls_fix of lt_fix) {
         sy_tabix++;
         result.push({ n: ls_fix.low, v: ls_fix.descr });
@@ -2262,11 +2311,12 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
 
   static data_get_by_path({ data, path } = {}) {
     let result = ``;
+    let sy_tabix = 0;
     // TODO(abap2js): FIELD-SYMBOLS <current> TYPE any.
     // TODO(abap2js): FIELD-SYMBOLS <field> TYPE any.
     // TODO(abap2js): ASSIGN data TO <current>.
     let lt_segments = path.split(`-`);
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const lv_segment of lt_segments) {
       sy_tabix++;
       const lv_seg = z2ui5_cl_util.c_trim_upper({ val: lv_segment });
@@ -2284,13 +2334,14 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     return result;
   }
 
-  static data_set_by_path({ path, !value } = {}) {
+  static data_set_by_path({ path, value, data } = {}) {
+    let sy_tabix = 0;
     // TODO(abap2js): FIELD-SYMBOLS <current> TYPE any.
     // TODO(abap2js): FIELD-SYMBOLS <field> TYPE any.
     // TODO(abap2js): ASSIGN data TO <current>.
     let lt_segments = path.split(`-`);
     const lv_last_idx = lt_segments.length;
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const lv_segment of lt_segments) {
       sy_tabix++;
       const lv_seg = z2ui5_cl_util.c_trim_upper({ val: lv_segment });
@@ -2309,8 +2360,9 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     }
   }
 
-  static bal_search({ object, subobject, id, date_from, date_to, !user } = {}) {
+  static bal_search({ object, subobject, id, date_from, date_to, user } = {}) {
     let result = [];
+    let sy_tabix = 0;
     if (this.context_check_abap_cloud()) {
       let lo_filter = null;
       let lo_db = null;
@@ -2318,29 +2370,29 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
       let lv_class = ``;
       try {
         lv_class = `CL_BALI_LOG_FILTER`;
-        call this.method(lv_class).( `CREATE` ) receiving filter === lo_filter;
+        // TODO(abap2js): CALL METHOD (lv_class)=>(`CREATE`) RECEIVING filter = lo_filter.
         const lv_obj_f = (object ? object : ``);
         const lv_sub_f = (subobject ? subobject : ``);
         const lv_id_f = (id ? id : ``);
-        call method lo_filter.( `SET_DESCRIPTOR` ) exporting object === lv_obj_f subobject === lv_sub_f external_id === lv_id_f;
+        // TODO(abap2js): CALL METHOD lo_filter->(`SET_DESCRIPTOR`) EXPORTING object = lv_obj_f subobject = lv_sub_f external_id = lv_id_f.
         if (date_from || date_to) {
           const lv_from = (date_from ? date_from : `19000101`);
           const lv_to = (date_to ? date_to : sy_datum);
-          call method lo_filter.( `SET_CREATE_DATE` ) exporting from_date === lv_from to_date === lv_to;
+          // TODO(abap2js): CALL METHOD lo_filter->(`SET_CREATE_DATE`) EXPORTING from_date = lv_from to_date = lv_to.
         }
         lv_class = `CL_BALI_LOG_DB`;
-        call this.method(lv_class).( `GET_INSTANCE` ) receiving db_handler === lo_db;
-        call method lo_db.( `LOAD_LOGS_VIA_FILTER` ) exporting filter === lo_filter read_only_header === true receiving log_table === lt_logs;
-        let sy_tabix = 0;
+        // TODO(abap2js): CALL METHOD (lv_class)=>(`GET_INSTANCE`) RECEIVING db_handler = lo_db.
+        // TODO(abap2js): CALL METHOD lo_db->(`LOAD_LOGS_VIA_FILTER`) EXPORTING filter = lo_filter read_only_header = abap_true RECEIVING log_table = lt_logs.
+        sy_tabix = 0;
         for (const lo_log of lt_logs) {
           sy_tabix++;
           const ls_hdr_c = {};
           try {
             let lo_header = null;
-            call method lo_log.( `GET_HEADER` ) receiving header === lo_header;
-            call method lo_header.( `GET_OBJECT` ) receiving object === ls_hdr_c.object;
-            call method lo_header.( `GET_SUBOBJECT` ) receiving subobject === ls_hdr_c.subobject;
-            call method lo_header.( `GET_EXTERNAL_ID` ) receiving external_id === ls_hdr_c.external_id;
+            // TODO(abap2js): CALL METHOD lo_log->(`GET_HEADER`) RECEIVING header = lo_header.
+            // TODO(abap2js): CALL METHOD lo_header->(`GET_OBJECT`) RECEIVING object = ls_hdr_c-object.
+            // TODO(abap2js): CALL METHOD lo_header->(`GET_SUBOBJECT`) RECEIVING subobject = ls_hdr_c-subobject.
+            // TODO(abap2js): CALL METHOD lo_header->(`GET_EXTERNAL_ID`) RECEIVING external_id = ls_hdr_c-external_id.
           } catch (error) {
           }
           result.push(ls_hdr_c);
@@ -2431,8 +2483,8 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
       if (sy_subrc !== 0) {
         return result;
       }
-      let sy_tabix = 0;
-      for (const fs of headers) {
+      sy_tabix = 0;
+      for (const header of headers) {
         sy_tabix++;
         const ls_hdr = {};
         // TODO(abap2js): ASSIGN COMPONENT `LOG_HANDLE` OF STRUCTURE <header> TO <comp>.
@@ -2479,7 +2531,8 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     return result;
   }
 
-  static bal_delete_before({ object, subobject, !days = 30 } = {}) {
+  static bal_delete_before({ object, subobject, days = 30 } = {}) {
+    let sy_tabix = 0;
     const lv_cutoff = (sy_datum - days);
     if (this.context_check_abap_cloud()) {
       let lo_filter_c = null;
@@ -2488,17 +2541,17 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
       let lv_cls = ``;
       try {
         lv_cls = `CL_BALI_LOG_FILTER`;
-        call this.method(lv_cls).( `CREATE` ) receiving filter === lo_filter_c;
+        // TODO(abap2js): CALL METHOD (lv_cls)=>(`CREATE`) RECEIVING filter = lo_filter_c.
         const lv_sub_c = (subobject ? subobject : ``);
-        call method lo_filter_c.( `SET_DESCRIPTOR` ) exporting object === object subobject === lv_sub_c external_id === ``;
-        call method lo_filter_c.( `SET_CREATE_DATE` ) exporting from_date === (`19000101`) to_date === lv_cutoff;
+        // TODO(abap2js): CALL METHOD lo_filter_c->(`SET_DESCRIPTOR`) EXPORTING object = object subobject = lv_sub_c external_id = ``.
+        // TODO(abap2js): CALL METHOD lo_filter_c->(`SET_CREATE_DATE`) EXPORTING from_date = CONV d( '19000101' ) to_date = lv_cutoff.
         lv_cls = `CL_BALI_LOG_DB`;
-        call this.method(lv_cls).( `GET_INSTANCE` ) receiving db_handler === lo_db_c;
-        call method lo_db_c.( `LOAD_LOGS_VIA_FILTER` ) exporting filter === lo_filter_c receiving log_table === lt_logs_c;
-        let sy_tabix = 0;
+        // TODO(abap2js): CALL METHOD (lv_cls)=>(`GET_INSTANCE`) RECEIVING db_handler = lo_db_c.
+        // TODO(abap2js): CALL METHOD lo_db_c->(`LOAD_LOGS_VIA_FILTER`) EXPORTING filter = lo_filter_c RECEIVING log_table = lt_logs_c.
+        sy_tabix = 0;
         for (const lo_log_c of lt_logs_c) {
           sy_tabix++;
-          call method lo_db_c.( `DELETE_LOG` ) exporting log === lo_log_c;
+          // TODO(abap2js): CALL METHOD lo_db_c->(`DELETE_LOG`) EXPORTING log = lo_log_c.
         }
         // TODO(abap2js): COMMIT WORK AND WAIT.
       } catch (error) {
@@ -2560,8 +2613,9 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
 
   static bal_read_by_type({ object, subobject, id, msg_type = `E` } = {}) {
     let result = [];
-    const lt_all = this.bal_read({ object, subobject, id });
     let sy_tabix = 0;
+    const lt_all = this.bal_read({ object, subobject, id });
+    sy_tabix = 0;
     for (const ls_msg of lt_all) {
       sy_tabix++;
       if (!(ls_msg.type === msg_type)) continue;
@@ -2579,27 +2633,28 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
 
   static tr_get_objects({ trkorr } = {}) {
     let result = [];
+    let sy_tabix = 0;
     if (this.context_check_abap_cloud()) {
       try {
         let lo_transport = null;
         let lt_objects_c = null;
         const lv_xco = `XCO_CP_CTS`;
         const lv_trkorr_c = (trkorr);
-        call this.method(lv_xco).( `TRANSPORT` ) exporting iv_transport === lv_trkorr_c receiving ro_transport === lo_transport;
+        // TODO(abap2js): CALL METHOD (lv_xco)=>(`TRANSPORT`) EXPORTING iv_transport = lv_trkorr_c RECEIVING ro_transport = lo_transport.
         let lo_objects_api = null;
-        call method lo_transport.( `OBJECTS` ) receiving ro_objects === lo_objects_api;
+        // TODO(abap2js): CALL METHOD lo_transport->(`OBJECTS`) RECEIVING ro_objects = lo_objects_api.
         let lo_all = null;
-        call method lo_objects_api.( `ALL` ) receiving ro_all === lo_all;
-        call method lo_all.( `GET` ) receiving rt_objects === lt_objects_c;
-        let sy_tabix = 0;
+        // TODO(abap2js): CALL METHOD lo_objects_api->(`ALL`) RECEIVING ro_all = lo_all.
+        // TODO(abap2js): CALL METHOD lo_all->(`GET`) RECEIVING rt_objects = lt_objects_c.
+        sy_tabix = 0;
         for (const lo_obj of lt_objects_c) {
           sy_tabix++;
           let ls_obj_c = {};
           ls_obj_c = null;
           try {
-            call method lo_obj.( `GET_PGMID` ) receiving rv_pgmid === ls_obj_c.pgmid;
-            call method lo_obj.( `GET_TYPE` ) receiving rv_type === ls_obj_c.object;
-            call method lo_obj.( `GET_NAME` ) receiving rv_name === ls_obj_c.obj_name;
+            // TODO(abap2js): CALL METHOD lo_obj->(`GET_PGMID`) RECEIVING rv_pgmid = ls_obj_c-pgmid.
+            // TODO(abap2js): CALL METHOD lo_obj->(`GET_TYPE`) RECEIVING rv_type = ls_obj_c-object.
+            // TODO(abap2js): CALL METHOD lo_obj->(`GET_NAME`) RECEIVING rv_name = ls_obj_c-obj_name.
           } catch (error) {
           }
           result.push(ls_obj_c);
@@ -2627,8 +2682,8 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
       if (sy_subrc !== 0) {
         return result;
       }
-      let sy_tabix = 0;
-      for (const fs of objects) {
+      sy_tabix = 0;
+      for (const object of objects) {
         sy_tabix++;
         const ls_obj = {};
         // TODO(abap2js): ASSIGN COMPONENT `PGMID` OF STRUCTURE <object> TO <comp>.
@@ -2650,8 +2705,9 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     return result;
   }
 
-  static tr_get_user_requests({ !user = sy_uname, request_type } = {}) {
+  static tr_get_user_requests({ user = sy_uname, request_type } = {}) {
     let result = [];
+    let sy_tabix = 0;
     if (this.context_check_abap_cloud()) {
       try {
         const lv_xco = `XCO_CP_CTS`;
@@ -2660,20 +2716,20 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
         let lo_owner_f = null;
         let lt_transports = null;
         const lv_user_c = ((user ? user : sy_uname));
-        call this.method(lv_xco).( `TRANSPORTS` ) receiving ro_transports === lo_filter_tr;
+        // TODO(abap2js): CALL METHOD (lv_xco)=>(`TRANSPORTS`) RECEIVING ro_transports = lo_filter_tr.
         let lo_where = null;
-        call method lo_filter_tr.( `ALL` ) receiving ro_all === lo_where;
-        call method lo_where.( `GET` ) receiving rt_transports === lt_transports;
-        let sy_tabix = 0;
+        // TODO(abap2js): CALL METHOD lo_filter_tr->(`ALL`) RECEIVING ro_all = lo_where.
+        // TODO(abap2js): CALL METHOD lo_where->(`GET`) RECEIVING rt_transports = lt_transports.
+        sy_tabix = 0;
         for (const lo_tr of lt_transports) {
           sy_tabix++;
           let ls_req_c = {};
           ls_req_c = null;
           try {
             let lo_props = null;
-            call method lo_tr.( `PROPERTIES` ) receiving ro_properties === lo_props;
+            // TODO(abap2js): CALL METHOD lo_tr->(`PROPERTIES`) RECEIVING ro_properties = lo_props.
             let ls_prop = null;
-            call method lo_props.( `GET` ) receiving rs_properties === ls_prop;
+            // TODO(abap2js): CALL METHOD lo_props->(`GET`) RECEIVING rs_properties = ls_prop.
             // TODO(abap2js): FIELD-SYMBOLS <prop> TYPE any.
             // TODO(abap2js): FIELD-SYMBOLS <pcomp> TYPE any.
             // TODO(abap2js): ASSIGN ls_prop->* TO <prop>.
@@ -2697,7 +2753,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
               ls_req_c.type = pcomp;
             }
             let lv_tr_value = ``;
-            call method lo_tr.( `GET_VALUE` ) receiving rv_value === lv_tr_value;
+            // TODO(abap2js): CALL METHOD lo_tr->(`GET_VALUE`) RECEIVING rv_value = lv_tr_value.
             ls_req_c.trkorr = lv_tr_value;
           } catch (error) {
           }
@@ -2727,8 +2783,8 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
       // TODO(abap2js): CREATE DATA lr_data TYPE HANDLE lo_table.
       // TODO(abap2js): ASSIGN lr_data->* TO <tab>.
       // TODO(abap2js): SELECT trkorr, as4user, trstatus, trfunction FROM (lv_tab1) WHERE (lv_where) INTO CORRESPONDING FIELDS OF TABLE @<tab>.
-      let sy_tabix = 0;
-      for (const fs of tab) {
+      sy_tabix = 0;
+      for (const row of tab) {
         sy_tabix++;
         const ls_req = {};
         // TODO(abap2js): ASSIGN COMPONENT `TRKORR` OF STRUCTURE <row> TO <comp>.
@@ -2764,10 +2820,10 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
       try {
         let lo_tr_d = null;
         const lv_xco_d = `XCO_CP_CTS`;
-        call this.method(lv_xco_d).( `TRANSPORT` ) exporting iv_transport === (trkorr) receiving ro_transport === lo_tr_d;
+        // TODO(abap2js): CALL METHOD (lv_xco_d)=>(`TRANSPORT`) EXPORTING iv_transport = CONV string( trkorr ) RECEIVING ro_transport = lo_tr_d.
         let lo_props_d = null;
-        call method lo_tr_d.( `PROPERTIES` ) receiving ro_properties === lo_props_d;
-        call method lo_props_d.( `GET_SHORT_DESCRIPTION` ) receiving rv_short_description === result;
+        // TODO(abap2js): CALL METHOD lo_tr_d->(`PROPERTIES`) RECEIVING ro_properties = lo_props_d.
+        // TODO(abap2js): CALL METHOD lo_props_d->(`GET_SHORT_DESCRIPTION`) RECEIVING rv_short_description = result.
       } catch (error) {
       }
       return result;
@@ -2789,11 +2845,11 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
       try {
         let lo_tr_r = null;
         const lv_xco_r = `XCO_CP_CTS`;
-        call this.method(lv_xco_r).( `TRANSPORT` ) exporting iv_transport === (trkorr) receiving ro_transport === lo_tr_r;
+        // TODO(abap2js): CALL METHOD (lv_xco_r)=>(`TRANSPORT`) EXPORTING iv_transport = CONV string( trkorr ) RECEIVING ro_transport = lo_tr_r.
         let lo_props_r = null;
-        call method lo_tr_r.( `PROPERTIES` ) receiving ro_properties === lo_props_r;
+        // TODO(abap2js): CALL METHOD lo_tr_r->(`PROPERTIES`) RECEIVING ro_properties = lo_props_r.
         let lv_status_c = ``;
-        call method lo_props_r.( `GET_STATUS` ) receiving rv_status === lv_status_c;
+        // TODO(abap2js): CALL METHOD lo_props_r->(`GET_STATUS`) RECEIVING rv_status = lv_status_c.
         result = /* TODO(abap2js) */ xsdbool(lv_status_c === `RELEASED` || lv_status_c === `R`);
       } catch (error) {
         result = false;
@@ -2830,10 +2886,16 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
       if (sy_subrc !== 0) {
         throw new z2ui5_cx_util_error({ val: `TR_ADD_OBJECT failed` });
       }
-    } catch (lx) {
-      throw lx;
-    } catch (x) {
-      throw new z2ui5_cx_util_error({ val: x });
+    } catch (_caught1) {
+      if (_caught1 instanceof z2ui5_cx_util_error) {
+        const lx = _caught1;
+        throw lx;
+      } else if (true) {
+        const x = _caught1;
+        throw new z2ui5_cx_util_error({ val: x });
+      } else {
+        throw _caught1;
+      }
     }
   }
 
@@ -2851,21 +2913,22 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
 
   static lock_get_owner({ val, t_param } = {}) {
     let result = ``;
+    let sy_tabix = 0;
     try {
       const lt_locks = z2ui5_cl_util.lock_read();
       let lv_arg = ``;
-      let sy_tabix = 0;
+      sy_tabix = 0;
       for (const ls_param of t_param) {
         sy_tabix++;
         lv_arg = lv_arg + ls_param.value;
       }
       const lv_name = z2ui5_cl_util.c_trim_upper({ val: val });
       // TODO(abap2js): REPLACE `ENQUEUE_` IN lv_name WITH ``.
-      let sy_tabix = 0;
+      sy_tabix = 0;
       for (const ls_lock of lt_locks) {
         sy_tabix++;
-        if (!(lock_object.toLowerCase().includes(String(lv_name).toLowerCase()))) continue;
-        if (!lv_arg || ls_lock.argument.toLowerCase().includes(String(lv_arg).toLowerCase())) {
+        if (!(String(ls_lock.lock_object).toLowerCase().includes(String(lv_name).toLowerCase()))) continue;
+        if (!lv_arg || String(ls_lock.argument).toLowerCase().includes(String(lv_arg).toLowerCase())) {
           result = ls_lock.user;
           return result;
         }
@@ -2901,7 +2964,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     try {
       if (this.context_check_abap_cloud()) {
         const lv_cls = `CL_NUMBERRANGE_RUNTIME`;
-        call this.method(lv_cls).( `NUMBER_GET` ) exporting nr_range_nr === lv_nr_sub object === lv_object importing number === lv_number;
+        // TODO(abap2js): CALL METHOD (lv_cls)=>(`NUMBER_GET`) EXPORTING nr_range_nr = lv_nr_sub object = lv_object IMPORTING number = lv_number.
       } else {
         const lv_fm = `NUMBER_GET_NEXT`;
         // TODO(abap2js): CALL FUNCTION lv_fm EXPORTING nr_range_nr = lv_nr_sub object = lv_object IMPORTING number = lv_number EXCEPTIONS OTHERS = 1.
@@ -2910,16 +2973,23 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
         }
       }
       result = lv_number;
-    } catch (lx) {
-      throw lx;
-    } catch (x) {
-      throw new z2ui5_cx_util_error({ val: x });
+    } catch (_caught1) {
+      if (_caught1 instanceof z2ui5_cx_util_error) {
+        const lx = _caught1;
+        throw lx;
+      } else if (true) {
+        const x = _caught1;
+        throw new z2ui5_cx_util_error({ val: x });
+      } else {
+        throw _caught1;
+      }
     }
     return result;
   }
 
   static changdoc_read({ objectclass, objectid, date_from = `19000101`, date_to = `99991231` } = {}) {
     let result = [];
+    let sy_tabix = 0;
     if (this.context_check_abap_cloud()) {
       try {
         const lv_cds = `I_CHANGEDOCUMENTITEM`;
@@ -2940,8 +3010,8 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
         // TODO(abap2js): CREATE DATA lr_cds_tab TYPE HANDLE lo_table_c.
         // TODO(abap2js): ASSIGN lr_cds_tab->* TO <cds_tab>.
         // TODO(abap2js): SELECT * FROM (lv_cds) WHERE (lv_where_c) INTO CORRESPONDING FIELDS OF TABLE @<cds_tab>.
-        let sy_tabix = 0;
-        for (const fs of cds_tab) {
+        sy_tabix = 0;
+        for (const cds_row of cds_tab) {
           sy_tabix++;
           const ls_doc_c = {};
           // TODO(abap2js): ASSIGN COMPONENT `CHANGEDOCOBJECTCLASS` OF STRUCTURE <cds_row> TO <cds_fld>.
@@ -3016,8 +3086,8 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
       if (sy_subrc !== 0) {
         return result;
       }
-      let sy_tabix = 0;
-      for (const fs of headers) {
+      sy_tabix = 0;
+      for (const hdr of headers) {
         sy_tabix++;
         const ls_doc = {};
         // TODO(abap2js): ASSIGN COMPONENT `CHANGENR` OF STRUCTURE <hdr> TO <comp>.
@@ -3046,8 +3116,9 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
         if (!positions) {
           result.push(ls_doc);
         } else {
-          let sy_tabix = 0;
-          for (const fs of positions) {
+          const _sy_tabix_1 = sy_tabix;
+          sy_tabix = 0;
+          for (const pos of positions) {
             sy_tabix++;
             const ls_pos = ls_doc;
             // TODO(abap2js): ASSIGN COMPONENT `FNAME` OF STRUCTURE <pos> TO <comp>.
@@ -3072,6 +3143,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
             }
             result.push(ls_pos);
           }
+          sy_tabix = _sy_tabix_1;
         }
       }
     } catch (error) {
@@ -3113,31 +3185,38 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
         throw new z2ui5_cx_util_error({ val: `JOB_CLOSE failed` });
       }
       result = lv_jobname;
-    } catch (lx) {
-      throw lx;
-    } catch (x) {
-      throw new z2ui5_cx_util_error({ val: x });
+    } catch (_caught1) {
+      if (_caught1 instanceof z2ui5_cx_util_error) {
+        const lx = _caught1;
+        throw lx;
+      } else if (true) {
+        const x = _caught1;
+        throw new z2ui5_cx_util_error({ val: x });
+      } else {
+        throw _caught1;
+      }
     }
     return result;
   }
 
-  static mail_send({ !to, subject, body, html = false } = {}) {
+  static mail_send({ subject, body, html = false } = {}) {
     let result = false;
+    let sy_tabix = 0;
     if (this.context_check_abap_cloud()) {
       let lo_mail_c = null;
       let lv_cls_c = ``;
       try {
         lv_cls_c = `CL_BCS_MAIL_MESSAGE`;
-        call this.method(lv_cls_c).( `CREATE_INSTANCE` ) receiving result === lo_mail_c;
-        call method lo_mail_c.( `SET_SENDER` ) exporting iv_address === this.context_get_user_tech() + `@placeholder.local`;
-        call method lo_mail_c.( `ADD_RECIPIENT` ) exporting iv_address === to;
-        call method lo_mail_c.( `SET_SUBJECT` ) exporting iv_subject === subject;
+        // TODO(abap2js): CALL METHOD (lv_cls_c)=>(`CREATE_INSTANCE`) RECEIVING result = lo_mail_c.
+        // TODO(abap2js): CALL METHOD lo_mail_c->(`SET_SENDER`) EXPORTING iv_address = context_get_user_tech( ) && `@placeholder.local`.
+        // TODO(abap2js): CALL METHOD lo_mail_c->(`ADD_RECIPIENT`) EXPORTING iv_address = to.
+        // TODO(abap2js): CALL METHOD lo_mail_c->(`SET_SUBJECT`) EXPORTING iv_subject = subject.
         if (html === true) {
-          call method lo_mail_c.( `SET_MAIN` ) exporting iv_content_type === `text/html` iv_content_text === body;
+          // TODO(abap2js): CALL METHOD lo_mail_c->(`SET_MAIN`) EXPORTING iv_content_type = `text/html` iv_content_text = body.
         } else {
-          call method lo_mail_c.( `SET_MAIN` ) exporting iv_content_type === `text/plain` iv_content_text === body;
+          // TODO(abap2js): CALL METHOD lo_mail_c->(`SET_MAIN`) EXPORTING iv_content_type = `text/plain` iv_content_text = body.
         }
-        call method lo_mail_c.( `SEND` ) receiving result === result;
+        // TODO(abap2js): CALL METHOD lo_mail_c->(`SEND`) RECEIVING result = result.
       } catch (error) {
         result = false;
       }
@@ -3161,19 +3240,19 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
     lv_type = (html === true ? `HTM` : `RAW`);
     try {
       lv_class = `CL_BCS`;
-      call this.method(lv_class).( `CREATE_PERSISTENT` ) receiving result === lo_mail;
+      // TODO(abap2js): CALL METHOD (lv_class)=>(`CREATE_PERSISTENT`) RECEIVING result = lo_mail.
       lv_class = `CL_SAPUSER_BCS`;
-      call this.method(lv_class).( `CREATE` ) exporting i_user === sy_uname receiving result === lo_sender;
-      call method lo_mail.( `SET_SENDER` ) exporting i_sender === lo_sender;
+      // TODO(abap2js): CALL METHOD (lv_class)=>(`CREATE`) EXPORTING i_user = sy-uname RECEIVING result = lo_sender.
+      // TODO(abap2js): CALL METHOD lo_mail->(`SET_SENDER`) EXPORTING i_sender = lo_sender.
       lv_class = `CL_CAM_ADDRESS_BCS`;
-      call this.method(lv_class).( `CREATE_INTERNET_ADDRESS` ) exporting i_address_string === lv_address receiving result === lo_recipient;
-      call method lo_mail.( `ADD_RECIPIENT` ) exporting i_recipient === lo_recipient;
+      // TODO(abap2js): CALL METHOD (lv_class)=>(`CREATE_INTERNET_ADDRESS`) EXPORTING i_address_string = lv_address RECEIVING result = lo_recipient.
+      // TODO(abap2js): CALL METHOD lo_mail->(`ADD_RECIPIENT`) EXPORTING i_recipient = lo_recipient.
       // TODO(abap2js): CREATE DATA lr_body TYPE (`BCSY_TEXT`).
       // TODO(abap2js): ASSIGN lr_body->* TO <body>.
       // TODO(abap2js): CREATE DATA lr_line TYPE (`SOLI`).
       // TODO(abap2js): ASSIGN lr_line->* TO <line>.
       const lt_lines = z2ui5_cl_util.c_split({ val: body, sep: cl_abap_char_utilities.newline });
-      let sy_tabix = 0;
+      sy_tabix = 0;
       for (const lv_body_line of lt_lines) {
         sy_tabix++;
         // TODO(abap2js): ASSIGN COMPONENT `LINE` OF STRUCTURE <line> TO <field>.
@@ -3181,10 +3260,10 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
         body.push(line);
       }
       lv_class = `CL_DOCUMENT_BCS`;
-      call this.method(lv_class).( `CREATE_DOCUMENT` ) exporting i_type === lv_type i_text === body i_subject === lv_subject receiving result === lo_doc;
-      call method lo_mail.( `SET_DOCUMENT` ) exporting i_document === lo_doc;
-      call method lo_mail.( `SET_SEND_IMMEDIATELY` ) exporting i_send_immediately === true;
-      call method lo_mail.( `SEND` ) receiving result === result;
+      // TODO(abap2js): CALL METHOD (lv_class)=>(`CREATE_DOCUMENT`) EXPORTING i_type = lv_type i_text = <body> i_subject = lv_subject RECEIVING result = lo_doc.
+      // TODO(abap2js): CALL METHOD lo_mail->(`SET_DOCUMENT`) EXPORTING i_document = lo_doc.
+      // TODO(abap2js): CALL METHOD lo_mail->(`SET_SEND_IMMEDIATELY`) EXPORTING i_send_immediately = abap_true.
+      // TODO(abap2js): CALL METHOD lo_mail->(`SEND`) RECEIVING result = result.
       // TODO(abap2js): COMMIT WORK AND WAIT.
     } catch (error) {
       result = false;

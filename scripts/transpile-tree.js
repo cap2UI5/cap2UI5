@@ -12,6 +12,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const vm = require("vm");
 const { transpileFile } = require("./abap2js");
 
 const TARGETS = {
@@ -40,7 +41,7 @@ const targets = [];
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) walk(full);
-    else if (entry.name.endsWith(".clas.abap") && !entry.name.includes(".testclasses.") && cfg.filter(entry.name)) {
+    else if ((entry.name.endsWith(".clas.abap") || entry.name.endsWith(".intf.abap")) && !entry.name.includes(".testclasses.") && cfg.filter(entry.name)) {
       targets.push({ file: full, relDir: path.relative(srcBase, dir) });
     }
   }
@@ -56,7 +57,13 @@ for (const { file, relDir } of targets) {
     const outPath = path.join(outBase, relPath);
     fs.mkdirSync(path.dirname(outPath), { recursive: true });
     fs.writeFileSync(outPath, code);
-    report.push({ class: className, path: relPath, todos: todos.length, todoDetails: todos });
+    let parseError = null;
+    try {
+      new vm.Script(code, { filename: relPath });
+    } catch (e) {
+      parseError = e.message;
+    }
+    report.push({ class: className, path: relPath, todos: todos.length, ...(parseError ? { parseError } : {}), todoDetails: todos });
   } catch (e) {
     failed.push(`${path.basename(file)}: ${e.message}`);
   }
@@ -66,6 +73,8 @@ fs.mkdirSync(outBase, { recursive: true });
 fs.writeFileSync(path.join(outBase, "transpile-report.json"), JSON.stringify(report, null, 2) + "\n");
 
 const clean = report.filter((r) => r.todos === 0).length;
-console.log(`output/${name}: ${report.length} classes transpiled (${clean} clean, ${report.length - clean} with TODOs), ${failed.length} failed`);
+const unparseable = report.filter((r) => r.parseError);
+console.log(`output/${name}: ${report.length} classes transpiled (${clean} clean, ${report.length - clean} with TODOs, ${unparseable.length} with parse errors), ${failed.length} failed`);
+for (const r of unparseable) console.error(`  PARSE ERROR: ${r.path}: ${r.parseError}`);
 for (const f of failed) console.error(`  FAILED: ${f}`);
 if (failed.length) process.exit(1);

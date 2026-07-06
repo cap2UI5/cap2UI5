@@ -31,7 +31,7 @@ class z2ui5_cl_demo_app_088 extends z2ui5_if_app {
       .shell()
       .page({ navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack(), title: `abap2UI5 - Sample: Nav Container` })
       .content();
-    page.icon_tab_header({ selectedkey: this.client._bind_edit(this.mv_selected_key), select: this.client._event_client(this.client.cs_event.nav_container_to, [`NavCon`, `${$parameters>/selectedKey}`]), mode: `Inline` })
+    page.icon_tab_header({ selectedkey: this.client._bind_edit(this.mv_selected_key), select: this.client._event_client(this.client.cs_event.nav_container_to, [`NavCon`, `\${$parameters>/selectedKey}`]), mode: `Inline` })
       .items()
       .icon_tab_filter({ key: `page1`, text: `Home` })
       .get_parent()

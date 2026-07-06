@@ -75,11 +75,11 @@ class z2ui5_cl_demo_app_002 extends z2ui5_if_app {
       .segmented_button_item({ key: `BLUE`, icon: `sap-icon://accept`, text: `blue` })
       .segmented_button_item({ key: `GREEN`, icon: `sap-icon://add-favorite`, text: `green` })
       .segmented_button_item({ key: `BLACK`, icon: `sap-icon://attachment`, text: `black` });
-    content.label(`Switch disabled`).switch({ enabled: false, customtexton: `A`, customtextoff: `B` });
+    content.label(`Switch disabled`).switch_({ enabled: false, customtexton: `A`, customtextoff: `B` });
     content.label(`Switch accept/reject`)
-      .switch({ state: this.client._bind_edit(this.s_screen.check_switch_01), customtexton: `on`, customtextoff: `off`, type: `AcceptReject` });
+      .switch_({ state: this.client._bind_edit(this.s_screen.check_switch_01), customtexton: `on`, customtextoff: `off`, type: `AcceptReject` });
     content.label(`Switch normal`)
-      .switch({ state: this.client._bind_edit(this.s_screen.check_switch_02), customtexton: `YES`, customtextoff: `NO` });
+      .switch_({ state: this.client._bind_edit(this.s_screen.check_switch_02), customtexton: `YES`, customtextoff: `NO` });
     page.footer()
       .overflow_toolbar()
       .toolbar_spacer()

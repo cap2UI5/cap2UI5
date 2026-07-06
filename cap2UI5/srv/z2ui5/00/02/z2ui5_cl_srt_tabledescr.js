@@ -1,7 +1,7 @@
 // TODO(abap2js): unresolved reference cl_abap_tabledescr — add require manually
-// TODO(abap2js): unresolved reference z2ui5_cl_srt_complexdescr — add require manually
-// TODO(abap2js): unresolved reference z2ui5_cl_srt_typedescr — add require manually
-// TODO(abap2js): unresolved reference z2ui5_cx_srt — add require manually
+const z2ui5_cl_srt_complexdescr = require("abap2UI5/z2ui5_cl_srt_complexdescr");
+const z2ui5_cl_srt_typedescr = require("abap2UI5/z2ui5_cl_srt_typedescr");
+const z2ui5_cx_srt = require("abap2UI5/z2ui5_cx_srt");
 
 class z2ui5_cl_srt_tabledescr extends z2ui5_cl_srt_complexdescr {
   key = null;
@@ -11,7 +11,7 @@ class z2ui5_cl_srt_tabledescr extends z2ui5_cl_srt_complexdescr {
   table_kind = null;
   line_type = null;
 
-  constructor({ !rtti } = {}) {
+  constructor({ rtti } = {}) {
     super.constructor(rtti);
     this.key = rtti.key;
     this.initial_size = rtti.initial_size;

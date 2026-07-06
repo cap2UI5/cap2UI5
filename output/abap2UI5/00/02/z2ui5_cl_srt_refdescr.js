@@ -1,11 +1,11 @@
 // TODO(abap2js): unresolved reference cl_abap_refdescr — add require manually
 // TODO(abap2js): unresolved reference cl_abap_typedescr — add require manually
-// TODO(abap2js): unresolved reference z2ui5_cl_srt_datadescr — add require manually
+const z2ui5_cl_srt_datadescr = require("abap2UI5/z2ui5_cl_srt_datadescr");
 
 class z2ui5_cl_srt_refdescr extends z2ui5_cl_srt_datadescr {
   referenced_type = null;
 
-  constructor({ !rtti } = {}) {
+  constructor({ rtti } = {}) {
     super.constructor(rtti);
     this.referenced_type = null; // TODO(abap2js): CREATE OBJECT referenced_type TYPE z2ui5_cl_srt_typedescr EXPORTING rtti = rtti->get_referenced_type( ).
     if (this.referenced_type.not_serializable === true) {

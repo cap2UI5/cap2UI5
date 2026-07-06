@@ -1,7 +1,6 @@
 // TODO(abap2js): unresolved reference cl_abap_datadescr — add require manually
 // TODO(abap2js): unresolved reference cl_abap_structdescr — add require manually
 // TODO(abap2js): unresolved reference cl_abap_tabledescr — add require manually
-// TODO(abap2js): unresolved reference cl_abap_typedescr — add require manually
 const z2ui5_cl_demo_app_333 = require("./z2ui5_cl_demo_app_333");
 const z2ui5_cl_demo_app_336 = require("./z2ui5_cl_demo_app_336");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
@@ -60,10 +59,11 @@ class z2ui5_cl_demo_app_344 extends z2ui5_if_app {
   }
 
   xml_table({ i_page, i_client, i_data, i_layout } = {}) {
+    let sy_tabix = 0;
     // TODO(abap2js): ASSIGN i_data->* TO FIELD-SYMBOL(<table>).
     const table = i_page.table({ width: `auto`, items: i_client._bind_edit({ val: table }) });
     const columns = table.columns();
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const layout of i_layout.ms_data.t_layout) {
       sy_tabix++;
       let lv_index = sy_tabix;
@@ -72,7 +72,7 @@ class z2ui5_cl_demo_app_344 extends z2ui5_if_app {
     }
     const column_list_item = columns.get_parent().items().column_list_item({ valign: `Middle`, type: `Inactive` });
     const cells = column_list_item.cells();
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const layout of i_layout.ms_data.t_layout) {
       sy_tabix++;
       lv_index = sy_tabix;
@@ -89,7 +89,7 @@ class z2ui5_cl_demo_app_344 extends z2ui5_if_app {
       // TODO(abap2js): CREATE DATA mt_data TYPE HANDLE new_table_desc.
       // TODO(abap2js): ASSIGN mt_data->* TO <table>.
       // TODO(abap2js): SELECT * FROM (iv_tabname) INTO CORRESPONDING FIELDS OF TABLE @<table> UP TO 3 ROWS.
-      // TODO(abap2js): SORT <table>.
+      table.sort();
     } catch (error) {
     }
   }
@@ -103,20 +103,21 @@ class z2ui5_cl_demo_app_344 extends z2ui5_if_app {
       // TODO(abap2js): CREATE DATA mt_data2 TYPE HANDLE new_table_desc.
       // TODO(abap2js): ASSIGN mt_data2->* TO <table>.
       // TODO(abap2js): SELECT * FROM (iv_tabname) INTO CORRESPONDING FIELDS OF TABLE @<table> UP TO 4 ROWS.
-      // TODO(abap2js): SORT <table>.
+      table.sort();
     } catch (error) {
     }
   }
 
   get_comp({ iv_tabname } = {}) {
     let result = [];
+    let sy_tabix = 0;
     let selkz = false;
     try {
       try {
-        cl_abap_typedescr.describe_by_name(/* TODO(abap2js): out-params */ EXPORTING p_name = iv_tabname RECEIVING p_descr_ref = DATA ( typedesc ) EXCEPTIONS type_not_found = 1 OTHERS = 2);
+        // TODO(abap2js): cl_abap_typedescr=>describe_by_name( EXPORTING p_name = iv_tabname RECEIVING p_descr_ref = DATA(typedesc) EXCEPTIONS type_not_found = 1 OTHERS = 2 ).
         const structdesc = (typedesc);
         const comp = structdesc.get_components();
-        let sy_tabix = 0;
+        sy_tabix = 0;
         for (const com of comp) {
           sy_tabix++;
           if (com.as_include === false) {
@@ -125,7 +126,7 @@ class z2ui5_cl_demo_app_344 extends z2ui5_if_app {
         }
       } catch (error) {
       }
-      const component = value cl_abap_structdescr.component_table((name === `SELKZ` type === (cl_abap_datadescr.describe_by_data(selkz))));
+      const component = [{ name: `SELKZ`, type: (cl_abap_datadescr.describe_by_data(selkz)) }];
       result.push(...component);
     } catch (error) {
     }

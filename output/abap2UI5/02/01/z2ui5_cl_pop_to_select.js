@@ -41,21 +41,22 @@ class z2ui5_cl_pop_to_select extends z2ui5_if_app {
   }
 
   display() {
+    let sy_tabix = 0;
     // TODO(abap2js): FIELD-SYMBOLS <tab_out> TYPE STANDARD TABLE.
     // TODO(abap2js): ASSIGN mr_tab_popup->* TO <tab_out>.
     const popup = z2ui5_cl_xml_view.factory_popup();
-    const tab = popup.table_select_dialog({ items: `{path:'` + this.client._bind_edit({ val: tab_out, path: true }) + `', sorter : { path : '${this.sort_field.toUpperCase()}', descending : ` + z2ui5_cl_util.boolean_abap_2_json(this.descending) + ` } }`, cancel: this.client._event(`CANCEL`), search: this.client._event(`SEARCH`, [`${$parameters>/value}`, `${$parameters>/clearButtonPressed}`]), confirm: this.client._event(`CONFIRM`, [`${$parameters>/selectedContexts[0]/sPath}`]), growing: true, contentwidth: this.content_width, contentheight: this.content_height, growingthreshold: this.growing_threshold, title: this.title, multiselect: this.multiselect });
+    const tab = popup.table_select_dialog({ items: `{path:'` + this.client._bind_edit({ val: tab_out, path: true }) + `', sorter : { path : '${this.sort_field.toUpperCase()}', descending : ` + z2ui5_cl_util.boolean_abap_2_json(this.descending) + ` } }`, cancel: this.client._event(`CANCEL`), search: this.client._event(`SEARCH`, [`\${$parameters>/value}`, `\${$parameters>/clearButtonPressed}`]), confirm: this.client._event(`CONFIRM`, [`\${$parameters>/selectedContexts[0]/sPath}`]), growing: true, contentwidth: this.content_width, contentheight: this.content_height, growingthreshold: this.growing_threshold, title: this.title, multiselect: this.multiselect });
     const lt_comp = z2ui5_cl_util.rtti_get_t_attri_by_any(tab_out);
     for (let _i = lt_comp.length - 1; _i >= 0; _i--) { const row = lt_comp[_i]; if (row.name === `ZZSELKZ`) lt_comp.splice(_i, 1); }
     const list = tab.column_list_item({ valign: `Top`, selected: `{ZZSELKZ}` });
     const cells = list.cells();
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const ls_comp of lt_comp) {
       sy_tabix++;
       cells.text(`{${ls_comp.name}}`);
     }
     const columns = tab.columns();
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const ls_comp of lt_comp) {
       sy_tabix++;
       const text = (medium_label ? medium_label : ls_comp.name);
@@ -97,6 +98,7 @@ class z2ui5_cl_pop_to_select extends z2ui5_if_app {
   }
 
   set_output_table() {
+    let sy_tabix = 0;
     let lr_row = null;
     // TODO(abap2js): FIELD-SYMBOLS <tab> TYPE STANDARD TABLE.
     // TODO(abap2js): FIELD-SYMBOLS <tab_out> TYPE STANDARD TABLE.
@@ -124,8 +126,8 @@ class z2ui5_cl_pop_to_select extends z2ui5_if_app {
     // TODO(abap2js): CREATE DATA mr_tab_popup_backup TYPE HANDLE lo_tab_type.
     // TODO(abap2js): ASSIGN mr_tab_popup->* TO <tab_out>.
     // TODO(abap2js): ASSIGN mr_tab_popup_backup->* TO <tab_out2>.
-    let sy_tabix = 0;
-    for (const fs of tab) {
+    sy_tabix = 0;
+    for (const row of tab) {
       sy_tabix++;
       // TODO(abap2js): CREATE DATA lr_row LIKE LINE OF <tab_out>.
       // TODO(abap2js): ASSIGN lr_row->* TO <row2>.
@@ -142,6 +144,7 @@ class z2ui5_cl_pop_to_select extends z2ui5_if_app {
   }
 
   on_event_confirm() {
+    let sy_tabix = 0;
     // TODO(abap2js): FIELD-SYMBOLS <tab> TYPE STANDARD TABLE.
     // TODO(abap2js): FIELD-SYMBOLS <table_result> TYPE ANY TABLE.
     // TODO(abap2js): FIELD-SYMBOLS <row_selected> TYPE any.
@@ -152,8 +155,8 @@ class z2ui5_cl_pop_to_select extends z2ui5_if_app {
     // TODO(abap2js): ASSIGN ms_result-table->* TO <table_result>.
     // TODO(abap2js): ASSIGN ms_result-row->* TO <row_result>.
     table_result = null;
-    let sy_tabix = 0;
-    for (const fs of tab) {
+    sy_tabix = 0;
+    for (const row_selected of tab) {
       sy_tabix++;
       // TODO(abap2js): ASSIGN COMPONENT `ZZSELKZ` OF STRUCTURE <row_selected> TO <selkz>.
       if (!(sy_subrc === 0)) throw new Error(`ASSERT failed`);
@@ -183,7 +186,7 @@ class z2ui5_cl_pop_to_select extends z2ui5_if_app {
     // TODO(abap2js): ASSIGN mr_tab_popup->* TO <tab_out>.
     // TODO(abap2js): ASSIGN mr_tab_popup_backup->* TO <tab_out_backup>.
     tab_out = tab_out_backup;
-    z2ui5_cl_util.itab_filter_by_val(/* TODO(abap2js): out-params */ EXPORTING val = client -> get_event_arg ( 1 ) ignore_case = abap_true CHANGING tab = <tab_out>);
+    z2ui5_cl_util.itab_filter_by_val({ val: this.client.get_event_arg(1), ignore_case: true, tab: tab_out });
     this.client.popup_model_update();
   }
 }

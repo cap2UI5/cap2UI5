@@ -61,7 +61,7 @@ class z2ui5_cl_demo_app_160 extends z2ui5_if_app {
     columns.ui_column({ width: `5rem`, sortproperty: `PL_TOTAL`, filterproperty: `PL_TOTAL` })
       .text(`Column 5`)
       .ui_template()
-      .input({ value: `{PL_TOTAL}`, submit: this.client._event(`PL_TOTAL_CHANGE`, [`${$source>/id}`, `${INDEX}`, `$event.oSource.oParent.sId`]), editable: true, type: `Number` });
+      .input({ value: `{PL_TOTAL}`, submit: this.client._event(`PL_TOTAL_CHANGE`, [`\${$source>/id}`, `\${INDEX}`, `$event.oSource.oParent.sId`]), editable: true, type: `Number` });
     columns.ui_column({ width: `4rem`, sortproperty: `per_cent_total`, filterproperty: `per_cent_total` })
       .text(`Column 6`)
       .ui_template()

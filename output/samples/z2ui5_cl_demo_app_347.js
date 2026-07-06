@@ -45,9 +45,10 @@ class z2ui5_cl_demo_app_347 extends z2ui5_if_app {
   }
 
   xml_table({ i_page, i_client } = {}) {
+    let sy_tabix = 0;
     const table = i_page.table({ width: `auto`, items: i_client._bind_edit({ val: this.mt_data }) });
     const columns = table.columns();
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const layout of this.mo_layout_obj.ms_data.t_layout) {
       sy_tabix++;
       let lv_index = sy_tabix;
@@ -56,7 +57,7 @@ class z2ui5_cl_demo_app_347 extends z2ui5_if_app {
     }
     const column_list_item = columns.get_parent().items().column_list_item({ valign: `Middle`, type: `Inactive` });
     const cells = column_list_item.cells();
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const layout of this.mo_layout_obj.ms_data.t_layout) {
       sy_tabix++;
       lv_index = sy_tabix;

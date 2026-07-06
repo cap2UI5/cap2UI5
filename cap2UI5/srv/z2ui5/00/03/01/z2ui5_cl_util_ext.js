@@ -16,14 +16,15 @@ class z2ui5_cl_util_ext {
     let xco_cp_abap = ``;
     lv_classname = i_classname;
     xco_cp_abap = `XCO_CP_ABAP`;
-    call this.method(xco_cp_abap).( `CLASS` ) exporting iv_name === lv_classname receiving ro_class === obj;
-    call method obj.( `IF_XCO_AO_CLASS~CONTENT` ) receiving ro_content === content;
-    call method content.( `IF_XCO_CLAS_CONTENT~GET_SHORT_DESCRIPTION` ) receiving rv_short_description === result;
+    // TODO(abap2js): CALL METHOD (xco_cp_abap)=>(`CLASS`) EXPORTING iv_name = lv_classname RECEIVING ro_class = obj.
+    // TODO(abap2js): CALL METHOD obj->(`IF_XCO_AO_CLASS~CONTENT`) RECEIVING ro_content = content.
+    // TODO(abap2js): CALL METHOD content->(`IF_XCO_CLAS_CONTENT~GET_SHORT_DESCRIPTION`) RECEIVING rv_short_description = result.
     return result;
   }
 
   static rtti_get_t_attri_on_prem({ tabname } = {}) {
     let result = [];
+    let sy_tabix = 0;
     let structdescr = null;
     let dfies = null;
     let s_dfies = {};
@@ -55,10 +56,11 @@ class z2ui5_cl_util_ext {
       }
       structdescr = cl_abap_structdescr.describe_by_name(tabname);
       dfies = structdescr.get_ddic_field_list();
-      let sy_tabix = 0;
-      for (const fs of dfies) {
+      sy_tabix = 0;
+      for (const line of dfies) {
         sy_tabix++;
-        let sy_tabix = 0;
+        const _sy_tabix_1 = sy_tabix;
+        sy_tabix = 0;
         for (const comp of comps) {
           sy_tabix++;
           // TODO(abap2js): ASSIGN COMPONENT comp-name OF STRUCTURE <line> TO <value>.
@@ -73,6 +75,7 @@ class z2ui5_cl_util_ext {
           // TODO(abap2js): UNASSIGN <value>.
           // TODO(abap2js): UNASSIGN <value_dest>.
         }
+        sy_tabix = _sy_tabix_1;
         result.push(s_dfies);
         s_dfies = null;
       }
@@ -83,6 +86,7 @@ class z2ui5_cl_util_ext {
 
   static rtti_get_t_attri_on_cloud({ tabname } = {}) {
     let result = [];
+    let sy_tabix = 0;
     let obj = null;
     let lv_tabname = ``;
     let lr_ddfields = null;
@@ -95,21 +99,21 @@ class z2ui5_cl_util_ext {
     try {
       try {
         const lv_method2 = `XCO_CP_ABAP_DICTIONARY`;
-        call this.method(lv_method2).( `DATABASE_TABLE` ) exporting iv_name === lv_tabname receiving ro_database_table === obj;
+        // TODO(abap2js): CALL METHOD (lv_method2)=>(`DATABASE_TABLE`) EXPORTING iv_name = lv_tabname RECEIVING ro_database_table = obj.
         // TODO(abap2js): ASSIGN obj->(`IF_XCO_DATABASE_TABLE~FIELDS->IF_XCO_DBT_FIELDS_FACTORY~KEY`) TO <any>.
         if (sy_subrc !== 0) {
           throw new cx_sy_dyn_call_illegal_class();
         }
         obj = any;
-        call method obj.( `IF_XCO_DBT_FIELDS~GET_NAMES` ) receiving rt_names === names;
+        // TODO(abap2js): CALL METHOD obj->(`IF_XCO_DBT_FIELDS~GET_NAMES`) RECEIVING rt_names = names.
       } catch (error) {
         const workaround = `DDFIELDS`;
         // TODO(abap2js): CREATE DATA lr_ddfields TYPE (workaround).
         // TODO(abap2js): ASSIGN lr_ddfields->* TO <ddfields>.
         if (!(sy_subrc === 0)) throw new Error(`ASSERT failed`);
         ddfields = (cl_abap_typedescr.describe_by_name(lv_tabname)).get_ddic_field_list();
-        let sy_tabix = 0;
-        for (const fs of ddfields) {
+        sy_tabix = 0;
+        for (const any of ddfields) {
           sy_tabix++;
           // TODO(abap2js): ASSIGN COMPONENT `KEYFLAG` OF STRUCTURE <any> TO <field>.
           if (sy_subrc !== 0 || field !== true) {
@@ -123,7 +127,7 @@ class z2ui5_cl_util_ext {
     } catch (error) {
     }
     const lt_comp = z2ui5_cl_util.rtti_get_t_attri_by_any(tabname);
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const lr_comp of lt_comp) {
       sy_tabix++;
       let lv_check_key = false;
@@ -167,7 +171,8 @@ class z2ui5_cl_util_ext {
     return result;
   }
 
-  static bus_search_help_read() {
+  static bus_search_help_read({ ms_shlp, mv_fname, mv_table, mr_data, mt_result_desc, mv_shlpfield, mt_data, ms_data_row } = {}) {
+    let sy_tabix = 0;
     let lt_result_tab = [];
     let ls_comp = null;
     let lt_comps = [];
@@ -203,10 +208,10 @@ class z2ui5_cl_util_ext {
       }
     }
     if (mr_data != null) {
-      let sy_tabix = 0;
+      sy_tabix = 0;
       for (const r_interface of ms_shlp.interface) {
         sy_tabix++;
-        if (!(!value)) continue;
+        if (!(!r_interface.value)) continue;
         // TODO(abap2js): FIELD-SYMBOLS <any> TYPE any.
         // TODO(abap2js): ASSIGN mr_data->* TO <any>.
         // TODO(abap2js): FIELD-SYMBOLS <value> TYPE any.
@@ -217,17 +222,17 @@ class z2ui5_cl_util_ext {
         r_interface.value = value;
       }
     }
-    let sy_tabix = 0;
-    for (const interface of ms_shlp.interface) {
+    sy_tabix = 0;
+    for (const interface_ of ms_shlp.interface) {
       sy_tabix++;
-      if (interface.valfield === mv_fname) {
-        mv_shlpfield = interface.shlpfield;
+      if (interface_.valfield === mv_fname) {
+        mv_shlpfield = interface_.shlpfield;
       }
-      if (interface.value) {
-        ms_shlp.selopt = /* TODO(abap2js): VALUE FOR/BASE */ [];
+      if (interface_.value) {
+        ms_shlp.selopt = [...(ms_shlp.selopt ?? []),{ shlpfield: interface_.shlpfield, shlpname: interface_.valtabname, option: ([...String(interface_.value)].some(($c) => String(`*`).includes($c)) ? `CP` : `EQ`), sign: `I`, low: interface_.value }];
       }
     }
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const fieldrop of ms_shlp.fieldprop) {
       sy_tabix++;
       if (!fieldrop.defaultval) {
@@ -235,7 +240,7 @@ class z2ui5_cl_util_ext {
       }
       const valule = fieldrop.defaultval;
       // TODO(abap2js): REPLACE ALL OCCURRENCES OF `'` IN valule WITH ``.
-      ms_shlp.selopt = /* TODO(abap2js): VALUE FOR/BASE */ [];
+      ms_shlp.selopt = [...(ms_shlp.selopt ?? []),{ shlpfield: fieldrop.fieldname, option: ([...String(fieldrop.defaultval)].some(($c) => String(`*`).includes($c)) ? `CP` : `EQ`), sign: `I`, low: valule }];
     }
     // TODO(abap2js): CREATE DATA lr_shlp TYPE (lv_type).
     // TODO(abap2js): ASSIGN lr_shlp->* TO <shlp>.
@@ -243,12 +248,12 @@ class z2ui5_cl_util_ext {
     // TODO(abap2js): MOVE-CORRESPONDING ms_shlp TO <shlp>.
     lv_fm = `F4IF_SELECT_VALUES`;
     // TODO(abap2js): CALL FUNCTION lv_fm EXPORTING shlp = <shlp> sort = space call_shlp_exit = abap_true TABLES record_tab = lt_result_tab recdescr_tab = mt_result_desc.
-    ms_shlp.fieldprop.sort((a, b) => (a.shlplispos > b.shlplispos ? 1 : a.shlplispos < b.shlplispos ? -1 : 0));
-    let sy_tabix = 0;
+    ms_shlp.fieldprop.sort((a, b) => ((a.shlplispos > b.shlplispos ? 1 : a.shlplispos < b.shlplispos ? -1 : 0)));
+    sy_tabix = 0;
     for (const field_props of ms_shlp.fieldprop) {
       sy_tabix++;
-      if (!(shlplispos)) continue;
-      const descption = (mt_result_desc.find((row) => row.fieldname === field_props.fieldname) optional);
+      if (!(field_props.shlplispos)) continue;
+      const descption = (() => { try { return mt_result_desc.find((row) => row.fieldname === field_props.fieldname) ?? null; } catch { return null; } })();
       ls_comp.name = descption.fieldname;
       ls_comp.type = cl_abap_datadescr.describe_by_name(descption.rollname);
       lt_comps.push(ls_comp);
@@ -270,12 +275,13 @@ class z2ui5_cl_util_ext {
     if (ms_data_row != null) {
       // TODO(abap2js): CREATE DATA ms_data_row TYPE HANDLE strucdescr.
     }
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const result_line of lt_result_tab) {
       sy_tabix++;
       // TODO(abap2js): CREATE DATA lr_line TYPE HANDLE strucdescr.
       // TODO(abap2js): ASSIGN lr_line->* TO FIELD-SYMBOL(<fs_line>).
-      let sy_tabix = 0;
+      const _sy_tabix_1 = sy_tabix;
+      sy_tabix = 0;
       for (const result_desc of mt_result_desc) {
         sy_tabix++;
         // TODO(abap2js): ASSIGN COMPONENT result_desc-fieldname OF STRUCTURE <fs_line> TO FIELD-SYMBOL(<line_content>).
@@ -294,26 +300,27 @@ class z2ui5_cl_util_ext {
           }
         }
       }
+      sy_tabix = _sy_tabix_1;
       fs_target_tab.push(fs_line);
     }
-    let sy_tabix = 0;
-    for (const interface of ms_shlp.interface) {
+    sy_tabix = 0;
+    for (const interface_ of ms_shlp.interface) {
       sy_tabix++;
-      if (interface.value) {
+      if (interface_.value) {
         // TODO(abap2js): UNASSIGN <any>.
         // TODO(abap2js): ASSIGN ms_data_row->* TO <any>.
         // TODO(abap2js): ASSIGN COMPONENT interface-shlpfield OF STRUCTURE <any> TO <value>.
         if (sy_subrc !== 0) {
           continue;
         }
-        value = interface.value;
+        value = interface_.value;
       }
     }
     // TODO(abap2js): FIELD-SYMBOLS <tab> TYPE STANDARD TABLE.
     // TODO(abap2js): FIELD-SYMBOLS <line> TYPE any.
     // TODO(abap2js): ASSIGN mt_data->* TO <tab>.
-    let sy_tabix = 0;
-    for (const fs of tab) {
+    sy_tabix = 0;
+    for (const line of tab) {
       sy_tabix++;
       // TODO(abap2js): ASSIGN COMPONENT 'ROW_ID' OF STRUCTURE <line> TO FIELD-SYMBOL(<row>).
       if (row != null) {
@@ -324,8 +331,9 @@ class z2ui5_cl_util_ext {
 
   static tab_get_where_by_dfies({ mv_check_tab_field, ms_data_row, it_dfies } = {}) {
     let result = ``;
-    let val = ``;
     let sy_tabix = 0;
+    let val = ``;
+    sy_tabix = 0;
     for (const dfies of it_dfies) {
       sy_tabix++;
       if (!((dfies.keyflag === true || dfies.fieldname === mv_check_tab_field))) {
@@ -342,28 +350,29 @@ class z2ui5_cl_util_ext {
       if (result) {
         const and = ` AND `;
       }
-      if (value CA `_`) {
+      if ([...String(value)].some(($c) => String(`_`).includes($c))) {
         const escape = `ESCAPE '#'`;
       } else {
         escape = null;
       }
       val = value;
-      if (val CA `_`) {
+      if ([...String(val)].some(($c) => String(`_`).includes($c))) {
         // TODO(abap2js): REPLACE ALL OCCURRENCES OF `_` IN val WITH `#_`.
       }
-      result = `${result}${&&} ( ${dfies.fieldname} LIKE '%${val}%' ${escape} )`;
+      result = `${result}${and} ( ${dfies.fieldname} LIKE '%${val}%' ${escape} )`;
     }
     return result;
   }
 
   static _get_e071k_tabkey({ dfies } = {}) {
     let rv_tabkey = null;
+    let sy_tabix = 0;
     let lv_type = ``;
     let lv_tabkey = ``;
     let lv_tabkey_len = 0;
     let lv_field_len = 0;
     let lv_offset = 0;
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const s_dfies of dfies) {
       sy_tabix++;
       if (!(s_dfies.keyflag === true)) continue;
@@ -372,23 +381,23 @@ class z2ui5_cl_util_ext {
         continue;
       }
       lv_type = cl_abap_typedescr.describe_by_data(value).type_kind;
-      if (lv_type NA `CDNT`) {
-        lv_tabkey + lv_tabkey_len = `*`;
+      if (![...String(lv_type)].some(($c) => String(`CDNT`).includes($c))) {
+        // TODO(abap2js): lv_tabkey+lv_tabkey_len = '*'.
         rv_tabkey = lv_tabkey;
         return rv_tabkey;
       } else {
         lv_field_len = cl_abap_typedescr.describe_by_data(value).length / cl_abap_char_utilities.charsize;
       }
       lv_field_len = cl_abap_typedescr.describe_by_data(value).length / cl_abap_char_utilities.charsize;
-      lv_tabkey + lv_tabkey_len (lv_field_len) = value;
+      // TODO(abap2js): lv_tabkey+lv_tabkey_len(lv_field_len) = <value>.
       lv_tabkey_len = lv_tabkey_len + lv_field_len;
     }
     if (lv_tabkey_len > 119) {
-      if (lv_tabkey.toLowerCase().includes(String(`_`).toLowerCase())) {
+      if (String(lv_tabkey).toLowerCase().includes(String(`_`).toLowerCase())) {
         lv_offset = sy_fdpos;
-        lv_tabkey + lv_offset = `*`;
+        // TODO(abap2js): lv_tabkey+lv_offset = '*'.
       } else {
-        lv_tabkey + 119 = `*`;
+        // TODO(abap2js): lv_tabkey+119 = '*'.
       }
     }
     rv_tabkey = lv_tabkey;
@@ -427,6 +436,7 @@ class z2ui5_cl_util_ext {
 
   static _set_e071k({ ir_data, iv_tabname, is_transport } = {}) {
     let result = null;
+    let sy_tabix = 0;
     let t_e071k = null;
     let s_e071k = null;
     // TODO(abap2js): FIELD-SYMBOLS <t_e071k> TYPE STANDARD TABLE.
@@ -488,8 +498,8 @@ class z2ui5_cl_util_ext {
     }
     // TODO(abap2js): UNASSIGN <value>.
     // TODO(abap2js): ASSIGN ir_data->* TO <tab>.
-    let sy_tabix = 0;
-    for (const fs of tab) {
+    sy_tabix = 0;
+    for (const line of tab) {
       sy_tabix++;
       // TODO(abap2js): ASSIGN COMPONENT 'TABKEY' OF STRUCTURE <s_e071k> TO <value>.
       if (!(value != null)) {
@@ -560,7 +570,8 @@ class z2ui5_cl_util_ext {
     return result;
   }
 
-  static _read_e070() {
+  static _read_e070({ mt_data } = {}) {
+    let sy_tabix = 0;
     let lo_tab = null;
     let lo_line = null;
     let ls_data = {};
@@ -583,8 +594,8 @@ class z2ui5_cl_util_ext {
       }
     } catch (error) {
     }
-    let sy_tabix = 0;
-    for (const <line> of table) {
+    sy_tabix = 0;
+    for (const line of table) {
       sy_tabix++;
       // TODO(abap2js): ASSIGN COMPONENT 'TRKORR' OF STRUCTURE <line> TO <value>.
       if (!(value != null)) {
@@ -606,6 +617,7 @@ class z2ui5_cl_util_ext {
 
   static bus_tr_read() {
     let mt_data = [];
+    let sy_tabix = 0;
     if (z2ui5_cl_util.context_check_abap_cloud()) {
     } else {
       let lo_tab = null;
@@ -613,7 +625,7 @@ class z2ui5_cl_util_ext {
       // TODO(abap2js): FIELD-SYMBOLS <table> TYPE STANDARD TABLE.
       // TODO(abap2js): FIELD-SYMBOLS <line> TYPE any.
       // TODO(abap2js): FIELD-SYMBOLS <value> TYPE any.
-      z2ui5_cl_util_ext._read_e070(/* TODO(abap2js): out-params */ CHANGING mt_data = mt_data);
+      z2ui5_cl_util_ext._read_e070({ mt_data: { mt_data } });
       const table_name = `E07T`;
       try {
         const t_comp = z2ui5_cl_util.rtti_get_t_attri_by_table_name(table_name);
@@ -624,7 +636,7 @@ class z2ui5_cl_util_ext {
         // TODO(abap2js): ASSIGN lo_tab->* TO <table>.
         // TODO(abap2js): ASSIGN lo_line->* TO <line>.
         let index = 0;
-        let sy_tabix = 0;
+        sy_tabix = 0;
         for (const line of mt_data) {
           sy_tabix++;
           index = index + 1;
@@ -641,8 +653,8 @@ class z2ui5_cl_util_ext {
         }
       } catch (error) {
       }
-      let sy_tabix = 0;
-      for (const <line> of table) {
+      sy_tabix = 0;
+      for (const line of table) {
         sy_tabix++;
         // TODO(abap2js): ASSIGN COMPONENT 'TRKORR' OF STRUCTURE <line> TO <value>.
         if (!(value != null)) {
@@ -664,11 +676,12 @@ class z2ui5_cl_util_ext {
   }
 
   static set_mandt({ ir_data } = {}) {
+    let sy_tabix = 0;
     // TODO(abap2js): FIELD-SYMBOLS <tab> TYPE STANDARD TABLE.
     // TODO(abap2js): FIELD-SYMBOLS <line> TYPE any.
     // TODO(abap2js): ASSIGN ir_data->* TO <tab>.
-    let sy_tabix = 0;
-    for (const fs of tab) {
+    sy_tabix = 0;
+    for (const line of tab) {
       sy_tabix++;
       // TODO(abap2js): ASSIGN COMPONENT `MANDT` OF STRUCTURE <line> TO FIELD-SYMBOL(<row>).
       if (row != null) {
@@ -680,7 +693,7 @@ class z2ui5_cl_util_ext {
     }
   }
 
-  static conv_exit({ name, val } = {}) {
+  static conv_exit({ name, val, result } = {}) {
     if (z2ui5_cl_util.context_check_abap_cloud()) {
     } else {
       const conv = `CONVERSION_EXIT_${name.convexit}_INPUT`;

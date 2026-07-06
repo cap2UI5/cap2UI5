@@ -41,8 +41,9 @@ class z2ui5_cl_demo_app_111 extends z2ui5_if_app {
   }
 
   set_search() {
+    let sy_tabix = 0;
     if (this.mv_search_value) {
-      let sy_tabix = 0;
+      sy_tabix = 0;
       for (const lr_row of this.mt_table) {
         sy_tabix++;
         let lv_row = ``;
@@ -55,7 +56,7 @@ class z2ui5_cl_demo_app_111 extends z2ui5_if_app {
           lv_row = lv_row + field;
           lv_index = lv_index + 1;
         }
-        if (lv_row NS this.mv_search_value) {
+        if (!String(lv_row).toLowerCase().includes(String(this.mv_search_value).toLowerCase())) {
           // TODO(abap2js): DELETE mt_table.
         }
       }

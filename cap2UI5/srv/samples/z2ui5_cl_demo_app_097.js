@@ -27,7 +27,7 @@ class z2ui5_cl_demo_app_097 extends z2ui5_if_app {
     lo_columns.get_parent()
       .ui_row_action_template()
       .ui_row_action()
-      .ui_row_action_item({ icon: `sap-icon://delete`, press: this.client._event(`ROW_DELETE`, [`${TITLE}`]) });
+      .ui_row_action_item({ icon: `sap-icon://delete`, press: this.client._event(`ROW_DELETE`, [`\${TITLE}`]) });
     this.client.nest_view_display(lo_view_nested.stringify(), `test`, `addMidColumnPage`, `removeAllMidColumnPages`);
   }
 
@@ -54,7 +54,7 @@ class z2ui5_cl_demo_app_097 extends z2ui5_if_app {
         const lt_arg = client.get().T_EVENT_ARG;
         // TODO(abap2js): READ TABLE lt_arg INTO DATA(ls_arg) INDEX 1.
         if (ls_arg) {
-          for (let _i = this.t_tab2.length - 1; _i >= 0; _i--) { const row = this.t_tab2[_i]; if (row.title === ls_arg) this.t_tab2.splice(_i, 1); }
+          for (let _i = this.t_tab2.length - 1; _i >= 0; _i--) { const row = this.t_tab2[_i]; if (row.title === row.ls_arg) this.t_tab2.splice(_i, 1); }
         }
         client.nest_view_model_update();
         break;

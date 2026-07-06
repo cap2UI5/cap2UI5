@@ -1,9 +1,6 @@
 // TODO(abap2js): unresolved reference z2ui5_cl_core_app — add require manually
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cx_util_error = require("abap2UI5/z2ui5_cx_util_error");
-const z2ui5_if_client~_event = require("abap2UI5/z2ui5_if_client~_event");
-const z2ui5_if_client~action = require("abap2UI5/z2ui5_if_client~action");
-const z2ui5_if_client~get_app = require("abap2UI5/z2ui5_if_client~get_app");
 const z2ui5_if_core_types = require("abap2UI5/z2ui5_if_core_types");
 
 class z2ui5_cl_core_client {
@@ -15,7 +12,7 @@ class z2ui5_cl_core_client {
     this.mo_action = action;
     this.mo_srv_bind = /* TODO(abap2js): NEW #( ) */ null;
     this.mo_srv_event = /* TODO(abap2js): NEW #( ) */ null;
-    z2ui5_if_client~action = this;
+    this.action = this;
   }
 
   follow_up_action() {
@@ -25,7 +22,7 @@ class z2ui5_cl_core_client {
   gen() {
     let lv_val = ``;
     lv_val = val;
-    if (!lv_val || lv_val CN `ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_`) {
+    if (!lv_val || ![...String(lv_val)].every(($c) => String(`ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_`).includes($c))) {
       throw new z2ui5_cx_util_error({ val: `action: invalid event name '${val}' - only A-Z, a-z, 0-9 and _ allowed` });
     }
     this.mo_action.ms_next.s_set.s_follow_up_action.custom_js.push(this.mo_srv_event.get_event_client({ val, t_arg }));
@@ -40,7 +37,8 @@ class z2ui5_cl_core_client {
   }
 
   get() {
-    result = { event: this.mo_action.ms_actual.event, check_launchpad_active: this.mo_action.mo_http_post.ms_request.s_control.check_launchpad, t_event_arg: this.mo_action.ms_actual.t_event_arg, s_draft: ({ ...this.mo_action.mo_app.ms_draft }), check_on_navigated: this.mo_action.ms_actual.check_on_navigated, s_config: ({ ...this.mo_action.mo_http_post.ms_request.s_front }), s_device: this.mo_action.mo_http_post.ms_request.s_front.s_device, s_focus: this.mo_action.mo_http_post.ms_request.s_front.s_focus, s_scroll: this.mo_action.mo_http_post.ms_request.s_front.s_scroll, s_ui5: this.mo_action.mo_http_post.ms_request.s_front.s_ui5, r_event_data: this.mo_action.ms_actual.r_data _s_nav -, check_call: Boolean(this.mo_action.ms_next.o_app_call) _s_nav -, check_leave: Boolean(this.mo_action.ms_next.o_app_leave) };
+    let sy_tabix = 0;
+    result = { event: this.mo_action.ms_actual.event, check_launchpad_active: this.mo_action.mo_http_post.ms_request.s_control.check_launchpad, t_event_arg: this.mo_action.ms_actual.t_event_arg, s_draft: ({ ...this.mo_action.mo_app.ms_draft }), check_on_navigated: this.mo_action.ms_actual.check_on_navigated, s_config: ({ ...this.mo_action.mo_http_post.ms_request.s_front }), s_device: this.mo_action.mo_http_post.ms_request.s_front.s_device, s_focus: this.mo_action.mo_http_post.ms_request.s_front.s_focus, s_scroll: this.mo_action.mo_http_post.ms_request.s_front.s_scroll, s_ui5: this.mo_action.mo_http_post.ms_request.s_front.s_ui5, r_event_data: this.mo_action.ms_actual.r_data, _s_nav: { check_call: Boolean(this.mo_action.ms_next.o_app_call), check_leave: Boolean(this.mo_action.ms_next.o_app_leave) } };
     try {
       const lo_comp = this.mo_action.mo_http_post.ms_request.s_front.o_comp_data;
       if (lo_comp != null) {
@@ -50,7 +48,7 @@ class z2ui5_cl_core_client {
       if (lo_params != null) {
         return;
       }
-      let sy_tabix = 0;
+      sy_tabix = 0;
       for (const lr_comp of lo_params.mt_json_tree) {
         sy_tabix++;
         if (!(lr_comp.name === `1`)) continue;
@@ -131,7 +129,7 @@ class z2ui5_cl_core_client {
 
   nav_app_leave() {
     if (!(app !== undefined)) {
-      app = z2ui5_if_client~get_app (this.mo_action.mo_app.ms_draft.id_prev_app_stack);
+      app = this.get_app(this.mo_action.mo_app.ms_draft.id_prev_app_stack);
     }
     this.mo_action.ms_next.o_app_leave = app;
     this.mo_action.ms_next.next_event = event;
@@ -267,11 +265,11 @@ class z2ui5_cl_core_client {
   }
 
   get_app_prev() {
-    result = z2ui5_if_client~get_app (this.mo_action.mo_app.ms_draft.id_prev_app);
+    result = this.get_app(this.mo_action.mo_app.ms_draft.id_prev_app);
   }
 
   _event_nav_app_leave() {
-    result = z2ui5_if_client~_event (z2ui5_if_core_types.cs_event_nav_app_leave);
+    result = this._event(z2ui5_if_core_types.cs_event_nav_app_leave);
   }
 
   get_if_app() {

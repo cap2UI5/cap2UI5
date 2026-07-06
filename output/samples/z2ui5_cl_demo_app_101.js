@@ -27,7 +27,7 @@ class z2ui5_cl_demo_app_101 extends z2ui5_if_app {
       this.ms_feed.type = `Respond`;
       this.ms_feed.text = this.mv_value;
       this.mv_value = ``;
-      this.mt_feed index 1.push(this.ms_feed);
+      this.mt_feed.splice((1) - 1, 0, this.ms_feed);
       this.client.view_model_update();
     }
   }

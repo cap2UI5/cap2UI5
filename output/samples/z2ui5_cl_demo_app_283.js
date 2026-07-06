@@ -14,19 +14,19 @@ class z2ui5_cl_demo_app_283 extends z2ui5_if_app {
     page.header_content()
       .link({ text: `UI5 Demo Kit`, target: `_blank`, href: base_url + `sdk/#/entity/sap.m.FeedInput/sample/sap.m.sample.FeedInput` });
     page.label({ text: `Without Icon`, class: `sapUiSmallMarginTop sapUiTinyMarginBottom` });
-    page.feed_input({ post: client._event(`onPost`, [`${$source>/value}`]), showicon: false });
+    page.feed_input({ post: client._event(`onPost`, [`\${$source>/value}`]), showicon: false });
     page.label({ text: `With Icon Placeholder`, class: `sapUiSmallMarginTop sapUiTinyMarginBottom` });
-    page.feed_input({ post: client._event(`onPost`, [`${$source>/value}`]), showicon: true });
+    page.feed_input({ post: client._event(`onPost`, [`\${$source>/value}`]), showicon: true });
     page.label({ text: `With Icon Placeholder`, class: `sapUiSmallMarginTop sapUiTinyMarginBottom` });
-    page.feed_input({ post: client._event(`onPost`, [`${$source>/value}`]), showicon: true, icon: base_url + `test-resources/sap/m/images/george_washington.jpg` });
+    page.feed_input({ post: client._event(`onPost`, [`\${$source>/value}`]), showicon: true, icon: base_url + `test-resources/sap/m/images/george_washington.jpg` });
     page.label({ text: `Disabled`, class: `sapUiSmallMarginTop sapUiTinyMarginBottom` });
-    page.feed_input({ post: client._event(`onPost`, [`${$source>/value}`]), enabled: false, showicon: true, icon: base_url + `test-resources/sap/m/images/george_washington.jpg` });
+    page.feed_input({ post: client._event(`onPost`, [`\${$source>/value}`]), enabled: false, showicon: true, icon: base_url + `test-resources/sap/m/images/george_washington.jpg` });
     page.label({ text: `Rows Set to 5`, class: `sapUiSmallMarginTop sapUiTinyMarginBottom` });
-    page.feed_input({ post: client._event(`onPost`, [`${$source>/value}`]), rows: `5` });
+    page.feed_input({ post: client._event(`onPost`, [`\${$source>/value}`]), rows: `5` });
     page.label({ text: `With Exceeded Text`, class: `sapUiSmallMarginTop sapUiTinyMarginBottom` });
-    page.feed_input({ post: client._event(`onPost`, [`${$source>/value}`]), maxlength: `20`, showexceededtext: true });
+    page.feed_input({ post: client._event(`onPost`, [`\${$source>/value}`]), maxlength: `20`, showexceededtext: true });
     page.label({ text: `With Growing`, class: `sapUiSmallMarginTop sapUiTinyMarginBottom` });
-    page.feed_input({ post: client._event(`onPost`, [`${$source>/value}`]), growing: true });
+    page.feed_input({ post: client._event(`onPost`, [`\${$source>/value}`]), growing: true });
     client.view_display(page.stringify());
   }
 

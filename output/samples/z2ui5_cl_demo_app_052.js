@@ -41,7 +41,7 @@ class z2ui5_cl_demo_app_052 extends z2ui5_if_app {
     lo_columns.column().text(`Location`);
     lo_columns.column().text(`Quantity`);
     const lo_cells = tab.items().column_list_item();
-    lo_cells.link({ id: `link`, text: `{PRODUCT}`, press: this.client._event(`POPOVER_DETAIL`, [`${$source>/id}`, `${PRODUCT}`]) });
+    lo_cells.link({ id: `link`, text: `{PRODUCT}`, press: this.client._event(`POPOVER_DETAIL`, [`\${$source>/id}`, `\${PRODUCT}`]) });
     lo_cells.text(`{CREATE_DATE}`);
     lo_cells.text(`{CREATE_BY}`);
     lo_cells.text(`{STORAGE_LOCATION}`);

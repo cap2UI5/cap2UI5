@@ -48,14 +48,15 @@ class z2ui5_cl_demo_app_011 extends z2ui5_if_app {
   }
 
   async main(client) {
+    let sy_tabix = 0;
     this.client = client;
     if (client.check_on_init()) {
       this.check_editable_active = false;
-      this.t_tab = [{ title: `entry 01`, value: `red`, info: `completed`, descr: `this is a description`, checkbox: true }, { title: `entry 02`, value: `blue`, info: `completed`, descr: `this is a description`, checkbox: true }, { title: `entry 03`, value: `green`, info: `completed`, descr: `this is a description`, checkbox: true }, { title: `entry 04`, value: `orange`, info: `completed`, descr: ``, checkbox: true }, { title: `entry 05`, value: `grey`, info: `completed`, descr: `this is a description`, checkbox: true }, ];
+      this.t_tab = [{ title: `entry 01`, value: `red`, info: `completed`, descr: `this is a description`, checkbox: true }, { title: `entry 02`, value: `blue`, info: `completed`, descr: `this is a description`, checkbox: true }, { title: `entry 03`, value: `green`, info: `completed`, descr: `this is a description`, checkbox: true }, { title: `entry 04`, value: `orange`, info: `completed`, descr: ``, checkbox: true }, { title: `entry 05`, value: `grey`, info: `completed`, descr: `this is a description`, checkbox: true }, { }];
       this.view_display();
     } else if (client.check_on_event(`BUTTON_EDIT`)) {
       this.check_editable_active = /* TODO(abap2js) */ xsdbool(this.check_editable_active === false);
-      let sy_tabix = 0;
+      sy_tabix = 0;
       for (const lr_tab of this.t_tab) {
         sy_tabix++;
         lr_tab.editable = this.check_editable_active;

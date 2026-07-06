@@ -1,4 +1,4 @@
-// TODO(abap2js): unresolved reference z2ui5_cl_ajson — add require manually
+const z2ui5_cl_ajson = require("abap2UI5/z2ui5_cl_ajson");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -30,7 +30,7 @@ class z2ui5_cl_demo_app_319 extends z2ui5_if_app {
       m_selection.product_type.ranges.push({ operation: `EQ`, value1: `EUR`, keyfield: `CurrencyCode`, tokentext: `Euro (auto added line)` });
       this.m_client.view_model_update();
       try {
-        this.m_client.message_box_display({ text: z2ui5_cl_ajson.new().set({ iv_path: `/`, iv_val: m_selection.product_type.ranges }).stringify(), title: `range content` });
+        this.m_client.message_box_display({ text: z2ui5_cl_ajson.new_().set({ iv_path: `/`, iv_val: m_selection.product_type.ranges }).stringify(), title: `range content` });
       } catch (lx_ajson) {
         this.m_client.message_toast_display(lx_ajson.get_text());
       }

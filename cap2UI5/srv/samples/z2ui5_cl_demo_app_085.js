@@ -17,10 +17,10 @@ class z2ui5_cl_demo_app_085 extends z2ui5_if_app {
 
   sort() {
     if (this.lv_sort_desc === true) {
-      this.mt_table.sort((a, b) => (a.productid > b.productid ? 1 : a.productid < b.productid ? -1 : 0));
+      this.mt_table.sort((a, b) => ((a.productid > b.productid ? 1 : a.productid < b.productid ? -1 : 0)));
       this.lv_sort_desc = false;
     } else {
-      this.mt_table.sort((a, b) => (a.productid > b.productid ? 1 : a.productid < b.productid ? -1 : 0) * -1);
+      this.mt_table.sort((a, b) => ((a.productid > b.productid ? 1 : a.productid < b.productid ? -1 : 0)) * -1);
       this.lv_sort_desc = true;
     }
   }
@@ -148,7 +148,7 @@ class z2ui5_cl_demo_app_085 extends z2ui5_if_app {
       .get_parent()
       .get_parent()
       .items()
-      .column_list_item({ type: `Navigation`, press: this.client._event(`ONPRESSSUPPLIER`, [`${SUPPLIERNAME}`]) })
+      .column_list_item({ type: `Navigation`, press: this.client._event(`ONPRESSSUPPLIER`, [`\${SUPPLIERNAME}`]) })
       .cells()
       .text(`{SUPPLIERNAME}`)
       .get_parent()
@@ -186,7 +186,7 @@ class z2ui5_cl_demo_app_085 extends z2ui5_if_app {
       .column({ halign: `End` })
       .text(`Price`);
     tab.items()
-      .column_list_item({ type: `Navigation`, press: this.client._event(`ONPRESSMASTER`, [`${KEY}`]) })
+      .column_list_item({ type: `Navigation`, press: this.client._event(`ONPRESSMASTER`, [`\${KEY}`]) })
       .cells()
       .object_identifier({ text: `{PRODUCTNAME}`, title: `{PRODUCTID}` })
       .get_parent()
@@ -293,8 +293,9 @@ class z2ui5_cl_demo_app_085 extends z2ui5_if_app {
   }
 
   set_search() {
+    let sy_tabix = 0;
     if (this.mv_search_value) {
-      let sy_tabix = 0;
+      sy_tabix = 0;
       for (const lr_row of this.mt_table) {
         sy_tabix++;
         let lv_row = ``;
@@ -307,7 +308,7 @@ class z2ui5_cl_demo_app_085 extends z2ui5_if_app {
           lv_row = lv_row + field;
           lv_index = lv_index + 1;
         }
-        if (lv_row NS this.mv_search_value) {
+        if (!String(lv_row).toLowerCase().includes(String(this.mv_search_value).toLowerCase())) {
           // TODO(abap2js): DELETE mt_table.
         }
       }

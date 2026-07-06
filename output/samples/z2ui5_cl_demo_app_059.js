@@ -20,7 +20,7 @@ class z2ui5_cl_demo_app_059 extends z2ui5_if_app {
     this.client = this.client;
     if (this.client.check_on_event(`BUTTON_SEARCH`)) {
       this.set_data();
-      z2ui5_cl_util.itab_filter_by_val(/* TODO(abap2js): out-params */ EXPORTING val = client -> get_event_arg ( 1 ) CHANGING tab = mt_table);
+      z2ui5_cl_util.itab_filter_by_val({ val: this.client.get_event_arg(1), tab: this.mt_table });
       this.client.view_model_update();
     }
   }
@@ -35,7 +35,7 @@ class z2ui5_cl_demo_app_059 extends z2ui5_if_app {
       .page({ id: `page_main`, title: `abap2UI5 - Search Field with Backend Live Change`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
     const lo_box = page1.vbox()
       .text(`Search`)
-      .search_field({ width: `17.5rem`, livechange: this.client._event(`BUTTON_SEARCH`, [`${$source>/value}`], { check_allow_multi_req: true }) });
+      .search_field({ width: `17.5rem`, livechange: this.client._event(`BUTTON_SEARCH`, [`\${$source>/value}`], { check_allow_multi_req: true }) });
     const tab = lo_box.table(this.client._bind(this.mt_table));
     const lo_columns = tab.columns();
     lo_columns.column().text(`Product`);

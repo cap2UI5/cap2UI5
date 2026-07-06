@@ -19,6 +19,7 @@ class z2ui5_cl_demo_app_332 extends z2ui5_if_app {
   }
 
   view_display({ client } = {}) {
+    let sy_tabix = 0;
     const page = z2ui5_cl_xml_view.factory()
       .shell()
       .page({ title: `RTTI IV`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
@@ -26,7 +27,7 @@ class z2ui5_cl_demo_app_332 extends z2ui5_if_app {
     const form = page.simple_form({ editable: true, layout: `ResponsiveGridLayout`, adjustlabelspan: true })
       .content(`form`);
     let index = 0;
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const layout of this.mo_table_obj.ms_data.t_layout) {
       sy_tabix++;
       index = index + 1;

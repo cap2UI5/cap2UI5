@@ -18,7 +18,7 @@ class z2ui5_cl_demo_app_104 extends z2ui5_if_app {
     if (this.mo_app_sub != null) {
       // TODO(abap2js): ASSIGN mo_app_sub->(`MO_VIEW_PARENT`) TO FIELD-SYMBOL(<fs>).
       fs = this.mo_grid_sub;
-      call method this.mo_app_sub.( `Z2UI5_IF_APP~MAIN` ) exporting this.client === this.client;
+      // TODO(abap2js): CALL METHOD mo_app_sub->(`Z2UI5_IF_APP~MAIN`) EXPORTING client = client.
     }
   }
 
@@ -27,7 +27,7 @@ class z2ui5_cl_demo_app_104 extends z2ui5_if_app {
     this.mo_app_sub = null; // TODO(abap2js): CREATE OBJECT mo_app_sub TYPE (classname).
     // TODO(abap2js): ASSIGN mo_app_sub->(`MO_VIEW_PARENT`) TO FIELD-SYMBOL(<fs>).
     fs = this.mo_grid_sub;
-    call method this.mo_app_sub.( `Z2UI5_IF_APP~MAIN` ) exporting this.client === this.client;
+    // TODO(abap2js): CALL METHOD mo_app_sub->(`Z2UI5_IF_APP~MAIN`) EXPORTING client = client.
   }
 
   view_display_detail() {

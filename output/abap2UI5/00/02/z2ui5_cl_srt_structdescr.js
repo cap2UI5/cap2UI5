@@ -1,14 +1,14 @@
-// TODO(abap2js): unresolved reference cl_abap_elemdescr — add require manually
 // TODO(abap2js): unresolved reference cl_abap_structdescr — add require manually
-// TODO(abap2js): unresolved reference z2ui5_cl_srt_complexdescr — add require manually
-// TODO(abap2js): unresolved reference z2ui5_cl_srt_datadescr — add require manually
+const z2ui5_cl_srt_complexdescr = require("abap2UI5/z2ui5_cl_srt_complexdescr");
+const z2ui5_cl_srt_datadescr = require("abap2UI5/z2ui5_cl_srt_datadescr");
 
 class z2ui5_cl_srt_structdescr extends z2ui5_cl_srt_complexdescr {
   struct_kind = null;
   components = null;
   has_include = null;
 
-  constructor({ !rtti } = {}) {
+  constructor({ rtti } = {}) {
+    let sy_tabix = 0;
     let components_rtti = [];
     let scomponent = null;
     let scomponent_rtti = null;
@@ -17,8 +17,8 @@ class z2ui5_cl_srt_structdescr extends z2ui5_cl_srt_complexdescr {
     this.struct_kind = rtti.struct_kind;
     this.has_include = rtti.has_include;
     components_rtti = rtti.get_components();
-    let sy_tabix = 0;
-    for (const fs of components_rtti) {
+    sy_tabix = 0;
+    for (const component of components_rtti) {
       sy_tabix++;
       scomponent = null;
       scomponent.name = component.name;
@@ -34,12 +34,13 @@ class z2ui5_cl_srt_structdescr extends z2ui5_cl_srt_complexdescr {
   }
 
   get_rtti() {
+    let sy_tabix = 0;
     let components_rtti = [];
     let component_rtti = null;
     // TODO(abap2js): FIELD-SYMBOLS <component> TYPE sabap_componentdescr.
     components_rtti = null;
-    let sy_tabix = 0;
-    for (const fs of this.components) {
+    sy_tabix = 0;
+    for (const component of this.components) {
       sy_tabix++;
       component_rtti = null;
       component_rtti.name = component.name;
@@ -47,7 +48,7 @@ class z2ui5_cl_srt_structdescr extends z2ui5_cl_srt_complexdescr {
         component_rtti.type = component.type.get_rtti();
       } catch (x) {
         const lv_method = `GET_BY_KIND`;
-        call method cl_abap_elemdescr.( lv_method ) exporting p_type_kind === component.type.type_kind p_length === component.type.length p_decimals === component.type.decimals receiving p_result === component_rtti.type;
+        // TODO(abap2js): CALL METHOD cl_abap_elemdescr=>(lv_method) EXPORTING p_type_kind = <component>-type->type_kind p_length = <component>-type->length p_decimals = <component>-type->decimals RECEIVING p_result = component_rtti-type.
       }
       component_rtti.as_include = component.as_include;
       component_rtti.suffix = component.suffix;

@@ -24,58 +24,71 @@ class z2ui5_cl_demo_app_317 extends z2ui5_if_app {
   }
 
   build_tree() {
-    this.mt_tree = {};
     let sy_tabix = 0;
+    this.mt_tree = {};
+    sy_tabix = 0;
     for (const ls_node of this.mt_node) {
       sy_tabix++;
-      if (!(!id_parent)) continue;
+      if (!(!ls_node.id_parent)) continue;
       const ls_root = ({ ...ls_node });
       this.mt_tree.push(ls_root);
     }
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const lr_node of this.mt_tree) {
       sy_tabix++;
-      let sy_tabix = 0;
+      const _sy_tabix_1 = sy_tabix;
+      sy_tabix = 0;
       for (const ls_node of this.mt_node) {
         sy_tabix++;
         if (!(ls_node.id_parent === lr_node.id)) continue;
         const ls_root2 = ({ ...ls_node });
         lr_node.nodes.push(ls_root2);
       }
+      sy_tabix = _sy_tabix_1;
     }
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const lr_node of this.mt_tree) {
       sy_tabix++;
-      let sy_tabix = 0;
+      const _sy_tabix_2 = sy_tabix;
+      sy_tabix = 0;
       for (const lr_node2 of lr_node.nodes) {
         sy_tabix++;
-        let sy_tabix = 0;
+        const _sy_tabix_3 = sy_tabix;
+        sy_tabix = 0;
         for (const ls_node of this.mt_node) {
           sy_tabix++;
           if (!(ls_node.id_parent === lr_node2.id)) continue;
           const ls_root3 = ({ ...ls_node });
           lr_node2.nodes.push(ls_root3);
         }
+        sy_tabix = _sy_tabix_3;
       }
+      sy_tabix = _sy_tabix_2;
     }
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const lr_node of this.mt_tree) {
       sy_tabix++;
-      let sy_tabix = 0;
+      const _sy_tabix_4 = sy_tabix;
+      sy_tabix = 0;
       for (const lr_node2 of lr_node.nodes) {
         sy_tabix++;
-        let sy_tabix = 0;
+        const _sy_tabix_5 = sy_tabix;
+        sy_tabix = 0;
         for (const lr_node3 of lr_node2.nodes) {
           sy_tabix++;
-          let sy_tabix = 0;
+          const _sy_tabix_6 = sy_tabix;
+          sy_tabix = 0;
           for (const ls_node of this.mt_node) {
             sy_tabix++;
             if (!(ls_node.id_parent === lr_node3.id)) continue;
             const ls_root4 = ({ ...ls_node });
             lr_node3.nodes.push(ls_root4);
           }
+          sy_tabix = _sy_tabix_6;
         }
+        sy_tabix = _sy_tabix_5;
       }
+      sy_tabix = _sy_tabix_4;
     }
   }
 
@@ -90,7 +103,7 @@ class z2ui5_cl_demo_app_317 extends z2ui5_if_app {
       .custom_data()
       .core_custom_data({ key: `ID`, value: `{ID}` });
     tree.drag_drop_config(``)
-      .drag_drop_info({ sourceaggregation: `items`, targetaggregation: `items`, dragstart: `Horizontal`, drop: client._event(`onDrop`, [`${$parameters>/draggedControl/mAggregations/customData/0/mProperties/value}`, `${$parameters>/droppedControl/mAggregations/customData/0/mProperties/value}`]) });
+      .drag_drop_info({ sourceaggregation: `items`, targetaggregation: `items`, dragstart: `Horizontal`, drop: client._event(`onDrop`, [`\${$parameters>/draggedControl/mAggregations/customData/0/mProperties/value}`, `\${$parameters>/droppedControl/mAggregations/customData/0/mProperties/value}`]) });
     client.follow_up_action(`myFunction()`);
     client.view_display(page.stringify());
   }

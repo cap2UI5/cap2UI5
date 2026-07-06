@@ -61,7 +61,7 @@ class z2ui5_cl_demo_app_182 extends z2ui5_if_app {
       .get_parent()
       .get_parent()
       .action_buttons()
-      .action_button({ position: `Left`, title: `Detail`, icon: `sap-icon://employee`, press: this.client._event(`DETAIL_POPOVER`, [`${$source>/id}`, `${ID}`]) })
+      .action_button({ position: `Left`, title: `Detail`, icon: `sap-icon://employee`, press: this.client._event(`DETAIL_POPOVER`, [`\${$source>/id}`, `\${ID}`]) })
       .get_parent()
       .get_parent()
       .get()
@@ -81,7 +81,7 @@ class z2ui5_cl_demo_app_182 extends z2ui5_if_app {
   async main(client) {
     this.client = client;
     if (client.check_on_init()) {
-      this.mt_data = /* TODO(abap2js): VALUE FOR/BASE */ [];
+      this.mt_data = { nodes: [{ id: `Dinter`, title: `Sophie Dinter`, src: `https://ui5.sap.com/test-resources/sap/suite/ui/commons/demokit/images/people/female_IngallsB.jpg`, attributes: [{ label: 35, value: `` }], team: 13, location: `Walldorf`, position: `lobal Solutions Manager`, email: `sophie.dinter@example.com`, phone: `+000 423 230 000` }, { id: `Ninsei`, title: `Yamasaki Ninsei`, src: `https://ui5.sap.com/test-resources/sap/suite/ui/commons/demokit/images/people/male_GordonR.jpg`, attributes: [{ label: 9, value: `` }], supervisor: `Dinter`, team: 9, location: `Walldorf`, position: `Lead Markets Manage`, email: `yamasaki.ninsei@example.com`, phone: `+000 423 230 002` }, { id: `Mills`, title: `Henry Mills`, src: `https://ui5.sap.com/test-resources/sap/suite/ui/commons/demokit/images/people/male_MillerM.jpg`, attributes: [{ label: 4, value: `` }], supervisor: `Ninsei`, team: 4, location: `Praha`, position: `Sales Manager`, email: `henry.mills@example.com`, phone: `+000 423 232 003` }, { id: `Polak`, title: `Adam Polak`, src: `https://ui5.sap.com/test-resources/sap/suite/ui/commons/demokit/images/people/male_PlatteR.jpg`, supervisor: `Mills`, location: `Praha`, position: `Marketing Specialist`, email: `adam.polak@example.com`, phone: `+000 423 232 004` }, { id: `Sykorova`, title: `Vlasta Sykorova`, src: `https://ui5.sap.com/test-resources/sap/suite/ui/commons/demokit/images/people/female_SpringS.jpg`, supervisor: `Mills`, location: `Praha`, position: `Human Assurance Officer`, email: `vlasta.sykorova@example.com`, phone: `+000 423 232 005` }], lines: [{ from: `Dinter`, to: `Ninsei` }, { from: `Ninsei`, to: `Mills` }, { from: `Mills`, to: `Polak` }, { from: `Mills`, to: `Sykorova` }] };
       this.view_display();
     }
     this.on_event();
