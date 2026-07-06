@@ -30,7 +30,12 @@ idiomatic JavaScript style used in `srv/z2ui5` and `srv/samples`:
 ```
 npm run transpile -- path/to/z2ui5_cl_my_app.clas.abap --stdout
 npm run transpile -- path/to/abap2UI5/src/02/01 -o srv/z2ui5/02/01
+npm run transpile -- path/to/abap2UI5/src -o out   # walks recursively, mirrors 02/01/... 1:1
 ```
+
+Directory inputs are walked recursively and their internal layout (the
+abap2UI5 `src/00|01|02` numbering that `srv/z2ui5` mirrors) is reproduced
+1:1 below the `-o` target.
 
 Statements outside the supported subset (dynamic `CREATE OBJECT`, field-symbol
 dereferencing, `SELECT`, ...) are emitted as `// TODO(abap2js): <original>`

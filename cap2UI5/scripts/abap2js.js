@@ -1541,22 +1541,32 @@ function main(argv) {
     console.error("usage: node scripts/abap2js.js <file.clas.abap|dir>... [-o outdir | --stdout]");
     process.exit(1);
   }
-  const files = [];
+  // collect inputs; directories are walked recursively and their internal
+  // layout (e.g. abap2UI5 src/02/01) is mirrored 1:1 below the -o target
+  const files = []; // { file, relDir }
+  const walk = (dir, root) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) walk(full, root);
+      else if (entry.name.endsWith(".clas.abap") && !entry.name.includes(".testclasses.")) {
+        files.push({ file: full, relDir: path.relative(root, dir) });
+      }
+    }
+  };
   for (const input of inputs) {
     const stat = fs.statSync(input);
-    if (stat.isDirectory()) {
-      for (const f of fs.readdirSync(input)) if (f.endsWith(".clas.abap") && !f.includes(".testclasses.")) files.push(path.join(input, f));
-    } else files.push(input);
+    if (stat.isDirectory()) walk(input, input);
+    else files.push({ file: input, relDir: "" });
   }
   let todoTotal = 0;
-  for (const f of files) {
+  for (const { file: f, relDir } of files) {
     try {
       const { code, todos, name } = transpileFile(f);
       todoTotal += todos.length;
       if (stdout) {
         console.log(code);
       } else {
-        const out = path.join(outDir ?? path.dirname(f), `${name}.js`);
+        const out = path.join(outDir ?? path.dirname(f), outDir ? relDir : "", `${name}.js`);
         fs.mkdirSync(path.dirname(out), { recursive: true });
         fs.writeFileSync(out, code);
         console.log(`${f} -> ${out}${todos.length ? `  (${todos.length} TODOs)` : ""}`);
