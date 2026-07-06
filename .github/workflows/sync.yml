@@ -5,12 +5,19 @@ name: sync pipeline
 # Every step also runs standalone via its own workflow. Manual follow-up work
 # is what the TODO reports in output/*/transpile-report.json point at.
 #
-# Runs event-driven on every upstream update: abap2UI5 (push to main) and
-# samples (cloud branch rebuilt) send a repository_dispatch via their
-# trigger_cap workflows. The weekly cron remains as a safety net.
+# Runs event-driven on every upstream update: abap2UI5's trigger_cap
+# workflow refreshes input/abap2UI5/ and pushes it to main via deploy key
+# (that push triggers this pipeline — the pipeline's own sync commits use
+# GITHUB_TOKEN and therefore never retrigger it); samples (cloud branch
+# rebuilt) sends a repository_dispatch via its trigger_cap workflow. The
+# weekly cron remains as a safety net.
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "input/abap2UI5/**"
   repository_dispatch:
     types: [upstream-update]
   schedule:
