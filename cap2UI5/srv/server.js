@@ -1,7 +1,14 @@
 const cds = require("@sap/cds");
+const express = require("express");
+const path = require("path");
 const z2ui5_cl_app_index_html = require("./z2ui5/01/03/z2ui5_cl_app_index_html");
 const z2ui5_cl_exit            = require("./z2ui5/02/z2ui5_cl_exit");
 const z2ui5_cl_util_http       = require("./z2ui5/00/03/z2ui5_cl_util_http");
+
+// The mirrored abap2UI5 frontend lives OUTSIDE the CAP project in
+// <repo>/static/webapp (refresh with `npm run mirror_frontend`) so the
+// project folder stays free of generated/mirrored files.
+const STATIC_WEBAPP = path.join(__dirname, "..", "..", "static", "webapp");
 
 /**
  * The z2ui5 roundtrip itself is wired as a CDS REST action (see cat-service.cds
@@ -18,6 +25,8 @@ const z2ui5_cl_util_http       = require("./z2ui5/00/03/z2ui5_cl_util_http");
  *                            actions don't expose HEAD, so we register it here.
  */
 cds.on("bootstrap", (app) => {
+  app.use("/z2ui5/webapp", express.static(STATIC_WEBAPP));
+
   app.get("/rest/root/z2ui5", (req, res) => {
     // Mirror abap _http_get: build a per-request http_req struct, init
     // cl_exit's context, fetch the resolved config, then emit + apply headers.

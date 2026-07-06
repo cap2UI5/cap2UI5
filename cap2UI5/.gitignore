@@ -39,3 +39,5 @@ app/orderschedline/dist/
 cf
 cf8
 NOTICE
+# frontend mirror workdir
+.mirror_tmp/
