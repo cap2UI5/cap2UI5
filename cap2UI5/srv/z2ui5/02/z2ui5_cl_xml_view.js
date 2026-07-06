@@ -43,7 +43,7 @@ class z2ui5_cl_xml_view {
     l: `sap.ui.layout`,
     u: `sap.ui.unified`,
     unified: `sap.ui.unified`,
-    z2ui5: `z2ui5.cc`,
+    z2ui5: `z2ui5`,
     layout: `sap.ui.layout`,
     networkgraph: `sap.suite.ui.commons.networkgraph`,
     nglayout: `sap.suite.ui.commons.networkgraph.layout`,
@@ -117,9 +117,9 @@ class z2ui5_cl_xml_view {
     // un-prefixed tag resolves to sap.m instead of the null namespace (which
     // UI5 would try to load as a module, e.g. `null/content.js`).
     if (this._isPopup) {
-      return `<core:FragmentDefinition xmlns="sap.m" xmlns:m="sap.m" xmlns:core="sap.ui.core" xmlns:f="sap.f" xmlns:form="sap.ui.layout.form" xmlns:l="sap.ui.layout" xmlns:mvc="sap.ui.core.mvc" xmlns:table="sap.ui.table" xmlns:unified="sap.ui.unified" xmlns:upload="sap.m.upload" xmlns:uxap="sap.uxap" xmlns:z2ui5="z2ui5.cc"${this._renderExtraNs()}`;
+      return `<core:FragmentDefinition xmlns="sap.m" xmlns:m="sap.m" xmlns:core="sap.ui.core" xmlns:f="sap.f" xmlns:form="sap.ui.layout.form" xmlns:l="sap.ui.layout" xmlns:mvc="sap.ui.core.mvc" xmlns:table="sap.ui.table" xmlns:unified="sap.ui.unified" xmlns:upload="sap.m.upload" xmlns:uxap="sap.uxap" xmlns:z2ui5="z2ui5"${this._renderExtraNs()}`;
     }
-    return `<mvc:View xmlns="sap.m" xmlns:m="sap.m" xmlns:core="sap.ui.core" xmlns:f="sap.f" xmlns:form="sap.ui.layout.form" xmlns:l="sap.ui.layout" xmlns:mvc="sap.ui.core.mvc" xmlns:table="sap.ui.table" xmlns:unified="sap.ui.unified" xmlns:upload="sap.m.upload" xmlns:uxap="sap.uxap" xmlns:z2ui5="z2ui5.cc"${this._renderExtraNs()} displayBlock="true" height="100%"`;
+    return `<mvc:View xmlns="sap.m" xmlns:m="sap.m" xmlns:core="sap.ui.core" xmlns:f="sap.f" xmlns:form="sap.ui.layout.form" xmlns:l="sap.ui.layout" xmlns:mvc="sap.ui.core.mvc" xmlns:table="sap.ui.table" xmlns:unified="sap.ui.unified" xmlns:upload="sap.m.upload" xmlns:uxap="sap.uxap" xmlns:z2ui5="z2ui5"${this._renderExtraNs()} displayBlock="true" height="100%"`;
   }
 
   _renderRootClose() {
@@ -1283,29 +1283,8 @@ class z2ui5_cl_xml_view {
   }
 
   // Aggregation accessors for DynamicPage
-  // sap.m/core Title control — or the `title` aggregation when ns="f".
-  // Mirrors abap: positional arg = text (PREFERRED PARAMETER), returns the
-  // PARENT for chaining; dive into the created element with .get().
-  title(args = {}) {
-    const props = typeof args === "string" ? { text: args } : args || {};
-    const { ns, text, wrapping, level, class: cssClass, id, textalign, textdirection, titlestyle, width, wrappingtype, visible } = props;
-    return this._leaf({
-      name: ns === "f" ? "title" : "Title",
-      ns: ns || "",
-      aProp: this._filterProps([
-        { n: "text", v: text },
-        { n: "class", v: cssClass },
-        { n: "id", v: id },
-        { n: "wrappingType", v: wrappingtype },
-        { n: "textAlign", v: textalign },
-        { n: "textDirection", v: textdirection },
-        { n: "titleStyle", v: titlestyle },
-        { n: "width", v: width },
-        { n: "wrapping", v: this.boolean_abap_2_json(wrapping) },
-        { n: "visible", v: this.boolean_abap_2_json(visible) },
-        { n: "level", v: level },
-      ]),
-    });
+  title(props = {}) {
+    return this._container({ name: "title", ns: "f", aProp: [] });
   }
 
   expandedHeading(props = {}) {
