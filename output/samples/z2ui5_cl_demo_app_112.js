@@ -1,0 +1,29 @@
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
+
+class z2ui5_cl_demo_app_112 extends z2ui5_if_app {
+  mo_view_parent = null;
+  mv_class_2 = ``;
+  mr_data = null;
+  client = null;
+
+  view_display() {
+    this.mo_view_parent.input({ value: this.client._bind_edit(this.mv_class_2), placeholder: `Input From Class 2` });
+  }
+
+  on_event() {
+    if (this.client.check_on_event(`MESSAGE_SUB`)) {
+      this.client.message_box_display(`event sub app`);
+    }
+  }
+
+  async main(client) {
+    this.client = client;
+    if (client.check_on_init()) {
+      this.view_display();
+    } else {
+      this.on_event();
+    }
+  }
+}
+
+module.exports = z2ui5_cl_demo_app_112;

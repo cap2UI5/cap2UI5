@@ -1,0 +1,2766 @@
+[
+  {
+    "class": "z2ui5_cl_demo_app_s_01",
+    "path": "00/z2ui5_cl_demo_app_s_01.js",
+    "todos": 1,
+    "todoDetails": [
+      "unsupported statement: ROLLBACK WORK."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_s_02",
+    "path": "00/z2ui5_cl_demo_app_s_02.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_s_03",
+    "path": "00/z2ui5_cl_demo_app_s_03.js",
+    "todos": 1,
+    "todoDetails": [
+      "unsupported statement: SELECT SINGLE FROM icfservloc FIELDS icfactive WHERE icf_name = `MIME_DEMO` INTO @DATA(icfactive)."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_s_04",
+    "path": "00/z2ui5_cl_demo_app_s_04.js",
+    "todos": 2,
+    "todoDetails": [
+      "unsupported statement: CALL FUNCTION `CONVERSION_EXIT_CUNIT_OUTPUT` EXPORTING input = unit IMPORTING output = unit EXCEPTIONS OTHERS = 99.",
+      "unsupported statement: CALL FUNCTION `CONVERSION_EXIT_ALPHA_OUTPUT` EXPORTING input = numc IMPORTING output = numc_out EXCEPTIONS OTHERS = 99."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_s_05_ws",
+    "path": "00/z2ui5_cl_demo_app_s_05_ws.js",
+    "todos": 3,
+    "todoDetails": [
+      "unsupported statement: SELECT FROM amc_receiver2 FIELDS COUNT( * ) WHERE channel_id = @( to_lower( |{ c_amc_application_id }{ c_channel_id }| )",
+      "unresolved class reference: cl_amc_channel_manager",
+      "unresolved class reference: cl_apc_wsp_ext_stateless_base"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_s_05",
+    "path": "00/z2ui5_cl_demo_app_s_05.js",
+    "todos": 1,
+    "todoDetails": [
+      "unsupported statement: SELECT SINGLE FROM icfservloc FIELDS icfactive WHERE icf_name = `Z2UI5_SAMPLE` INTO @DATA(icfactive)."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_s_06",
+    "path": "00/z2ui5_cl_demo_app_s_06.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_lp_01",
+    "path": "01/z2ui5_cl_demo_app_lp_01.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_lp_02",
+    "path": "01/z2ui5_cl_demo_app_lp_02.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_lp_03",
+    "path": "01/z2ui5_cl_demo_app_lp_03.js",
+    "todos": 1,
+    "todoDetails": [
+      "builtin xsdbool( ) not mapped"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_lp_04",
+    "path": "01/z2ui5_cl_demo_app_lp_04.js",
+    "todos": 1,
+    "todoDetails": [
+      "builtin xsdbool( ) not mapped"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_355",
+    "path": "02/z2ui5_cl_demo_app_355.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_356",
+    "path": "02/z2ui5_cl_demo_app_356.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_357",
+    "path": "02/z2ui5_cl_demo_app_357.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_358",
+    "path": "02/z2ui5_cl_demo_app_358.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_359",
+    "path": "02/z2ui5_cl_demo_app_359.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_360",
+    "path": "02/z2ui5_cl_demo_app_360.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_361",
+    "path": "02/z2ui5_cl_demo_app_361.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_032",
+    "path": "03/z2ui5_cl_demo_app_032.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_036",
+    "path": "03/z2ui5_cl_demo_app_036.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_037",
+    "path": "03/z2ui5_cl_demo_app_037.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_040",
+    "path": "03/z2ui5_cl_demo_app_040.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_060",
+    "path": "03/z2ui5_cl_demo_app_060.js",
+    "todos": 6,
+    "todoDetails": [
+      "unsupported statement: TYPES BEGIN OF ty_s_currency,",
+      "unsupported statement: TYPES language TYPE string,",
+      "unsupported statement: TYPES currency TYPE string,",
+      "unsupported statement: TYPES currencyname TYPE string,",
+      "unsupported statement: TYPES currencyshortname TYPE string,",
+      "unsupported statement: TYPES END OF ty_s_currency."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_084",
+    "path": "03/z2ui5_cl_demo_app_084.js",
+    "todos": 1,
+    "todoDetails": [
+      "builtin xsdbool( ) not mapped"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_093",
+    "path": "03/z2ui5_cl_demo_app_093.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_111",
+    "path": "03/z2ui5_cl_demo_app_111.js",
+    "todos": 3,
+    "todoDetails": [
+      "unsupported statement: ASSIGN COMPONENT lv_index OF STRUCTURE lr_row->* TO FIELD-SYMBOL(<field>).",
+      "sy-subrc used — provide manually",
+      "unsupported statement: DELETE mt_table."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_116",
+    "path": "03/z2ui5_cl_demo_app_116.js",
+    "todos": 2,
+    "todoDetails": [
+      "sy-uname used — provide manually",
+      "sy-datum used — provide manually"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_141",
+    "path": "03/z2ui5_cl_demo_app_141.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_172",
+    "path": "03/z2ui5_cl_demo_app_172.js",
+    "todos": 5,
+    "todoDetails": [
+      "unsupported statement: FIELD-SYMBOLS <f_output> LIKE LINE OF output,",
+      "unsupported statement: FIELD-SYMBOLS <f_input> TYPE any.",
+      "unsupported statement: ASSIGN COMPONENT i_column OF STRUCTURE <f_output> TO <f_input>.",
+      "unsupported statement: READ TABLE output INDEX 1 ASSIGNING <f_output>.",
+      "unsupported statement: ASSIGN COMPONENT i_column OF STRUCTURE <f_output> TO <f_input>."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_178",
+    "path": "03/z2ui5_cl_demo_app_178.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_201",
+    "path": "03/z2ui5_cl_demo_app_201.js",
+    "todos": 6,
+    "todoDetails": [
+      "unsupported statement: TYPES BEGIN OF ty_s_currency,",
+      "unsupported statement: TYPES language TYPE string,",
+      "unsupported statement: TYPES currency TYPE string,",
+      "unsupported statement: TYPES currencyname TYPE string,",
+      "unsupported statement: TYPES currencyshortname TYPE string,",
+      "unsupported statement: TYPES END OF ty_s_currency."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_309",
+    "path": "03/z2ui5_cl_demo_app_309.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_317",
+    "path": "03/z2ui5_cl_demo_app_317.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_346",
+    "path": "03/z2ui5_cl_demo_app_346.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_028_0",
+    "path": "99/z2ui5_cl_demo_app_028_0.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_121_0",
+    "path": "99/z2ui5_cl_demo_app_121_0.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_122_0",
+    "path": "99/z2ui5_cl_demo_app_122_0.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_125_0",
+    "path": "99/z2ui5_cl_demo_app_125_0.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_129_0",
+    "path": "99/z2ui5_cl_demo_app_129_0.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_133_0",
+    "path": "99/z2ui5_cl_demo_app_133_0.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_134_0",
+    "path": "99/z2ui5_cl_demo_app_134_0.js",
+    "todos": 2,
+    "todoDetails": [
+      "builtin shift_left( ) not mapped",
+      "builtin shift_left( ) not mapped"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_180",
+    "path": "99/z2ui5_cl_demo_app_180.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_189_0",
+    "path": "99/z2ui5_cl_demo_app_189_0.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_202_0",
+    "path": "99/z2ui5_cl_demo_app_202_0.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_309_0",
+    "path": "99/z2ui5_cl_demo_app_309_0.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_352_0",
+    "path": "99/z2ui5_cl_demo_app_352_0.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_353_0",
+    "path": "99/z2ui5_cl_demo_app_353_0.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_lp_02_0",
+    "path": "99/z2ui5_cl_demo_app_lp_02_0.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_s_03_0",
+    "path": "99/z2ui5_cl_demo_app_s_03_0.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_000",
+    "path": "z2ui5_cl_demo_app_000.js",
+    "todos": 4,
+    "todoDetails": [
+      "unsupported statement: CONSTANTS c_title TYPE string VALUE ` abap2UI5 - Samples`.",
+      "CREATE OBJECT: CREATE OBJECT li_app TYPE (lv_classname).",
+      "unsupported statement: ASSIGN COMPONENT sy-index OF STRUCTURE ms_check_expanded TO FIELD-SYMBOL(<check>).",
+      "sy-subrc used — provide manually"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_001",
+    "path": "z2ui5_cl_demo_app_001.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_002",
+    "path": "z2ui5_cl_demo_app_002.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_003",
+    "path": "z2ui5_cl_demo_app_003.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_004",
+    "path": "z2ui5_cl_demo_app_004.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_005",
+    "path": "z2ui5_cl_demo_app_005.js",
+    "todos": 1,
+    "todoDetails": [
+      "unresolved class reference: cl_abap_char_utilities"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_006",
+    "path": "z2ui5_cl_demo_app_006.js",
+    "todos": 1,
+    "todoDetails": [
+      "VALUE #( FOR/BASE ... ) not supported — rewrite manually"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_008",
+    "path": "z2ui5_cl_demo_app_008.js",
+    "todos": 1,
+    "todoDetails": [
+      "unresolved class reference: cl_abap_char_utilities"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_009",
+    "path": "z2ui5_cl_demo_app_009.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_010",
+    "path": "z2ui5_cl_demo_app_010.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_011",
+    "path": "z2ui5_cl_demo_app_011.js",
+    "todos": 1,
+    "todoDetails": [
+      "builtin xsdbool( ) not mapped"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_012",
+    "path": "z2ui5_cl_demo_app_012.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_013",
+    "path": "z2ui5_cl_demo_app_013.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_014",
+    "path": "z2ui5_cl_demo_app_014.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_015",
+    "path": "z2ui5_cl_demo_app_015.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_016",
+    "path": "z2ui5_cl_demo_app_016.js",
+    "todos": 1,
+    "todoDetails": [
+      "builtin xsdbool( ) not mapped"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_017",
+    "path": "z2ui5_cl_demo_app_017.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_018",
+    "path": "z2ui5_cl_demo_app_018.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_019",
+    "path": "z2ui5_cl_demo_app_019.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_020",
+    "path": "z2ui5_cl_demo_app_020.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_021",
+    "path": "z2ui5_cl_demo_app_021.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_022",
+    "path": "z2ui5_cl_demo_app_022.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_024",
+    "path": "z2ui5_cl_demo_app_024.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_025",
+    "path": "z2ui5_cl_demo_app_025.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_026",
+    "path": "z2ui5_cl_demo_app_026.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_027",
+    "path": "z2ui5_cl_demo_app_027.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_028",
+    "path": "z2ui5_cl_demo_app_028.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_029",
+    "path": "z2ui5_cl_demo_app_029.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_030",
+    "path": "z2ui5_cl_demo_app_030.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_031",
+    "path": "z2ui5_cl_demo_app_031.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_033",
+    "path": "z2ui5_cl_demo_app_033.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_034",
+    "path": "z2ui5_cl_demo_app_034.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_035",
+    "path": "z2ui5_cl_demo_app_035.js",
+    "todos": 2,
+    "todoDetails": [
+      "VALUE #( FOR/BASE ... ) not supported — rewrite manually",
+      "builtin xsdbool( ) not mapped"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_038",
+    "path": "z2ui5_cl_demo_app_038.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_039",
+    "path": "z2ui5_cl_demo_app_039.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_041",
+    "path": "z2ui5_cl_demo_app_041.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_042",
+    "path": "z2ui5_cl_demo_app_042.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_043",
+    "path": "z2ui5_cl_demo_app_043.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_044",
+    "path": "z2ui5_cl_demo_app_044.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_045",
+    "path": "z2ui5_cl_demo_app_045.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_046",
+    "path": "z2ui5_cl_demo_app_046.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_047",
+    "path": "z2ui5_cl_demo_app_047.js",
+    "todos": 4,
+    "todoDetails": [
+      "sy-datum used — provide manually",
+      "sy-uzeit used — provide manually",
+      "sy-datum used — provide manually",
+      "sy-uzeit used — provide manually"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_048",
+    "path": "z2ui5_cl_demo_app_048.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_049",
+    "path": "z2ui5_cl_demo_app_049.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_050",
+    "path": "z2ui5_cl_demo_app_050.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_051",
+    "path": "z2ui5_cl_demo_app_051.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_052",
+    "path": "z2ui5_cl_demo_app_052.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_053",
+    "path": "z2ui5_cl_demo_app_053.js",
+    "todos": 1,
+    "todoDetails": [
+      "call with IMPORTING/CHANGING params: itab_filter_by_val( ... ) — rewrite manually"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_054",
+    "path": "z2ui5_cl_demo_app_054.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_055",
+    "path": "z2ui5_cl_demo_app_055.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_056",
+    "path": "z2ui5_cl_demo_app_056.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_057",
+    "path": "z2ui5_cl_demo_app_057.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_058",
+    "path": "z2ui5_cl_demo_app_058.js",
+    "todos": 1,
+    "todoDetails": [
+      "call with IMPORTING/CHANGING params: xml_parse( ... ) — rewrite manually"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_059",
+    "path": "z2ui5_cl_demo_app_059.js",
+    "todos": 1,
+    "todoDetails": [
+      "call with IMPORTING/CHANGING params: itab_filter_by_val( ... ) — rewrite manually"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_061",
+    "path": "z2ui5_cl_demo_app_061.js",
+    "todos": 5,
+    "todoDetails": [
+      "unsupported statement: FIELD-SYMBOLS <tab> TYPE table.",
+      "unsupported statement: ASSIGN t_tab->* TO <tab>.",
+      "unsupported statement: FIELD-SYMBOLS <tab> TYPE table.",
+      "unsupported statement: CREATE DATA t_tab TYPE STANDARD TABLE OF (`Z2UI5_T_01`).",
+      "unsupported statement: ASSIGN t_tab->* TO <tab>."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_062",
+    "path": "z2ui5_cl_demo_app_062.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_063",
+    "path": "z2ui5_cl_demo_app_063.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_064",
+    "path": "z2ui5_cl_demo_app_064.js",
+    "todos": 2,
+    "todoDetails": [
+      "unsupported statement: FIELD-SYMBOLS <ls_table> TYPE ty_s_tab.",
+      "unsupported statement: WAIT UP TO 2 SECONDS."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_065",
+    "path": "z2ui5_cl_demo_app_065.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_067",
+    "path": "z2ui5_cl_demo_app_067.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_068",
+    "path": "z2ui5_cl_demo_app_068.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_069",
+    "path": "z2ui5_cl_demo_app_069.js",
+    "todos": 2,
+    "todoDetails": [
+      "builtin xsdbool( ) not mapped",
+      "builtin xsdbool( ) not mapped"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_070",
+    "path": "z2ui5_cl_demo_app_070.js",
+    "todos": 10,
+    "todoDetails": [
+      "unsupported statement: FIELD-SYMBOLS <ls_table> TYPE ty_s_tab.",
+      "unsupported statement: READ TABLE lt_arg INTO DATA(ls_arg) INDEX 1.",
+      "sy-subrc used — provide manually",
+      "unsupported statement: READ TABLE lt_arg INTO ls_arg INDEX 1.",
+      "sy-subrc used — provide manually",
+      "unsupported statement: READ TABLE lt_arg INTO ls_arg INDEX 1.",
+      "sy-subrc used — provide manually",
+      "unsupported statement: ASSIGN COMPONENT lv_index OF STRUCTURE lr_row->* TO FIELD-SYMBOL(<field>).",
+      "sy-subrc used — provide manually",
+      "unsupported statement: DELETE mt_table."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_071",
+    "path": "z2ui5_cl_demo_app_071.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_072",
+    "path": "z2ui5_cl_demo_app_072.js",
+    "todos": 4,
+    "todoDetails": [
+      "builtin xsdbool( ) not mapped",
+      "REDUCE #( ) not supported",
+      "REDUCE #( ) not supported",
+      "REDUCE #( ) not supported"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_073",
+    "path": "z2ui5_cl_demo_app_073.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_074",
+    "path": "z2ui5_cl_demo_app_074.js",
+    "todos": 2,
+    "todoDetails": [
+      "unsupported statement: FIELD-SYMBOLS <tab> TYPE table.",
+      "unsupported statement: ASSIGN mr_table->* TO <tab>."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_075",
+    "path": "z2ui5_cl_demo_app_075.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_076",
+    "path": "z2ui5_cl_demo_app_076.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_078",
+    "path": "z2ui5_cl_demo_app_078.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_079",
+    "path": "z2ui5_cl_demo_app_079.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_080",
+    "path": "z2ui5_cl_demo_app_080.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_081",
+    "path": "z2ui5_cl_demo_app_081.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_082",
+    "path": "z2ui5_cl_demo_app_082.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_083",
+    "path": "z2ui5_cl_demo_app_083.js",
+    "todos": 2,
+    "todoDetails": [
+      "unsupported statement: CREATE DATA mt_table TYPE (mv_name).",
+      "VALUE #( FOR/BASE ... ) not supported — rewrite manually"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_085",
+    "path": "z2ui5_cl_demo_app_085.js",
+    "todos": 7,
+    "todoDetails": [
+      "unsupported statement: READ TABLE mt_table_supplier WITH KEY suppliername = lt_arg[ 1 ] INTO ls_detail_supplier.",
+      "unsupported statement: READ TABLE mt_table WITH KEY key = lt_arg[ 1 ] INTO ls_detail.",
+      "unsupported statement: READ TABLE mt_table_supplier WITH KEY suppliername = ls_detail-suppliername INTO ls_detail_supplier.",
+      "unsupported statement: READ TABLE mt_table INDEX 1 INTO ls_detail.",
+      "unsupported statement: ASSIGN COMPONENT lv_index OF STRUCTURE lr_row->* TO FIELD-SYMBOL(<field>).",
+      "sy-subrc used — provide manually",
+      "unsupported statement: DELETE mt_table."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_086",
+    "path": "z2ui5_cl_demo_app_086.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_087",
+    "path": "z2ui5_cl_demo_app_087.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_088",
+    "path": "z2ui5_cl_demo_app_088.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_090",
+    "path": "z2ui5_cl_demo_app_090.js",
+    "todos": 1,
+    "todoDetails": [
+      "unresolved class reference: z2ui5_cl_ajson_mapping"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_091",
+    "path": "z2ui5_cl_demo_app_091.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_094",
+    "path": "z2ui5_cl_demo_app_094.js",
+    "todos": 11,
+    "todoDetails": [
+      "unsupported statement: FIELD-SYMBOLS <input> TYPE any.",
+      "unsupported statement: FIELD-SYMBOLS <screen> TYPE ty_s_01.",
+      "unsupported statement: CREATE DATA mr_input TYPE string.",
+      "unsupported statement: ASSIGN mr_input->* TO <input>.",
+      "unsupported statement: CREATE DATA mr_screen TYPE ty_s_01.",
+      "unsupported statement: ASSIGN mr_screen->* TO <screen>.",
+      "NEW #( ) — target type unknown, resolve manually",
+      "unsupported statement: FIELD-SYMBOLS <input> TYPE any.",
+      "unsupported statement: FIELD-SYMBOLS <screen> TYPE ty_s_01.",
+      "unsupported statement: ASSIGN mr_input->* TO <input>.",
+      "unsupported statement: ASSIGN mr_screen->* TO <screen>."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_095",
+    "path": "z2ui5_cl_demo_app_095.js",
+    "todos": 1,
+    "todoDetails": [
+      "NEW #( ) — target type unknown, resolve manually"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_096",
+    "path": "z2ui5_cl_demo_app_096.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_097",
+    "path": "z2ui5_cl_demo_app_097.js",
+    "todos": 2,
+    "todoDetails": [
+      "unsupported statement: READ TABLE lt_arg INTO DATA(ls_arg) INDEX 1.",
+      "unsupported statement: READ TABLE lt_sel INTO DATA(ls_sel) INDEX 1."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_098",
+    "path": "z2ui5_cl_demo_app_098.js",
+    "todos": 2,
+    "todoDetails": [
+      "builtin xsdbool( ) not mapped",
+      "unsupported statement: READ TABLE lt_sel INTO DATA(ls_sel) INDEX 1."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_099",
+    "path": "z2ui5_cl_demo_app_099.js",
+    "todos": 4,
+    "todoDetails": [
+      "unsupported statement: CONDENSE filter_string NO-GAPS.",
+      "unsupported statement: TRANSLATE lv_field TO UPPER CASE.",
+      "sy-subrc used — provide manually",
+      "unsupported statement: TRANSLATE mv_sorter_group TO UPPER CASE."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_100",
+    "path": "z2ui5_cl_demo_app_100.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_101",
+    "path": "z2ui5_cl_demo_app_101.js",
+    "todos": 1,
+    "todoDetails": [
+      "sy-uname used — provide manually"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_103",
+    "path": "z2ui5_cl_demo_app_103.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_104",
+    "path": "z2ui5_cl_demo_app_104.js",
+    "todos": 4,
+    "todoDetails": [
+      "unsupported statement: ASSIGN mo_app_sub->(`MO_VIEW_PARENT`) TO FIELD-SYMBOL(<fs>).",
+      "CREATE OBJECT: CREATE OBJECT mo_app_sub TYPE (classname).",
+      "unsupported statement: ASSIGN mo_app_sub->(`MO_VIEW_PARENT`) TO FIELD-SYMBOL(<fs>).",
+      "unsupported statement: READ TABLE lt_sel INTO DATA(ls_sel) INDEX 1."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_105",
+    "path": "z2ui5_cl_demo_app_105.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_106",
+    "path": "z2ui5_cl_demo_app_106.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_108",
+    "path": "z2ui5_cl_demo_app_108.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_109",
+    "path": "z2ui5_cl_demo_app_109.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_110",
+    "path": "z2ui5_cl_demo_app_110.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_112",
+    "path": "z2ui5_cl_demo_app_112.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_113",
+    "path": "z2ui5_cl_demo_app_113.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_114",
+    "path": "z2ui5_cl_demo_app_114.js",
+    "todos": 1,
+    "todoDetails": [
+      "sy-uname used — provide manually"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_117",
+    "path": "z2ui5_cl_demo_app_117.js",
+    "todos": 6,
+    "todoDetails": [
+      "unsupported statement: FIELD-SYMBOLS <view_display> TYPE any.",
+      "unsupported statement: READ TABLE mt_t002 REFERENCE INTO DATA(t002) WITH KEY id = mv_selectedkey.",
+      "sy-subrc used — provide manually",
+      "CREATE OBJECT: CREATE OBJECT mo_app TYPE (t002->class).",
+      "unsupported statement: ASSIGN mo_app->(`MO_PARENT_VIEW`) TO FIELD-SYMBOL(<view>).",
+      "unsupported statement: ASSIGN mo_app->(`MV_VIEW_DISPLAY`) TO <view_display>."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_118",
+    "path": "z2ui5_cl_demo_app_118.js",
+    "todos": 8,
+    "todoDetails": [
+      "sy-datum used — provide manually",
+      "sy-uzeit used — provide manually",
+      "sy-datum used — provide manually",
+      "sy-uzeit used — provide manually",
+      "sy-datum used — provide manually",
+      "sy-uzeit used — provide manually",
+      "sy-datum used — provide manually",
+      "sy-uzeit used — provide manually"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_120",
+    "path": "z2ui5_cl_demo_app_120.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_121",
+    "path": "z2ui5_cl_demo_app_121.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_122",
+    "path": "z2ui5_cl_demo_app_122.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_123",
+    "path": "z2ui5_cl_demo_app_123.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_124",
+    "path": "z2ui5_cl_demo_app_124.js",
+    "todos": 1,
+    "todoDetails": [
+      "builtin xsdbool( ) not mapped"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_125",
+    "path": "z2ui5_cl_demo_app_125.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_126",
+    "path": "z2ui5_cl_demo_app_126.js",
+    "todos": 14,
+    "todoDetails": [
+      "call with IMPORTING/CHANGING params: describe_by_name( ... ) — rewrite manually",
+      "unsupported statement: FIELD-SYMBOLS <table> TYPE STANDARD TABLE.",
+      "unsupported statement: FIELD-SYMBOLS <table_tmp> TYPE STANDARD TABLE.",
+      "unsupported statement: CREATE DATA mt_table TYPE HANDLE new_table_desc.",
+      "unsupported statement: CREATE DATA mt_table_del TYPE HANDLE new_table_desc.",
+      "unsupported statement: CREATE DATA mt_table_tmp TYPE HANDLE new_table_desc.",
+      "unsupported statement: CREATE DATA ms_table_row TYPE HANDLE new_struct_desc.",
+      "unsupported statement: ASSIGN mt_table->* TO <table>.",
+      "unsupported statement: SELECT * FROM z2ui5_t_01 INTO CORRESPONDING FIELDS OF TABLE @<table> UP TO 3 ROWS.",
+      "unsupported statement: ASSIGN mt_table_tmp->* TO <table_tmp>.",
+      "unresolved class reference: cl_abap_datadescr",
+      "unresolved class reference: cl_abap_structdescr",
+      "unresolved class reference: cl_abap_tabledescr",
+      "unresolved class reference: cl_abap_typedescr"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_129",
+    "path": "z2ui5_cl_demo_app_129.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_130",
+    "path": "z2ui5_cl_demo_app_130.js",
+    "todos": 7,
+    "todoDetails": [
+      "call with IMPORTING/CHANGING params: set_token( ... ) — rewrite manually",
+      "unsupported statement: READ TABLE mt_fields REFERENCE INTO DATA(lr_field) WITH KEY field = mv_activ_elemnt.",
+      "sy-subrc used — provide manually",
+      "call with IMPORTING/CHANGING params: set_token( ... ) — rewrite manually",
+      "unsupported statement: REPLACE `{LOW}` IN lv_value WITH lr_filter->low.",
+      "unsupported statement: REPLACE `{HIGH}` IN lv_value WITH lr_filter->high.",
+      "unsupported statement: READ TABLE mt_fields REFERENCE INTO DATA(lr_field) WITH KEY field = mv_activ_elemnt."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_131",
+    "path": "z2ui5_cl_demo_app_131.js",
+    "todos": 6,
+    "todoDetails": [
+      "unsupported statement: FIELD-SYMBOLS <view_display> TYPE any.",
+      "unsupported statement: READ TABLE mt_t002 REFERENCE INTO DATA(t002) WITH KEY id = mv_selectedkey.",
+      "sy-subrc used — provide manually",
+      "CREATE OBJECT: CREATE OBJECT mo_app TYPE (t002->class).",
+      "unsupported statement: ASSIGN mo_app->(`MO_PARENT_VIEW`) TO FIELD-SYMBOL(<view>).",
+      "unsupported statement: ASSIGN mo_app->(`MV_VIEW_DISPLAY`) TO <view_display>."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_132",
+    "path": "z2ui5_cl_demo_app_132.js",
+    "todos": 4,
+    "todoDetails": [
+      "call with IMPORTING/CHANGING params: describe_by_name( ... ) — rewrite manually",
+      "unresolved class reference: cl_abap_datadescr",
+      "unresolved class reference: cl_abap_structdescr",
+      "unresolved class reference: cl_abap_typedescr"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_133",
+    "path": "z2ui5_cl_demo_app_133.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_136",
+    "path": "z2ui5_cl_demo_app_136.js",
+    "todos": 2,
+    "todoDetails": [
+      "unsupported statement: FIELD-SYMBOLS <tab> TYPE table.",
+      "unsupported statement: ASSIGN mr_table->* TO <tab>."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_138",
+    "path": "z2ui5_cl_demo_app_138.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_139",
+    "path": "z2ui5_cl_demo_app_139.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_140",
+    "path": "z2ui5_cl_demo_app_140.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_143",
+    "path": "z2ui5_cl_demo_app_143.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_144",
+    "path": "z2ui5_cl_demo_app_144.js",
+    "todos": 1,
+    "todoDetails": [
+      "VALUE #( FOR/BASE ... ) not supported — rewrite manually"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_149",
+    "path": "z2ui5_cl_demo_app_149.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_150",
+    "path": "z2ui5_cl_demo_app_150.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_151",
+    "path": "z2ui5_cl_demo_app_151.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_152",
+    "path": "z2ui5_cl_demo_app_152.js",
+    "todos": 3,
+    "todoDetails": [
+      "unsupported statement: FIELD-SYMBOLS <row> TYPE ty_s_row.",
+      "unsupported statement: ASSIGN ls_result-row->* TO <row>.",
+      "unsupported statement: ASSIGN ls_result-table->* TO FIELD-SYMBOL(<table>)."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_153",
+    "path": "z2ui5_cl_demo_app_153.js",
+    "todos": 1,
+    "todoDetails": [
+      "unresolved class reference: z2ui5_cl_ajson_mapping"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_154",
+    "path": "z2ui5_cl_demo_app_154.js",
+    "todos": 22,
+    "todoDetails": [
+      "unsupported statement: TYPES BEGIN OF ty_s_log_entry.",
+      "unsupported statement: TYPES msgnumber TYPE n LENGTH 6.",
+      "unsupported statement: TYPES msgty TYPE c LENGTH 1.",
+      "unsupported statement: TYPES msgid TYPE c LENGTH 20.",
+      "unsupported statement: TYPES msgno TYPE n LENGTH 3.",
+      "unsupported statement: TYPES msgv1 TYPE c LENGTH 50.",
+      "unsupported statement: TYPES msgv2 TYPE c LENGTH 50.",
+      "unsupported statement: TYPES msgv3 TYPE c LENGTH 50.",
+      "unsupported statement: TYPES msgv4 TYPE c LENGTH 50.",
+      "unsupported statement: TYPES msgv1_src TYPE c LENGTH 15.",
+      "unsupported statement: TYPES msgv2_src TYPE c LENGTH 15.",
+      "unsupported statement: TYPES msgv3_src TYPE c LENGTH 15.",
+      "unsupported statement: TYPES msgv4_src TYPE c LENGTH 15.",
+      "unsupported statement: TYPES detlevel TYPE c LENGTH 1.",
+      "unsupported statement: TYPES probclass TYPE c LENGTH 1.",
+      "unsupported statement: TYPES alsort TYPE c LENGTH 3.",
+      "unsupported statement: TYPES time_stmp TYPE p LENGTH 16 DECIMALS 7.",
+      "unsupported statement: TYPES msg_count TYPE i.",
+      "unsupported statement: TYPES context TYPE c LENGTH 255.",
+      "unsupported statement: TYPES params TYPE c LENGTH 255.",
+      "unsupported statement: TYPES msg_txt TYPE string.",
+      "unsupported statement: TYPES END OF ty_s_log_entry."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_155",
+    "path": "z2ui5_cl_demo_app_155.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_156",
+    "path": "z2ui5_cl_demo_app_156.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_157",
+    "path": "z2ui5_cl_demo_app_157.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_158",
+    "path": "z2ui5_cl_demo_app_158.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_159",
+    "path": "z2ui5_cl_demo_app_159.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_160",
+    "path": "z2ui5_cl_demo_app_160.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_161",
+    "path": "z2ui5_cl_demo_app_161.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_162",
+    "path": "z2ui5_cl_demo_app_162.js",
+    "todos": 1,
+    "todoDetails": [
+      "call with IMPORTING/CHANGING params: filter_itab( ... ) — rewrite manually"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_163",
+    "path": "z2ui5_cl_demo_app_163.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_164",
+    "path": "z2ui5_cl_demo_app_164.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_166",
+    "path": "z2ui5_cl_demo_app_166.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_167",
+    "path": "z2ui5_cl_demo_app_167.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_168",
+    "path": "z2ui5_cl_demo_app_168.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_170",
+    "path": "z2ui5_cl_demo_app_170.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_171",
+    "path": "z2ui5_cl_demo_app_171.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_173",
+    "path": "z2ui5_cl_demo_app_173.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_174",
+    "path": "z2ui5_cl_demo_app_174.js",
+    "todos": 1,
+    "todoDetails": [
+      "unsupported statement: ASSIGN lr->* TO FIELD-SYMBOL(<t>)."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_175",
+    "path": "z2ui5_cl_demo_app_175.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_176",
+    "path": "z2ui5_cl_demo_app_176.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_177",
+    "path": "z2ui5_cl_demo_app_177.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_179",
+    "path": "z2ui5_cl_demo_app_179.js",
+    "todos": 1,
+    "todoDetails": [
+      "call with IMPORTING/CHANGING params: json_parse( ... ) — rewrite manually"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_181",
+    "path": "z2ui5_cl_demo_app_181.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_182",
+    "path": "z2ui5_cl_demo_app_182.js",
+    "todos": 2,
+    "todoDetails": [
+      "unsupported statement: READ TABLE mt_data-nodes INTO DATA(ls_node) WITH KEY id = lt_arg[ 2 ].",
+      "VALUE #( FOR/BASE ... ) not supported — rewrite manually"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_183",
+    "path": "z2ui5_cl_demo_app_183.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_184",
+    "path": "z2ui5_cl_demo_app_184.js",
+    "todos": 14,
+    "todoDetails": [
+      "unsupported statement: FIELD-SYMBOLS <tab> TYPE data.",
+      "unsupported statement: ASSIGN mt_table->* TO <tab>.",
+      "unsupported statement: FIELD-SYMBOLS <table> TYPE STANDARD TABLE.",
+      "unsupported statement: FIELD-SYMBOLS <table_tmp> TYPE STANDARD TABLE.",
+      "unsupported statement: CREATE DATA mt_table TYPE HANDLE new_table_desc.",
+      "unsupported statement: CREATE DATA mt_table_tmp TYPE HANDLE new_table_desc.",
+      "unsupported statement: ASSIGN mt_table->* TO <table>.",
+      "unsupported statement: SELECT * FROM (mv_table) INTO CORRESPONDING FIELDS OF TABLE @<table> UP TO 2 ROWS.",
+      "unsupported statement: ASSIGN mt_table_tmp->* TO <table_tmp>.",
+      "call with IMPORTING/CHANGING params: describe_by_name( ... ) — rewrite manually",
+      "unresolved class reference: cl_abap_datadescr",
+      "unresolved class reference: cl_abap_structdescr",
+      "unresolved class reference: cl_abap_tabledescr",
+      "unresolved class reference: cl_abap_typedescr"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_185",
+    "path": "z2ui5_cl_demo_app_185.js",
+    "todos": 6,
+    "todoDetails": [
+      "unsupported statement: FIELD-SYMBOLS <view_display> TYPE any.",
+      "unsupported statement: READ TABLE mt_t002 REFERENCE INTO DATA(t002) WITH KEY id = mv_selectedkey.",
+      "sy-subrc used — provide manually",
+      "CREATE OBJECT: CREATE OBJECT mo_app TYPE (t002->class).",
+      "unsupported statement: ASSIGN mo_app->(`MO_PARENT_VIEW`) TO FIELD-SYMBOL(<view>).",
+      "unsupported statement: ASSIGN mo_app->(`MV_VIEW_DISPLAY`) TO <view_display>."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_186",
+    "path": "z2ui5_cl_demo_app_186.js",
+    "todos": 1,
+    "todoDetails": [
+      "builtin xsdbool( ) not mapped"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_187",
+    "path": "z2ui5_cl_demo_app_187.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_189",
+    "path": "z2ui5_cl_demo_app_189.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_190",
+    "path": "z2ui5_cl_demo_app_190.js",
+    "todos": 13,
+    "todoDetails": [
+      "unsupported statement: FIELD-SYMBOLS <row> TYPE any.",
+      "unsupported statement: FIELD-SYMBOLS <tab> TYPE data.",
+      "unsupported statement: ASSIGN mt_table->* TO <tab>.",
+      "unsupported statement: FIELD-SYMBOLS <table> TYPE STANDARD TABLE.",
+      "unsupported statement: FIELD-SYMBOLS <table_tmp> TYPE STANDARD TABLE.",
+      "unsupported statement: CREATE DATA mt_table TYPE HANDLE new_table_desc.",
+      "unsupported statement: ASSIGN mt_table->* TO <table>.",
+      "unsupported statement: SELECT * FROM (mv_table) INTO CORRESPONDING FIELDS OF TABLE @<table> UP TO 100 ROWS.",
+      "call with IMPORTING/CHANGING params: describe_by_name( ... ) — rewrite manually",
+      "unresolved class reference: cl_abap_datadescr",
+      "unresolved class reference: cl_abap_structdescr",
+      "unresolved class reference: cl_abap_tabledescr",
+      "unresolved class reference: cl_abap_typedescr"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_191",
+    "path": "z2ui5_cl_demo_app_191.js",
+    "todos": 6,
+    "todoDetails": [
+      "unsupported statement: FIELD-SYMBOLS <view_display> TYPE any.",
+      "unsupported statement: READ TABLE mt_t002 REFERENCE INTO DATA(t002) WITH KEY id = mv_selectedkey.",
+      "sy-subrc used — provide manually",
+      "CREATE OBJECT: CREATE OBJECT mo_app TYPE (t002->class).",
+      "unsupported statement: ASSIGN mo_app->(`MO_PARENT_VIEW`) TO FIELD-SYMBOL(<view>).",
+      "unsupported statement: ASSIGN mo_app->(`MV_VIEW_DISPLAY`) TO <view_display>."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_192",
+    "path": "z2ui5_cl_demo_app_192.js",
+    "todos": 7,
+    "todoDetails": [
+      "unsupported statement: FIELD-SYMBOLS <fs_s_head> TYPE any.",
+      "unsupported statement: FIELD-SYMBOLS <fs_t_head_new> TYPE STANDARD TABLE.",
+      "unsupported statement: FIELD-SYMBOLS <fs_s_head_new> TYPE any.",
+      "unsupported statement: CREATE DATA lo_new_data->mt_kopf TYPE HANDLE lr_tabdescr.",
+      "unsupported statement: ASSIGN lo_new_data->mt_kopf->* TO <fs_t_head_new>.",
+      "unresolved class reference: cl_abap_structdescr",
+      "unresolved class reference: cl_abap_tabledescr"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_193",
+    "path": "z2ui5_cl_demo_app_193.js",
+    "todos": 4,
+    "todoDetails": [
+      "unsupported statement: ASSIGN mt_kopf->* TO FIELD-SYMBOL(<head>).",
+      "sy-subrc used — provide manually",
+      "unsupported statement: ASSIGN mt_pos->* TO FIELD-SYMBOL(<pos>).",
+      "sy-subrc used — provide manually"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_194",
+    "path": "z2ui5_cl_demo_app_194.js",
+    "todos": 28,
+    "todoDetails": [
+      "unsupported statement: FIELD-SYMBOLS <row> TYPE any.",
+      "unsupported statement: ASSIGN ms_table_row->* TO <row>.",
+      "unsupported statement: ASSIGN COMPONENT comp->name OF STRUCTURE <row> TO FIELD-SYMBOL(<val>).",
+      "sy-subrc used — provide manually",
+      "unsupported statement: FIELD-SYMBOLS <tab> TYPE data.",
+      "unsupported statement: ASSIGN mt_table->* TO <tab>.",
+      "unsupported statement: FIELD-SYMBOLS <table> TYPE STANDARD TABLE.",
+      "unsupported statement: FIELD-SYMBOLS <table_tmp> TYPE STANDARD TABLE.",
+      "unsupported statement: CREATE DATA mt_table TYPE HANDLE new_table_desc.",
+      "unsupported statement: CREATE DATA mt_table_tmp TYPE HANDLE new_table_desc.",
+      "unsupported statement: CREATE DATA ms_table_row TYPE HANDLE new_struct_desc.",
+      "unsupported statement: ASSIGN mt_table->* TO <table>.",
+      "unsupported statement: SELECT * FROM (mv_table) INTO CORRESPONDING FIELDS OF TABLE @<table> UP TO 100 ROWS.",
+      "unsupported statement: ASSIGN mt_table_tmp->* TO <table_tmp>.",
+      "unsupported statement: TYPES BEGIN OF ty_s_fixvalue,",
+      "unsupported statement: TYPES low TYPE string,",
+      "unsupported statement: TYPES high TYPE string,",
+      "unsupported statement: TYPES option TYPE string,",
+      "unsupported statement: TYPES ddlanguage TYPE string,",
+      "unsupported statement: TYPES ddtext TYPE string,",
+      "unsupported statement: TYPES END OF ty_s_fixvalue.",
+      "unsupported statement: TYPES fixvalues TYPE STANDARD TABLE OF ty_s_fixvalue WITH DEFAULT KEY.",
+      "unsupported statement: CREATE DATA ms_fixval TYPE HANDLE structdescr.",
+      "call with IMPORTING/CHANGING params: describe_by_name( ... ) — rewrite manually",
+      "unresolved class reference: cl_abap_datadescr",
+      "unresolved class reference: cl_abap_structdescr",
+      "unresolved class reference: cl_abap_tabledescr",
+      "unresolved class reference: cl_abap_typedescr"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_195",
+    "path": "z2ui5_cl_demo_app_195.js",
+    "todos": 6,
+    "todoDetails": [
+      "unsupported statement: FIELD-SYMBOLS <view_display> TYPE any.",
+      "unsupported statement: READ TABLE mt_t002 REFERENCE INTO DATA(t002) WITH KEY id = mv_selectedkey.",
+      "sy-subrc used — provide manually",
+      "CREATE OBJECT: CREATE OBJECT mo_app TYPE (t002->class).",
+      "unsupported statement: ASSIGN mo_app->(`MO_PARENT_VIEW`) TO FIELD-SYMBOL(<view>).",
+      "unsupported statement: ASSIGN mo_app->(`MV_VIEW_DISPLAY`) TO <view_display>."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_196",
+    "path": "z2ui5_cl_demo_app_196.js",
+    "todos": 1,
+    "todoDetails": [
+      "builtin xsdbool( ) not mapped"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_197",
+    "path": "z2ui5_cl_demo_app_197.js",
+    "todos": 3,
+    "todoDetails": [
+      "unsupported statement: DELETE mt_table.",
+      "unsupported statement: DELETE ADJACENT DUPLICATES FROM mt_table_products COMPARING product.",
+      "unresolved class reference: z2ui5_cl_ajson"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_199",
+    "path": "z2ui5_cl_demo_app_199.js",
+    "todos": 10,
+    "todoDetails": [
+      "unsupported statement: FIELD-SYMBOLS <tab> TYPE data.",
+      "unsupported statement: ASSIGN mt_table->* TO <tab>.",
+      "unsupported statement: FIELD-SYMBOLS <tab> TYPE STANDARD TABLE.",
+      "unsupported statement: ASSIGN mt_table->* TO <tab>.",
+      "unsupported statement: FIELD-SYMBOLS <table> TYPE STANDARD TABLE.",
+      "unsupported statement: CREATE DATA mt_table TYPE STANDARD TABLE OF z2ui5_t_01.",
+      "unsupported statement: ASSIGN mt_table->* TO <table>.",
+      "unsupported statement: SELECT id, id_prev FROM z2ui5_t_01 INTO CORRESPONDING FIELDS OF TABLE @<table> UP TO 2 ROWS.",
+      "unsupported statement: FIELD-SYMBOLS <tab> TYPE STANDARD TABLE.",
+      "unsupported statement: ASSIGN mt_table->* TO <tab>."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_202",
+    "path": "z2ui5_cl_demo_app_202.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_205",
+    "path": "z2ui5_cl_demo_app_205.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_206",
+    "path": "z2ui5_cl_demo_app_206.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_207",
+    "path": "z2ui5_cl_demo_app_207.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_208",
+    "path": "z2ui5_cl_demo_app_208.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_209",
+    "path": "z2ui5_cl_demo_app_209.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_210",
+    "path": "z2ui5_cl_demo_app_210.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_211",
+    "path": "z2ui5_cl_demo_app_211.js",
+    "todos": 6,
+    "todoDetails": [
+      "unsupported statement: READ TABLE mt_t002 REFERENCE INTO DATA(t002) WITH KEY id = mv_selectedkey.",
+      "sy-subrc used — provide manually",
+      "CREATE OBJECT: CREATE OBJECT mo_app TYPE (t002->class).",
+      "unsupported statement: ASSIGN mo_app->(`MO_PARENT_VIEW`) TO FIELD-SYMBOL(<view>).",
+      "unsupported statement: ASSIGN mo_app->(`MV_VIEW_DISPLAY`) TO FIELD-SYMBOL(<view_display>).",
+      "unsupported statement: ASSIGN mo_app->(`MV_VIEW_MODEL_UPDATE`) TO FIELD-SYMBOL(<view_update>)."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_212",
+    "path": "z2ui5_cl_demo_app_212.js",
+    "todos": 31,
+    "todoDetails": [
+      "unsupported statement: READ TABLE lt_arg INTO DATA(ls_arg) INDEX 1.",
+      "sy-subrc used — provide manually",
+      "unsupported statement: FIELD-SYMBOLS <tab> TYPE STANDARD TABLE.",
+      "unsupported statement: FIELD-SYMBOLS <table_row> TYPE any.",
+      "unsupported statement: ASSIGN mt_table->* TO <tab>.",
+      "unsupported statement: ASSIGN <tab>[ index ] TO FIELD-SYMBOL(<row>).",
+      "sy-subrc used — provide manually",
+      "unsupported statement: ASSIGN COMPONENT dfies-fieldname OF STRUCTURE <row> TO FIELD-SYMBOL(<value_tab>).",
+      "sy-subrc used — provide manually",
+      "unsupported statement: ASSIGN ms_table_row->* TO <table_row>.",
+      "unsupported statement: ASSIGN COMPONENT dfies-fieldname OF STRUCTURE <table_row> TO FIELD-SYMBOL(<value_struc>).",
+      "sy-subrc used — provide manually",
+      "unsupported statement: FIELD-SYMBOLS <row> TYPE any.",
+      "unsupported statement: ASSIGN ms_table_row->* TO <row>.",
+      "unsupported statement: ASSIGN COMPONENT dfies->fieldname OF STRUCTURE <row> TO FIELD-SYMBOL(<val>).",
+      "sy-subrc used — provide manually",
+      "unsupported statement: FIELD-SYMBOLS <tab> TYPE data.",
+      "unsupported statement: ASSIGN mt_table->* TO <tab>.",
+      "unsupported statement: FIELD-SYMBOLS <table> TYPE STANDARD TABLE.",
+      "unsupported statement: FIELD-SYMBOLS <table_tmp> TYPE STANDARD TABLE.",
+      "unsupported statement: CREATE DATA mt_table TYPE HANDLE new_table_desc.",
+      "unsupported statement: CREATE DATA mt_table_tmp TYPE HANDLE new_table_desc.",
+      "unsupported statement: CREATE DATA ms_table_row TYPE HANDLE new_struct_desc.",
+      "unsupported statement: ASSIGN mt_table->* TO <table>.",
+      "unsupported statement: SELECT * FROM (mv_table) INTO CORRESPONDING FIELDS OF TABLE @<table> UP TO 100 ROWS.",
+      "unsupported statement: ASSIGN mt_table_tmp->* TO <table_tmp>.",
+      "call with IMPORTING/CHANGING params: describe_by_name( ... ) — rewrite manually",
+      "unresolved class reference: cl_abap_datadescr",
+      "unresolved class reference: cl_abap_structdescr",
+      "unresolved class reference: cl_abap_tabledescr",
+      "unresolved class reference: cl_abap_typedescr"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_213",
+    "path": "z2ui5_cl_demo_app_213.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_214",
+    "path": "z2ui5_cl_demo_app_214.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_215",
+    "path": "z2ui5_cl_demo_app_215.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_216",
+    "path": "z2ui5_cl_demo_app_216.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_217",
+    "path": "z2ui5_cl_demo_app_217.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_218",
+    "path": "z2ui5_cl_demo_app_218.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_219",
+    "path": "z2ui5_cl_demo_app_219.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_220",
+    "path": "z2ui5_cl_demo_app_220.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_221",
+    "path": "z2ui5_cl_demo_app_221.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_222",
+    "path": "z2ui5_cl_demo_app_222.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_223",
+    "path": "z2ui5_cl_demo_app_223.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_224",
+    "path": "z2ui5_cl_demo_app_224.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_225",
+    "path": "z2ui5_cl_demo_app_225.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_226",
+    "path": "z2ui5_cl_demo_app_226.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_227",
+    "path": "z2ui5_cl_demo_app_227.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_228",
+    "path": "z2ui5_cl_demo_app_228.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_229",
+    "path": "z2ui5_cl_demo_app_229.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_230",
+    "path": "z2ui5_cl_demo_app_230.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_231",
+    "path": "z2ui5_cl_demo_app_231.js",
+    "todos": 1,
+    "todoDetails": [
+      "unsupported statement: ASSIGN me->(source) TO FIELD-SYMBOL(<drs>)."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_232",
+    "path": "z2ui5_cl_demo_app_232.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_233",
+    "path": "z2ui5_cl_demo_app_233.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_234",
+    "path": "z2ui5_cl_demo_app_234.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_235",
+    "path": "z2ui5_cl_demo_app_235.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_236",
+    "path": "z2ui5_cl_demo_app_236.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_237",
+    "path": "z2ui5_cl_demo_app_237.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_238",
+    "path": "z2ui5_cl_demo_app_238.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_239",
+    "path": "z2ui5_cl_demo_app_239.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_240",
+    "path": "z2ui5_cl_demo_app_240.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_241",
+    "path": "z2ui5_cl_demo_app_241.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_242",
+    "path": "z2ui5_cl_demo_app_242.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_243",
+    "path": "z2ui5_cl_demo_app_243.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_244",
+    "path": "z2ui5_cl_demo_app_244.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_245",
+    "path": "z2ui5_cl_demo_app_245.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_246",
+    "path": "z2ui5_cl_demo_app_246.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_247",
+    "path": "z2ui5_cl_demo_app_247.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_248",
+    "path": "z2ui5_cl_demo_app_248.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_249",
+    "path": "z2ui5_cl_demo_app_249.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_250",
+    "path": "z2ui5_cl_demo_app_250.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_251",
+    "path": "z2ui5_cl_demo_app_251.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_252",
+    "path": "z2ui5_cl_demo_app_252.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_253",
+    "path": "z2ui5_cl_demo_app_253.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_254",
+    "path": "z2ui5_cl_demo_app_254.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_255",
+    "path": "z2ui5_cl_demo_app_255.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_256",
+    "path": "z2ui5_cl_demo_app_256.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_257",
+    "path": "z2ui5_cl_demo_app_257.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_258",
+    "path": "z2ui5_cl_demo_app_258.js",
+    "todos": 1,
+    "todoDetails": [
+      "call with IMPORTING/CHANGING params: render_site_content( ... ) — rewrite manually"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_259",
+    "path": "z2ui5_cl_demo_app_259.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_260",
+    "path": "z2ui5_cl_demo_app_260.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_261",
+    "path": "z2ui5_cl_demo_app_261.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_262",
+    "path": "z2ui5_cl_demo_app_262.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_263",
+    "path": "z2ui5_cl_demo_app_263.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_264",
+    "path": "z2ui5_cl_demo_app_264.js",
+    "todos": 1,
+    "todoDetails": [
+      "unsupported statement: FIELD-SYMBOLS <fs_a_data> TYPE ty_s_a_data."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_265",
+    "path": "z2ui5_cl_demo_app_265.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_266",
+    "path": "z2ui5_cl_demo_app_266.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_267",
+    "path": "z2ui5_cl_demo_app_267.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_268",
+    "path": "z2ui5_cl_demo_app_268.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_269",
+    "path": "z2ui5_cl_demo_app_269.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_270",
+    "path": "z2ui5_cl_demo_app_270.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_271",
+    "path": "z2ui5_cl_demo_app_271.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_272",
+    "path": "z2ui5_cl_demo_app_272.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_273",
+    "path": "z2ui5_cl_demo_app_273.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_274",
+    "path": "z2ui5_cl_demo_app_274.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_275",
+    "path": "z2ui5_cl_demo_app_275.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_276",
+    "path": "z2ui5_cl_demo_app_276.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_277",
+    "path": "z2ui5_cl_demo_app_277.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_278",
+    "path": "z2ui5_cl_demo_app_278.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_279",
+    "path": "z2ui5_cl_demo_app_279.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_280",
+    "path": "z2ui5_cl_demo_app_280.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_281",
+    "path": "z2ui5_cl_demo_app_281.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_282",
+    "path": "z2ui5_cl_demo_app_282.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_283",
+    "path": "z2ui5_cl_demo_app_283.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_284",
+    "path": "z2ui5_cl_demo_app_284.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_285",
+    "path": "z2ui5_cl_demo_app_285.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_286",
+    "path": "z2ui5_cl_demo_app_286.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_287",
+    "path": "z2ui5_cl_demo_app_287.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_288",
+    "path": "z2ui5_cl_demo_app_288.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_289",
+    "path": "z2ui5_cl_demo_app_289.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_290",
+    "path": "z2ui5_cl_demo_app_290.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_291",
+    "path": "z2ui5_cl_demo_app_291.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_292",
+    "path": "z2ui5_cl_demo_app_292.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_293",
+    "path": "z2ui5_cl_demo_app_293.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_294",
+    "path": "z2ui5_cl_demo_app_294.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_295",
+    "path": "z2ui5_cl_demo_app_295.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_296",
+    "path": "z2ui5_cl_demo_app_296.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_297",
+    "path": "z2ui5_cl_demo_app_297.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_298",
+    "path": "z2ui5_cl_demo_app_298.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_299",
+    "path": "z2ui5_cl_demo_app_299.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_300",
+    "path": "z2ui5_cl_demo_app_300.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_301",
+    "path": "z2ui5_cl_demo_app_301.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_302",
+    "path": "z2ui5_cl_demo_app_302.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_303",
+    "path": "z2ui5_cl_demo_app_303.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_305",
+    "path": "z2ui5_cl_demo_app_305.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_306",
+    "path": "z2ui5_cl_demo_app_306.js",
+    "todos": 3,
+    "todoDetails": [
+      "sy-uzeit used — provide manually",
+      "unsupported statement: ASSIGN mt_picture[ selected_picture-id ] TO FIELD-SYMBOL(<picture>).",
+      "sy-subrc used — provide manually"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_307",
+    "path": "z2ui5_cl_demo_app_307.js",
+    "todos": 1,
+    "todoDetails": [
+      "unsupported statement: DELETE items INDEX drag_position."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_308",
+    "path": "z2ui5_cl_demo_app_308.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_310",
+    "path": "z2ui5_cl_demo_app_310.js",
+    "todos": 1,
+    "todoDetails": [
+      "unresolved class reference: cl_abap_char_utilities"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_311",
+    "path": "z2ui5_cl_demo_app_311.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_312",
+    "path": "z2ui5_cl_demo_app_312.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_313",
+    "path": "z2ui5_cl_demo_app_313.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_314",
+    "path": "z2ui5_cl_demo_app_314.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_315",
+    "path": "z2ui5_cl_demo_app_315.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_316",
+    "path": "z2ui5_cl_demo_app_316.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_318",
+    "path": "z2ui5_cl_demo_app_318.js",
+    "todos": 2,
+    "todoDetails": [
+      "VALUE #( FOR/BASE ... ) not supported — rewrite manually",
+      "builtin xsdbool( ) not mapped"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_319",
+    "path": "z2ui5_cl_demo_app_319.js",
+    "todos": 1,
+    "todoDetails": [
+      "unresolved class reference: z2ui5_cl_ajson"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_320",
+    "path": "z2ui5_cl_demo_app_320.js",
+    "todos": 1,
+    "todoDetails": [
+      "VALUE #( FOR/BASE ... ) not supported — rewrite manually"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_321",
+    "path": "z2ui5_cl_demo_app_321.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_322",
+    "path": "z2ui5_cl_demo_app_322.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_323",
+    "path": "z2ui5_cl_demo_app_323.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_324",
+    "path": "z2ui5_cl_demo_app_324.js",
+    "todos": 1,
+    "todoDetails": [
+      "unsupported statement: CALL FUNCTION fm EXPORTING text_question = `Test` EXCEPTIONS text_not_found = 1 OTHERS = 2."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_325",
+    "path": "z2ui5_cl_demo_app_325.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_327",
+    "path": "z2ui5_cl_demo_app_327.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_328",
+    "path": "z2ui5_cl_demo_app_328.js",
+    "todos": 15,
+    "todoDetails": [
+      "unsupported statement: FIELD-SYMBOLS <line> TYPE any.",
+      "unsupported statement: FIELD-SYMBOLS <tab> TYPE ANY TABLE.",
+      "unsupported statement: ASSIGN mt_table->* TO <tab>.",
+      "unsupported statement: ASSIGN COMPONENT `SELKZ` OF STRUCTURE <line> TO FIELD-SYMBOL(<selkz>).",
+      "sy-subrc used — provide manually",
+      "unsupported statement: ASSIGN mt_table->* TO FIELD-SYMBOL(<table>).",
+      "unsupported statement: ASSIGN mo_table_obj->mr_data->* TO FIELD-SYMBOL(<val>).",
+      "unsupported statement: ASSIGN mt_table->* TO FIELD-SYMBOL(<table>).",
+      "unsupported statement: FIELD-SYMBOLS <table> TYPE STANDARD TABLE.",
+      "unsupported statement: CREATE DATA mt_table TYPE HANDLE new_table_desc.",
+      "unsupported statement: ASSIGN mt_table->* TO <table>.",
+      "unsupported statement: SELECT id FROM z2ui5_t_01 INTO CORRESPONDING FIELDS OF TABLE @<table> UP TO 4 ROWS.",
+      "unresolved class reference: cl_abap_datadescr",
+      "unresolved class reference: cl_abap_structdescr",
+      "unresolved class reference: cl_abap_tabledescr"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_329",
+    "path": "z2ui5_cl_demo_app_329.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_330",
+    "path": "z2ui5_cl_demo_app_330.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_331",
+    "path": "z2ui5_cl_demo_app_331.js",
+    "todos": 3,
+    "todoDetails": [
+      "unsupported statement: ASSIGN mo_table_obj->mr_data->* TO FIELD-SYMBOL(<val>).",
+      "unsupported statement: ASSIGN COMPONENT `ID` OF STRUCTURE <val> TO FIELD-SYMBOL(<value>).",
+      "unsupported statement: SELECT SINGLE * FROM z2ui5_t_01 INTO CORRESPONDING FIELDS OF @ms_struc."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_332",
+    "path": "z2ui5_cl_demo_app_332.js",
+    "todos": 4,
+    "todoDetails": [
+      "unsupported statement: ASSIGN mo_table_obj->mr_data->* TO FIELD-SYMBOL(<val>).",
+      "unsupported statement: ASSIGN COMPONENT layout->name OF STRUCTURE <val> TO FIELD-SYMBOL(<value>).",
+      "sy-subrc used — provide manually",
+      "unsupported statement: SELECT SINGLE * FROM z2ui5_t_01 INTO CORRESPONDING FIELDS OF @ms_struc."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_333",
+    "path": "z2ui5_cl_demo_app_333.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_334",
+    "path": "z2ui5_cl_demo_app_334.js",
+    "todos": 4,
+    "todoDetails": [
+      "unsupported statement: ASSIGN mo_layout_obj->mr_data->* TO FIELD-SYMBOL(<val>).",
+      "unsupported statement: ASSIGN COMPONENT layout->name OF STRUCTURE <val> TO FIELD-SYMBOL(<value>).",
+      "sy-subrc used — provide manually",
+      "unsupported statement: SELECT SINGLE * FROM z2ui5_t_01 INTO CORRESPONDING FIELDS OF @ms_struc."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_335",
+    "path": "z2ui5_cl_demo_app_335.js",
+    "todos": 8,
+    "todoDetails": [
+      "unsupported statement: FIELD-SYMBOLS <row> TYPE z2ui5_t_01.",
+      "unsupported statement: ASSIGN mo_layout_obj_2->mr_data->* TO <row>.",
+      "unsupported statement: ASSIGN mo_layout_obj->mr_data->* TO <row>.",
+      "unsupported statement: ASSIGN mo_layout_obj->mr_data->* TO FIELD-SYMBOL(<val>).",
+      "unsupported statement: ASSIGN COMPONENT layout->name OF STRUCTURE <val> TO FIELD-SYMBOL(<value>).",
+      "sy-subrc used — provide manually",
+      "unsupported statement: SELECT SINGLE * FROM z2ui5_t_01 INTO CORRESPONDING FIELDS OF @ms_struc.",
+      "unsupported statement: SELECT SINGLE * FROM z2ui5_t_01 WHERE id <> @ms_struc-id INTO CORRESPONDING FIELDS OF @ms_struc."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_336",
+    "path": "z2ui5_cl_demo_app_336.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_337",
+    "path": "z2ui5_cl_demo_app_337.js",
+    "todos": 5,
+    "todoDetails": [
+      "unsupported statement: ASSIGN mo_layout_obj->mr_data->* TO FIELD-SYMBOL(<val>).",
+      "unsupported statement: ASSIGN mo_layout_obj_2->mr_data->* TO FIELD-SYMBOL(<val2>).",
+      "unsupported statement: SELECT id, id_prev, id_prev_app, id_prev_app_stack, timestampl FROM z2ui5_t_01 INTO CORRESPONDING FIELDS OF TABLE @mt_da",
+      "unsupported statement: ASSIGN COMPONENT layout->name OF STRUCTURE ms_data TO FIELD-SYMBOL(<value>).",
+      "sy-subrc used — provide manually"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_338",
+    "path": "z2ui5_cl_demo_app_338.js",
+    "todos": 6,
+    "todoDetails": [
+      "unsupported statement: FIELD-SYMBOLS <view_display> TYPE any.",
+      "unsupported statement: READ TABLE mt_t002 REFERENCE INTO DATA(t002) WITH KEY id = mv_selectedkey.",
+      "sy-subrc used — provide manually",
+      "CREATE OBJECT: CREATE OBJECT mo_app TYPE (t002->class).",
+      "unsupported statement: ASSIGN mo_app->(`MO_PARENT_VIEW`) TO FIELD-SYMBOL(<view>).",
+      "unsupported statement: ASSIGN mo_app->(`MV_VIEW_DISPLAY`) TO <view_display>."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_339",
+    "path": "z2ui5_cl_demo_app_339.js",
+    "todos": 14,
+    "todoDetails": [
+      "call with IMPORTING/CHANGING params: describe_by_name( ... ) — rewrite manually",
+      "unsupported statement: ASSIGN mt_table->* TO FIELD-SYMBOL(<table>).",
+      "unsupported statement: ASSIGN mo_layout->mr_data->* TO FIELD-SYMBOL(<data>).",
+      "unsupported statement: ASSIGN mt_table->* TO FIELD-SYMBOL(<table>).",
+      "unsupported statement: FIELD-SYMBOLS <table> TYPE STANDARD TABLE.",
+      "unsupported statement: CREATE DATA mt_table TYPE HANDLE new_table_desc.",
+      "unsupported statement: CREATE DATA mt_table_tmp TYPE HANDLE new_table_desc.",
+      "unsupported statement: ASSIGN mt_table->* TO <table>.",
+      "unsupported statement: SELECT * FROM (mv_table) INTO CORRESPONDING FIELDS OF TABLE @<table> UP TO 3 ROWS.",
+      "unsupported statement: SORT <table>.",
+      "unresolved class reference: cl_abap_datadescr",
+      "unresolved class reference: cl_abap_structdescr",
+      "unresolved class reference: cl_abap_tabledescr",
+      "unresolved class reference: cl_abap_typedescr"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_340",
+    "path": "z2ui5_cl_demo_app_340.js",
+    "todos": 10,
+    "todoDetails": [
+      "unsupported statement: ASSIGN mo_layout->mr_data->* TO FIELD-SYMBOL(<data>).",
+      "unsupported statement: ASSIGN mt_data->* TO FIELD-SYMBOL(<table>).",
+      "unsupported statement: CREATE DATA result->mt_data TYPE HANDLE new_table_desc.",
+      "unsupported statement: CREATE DATA result->mt_data_tmp TYPE HANDLE new_table_desc.",
+      "unsupported statement: CREATE DATA result->ms_data_row TYPE HANDLE new_struct_desc.",
+      "unsupported statement: ASSIGN io_table->* TO FIELD-SYMBOL(<table>).",
+      "unsupported statement: ASSIGN result->mt_data->* TO FIELD-SYMBOL(<data>).",
+      "unsupported statement: ASSIGN result->mt_data_tmp->* TO <data>.",
+      "unresolved class reference: cl_abap_structdescr",
+      "unresolved class reference: cl_abap_tabledescr"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_341",
+    "path": "z2ui5_cl_demo_app_341.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_342",
+    "path": "z2ui5_cl_demo_app_342.js",
+    "todos": 14,
+    "todoDetails": [
+      "call with IMPORTING/CHANGING params: describe_by_name( ... ) — rewrite manually",
+      "unsupported statement: ASSIGN mt_data->* TO FIELD-SYMBOL(<table>).",
+      "unsupported statement: ASSIGN mo_lay->mr_data->* TO FIELD-SYMBOL(<data>).",
+      "unsupported statement: ASSIGN mt_data->* TO FIELD-SYMBOL(<table>).",
+      "unsupported statement: FIELD-SYMBOLS <table> TYPE STANDARD TABLE.",
+      "unsupported statement: CREATE DATA mt_data TYPE HANDLE new_table_desc.",
+      "unsupported statement: CREATE DATA mt_data_tmp TYPE HANDLE new_table_desc.",
+      "unsupported statement: ASSIGN mt_data->* TO <table>.",
+      "unsupported statement: SELECT * FROM (mv_table) INTO CORRESPONDING FIELDS OF TABLE @<table> UP TO 5 ROWS.",
+      "unsupported statement: SORT <table>.",
+      "unresolved class reference: cl_abap_datadescr",
+      "unresolved class reference: cl_abap_structdescr",
+      "unresolved class reference: cl_abap_tabledescr",
+      "unresolved class reference: cl_abap_typedescr"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_343",
+    "path": "z2ui5_cl_demo_app_343.js",
+    "todos": 8,
+    "todoDetails": [
+      "call with IMPORTING/CHANGING params: describe_by_name( ... ) — rewrite manually",
+      "unsupported statement: FIELD-SYMBOLS <table1> TYPE STANDARD TABLE.",
+      "unsupported statement: CREATE DATA mt_data1 TYPE HANDLE new_table_desc.",
+      "unsupported statement: ASSIGN mt_data1->* TO <table1>.",
+      "unsupported statement: SELECT * FROM z2ui5_t_01 INTO TABLE @<table1> UP TO 5 ROWS.",
+      "unresolved class reference: cl_abap_structdescr",
+      "unresolved class reference: cl_abap_tabledescr",
+      "unresolved class reference: cl_abap_typedescr"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_344",
+    "path": "z2ui5_cl_demo_app_344.js",
+    "todos": 20,
+    "todoDetails": [
+      "unsupported statement: ASSIGN mt_data->* TO FIELD-SYMBOL(<table>).",
+      "unsupported statement: ASSIGN mo_layout_obj->mr_data->* TO FIELD-SYMBOL(<val>).",
+      "unsupported statement: ASSIGN mt_data2->* TO FIELD-SYMBOL(<table2>).",
+      "unsupported statement: ASSIGN mo_layout_obj2->mr_data->* TO FIELD-SYMBOL(<val2>).",
+      "unsupported statement: ASSIGN i_data->* TO FIELD-SYMBOL(<table>).",
+      "unsupported statement: FIELD-SYMBOLS <table> TYPE STANDARD TABLE.",
+      "unsupported statement: CREATE DATA mt_data TYPE HANDLE new_table_desc.",
+      "unsupported statement: ASSIGN mt_data->* TO <table>.",
+      "unsupported statement: SELECT * FROM (iv_tabname) INTO CORRESPONDING FIELDS OF TABLE @<table> UP TO 3 ROWS.",
+      "unsupported statement: SORT <table>.",
+      "unsupported statement: FIELD-SYMBOLS <table> TYPE STANDARD TABLE.",
+      "unsupported statement: CREATE DATA mt_data2 TYPE HANDLE new_table_desc.",
+      "unsupported statement: ASSIGN mt_data2->* TO <table>.",
+      "unsupported statement: SELECT * FROM (iv_tabname) INTO CORRESPONDING FIELDS OF TABLE @<table> UP TO 4 ROWS.",
+      "unsupported statement: SORT <table>.",
+      "call with IMPORTING/CHANGING params: describe_by_name( ... ) — rewrite manually",
+      "unresolved class reference: cl_abap_datadescr",
+      "unresolved class reference: cl_abap_structdescr",
+      "unresolved class reference: cl_abap_tabledescr",
+      "unresolved class reference: cl_abap_typedescr"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_345",
+    "path": "z2ui5_cl_demo_app_345.js",
+    "todos": 11,
+    "todoDetails": [
+      "call with IMPORTING/CHANGING params: describe_by_name( ... ) — rewrite manually",
+      "unsupported statement: FIELD-SYMBOLS <table1> TYPE STANDARD TABLE.",
+      "unsupported statement: CREATE DATA mt_data1 TYPE HANDLE new_table_desc.",
+      "unsupported statement: ASSIGN mt_data1->* TO <table1>.",
+      "unsupported statement: SELECT * FROM z2ui5_t_01 INTO TABLE @<table1> UP TO 5 ROWS.",
+      "unsupported statement: ASSIGN i_data->* TO FIELD-SYMBOL(<data>).",
+      "unsupported statement: ASSIGN mt_data1->* TO FIELD-SYMBOL(<table>).",
+      "unsupported statement: ASSIGN mo_layout_obj1->mr_data->* TO FIELD-SYMBOL(<val>).",
+      "unresolved class reference: cl_abap_structdescr",
+      "unresolved class reference: cl_abap_tabledescr",
+      "unresolved class reference: cl_abap_typedescr"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_347",
+    "path": "z2ui5_cl_demo_app_347.js",
+    "todos": 2,
+    "todoDetails": [
+      "unsupported statement: ASSIGN mo_layout_obj->mr_data->* TO FIELD-SYMBOL(<val>).",
+      "unsupported statement: SELECT id, id_prev, id_prev_app, id_prev_app_stack, timestampl FROM z2ui5_t_01 INTO CORRESPONDING FIELDS OF TABLE @mt_da"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_348",
+    "path": "z2ui5_cl_demo_app_348.js",
+    "todos": 10,
+    "todoDetails": [
+      "unsupported statement: FIELD-SYMBOLS <row> TYPE z2ui5_t_01.",
+      "unsupported statement: ASSIGN mo_layout_obj->mr_data->* TO <row>.",
+      "unsupported statement: SELECT SINGLE id, id_prev, id_prev_app, id_prev_app_stack, timestampl FROM z2ui5_t_01 INTO CORRESPONDING FIELDS OF @ms_s",
+      "unsupported statement: SELECT SINGLE id, id_prev, id_prev_app, id_prev_app_stack, timestampl FROM z2ui5_t_01 WHERE id <> @ms_struc-id INTO CORR",
+      "unsupported statement: FIELD-SYMBOLS <layout> TYPE z2ui5_cl_demo_app_333=>ty_s_layout.",
+      "unsupported statement: FIELD-SYMBOLS <data> TYPE any.",
+      "unsupported statement: FIELD-SYMBOLS <value> TYPE any.",
+      "unsupported statement: ASSIGN i_data->* TO <data>.",
+      "unsupported statement: ASSIGN COMPONENT <layout>-name OF STRUCTURE <data> TO <value>.",
+      "sy-subrc used — provide manually"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_349",
+    "path": "z2ui5_cl_demo_app_349.js",
+    "todos": 5,
+    "todoDetails": [
+      "unsupported statement: ASSIGN mo_layout_obj->mr_data->* TO FIELD-SYMBOL(<val>).",
+      "unsupported statement: ASSIGN mo_layout_obj_2->mr_data->* TO FIELD-SYMBOL(<val2>).",
+      "unsupported statement: SELECT id, id_prev, id_prev_app, id_prev_app_stack, timestampl FROM z2ui5_t_01 INTO CORRESPONDING FIELDS OF TABLE @mt_da",
+      "unsupported statement: ASSIGN COMPONENT layout->name OF STRUCTURE ms_data TO FIELD-SYMBOL(<value>).",
+      "sy-subrc used — provide manually"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_350",
+    "path": "z2ui5_cl_demo_app_350.js",
+    "todos": 2,
+    "todoDetails": [
+      "unsupported statement: CALL FUNCTION lv_fm EXPORTING tabname = `ZTEST` varkey = varkey EXCEPTIONS foreign_lock = 1 system_failure = 2 OTHERS = ",
+      "sy-subrc used — provide manually"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_352",
+    "path": "z2ui5_cl_demo_app_352.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_353",
+    "path": "z2ui5_cl_demo_app_353.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_354",
+    "path": "z2ui5_cl_demo_app_354.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_362",
+    "path": "z2ui5_cl_demo_app_362.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_363",
+    "path": "z2ui5_cl_demo_app_363.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_364",
+    "path": "z2ui5_cl_demo_app_364.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_365",
+    "path": "z2ui5_cl_demo_app_365.js",
+    "todos": 5,
+    "todoDetails": [
+      "unsupported statement: TYPES BEGIN OF ty_s_carrier,",
+      "unsupported statement: TYPES carrid TYPE c LENGTH 3,",
+      "unsupported statement: TYPES name TYPE string,",
+      "unsupported statement: TYPES url TYPE string,",
+      "unsupported statement: TYPES END OF ty_s_carrier."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_999",
+    "path": "z2ui5_cl_demo_app_999.js",
+    "todos": 2,
+    "todoDetails": [
+      "unsupported statement: CONSTANTS c_title TYPE string VALUE `abap2UI5 - Samples (new structure)`.",
+      "CREATE OBJECT: CREATE OBJECT li_app TYPE (lv_classname)."
+    ]
+  }
+]
