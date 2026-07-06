@@ -1,166 +1,74 @@
-/* AUTO-GENERATED scaffolding — abap2UI5 transpile failed; manual port required.
- *
- * Original ABAP source:
- * ====================
- * CLASS z2ui5_cl_demo_app_152 DEFINITION PUBLIC.
- * 
- *   PUBLIC SECTION.
- *     INTERFACES z2ui5_if_app.
- * 
- *     TYPES:
- *       BEGIN OF ty_row,
- *         zzselkz TYPE abap_bool,
- *         title   TYPE string,
- *         value   TYPE string,
- *         descr   TYPE string,
- *       END OF ty_row.
- * 
- *     DATA client TYPE REF TO z2ui5_if_client.
- * 
- *     DATA mt_tab TYPE STANDARD TABLE OF ty_row WITH EMPTY KEY.
- *     DATA mv_multiselect TYPE abap_bool.
- *     DATA mv_preselect TYPE abap_bool.
- * 
- *     METHODS view_display.
- *     METHODS on_event.
- *     METHODS on_navigation.
- *   PROTECTED SECTION.
- *   PRIVATE SECTION.
- * ENDCLASS.
- * 
- * 
- * CLASS z2ui5_cl_demo_app_152 IMPLEMENTATION.
- * 
- *   METHOD on_event.
- * 
- *     CASE client->get( )-event.
- * 
- *       WHEN `POPUP`.
- * 
- *         mt_tab = VALUE #( descr = `this is a description`
- *              ( zzselkz = mv_preselect title = `title_01`  value = `value_01` )
- *              ( zzselkz = mv_preselect title = `title_02`  value = `value_02` )
- *              ( zzselkz = mv_preselect title = `title_03`  value = `value_03` )
- *              ( zzselkz = mv_preselect title = `title_04`  value = `value_04` )
- *              ( zzselkz = mv_preselect title = `title_05`  value = `value_05` ) ).
- * 
- *         DATA(lo_app) = z2ui5_cl_pop_to_select=>factory(
- *                            i_tab         = mt_tab
- *                            i_multiselect = mv_multiselect
- *                            i_title       = COND #(
- *                                              WHEN mv_multiselect = abap_true
- *                                              THEN `Multi select`
- *                                              ELSE `Single select` ) ).
- *         client->nav_app_call( lo_app ).
- * 
- *       WHEN `MULTISELECT_TOGGLE`.
- * 
- *         mv_preselect = COND #( WHEN mv_multiselect = abap_false
- *                                THEN abap_false
- *                                ELSE mv_preselect ).
- * 
- *         client->view_model_update( ).
- *     ENDCASE.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD view_display.
- * 
- *     DATA(view) = z2ui5_cl_xml_view=>factory( ).
- *     view->shell(
- *         )->page(
- *                 title          = `abap2UI5 - Popup To Select`
- *                 navbuttonpress = client->_event_nav_app_leave( )
- *                 shownavbutton  = client->check_app_prev_stack( )
- *            )->hbox(
- *            )->text( text  = `Multiselect: `
- *                     class = `sapUiTinyMargin`
- *            )->switch( state  = client->_bind_edit( mv_multiselect )
- *                       change = client->_event( `MULTISELECT_TOGGLE` )
- *            )->get_parent(
- *            )->hbox(
- *            )->text( text  = `Preselect all entries: `
- *                     class = `sapUiTinyMargin`
- *            )->switch( state   = client->_bind_edit( mv_preselect )
- *                       enabled = client->_bind_edit( mv_multiselect )
- *            )->get_parent(
- *            )->button(
- *             text  = `Open Popup...`
- *             press = client->_event( `POPUP` ) ).
- * 
- *     client->view_display( view->stringify( ) ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD z2ui5_if_app~main.
- * 
- *     me->client = client.
- * 
- *     IF client->get( )-check_on_navigated = abap_true.
- * 
- *       IF client->check_on_init( ).
- *         view_display( ).
- * 
- *       ELSE.
- *         on_navigation( ).
- *       ENDIF.
- *       RETURN.
- *     ENDIF.
- * 
- *     on_event( ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD on_navigation.
- * 
- *     FIELD-SYMBOLS <row> TYPE ty_row.
- * 
- *     TRY.
- *         DATA(lo_prev) = client->get_app( client->get( )-s_draft-id_prev_app ).
- *         DATA(ls_result) = CAST z2ui5_cl_pop_to_select( lo_prev )->result( ).
- * 
- *         IF ls_result-check_confirmed = abap_false.
- *           client->message_box_display( `Popup was cancelled` ).
- *           RETURN.
- *         ENDIF.
- * 
- *         IF mv_multiselect = abap_false.
- * 
- *           ASSIGN ls_result-row->* TO <row>.
- *           client->message_box_display( `callback after popup to select: ` && <row>-title ).
- * 
- *         ELSE.
- * 
- *           ASSIGN ls_result-table->* TO FIELD-SYMBOL(<table>).
- *           client->nav_app_call( z2ui5_cl_pop_table=>factory(
- *                                     i_tab   = <table>
- *                                     i_title = `Selected rows` ) ).
- * 
- *         ENDIF.
- * 
- *       CATCH cx_root.
- *     ENDTRY.
- * 
- *   ENDMETHOD.
- * 
- * ENDCLASS.
- */
-
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
+const z2ui5_cl_pop_table = require("abap2UI5/z2ui5_cl_pop_table");
+const z2ui5_cl_pop_to_select = require("abap2UI5/z2ui5_cl_pop_to_select");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_152 extends z2ui5_if_app {
+  mt_tab = [];
+  mv_multiselect = false;
+  mv_preselect = false;
   client = null;
+
+  on_event() {
+    switch (this.client.get().EVENT) {
+      case `POPUP`:
+        this.mt_tab = { descr: `this is a description` (zzselkz === this.mv_preselect title === `title_01` value === `value_01`) (zzselkz === this.mv_preselect title === `title_02` value === `value_02`) (zzselkz === this.mv_preselect title === `title_03` value === `value_03`) (zzselkz === this.mv_preselect title === `title_04` value === `value_04`) (zzselkz === this.mv_preselect title === `title_05` value === `value_05`) };
+        const lo_app = z2ui5_cl_pop_to_select.factory({ i_tab: this.mt_tab, i_multiselect: this.mv_multiselect, i_title: (this.mv_multiselect === true ? `Multi select` : `Single select`) });
+        this.client.nav_app_call(lo_app);
+        break;
+      case `MULTISELECT_TOGGLE`:
+        this.mv_preselect = (this.mv_multiselect === false ? false : this.mv_preselect);
+        this.client.view_model_update();
+        break;
+    }
+  }
+
+  view_display() {
+    const view = z2ui5_cl_xml_view.factory();
+    view.shell()
+      .page({ title: `abap2UI5 - Popup To Select`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() })
+      .hbox()
+      .text({ text: `Multiselect: `, class: `sapUiTinyMargin` })
+      .switch({ state: this.client._bind_edit(this.mv_multiselect), change: this.client._event(`MULTISELECT_TOGGLE`) })
+      .get_parent()
+      .hbox()
+      .text({ text: `Preselect all entries: `, class: `sapUiTinyMargin` })
+      .switch({ state: this.client._bind_edit(this.mv_preselect), enabled: this.client._bind_edit(this.mv_multiselect) })
+      .get_parent()
+      .button({ text: `Open Popup...`, press: this.client._event(`POPUP`) });
+    this.client.view_display(view.stringify());
+  }
+
   async main(client) {
     this.client = client;
-    if (client.check_on_init()) {
-      const v = z2ui5_cl_xml_view.factory()
-        .Page({ title: "z2ui5_cl_demo_app_152 (TODO: port from abap)" })
-        .Text({ text: "This sample needs to be ported manually from abap2UI5." });
-      client.view_display(v.stringify());
+    if (client.get().CHECK_ON_NAVIGATED === true) {
+      if (client.check_on_init()) {
+        this.view_display();
+      } else {
+        this.on_navigation();
+      }
+      return;
+    }
+    this.on_event();
+  }
+
+  on_navigation() {
+    // TODO(abap2js): FIELD-SYMBOLS <row> TYPE ty_s_row.
+    try {
+      const lo_prev = this.client.get_app(this.client.get().S_DRAFT.ID_PREV_APP);
+      const ls_result = (lo_prev).result();
+      if (ls_result.check_confirmed === false) {
+        this.client.message_box_display(`Popup was cancelled`);
+        return;
+      }
+      if (this.mv_multiselect === false) {
+        // TODO(abap2js): ASSIGN ls_result-row->* TO <row>.
+        this.client.message_box_display(`callback after popup to select: ${row.title}`);
+      } else {
+        // TODO(abap2js): ASSIGN ls_result-table->* TO FIELD-SYMBOL(<table>).
+        this.client.nav_app_call(z2ui5_cl_pop_table.factory({ i_tab: table, i_title: `Selected rows` }));
+      }
+    } catch (error) {
     }
   }
 }

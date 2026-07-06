@@ -1,114 +1,521 @@
-const { randomUUID } = require("crypto");
-const z2ui5_cl_util   = require("../z2ui5_cl_util");
+// TODO(abap2js): unresolved reference cl_abap_elemdescr — add require manually
+// TODO(abap2js): unresolved reference cl_abap_structdescr — add require manually
+// TODO(abap2js): unresolved reference cl_abap_typedescr — add require manually
+// TODO(abap2js): unresolved reference cx_sy_dyn_call_illegal_class — add require manually
+const z2ui5_cl_util_api_c = require("abap2UI5/z2ui5_cl_util_api_c");
+const z2ui5_cl_util_api_s = require("abap2UI5/z2ui5_cl_util_api_s");
+const z2ui5_cx_util_error = require("abap2UI5/z2ui5_cx_util_error");
 
-/**
- * z2ui5_cl_util_api — JS port of abap2UI5 z2ui5_cl_util_api.
- *
- * ABAP defines this class as the runtime dispatcher between `_c` (cloud) and
- * `_s` (on-prem) variants. JS has neither distinction — there's just one
- * platform — so the variants `_c` and `_s` re-export this class.
- *
- * Methods (1:1 with abap CLASS-METHODS):
- *   bal_read / bal_save        — Business Application Log (no-op in JS)
- *   context_get_callstack      — best-effort stack trace
- *   context_get_tenant         — env-driven; defaults to "DEFAULT"
- *   context_get_sy             — empty (no SY-* in JS)
- *   context_check_abap_cloud   — false
- *   context_get_user_tech      — env.USER || env.USERNAME
- *   source_get_method          — function source via .toString()
- *   uuid_get_c32 / _c22        — delegated to util
- *   rtti_get_data_element_texts — empty (no DDIC in JS)
- *   conv_decode_x_base64        — Buffer.from(b64, 'base64')
- *   conv_encode_x_base64        — Buffer.toString('base64')
- *   conv_get_string_by_xstring  — Buffer.toString('utf-8')
- *   conv_get_xstring_by_string  — Buffer.from(str, 'utf-8')
- *   conv_get_xlsx_by_itab       — CSV (xlsx-from-array would need a 3p lib)
- *   conv_get_itab_by_xlsx       — pass-through
- *   rtti_get_classes_impl_intf  — delegated to util
- *   rtti_get_t_fixvalues        — empty (no DDIC fixed values)
- *   rtti_get_table_desrc        — empty
- *   rtti_get_class_descr_on_cloud — empty
- */
 class z2ui5_cl_util_api {
+  static gv_check_cloud = false;
+  static gv_check_cloud_cached = false;
 
-  // ---- BAL ----
-  static bal_read(_args)  { return []; }
-  static bal_save(_args)  { /* no-op */ }
-
-  // ---- context ----
-  static context_get_callstack() {
-    return new Error().stack || ``;
-  }
-  static context_get_tenant() {
-    return process.env.TENANT || `DEFAULT`;
-  }
-  static context_get_sy() {
-    return {};                          // no SY-* in JS
-  }
-  static context_check_abap_cloud() {
-    return false;
-  }
   static context_get_user_tech() {
-    return process.env.USER || process.env.USERNAME || `anonymous`;
+    let result = ``;
+    if (z2ui5_cl_util_api.context_check_abap_cloud()) {
+      result = z2ui5_cl_util_api_c.context_get_user_tech();
+    } else {
+      result = z2ui5_cl_util_api_s.context_get_user_tech();
+    }
+    return result;
   }
 
-  // ---- source ----
-  static source_get_method({ classname, methodname } = {}) {
+  static context_check_abap_cloud() {
+    let result = false;
+    if (z2ui5_cl_util_api.gv_check_cloud_cached === true) {
+      result = z2ui5_cl_util_api.gv_check_cloud;
+      return result;
+    }
     try {
-      const Cls = z2ui5_cl_util.rtti_get_class(classname);
-      const fn  = Cls?.prototype?.[methodname] || Cls?.[methodname];
-      return fn ? fn.toString() : ``;
-    } catch { return ``; }
+      cl_abap_typedescr.describe_by_name(`T100`);
+      z2ui5_cl_util_api.gv_check_cloud = false;
+    } catch (error) {
+      z2ui5_cl_util_api.gv_check_cloud = true;
+    }
+    z2ui5_cl_util_api.gv_check_cloud_cached = true;
+    result = z2ui5_cl_util_api.gv_check_cloud;
+    return result;
   }
 
-  // ---- uuid ----
-  static uuid_get_c32() { return z2ui5_cl_util.uuid_get_c32(); }
-  static uuid_get_c22() { return z2ui5_cl_util.uuid_get_c22(); }
-
-  // ---- rtti ----
-  static rtti_get_data_element_texts(_name) {
-    // SAP DDIC has long/medium/short field labels. JS has no such metadata.
-    return { l: ``, m: ``, s: `` };
-  }
-  static rtti_get_classes_impl_intf(intf) {
-    return z2ui5_cl_util.rtti_get_classes_impl_intf(intf);
-  }
-  static rtti_get_t_fixvalues(_name) { return []; }
-  static rtti_get_table_desrc(_name) { return []; }
-  static rtti_get_class_descr_on_cloud(_name) { return null; }
-
-  // ---- base64 / xstring ----
-  static conv_decode_x_base64(b64)  { return Buffer.from(String(b64 ?? ``), `base64`); }
-  static conv_encode_x_base64(buf)  {
-    if (buf == null) return ``;
-    if (Buffer.isBuffer(buf)) return buf.toString(`base64`);
-    return Buffer.from(String(buf), `utf-8`).toString(`base64`);
-  }
-  static conv_get_string_by_xstring(buf) {
-    if (Buffer.isBuffer(buf)) return buf.toString(`utf-8`);
-    return String(buf ?? ``);
-  }
-  static conv_get_xstring_by_string(s) {
-    return Buffer.from(String(s ?? ``), `utf-8`);
-  }
-
-  // ---- xlsx ----
-  /**
-   * Real XLSX requires a binary ZIP container. Without a 3p library we emit
-   * CSV — apps that need true XLSX can override (e.g. via the `xlsx` npm
-   * package) and replace this method.
-   */
-  static conv_get_xlsx_by_itab(tab) {
-    return z2ui5_cl_util.itab_get_csv_by_itab(tab);
-  }
-  static conv_get_itab_by_xlsx(xlsx) {
-    // Mirror the abap signature (string-in → array-out) — apps override for
-    // real XLSX parsing.
-    return z2ui5_cl_util.itab_get_itab_by_csv(xlsx);
+  static rtti_get_t_fixvalues({ elemdescr, langu } = {}) {
+    let result = [];
+    // TODO(abap2js): TYPES BEGIN OF fixvalue,
+    // TODO(abap2js): TYPES low TYPE c LENGTH 10,
+    // TODO(abap2js): TYPES high TYPE c LENGTH 10,
+    // TODO(abap2js): TYPES option TYPE c LENGTH 2,
+    // TODO(abap2js): TYPES ddlanguage TYPE c LENGTH 1,
+    // TODO(abap2js): TYPES ddtext TYPE c LENGTH 60,
+    // TODO(abap2js): TYPES END OF fixvalue.
+    // TODO(abap2js): TYPES fixvalues TYPE STANDARD TABLE OF fixvalue WITH DEFAULT KEY.
+    let lt_values = null;
+    let lv_langu = ``;
+    let temp1 = null;
+    let lr_fix = null;
+    let temp2 = null;
+    lv_langu = ` `;
+    lv_langu = langu;
+    call method elemdescr.( `GET_DDIC_FIXED_VALUES` ) exporting p_langu === lv_langu receiving p_fixed_values === lt_values exceptions not_found === 1 no_ddic_type === 2 others === 3;
+    let sy_tabix = 0;
+    for (const lr_fix of lt_values) {
+      sy_tabix++;
+      temp2 = null;
+      temp2.low = lr_fix.low;
+      temp2.high = lr_fix.high;
+      temp2.descr = lr_fix.ddtext;
+      result.push(temp2);
+    }
+    return result;
   }
 
-  // ---- internal helper ----
-  static _new_uuid() { return randomUUID().replace(/-/g, ``); }
+  static conv_decode_x_base64({ val } = {}) {
+    let result = null;
+    let lv_web_http_name = ``;
+    let classname = ``;
+    try {
+      lv_web_http_name = `CL_WEB_HTTP_UTILITY`;
+      call this.method(lv_web_http_name).( `DECODE_X_BASE64` ) exporting encoded === val receiving decoded === result;
+    } catch (error) {
+      classname = `CL_HTTP_UTILITY`;
+      call this.method(classname).( `DECODE_X_BASE64` ) exporting encoded === val receiving decoded === result;
+    }
+    return result;
+  }
+
+  static conv_encode_x_base64({ val } = {}) {
+    let result = ``;
+    let lv_web_http_name = ``;
+    let classname = ``;
+    try {
+      lv_web_http_name = `CL_WEB_HTTP_UTILITY`;
+      call this.method(lv_web_http_name).( `ENCODE_X_BASE64` ) exporting unencoded === val receiving encoded === result;
+    } catch (error) {
+      classname = `CL_HTTP_UTILITY`;
+      call this.method(classname).( `ENCODE_X_BASE64` ) exporting unencoded === val receiving encoded === result;
+    }
+    return result;
+  }
+
+  static conv_get_string_by_xstring({ val } = {}) {
+    let result = ``;
+    let conv = null;
+    let conv_codepage = ``;
+    let conv_in_class = ``;
+    try {
+      conv_codepage = `CL_ABAP_CONV_CODEPAGE`;
+      call this.method(conv_codepage).create_in receiving instance === conv;
+      call method conv.( `IF_ABAP_CONV_IN~CONVERT` ) exporting source === val receiving result === result;
+    } catch (error) {
+      conv_in_class = `CL_ABAP_CONV_IN_CE`;
+      call this.method(conv_in_class).create exporting encoding === `UTF-8` receiving conv === conv;
+      call method conv.( `CONVERT` ) exporting input === val importing data === result;
+    }
+    return result;
+  }
+
+  static conv_get_xstring_by_string({ val } = {}) {
+    let result = null;
+    let conv = null;
+    let conv_codepage = ``;
+    let conv_out_class = ``;
+    try {
+      conv_codepage = `CL_ABAP_CONV_CODEPAGE`;
+      call this.method(conv_codepage).create_out receiving instance === conv;
+      call method conv.( `IF_ABAP_CONV_OUT~CONVERT` ) exporting source === val receiving result === result;
+    } catch (error) {
+      conv_out_class = `CL_ABAP_CONV_OUT_CE`;
+      call this.method(conv_out_class).create exporting encoding === `UTF-8` receiving conv === conv;
+      call method conv.( `CONVERT` ) exporting data === val importing buffer === result;
+    }
+    return result;
+  }
+
+  static source_get_method({ iv_classname, iv_methodname } = {}) {
+    let result = [];
+    let object = null;
+    // TODO(abap2js): FIELD-SYMBOLS <any> TYPE any.
+    let lt_source = [];
+    let lt_string = [];
+    let lv_class = ``;
+    let lv_method = ``;
+    let xco_cp_abap = ``;
+    let lv_name = ``;
+    let lv_check_method = null;
+    let lv_source = null;
+    let lv_source_upper = ``;
+    try {
+      lv_class = iv_classname.toUpperCase();
+      lv_method = iv_methodname.toUpperCase();
+      xco_cp_abap = `XCO_CP_ABAP`;
+      call this.method(xco_cp_abap).( `CLASS` ) exporting iv_name === lv_class receiving ro_class === object;
+      // TODO(abap2js): ASSIGN object->(`IF_XCO_AO_CLASS~IMPLEMENTATION`) TO <any>.
+      if (!(sy_subrc === 0)) throw new Error(`ASSERT failed`);
+      object = any;
+      call method object.( `IF_XCO_CLAS_IMPLEMENTATION~METHOD` ) exporting iv_name === lv_method receiving ro_method === object;
+      call method object.( `IF_XCO_CLAS_I_METHOD~CONTENT` ) receiving ro_content === object;
+      call method object.( `IF_XCO_CLAS_I_METHOD_CONTENT~GET_SOURCE` ) receiving rt_source === result;
+    } catch (error) {
+    }
+    result = lt_string;
+    return result;
+  }
+
+  static rtti_get_classes_impl_intf({ val } = {}) {
+    let result = [];
+    let obj = null;
+    // TODO(abap2js): FIELD-SYMBOLS <any> TYPE any.
+    let lt_implementation_names = [];
+    // TODO(abap2js): TYPES BEGIN OF ty_s_impl.
+    // TODO(abap2js): TYPES clsname TYPE c LENGTH 30.
+    // TODO(abap2js): TYPES refclsname TYPE c LENGTH 30.
+    // TODO(abap2js): TYPES END OF ty_s_impl.
+    let lt_impl = [];
+    // TODO(abap2js): TYPES BEGIN OF ty_s_key.
+    // TODO(abap2js): TYPES intkey TYPE c LENGTH 30.
+    // TODO(abap2js): TYPES END OF ty_s_key.
+    let ls_key = {};
+    // TODO(abap2js): DATA BEGIN OF ls_clskey.
+    let clsname = ``;
+    // TODO(abap2js): DATA END OF ls_clskey.
+    let class_ = null;
+    let xco_cp_abap = ``;
+    let temp3 = [];
+    let implementation_name = null;
+    let temp4 = null;
+    let type = ``;
+    // TODO(abap2js): FIELD-SYMBOLS <class> TYPE data.
+    let temp5 = null;
+    let lr_impl = null;
+    // TODO(abap2js): FIELD-SYMBOLS <description> TYPE any.
+    let temp6 = null;
+    if (z2ui5_cl_util_api.context_check_abap_cloud()) {
+      ls_clskey.clsname = val;
+      xco_cp_abap = `XCO_CP_ABAP`;
+      call this.method(xco_cp_abap).interface exporting iv_name === ls_clskey.clsname receiving ro_interface === obj;
+      // TODO(abap2js): ASSIGN obj->(`IF_XCO_AO_INTERFACE~IMPLEMENTATIONS`) TO <any>.
+      if (sy_subrc !== 0) {
+        throw new cx_sy_dyn_call_illegal_class();
+      }
+      obj = any;
+      // TODO(abap2js): ASSIGN obj->(`IF_XCO_INTF_IMPLEMENTATIONS_FC~ALL`) TO <any>.
+      if (sy_subrc !== 0) {
+        throw new cx_sy_dyn_call_illegal_class();
+      }
+      obj = any;
+      call method obj.( `IF_XCO_INTF_IMPLEMENTATIONS~GET_NAMES` ) receiving rt_names === lt_implementation_names;
+      temp3 = null;
+      let sy_tabix = 0;
+      for (const implementation_name of lt_implementation_names) {
+        sy_tabix++;
+        temp4.classname = implementation_name;
+        temp4.description = z2ui5_cl_util_api.rtti_get_class_descr_on_cloud({ i_classname: implementation_name });
+        temp3.push(temp4);
+      }
+      result = temp3;
+    } else {
+      ls_key.intkey = val;
+      let lv_fm = ``;
+      lv_fm = `SEO_INTERFACE_IMPLEM_GET_ALL`;
+      // TODO(abap2js): CALL FUNCTION lv_fm EXPORTING intkey = ls_key IMPORTING impkeys = lt_impl EXCEPTIONS error_message = 1 OTHERS = 2.
+      if (sy_subrc !== 0) {
+        return result;
+      }
+      type = `SEOC_CLASS_R`;
+      // TODO(abap2js): CREATE DATA class TYPE (type).
+      // TODO(abap2js): ASSIGN class->* TO <class>.
+      let sy_tabix = 0;
+      for (const lr_impl of lt_impl) {
+        sy_tabix++;
+        class_ = null;
+        ls_clskey.clsname = lr_impl.clsname;
+        lv_fm = `SEO_CLASS_READ`;
+        // TODO(abap2js): CALL FUNCTION lv_fm EXPORTING clskey = ls_clskey IMPORTING class = <class> EXCEPTIONS error_message = 1 OTHERS = 2.
+        if (sy_subrc !== 0) {
+          throw new z2ui5_cx_util_error();
+        }
+        // TODO(abap2js): ASSIGN COMPONENT `DESCRIPT` OF STRUCTURE <class> TO <description>.
+        if (!(sy_subrc === 0)) throw new Error(`ASSERT failed`);
+        temp6 = null;
+        temp6.classname = lr_impl.clsname;
+        temp6.description = description;
+        result.push(temp6);
+      }
+    }
+    return result;
+  }
+
+  static rtti_get_data_element_texts({ val } = {}) {
+    let result = {};
+    let ddic_ref = null;
+    let data_element = null;
+    let content = null;
+    // TODO(abap2js): DATA BEGIN OF ddic,
+    let reptext = ``;
+    let scrtext_s = ``;
+    let scrtext_m = ``;
+    let scrtext_l = ``;
+    // TODO(abap2js): DATA END OF ddic.
+    let exists = false;
+    let data_element_name = ``;
+    let temp7 = null;
+    let struct_desrc = null;
+    // TODO(abap2js): FIELD-SYMBOLS <ddic> TYPE data.
+    let lo_typedescr = null;
+    let temp8 = null;
+    let data_descr = null;
+    data_element_name = val;
+    try {
+      cl_abap_typedescr.describe_by_name(`T100`);
+      temp7 = cl_abap_structdescr.describe_by_name(`DFIES`);
+      struct_desrc = temp7;
+      // TODO(abap2js): CREATE DATA ddic_ref TYPE HANDLE struct_desrc.
+      // TODO(abap2js): ASSIGN ddic_ref->* TO <ddic>.
+      if (!(sy_subrc === 0)) throw new Error(`ASSERT failed`);
+      cl_abap_elemdescr.describe_by_name(/* TODO(abap2js): out-params */ EXPORTING p_name = data_element_name RECEIVING p_descr_ref = lo_typedescr EXCEPTIONS OTHERS = 1);
+      if (sy_subrc !== 0) {
+        return result;
+      }
+      temp8 = lo_typedescr;
+      data_descr = temp8;
+      call method data_descr.( `GET_DDIC_FIELD` ) receiving p_flddescr === ddic exceptions not_found === 1 no_ddic_type === 2 others === 3;
+      if (sy_subrc !== 0) {
+        return result;
+      }
+      // TODO(abap2js): MOVE-CORRESPONDING <ddic> TO ddic.
+      result.header = ddic.reptext;
+      result.short = ddic.scrtext_s;
+      result.medium = ddic.scrtext_m;
+      result.long = ddic.scrtext_l;
+    } catch (error) {
+      try {
+        let lv_xco_cp_abap_dictionary = ``;
+        lv_xco_cp_abap_dictionary = `XCO_CP_ABAP_DICTIONARY`;
+        call this.method(lv_xco_cp_abap_dictionary).( `DATA_ELEMENT` ) exporting iv_name === data_element_name receiving ro_data_element === data_element;
+        call method data_element.( `IF_XCO_AD_DATA_ELEMENT~EXISTS` ) receiving rv_exists === exists;
+        if (exists === false) {
+          return result;
+        }
+        call method data_element.( `IF_XCO_AD_DATA_ELEMENT~CONTENT` ) receiving ro_content === content;
+        call method content.( `IF_XCO_DTEL_CONTENT~GET_HEADING_FIELD_LABEL` ) receiving rs_heading_field_label === result.header;
+        call method content.( `IF_XCO_DTEL_CONTENT~GET_SHORT_FIELD_LABEL` ) receiving rs_short_field_label === result.short;
+        call method content.( `IF_XCO_DTEL_CONTENT~GET_MEDIUM_FIELD_LABEL` ) receiving rs_medium_field_label === result.medium;
+        call method content.( `IF_XCO_DTEL_CONTENT~GET_LONG_FIELD_LABEL` ) receiving rs_long_field_label === result.long;
+      } catch (x) {
+        const error = x.get_text();
+      }
+    }
+    if (!result) {
+      result.header = val;
+      result.long = val;
+      result.medium = val;
+      result.short = val;
+    }
+    return result;
+  }
+
+  static uuid_get_c22() {
+    let result = ``;
+    let lv_uuid = ``;
+    let lv_classname = ``;
+    let lv_fm = ``;
+    try {
+      try {
+        lv_classname = `CL_SYSTEM_UUID`;
+        call this.method(lv_classname).if_system_uuid_static~create_uuid_c22 receiving uuid === lv_uuid;
+      } catch (error) {
+        lv_fm = `GUID_CREATE`;
+        // TODO(abap2js): CALL FUNCTION lv_fm IMPORTING ev_guid_22 = lv_uuid.
+      }
+      result = lv_uuid;
+    } catch (error) {
+      if (!(1 === 0)) throw new Error(`ASSERT failed`);
+    }
+    result = result.replaceAll(`}`, `0`);
+    result = result.replaceAll(`{`, `0`);
+    result = result.replaceAll(`"`, `0`);
+    result = result.replaceAll(`'`, `0`);
+    return result;
+  }
+
+  static uuid_get_c32() {
+    let result = ``;
+    let lv_uuid = ``;
+    let lv_classname = ``;
+    let lv_fm = ``;
+    try {
+      try {
+        lv_classname = `CL_SYSTEM_UUID`;
+        call this.method(lv_classname).if_system_uuid_static~create_uuid_c32 receiving uuid === lv_uuid;
+      } catch (error) {
+        lv_fm = `GUID_CREATE`;
+        // TODO(abap2js): CALL FUNCTION lv_fm IMPORTING ev_guid_32 = lv_uuid.
+      }
+      result = lv_uuid;
+    } catch (error) {
+      if (!(1 === 0)) throw new Error(`ASSERT failed`);
+    }
+    return result;
+  }
+
+  static rtti_get_class_descr_on_cloud({ i_classname } = {}) {
+    let result = ``;
+    try {
+      let obj = null;
+      let content = null;
+      let lv_classname = ``;
+      let xco_cp_abap = ``;
+      lv_classname = i_classname;
+      xco_cp_abap = `XCO_CP_ABAP`;
+      call this.method(xco_cp_abap).( `CLASS` ) exporting iv_name === lv_classname receiving ro_class === obj;
+      call method obj.( `IF_XCO_AO_CLASS~CONTENT` ) receiving ro_content === content;
+      call method content.( `IF_XCO_CLAS_CONTENT~GET_SHORT_DESCRIPTION` ) receiving rv_short_description === result;
+    } catch (x) {
+      const lv_error = x.get_text();
+    }
+    return result;
+  }
+
+  static rtti_get_table_desrc({ tabname, langu } = {}) {
+    let result = ``;
+    let ddtext = ``;
+    if (!(langu !== undefined)) {
+      let lan = sy_langu;
+    } else {
+      lan = langu;
+    }
+    if (z2ui5_cl_util_api.context_check_abap_cloud()) {
+      ddtext = tabname;
+    } else {
+      const lv_tabname = `dd02t`;
+      // TODO(abap2js): SELECT SINGLE ddtext FROM (lv_tabname) WHERE tabname = @tabname AND ddlanguage = @lan INTO @ddtext.
+    }
+    if (ddtext) {
+      result = ddtext;
+    } else {
+      result = tabname;
+    }
+    return result;
+  }
+
+  static context_get_tenant() {
+    let result = ``;
+    return result;
+  }
+
+  static context_get_callstack() {
+    let result = [];
+    let lo_util = null;
+    if (z2ui5_cl_util_api.context_check_abap_cloud()) {
+      lo_util = null; // TODO(abap2js): CREATE OBJECT lo_util TYPE (`Z2UI5_CL_UTIL_API_C`).
+      call method lo_util.( `CONTEXT_GET_CALLSTACK` ) receiving result === result;
+    } else {
+    }
+    return result;
+  }
+
+  static conv_get_xlsx_by_itab({ val } = {}) {
+    let result = null;
+    return result;
+  }
+
+  static conv_get_itab_by_xlsx({ val } = {}) {
+  }
+
+  static bal_create({ object, subobject, id, t_log } = {}) {
+    if (z2ui5_cl_util_api.context_check_abap_cloud()) {
+      z2ui5_cl_util_api_c.bal_create({ object, subobject, id, t_log });
+    } else {
+      z2ui5_cl_util_api_s.bal_create({ object, subobject, id, t_log });
+    }
+  }
+
+  static bal_read({ object, subobject, id } = {}) {
+    let result = [];
+    if (z2ui5_cl_util_api.context_check_abap_cloud()) {
+      result = z2ui5_cl_util_api_c.bal_read({ object, subobject, id });
+    } else {
+      result = z2ui5_cl_util_api_s.bal_read({ object, subobject, id });
+    }
+    return result;
+  }
+
+  static bal_update({ object, subobject, id, t_log } = {}) {
+    if (z2ui5_cl_util_api.context_check_abap_cloud()) {
+      z2ui5_cl_util_api_c.bal_update({ object, subobject, id, t_log });
+    } else {
+      z2ui5_cl_util_api_s.bal_update({ object, subobject, id, t_log });
+    }
+  }
+
+  static bal_delete({ object, subobject, id } = {}) {
+    if (z2ui5_cl_util_api.context_check_abap_cloud()) {
+      z2ui5_cl_util_api_c.bal_delete({ object, subobject, id });
+    } else {
+      z2ui5_cl_util_api_s.bal_delete({ object, subobject, id });
+    }
+  }
+
+  static context_get_sy() {
+    let result = null;
+    result = ({ ...sy });
+    return result;
+  }
+
+  static tr_create({ text, target, clike = `T` } = {}) {
+    let result = ``;
+    try {
+      let lr_header = null;
+      // TODO(abap2js): FIELD-SYMBOLS <header> TYPE any.
+      // TODO(abap2js): FIELD-SYMBOLS <trkorr> TYPE any.
+      let lv_class = ``;
+      // TODO(abap2js): CREATE DATA lr_header TYPE (`TRWBO_REQUEST_HEADER`).
+      // TODO(abap2js): ASSIGN lr_header->* TO <header>.
+      lv_class = `CL_ADT_CTS_MANAGEMENT`;
+      call this.method(lv_class).( `CREATE_EMPTY_REQUEST` ) exporting iv_type === type iv_text === text iv_target === target importing es_request_header === header;
+      // TODO(abap2js): ASSIGN COMPONENT `TRKORR` OF STRUCTURE <header> TO <trkorr>.
+      result = trkorr;
+    } catch (x) {
+      throw new z2ui5_cx_util_error({ previous: x });
+    }
+    return result;
+  }
+
+  static tr_release({ trkorr, ignore_locks = true } = {}) {
+    try {
+      let lo_api = null;
+      let lv_class = ``;
+      lv_class = `CL_CTS_REST_API_FACTORY`;
+      call this.method(lv_class).( `CREATE_INSTANCE` ) receiving result === lo_api;
+      call method lo_api.( `RELEASE` ) exporting iv_trkorr === trkorr iv_ignore_locks === ignore_locks;
+    } catch (x) {
+      throw new z2ui5_cx_util_error({ previous: x });
+    }
+  }
+
+  static tr_copy_objects({ source, destination } = {}) {
+    if (z2ui5_cl_util_api.context_check_abap_cloud()) {
+      z2ui5_cl_util_api_c.tr_copy_objects({ source, destination });
+    } else {
+      z2ui5_cl_util_api_s.tr_copy_objects({ source, destination });
+    }
+  }
+
+  static tr_import({ trkorr, target_system, client, ignore_version = true } = {}) {
+    let result = 0;
+    if (z2ui5_cl_util_api.context_check_abap_cloud()) {
+      result = z2ui5_cl_util_api_c.tr_import({ trkorr, target_system, client, ignore_version });
+    } else {
+      result = z2ui5_cl_util_api_s.tr_import({ trkorr, target_system, client, ignore_version });
+    }
+    return result;
+  }
+
+  static tr_check_status({ trkorr, system } = {}) {
+    if (z2ui5_cl_util_api.context_check_abap_cloud()) {
+      z2ui5_cl_util_api_c.tr_check_status(/* TODO(abap2js): out-params */ EXPORTING trkorr = trkorr system = system IMPORTING imported = imported rc = rc);
+    } else {
+      z2ui5_cl_util_api_s.tr_check_status(/* TODO(abap2js): out-params */ EXPORTING trkorr = trkorr system = system IMPORTING imported = imported rc = rc);
+    }
+  }
 }
 
 module.exports = z2ui5_cl_util_api;

@@ -1,350 +1,147 @@
-/* AUTO-GENERATED scaffolding — abap2UI5 transpile failed; manual port required.
- *
- * Original ABAP source:
- * ====================
- * CLASS z2ui5_cl_demo_app_083 DEFINITION PUBLIC.
- * 
- *   PUBLIC SECTION.
- *     INTERFACES z2ui5_if_app.
- * 
- *     TYPES:
- *       BEGIN OF ty_s_tab_01,
- *         screen_name TYPE string,
- *       END OF ty_s_tab_01.
- * 
- *     TYPES:
- *       BEGIN OF ty_s_tab_02,
- *         screen_name TYPE string,
- *         field       TYPE string,
- *         field_doma  TYPE string,
- *       END OF ty_s_tab_02.
- * 
- *     TYPES:
- *       BEGIN OF ty_s_tab_02_input,
- *         name  TYPE string,
- *         value TYPE string,
- *       END OF ty_s_tab_02_input.
- * 
- *     TYPES:
- *       BEGIN OF ty_s_filter_pop,
- *         option TYPE string,
- *         low    TYPE string,
- *         high   TYPE string,
- *         key    TYPE string,
- *       END OF ty_s_filter_pop.
- * 
- *     TYPES:
- *       BEGIN OF ty_s_token,
- *         key      TYPE string,
- *         text     TYPE string,
- *         visible  TYPE abap_bool,
- *         selkz    TYPE abap_bool,
- *         editable TYPE abap_bool,
- *       END OF ty_s_token.
- * 
- *     TYPES ty_t_range TYPE RANGE OF string.
- *     TYPES ty_s_range TYPE LINE OF ty_t_range.
- *     TYPES:
- *       BEGIN OF ty_s_filter,
- *         product TYPE ty_t_range,
- *       END OF ty_s_filter.
- * 
- *     DATA mt_01 TYPE STANDARD TABLE OF ty_s_tab_01 WITH EMPTY KEY.
- * 
- *     DATA mt_02 TYPE STANDARD TABLE OF ty_s_tab_02 WITH EMPTY KEY.
- *     DATA mt_02_display TYPE STANDARD TABLE OF ty_s_tab_02 WITH EMPTY KEY.
- * 
- *     DATA mt_tab_02_input TYPE STANDARD TABLE OF ty_s_tab_02_input WITH EMPTY KEY.
- * 
- *     DATA mt_filter TYPE STANDARD TABLE OF ty_s_filter_pop WITH EMPTY KEY.
- * 
- *     DATA mv_value       TYPE string.
- *     DATA mv_value2      TYPE string.
- *     DATA mt_token       TYPE STANDARD TABLE OF ty_s_token WITH EMPTY KEY.
- * 
- *     DATA mt_mapping TYPE z2ui5_if_types=>ty_t_name_value.
- * 
- *     DATA ms_filter TYPE ty_s_filter.
- *     DATA mv_name TYPE string.
- * 
- *     DATA mt_table TYPE REF TO data.
- *   PROTECTED SECTION.
- *     DATA client TYPE REF TO z2ui5_if_client.
- * 
- *     DATA mt_cols TYPE string_table.
- * 
- *     METHODS on_init.
- *     METHODS on_event.
- *     METHODS view_display_main.
- *     METHODS popover_display_filter.
- *   PRIVATE SECTION.
- * ENDCLASS.
- * 
- * 
- * CLASS z2ui5_cl_demo_app_083 IMPLEMENTATION.
- * 
- *   METHOD z2ui5_if_app~main.
- * 
- *     me->client     = client.
- * 
- *     IF client->check_on_init( ).
- *       on_init( ).
- * 
- *     ELSE.
- *       on_event( ).
- *     ENDIF.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD on_event.
- * 
- *     DATA ls_range TYPE z2ui5_cl_util=>ty_s_range.
- * 
- *     CASE client->get( )-event.
- * 
- *       WHEN `BUTTON_POST`.
- *         CREATE DATA mt_table TYPE (mv_name).
- *         view_display_main( ).
- * 
- *       WHEN `FILTER_UPDATE`.
- *         IF mv_value IS NOT INITIAL.
- * 
- *           ls_range = z2ui5_cl_util=>filter_get_range_by_token( mv_value ).
- *           INSERT ls_range INTO TABLE ms_filter-product.
- *         ENDIF.
- * 
- *       WHEN `FILTER_VALUE_HELP_OK`.
- *         ms_filter-product = VALUE #( ).
- *         LOOP AT mt_filter REFERENCE INTO DATA(lr_filter).
- *           INSERT VALUE #(
- *               sign   = `I`
- *               option = lr_filter->option
- *               low    = lr_filter->low
- *               high   = lr_filter->high
- *             ) INTO TABLE ms_filter-product.
- *         ENDLOOP.
- * 
- *         client->popup_destroy( ).
- * 
- *       WHEN `POPUP_ADD`.
- *         INSERT VALUE #( key = z2ui5_cl_util=>uuid_get_c32( ) ) INTO TABLE mt_filter.
- *         client->popup_model_update( ).
- * 
- *       WHEN `POPUP_DELETE`.
- *         DATA(lt_item) = client->get( )-t_event_arg.
- *         DELETE mt_filter WHERE key = lt_item[ 1 ].
- *         client->popup_model_update( ).
- * 
- *       WHEN `POPUP_DELETE_ALL`.
- *         mt_filter = VALUE #( ).
- *         client->popup_model_update( ).
- * 
- *       WHEN `FILTER_VALUE_HELP`.
- *         popover_display_filter( ).
- * 
- *         mt_filter = VALUE #( ).
- *         LOOP AT ms_filter-product REFERENCE INTO DATA(lr_product).
- *           INSERT VALUE #(
- *                    low    = lr_product->low
- *                    high   = lr_product->high
- *                    option = lr_product->option
- *                    key    = z2ui5_cl_util=>uuid_get_c32( )
- *             ) INTO TABLE mt_filter.
- * 
- *         ENDLOOP.
- *     ENDCASE.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD on_init.
- * 
- *     mt_01 = VALUE #( ( screen_name = `screen_01` ) ( screen_name = `screen_02` ) ).
- * 
- *     mt_02 = VALUE #(
- *       ( screen_name = `screen_01` field_doma = `CHAR30` field = `MATNR` )
- *       ( screen_name = `screen_01` field_doma = `STRING` field = `LGNUM` )
- *       ( screen_name = `screen_02` field_doma = `PRODUCT` field = `PRODUCT` ) ).
- * 
- *     mv_name = `screen_01`.
- *     view_display_main( ).
- * 
- *     mt_mapping = VALUE #(
- *       (   n = `EQ`     v = `={LOW}` )
- *       (   n = `LT`     v = `<{LOW}` )
- *       (   n = `LE`     v = `<={LOW}` )
- *       (   n = `GT`     v = `>{LOW}` )
- *       (   n = `GE`     v = `>={LOW}` )
- *       (   n = `CP`     v = `*{LOW}*` )
- *       (   n = `BT`     v = `{LOW}...{HIGH}` )
- *       (   n = `NE`     v = `!(={LOW})` )
- *       (   n = `NE`     v = `!(<leer>)` )
- *       (   n = `<leer>` v = `<leer>` ) ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD view_display_main.
- * 
- *     DATA(view) = z2ui5_cl_xml_view=>factory( ).
- * 
- *     view = view->page( id   = `page_main`
- *              title          = `abap2UI5 - Select-Options`
- *              navbuttonpress = client->_event_nav_app_leave( )
- *              shownavbutton  = client->check_app_prev_stack( ) ).
- * 
- *     DATA(page) = view->dynamic_page(
- *             headerexpanded = abap_true
- *             headerpinned   = abap_true ).
- * 
- *     DATA(header_title) = page->title( ns = `f`
- *             )->get( )->dynamic_page_title( ).
- * 
- *     header_title->heading( `f` )->hbox(
- *         )->title( `Select-Option` ).
- *     header_title->expanded_content( `f` ).
- *     header_title->snapped_content( `f` ).
- * 
- *     DATA(lo_box) = page->header( )->dynamic_page_header( abap_true
- *          )->flex_box( alignitems     = `Start`
- *                       justifycontent = `SpaceBetween` )->flex_box( alignitems = `Start` ).
- * 
- *     DATA(vbox) = lo_box->vbox( ).
- *     vbox->simple_form( editable = abap_true
- *             )->content( `form`
- *                 )->title( `Table`
- *                 )->label( `Name` ).
- * 
- *     vbox->input( client->_bind_edit( mv_name ) ).
- * 
- *     vbox->button(
- *                 text  = `read`
- *                 press = client->_event( `BUTTON_POST` ) ).
- * 
- *     vbox = lo_box->vbox( ).
- * 
- *     IF mt_02 IS NOT INITIAL.
- * 
- *       mt_02_display = mt_02.
- *       DELETE mt_02_display WHERE screen_name <> mv_name.
- * 
- *       mt_tab_02_input = VALUE #( FOR line IN mt_cols ( name = line ) ).
- * 
- *       LOOP AT mt_02_display REFERENCE INTO DATA(lr_tab).
- *         INSERT VALUE #(
- *             name = lr_tab->field
- * *                value = lr_tab->field_doma
- *                  ) INTO TABLE mt_tab_02_input.
- *       ENDLOOP.
- * *
- *       vbox->list(
- *         items      = client->_bind( mt_tab_02_input )
- *         headertext = `Filter`
- *         )->custom_list_item(
- *             )->hbox(
- *                 )->text( `{NAME}`
- *             )->multi_input(
- *                 tokens           = client->_bind( mt_token )
- *                 showclearicon    = abap_true
- *                 value            = `{VALUE}`
- *                 tokenupdate      = client->_event( `FILTER_UPDATE1` )
- *                 submit           = client->_event( `FILTER_UPDATE` )
- *                 id               = `FILTER`
- *                 valuehelprequest = client->_event( `FILTER_VALUE_HELP` )
- *             )->item(
- *                     key  = `{KEY}`
- *                     text = `{TEXT}`
- *             )->tokens(
- *                 )->token(
- *                     key      = `{KEY}`
- *                     text     = `{TEXT}`
- *                     visible  = `{VISIBLE}`
- *                     selected = `{SELKZ}`
- *                     editable = `{EDITABLE}` ).
- *     ENDIF.
- * 
- *     client->view_display( page->stringify( ) ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD popover_display_filter.
- * 
- *     DATA(lo_popup) = z2ui5_cl_xml_view=>factory_popup( ).
- * 
- *     lo_popup = lo_popup->dialog(
- *       contentheight = `50%`
- *       contentwidth  = `50%`
- *         title       = `Define Conditons - Product` ).
- * 
- *     DATA(vbox) = lo_popup->vbox( height         = `100%`
- *                                  justifycontent = `SpaceBetween` ).
- * 
- *     DATA(pan)  = vbox->panel(
- *          expandable = abap_false
- *          expanded   = abap_true
- *          headertext = `Product` ).
- *     DATA(item) = pan->list(
- *            "   headertext = `Product`
- *               nodata         = `no conditions defined`
- *              items           = client->_bind_edit( mt_filter )
- *              selectionchange = client->_event( `SELCHANGE` )
- *                 )->custom_list_item( ).
- * 
- *     DATA(grid) = item->grid( ).
- * 
- *     grid->combobox(
- *                  selectedkey = `{OPTION}`
- *                  items       = client->_bind_edit( mt_mapping )
- *              )->item(
- *                      key  = `{N}`
- *                      text = `{N}`
- *              )->get_parent(
- *              )->input( `{LOW}`
- *              )->input( value   = `{HIGH}`
- *                        visible = `{= ${OPTION} === 'BT' }`
- *              )->button( icon  = `sap-icon://decline`
- *                         type  = `Transparent`
- *                         press = client->_event( val = `POPUP_DELETE` t_arg = VALUE #( ( `${KEY}` ) ) ) ).
- * 
- *     lo_popup->footer( )->overflow_toolbar(
- *         )->button( text  = `Delete All`
- *                    icon  = `sap-icon://delete`
- *                    type  = `Transparent`
- *                    press = client->_event( `POPUP_DELETE_ALL` )
- *         )->button( text  = `Add Item`
- *                    icon  = `sap-icon://add`
- *                    press = client->_event( `POPUP_ADD` )
- *         )->toolbar_spacer(
- *         )->button(
- *             text  = `OK`
- *             press = client->_event( `FILTER_VALUE_HELP_OK` )
- *             type  = `Emphasized`
- *        )->button(
- *             text  = `Cancel`
- *             press = client->_event( `FILTER_VALUE_HELP_CANCEL` ) ).
- * 
- *     client->popup_display( lo_popup->stringify( ) ).
- * 
- *   ENDMETHOD.
- * 
- * ENDCLASS.
- */
-
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_083 extends z2ui5_if_app {
+  mt_01 = [];
+  mt_02 = [];
+  mt_02_display = [];
+  mt_tab_02_input = [];
+  mt_filter = [];
+  mv_value = ``;
+  mv_value2 = ``;
+  mt_token = [];
+  mt_mapping = [];
+  ms_filter = {};
+  mv_name = ``;
+  mt_table = null;
   client = null;
+  mt_cols = [];
+
   async main(client) {
     this.client = client;
     if (client.check_on_init()) {
-      const v = z2ui5_cl_xml_view.factory()
-        .Page({ title: "z2ui5_cl_demo_app_083 (TODO: port from abap)" })
-        .Text({ text: "This sample needs to be ported manually from abap2UI5." });
-      client.view_display(v.stringify());
+      this.on_init();
+    } else {
+      this.on_event();
     }
+  }
+
+  on_event() {
+    let ls_range = null;
+    switch (this.client.get().EVENT) {
+      case `BUTTON_POST`:
+        // TODO(abap2js): CREATE DATA mt_table TYPE (mv_name).
+        this.view_display_main();
+        break;
+      case `FILTER_UPDATE`:
+        if (this.mv_value) {
+          ls_range = z2ui5_cl_util.filter_get_range_by_token(this.mv_value);
+          this.ms_filter.product.push(ls_range);
+        }
+        break;
+      case `FILTER_VALUE_HELP_OK`:
+        this.ms_filter.product = {};
+        let sy_tabix = 0;
+        for (const lr_filter of this.mt_filter) {
+          sy_tabix++;
+          this.ms_filter.product.push({ sign: `I`, option: lr_filter.option, low: lr_filter.low, high: lr_filter.high });
+        }
+        this.client.popup_destroy();
+        break;
+      case `POPUP_ADD`:
+        this.mt_filter.push({ key: z2ui5_cl_util.uuid_get_c32() });
+        this.client.popup_model_update();
+        break;
+      case `POPUP_DELETE`:
+        const lt_item = this.client.get().T_EVENT_ARG;
+        for (let _i = this.mt_filter.length - 1; _i >= 0; _i--) { const row = this.mt_filter[_i]; if (row.key === lt_item[(1) - 1]) this.mt_filter.splice(_i, 1); }
+        this.client.popup_model_update();
+        break;
+      case `POPUP_DELETE_ALL`:
+        this.mt_filter = {};
+        this.client.popup_model_update();
+        break;
+      case `FILTER_VALUE_HELP`:
+        this.popover_display_filter();
+        this.mt_filter = {};
+        let sy_tabix = 0;
+        for (const lr_product of this.ms_filter.product) {
+          sy_tabix++;
+          this.mt_filter.push({ low: lr_product.low, high: lr_product.high, option: lr_product.option, key: z2ui5_cl_util.uuid_get_c32() });
+        }
+        break;
+    }
+  }
+
+  on_init() {
+    this.mt_01 = [{ screen_name: `screen_01` }, { screen_name: `screen_02` }];
+    this.mt_02 = [{ screen_name: `screen_01`, field_doma: `CHAR30`, field: `MATNR` }, { screen_name: `screen_01`, field_doma: `STRING`, field: `LGNUM` }, { screen_name: `screen_02`, field_doma: `PRODUCT`, field: `PRODUCT` }];
+    this.mv_name = `screen_01`;
+    this.view_display_main();
+    this.mt_mapping = [{ n: `EQ`, v: `={LOW}` }, { n: `LT`, v: `<{LOW}` }, { n: `LE`, v: `<={LOW}` }, { n: `GT`, v: `>{LOW}` }, { n: `GE`, v: `>={LOW}` }, { n: `CP`, v: `*{LOW}*` }, { n: `BT`, v: `{LOW}...{HIGH}` }, { n: `NE`, v: `!(={LOW})` }, { n: `NE`, v: `!(<leer>)` }, { n: `<leer>`, v: `<leer>` }];
+  }
+
+  view_display_main() {
+    let view = z2ui5_cl_xml_view.factory();
+    view = view.page({ id: `page_main`, title: `abap2UI5 - Select-Options`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    const page = view.dynamic_page({ headerexpanded: true, headerpinned: true });
+    const header_title = page.title({ ns: `f` }).get().dynamic_page_title();
+    header_title.heading(`f`).hbox().title(`Select-Option`);
+    header_title.expanded_content(`f`);
+    header_title.snapped_content(`f`);
+    const lo_box = page.header()
+      .dynamic_page_header(true)
+      .flex_box({ alignitems: `Start`, justifycontent: `SpaceBetween` })
+      .flex_box({ alignitems: `Start` });
+    let vbox = lo_box.vbox();
+    vbox.simple_form({ editable: true }).content(`form`).title(`Table`).label(`Name`);
+    vbox.input(this.client._bind_edit(this.mv_name));
+    vbox.button({ text: `read`, press: this.client._event(`BUTTON_POST`) });
+    vbox = lo_box.vbox();
+    if (this.mt_02) {
+      this.mt_02_display = this.mt_02;
+      for (let _i = this.mt_02_display.length - 1; _i >= 0; _i--) { const row = this.mt_02_display[_i]; if (row.screen_name !== this.mv_name) this.mt_02_display.splice(_i, 1); }
+      this.mt_tab_02_input = /* TODO(abap2js): VALUE FOR/BASE */ [];
+      let sy_tabix = 0;
+      for (const lr_tab of this.mt_02_display) {
+        sy_tabix++;
+        this.mt_tab_02_input.push({ name: lr_tab.field });
+      }
+      vbox.list({ items: this.client._bind(this.mt_tab_02_input), headertext: `Filter` })
+        .custom_list_item()
+        .hbox()
+        .text(`{NAME}`)
+        .multi_input({ tokens: this.client._bind(this.mt_token), showclearicon: true, value: `{VALUE}`, tokenupdate: this.client._event(`FILTER_UPDATE1`), submit: this.client._event(`FILTER_UPDATE`), id: `FILTER`, valuehelprequest: this.client._event(`FILTER_VALUE_HELP`) })
+        .item({ key: `{KEY}`, text: `{TEXT}` })
+        .tokens()
+        .token({ key: `{KEY}`, text: `{TEXT}`, visible: `{VISIBLE}`, selected: `{SELKZ}`, editable: `{EDITABLE}` });
+    }
+    this.client.view_display(page.stringify());
+  }
+
+  popover_display_filter() {
+    let lo_popup = z2ui5_cl_xml_view.factory_popup();
+    lo_popup = lo_popup.dialog({ contentheight: `50%`, contentwidth: `50%`, title: `Define Conditons - Product` });
+    const vbox = lo_popup.vbox({ height: `100%`, justifycontent: `SpaceBetween` });
+    const pan = vbox.panel({ expandable: false, expanded: true, headertext: `Product` });
+    const item = pan.list({ nodata: `no conditions defined`, items: this.client._bind_edit(this.mt_filter), selectionchange: this.client._event(`SELCHANGE`) })
+      .custom_list_item();
+    const grid = item.grid();
+    grid.combobox({ selectedkey: `{OPTION}`, items: this.client._bind_edit(this.mt_mapping) })
+      .item({ key: `{N}`, text: `{N}` })
+      .get_parent()
+      .input(`{LOW}`)
+      .input({ value: `{HIGH}`, visible: `{= ${OPTION} === 'BT' }` })
+      .button({ icon: `sap-icon://decline`, type: `Transparent`, press: this.client._event(`POPUP_DELETE`, [`${KEY}`]) });
+    lo_popup.footer()
+      .overflow_toolbar()
+      .button({ text: `Delete All`, icon: `sap-icon://delete`, type: `Transparent`, press: this.client._event(`POPUP_DELETE_ALL`) })
+      .button({ text: `Add Item`, icon: `sap-icon://add`, press: this.client._event(`POPUP_ADD`) })
+      .toolbar_spacer()
+      .button({ text: `OK`, press: this.client._event(`FILTER_VALUE_HELP_OK`), type: `Emphasized` })
+      .button({ text: `Cancel`, press: this.client._event(`FILTER_VALUE_HELP_CANCEL`) });
+    this.client.popup_display(lo_popup.stringify());
   }
 }
 

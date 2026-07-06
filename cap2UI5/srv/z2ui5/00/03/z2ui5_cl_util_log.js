@@ -1,83 +1,101 @@
-const z2ui5_cl_util_msg = require("./z2ui5_cl_util_msg");
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 
-/**
- * z2ui5_cl_util_log — JS port of abap2UI5 z2ui5_cl_util_log.
- *
- * Fluent log accumulator. Method chain mirrors the ABAP impl:
- *   new z2ui5_cl_util_log()
- *     .info("hello")
- *     .warning("careful")
- *     .error("boom")
- *     .add(some_msg_struct);
- *
- * Each builder returns `this` (== abap `result = me`).
- * `mt_log` is the protected message table — same name as in ABAP.
- *
- * `bal_save` / `bal_read` are kept as no-ops (no SAP BAL in JS); apps that
- * need persistent logging should pipe `to_msg()` into their own store.
- */
 class z2ui5_cl_util_log {
-
   mt_log = [];
 
-  add(val) {
-    const lt_msg = z2ui5_cl_util_msg.msg_get(val);
-    this.mt_log.push(...lt_msg);
-    return this;
+  add({ val } = {}) {
+    let result = null;
+    const lt_msg = z2ui5_cl_util.msg_get_t(val);
+    this.mt_log.push(lines OF lt_msg);
+    result = this;
+    return result;
   }
 
-  info(val)    { this.mt_log.push({ type: `I`, text: String(val ?? ``) }); return this; }
-  error(val)   { this.mt_log.push({ type: `E`, text: String(val ?? ``) }); return this; }
-  warning(val) { this.mt_log.push({ type: `W`, text: String(val ?? ``) }); return this; }
-  success(val) { this.mt_log.push({ type: `S`, text: String(val ?? ``) }); return this; }
+  info({ val } = {}) {
+    let result = null;
+    this.mt_log.push({ type: `I`, text: val });
+    result = this;
+    return result;
+  }
+
+  error({ val } = {}) {
+    let result = null;
+    this.mt_log.push({ type: `E`, text: val });
+    result = this;
+    return result;
+  }
+
+  warning({ val } = {}) {
+    let result = null;
+    this.mt_log.push({ type: `W`, text: val });
+    result = this;
+    return result;
+  }
+
+  success({ val } = {}) {
+    let result = null;
+    this.mt_log.push({ type: `S`, text: val });
+    result = this;
+    return result;
+  }
 
   clear() {
-    this.mt_log.length = 0;
-    return this;
+    let result = null;
+    this.mt_log = [];
+    result = this;
+    return result;
   }
 
   has_error() {
-    return this.mt_log.some((m) => m?.type === `E`);
+    let result = false;
+    result = Boolean(this.mt_log.some((row) => row.type === `E`));
+    return result;
   }
 
   count() {
-    return this.mt_log.length;
+    let result = 0;
+    result = this.mt_log.length;
+    return result;
   }
 
-  /** No-op in JS — SAP BAL has no equivalent. Apps may override. */
-  bal_save(_object, _subobject, _id) { /* intentional no-op */ }
+  bal_read({ object, subobject, id } = {}) {
+    const lt_msg = z2ui5_cl_util.bal_read({ object, subobject, id });
+    this.mt_log.push(lines OF lt_msg);
+  }
 
-  /** No-op in JS. Apps that need BAL bridging should override. */
-  bal_read(_object, _subobject, _id) { /* intentional no-op */ }
+  bal_save({ object, subobject, id } = {}) {
+    z2ui5_cl_util.bal_create({ object, subobject, id, t_log: this.mt_log });
+  }
 
   to_csv() {
-    // header + rows; no quoting beyond escaping double-quotes
-    const cols = [`type`, `id`, `no`, `text`, `v1`, `v2`, `v3`, `v4`];
-    const esc  = (s) => `"${String(s ?? ``).replace(/"/g, `""`)}"`;
-    const lines = [cols.join(`,`)];
-    for (const m of this.mt_log) {
-      lines.push(cols.map((c) => esc(m[c])).join(`,`));
-    }
-    return lines.join(`\n`);
+    let result = ``;
+    result = z2ui5_cl_util.itab_get_csv_by_itab(this.mt_log);
+    return result;
   }
 
-  /**
-   * to_xlsx — ABAP returns the XLSX bytes as a string. JS has no native XLSX
-   * writer; returning CSV here keeps the API alive for app code, with a
-   * comment for future replacement (e.g. via `xlsx` npm package).
-   */
   to_xlsx() {
-    return this.to_csv();
+    let result = ``;
+    result = z2ui5_cl_util.conv_get_xlsx_by_itab(this.mt_log);
+    return result;
   }
 
   to_msg() {
-    return this.mt_log.slice();
+    let result = [];
+    result = this.mt_log;
+    return result;
   }
 
   to_string() {
-    return this.mt_log
-      .map((m) => `[${m.type ?? ``}] ${m.text ?? ``}`)
-      .join(`\n`);
+    let result = ``;
+    let sy_tabix = 0;
+    for (const ls_msg of this.mt_log) {
+      sy_tabix++;
+      if (result) {
+        result = `${result}\\n`;
+      }
+      result = `${result}[${ls_msg.type}] ${ls_msg.text}`;
+    }
+    return result;
   }
 }
 

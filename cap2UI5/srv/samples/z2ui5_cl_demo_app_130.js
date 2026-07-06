@@ -1,707 +1,318 @@
-/* AUTO-GENERATED scaffolding — abap2UI5 transpile failed; manual port required.
- *
- * Original ABAP source:
- * ====================
- * CLASS z2ui5_cl_demo_app_130 DEFINITION PUBLIC.
- * 
- *   PUBLIC SECTION.
- *     INTERFACES z2ui5_if_app.
- * 
- *     TYPES:
- *       BEGIN OF ty_s_token,
- *         key      TYPE string,
- *         text     TYPE string,
- *         visible  TYPE abap_bool,
- *         selkz    TYPE abap_bool,
- *         editable TYPE abap_bool,
- *       END OF ty_s_token.
- *     TYPES
- *       ty_t_token TYPE STANDARD TABLE OF ty_s_token WITH EMPTY KEY.
- *     TYPES
- *       ty_t_range    TYPE RANGE OF string.
- *     TYPES
- *       ty_s_range    TYPE LINE OF ty_t_range.
- *     TYPES:
- *       BEGIN OF ty_s_filter_pop,
- *         option TYPE string,
- *         low    TYPE string,
- *         high   TYPE string,
- *         key    TYPE string,
- *       END OF ty_s_filter_pop.
- *     TYPES
- *       ty_t_filter_pop TYPE STANDARD TABLE OF ty_s_filter_pop WITH EMPTY KEY.
- *     TYPES:
- *       BEGIN OF ty_s_fieldsdb,
- *         screen_name TYPE string,
- *         field       TYPE string,
- *         field_doma  TYPE string,
- *       END OF ty_s_fieldsdb.
- *     TYPES
- *       ty_t_fieldsdb TYPE STANDARD TABLE OF ty_s_fieldsdb WITH DEFAULT KEY.
- *     TYPES
- *       BEGIN OF ty_s_fields.
- *         INCLUDE TYPE ty_s_fieldsdb.
- *     TYPES: t_token  TYPE ty_t_token,
- *           t_filter TYPE ty_t_filter_pop,
- *           END OF ty_s_fields.
- *     TYPES:
- *       BEGIN OF ty_s_var_val,
- *         screen_name TYPE string,
- *         var         TYPE string,
- *         field       TYPE string,
- *         guid        TYPE string,
- *         sign        TYPE string,
- *         opt         TYPE string,
- *         low         TYPE string,
- *         high        TYPE string,
- *       END OF ty_s_var_val.
- *     TYPES
- *       ty_t_var_val TYPE STANDARD TABLE OF ty_s_var_val WITH DEFAULT KEY.
- *     TYPES:
- *       BEGIN OF ty_s_variants,
- *         screen_name TYPE string,
- *         var         TYPE string,
- *         descr       TYPE string,
- *       END OF ty_s_variants.
- *     TYPES
- *       ty_t_variants TYPE STANDARD TABLE OF ty_s_variants WITH DEFAULT KEY.
- *     TYPES
- *       BEGIN OF ty_s_var_pop.
- *         INCLUDE TYPE ty_s_variants.
- *     TYPES: selkz TYPE abap_bool,
- *           END OF ty_s_var_pop.
- *     TYPES:
- *       BEGIN OF ty_s_screens,
- *         screen_name TYPE string,
- *         descr       TYPE string,
- *       END OF ty_s_screens.
- * 
- *     DATA
- *       mt_filter       TYPE STANDARD TABLE OF ty_s_filter_pop WITH EMPTY KEY.
- * 
- *     DATA mt_mapping TYPE z2ui5_if_types=>ty_t_name_value.
- *     DATA
- *       mt_screens      TYPE STANDARD TABLE OF ty_s_screens WITH EMPTY KEY.
- *     DATA
- *       mt_variants     TYPE STANDARD TABLE OF ty_s_variants WITH EMPTY KEY.
- *     DATA
- *       mt_variants_pop TYPE STANDARD TABLE OF ty_s_var_pop WITH EMPTY KEY.
- *     DATA mv_activ_elemnt TYPE string.
- *     DATA mv_screen TYPE string.
- *     DATA mv_button_active TYPE abap_bool.
- *     DATA mv_description TYPE string.
- *     DATA mv_screen_descr TYPE string.
- *     DATA mv_variant TYPE string.
- *     DATA mv_description_copy TYPE string.
- *     DATA mv_variant_copy TYPE string.
- *     DATA mo_parent_view TYPE REF TO z2ui5_cl_xml_view.
- *   PROTECTED SECTION.
- *     DATA client            TYPE REF TO z2ui5_if_client.
- *     DATA mt_fields         TYPE STANDARD TABLE OF ty_s_fields WITH EMPTY KEY.
- * 
- *     METHODS on_init.
- * 
- *     METHODS view_display.
- * 
- *     METHODS render_popup_filter.
- * 
- *     METHODS get_fields.
- * 
- *     METHODS get_values.
- * 
- *     METHODS popup_filter_ok.
- * 
- *     METHODS render_pop_copy.
- * 
- *     METHODS get_variants.
- * 
- *     METHODS render_popup_varaint
- *       IMPORTING
- *         client TYPE REF TO z2ui5_if_client.
- * 
- *     METHODS popup_copy_save.
- * 
- *     METHODS set_token
- *       CHANGING
- *         field TYPE REF TO ty_s_fields.
- * 
- *     METHODS get_txt
- *       IMPORTING
- *                 roll          TYPE string
- *                 type          TYPE string OPTIONAL
- *       RETURNING VALUE(result) TYPE string.
- * 
- *     METHODS get_txt_l
- *       IMPORTING
- *                 roll          TYPE string
- *       RETURNING VALUE(result) TYPE string.
- * 
- *     METHODS varaint_page.
- *   PRIVATE SECTION.
- * ENDCLASS.
- * 
- * 
- * CLASS z2ui5_cl_demo_app_130 IMPLEMENTATION.
- * 
- *   METHOD get_fields.
- * 
- *     DATA(db_fields) = VALUE ty_t_fieldsdb(
- *       ( screen_name = `INV`        field = `LGNUM`   field_doma = `/SCWM/LGNUM` )
- *       ( screen_name = `LAGP`       field = `LGNUM`   field_doma = `/SCWM/LGNUM` )
- *       ( screen_name = `LAGP`       field = `LGPLA`   field_doma = `/SCWM/DE_LGPLA` )
- *       ( screen_name = `LAGP`       field = `LGTYP`   field_doma = `/SCWM/DE_LGTYP` )
- *       ( screen_name = `QUAN`       field = `LGNUM`   field_doma = `/SCWM/LGNUM` )
- *       ( screen_name = `QUAN`       field = `LGPLA`   field_doma = `/SCWM/DE_LGPLA` )
- *       ( screen_name = `QUAN`       field = `MATNR`   field_doma = `/SCWM/DE_MATNR` )
- *       ( screen_name = `QUAN`       field = `OWNER`   field_doma = `/SCWM/DE_OWNER` )
- *       ( screen_name = `TO`         field = `LGNUM`   field_doma = `/SCWM/LGNUM` )
- *       ( screen_name = `TO`         field = `MATNR`   field_doma = `/SCWM/DE_MATNR` )
- *       ( screen_name = `TO`         field = `PROCTY`  field_doma = `/SCWM/DE_PROCTY` )
- *       ( screen_name = `TO`         field = `TOSTAT`  field_doma = `/SCWM/DE_TOSTAT` )
- *       ( screen_name = `TO`         field = `VLPLA`   field_doma = `/SCWM/LTAP_VLPLA` ) ).
- * 
- *     mt_fields = VALUE #( ).
- *     LOOP AT db_fields REFERENCE INTO DATA(lr_fields) WHERE screen_name = mv_screen.
- * 
- *       APPEND INITIAL LINE TO mt_fields REFERENCE INTO DATA(field).
- *       field->* = CORRESPONDING #( lr_fields->* ).
- * 
- *     ENDLOOP.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD get_txt.
- * 
- *     result = `Text`.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD get_txt_l.
- * 
- *     result = `Text`.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD get_values.
- * 
- *     DATA(l_variants) = VALUE ty_t_variants(
- *       ( screen_name = `QUAN`        var = `E001 - ALL` descr = `123` )
- *       ( screen_name = `TO`          var = `E001`       descr = `123` )
- *       ( screen_name = `TO`          var = `E001 - All` descr = `123` ) ).
- * 
- *     DATA var TYPE ty_t_variants.
- *     DATA var_val TYPE ty_t_var_val.
- *     LOOP AT l_variants INTO DATA(a)  WHERE screen_name = mv_screen
- *                                      AND var         = mv_variant.
- * 
- *       APPEND a TO var.
- *       mv_description = a-descr.
- *     ENDLOOP.
- * 
- *     DATA(var_vall_all) = VALUE ty_t_var_val(
- *       ( screen_name = `LTAP`         var = `E001 - All` field = `LGNUM`      guid = `663192E9D70C1EEE8CC06B0F98CD81A3` sign = `I`   opt = `EQ` )
- *       ( screen_name = `LTAP`         var = `E001 - All` field = `MATNR`      guid = `663192E9D70C1EEE8CD4E9389CB11403` sign = `I`   opt = `EQ` )
- *       ( screen_name = `LTAP`         var = `E001 - All` field = `TOSTAT`     guid = `663192E9D70C1EEE8CC06BC66AD581A3` sign = `I`   opt = `NE` )
- *       ( screen_name = `LTAP`         var = `E002 - All` field = `LGNUM`      guid = `663192E9D70C1EEE8CC06B0F98CD81A3` sign = `I`   opt = `EQ` )
- *       ( screen_name = `LTAP`         var = `E002 - All` field = `MATNR`      guid = `663192E9D70C1EEE8CD4E9389CB11403` sign = `I`   opt = `EQ` )
- *       ( screen_name = `LTAP`         var = `E002 - All` field = `TOSTAT`     guid = `663192E9D70C1EEE8CC06BC66AD581A3` sign = `I`   opt = `NE` )
- *       ( screen_name = `QUAN`         var = `E001 - ALL` field = `LGNUM`      guid = `663192E9D70C1EEE90CEE2FA658C51EE` sign = `I`   opt = `EQ` )
- *       ( screen_name = `QUAN`         var = `E001 - ALL` field = `LGPLA`      guid = `663192E9D70C1EEE90CEEF4750FD91EE` sign = `I`   opt = `EQ` )
- *       ( screen_name = `TO`           var = `E001      ` field = `LGNUM`      guid = `663192E9D70C1EEE8E87DE5FF8CC512A` sign = `I`   opt = `EQ` )
- *       ( screen_name = `TO`           var = `E001      ` field = `PROCTY`     guid = `663192E9D70C1EEE8E87DD8D1EB8C7F5` sign = `I`   opt = `EQ` )
- *       ( screen_name = `TO`           var = `E001 - All` field = `LGNUM`      guid = `663192E9D70C1EEE8E86552847635198` sign = `I`   opt = `EQ` ) ).
- * 
- *     LOOP AT var_vall_all INTO DATA(b) WHERE screen_name = mv_screen
- *         AND var         = mv_variant.
- * 
- *       APPEND b TO var_val.
- *     ENDLOOP.
- * 
- *     LOOP AT mt_fields REFERENCE INTO DATA(field).
- * 
- *       field->t_filter = VALUE #( ).
- *       field->t_token = VALUE #( ).
- * 
- *       LOOP AT var_val REFERENCE INTO DATA(val)
- *           WHERE field = field->field.
- * 
- *         DATA(filter) = VALUE ty_s_filter_pop( key    = val->guid
- *                                               option = val->opt
- *                                               low    = val->low
- *                                               high   = val->high ).
- * 
- *         APPEND filter TO field->t_filter.
- * 
- *         set_token( CHANGING field = field ).
- * 
- *       ENDLOOP.
- *     ENDLOOP.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD get_variants.
- * 
- *     mt_variants = VALUE #(
- *       ( screen_name = `QUAN`        var = `E001 - ALL` descr = `123` )
- *       ( screen_name = `TO`          var = `E001`       descr = `123` )
- *       ( screen_name = `TO`          var = `E001 - All` descr = `123` ) ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD on_init.
- * 
- *     mt_screens = VALUE #(
- *       ( screen_name = `INV`      descr = `123` )
- *       ( screen_name = `LAGP`     descr = `123` )
- *       ( screen_name = `PO`       descr = `123` )
- *       ( screen_name = `QUAN`     descr = `123` )
- *       ( screen_name = `TO`       descr = `123` ) ).
- * 
- *     view_display( ).
- * 
- *     mt_mapping = VALUE #(
- *       (   n = `EQ`     v = `={LOW}` )
- *       (   n = `LT`     v = `<{LOW}` )
- *       (   n = `LE`     v = `<={LOW}` )
- *       (   n = `GT`     v = `>{LOW}` )
- *       (   n = `GE`     v = `>={LOW}` )
- *       (   n = `CP`     v = `*{LOW}*` )
- *       (   n = `BT`     v = `{LOW}...{HIGH}` )
- *       (   n = `NE`     v = `!(={LOW})` )
- *       (   n = `<leer>` v = `<leer>` ) ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD popup_copy_save.
- * 
- *     mv_variant     = mv_variant_copy.
- *     mv_description = mv_description_copy.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD popup_filter_ok.
- * 
- *     READ TABLE mt_fields REFERENCE INTO DATA(lr_field)
- *       WITH KEY field = mv_activ_elemnt.
- * 
- *     IF sy-subrc = 0.
- * 
- *       DELETE mt_filter WHERE option IS INITIAL.
- * 
- *       lr_field->t_filter = mt_filter.
- * 
- *       lr_field->t_token = VALUE #( ).
- * 
- *       set_token( CHANGING field = lr_field ).
- * 
- *       client->popup_destroy( ).
- * 
- *       view_display( ).
- * 
- *     ENDIF.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD view_display.
- * 
- *     IF mo_parent_view IS INITIAL.
- * 
- *       DATA(view) = z2ui5_cl_xml_view=>factory( ).
- * 
- *       DATA(page) = z2ui5_cl_xml_view=>factory( )->shell(
- *                )->page(
- *                   title          = get_txt( `/SCWM/DE_TW_COND_CHECK_SELECT` )
- *                   navbuttonpress = client->_event_nav_app_leave( )
- *                   shownavbutton  = client->check_app_prev_stack( ) ).
- * 
- *     ELSE.
- *       page = mo_parent_view->get( `Page` ).
- * 
- *     ENDIF.
- * 
- *     page->header_content(
- *        )->get_parent( ).
- * 
- *     DATA(grid) = page->grid( `L6 M12 S12`
- *         )->content( `layout` ).
- * 
- *     grid->simple_form( get_txt( `BU_DYNID` )
- *         )->content( `form`
- *             )->label( get_txt( `BU_DYNID` )
- *              )->combobox(
- *              change      = client->_event( `INPUT_SCREEN_CHANGE` )
- *              items       = client->_bind_edit( mt_screens )
- *              selectedkey = client->_bind_edit( mv_screen )
- *                  )->item(
- *                      key  = `{SCREEN_NAME}`
- *                      text = `{SCREEN_NAME} - {DESCR}`
- *          )->get_parent( )->label( get_txt( `DESCR_40` )
- *             )->input(
- *             value         = client->_bind_edit( mv_screen_descr )
- *             showvaluehelp = abap_false
- * *            editable         = abap_false
- *             enabled       = abap_false ).
- * 
- *     grid->simple_form( get_txt( `/SCWM/WB_VARIANT` )
- *             )->content( `form`
- *                 )->label( get_txt( `/SCWM/WB_VARIANT` )
- *             )->input(
- *             value            = client->_bind_edit( mv_variant )
- *             showvaluehelp    = abap_true
- *             valuehelprequest = client->_event( `CALL_POPUP_VARIANT` )
- *             submit           = client->_event( `INPUT_VARIANT_CHANGE` )
- *             )->label( get_txt( `DESCR_40` )
- *             )->input(
- *             value         = client->_bind_edit( mv_description )
- *             showvaluehelp = abap_false ).
- * 
- *     DATA(content) = grid->simple_form( get_txt( `CLASSFEL` )
- *          )->content( `form` ).
- * 
- *     IF mt_fields IS NOT INITIAL.
- * 
- *       LOOP AT mt_fields REFERENCE INTO DATA(lr_tab).
- *         DATA(lv_tabix) = sy-tabix.
- * 
- *         DATA(scrtext) = get_txt( CONV #( lr_tab->field_doma ) ).
- * 
- *         content->label( scrtext
- *           )->multi_input(
- *                    tokens           = client->_bind( val = lr_tab->t_token tab = mt_fields tab_index = lv_tabix )
- *                    showclearicon    = abap_true
- *                    id               = lr_tab->field
- *                    valuehelprequest = client->_event( val = `CALL_POPUP_FILTER` t_arg = VALUE #( ( CONV #( lr_tab->field ) ) ) )
- *                )->item(
- *                        key  = `{KEY}`
- *                        text = `{TEXT}`
- *                )->tokens(
- *                    )->token(
- *                        key      = `{KEY}`
- *                        text     = `{TEXT}`
- *                        visible  = `{VISIBLE}`
- *                        selected = `{SELKZ}`
- *                        editable = `{EDITABLE}` ).
- * 
- *       ENDLOOP.
- * 
- *     ENDIF.
- * 
- *     page->footer( )->overflow_toolbar(
- *                  )->toolbar_spacer(
- *                  )->button(
- *                      text    = get_txt( `/SCWM/DE_HUDEL` )
- *                      press   = client->_event( `BUTTON_DELETE` )
- *                      type    = `Reject`
- *                      icon    = `sap-icon://delete`
- *                      enabled = mv_button_active
- *                  )->button(
- *                      text    = get_txt( `B_KOPIE` )
- *                      press   = client->_event( `BUTTON_COPY` )
- *                      type    = `Default`
- *                      enabled = mv_button_active
- *                   )->button(
- *                      text    = get_txt( `/SCWM/DE_LM_LOGSAVE` )
- *                      press   = client->_event( `BUTTON_SAVE` )
- *                      type    = `Success`
- *                      enabled = mv_button_active ).
- * 
- *     IF mo_parent_view IS INITIAL.
- *       client->view_display( page->stringify( ) ).
- * 
- *     ENDIF.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD render_popup_filter.
- * 
- *     DATA(lo_popup) = z2ui5_cl_xml_view=>factory_popup( ).
- * 
- *     lo_popup = lo_popup->dialog(
- *       contentheight = `50%`
- *       contentwidth  = `50%`
- *       title         = get_txt_l( `/SCWM/DE_TW_COND_CHECK_COND` ) ).
- * 
- *     DATA(vbox) = lo_popup->vbox( height         = `100%`
- *                                  justifycontent = `SpaceBetween` ).
- * 
- *     DATA(item) = vbox->list(
- *       nodata          = get_txt( `/SCWM/DE_IND_BIN_EMPTY` )
- *       items           = client->_bind_edit( mt_filter )
- *       selectionchange = client->_event( `SELCHANGE` )
- *                         )->custom_list_item( ).
- * 
- *     DATA(grid) = item->grid( ).
- * 
- *     grid->combobox(
- *                  selectedkey = `{OPTION}`
- *                  items       = client->_bind_edit( mt_mapping )
- *              )->item(
- *                      key  = `{N}`
- *                      text = `{N}`
- *              )->get_parent(
- *              )->input( `{LOW}`
- *              )->input( value   = `{HIGH}`
- *                        visible = `{= ${OPTION} === 'BT' }`
- *              )->button( icon = `sap-icon://decline`
- *              type            = `Transparent`
- *              press           = client->_event( val = `POPUP_FILTER_DELETE`
- *              t_arg                                 = VALUE #( ( `${KEY}` ) ) ) ).
- * 
- *     lo_popup->footer( )->overflow_toolbar(
- *         )->button( text = get_txt( `FC_DELALL` )
- *                   icon  = `sap-icon://delete`
- *                   type  = `Transparent`
- *                   press = client->_event( `POPUP_FILTER_DELETE_ALL` )
- *         )->button( text  = get_txt( `RSLPO_GUI_ADDPART` )
- *                    icon  = `sap-icon://add`
- *                    press = client->_event( `POPUP_FILTER_ADD` )
- *         )->toolbar_spacer(
- *         )->button(
- *             text  = get_txt( `MSSRCF_ACTION` )
- *             press = client->_event( `POPUP_FILTER_OK` )
- *             type  = `Emphasized` ).
- * 
- *     client->popup_display( lo_popup->stringify( ) ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD render_popup_varaint.
- * 
- *     DATA(popup) = z2ui5_cl_xml_view=>factory_popup( ).
- * 
- *     popup->dialog( title        = get_txt( `/SCWM/WB_VARIANT` )
- *                    contentwidth = `30%`
- *       )->table(
- *             mode  = `SingleSelectLeft`
- *             items = client->_bind_edit( mt_variants_pop )
- *         )->columns(
- *             )->column( `20rem`
- *                 )->text( get_txt( `/SCWM/WB_VARIANT` ) )->get_parent(
- *             )->column(
- *                 )->text( get_txt( `DESCR_40` )
- *         )->get_parent( )->get_parent(
- *         )->items(
- *             )->column_list_item( selected = `{SELKZ}`
- *                 )->cells(
- *                     )->text( `{VAR}`
- *                     )->text( `{DESCR}`
- *       )->get_parent( )->get_parent( )->get_parent( )->get_parent(
- *       )->footer(
- *         )->overflow_toolbar(
- *             )->toolbar_spacer(
- *             )->button(
- *                 text  = get_txt( `MSSRCF_ACTION` )
- *                 press = client->_event( `POPUP_VARIANT_CLOSE` )
- *                 type  = `Emphasized` ).
- *     client->popup_display( popup->stringify( ) ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD render_pop_copy.
- * 
- *     DATA(lo_popup) = z2ui5_cl_xml_view=>factory_popup( ).
- * 
- *     lo_popup = lo_popup->dialog(
- *       contentheight = `50%`
- *       contentwidth  = `50%`
- *       title         = get_txt( `/SCWM/DE_COPY_NUMBER` ) ).
- * 
- *     lo_popup->simple_form( get_txt( `/SCWM/WB_VARIANT` )
- *                )->content( `form`
- *                    )->label( get_txt( `/SCWM/WB_VARIANT` )
- *                )->input(
- *                value         = client->_bind_edit( mv_variant_copy )
- *                showvaluehelp = abap_false
- *                )->label( get_txt( `DESCR_40` )
- *                )->input(
- *                value         = client->_bind_edit( mv_description_copy )
- *                showvaluehelp = abap_false ).
- * 
- *     lo_popup->footer( )->overflow_toolbar(
- *         )->toolbar_spacer(
- *         )->button(
- *             text  = get_txt( `XEXIT` )
- *             press = client->_event( `POPUP_COPY_EXIT` )
- *             type  = `Reject`
- *        )->button(
- *             text    = get_txt( `/SCWM/DE_LM_LOGSAVE` )
- *             press   = client->_event( `POPUP_COPY_SAVE` )
- *             type    = `Emphasized`
- *             enabled = `{= ${MV_VARIANT_COPY} !== "" }`
- *        ).
- * 
- *     client->popup_display( lo_popup->stringify( ) ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD set_token.
- * 
- *     LOOP AT field->t_filter REFERENCE INTO DATA(lr_filter).
- * 
- *       DATA(lv_value) = mt_mapping[ n = lr_filter->option ]-v.
- *       REPLACE `{LOW}`  IN lv_value WITH lr_filter->low.
- *       REPLACE `{HIGH}` IN lv_value WITH lr_filter->high.
- * 
- *       INSERT VALUE #( key = lv_value text = lv_value visible = abap_true editable = abap_false ) INTO TABLE field->t_token.
- * 
- *     ENDLOOP.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD varaint_page.
- * 
- *     CASE client->get( )-event.
- * 
- *       WHEN `INPUT_SCREEN_CHANGE`.
- * 
- *         mv_screen_descr = VALUE #( mt_screens[ screen_name = mv_screen ]-descr OPTIONAL ).
- * 
- *         get_fields( ).
- * 
- *         mv_variant = VALUE #( ).
- *         mv_description = VALUE #( ).
- * 
- *         get_variants( ).
- * 
- *         view_display( ).
- * 
- *       WHEN `INPUT_VARIANT_CHANGE`.
- * 
- *         get_values( ).
- * 
- *         view_display( ).
- * 
- *       WHEN `POPUP_FILTER_OK`.
- * 
- *         popup_filter_ok( ).
- * 
- *       WHEN `POPUP_FILTER_ADD`.
- * 
- *         INSERT VALUE #( key = z2ui5_cl_util=>uuid_get_c32( ) ) INTO TABLE mt_filter.
- * 
- *         client->popup_model_update( ).
- * 
- *       WHEN `POPUP_FILTER_DELETE`.
- * 
- *         DATA(lt_item) = client->get( )-t_event_arg.
- * 
- *         DELETE mt_filter WHERE key = lt_item[ 1 ].
- * 
- *         client->popup_model_update( ).
- * 
- *       WHEN `POPUP_FILTER_DELETE_ALL`.
- * 
- *         mt_filter = VALUE #( ).
- * 
- *         client->popup_model_update( ).
- * 
- *       WHEN `CALL_POPUP_FILTER`.
- * 
- *         DATA(arg) = client->get( )-t_event_arg.
- *         mv_activ_elemnt = VALUE #( arg[ 1 ] OPTIONAL ).
- * 
- *         READ TABLE mt_fields REFERENCE INTO DATA(lr_field)
- *           WITH KEY field = mv_activ_elemnt.
- * 
- *         " copy over existing values
- *         mt_filter = lr_field->t_filter.
- * 
- *         render_popup_filter( ).
- * 
- *       WHEN `CALL_POPUP_VARIANT`.
- * 
- *         LOOP AT mt_variants REFERENCE INTO DATA(lr_fields).
- *           APPEND INITIAL LINE TO mt_variants_pop REFERENCE INTO DATA(field).
- *           field->* = CORRESPONDING #( lr_fields->* ).
- *         ENDLOOP.
- * 
- *         render_popup_varaint( client ).
- * 
- *       WHEN `POPUP_VARIANT_CLOSE`.
- * 
- *         mv_variant = VALUE #( mt_variants_pop[ selkz = abap_true ]-var OPTIONAL ).
- * 
- *         client->popup_destroy( ).
- * 
- *         get_values( ).
- * 
- *         view_display( ).
- *       WHEN `BUTTON_SAVE`.
- * 
- *       WHEN `BUTTON_DELETE`.
- * 
- *         view_display( ).
- * 
- *       WHEN `BUTTON_COPY`.
- * 
- *         render_pop_copy( ).
- * 
- *         view_display( ).
- * 
- *       WHEN `POPUP_COPY_EXIT`.
- * 
- *         client->popup_destroy( ).
- * 
- *       WHEN `POPUP_COPY_SAVE`.
- * 
- *         popup_copy_save( ).
- * 
- *         client->popup_destroy( ).
- * 
- *     ENDCASE.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD z2ui5_if_app~main.
- * 
- *     me->client = client.
- * 
- *     IF client->check_on_init( ).
- * 
- *       on_init( ).
- * 
- *       RETURN.
- * 
- *     ENDIF.
- * 
- *     varaint_page( ).
- * 
- *     mv_button_active = xsdbool( mv_screen IS NOT INITIAL AND mv_variant IS NOT INITIAL ).
- * 
- *     client->view_model_update( ).
- * 
- *   ENDMETHOD.
- * 
- * ENDCLASS.
- */
-
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_130 extends z2ui5_if_app {
+  mt_filter = [];
+  mt_mapping = [];
+  mt_screens = [];
+  mt_variants = [];
+  mt_variants_pop = [];
+  mv_activ_elemnt = ``;
+  mv_screen = ``;
+  mv_button_active = false;
+  mv_description = ``;
+  mv_screen_descr = ``;
+  mv_variant = ``;
+  mv_description_copy = ``;
+  mv_variant_copy = ``;
+  mo_parent_view = null;
   client = null;
+  mt_fields = [];
+
+  get_fields() {
+    const db_fields = [{ screen_name: `INV`, field: `LGNUM`, field_doma: `/SCWM/LGNUM` }, { screen_name: `LAGP`, field: `LGNUM`, field_doma: `/SCWM/LGNUM` }, { screen_name: `LAGP`, field: `LGPLA`, field_doma: `/SCWM/DE_LGPLA` }, { screen_name: `LAGP`, field: `LGTYP`, field_doma: `/SCWM/DE_LGTYP` }, { screen_name: `QUAN`, field: `LGNUM`, field_doma: `/SCWM/LGNUM` }, { screen_name: `QUAN`, field: `LGPLA`, field_doma: `/SCWM/DE_LGPLA` }, { screen_name: `QUAN`, field: `MATNR`, field_doma: `/SCWM/DE_MATNR` }, { screen_name: `QUAN`, field: `OWNER`, field_doma: `/SCWM/DE_OWNER` }, { screen_name: `TO`, field: `LGNUM`, field_doma: `/SCWM/LGNUM` }, { screen_name: `TO`, field: `MATNR`, field_doma: `/SCWM/DE_MATNR` }, { screen_name: `TO`, field: `PROCTY`, field_doma: `/SCWM/DE_PROCTY` }, { screen_name: `TO`, field: `TOSTAT`, field_doma: `/SCWM/DE_TOSTAT` }, { screen_name: `TO`, field: `VLPLA`, field_doma: `/SCWM/LTAP_VLPLA` }];
+    this.mt_fields = {};
+    let sy_tabix = 0;
+    for (const lr_fields of db_fields) {
+      sy_tabix++;
+      if (!(lr_fields.screen_name === this.mv_screen)) continue;
+      this.mt_fields reference into this.data(field).push({});
+      field.* = ({ ...lr_fields.* });
+    }
+  }
+
+  get_txt({ roll, string } = {}) {
+    let result = ``;
+    result = `Text`;
+    return result;
+  }
+
+  get_txt_l({ roll } = {}) {
+    let result = ``;
+    result = `Text`;
+    return result;
+  }
+
+  get_values() {
+    const l_variants = [{ screen_name: `QUAN`, var: `E001 - ALL`, descr: `123` }, { screen_name: `TO`, var: `E001`, descr: `123` }, { screen_name: `TO`, var: `E001 - All`, descr: `123` }];
+    let var_ = [];
+    let var_val = [];
+    let sy_tabix = 0;
+    for (const a of l_variants) {
+      sy_tabix++;
+      if (!(a.screen_name === this.mv_screen && var_ === this.mv_variant)) continue;
+      var_.push(a);
+      this.mv_description = a.descr;
+    }
+    const var_vall_all = [{ screen_name: `LTAP`, var: `E001 - All`, field: `LGNUM`, guid: `663192E9D70C1EEE8CC06B0F98CD81A3`, sign: `I`, opt: `EQ` }, { screen_name: `LTAP`, var: `E001 - All`, field: `MATNR`, guid: `663192E9D70C1EEE8CD4E9389CB11403`, sign: `I`, opt: `EQ` }, { screen_name: `LTAP`, var: `E001 - All`, field: `TOSTAT`, guid: `663192E9D70C1EEE8CC06BC66AD581A3`, sign: `I`, opt: `NE` }, { screen_name: `LTAP`, var: `E002 - All`, field: `LGNUM`, guid: `663192E9D70C1EEE8CC06B0F98CD81A3`, sign: `I`, opt: `EQ` }, { screen_name: `LTAP`, var: `E002 - All`, field: `MATNR`, guid: `663192E9D70C1EEE8CD4E9389CB11403`, sign: `I`, opt: `EQ` }, { screen_name: `LTAP`, var: `E002 - All`, field: `TOSTAT`, guid: `663192E9D70C1EEE8CC06BC66AD581A3`, sign: `I`, opt: `NE` }, { screen_name: `QUAN`, var: `E001 - ALL`, field: `LGNUM`, guid: `663192E9D70C1EEE90CEE2FA658C51EE`, sign: `I`, opt: `EQ` }, { screen_name: `QUAN`, var: `E001 - ALL`, field: `LGPLA`, guid: `663192E9D70C1EEE90CEEF4750FD91EE`, sign: `I`, opt: `EQ` }, { screen_name: `TO`, var: `E001 `, field: `LGNUM`, guid: `663192E9D70C1EEE8E87DE5FF8CC512A`, sign: `I`, opt: `EQ` }, { screen_name: `TO`, var: `E001 `, field: `PROCTY`, guid: `663192E9D70C1EEE8E87DD8D1EB8C7F5`, sign: `I`, opt: `EQ` }, { screen_name: `TO`, var: `E001 - All`, field: `LGNUM`, guid: `663192E9D70C1EEE8E86552847635198`, sign: `I`, opt: `EQ` }];
+    let sy_tabix = 0;
+    for (const b of var_vall_all) {
+      sy_tabix++;
+      if (!(b.screen_name === this.mv_screen && var_ === this.mv_variant)) continue;
+      var_val.push(b);
+    }
+    let sy_tabix = 0;
+    for (const field of this.mt_fields) {
+      sy_tabix++;
+      field.t_filter = {};
+      field.t_token = {};
+      let sy_tabix = 0;
+      for (const val of var_val) {
+        sy_tabix++;
+        if (!(field === field.field)) continue;
+        const filter = { key: val.guid, option: val.opt, low: val.low, high: val.high };
+        field.t_filter.push(filter);
+        this.set_token(/* TODO(abap2js): out-params */ CHANGING field = field);
+      }
+    }
+  }
+
+  get_variants() {
+    this.mt_variants = [{ screen_name: `QUAN`, var: `E001 - ALL`, descr: `123` }, { screen_name: `TO`, var: `E001`, descr: `123` }, { screen_name: `TO`, var: `E001 - All`, descr: `123` }];
+  }
+
+  on_init() {
+    this.mt_screens = [{ screen_name: `INV`, descr: `123` }, { screen_name: `LAGP`, descr: `123` }, { screen_name: `PO`, descr: `123` }, { screen_name: `QUAN`, descr: `123` }, { screen_name: `TO`, descr: `123` }];
+    this.view_display();
+    this.mt_mapping = [{ n: `EQ`, v: `={LOW}` }, { n: `LT`, v: `<{LOW}` }, { n: `LE`, v: `<={LOW}` }, { n: `GT`, v: `>{LOW}` }, { n: `GE`, v: `>={LOW}` }, { n: `CP`, v: `*{LOW}*` }, { n: `BT`, v: `{LOW}...{HIGH}` }, { n: `NE`, v: `!(={LOW})` }, { n: `<leer>`, v: `<leer>` }];
+  }
+
+  popup_copy_save() {
+    this.mv_variant = this.mv_variant_copy;
+    this.mv_description = this.mv_description_copy;
+  }
+
+  popup_filter_ok() {
+    // TODO(abap2js): READ TABLE mt_fields REFERENCE INTO DATA(lr_field) WITH KEY field = mv_activ_elemnt.
+    if (sy_subrc === 0) {
+      for (let _i = this.mt_filter.length - 1; _i >= 0; _i--) { const row = this.mt_filter[_i]; if (!option) this.mt_filter.splice(_i, 1); }
+      lr_field.t_filter = this.mt_filter;
+      lr_field.t_token = {};
+      this.set_token(/* TODO(abap2js): out-params */ CHANGING field = lr_field);
+      this.client.popup_destroy();
+      this.view_display();
+    }
+  }
+
+  view_display() {
+    if (!this.mo_parent_view) {
+      const view = z2ui5_cl_xml_view.factory();
+      let page = z2ui5_cl_xml_view.factory()
+        .shell()
+        .page({ title: this.get_txt({ roll: `/SCWM/DE_TW_COND_CHECK_SELECT` }), navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    } else {
+      page = this.mo_parent_view.get(`Page`);
+    }
+    page.header_content().get_parent();
+    const grid = page.grid(`L6 M12 S12`).content(`layout`);
+    grid.simple_form(this.get_txt({ roll: `BU_DYNID` }))
+      .content(`form`)
+      .label(this.get_txt({ roll: `BU_DYNID` }))
+      .combobox({ change: this.client._event(`INPUT_SCREEN_CHANGE`), items: this.client._bind_edit(this.mt_screens), selectedkey: this.client._bind_edit(this.mv_screen) })
+      .item({ key: `{SCREEN_NAME}`, text: `{SCREEN_NAME} - {DESCR}` })
+      .get_parent()
+      .label(this.get_txt({ roll: `DESCR_40` }))
+      .input({ value: this.client._bind_edit(this.mv_screen_descr), showvaluehelp: false, enabled: false });
+    grid.simple_form(this.get_txt({ roll: `/SCWM/WB_VARIANT` }))
+      .content(`form`)
+      .label(this.get_txt({ roll: `/SCWM/WB_VARIANT` }))
+      .input({ value: this.client._bind_edit(this.mv_variant), showvaluehelp: true, valuehelprequest: this.client._event(`CALL_POPUP_VARIANT`), submit: this.client._event(`INPUT_VARIANT_CHANGE`) })
+      .label(this.get_txt({ roll: `DESCR_40` }))
+      .input({ value: this.client._bind_edit(this.mv_description), showvaluehelp: false });
+    const content = grid.simple_form(this.get_txt({ roll: `CLASSFEL` })).content(`form`);
+    if (this.mt_fields) {
+      let sy_tabix = 0;
+      for (const lr_tab of this.mt_fields) {
+        sy_tabix++;
+        const lv_tabix = sy_tabix;
+        const scrtext = this.get_txt({ roll: lr_tab.field_doma });
+        content.label(scrtext)
+          .multi_input({ tokens: this.client._bind({ val: lr_tab.t_token, tab: this.mt_fields, tab_index: lv_tabix }), showclearicon: true, id: lr_tab.field, valuehelprequest: this.client._event(`CALL_POPUP_FILTER`, [lr_tab.field]) })
+          .item({ key: `{KEY}`, text: `{TEXT}` })
+          .tokens()
+          .token({ key: `{KEY}`, text: `{TEXT}`, visible: `{VISIBLE}`, selected: `{SELKZ}`, editable: `{EDITABLE}` });
+      }
+    }
+    page.footer()
+      .overflow_toolbar()
+      .toolbar_spacer()
+      .button({ text: this.get_txt({ roll: `/SCWM/DE_HUDEL` }), press: this.client._event(`BUTTON_DELETE`), type: `Reject`, icon: `sap-icon://delete`, enabled: this.mv_button_active })
+      .button({ text: this.get_txt({ roll: `B_KOPIE` }), press: this.client._event(`BUTTON_COPY`), type: `Default`, enabled: this.mv_button_active })
+      .button({ text: this.get_txt({ roll: `/SCWM/DE_LM_LOGSAVE` }), press: this.client._event(`BUTTON_SAVE`), type: `Success`, enabled: this.mv_button_active });
+    if (!this.mo_parent_view) {
+      this.client.view_display(page.stringify());
+    }
+  }
+
+  render_popup_filter() {
+    let lo_popup = z2ui5_cl_xml_view.factory_popup();
+    lo_popup = lo_popup.dialog({ contentheight: `50%`, contentwidth: `50%`, title: this.get_txt_l({ roll: `/SCWM/DE_TW_COND_CHECK_COND` }) });
+    const vbox = lo_popup.vbox({ height: `100%`, justifycontent: `SpaceBetween` });
+    const item = vbox.list({ nodata: this.get_txt({ roll: `/SCWM/DE_IND_BIN_EMPTY` }), items: this.client._bind_edit(this.mt_filter), selectionchange: this.client._event(`SELCHANGE`) })
+      .custom_list_item();
+    const grid = item.grid();
+    grid.combobox({ selectedkey: `{OPTION}`, items: this.client._bind_edit(this.mt_mapping) })
+      .item({ key: `{N}`, text: `{N}` })
+      .get_parent()
+      .input(`{LOW}`)
+      .input({ value: `{HIGH}`, visible: `{= ${OPTION} === 'BT' }` })
+      .button({ icon: `sap-icon://decline`, type: `Transparent`, press: this.client._event(`POPUP_FILTER_DELETE`, [`${KEY}`]) });
+    lo_popup.footer()
+      .overflow_toolbar()
+      .button({ text: this.get_txt({ roll: `FC_DELALL` }), icon: `sap-icon://delete`, type: `Transparent`, press: this.client._event(`POPUP_FILTER_DELETE_ALL`) })
+      .button({ text: this.get_txt({ roll: `RSLPO_GUI_ADDPART` }), icon: `sap-icon://add`, press: this.client._event(`POPUP_FILTER_ADD`) })
+      .toolbar_spacer()
+      .button({ text: this.get_txt({ roll: `MSSRCF_ACTION` }), press: this.client._event(`POPUP_FILTER_OK`), type: `Emphasized` });
+    this.client.popup_display(lo_popup.stringify());
+  }
+
+  render_popup_varaint({ client } = {}) {
+    const popup = z2ui5_cl_xml_view.factory_popup();
+    popup.dialog({ title: this.get_txt({ roll: `/SCWM/WB_VARIANT` }), contentwidth: `30%` })
+      .table({ mode: `SingleSelectLeft`, items: client._bind_edit(this.mt_variants_pop) })
+      .columns()
+      .column(`20rem`)
+      .text(this.get_txt({ roll: `/SCWM/WB_VARIANT` }))
+      .get_parent()
+      .column()
+      .text(this.get_txt({ roll: `DESCR_40` }))
+      .get_parent()
+      .get_parent()
+      .items()
+      .column_list_item({ selected: `{SELKZ}` })
+      .cells()
+      .text(`{VAR}`)
+      .text(`{DESCR}`)
+      .get_parent()
+      .get_parent()
+      .get_parent()
+      .get_parent()
+      .footer()
+      .overflow_toolbar()
+      .toolbar_spacer()
+      .button({ text: this.get_txt({ roll: `MSSRCF_ACTION` }), press: client._event(`POPUP_VARIANT_CLOSE`), type: `Emphasized` });
+    client.popup_display(popup.stringify());
+  }
+
+  render_pop_copy() {
+    let lo_popup = z2ui5_cl_xml_view.factory_popup();
+    lo_popup = lo_popup.dialog({ contentheight: `50%`, contentwidth: `50%`, title: this.get_txt({ roll: `/SCWM/DE_COPY_NUMBER` }) });
+    lo_popup.simple_form(this.get_txt({ roll: `/SCWM/WB_VARIANT` }))
+      .content(`form`)
+      .label(this.get_txt({ roll: `/SCWM/WB_VARIANT` }))
+      .input({ value: this.client._bind_edit(this.mv_variant_copy), showvaluehelp: false })
+      .label(this.get_txt({ roll: `DESCR_40` }))
+      .input({ value: this.client._bind_edit(this.mv_description_copy), showvaluehelp: false });
+    lo_popup.footer()
+      .overflow_toolbar()
+      .toolbar_spacer()
+      .button({ text: this.get_txt({ roll: `XEXIT` }), press: this.client._event(`POPUP_COPY_EXIT`), type: `Reject` })
+      .button({ text: this.get_txt({ roll: `/SCWM/DE_LM_LOGSAVE` }), press: this.client._event(`POPUP_COPY_SAVE`), type: `Emphasized`, enabled: `{= ${MV_VARIANT_COPY} !== "" }` });
+    this.client.popup_display(lo_popup.stringify());
+  }
+
+  set_token() {
+    let sy_tabix = 0;
+    for (const lr_filter of field.t_filter) {
+      sy_tabix++;
+      const lv_value = this.mt_mapping.find((row) => row.n === lr_filter.option).v;
+      // TODO(abap2js): REPLACE `{LOW}` IN lv_value WITH lr_filter->low.
+      // TODO(abap2js): REPLACE `{HIGH}` IN lv_value WITH lr_filter->high.
+      field.t_token.push({ key: lv_value, text: lv_value, visible: true, editable: false });
+    }
+  }
+
+  varaint_page() {
+    switch (this.client.get().EVENT) {
+      case `INPUT_SCREEN_CHANGE`:
+        this.mv_screen_descr = (this.mt_screens.find((row) => row.screen_name === this.mv_screen).descr optional);
+        this.get_fields();
+        this.mv_variant = {};
+        this.mv_description = {};
+        this.get_variants();
+        this.view_display();
+        break;
+      case `INPUT_VARIANT_CHANGE`:
+        this.get_values();
+        this.view_display();
+        break;
+      case `POPUP_FILTER_OK`:
+        this.popup_filter_ok();
+        break;
+      case `POPUP_FILTER_ADD`:
+        this.mt_filter.push({ key: z2ui5_cl_util.uuid_get_c32() });
+        this.client.popup_model_update();
+        break;
+      case `POPUP_FILTER_DELETE`:
+        const lt_item = this.client.get().T_EVENT_ARG;
+        for (let _i = this.mt_filter.length - 1; _i >= 0; _i--) { const row = this.mt_filter[_i]; if (row.key === lt_item[(1) - 1]) this.mt_filter.splice(_i, 1); }
+        this.client.popup_model_update();
+        break;
+      case `POPUP_FILTER_DELETE_ALL`:
+        this.mt_filter = {};
+        this.client.popup_model_update();
+        break;
+      case `CALL_POPUP_FILTER`:
+        const arg = this.client.get().T_EVENT_ARG;
+        this.mv_activ_elemnt = (arg[(1) - 1] optional);
+        // TODO(abap2js): READ TABLE mt_fields REFERENCE INTO DATA(lr_field) WITH KEY field = mv_activ_elemnt.
+        this.mt_filter = lr_field.t_filter;
+        this.render_popup_filter();
+        break;
+      case `CALL_POPUP_VARIANT`:
+        let sy_tabix = 0;
+        for (const lr_fields of this.mt_variants) {
+          sy_tabix++;
+          this.mt_variants_pop reference into this.data(field).push({});
+          field.* = ({ ...lr_fields.* });
+        }
+        this.render_popup_varaint({ client: this.client });
+        break;
+      case `POPUP_VARIANT_CLOSE`:
+        this.mv_variant = (this.mt_variants_pop.find((row) => row.selkz === true).var optional);
+        this.client.popup_destroy();
+        this.get_values();
+        this.view_display();
+        break;
+      case `BUTTON_SAVE`:
+        break;
+      case `BUTTON_DELETE`:
+        this.view_display();
+        break;
+      case `BUTTON_COPY`:
+        this.render_pop_copy();
+        this.view_display();
+        break;
+      case `POPUP_COPY_EXIT`:
+        this.client.popup_destroy();
+        break;
+      case `POPUP_COPY_SAVE`:
+        this.popup_copy_save();
+        this.client.popup_destroy();
+        break;
+    }
+  }
+
   async main(client) {
     this.client = client;
     if (client.check_on_init()) {
-      const v = z2ui5_cl_xml_view.factory()
-        .Page({ title: "z2ui5_cl_demo_app_130 (TODO: port from abap)" })
-        .Text({ text: "This sample needs to be ported manually from abap2UI5." });
-      client.view_display(v.stringify());
+      this.on_init();
+      return;
     }
+    this.varaint_page();
+    this.mv_button_active = Boolean(this.mv_screen && this.mv_variant);
+    client.view_model_update();
   }
 }
 

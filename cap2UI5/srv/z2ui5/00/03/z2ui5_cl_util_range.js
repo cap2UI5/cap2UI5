@@ -1,117 +1,135 @@
-/**
- * z2ui5_cl_util_range — JS port of abap2UI5 z2ui5_cl_util_range.
- *
- * Builds SAP-style range entries `{ sign, option, low, high }` and translates
- * a list of them into a SQL WHERE fragment via `get_sql()`.
- *
- * Static factory methods (eq/ne/bt/cp/gt/ge/lt/le) are 1:1 with the ABAP
- * CLASS-METHODS and return plain ty_s_range objects.
- *
- * Instance method get_sql() mirrors the ABAP impl: walks an array of range
- * entries (the abap impl uses a DREF, JS just takes the array directly),
- * joins them with " OR ", supports SIGN=E (NOT prefix), all 4 simple
- * comparison ops, BETWEEN/NOT BETWEEN, and CP/NP (translated to LIKE with
- * '*' → '%').
- */
+
 class z2ui5_cl_util_range {
+  static signs = { including: `I`, excluding: `E` };
+  static options = { equal: `EQ`, not_equal: `NE`, between: `BT`, not_between: `NB`, contains_pattern: `CP`, not_contains_pattern: `NP`, greater_than: `GT`, greater_equal: `GE`, less_equal: `LE`, less_than: `LT` };
 
-  static signs = Object.freeze({ including: `I`, excluding: `E` });
+  mv_fieldname = ``;
+  mr_range = null;
 
-  static options = Object.freeze({
-    equal:                `EQ`,
-    not_equal:            `NE`,
-    between:              `BT`,
-    not_between:          `NB`,
-    contains_pattern:     `CP`,
-    not_contains_pattern: `NP`,
-    greater_than:         `GT`,
-    greater_equal:        `GE`,
-    less_equal:           `LE`,
-    less_than:            `LT`,
-  });
-
-  static eq(val, sign = `I`) { return { sign, option: `EQ`, low: val,        high: `` }; }
-  static ne(val, sign = `I`) { return { sign, option: `NE`, low: val,        high: `` }; }
-  static bt(low, high, sign = `I`) { return { sign, option: `BT`, low, high }; }
-  static cp(val, sign = `I`) { return { sign, option: `CP`, low: val,        high: `` }; }
-  static gt(val, sign = `I`) { return { sign, option: `GT`, low: val,        high: `` }; }
-  static ge(val, sign = `I`) { return { sign, option: `GE`, low: val,        high: `` }; }
-  static lt(val, sign = `I`) { return { sign, option: `LT`, low: val,        high: `` }; }
-  static le(val, sign = `I`) { return { sign, option: `LE`, low: val,        high: `` }; }
-
-  /**
-   * AND-joins multiple SQL fragments produced by get_sql(). Skips empties.
-   * Mirrors abap CLASS-METHOD get_sql_multi.
-   */
-  static get_sql_multi(t_sql) {
-    return (t_sql || []).filter((s) => s && String(s).length > 0).join(` AND `);
+  static eq({ val, sign = `I` } = {}) {
+    let result = null;
+    result = { sign: sign, option: `EQ`, low: val };
+    return result;
   }
 
-  /**
-   * Constructor: ABAP signature (iv_fieldname, ir_range). In JS we accept
-   * either a DREF-like { value: [...] } or an array directly.
-   */
-  constructor(iv_fieldname, ir_range) {
-    this.mv_fieldname = String(iv_fieldname || ``).toUpperCase();
+  static ne({ val, sign = `I` } = {}) {
+    let result = null;
+    result = { sign: sign, option: `NE`, low: val };
+    return result;
+  }
+
+  static bt({ low, high, sign = `I` } = {}) {
+    let result = null;
+    result = { sign: sign, option: `BT`, low: low, high: high };
+    return result;
+  }
+
+  static cp({ val, sign = `I` } = {}) {
+    let result = null;
+    result = { sign: sign, option: `CP`, low: val };
+    return result;
+  }
+
+  static gt({ val, sign = `I` } = {}) {
+    let result = null;
+    result = { sign: sign, option: `GT`, low: val };
+    return result;
+  }
+
+  static ge({ val, sign = `I` } = {}) {
+    let result = null;
+    result = { sign: sign, option: `GE`, low: val };
+    return result;
+  }
+
+  static lt({ val, sign = `I` } = {}) {
+    let result = null;
+    result = { sign: sign, option: `LT`, low: val };
+    return result;
+  }
+
+  static le({ val, sign = `I` } = {}) {
+    let result = null;
+    result = { sign: sign, option: `LE`, low: val };
+    return result;
+  }
+
+  static get_sql_multi({ t_sql } = {}) {
+    let result = ``;
+    let sy_tabix = 0;
+    for (const lv_sql of t_sql) {
+      sy_tabix++;
+      if (!lv_sql) {
+        continue;
+      }
+      if (result) {
+        result = `${result} AND `;
+      }
+      result = `${result}${lv_sql}`;
+    }
+    return result;
+  }
+
+  constructor({ iv_fieldname, ir_range } = {}) {
     this.mr_range = ir_range;
+    this.mv_fieldname = `${iv_fieldname.toUpperCase()}`;
   }
 
-  static _quote(val) {
-    return `'${String(val ?? ``).replace(/'/g, `''`)}'`;
-  }
-
-  /**
-   * Renders the range list into a parenthesised, OR-joined SQL fragment.
-   * Returns "" when the range is empty.
-   */
   get_sql() {
-    const tab = Array.isArray(this.mr_range)
-      ? this.mr_range
-      : (Array.isArray(this.mr_range?.value) ? this.mr_range.value : []);
-    if (!tab.length) return ``;
-
-    const Q = z2ui5_cl_util_range._quote;
-    const opts = z2ui5_cl_util_range.options;
-    const fld  = this.mv_fieldname;
-
-    let result = `(`;
-    tab.forEach((row, idx) => {
-      const sign   = row?.sign   || row?.SIGN   || `I`;
-      const option = row?.option || row?.OPTION || `EQ`;
-      let low      = row?.low    ?? row?.LOW    ?? ``;
-      const high   = row?.high   ?? row?.HIGH   ?? ``;
-
-      if (idx > 0) result += ` OR`;
-      if (sign === z2ui5_cl_util_range.signs.excluding) result += ` NOT`;
-      result += ` ${fld}`;
-
-      switch (option) {
-        case opts.equal:
-        case opts.not_equal:
-        case opts.greater_than:
-        case opts.greater_equal:
-        case opts.less_equal:
-        case opts.less_than:
-          result += ` ${option} ${Q(low)}`;
+    let result = ``;
+    // TODO(abap2js): FIELD-SYMBOLS <lt_range> TYPE STANDARD TABLE.
+    // TODO(abap2js): ASSIGN me->mr_range->* TO <lt_range>.
+    if (Boolean(!lt_range) === true) {
+      return result;
+    }
+    result = `(`;
+    let sy_tabix = 0;
+    for (const SYMBOL of lt_range) {
+      sy_tabix++;
+      // TODO(abap2js): ASSIGN COMPONENT `SIGN` OF STRUCTURE <ls_range_item> TO FIELD-SYMBOL(<lv_sign>).
+      // TODO(abap2js): ASSIGN COMPONENT `OPTION` OF STRUCTURE <ls_range_item> TO FIELD-SYMBOL(<lv_option>).
+      // TODO(abap2js): ASSIGN COMPONENT `LOW` OF STRUCTURE <ls_range_item> TO FIELD-SYMBOL(<lv_low>).
+      // TODO(abap2js): ASSIGN COMPONENT `HIGH` OF STRUCTURE <ls_range_item> TO FIELD-SYMBOL(<lv_high>).
+      if (sy_tabix !== 1) {
+        result = `${result} OR`;
+      }
+      if (lv_sign === z2ui5_cl_util_range.signs.excluding) {
+        result = `${result} NOT`;
+      }
+      result = `${result} ${this.mv_fieldname}`;
+      switch (lv_option) {
+        case z2ui5_cl_util_range.options.equal:
+        case z2ui5_cl_util_range.options.not_equal:
+        case z2ui5_cl_util_range.options.greater_than:
+        case z2ui5_cl_util_range.options.greater_equal:
+        case z2ui5_cl_util_range.options.less_equal:
+        case z2ui5_cl_util_range.options.less_than:
+          result = `${result} ${lv_option} ${z2ui5_cl_util_range.quote({ val: lv_low })}`;
           break;
-        case opts.between:
-          result += ` BETWEEN ${Q(low)} AND ${Q(high)}`;
+        case z2ui5_cl_util_range.options.between:
+          result = `${result} BETWEEN ${z2ui5_cl_util_range.quote({ val: lv_low })} AND ${z2ui5_cl_util_range.quote({ val: lv_high })}`;
           break;
-        case opts.not_between:
-          result += ` NOT BETWEEN ${Q(low)} AND ${Q(high)}`;
+        case z2ui5_cl_util_range.options.not_between:
+          result = `${result} NOT BETWEEN ${z2ui5_cl_util_range.quote({ val: lv_low })} AND ${z2ui5_cl_util_range.quote({ val: lv_high })}`;
           break;
-        case opts.contains_pattern:
-          low = String(low).replace(/\*/g, `%`);
-          result += ` LIKE ${Q(low)}`;
+        case z2ui5_cl_util_range.options.contains_pattern:
+          // TODO(abap2js): TRANSLATE <lv_low> USING `*%`.
+          result = `${result} LIKE ${z2ui5_cl_util_range.quote({ val: lv_low })}`;
           break;
-        case opts.not_contains_pattern:
-          low = String(low).replace(/\*/g, `%`);
-          result += ` NOT LIKE ${Q(low)}`;
+        case z2ui5_cl_util_range.options.not_contains_pattern:
+          // TODO(abap2js): TRANSLATE <lv_low> USING `*%`.
+          result = `${result} NOT LIKE ${z2ui5_cl_util_range.quote({ val: lv_low })}`;
           break;
       }
-    });
-    result += ` )`;
+    }
+    result = `${result} )`;
     return result;
+  }
+
+  static quote({ val } = {}) {
+    let out = ``;
+    out = `'${val.replaceAll(`'`, `''`)}'`;
+    return out;
   }
 }
 

@@ -1,142 +1,65 @@
-/* AUTO-GENERATED scaffolding — abap2UI5 transpile failed; manual port required.
- *
- * Original ABAP source:
- * ====================
- * CLASS z2ui5_cl_demo_app_192 DEFINITION PUBLIC.
- * 
- *   PUBLIC SECTION.
- *     INTERFACES z2ui5_if_app.
- * 
- *     TYPES: BEGIN OF ty_s_key_value,
- *              fname   TYPE string,
- *              value   TYPE string,
- *              tabname TYPE string,
- *              comp    TYPE abap_componentdescr,
- *            END OF ty_s_key_value,
- *            ty_t_key_values TYPE STANDARD TABLE OF ty_s_key_value WITH EMPTY KEY.
- * 
- *     TYPES: BEGIN OF ty_s_merged_data,
- *              t_kopf  TYPE REF TO data,
- *              t_pos   TYPE REF TO data,
- *              t_keyva TYPE ty_t_key_values,
- *            END OF ty_s_merged_data,
- *            ty_t_merged_data TYPE STANDARD TABLE OF ty_s_merged_data WITH EMPTY KEY.
- * 
- *     TYPES:
- *       BEGIN OF ty_s_out,
- *         aa TYPE string,
- *         bb TYPE string,
- *         cc TYPE string,
- *       END OF ty_s_out,
- *       ty_t_out TYPE STANDARD TABLE OF ty_s_out WITH EMPTY KEY.
- * 
- *     DATA client TYPE REF TO z2ui5_if_client.
- * 
- *     DATA mt_new_data2 TYPE STANDARD TABLE OF REF TO z2ui5_cl_demo_app_193 WITH EMPTY KEY.
- * 
- *     DATA mt_out TYPE ty_t_out.
- * 
- *     METHODS view_display.
- *   PROTECTED SECTION.
- *     METHODS get_data.
- *     METHODS xml_parse.
- *     METHODS xml_stringify.
- *   PRIVATE SECTION.
- * ENDCLASS.
- * 
- * 
- * CLASS z2ui5_cl_demo_app_192 IMPLEMENTATION.
- * 
- * 
- *   METHOD view_display.
- * 
- *     DATA(view) = z2ui5_cl_xml_view=>factory( ).
- *     view->shell(
- *         )->page( title          = `xxx`
- *                  navbuttonpress = client->_event_nav_app_leave( )
- *                  shownavbutton  = client->check_app_prev_stack( )
- *             )->header_content( ).
- *     client->view_display( view->stringify( ) ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD z2ui5_if_app~main.
- * 
- *     xml_parse( ).
- *     me->client = client.
- *     get_data( ).
- *     view_display( ).
- *     xml_stringify( ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD get_data.
- * 
- *     DATA lr_structdescr TYPE REF TO cl_abap_structdescr.
- *     DATA lr_tabdescr TYPE REF TO cl_abap_tabledescr.
- *     FIELD-SYMBOLS <fs_s_head> TYPE any.
- *     FIELD-SYMBOLS <fs_t_head_new> TYPE STANDARD TABLE.
- *     FIELD-SYMBOLS <fs_s_head_new> TYPE any.
- * 
- *     mt_out = VALUE #( ( aa = `aa` bb = `bb` cc = `cc` )
- *                       ( aa = `a1` bb = `b1` cc = `c1` ) ).
- * 
- *     DATA(kopf) = REF #( mt_out ).
- * 
- *     LOOP AT kopf->* ASSIGNING <fs_s_head>.
- * 
- *       DATA(lo_new_data) = NEW z2ui5_cl_demo_app_193( ).
- *       INSERT lo_new_data INTO TABLE mt_new_data2.
- * 
- *       lr_structdescr ?= cl_abap_structdescr=>describe_by_data( <fs_s_head> ).
- *       lr_tabdescr ?= cl_abap_tabledescr=>create( lr_structdescr ).
- * 
- *       CREATE DATA lo_new_data->mt_kopf TYPE HANDLE lr_tabdescr.
- *       ASSIGN lo_new_data->mt_kopf->* TO <fs_t_head_new>.
- * 
- *       APPEND INITIAL LINE TO <fs_t_head_new> ASSIGNING <fs_s_head_new>.
- *       CLEAR: <fs_s_head_new>.
- *       <fs_s_head_new> = <fs_s_head>.
- * 
- *     ENDLOOP.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD xml_parse.
- * 
- *     LOOP AT mt_new_data2 INTO DATA(lo_data).
- *       lo_data->xml_parse( ).
- *     ENDLOOP.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD xml_stringify.
- * 
- *     LOOP AT mt_new_data2 INTO DATA(lo_data).
- *       lo_data->xml_stringify( ).
- *     ENDLOOP.
- * 
- *   ENDMETHOD.
- * 
- * ENDCLASS.
- */
-
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
+// TODO(abap2js): unresolved reference cl_abap_structdescr — add require manually
+// TODO(abap2js): unresolved reference cl_abap_tabledescr — add require manually
+const z2ui5_cl_demo_app_193 = require("./z2ui5_cl_demo_app_193");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_192 extends z2ui5_if_app {
+  mt_new_data2 = null;
+  mt_out = [];
   client = null;
+
+  view_display() {
+    const view = z2ui5_cl_xml_view.factory();
+    view.shell()
+      .page({ title: `xxx`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() })
+      .header_content();
+    this.client.view_display(view.stringify());
+  }
+
   async main(client) {
+    this.xml_parse();
     this.client = client;
-    if (client.check_on_init()) {
-      const v = z2ui5_cl_xml_view.factory()
-        .Page({ title: "z2ui5_cl_demo_app_192 (TODO: port from abap)" })
-        .Text({ text: "This sample needs to be ported manually from abap2UI5." });
-      client.view_display(v.stringify());
+    this.get_data();
+    this.view_display();
+    this.xml_stringify();
+  }
+
+  get_data() {
+    let lr_structdescr = null;
+    let lr_tabdescr = null;
+    // TODO(abap2js): FIELD-SYMBOLS <fs_s_head> TYPE any.
+    // TODO(abap2js): FIELD-SYMBOLS <fs_t_head_new> TYPE STANDARD TABLE.
+    // TODO(abap2js): FIELD-SYMBOLS <fs_s_head_new> TYPE any.
+    this.mt_out = [{ aa: `aa`, bb: `bb`, cc: `cc` }, { aa: `a1`, bb: `b1`, cc: `c1` }];
+    const kopf = (this.mt_out);
+    let sy_tabix = 0;
+    for (const fs of kopf.*) {
+      sy_tabix++;
+      const lo_new_data = new z2ui5_cl_demo_app_193();
+      this.mt_new_data2.push(lo_new_data);
+      lr_structdescr = cl_abap_structdescr.describe_by_data(fs_s_head);
+      lr_tabdescr = cl_abap_tabledescr.create(lr_structdescr);
+      // TODO(abap2js): CREATE DATA lo_new_data->mt_kopf TYPE HANDLE lr_tabdescr.
+      // TODO(abap2js): ASSIGN lo_new_data->mt_kopf->* TO <fs_t_head_new>.
+      fs_t_head_new assigning fs_s_head_new.push({});
+      fs_s_head_new = fs_s_head;
+    }
+  }
+
+  xml_parse() {
+    let sy_tabix = 0;
+    for (const lo_data of this.mt_new_data2) {
+      sy_tabix++;
+      lo_data.xml_parse();
+    }
+  }
+
+  xml_stringify() {
+    let sy_tabix = 0;
+    for (const lo_data of this.mt_new_data2) {
+      sy_tabix++;
+      lo_data.xml_stringify();
     }
   }
 }

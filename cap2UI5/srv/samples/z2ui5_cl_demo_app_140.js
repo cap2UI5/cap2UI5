@@ -1,124 +1,47 @@
-/* AUTO-GENERATED scaffolding — abap2UI5 transpile failed; manual port required.
- *
- * Original ABAP source:
- * ====================
- * CLASS z2ui5_cl_demo_app_140 DEFINITION PUBLIC.
- * 
- *   PUBLIC SECTION.
- *     INTERFACES z2ui5_if_app.
- * 
- *     TYPES:
- *       BEGIN OF s_combobox,
- *         key  TYPE string,
- *         text TYPE string,
- *       END OF s_combobox.
- *     TYPES
- *       ty_t_combo TYPE STANDARD TABLE OF s_combobox WITH EMPTY KEY.
- * 
- *     DATA client TYPE REF TO z2ui5_if_client.
- *     DATA gt_multi TYPE ty_t_combo.
- *     DATA gt_sel_multi TYPE ty_t_combo.
- *     DATA gt_sel_multi2 TYPE string_table.
- * 
- *     METHODS on_init.
- *     METHODS on_event.
- *     METHODS view_display.
- * 
- *   PROTECTED SECTION.
- *   PRIVATE SECTION.
- * ENDCLASS.
- * 
- * 
- * CLASS z2ui5_cl_demo_app_140 IMPLEMENTATION.
- * 
- *   METHOD on_event.
- * 
- *     TRY.
- *         IF client->check_on_event( `FILTERBAR` ).
- *           client->view_model_update( ).
- *         ENDIF.
- *       CATCH cx_root INTO DATA(x).
- *         client->message_box_display( text = x->get_text( )
- *                                      type = `error` ).
- *     ENDTRY.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD on_init.
- * 
- *     gt_multi = VALUE ty_t_combo(
- *       ( key = `A01` text = `T1` )
- *       ( key = `A02` text = `T2` )
- *       ( key = `A03` text = `T3` )
- *       ( key = `A04` text = `T4` )
- *       ( key = `A05` text = `T5` ) ).
- * 
- *     gt_sel_multi2 = VALUE #( ( `A01` ) ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD view_display.
- * 
- *     DATA(view) = z2ui5_cl_xml_view=>factory( ).
- * 
- *     view->shell(
- *             )->page(
- *                     title          = `abap2UI5 - Multi Combo Box`
- *                     navbuttonpress = client->_event( `BACK` )
- *                     shownavbutton  = client->check_app_prev_stack( )
- *                )->simple_form( title    = `Form Title`
- *                                editable = abap_true
- *                     )->content( `form`
- *                   )->multi_combobox(
- * *                            name = 'Multi'
- *                            name          = `MultiComboBox`
- *                     selectedkeys         = client->_bind_edit( gt_sel_multi2 )
- * *                            selecteditems = client->_bind_edit( gt_sel_multi )
- *                                    items = client->_bind_edit( val = gt_multi )
- *                                    )->item(
- *                                       key  = `{KEY}`
- *                                       text = `{TEXT}`
- *                                   )->get_parent(
- *                   )->button(
- *                             text  = `post`
- *                             press = client->_event( `BUTTON_POST` ) ).
- * 
- *     client->view_display( view->stringify( ) ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD z2ui5_if_app~main.
- * 
- *     me->client = client.
- * 
- *     IF client->check_on_init( ).
- *       on_init( ).
- *     ENDIF.
- * 
- *     view_display( ).
- *     on_event( ).
- * 
- *   ENDMETHOD.
- * 
- * ENDCLASS.
- */
-
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_140 extends z2ui5_if_app {
+  gt_multi = [];
+  gt_sel_multi = [];
+  gt_sel_multi2 = [];
   client = null;
+
+  on_event() {
+    try {
+      if (this.client.check_on_event(`FILTERBAR`)) {
+        this.client.view_model_update();
+      }
+    } catch (x) {
+      this.client.message_box_display(x.get_text(), `error`);
+    }
+  }
+
+  on_init() {
+    this.gt_multi = [{ key: `A01`, text: `T1` }, { key: `A02`, text: `T2` }, { key: `A03`, text: `T3` }, { key: `A04`, text: `T4` }, { key: `A05`, text: `T5` }];
+    this.gt_sel_multi2 = [`A01`];
+  }
+
+  view_display() {
+    const view = z2ui5_cl_xml_view.factory();
+    view.shell()
+      .page({ title: `abap2UI5 - Multi Combo Box`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() })
+      .simple_form({ title: `Form Title`, editable: true })
+      .content(`form`)
+      .multi_combobox({ name: `MultiComboBox`, selectedkeys: this.client._bind_edit(this.gt_sel_multi2), items: this.client._bind_edit(this.gt_multi) })
+      .item({ key: `{KEY}`, text: `{TEXT}` })
+      .get_parent()
+      .button({ text: `post`, press: this.client._event(`BUTTON_POST`) });
+    this.client.view_display(view.stringify());
+  }
+
   async main(client) {
     this.client = client;
     if (client.check_on_init()) {
-      const v = z2ui5_cl_xml_view.factory()
-        .Page({ title: "z2ui5_cl_demo_app_140 (TODO: port from abap)" })
-        .Text({ text: "This sample needs to be ported manually from abap2UI5." });
-      client.view_display(v.stringify());
+      this.on_init();
     }
+    this.view_display();
+    this.on_event();
   }
 }
 

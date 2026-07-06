@@ -1,30 +1,32 @@
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_221 extends z2ui5_if_app {
-
-
-  client = null;
-
-view_display() {
-const page = z2ui5_cl_xml_view.factory( ).shell(
-         ).page({ title: `abap2UI5 - Sample: Icon Tab Bar - Icons Only`, navbuttonpress: this.client._event_nav_app_leave( ), shownavbutton: this.client.check_app_prev_stack( ) });
-
-    const layout = page.icon_tab_bar({ id: `idIconTabBarMulti`, expanded: `{device>/isNoPhone}`, class: `sapUiResponsiveContentPadding` }).items(
-                              ).icon_tab_filter({ icon: `sap.icon://hint`, key: `info` }).text( `Info content goes here ..;` ).get_parent(
-                              ).icon_tab_filter({ icon: `sap.icon://attachment`, key: `attachments`, count: `3` }).text( `Attachments go here ..;` ).get_parent(
-                              ).icon_tab_filter({ icon: `sap.icon://notes`, key: `notes`, count: `12` }).text( `Notes go here ..;` ).get_parent(
-                              ).icon_tab_filter({ icon: `sap.icon://group`, key: `people` }).text( `People content goes here ..;` );
-
-    this.client.view_display( page.stringify( ) );
-
+  view_display({ client } = {}) {
+    const page = z2ui5_cl_xml_view.factory()
+      .shell()
+      .page({ title: `abap2UI5 - Sample: Icon Tab Bar - Icons Only`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
+    const layout = page.icon_tab_bar({ id: `idIconTabBarMulti`, expanded: `{device>/isNoPhone}`, class: `sapUiResponsiveContentPadding` })
+      .items()
+      .icon_tab_filter({ icon: `sap-icon://hint`, key: `info` })
+      .text(`Info content goes here ...`)
+      .get_parent()
+      .icon_tab_filter({ icon: `sap-icon://attachment`, key: `attachments`, count: `3` })
+      .text(`Attachments go here ...`)
+      .get_parent()
+      .icon_tab_filter({ icon: `sap-icon://notes`, key: `notes`, count: `12` })
+      .text(`Notes go here ...`)
+      .get_parent()
+      .icon_tab_filter({ icon: `sap-icon://group`, key: `people` })
+      .text(`People content goes here ...`);
+    client.view_display(page.stringify());
   }
-async main(client) {
-if (this.client.check_on_init( )) {
 
-      view_display( this.client );
+  async main(client) {
+    if (client.check_on_init()) {
+      this.view_display({ client: client });
     }
-}
+  }
 }
 
 module.exports = z2ui5_cl_demo_app_221;

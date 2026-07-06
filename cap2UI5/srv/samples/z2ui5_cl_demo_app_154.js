@@ -1,131 +1,73 @@
-/* AUTO-GENERATED scaffolding — abap2UI5 transpile failed; manual port required.
- *
- * Original ABAP source:
- * ====================
- * CLASS z2ui5_cl_demo_app_154 DEFINITION PUBLIC.
- * 
- *   PUBLIC SECTION.
- *     INTERFACES z2ui5_if_app.
- * 
- *     DATA client TYPE REF TO z2ui5_if_client.
- * 
- *     METHODS view_display.
- *     METHODS on_event.
- * 
- *   PROTECTED SECTION.
- *   PRIVATE SECTION.
- * ENDCLASS.
- * 
- * 
- * CLASS z2ui5_cl_demo_app_154 IMPLEMENTATION.
- * 
- *   METHOD on_event.
- * 
- *     TYPES BEGIN OF ty_log_entry.
- *     TYPES msgnumber TYPE n LENGTH 6.
- *     TYPES msgty     TYPE c LENGTH 1.
- *     TYPES msgid     TYPE c LENGTH 20.
- *     TYPES msgno     TYPE n LENGTH 3.
- *     TYPES msgv1     TYPE c LENGTH 50.
- *     TYPES msgv2     TYPE c LENGTH 50.
- *     TYPES msgv3     TYPE c LENGTH 50.
- *     TYPES msgv4     TYPE c LENGTH 50.
- *     TYPES msgv1_src TYPE c LENGTH 15.
- *     TYPES msgv2_src TYPE c LENGTH 15.
- *     TYPES msgv3_src TYPE c LENGTH 15.
- *     TYPES msgv4_src TYPE c LENGTH 15.
- *     TYPES detlevel  TYPE c LENGTH 1.
- *     TYPES probclass TYPE c LENGTH 1.
- *     TYPES alsort    TYPE c LENGTH 3.
- *     TYPES time_stmp TYPE p LENGTH 16 DECIMALS 7.
- *     TYPES msg_count TYPE i.
- *     TYPES context   TYPE c LENGTH 255.
- *     TYPES params    TYPE c LENGTH 255.
- *     TYPES msg_txt   TYPE string.
- *     TYPES END OF ty_log_entry.
- *     DATA lt_bal TYPE STANDARD TABLE OF ty_log_entry WITH EMPTY KEY.
- * 
- *     CASE client->get( )-event.
- * 
- *       WHEN `POPUP_BAPIRET`.
- * 
- *         DATA(lt_msg) = VALUE bapirettab(
- *             ( type = `E` id = `MSG1` number = `001` message = `An empty Report field causes an empty XML Message to be sent` )
- *             ( type = `I` id = `MSG2` number = `002` message = `Product already in use` ) ).
- * 
- *         client->nav_app_call( z2ui5_cl_pop_messages=>factory( lt_msg ) ).
- * 
- *       WHEN `POPUP_BALLOG`.
- * 
- *         lt_bal = VALUE #(
- *           ( msgid = `MSG1` msgno = `001` msgty = `S` time_stmp = z2ui5_cl_util=>time_get_timestampl( ) msgnumber = `01` )
- *           ( msgid = `MSG2` msgno = `002` msgty = `S` time_stmp = z2ui5_cl_util=>time_get_timestampl( ) msgnumber = `02` ) ).
- * 
- *         client->nav_app_call( z2ui5_cl_pop_bal=>factory( lt_bal ) ).
- * 
- *       WHEN `POPUP_EXCEPTION`.
- *         TRY.
- *             DATA(lv_dummy) = 1 / 0.
- *           CATCH cx_root INTO DATA(lx).
- *         ENDTRY.
- *         DATA(lo_app) = z2ui5_cl_pop_error=>factory( lx ).
- *         client->nav_app_call( lo_app ).
- *     ENDCASE.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD view_display.
- * 
- *     DATA(view) = z2ui5_cl_xml_view=>factory( ).
- *     view->shell(
- *         )->page(
- *                 title          = `abap2UI5 - Popup Messages`
- *                 navbuttonpress = client->_event_nav_app_leave( )
- *                 shownavbutton  = client->check_app_prev_stack( )
- *            )->button(
- *             text  = `Open Popup BAPIRET`
- *             press = client->_event( `POPUP_BAPIRET` )
- *                   )->button(
- *             text  = `Open Popup BALLOG`
- *             press = client->_event( `POPUP_BALLOG` )
- *                              )->button(
- *             text  = `Open Popup Exception`
- *             press = client->_event( `POPUP_EXCEPTION` ) ).
- * 
- *     client->view_display( view->stringify( ) ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD z2ui5_if_app~main.
- * 
- *     me->client = client.
- * 
- *     IF client->check_on_init( ).
- *       view_display( ).
- * 
- *     ELSE.
- *       on_event( ).
- *     ENDIF.
- * 
- *   ENDMETHOD.
- * 
- * ENDCLASS.
- */
-
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
+const z2ui5_cl_pop_bal = require("abap2UI5/z2ui5_cl_pop_bal");
+const z2ui5_cl_pop_error = require("abap2UI5/z2ui5_cl_pop_error");
+const z2ui5_cl_pop_messages = require("abap2UI5/z2ui5_cl_pop_messages");
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_154 extends z2ui5_if_app {
   client = null;
+
+  on_event() {
+    // TODO(abap2js): TYPES BEGIN OF ty_s_log_entry.
+    // TODO(abap2js): TYPES msgnumber TYPE n LENGTH 6.
+    // TODO(abap2js): TYPES msgty TYPE c LENGTH 1.
+    // TODO(abap2js): TYPES msgid TYPE c LENGTH 20.
+    // TODO(abap2js): TYPES msgno TYPE n LENGTH 3.
+    // TODO(abap2js): TYPES msgv1 TYPE c LENGTH 50.
+    // TODO(abap2js): TYPES msgv2 TYPE c LENGTH 50.
+    // TODO(abap2js): TYPES msgv3 TYPE c LENGTH 50.
+    // TODO(abap2js): TYPES msgv4 TYPE c LENGTH 50.
+    // TODO(abap2js): TYPES msgv1_src TYPE c LENGTH 15.
+    // TODO(abap2js): TYPES msgv2_src TYPE c LENGTH 15.
+    // TODO(abap2js): TYPES msgv3_src TYPE c LENGTH 15.
+    // TODO(abap2js): TYPES msgv4_src TYPE c LENGTH 15.
+    // TODO(abap2js): TYPES detlevel TYPE c LENGTH 1.
+    // TODO(abap2js): TYPES probclass TYPE c LENGTH 1.
+    // TODO(abap2js): TYPES alsort TYPE c LENGTH 3.
+    // TODO(abap2js): TYPES time_stmp TYPE p LENGTH 16 DECIMALS 7.
+    // TODO(abap2js): TYPES msg_count TYPE i.
+    // TODO(abap2js): TYPES context TYPE c LENGTH 255.
+    // TODO(abap2js): TYPES params TYPE c LENGTH 255.
+    // TODO(abap2js): TYPES msg_txt TYPE string.
+    // TODO(abap2js): TYPES END OF ty_s_log_entry.
+    let lt_bal = [];
+    switch (this.client.get().EVENT) {
+      case `POPUP_BAPIRET`:
+        const lt_msg = [{ type: `E`, id: `MSG1`, number: `001`, message: `An empty Report field causes an empty XML Message to be sent` }, { type: `I`, id: `MSG2`, number: `002`, message: `Product already in use` }];
+        this.client.nav_app_call(z2ui5_cl_pop_messages.factory(lt_msg));
+        break;
+      case `POPUP_BALLOG`:
+        lt_bal = [{ msgid: `MSG1`, msgno: `001`, msgty: `S`, time_stmp: z2ui5_cl_util.time_get_timestampl(), msgnumber: `01` }, { msgid: `MSG2`, msgno: `002`, msgty: `S`, time_stmp: z2ui5_cl_util.time_get_timestampl(), msgnumber: `02` }];
+        this.client.nav_app_call(z2ui5_cl_pop_bal.factory(lt_bal));
+        break;
+      case `POPUP_EXCEPTION`:
+        try {
+          const lv_dummy = 1 / 0;
+        } catch (lx) {
+        }
+        const lo_app = z2ui5_cl_pop_error.factory(lx);
+        this.client.nav_app_call(lo_app);
+        break;
+    }
+  }
+
+  view_display() {
+    const view = z2ui5_cl_xml_view.factory();
+    view.shell()
+      .page({ title: `abap2UI5 - Popup Messages`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() })
+      .button({ text: `Open Popup BAPIRET`, press: this.client._event(`POPUP_BAPIRET`) })
+      .button({ text: `Open Popup BALLOG`, press: this.client._event(`POPUP_BALLOG`) })
+      .button({ text: `Open Popup Exception`, press: this.client._event(`POPUP_EXCEPTION`) });
+    this.client.view_display(view.stringify());
+  }
+
   async main(client) {
     this.client = client;
     if (client.check_on_init()) {
-      const v = z2ui5_cl_xml_view.factory()
-        .Page({ title: "z2ui5_cl_demo_app_154 (TODO: port from abap)" })
-        .Text({ text: "This sample needs to be ported manually from abap2UI5." });
-      client.view_display(v.stringify());
+      this.view_display();
+    } else {
+      this.on_event();
     }
   }
 }

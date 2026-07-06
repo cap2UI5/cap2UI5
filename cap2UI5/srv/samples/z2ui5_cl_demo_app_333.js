@@ -1,107 +1,32 @@
-/* AUTO-GENERATED scaffolding — abap2UI5 transpile failed; manual port required.
- *
- * Original ABAP source:
- * ====================
- * CLASS z2ui5_cl_demo_app_333 DEFINITION PUBLIC.
- * 
- *   PUBLIC SECTION.
- *     INTERFACES if_serializable_object.
- * 
- *     TYPES:
- *       BEGIN OF ty_s_test,
- *         v1 TYPE abap_bool,
- *         BEGIN OF test2,
- *           v2 TYPE abap_bool,
- *           BEGIN OF test3,
- *             v3 TYPE abap_bool,
- *             BEGIN OF test4,
- *               v4 TYPE abap_bool,
- *             END OF test4,
- *           END OF test3,
- *         END OF test2,
- *       END OF ty_s_test.
- *     TYPES ty_t_test TYPE STANDARD TABLE OF ty_s_test WITH EMPTY KEY.
- * 
- *     TYPES:
- *       BEGIN OF ty_s_layout,
- *         name    TYPE string,
- *         visible TYPE abap_bool,
- *         s_test  TYPE ty_s_test,
- *       END OF ty_s_layout.
- *     TYPES ty_t_layout TYPE STANDARD TABLE OF ty_s_layout WITH EMPTY KEY.
- * 
- *     TYPES: BEGIN OF ty_s_data,
- *              guid     TYPE sysuuid_c32,
- *              t_layout TYPE ty_t_layout,
- *              s_test   TYPE ty_s_test,
- *            END OF ty_s_data.
- *     TYPES ty_t_data TYPE STANDARD TABLE OF ty_s_data WITH EMPTY KEY.
- * 
- *     DATA ms_data TYPE ty_s_data.
- *     DATA mr_data TYPE REF TO data.
- * 
- *     CLASS-DATA cv_value TYPE c LENGTH 10 VALUE `STRUCT`.
- * 
- *     CLASS-METHODS factory
- *       IMPORTING
- *         i_data        TYPE REF TO data
- *         vis_cols      TYPE int4
- *       RETURNING
- *         VALUE(result) TYPE REF TO z2ui5_cl_demo_app_333.
- *   PROTECTED SECTION.
- *   PRIVATE SECTION.
- * ENDCLASS.
- * 
- * 
- * CLASS z2ui5_cl_demo_app_333 IMPLEMENTATION.
- * 
- *   METHOD factory.
- * 
- *     result = NEW #( ).
- * 
- *     DATA(t_comp) = z2ui5_cl_util=>rtti_get_t_attri_by_any( i_data ).
- * 
- *     DATA(index) = 0.
- * 
- *     LOOP AT t_comp INTO DATA(comp).
- * 
- *       index = index + 1.
- * 
- *       APPEND INITIAL LINE TO result->ms_data-t_layout REFERENCE INTO DATA(layout).
- * 
- *       layout->name = comp-name.
- * 
- *       IF index <= vis_cols.
- *         layout->visible = abap_true.
- *       ENDIF.
- * 
- *     ENDLOOP.
- * 
- *     TRY.
- *         result->ms_data-guid = z2ui5_cl_util=>uuid_get_c32( ).
- *       CATCH cx_root.
- *     ENDTRY.
- * 
- *     result->mr_data = i_data.
- * 
- *   ENDMETHOD.
- * 
- * ENDCLASS.
- */
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+class z2ui5_cl_demo_app_333 {
+  static cv_value = `STRUCT`;
 
-class z2ui5_cl_demo_app_333 extends z2ui5_if_app {
-  client = null;
-  async main(client) {
-    this.client = client;
-    if (client.check_on_init()) {
-      const v = z2ui5_cl_xml_view.factory()
-        .Page({ title: "z2ui5_cl_demo_app_333 (TODO: port from abap)" })
-        .Text({ text: "This sample needs to be ported manually from abap2UI5." });
-      client.view_display(v.stringify());
+  ms_data = {};
+  mr_data = null;
+
+  static factory({ i_data, vis_cols } = {}) {
+    let result = null;
+    result = new z2ui5_cl_demo_app_333();
+    const t_comp = z2ui5_cl_util.rtti_get_t_attri_by_any(i_data);
+    let index = 0;
+    let sy_tabix = 0;
+    for (const comp of t_comp) {
+      sy_tabix++;
+      index = index + 1;
+      result.ms_data.t_layout reference into this.data(layout).push({});
+      layout.name = comp.name;
+      if (index <= vis_cols) {
+        layout.visible = true;
+      }
     }
+    try {
+      result.ms_data.guid = z2ui5_cl_util.uuid_get_c32();
+    } catch (error) {
+    }
+    result.mr_data = i_data;
+    return result;
   }
 }
 

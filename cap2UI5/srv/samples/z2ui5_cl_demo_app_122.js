@@ -1,116 +1,104 @@
-/* AUTO-GENERATED scaffolding — abap2UI5 transpile failed; manual port required.
- *
- * Original ABAP source:
- * ====================
- * CLASS z2ui5_cl_demo_app_122 DEFINITION PUBLIC.
- * 
- *   PUBLIC SECTION.
- *     INTERFACES z2ui5_if_app.
- * 
- *     DATA ui5_version TYPE string.
- *     DATA ui5_theme TYPE string.
- *     DATA ui5_gav TYPE string.
- *     DATA device_systemtype TYPE string.
- *     DATA device_os TYPE string.
- *     DATA device_browser TYPE string.
- * 
- *     DATA device_phone   TYPE abap_bool.
- *     DATA device_desktop TYPE abap_bool.
- *     DATA device_tablet  TYPE abap_bool.
- *     DATA device_combi   TYPE abap_bool.
- *     DATA device_height  TYPE string.
- *     DATA device_width   TYPE string.
- * 
- *   PROTECTED SECTION.
- *     DATA client TYPE REF TO z2ui5_if_client.
- * 
- *     METHODS view_display.
- * 
- *   PRIVATE SECTION.
- * ENDCLASS.
- * 
- * 
- * CLASS z2ui5_cl_demo_app_122 IMPLEMENTATION.
- * 
- *   METHOD view_display.
- * 
- *     DATA(view) = z2ui5_cl_xml_view=>factory( ).
- *     client->view_display( view->shell(
- *           )->page(
- *                   title          = `abap2UI5`
- *                   navbuttonpress = client->_event_nav_app_leave( )
- *                   shownavbutton  = client->check_app_prev_stack( )
- *               )->_z2ui5( )->info_frontend(
- *                                         finished          = client->_event( `INFO_FINISHED` )
- *                                         device_browser    = client->_bind_edit( device_browser )
- *                                         device_os         = client->_bind_edit( device_os )
- *                                         device_systemtype = client->_bind_edit( device_systemtype )
- *                                         ui5_gav           = client->_bind_edit( ui5_gav )
- *                                         ui5_theme         = client->_bind_edit( ui5_theme )
- *                                         ui5_version       = client->_bind_edit( ui5_version )
- *                                         device_phone      = client->_bind_edit( device_phone )
- *                                         device_desktop    = client->_bind_edit( device_desktop )
- *                                         device_tablet     = client->_bind_edit( device_tablet )
- *                                         device_combi      = client->_bind_edit( device_combi )
- *                                         device_height     = client->_bind_edit( device_height )
- *                                         device_width      = client->_bind_edit( device_width )
- *               )->simple_form( title    = `Information`
- *                               editable = abap_true
- *                   )->content( `form`
- *                       )->label( `device_browser`
- *                       )->input( client->_bind_edit( device_browser )
- *                       )->label( `device_os`
- *                       )->input( client->_bind_edit( device_os )
- *                       )->label( `device_systemtype`
- *                       )->input( client->_bind_edit( device_systemtype )
- *                       )->label( `ui5_gav`
- *                       )->input( client->_bind_edit( ui5_gav )
- *                       )->label( `ui5_theme`
- *                       )->input( client->_bind_edit( ui5_theme )
- *                       )->label( `ui5_version`
- *                       )->input( client->_bind_edit( ui5_version )
- *                       )->label( `device_phone`
- *                       )->input( client->_bind_edit( device_phone )
- *                       )->label( `device_desktop`
- *                       )->input( client->_bind_edit( device_desktop )
- *                       )->label( `device_tablet`
- *                       )->input( client->_bind_edit( device_tablet )
- *                       )->label( `device_combi`
- *                       )->input( client->_bind_edit( device_combi )
- *                       )->label( `device_height`
- *                       )->input( client->_bind_edit( device_height )
- *                       )->label( `device_width`
- *                       )->input( client->_bind_edit( device_width )
- *       )->stringify( ) ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD z2ui5_if_app~main.
- * 
- *     me->client = client.
- * 
- *     IF client->check_on_init( ).
- *       view_display( ).
- *     ENDIF.
- * 
- *   ENDMETHOD.
- * 
- * ENDCLASS.
- */
-
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
+const z2ui5_if_types = require("abap2UI5/z2ui5_if_types");
 
 class z2ui5_cl_demo_app_122 extends z2ui5_if_app {
+  ui5_version = ``;
+  ui5_theme = ``;
+  ui5_gav = ``;
+  ui5_build_timestamp = ``;
+  device_systemtype = ``;
+  device_os = ``;
+  device_os_version = ``;
+  device_browser = ``;
+  device_browser_version = ``;
+  device_orientation = ``;
+  device_phone = false;
+  device_desktop = false;
+  device_tablet = false;
+  device_combi = false;
+  device_touch = false;
+  device_pointer = false;
+  device_retina = false;
+  device_height = ``;
+  device_width = ``;
   client = null;
+
+  read_frontend_info() {
+    const ls_get = this.client.get();
+    this.device_browser = ls_get.S_DEVICE.BROWSER.NAME;
+    this.device_browser_version = ls_get.S_DEVICE.BROWSER.VERSION;
+    this.device_os = ls_get.S_DEVICE.OS.NAME;
+    this.device_os_version = ls_get.S_DEVICE.OS.VERSION;
+    this.device_systemtype = ls_get.S_DEVICE.SYSTEM;
+    this.device_orientation = ls_get.S_DEVICE.ORIENTATION;
+    this.device_height = (ls_get.S_DEVICE.RESIZE.HEIGHT);
+    this.device_width = (ls_get.S_DEVICE.RESIZE.WIDTH);
+    this.device_phone = Boolean(ls_get.S_DEVICE.SYSTEM === z2ui5_if_types.cs_device.system.phone);
+    this.device_desktop = Boolean(ls_get.S_DEVICE.SYSTEM === z2ui5_if_types.cs_device.system.desktop);
+    this.device_tablet = Boolean(ls_get.S_DEVICE.SYSTEM === z2ui5_if_types.cs_device.system.tablet);
+    this.device_combi = Boolean(ls_get.S_DEVICE.SYSTEM === z2ui5_if_types.cs_device.system.combi);
+    this.device_touch = ls_get.S_DEVICE.SUPPORT.TOUCH;
+    this.device_pointer = ls_get.S_DEVICE.SUPPORT.POINTER;
+    this.device_retina = ls_get.S_DEVICE.SUPPORT.RETINA;
+    this.ui5_version = ls_get.S_UI5.VERSION;
+    this.ui5_theme = ls_get.S_UI5.THEME;
+    this.ui5_gav = ls_get.S_UI5.GAV;
+    this.ui5_build_timestamp = ls_get.S_UI5.BUILD_TIMESTAMP;
+  }
+
+  view_display() {
+    const view = z2ui5_cl_xml_view.factory();
+    view.shell()
+      .page({ title: `abap2UI5`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() })
+      .simple_form({ title: `Information`, editable: true })
+      .content(`form`)
+      .label(`device_browser`)
+      .input(this.client._bind_edit(this.device_browser))
+      .label(`device_browser_version`)
+      .input(this.client._bind_edit(this.device_browser_version))
+      .label(`device_os`)
+      .input(this.client._bind_edit(this.device_os))
+      .label(`device_os_version`)
+      .input(this.client._bind_edit(this.device_os_version))
+      .label(`device_systemtype`)
+      .input(this.client._bind_edit(this.device_systemtype))
+      .label(`device_orientation`)
+      .input(this.client._bind_edit(this.device_orientation))
+      .label(`device_height`)
+      .input(this.client._bind_edit(this.device_height))
+      .label(`device_width`)
+      .input(this.client._bind_edit(this.device_width))
+      .label(`device_phone`)
+      .input(this.client._bind_edit(this.device_phone))
+      .label(`device_desktop`)
+      .input(this.client._bind_edit(this.device_desktop))
+      .label(`device_tablet`)
+      .input(this.client._bind_edit(this.device_tablet))
+      .label(`device_combi`)
+      .input(this.client._bind_edit(this.device_combi))
+      .label(`device_touch`)
+      .input(this.client._bind_edit(this.device_touch))
+      .label(`device_pointer`)
+      .input(this.client._bind_edit(this.device_pointer))
+      .label(`device_retina`)
+      .input(this.client._bind_edit(this.device_retina))
+      .label(`ui5_version`)
+      .input(this.client._bind_edit(this.ui5_version))
+      .label(`ui5_theme`)
+      .input(this.client._bind_edit(this.ui5_theme))
+      .label(`ui5_gav`)
+      .input(this.client._bind_edit(this.ui5_gav))
+      .label(`ui5_build_timestamp`)
+      .input(this.client._bind_edit(this.ui5_build_timestamp));
+    this.client.view_display(view.stringify());
+  }
+
   async main(client) {
     this.client = client;
     if (client.check_on_init()) {
-      const v = z2ui5_cl_xml_view.factory()
-        .Page({ title: "z2ui5_cl_demo_app_122 (TODO: port from abap)" })
-        .Text({ text: "This sample needs to be ported manually from abap2UI5." });
-      client.view_display(v.stringify());
+      this.read_frontend_info();
+      this.view_display();
     }
   }
 }

@@ -1,109 +1,51 @@
-/* AUTO-GENERATED scaffolding — abap2UI5 transpile failed; manual port required.
- *
- * Original ABAP source:
- * ====================
- * CLASS z2ui5_cl_demo_app_088 DEFINITION PUBLIC.
- * 
- *   PUBLIC SECTION.
- *     INTERFACES z2ui5_if_app.
- * 
- *     DATA mv_selected_key TYPE string.
- *   PROTECTED SECTION.
- *     DATA client TYPE REF TO z2ui5_if_client.
- * 
- *     DATA mv_page TYPE string.
- * 
- *     METHODS view_display.
- *     METHODS on_event.
- *   PRIVATE SECTION.
- * ENDCLASS.
- * 
- * 
- * CLASS z2ui5_cl_demo_app_088 IMPLEMENTATION.
- * 
- *   METHOD z2ui5_if_app~main.
- * 
- *     me->client     = client.
- * 
- *     IF client->check_on_init( ).
- *       mv_page = `page1`.
- *       view_display( ).
- * 
- *     ELSE.
- *       on_event( ).
- *     ENDIF.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD on_event.
- * 
- *     CASE client->get( )-event.
- *       WHEN OTHERS.
- *         mv_page = client->get( )-event.
- *         view_display( ).
- * 
- *     ENDCASE.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD view_display.
- * 
- *     DATA(view) = z2ui5_cl_xml_view=>factory( ).
- *     DATA(page) = z2ui5_cl_xml_view=>factory( )->shell( )->page(
- *         navbuttonpress = client->_event_nav_app_leave( )
- *         shownavbutton  = client->check_app_prev_stack( )
- *         title          = `abap2UI5 - Sample: Nav Container`
- *        )->content( ).
- * 
- *     page->icon_tab_header( selectedkey                   = client->_bind_edit( mv_selected_key )
- *                                                   select = client->_event_client( val = client->cs_event-nav_container_to t_arg  = VALUE #( ( `NavCon` ) ( `${$parameters>/selectedKey}` ) ) )
- *                                                   mode   = `Inline`
- *                                   )->items(
- *                                     )->icon_tab_filter( key  = `page1`
- *                                                         text = `Home` )->get_parent(
- *                                     )->icon_tab_filter( key  = `page2`
- *                                                         text = `Applications` )->get_parent(
- *                                     )->icon_tab_filter( key  = `page3`
- *                                                         text = `Users and Groups` ).
- * 
- *     page->nav_container( id                    = `NavCon`
- *                          initialpage           = `page1`
- *                          defaulttransitionname = `flip`
- *                                      )->pages(
- *                                      )->page(
- *                                        title = `first page`
- *                                        id    = `page1`
- *                                     )->get_parent(
- *                                      )->page(
- *                                        title = `second page`
- *                                        id    = `page2`
- *                                     )->get_parent(
- *                                      )->page(
- *                                        title = `third page`
- *                                        id    = `page3` ).
- * 
- *     client->view_display( page->stringify( ) ).
- * 
- *   ENDMETHOD.
- * 
- * ENDCLASS.
- */
-
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_088 extends z2ui5_if_app {
+  mv_selected_key = ``;
   client = null;
+  mv_page = ``;
+
   async main(client) {
     this.client = client;
     if (client.check_on_init()) {
-      const v = z2ui5_cl_xml_view.factory()
-        .Page({ title: "z2ui5_cl_demo_app_088 (TODO: port from abap)" })
-        .Text({ text: "This sample needs to be ported manually from abap2UI5." });
-      client.view_display(v.stringify());
+      this.mv_page = `page1`;
+      this.view_display();
+    } else {
+      this.on_event();
     }
+  }
+
+  on_event() {
+    switch (this.client.get().EVENT) {
+      default:
+        this.mv_page = this.client.get().EVENT;
+        this.view_display();
+        break;
+    }
+  }
+
+  view_display() {
+    const view = z2ui5_cl_xml_view.factory();
+    const page = z2ui5_cl_xml_view.factory()
+      .shell()
+      .page({ navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack(), title: `abap2UI5 - Sample: Nav Container` })
+      .content();
+    page.icon_tab_header({ selectedkey: this.client._bind_edit(this.mv_selected_key), select: this.client._event_client(this.client.cs_event.nav_container_to, [`NavCon`, `${$parameters>/selectedKey}`]), mode: `Inline` })
+      .items()
+      .icon_tab_filter({ key: `page1`, text: `Home` })
+      .get_parent()
+      .icon_tab_filter({ key: `page2`, text: `Applications` })
+      .get_parent()
+      .icon_tab_filter({ key: `page3`, text: `Users and Groups` });
+    page.nav_container({ id: `NavCon`, initialpage: `page1`, defaulttransitionname: `flip` })
+      .pages()
+      .page({ title: `first page`, id: `page1` })
+      .get_parent()
+      .page({ title: `second page`, id: `page2` })
+      .get_parent()
+      .page({ title: `third page`, id: `page3` });
+    this.client.view_display(page.stringify());
   }
 }
 

@@ -1,179 +1,77 @@
-/* AUTO-GENERATED scaffolding — abap2UI5 transpile failed; manual port required.
- *
- * Original ABAP source:
- * ====================
- * CLASS z2ui5_cl_demo_app_104 DEFINITION PUBLIC.
- * 
- *   PUBLIC SECTION.
- *     INTERFACES z2ui5_if_app.
- * 
- *     TYPES:
- *       BEGIN OF ty_row,
- *         title    TYPE string,
- *         value    TYPE string,
- *         descr    TYPE string,
- *         icon     TYPE string,
- *         info     TYPE string,
- *         selected TYPE abap_bool,
- *         checkbox TYPE abap_bool,
- *       END OF ty_row.
- * 
- *     DATA mo_app_sub TYPE REF TO object.
- *     DATA classname TYPE string.
- * 
- *     DATA
- *       t_tab TYPE STANDARD TABLE OF ty_row WITH EMPTY KEY.
- *     DATA
- *       t_tab2 TYPE STANDARD TABLE OF ty_row WITH EMPTY KEY.
- * 
- *     DATA mv_layout TYPE string.
- *     DATA mv_title TYPE string.
- *     DATA mv_check_enabled_01 TYPE abap_bool VALUE abap_true.
- *     DATA mv_check_enabled_02 TYPE abap_bool.
- *     DATA mo_grid_sub TYPE REF TO z2ui5_cl_xml_view.
- *     DATA lo_view_nested TYPE REF TO z2ui5_cl_xml_view.
- *   PROTECTED SECTION.
- *     DATA client TYPE REF TO z2ui5_if_client.
- * 
- *     METHODS view_display_master.
- *     METHODS view_display_detail.
- *     METHODS on_event_sub.
- *     METHODS on_init_sub.
- *   PRIVATE SECTION.
- * ENDCLASS.
- * 
- * 
- * CLASS z2ui5_cl_demo_app_104 IMPLEMENTATION.
- * 
- *   METHOD on_event_sub.
- * 
- *     IF mo_app_sub IS BOUND.
- * 
- *       ASSIGN mo_app_sub->(`MO_VIEW_PARENT`) TO FIELD-SYMBOL(<fs>).
- *       <fs> = mo_grid_sub.
- *       CALL METHOD mo_app_sub->(`Z2UI5_IF_APP~MAIN`) EXPORTING client = client.
- * 
- *     ENDIF.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD on_init_sub.
- * 
- *     classname = to_upper( classname ).
- *     CREATE OBJECT mo_app_sub TYPE (classname).
- * 
- *     ASSIGN mo_app_sub->(`MO_VIEW_PARENT`) TO FIELD-SYMBOL(<fs>).
- *     <fs> = mo_grid_sub.
- *     CALL METHOD mo_app_sub->(`Z2UI5_IF_APP~MAIN`) EXPORTING client = client.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD view_display_detail.
- * 
- *     lo_view_nested = z2ui5_cl_xml_view=>factory( ).
- *     DATA(page) = lo_view_nested->page( `Nested View` ).
- *     mo_grid_sub = page->grid( `L12 M12 S12`
- *         )->content( `layout` ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD view_display_master.
- * 
- *     DATA(page) = z2ui5_cl_xml_view=>factory(
- *        )->page(
- *           title           = `abap2UI5 - Master Detail Page with Nested View`
- *           navbuttonpress  = client->_event_nav_app_leave( )
- *             shownavbutton = abap_true ).
- * 
- *     DATA(col_layout) = page->flexible_column_layout( layout = client->_bind_edit( mv_layout )
- *                                                      id     =`test` ).
- * 
- *     DATA(lr_master) = col_layout->begin_column_pages( ).
- * 
- *     DATA(lr_list) = lr_master->list(
- *           headertext      = `List Output`
- *           items           = client->_bind_edit( val = t_tab view = client->cs_view-main )
- *           mode            = `SingleSelectMaster`
- *           selectionchange = client->_event( val = `SELCHANGE` )
- *           )->standard_list_item(
- *               title       = `{TITLE}`
- *               description = `{DESCR}`
- *               icon        = `{ICON}`
- *               info        = `{INFO}`
- *               press       = client->_event( `TEST` )
- *               selected    = `{SELECTED}` ).
- * 
- *     client->view_display( lr_list->stringify( ) ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD z2ui5_if_app~main.
- * 
- *     me->client = client.
- * 
- *     IF client->check_on_init( ).
- * 
- *       t_tab = VALUE #(
- *         ( title = `Class 1`  info = `z2ui5_cl_demo_app_105`   descr = `this is a description` icon = `sap-icon://account` )
- *         ( title = `Class 2`  info = `z2ui5_cl_demo_app_112` descr = `this is a description` icon = `sap-icon://account` ) ).
- * 
- *       mv_layout = `OneColumn`.
- *       view_display_master( ).
- *       view_display_detail( ).
- * 
- *     ENDIF.
- * 
- *     CASE client->get( )-event.
- * 
- *       WHEN `SELCHANGE`.
- * 
- *         DATA(lt_sel) = t_tab.
- *         DELETE lt_sel WHERE selected = abap_false.
- * 
- *         READ TABLE lt_sel INTO DATA(ls_sel) INDEX 1.
- *         APPEND ls_sel TO t_tab2.
- * 
- *         IF classname IS NOT INITIAL.
- *           view_display_master( ).
- *         ENDIF.
- *         classname = ls_sel-info.
- * 
- *         mv_layout = `TwoColumnsMidExpanded`.
- *         client->view_model_update( ).
- *         view_display_detail( ).
- *         on_init_sub( ).
- * 
- *         client->nest_view_display(
- *           val            = lo_view_nested->stringify( )
- *           id             = `test`
- *           method_insert  = `addMidColumnPage`
- *           method_destroy = `removeAllMidColumnPages` ).
- *     ENDCASE.
- * 
- *     on_event_sub( ).
- * 
- *   ENDMETHOD.
- * 
- * ENDCLASS.
- */
-
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_104 extends z2ui5_if_app {
+  mo_app_sub = null;
+  classname = ``;
+  t_tab = [];
+  t_tab2 = [];
+  mv_layout = ``;
+  mv_title = ``;
+  mv_check_enabled_01 = true;
+  mv_check_enabled_02 = false;
+  mo_grid_sub = null;
+  lo_view_nested = null;
   client = null;
+
+  on_event_sub() {
+    if (this.mo_app_sub != null) {
+      // TODO(abap2js): ASSIGN mo_app_sub->(`MO_VIEW_PARENT`) TO FIELD-SYMBOL(<fs>).
+      fs = this.mo_grid_sub;
+      call method this.mo_app_sub.( `Z2UI5_IF_APP~MAIN` ) exporting this.client === this.client;
+    }
+  }
+
+  on_init_sub() {
+    this.classname = this.classname.toUpperCase();
+    this.mo_app_sub = null; // TODO(abap2js): CREATE OBJECT mo_app_sub TYPE (classname).
+    // TODO(abap2js): ASSIGN mo_app_sub->(`MO_VIEW_PARENT`) TO FIELD-SYMBOL(<fs>).
+    fs = this.mo_grid_sub;
+    call method this.mo_app_sub.( `Z2UI5_IF_APP~MAIN` ) exporting this.client === this.client;
+  }
+
+  view_display_detail() {
+    this.lo_view_nested = z2ui5_cl_xml_view.factory();
+    const page = this.lo_view_nested.page(`Nested View`);
+    this.mo_grid_sub = page.grid(`L12 M12 S12`).content(`layout`);
+  }
+
+  view_display_master() {
+    const page = z2ui5_cl_xml_view.factory()
+      .page({ title: `abap2UI5 - Master Detail Page with Nested View`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: true });
+    const col_layout = page.flexible_column_layout({ layout: this.client._bind_edit(this.mv_layout), id: `test` });
+    const lr_master = col_layout.begin_column_pages();
+    const lr_list = lr_master.list({ headertext: `List Output`, items: this.client._bind_edit({ val: this.t_tab, view: this.client.cs_view.main }), mode: `SingleSelectMaster`, selectionchange: this.client._event(`SELCHANGE`) })
+      .standard_list_item({ title: `{TITLE}`, description: `{DESCR}`, icon: `{ICON}`, info: `{INFO}`, press: this.client._event(`TEST`), selected: `{SELECTED}` });
+    this.client.view_display(lr_list.stringify());
+  }
+
   async main(client) {
     this.client = client;
     if (client.check_on_init()) {
-      const v = z2ui5_cl_xml_view.factory()
-        .Page({ title: "z2ui5_cl_demo_app_104 (TODO: port from abap)" })
-        .Text({ text: "This sample needs to be ported manually from abap2UI5." });
-      client.view_display(v.stringify());
+      this.t_tab = [{ title: `Class 1`, info: `z2ui5_cl_demo_app_105`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `Class 2`, info: `z2ui5_cl_demo_app_112`, descr: `this is a description`, icon: `sap-icon://account` }];
+      this.mv_layout = `OneColumn`;
+      this.view_display_master();
+      this.view_display_detail();
     }
+    switch (client.get().EVENT) {
+      case `SELCHANGE`:
+        const lt_sel = this.t_tab;
+        for (let _i = lt_sel.length - 1; _i >= 0; _i--) { const row = lt_sel[_i]; if (row.selected === false) lt_sel.splice(_i, 1); }
+        // TODO(abap2js): READ TABLE lt_sel INTO DATA(ls_sel) INDEX 1.
+        this.t_tab2.push(ls_sel);
+        if (this.classname) {
+          this.view_display_master();
+        }
+        this.classname = ls_sel.info;
+        this.mv_layout = `TwoColumnsMidExpanded`;
+        client.view_model_update();
+        this.view_display_detail();
+        this.on_init_sub();
+        client.nest_view_display(this.lo_view_nested.stringify(), `test`, `addMidColumnPage`, `removeAllMidColumnPages`);
+        break;
+    }
+    this.on_event_sub();
   }
 }
 

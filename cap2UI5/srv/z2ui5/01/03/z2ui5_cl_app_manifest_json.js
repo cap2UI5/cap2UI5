@@ -1,27 +1,9 @@
-const fs = require("fs");
-const path = require("path");
 
-/**
- * z2ui5_cl_app_manifest_json — JS port of abap2UI5 z2ui5_cl_app_manifest_json.
- *
- * abap holds the source as an ABAP string template; in CAP the file lives on
- * disk under app/app_v2_new/webapp/manifest.json and is normally served by CAP's
- * static middleware. This wrapper exposes it for parity with the abap2UI5
- * src/01/03 layout — useful if you ever want to serve the entire app from
- * the same CDS endpoint instead of via the static folder.
- */
 class z2ui5_cl_app_manifest_json {
-
-  static MIME = "application/json";
-  static FILE_PATH = path.join(__dirname, "../../../../app/app_v2_new/webapp/manifest.json");
-
-  /** Returns the file content as a string (or null if missing). */
-  static get_source() {
-    try {
-      return fs.readFileSync(z2ui5_cl_app_manifest_json.FILE_PATH, "utf8");
-    } catch {
-      return null;
-    }
+  static get() {
+    let result = ``;
+    result = `{` + ` "_version": "1.65.0",` + ` "sap.app": {` + ` "id": "z2ui5",` + ` "type": "application",` + ` "applicationVersion": {` + ` "version": "0.0.1"` + ` },` + ` "title": "abap2UI5",` + ` "description": "Create UI5 apps purely in ABAP",` + ` "resources": "resources.json",` + ` "sourceTemplate": {` + ` "id": "@sap/generator-fiori:basic",` + ` "version": "1.15.0",` + ` "toolsId": "3a966e20-9635-4c28-8861-d1b66f79f1de"` + ` },` + ` "dataSources": {` + ` "http": {` + ` "uri": "/sap/bc/z2ui5",` + ` "type": "JSON"` + ` }` + ` },` + ` "crossNavigation": {` + ` "inbounds": {` + ` "z2ui5-display": {` + ` "semanticObject": "z2ui5",` + ` "action": "display",` + ` "title": "",` + ` "signature": {` + ` "parameters": {},` + ` "additionalParameters": "allowed"` + ` }` + ` }` + ` }` + ` }` + ` },` + ` "sap.ui": {` + ` "technology": "UI5",` + ` "icons": {` + ` "icon": "",` + ` "favIcon": "",` + ` "phone": "",` + ` "phone@2": "",` + ` "tablet": "",` + ` "tablet@2": ""` + ` },` + ` "deviceTypes": {` + ` "desktop": true,` + ` "tablet": true,` + ` "phone": true` + ` }` + ` },` + ` "sap.ui5": {` + ` "flexEnabled": false,` + ` "dependencies": {` + ` "minUI5Version": "1.71.0",` + ` "libs": {` + ` "sap.m": {},` + ` "sap.ui.core": {}` + ` }` + ` },` + ` "contentDensities": {` + ` "compact": true,` + ` "cozy": true` + ` },` + ` "services": {` + ` "ShellUIService": {` + ` "factoryName": "sap.ushell.ui5service.ShellUIService",` + ` "lazy": true` + ` }` + ` },` + ` "resources": {` + ` "css": [` + ` {` + ` "uri": "css/style.css"` + ` }` + ` ]` + ` },` + ` "rootView": {` + ` "viewName": "z2ui5.view.App",` + ` "type": "XML",` + ` "id": "App"` + ` }` + ` },` + ` "sap.cloud": {` + ` "public": true,` + ` "service": "z2ui5"` + ` }` + `}` + `` + ``;
+    return result;
   }
 }
 

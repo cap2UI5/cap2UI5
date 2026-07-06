@@ -1,127 +1,53 @@
-/* AUTO-GENERATED scaffolding — abap2UI5 transpile failed; manual port required.
- *
- * Original ABAP source:
- * ====================
- * CLASS z2ui5_cl_demo_app_173 DEFINITION PUBLIC.
- * 
- *   PUBLIC SECTION.
- *     INTERFACES z2ui5_if_app.
- * 
- *     TYPES:
- *       BEGIN OF ty_s_data,
- *         name TYPE string,
- *         date TYPE string,
- *         age  TYPE string,
- *       END OF ty_s_data,
- *       ty_t_data TYPE STANDARD TABLE OF ty_s_data WITH EMPTY KEY.
- * 
- *     TYPES:
- *       BEGIN OF ty_s_layout,
- *         fname   TYPE string,
- *         merge   TYPE string,
- *         visible TYPE string,
- *       END OF ty_s_layout,
- *       ty_t_layout TYPE STANDARD TABLE OF ty_s_layout WITH EMPTY KEY.
- * 
- *     DATA mv_flag TYPE abap_bool. " VALUE abap_true.
- *     DATA mt_layout TYPE ty_t_layout.
- *     DATA mt_data   TYPE ty_t_data.
- * 
- *     METHODS view_display.
- * 
- *   PROTECTED SECTION.
- *     DATA client TYPE REF TO z2ui5_if_client.
- * 
- *   PRIVATE SECTION.
- * ENDCLASS.
- * 
- * 
- * CLASS z2ui5_cl_demo_app_173 IMPLEMENTATION.
- * 
- *   METHOD view_display.
- * 
- *     DATA(view) = z2ui5_cl_xml_view=>factory( ).
- * 
- *     view = view->shell( )->page( id    = `page_main`
- *                                  class = `sapUiContentPadding`
- *              title                     = `abap2UI5 - Sample Templating I`
- *              navbuttonpress            = client->_event_nav_app_leave( )
- *              shownavbutton             = client->check_app_prev_stack( ) ).
- * 
- *     view->table( client->_bind( mt_data )
- *       )->columns(
- *         )->template_repeat( list = `{template>/MT_LAYOUT}`
- *                             var  = `L0`
- *           )->column( mergeduplicates = `{L0>MERGE}`
- *                      visible         = `{L0>VISIBLE}` )->text( `{L0>FNAME}` )->get_parent(
- *         )->get_parent( )->get_parent(
- *         )->items(
- *           )->column_list_item(
- *             )->cells(
- *               )->template_repeat( list = `{template>/MT_LAYOUT}`
- *                                   var  = `L1`
- *                 )->object_identifier( text = `{= '{' + ${L1>FNAME} + '}' }` ).
- * 
- *     view->label( `IF Template (with re-rendering)` ).
- *     view->switch( state  = client->_bind_edit( mv_flag )
- *                   change = client->_event( `CHANGE_FLAG` ) ).
- *     view = view->vbox( ).
- * 
- *     view->template_if( `{template>/XX/MV_FLAG}`
- *       )->template_then(
- *         )->icon( src   = `sap-icon://accept`
- *                  color = `green` )->get_parent(
- *       )->template_else(
- *         )->icon( src   = `sap-icon://decline`
- *                  color = `red` ).
- * 
- *     client->view_display( view->stringify( ) ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD z2ui5_if_app~main.
- * 
- *     me->client = client.
- * 
- *     IF client->check_on_init( ).
- * 
- *       client->_bind( mt_layout ).
- * 
- *       mt_data = VALUE #( ( name = `Theo` date = `01.01.2000` age = `5` )
- *                          ( name = `Lore` date = `01.01.2000` age = `1` ) ).
- * 
- *       mt_layout = VALUE #( ( fname = `NAME` merge = `false` visible = `true` )
- *                            ( fname = `DATE` merge = `false` visible = `true` )
- *                            ( fname = `AGE`  merge = `false` visible = `false` ) ).
- * 
- *       view_display( ).
- * 
- *     ENDIF.
- * 
- *     CASE client->get( )-event.
- *       WHEN `CHANGE_FLAG`.
- * 
- *         view_display( ).
- *     ENDCASE.
- * 
- *   ENDMETHOD.
- * 
- * ENDCLASS.
- */
-
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_173 extends z2ui5_if_app {
+  mv_flag = false;
+  mt_layout = [];
+  mt_data = [];
   client = null;
+
+  view_display() {
+    let view = z2ui5_cl_xml_view.factory();
+    view = view.shell()
+      .page({ id: `page_main`, class: `sapUiContentPadding`, title: `abap2UI5 - Sample Templating I`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    view.table(this.client._bind(this.mt_data))
+      .columns()
+      .template_repeat({ list: `{template>/MT_LAYOUT}`, var: `L0` })
+      .column({ mergeduplicates: `{L0>MERGE}`, visible: `{L0>VISIBLE}` })
+      .text(`{L0>FNAME}`)
+      .get_parent()
+      .get_parent()
+      .get_parent()
+      .items()
+      .column_list_item()
+      .cells()
+      .template_repeat({ list: `{template>/MT_LAYOUT}`, var: `L1` })
+      .object_identifier({ text: `{= '{' + ${L1>FNAME} + '}' }` });
+    view.label(`IF Template (with re-rendering)`);
+    view.switch({ state: this.client._bind_edit(this.mv_flag), change: this.client._event(`CHANGE_FLAG`) });
+    view = view.vbox();
+    view.template_if(`{template>/XX/MV_FLAG}`)
+      .template_then()
+      .icon({ src: `sap-icon://accept`, color: `green` })
+      .get_parent()
+      .template_else()
+      .icon({ src: `sap-icon://decline`, color: `red` });
+    this.client.view_display(view.stringify());
+  }
+
   async main(client) {
     this.client = client;
     if (client.check_on_init()) {
-      const v = z2ui5_cl_xml_view.factory()
-        .Page({ title: "z2ui5_cl_demo_app_173 (TODO: port from abap)" })
-        .Text({ text: "This sample needs to be ported manually from abap2UI5." });
-      client.view_display(v.stringify());
+      client._bind(this.mt_layout);
+      this.mt_data = [{ name: `Theo`, date: `01.01.2000`, age: `5` }, { name: `Lore`, date: `01.01.2000`, age: `1` }];
+      this.mt_layout = [{ fname: `NAME`, merge: `false`, visible: `true` }, { fname: `DATE`, merge: `false`, visible: `true` }, { fname: `AGE`, merge: `false`, visible: `false` }];
+      this.view_display();
+    }
+    switch (client.get().EVENT) {
+      case `CHANGE_FLAG`:
+        this.view_display();
+        break;
     }
   }
 }

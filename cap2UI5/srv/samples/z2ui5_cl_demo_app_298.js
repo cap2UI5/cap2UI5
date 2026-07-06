@@ -1,222 +1,86 @@
-/* AUTO-GENERATED scaffolding — abap2UI5 transpile failed; manual port required.
- *
- * Original ABAP source:
- * ====================
- * CLASS z2ui5_cl_demo_app_298 DEFINITION PUBLIC.
- * 
- *   PUBLIC SECTION.
- *     INTERFACES z2ui5_if_app.
- * 
- *     TYPES:
- *       BEGIN OF ty_product_collection,
- *         product_id TYPE string,
- *         name       TYPE string,
- *       END OF ty_product_collection.
- *     DATA lt_a_products TYPE TABLE OF ty_product_collection.
- *     DATA selectedproducterrorcollection TYPE string.
- *     DATA selectedproductwrnngcollection TYPE string.
- *     DATA selectedproductsccsscollection TYPE string.
- *     DATA selectedproductinforcollection TYPE string.
- * 
- *   PROTECTED SECTION.
- *     DATA client TYPE REF TO z2ui5_if_client.
- * 
- *     METHODS set_data.
- *     METHODS view_display
- *       IMPORTING
- *         client TYPE REF TO z2ui5_if_client.
- *     METHODS on_event
- *       IMPORTING
- *         client TYPE REF TO z2ui5_if_client.
- *     METHODS popover_display
- *       IMPORTING
- *         id TYPE string.
- * 
- *   PRIVATE SECTION.
- * ENDCLASS.
- * 
- * 
- * CLASS z2ui5_cl_demo_app_298 IMPLEMENTATION.
- * 
- *   METHOD view_display.
- * 
- *     DATA(page_01) = z2ui5_cl_xml_view=>factory( )->shell(
- *          )->page(
- *             title          = `abap2UI5 - Sample: Select - Validation states`
- *             navbuttonpress = client->_event_nav_app_leave( )
- *             shownavbutton  = client->check_app_prev_stack( ) ).
- * 
- *     page_01->header_content(
- *        )->button( id = `button_hint_id`
- *            icon      = `sap-icon://hint`
- *            tooltip   = `Sample information`
- *            press     = client->_event( `CLICK_HINT_ICON` ) ).
- * 
- *     page_01->header_content(
- *        )->link(
- *            text   = `UI5 Demo Kit`
- *            target = `_blank`
- *            href   = `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.Select/sample/sap.m.sample.SelectValueState` ).
- * 
- *     page_01->page( showheader = abap_false
- *               )->content(
- *                   )->hbox( class = `sapUiMediumMarginBottom`
- *                       )->label( text = `Error state`
- *                           labelfor   = `errorSelect`
- *                           class      = `sapUiTinyMarginEnd sapUiTinyMarginTop`
- *                       )->select(
- *                           id             = `errorSelect`
- *                           forceselection = abap_true
- *                           selectedkey    = client->_bind( selectedproducterrorcollection )
- *                           valuestate     = `Error`
- *                           valuestatetext = `error value state text`
- *                           items          = client->_bind( lt_a_products )
- *                           )->item( key  = `{PRODUCT_ID}`
- *                                    text = `{NAME}`
- *                       )->get_parent(
- *                   )->get_parent(
- *                   )->hbox( class = `sapUiMediumMarginBottom`
- *                       )->label( text = `Warning state`
- *                           labelfor   = `warningSelect`
- *                           class      = `sapUiTinyMarginEnd sapUiTinyMarginTop`
- *                       )->select(
- *                           id             = `warningSelect`
- *                           forceselection = abap_true
- *                           selectedkey    = client->_bind( selectedproductwrnngcollection )
- *                           valuestate     = `Warning`
- *                           valuestatetext = `This is a Level 1 explanation. The items Lorem and Ipsum are not recommended from the system.`
- *                           items          = client->_bind( lt_a_products )
- *                           )->item( key  = `{PRODUCT_ID}`
- *                                    text = `{NAME}`
- *                       )->get_parent(
- *                   )->get_parent(
- *                   )->hbox( class = `sapUiMediumMarginBottom`
- *                       )->label( text = `Success state`
- *                           labelfor   = `successSelect`
- *                           class      = `sapUiTinyMarginEnd sapUiTinyMarginTop`
- *                       )->select(
- *                           id             = `successSelect`
- *                           forceselection = abap_true
- *                           selectedkey    = client->_bind( selectedproductsccsscollection )
- *                           valuestate     = `Success`
- *                           valuestatetext = `success value state text`
- *                           items          = client->_bind( lt_a_products )
- *                           )->item( key  = `{PRODUCT_ID}`
- *                                    text = `{NAME}`
- *                       )->get_parent(
- *                   )->get_parent(
- *                   )->hbox( class = `sapUiMediumMarginBottom`
- *                       )->label( text = `Information state`
- *                           labelfor   = `informationSelect`
- *                           class      = `sapUiTinyMarginEnd sapUiTinyMarginTop`
- *                       )->select(
- *                           id             = `informationSelect`
- *                           forceselection = abap_true
- *                           selectedkey    = client->_bind( selectedproductinforcollection )
- *                           valuestate     = `Information`
- *                           valuestatetext = `information value state text`
- *                           items          = client->_bind( lt_a_products )
- *                           )->item( key  = `{PRODUCT_ID}`
- *                                    text = `{NAME}`
- *                       )->get_parent(
- *                   )->get_parent(
- *               )->get_parent( ).
- * 
- *     client->view_display( page_01->stringify( ) ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD on_event.
- * 
- *     IF client->check_on_event( `CLICK_HINT_ICON` ).
- *       popover_display( `button_hint_id` ).
- *     ENDIF.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD popover_display.
- * 
- *     DATA(view) = z2ui5_cl_xml_view=>factory_popup( ).
- *     view->quick_view( placement = `Bottom`
- *                       width     = `auto`
- *               )->quick_view_page( pageid      = `sampleInformationId`
- *                                   header      = `Sample information`
- *                                   description = `Visualizes the validation state of the control, for example, Error, Warning and Success.` ).
- * 
- *     client->popover_display(
- *       xml   = view->stringify( )
- *       by_id = id ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD z2ui5_if_app~main.
- * 
- *     me->client = client.
- * 
- *     IF client->check_on_init( ).
- *       view_display( client ).
- *       set_data( ).
- *     ENDIF.
- * 
- *     on_event( client ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD set_data.
- * 
- *     selectedproducterrorcollection = VALUE #( ).
- *     selectedproductwrnngcollection = VALUE #( ).
- *     selectedproductsccsscollection = VALUE #( ).
- *     selectedproductinforcollection = VALUE #( ).
- *     lt_a_products = VALUE #( ).
- * 
- *     selectedproducterrorcollection  = `HT-998`.
- *     selectedproductwrnngcollection  = `HT-999`.
- *     selectedproductsccsscollection  = `HT-1000`.
- *     selectedproductinforcollection  = `HT-1007`.
- * 
- *     " Populate the internal table
- *     lt_a_products = VALUE #(
- *       ( product_id = `HT-998`  name = `Notebook Basic 11` )
- *       ( product_id = `HT-999`  name = `Notebook Basic 13` )
- *       ( product_id = `HT-1000` name = `Notebook Basic 15` )
- *       ( product_id = `HT-1001` name = `Notebook Basic 17` )
- *       ( product_id = `HT-1002` name = `Notebook Basic 18` )
- *       ( product_id = `HT-1003` name = `Notebook Basic 19` )
- *       ( product_id = `HT-1007` name = `ITelO Vault` )
- *       ( product_id = `HT-1008` name = `Notebook Professional 11` )
- *       ( product_id = `HT-1009` name = `Notebook Professional 13` )
- *       ( product_id = `HT-1010` name = `Notebook Professional 15` )
- *       ( product_id = `HT-1011` name = `Notebook Professional 17` )
- *       ( product_id = `HT-1012` name = `Notebook Professional 19` )
- *       ( product_id = `HT-1020` name = `ITelO Vault Net` )
- *       ( product_id = `HT-1021` name = `ITelO Vault SAT` )
- *       ( product_id = `HT-1022` name = `Comfort Easy` )
- *       ( product_id = `HT-1023` name = `Comfort Senior` ) ).
- *     SORT lt_a_products BY name.
- * 
- *   ENDMETHOD.
- * 
- * ENDCLASS.
- */
-
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_298 extends z2ui5_if_app {
+  lt_a_products = [];
+  selectedproducterrorcollection = ``;
+  selectedproductwrnngcollection = ``;
+  selectedproductsccsscollection = ``;
+  selectedproductinforcollection = ``;
   client = null;
+
+  view_display({ client } = {}) {
+    const page_01 = z2ui5_cl_xml_view.factory()
+      .shell()
+      .page({ title: `abap2UI5 - Sample: Select - Validation states`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
+    page_01.header_content()
+      .button({ id: `button_hint_id`, icon: `sap-icon://hint`, tooltip: `Sample information`, press: client._event(`CLICK_HINT_ICON`) });
+    page_01.header_content()
+      .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.Select/sample/sap.m.sample.SelectValueState` });
+    page_01.page({ showheader: false })
+      .content()
+      .hbox({ class: `sapUiMediumMarginBottom` })
+      .label({ text: `Error state`, labelfor: `errorSelect`, class: `sapUiTinyMarginEnd sapUiTinyMarginTop` })
+      .select({ id: `errorSelect`, forceselection: true, selectedkey: client._bind_edit(this.selectedproducterrorcollection), valuestate: `Error`, valuestatetext: `error value state text`, items: client._bind(this.lt_a_products) })
+      .item({ key: `{PRODUCT_ID}`, text: `{NAME}` })
+      .get_parent()
+      .get_parent()
+      .hbox({ class: `sapUiMediumMarginBottom` })
+      .label({ text: `Warning state`, labelfor: `warningSelect`, class: `sapUiTinyMarginEnd sapUiTinyMarginTop` })
+      .select({ id: `warningSelect`, forceselection: true, selectedkey: client._bind_edit(this.selectedproductwrnngcollection), valuestate: `Warning`, valuestatetext: `This is a Level 1 explanation. The items Lorem and Ipsum are not recommended from the system.`, items: client._bind(this.lt_a_products) })
+      .item({ key: `{PRODUCT_ID}`, text: `{NAME}` })
+      .get_parent()
+      .get_parent()
+      .hbox({ class: `sapUiMediumMarginBottom` })
+      .label({ text: `Success state`, labelfor: `successSelect`, class: `sapUiTinyMarginEnd sapUiTinyMarginTop` })
+      .select({ id: `successSelect`, forceselection: true, selectedkey: client._bind_edit(this.selectedproductsccsscollection), valuestate: `Success`, valuestatetext: `success value state text`, items: client._bind(this.lt_a_products) })
+      .item({ key: `{PRODUCT_ID}`, text: `{NAME}` })
+      .get_parent()
+      .get_parent()
+      .hbox({ class: `sapUiMediumMarginBottom` })
+      .label({ text: `Information state`, labelfor: `informationSelect`, class: `sapUiTinyMarginEnd sapUiTinyMarginTop` })
+      .select({ id: `informationSelect`, forceselection: true, selectedkey: client._bind_edit(this.selectedproductinforcollection), valuestate: `Information`, valuestatetext: `information value state text`, items: client._bind(this.lt_a_products) })
+      .item({ key: `{PRODUCT_ID}`, text: `{NAME}` })
+      .get_parent()
+      .get_parent()
+      .get_parent();
+    client.view_display(page_01.stringify());
+  }
+
+  on_event({ client } = {}) {
+    if (client.check_on_event(`CLICK_HINT_ICON`)) {
+      this.popover_display({ id: `button_hint_id` });
+    }
+  }
+
+  popover_display({ id } = {}) {
+    const view = z2ui5_cl_xml_view.factory_popup();
+    view.quick_view({ placement: `Bottom`, width: `auto` })
+      .quick_view_page({ pageid: `sampleInformationId`, header: `Sample information`, description: `Visualizes the validation state of the control, for example, Error, Warning and Success.` });
+    this.client.popover_display(view.stringify(), id);
+  }
+
   async main(client) {
     this.client = client;
     if (client.check_on_init()) {
-      const v = z2ui5_cl_xml_view.factory()
-        .Page({ title: "z2ui5_cl_demo_app_298 (TODO: port from abap)" })
-        .Text({ text: "This sample needs to be ported manually from abap2UI5." });
-      client.view_display(v.stringify());
+      this.view_display({ client: client });
+      this.set_data();
     }
+    this.on_event({ client: client });
+  }
+
+  set_data() {
+    this.selectedproducterrorcollection = {};
+    this.selectedproductwrnngcollection = {};
+    this.selectedproductsccsscollection = {};
+    this.selectedproductinforcollection = {};
+    this.lt_a_products = {};
+    this.selectedproducterrorcollection = `HT-998`;
+    this.selectedproductwrnngcollection = `HT-999`;
+    this.selectedproductsccsscollection = `HT-1000`;
+    this.selectedproductinforcollection = `HT-1007`;
+    this.lt_a_products = [{ product_id: `HT-998`, name: `Notebook Basic 11` }, { product_id: `HT-999`, name: `Notebook Basic 13` }, { product_id: `HT-1000`, name: `Notebook Basic 15` }, { product_id: `HT-1001`, name: `Notebook Basic 17` }, { product_id: `HT-1002`, name: `Notebook Basic 18` }, { product_id: `HT-1003`, name: `Notebook Basic 19` }, { product_id: `HT-1007`, name: `ITelO Vault` }, { product_id: `HT-1008`, name: `Notebook Professional 11` }, { product_id: `HT-1009`, name: `Notebook Professional 13` }, { product_id: `HT-1010`, name: `Notebook Professional 15` }, { product_id: `HT-1011`, name: `Notebook Professional 17` }, { product_id: `HT-1012`, name: `Notebook Professional 19` }, { product_id: `HT-1020`, name: `ITelO Vault Net` }, { product_id: `HT-1021`, name: `ITelO Vault SAT` }, { product_id: `HT-1022`, name: `Comfort Easy` }, { product_id: `HT-1023`, name: `Comfort Senior` }];
+    this.lt_a_products.sort((a, b) => (a.name > b.name ? 1 : a.name < b.name ? -1 : 0));
   }
 }
 

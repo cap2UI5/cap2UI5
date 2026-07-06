@@ -1,161 +1,59 @@
-/* AUTO-GENERATED scaffolding — abap2UI5 transpile failed; manual port required.
- *
- * Original ABAP source:
- * ====================
- * CLASS z2ui5_cl_demo_app_283 DEFINITION PUBLIC.
- * 
- *   PUBLIC SECTION.
- *     INTERFACES z2ui5_if_app.
- * 
- *   PROTECTED SECTION.
- *     DATA client TYPE REF TO z2ui5_if_client.
- * 
- *     METHODS view_display
- *       IMPORTING
- *         client TYPE REF TO z2ui5_if_client.
- *     METHODS on_event
- *       IMPORTING
- *         client TYPE REF TO z2ui5_if_client.
- *     METHODS popover_display
- *       IMPORTING
- *         id TYPE string.
- * 
- *   PRIVATE SECTION.
- * ENDCLASS.
- * 
- * 
- * CLASS z2ui5_cl_demo_app_283 IMPLEMENTATION.
- * 
- *   METHOD view_display.
- * 
- *     " Define the base URL for the server
- *     DATA base_url TYPE string VALUE `https://sapui5.hana.ondemand.com/`.
- * 
- *     DATA(page) = z2ui5_cl_xml_view=>factory( )->shell(
- *          )->page(
- *             title          = `abap2UI5 - Sample: Feed Input`
- *             navbuttonpress = client->_event_nav_app_leave( )
- *             shownavbutton  = client->check_app_prev_stack( ) ).
- * 
- *     page->header_content(
- *        )->button( id = `button_hint_id`
- *            icon      = `sap-icon://hint`
- *            tooltip   = `Sample information`
- *            press     = client->_event( `CLICK_HINT_ICON` ) ).
- * 
- *     page->header_content(
- *        )->link(
- *            text   = `UI5 Demo Kit`
- *            target = `_blank`
- *            href   = base_url && `sdk/#/entity/sap.m.FeedInput/sample/sap.m.sample.FeedInput` ).
- * 
- *     page->label( text  = `Without Icon`
- *                  class = `sapUiSmallMarginTop sapUiTinyMarginBottom` ).
- *     page->feed_input(
- *           post      = client->_event( val = `onPost` t_arg = VALUE #( ( `${$source>/value}` ) ) )
- *            showicon = abap_false ).
- * 
- *     page->label( text  = `With Icon Placeholder`
- *                  class = `sapUiSmallMarginTop sapUiTinyMarginBottom` ).
- *     page->feed_input(
- *            post     = client->_event( val = `onPost` t_arg = VALUE #( ( `${$source>/value}` ) ) )
- *            showicon = abap_true ).
- * 
- *     page->label( text  = `With Icon Placeholder`
- *                  class = `sapUiSmallMarginTop sapUiTinyMarginBottom` ).
- *     page->feed_input(
- *            post     = client->_event( val = `onPost` t_arg = VALUE #( ( `${$source>/value}` ) ) )
- *            showicon = abap_true
- *            icon     = base_url && `test-resources/sap/m/images/george_washington.jpg` ).
- * 
- *     page->label( text  = `Disabled`
- *                  class = `sapUiSmallMarginTop sapUiTinyMarginBottom` ).
- *     page->feed_input(
- *            post     = client->_event( val = `onPost` t_arg = VALUE #( ( `${$source>/value}` ) ) )
- *            enabled  = abap_false
- *            showicon = abap_true
- *            icon     = base_url && `test-resources/sap/m/images/george_washington.jpg` ).
- * 
- *     page->label( text  = `Rows Set to 5`
- *                  class = `sapUiSmallMarginTop sapUiTinyMarginBottom` ).
- *     page->feed_input(
- *            post = client->_event( val = `onPost` t_arg = VALUE #( ( `${$source>/value}` ) ) )
- *            rows = `5` ).
- * 
- *     page->label( text  = `With Exceeded Text`
- *                  class = `sapUiSmallMarginTop sapUiTinyMarginBottom` ).
- *     page->feed_input(
- *            post             = client->_event( val = `onPost` t_arg = VALUE #( ( `${$source>/value}` ) ) )
- *            maxlength        = `20`
- *            showexceededtext = abap_true ).
- * 
- *     page->label( text  = `With Growing`
- *                  class = `sapUiSmallMarginTop sapUiTinyMarginBottom` ).
- *     page->feed_input(
- *            post    = client->_event( val = `onPost` t_arg = VALUE #( ( `${$source>/value}` ) ) )
- *            growing = abap_true ).
- * 
- *     client->view_display( page->stringify( ) ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD on_event.
- * 
- *     CASE client->get( )-event.
- *       WHEN `CLICK_HINT_ICON`.
- *         popover_display( `button_hint_id` ).
- *       WHEN `onPost`.
- *         client->message_toast_display( `Posted new feed entry: ` && client->get_event_arg( 1 ) ).
- *     ENDCASE.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD popover_display.
- * 
- *     DATA(view) = z2ui5_cl_xml_view=>factory_popup( ).
- *     view->quick_view( placement = `Bottom`
- *                       width     = `auto`
- *               )->quick_view_page( pageid      = `sampleInformationId`
- *                                   header      = `Sample information`
- *                                   description = `This sample shows a standalone feed input with different settings.` ).
- * 
- *     client->popover_display(
- *       xml   = view->stringify( )
- *       by_id = id ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD z2ui5_if_app~main.
- * 
- *     me->client = client.
- * 
- *     IF client->check_on_init( ).
- *       view_display( client ).
- *     ENDIF.
- * 
- *     on_event( client ).
- * 
- *   ENDMETHOD.
- * 
- * ENDCLASS.
- */
-
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_283 extends z2ui5_if_app {
   client = null;
+
+  view_display({ client } = {}) {
+    let base_url = ``;
+    const page = z2ui5_cl_xml_view.factory()
+      .shell()
+      .page({ title: `abap2UI5 - Sample: Feed Input`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
+    page.header_content()
+      .button({ id: `button_hint_id`, icon: `sap-icon://hint`, tooltip: `Sample information`, press: client._event(`CLICK_HINT_ICON`) });
+    page.header_content()
+      .link({ text: `UI5 Demo Kit`, target: `_blank`, href: base_url + `sdk/#/entity/sap.m.FeedInput/sample/sap.m.sample.FeedInput` });
+    page.label({ text: `Without Icon`, class: `sapUiSmallMarginTop sapUiTinyMarginBottom` });
+    page.feed_input({ post: client._event(`onPost`, [`${$source>/value}`]), showicon: false });
+    page.label({ text: `With Icon Placeholder`, class: `sapUiSmallMarginTop sapUiTinyMarginBottom` });
+    page.feed_input({ post: client._event(`onPost`, [`${$source>/value}`]), showicon: true });
+    page.label({ text: `With Icon Placeholder`, class: `sapUiSmallMarginTop sapUiTinyMarginBottom` });
+    page.feed_input({ post: client._event(`onPost`, [`${$source>/value}`]), showicon: true, icon: base_url + `test-resources/sap/m/images/george_washington.jpg` });
+    page.label({ text: `Disabled`, class: `sapUiSmallMarginTop sapUiTinyMarginBottom` });
+    page.feed_input({ post: client._event(`onPost`, [`${$source>/value}`]), enabled: false, showicon: true, icon: base_url + `test-resources/sap/m/images/george_washington.jpg` });
+    page.label({ text: `Rows Set to 5`, class: `sapUiSmallMarginTop sapUiTinyMarginBottom` });
+    page.feed_input({ post: client._event(`onPost`, [`${$source>/value}`]), rows: `5` });
+    page.label({ text: `With Exceeded Text`, class: `sapUiSmallMarginTop sapUiTinyMarginBottom` });
+    page.feed_input({ post: client._event(`onPost`, [`${$source>/value}`]), maxlength: `20`, showexceededtext: true });
+    page.label({ text: `With Growing`, class: `sapUiSmallMarginTop sapUiTinyMarginBottom` });
+    page.feed_input({ post: client._event(`onPost`, [`${$source>/value}`]), growing: true });
+    client.view_display(page.stringify());
+  }
+
+  on_event({ client } = {}) {
+    switch (client.get().EVENT) {
+      case `CLICK_HINT_ICON`:
+        this.popover_display({ id: `button_hint_id` });
+        break;
+      case `onPost`:
+        client.message_toast_display(`Posted new feed entry: ${client.get_event_arg(1)}`);
+        break;
+    }
+  }
+
+  popover_display({ id } = {}) {
+    const view = z2ui5_cl_xml_view.factory_popup();
+    view.quick_view({ placement: `Bottom`, width: `auto` })
+      .quick_view_page({ pageid: `sampleInformationId`, header: `Sample information`, description: `This sample shows a standalone feed input with different settings.` });
+    this.client.popover_display(view.stringify(), id);
+  }
+
   async main(client) {
     this.client = client;
     if (client.check_on_init()) {
-      const v = z2ui5_cl_xml_view.factory()
-        .Page({ title: "z2ui5_cl_demo_app_283 (TODO: port from abap)" })
-        .Text({ text: "This sample needs to be ported manually from abap2UI5." });
-      client.view_display(v.stringify());
+      this.view_display({ client: client });
     }
+    this.on_event({ client: client });
   }
 }
 

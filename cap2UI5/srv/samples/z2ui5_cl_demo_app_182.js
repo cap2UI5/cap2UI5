@@ -1,279 +1,90 @@
-/* AUTO-GENERATED scaffolding — abap2UI5 transpile failed; manual port required.
- *
- * Original ABAP source:
- * ====================
- * CLASS z2ui5_cl_demo_app_182 DEFINITION PUBLIC.
- * 
- *   PUBLIC SECTION.
- *     INTERFACES z2ui5_if_app.
- * 
- *     TYPES: BEGIN OF t_attributes3,
- *              label TYPE i,
- *              value TYPE string,
- *            END OF t_attributes3.
- *     TYPES tt_attributes3 TYPE STANDARD TABLE OF t_attributes3 WITH DEFAULT KEY.
- *     TYPES: BEGIN OF t_nodes2,
- *              id         TYPE string,
- *              title      TYPE string,
- *              src        TYPE string,
- *              attributes TYPE tt_attributes3,
- *              team       TYPE i,
- *              supervisor TYPE string,
- *              location   TYPE string,
- *              position   TYPE string,
- *              email      TYPE string,
- *              phone      TYPE string,
- *            END OF t_nodes2.
- *     TYPES: BEGIN OF t_lines4,
- *              from TYPE string,
- *              to   TYPE string,
- *            END OF t_lines4.
- *     TYPES tt_nodes2 TYPE STANDARD TABLE OF t_nodes2 WITH DEFAULT KEY.
- *     TYPES tt_lines4 TYPE STANDARD TABLE OF t_lines4 WITH DEFAULT KEY.
- *     TYPES: BEGIN OF t_json1,
- *              nodes TYPE tt_nodes2,
- *              lines TYPE tt_lines4,
- *            END OF t_json1.
- *     DATA mt_data TYPE t_json1.
- * 
- *     METHODS on_event.
- *     METHODS view_display.
- *     METHODS detail_popover
- *       IMPORTING
- *         id   TYPE string
- *         node TYPE t_nodes2.
- * 
- *   PROTECTED SECTION.
- *     DATA client TYPE REF TO z2ui5_if_client.
- * 
- *   PRIVATE SECTION.
- * ENDCLASS.
- * 
- * 
- * CLASS z2ui5_cl_demo_app_182 IMPLEMENTATION.
- * 
- *   METHOD detail_popover.
- * 
- *     DATA(view) = z2ui5_cl_xml_view=>factory_popup( ).
- *     DATA(qv) = view->quick_view( placement = `Left`
- *               )->quick_view_page(
- *                                   header      = `Employee`
- *                                   title       = node-title
- *                                   description = node-position
- *                 )->get( )->quick_view_page_avatar( )->avatar( src          = node-src
- *                                                               displayshape = `Square` )->get_parent(
- *                 )->quick_view_group( heading = `Contact Detail`
- *                   )->quick_view_group_element( label = `Location`
- *                                                value = node-location )->get_parent(
- *                   )->quick_view_group_element( label = `Mobile`
- *                                                value = node-phone
- *                                                type  = `phone` )->get_parent(
- *                   )->quick_view_group_element( label        = `Email`
- *                                                value        = node-email
- *                                                type         = `email`
- *                                                emailsubject = `Contact` && node-id ).
- * 
- *     IF node-team IS NOT INITIAL.
- *       qv = qv->get_parent( )->get_parent(
- *         )->quick_view_group( heading = `Team`
- *            )->quick_view_group_element( label = `Size`
- *                                         value = CONV string( node-team ) ).
- *     ENDIF.
- * 
- *     client->popover_display(
- *       xml   = view->stringify( )
- *       by_id = id ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD on_event.
- * 
- *     CASE client->get( )-event.
- *       WHEN `LINE_PRESS`.
- *         client->message_toast_display( `LINE_PRESSED` ).
- * 
- *       WHEN `DETAIL_POPOVER`.
- *         DATA(lt_arg) = client->get( )-t_event_arg.
- * 
- *         READ TABLE mt_data-nodes INTO DATA(ls_node) WITH KEY id = lt_arg[ 2 ].
- * 
- *         detail_popover( id   = lt_arg[ 1 ]
- *                         node = ls_node ).
- *     ENDCASE.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD view_display.
- * 
- *     DATA(view) = z2ui5_cl_xml_view=>factory( ).
- *     DATA(page) = view->page(
- *                     title          = `abap2UI5 - Network Graph - Org Tree`
- *                     navbuttonpress = client->_event_nav_app_leave( )
- *                     shownavbutton  = client->check_app_prev_stack( ) ).
- * 
- *     DATA(graph) = page->network_graph( enablewheelzoom = abap_false
- *                                        orientation     = `TopBottom`
- *                                        nodes           = client->_bind( mt_data-nodes )
- *                                        lines           = client->_bind( mt_data-lines )
- *                                        layout          = `Layered`
- *                                        searchsuggest   = `suggest`
- *                                        search          = `search`
- *                                        id              = `graph`
- *                                      )->get( )->layout_algorithm( )->layered_layout( mergeedges    = abap_true
- *                                                                                      nodeplacement = `Simple`
- *                                                                                      nodespacing   = `40`
- *                                      )->get_parent(
- *                                      )->get_parent(
- *                                   )->nodes( `networkgraph`
- *                                     )->node( icon                  = `sap-icon://action-settings`
- *                                              key                   = `{ID}`
- *                                              description           = `{TITLE}`
- *                                              title                 = `{TITLE}`
- *                                              width                 = `90`
- *                                              collapsed             = `{COLLAPSED}`
- *                                              attributes            = `{ATTRIBUTES}`
- *                                              showactionlinksbutton = abap_false
- *                                              showdetailbutton      = abap_false
- *                                              descriptionlinesize   = `0`
- *                                              shape                 = `Box`
- * *                                            )->get( )->custom_data( ns = `networkgraph` )->core_custom_data( key = `supervisor` value = `{SUPERVISOR}`
- * *                                                                                        )->core_custom_data( key = `team` value = `{TEAM}`
- * *                                                                                        )->core_custom_data( key = `location` value = `{LOCATION}`
- * *                                                                                        )->core_custom_data( key = `position` value = `{POSITION}`
- * *                                                                                        )->core_custom_data( key = `team` value = `{TEAM}`
- * *                                                                                        )->core_custom_data( key = `email` value = `{EMAIL}`
- * *                                                                                        )->core_custom_data( key = `phone` value = `{PHONE}`
- * *                                           )->get_parent(
- * *                                           )->get( )->get_parent( )->get_parent( )->attributes( ns = `networkgraph`
- *                                            )->get( )->attributes( `networkgraph`
- *                                             )->element_attribute( label = `{LABEL}`
- *                                                                   value = `{VALUE}`
- *                                            )->get_parent(
- *                                            )->get_parent(
- *                                            )->get( )->get_parent( )->get_parent( )->action_buttons(
- *                                             )->action_button( "id = `{ID}`
- *                                                               position = `Left`
- *                                                               title    = `Detail`
- *                                                               icon     = `sap-icon://employee`
- *                                                               press    = client->_event( val = `DETAIL_POPOVER` t_arg = VALUE #( ( `${$source>/id}` )
- *                                                                                                                               ( `${ID}` )
- * *                                                                                                                              ( `${TEAM}` )
- * *                                                                                                                              ( `${LOCATION}` )
- * *                                                                                                                              ( `${POSITION}` )
- * *                                                                                                                              ( `${EMAIL}` )
- * *                                                                                                                              ( `${PHONE}` )
- *                                                                                                                              ) )
- *                                            )->get_parent(
- *                                            )->get_parent(
- *                                            )->get( )->get_parent( )->get_parent( )->_generic( ns   = `networkgraph`
- *                                                                                               name = `image`
- *                                             )->node_image( src    = `{SRC}`
- *                                                            width  = `80`
- *                                                            height = `100`
- *                                                           )->get_parent(
- *                                                        )->get_parent(
- *                                                 )->get_parent(
- *                                           )->get_parent(
- *                                           )->lines(
- *                                             )->line( from             = `{FROM}`
- *                                                      to               = `{TO}`
- *                                                      arroworientation = `None`
- *                                                      press            = client->_event( `LINE_PRESS` ) ).
- * 
- *     client->view_display( view->stringify( ) ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD z2ui5_if_app~main.
- * 
- *     me->client = client.
- * 
- *     IF client->check_on_init( ).
- * 
- *       mt_data = VALUE #( nodes             = VALUE #( ( id = `Dinter`
- *                                             title          = `Sophie Dinter`
- *                                             src            = `https://ui5.sap.com/test-resources/sap/suite/ui/commons/demokit/images/people/female_IngallsB.jpg`
- *                                             attributes     = VALUE #( ( label = 35 value = `` ) )
- *                                             team           = 13
- *                                             location       = `Walldorf`
- *                                             position       = `lobal Solutions Manager`
- *                                             email          = `sophie.dinter@example.com`
- *                                             phone          = `+000 423 230 000`
- *                                           )
- *                                           ( id         = `Ninsei`
- *                                             title      = `Yamasaki Ninsei`
- *                                             src        = `https://ui5.sap.com/test-resources/sap/suite/ui/commons/demokit/images/people/male_GordonR.jpg`
- *                                             attributes = VALUE #( ( label = 9 value = `` ) )
- *                                             supervisor = `Dinter`
- *                                             team       = 9
- *                                             location   = `Walldorf`
- *                                             position   = `Lead Markets Manage`
- *                                             email      = `yamasaki.ninsei@example.com`
- *                                             phone      = `+000 423 230 002`
- *                                          )
- *                                          ( id         = `Mills`
- *                                            title      = `Henry Mills`
- *                                            src        = `https://ui5.sap.com/test-resources/sap/suite/ui/commons/demokit/images/people/male_MillerM.jpg`
- *                                            attributes = VALUE #( ( label = 4 value = `` ) )
- *                                            supervisor = `Ninsei`
- *                                            team       = 4
- *                                            location   = `Praha`
- *                                            position   = `Sales Manager`
- *                                            email      = `henry.mills@example.com`
- *                                            phone      = `+000 423 232 003`
- *                                         )
- *                                         ( id         = `Polak`
- *                                           title      = `Adam Polak`
- *                                           src        = `https://ui5.sap.com/test-resources/sap/suite/ui/commons/demokit/images/people/male_PlatteR.jpg`
- *                                           supervisor = `Mills`
- *                                           location   = `Praha`
- *                                           position   = `Marketing Specialist`
- *                                           email      = `adam.polak@example.com`
- *                                           phone      = `+000 423 232 004`
- *                                        )
- *                                        ( id          = `Sykorova`
- *                                           title      = `Vlasta Sykorova`
- *                                           src        = `https://ui5.sap.com/test-resources/sap/suite/ui/commons/demokit/images/people/female_SpringS.jpg`
- *                                           supervisor = `Mills`
- *                                           location   = `Praha`
- *                                           position   = `Human Assurance Officer`
- *                                           email      = `vlasta.sykorova@example.com`
- *                                           phone      = `+000 423 232 005`
- *                                        )
- *                                      )
- *                                      lines = VALUE #( ( from = `Dinter` to = `Ninsei` )
- *                                                       ( from = `Ninsei` to = `Mills` )
- *                                                       ( from = `Mills` to = `Polak` )
- *                                                       ( from = `Mills` to = `Sykorova` )
- *                                     ) ).
- * 
- *       view_display( ).
- * 
- *     ENDIF.
- * 
- *     on_event( ).
- * 
- *   ENDMETHOD.
- * 
- * ENDCLASS.
- */
-
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_182 extends z2ui5_if_app {
+  mt_data = {};
   client = null;
+
+  detail_popover({ id, node } = {}) {
+    const view = z2ui5_cl_xml_view.factory_popup();
+    let qv = view.quick_view({ placement: `Left` })
+      .quick_view_page({ header: `Employee`, title: node.title, description: node.position })
+      .get()
+      .quick_view_page_avatar()
+      .avatar({ src: node.src, displayshape: `Square` })
+      .get_parent()
+      .quick_view_group({ heading: `Contact Detail` })
+      .quick_view_group_element({ label: `Location`, value: node.location })
+      .get_parent()
+      .quick_view_group_element({ label: `Mobile`, value: node.phone, type: `phone` })
+      .get_parent()
+      .quick_view_group_element({ label: `Email`, value: node.email, type: `email`, emailsubject: `Contact${node.id}` });
+    if (node.team) {
+      qv = qv.get_parent()
+        .get_parent()
+        .quick_view_group({ heading: `Team` })
+        .quick_view_group_element({ label: `Size`, value: (node.team) });
+    }
+    this.client.popover_display(view.stringify(), id);
+  }
+
+  on_event() {
+    switch (this.client.get().EVENT) {
+      case `LINE_PRESS`:
+        this.client.message_toast_display(`LINE_PRESSED`);
+        break;
+      case `DETAIL_POPOVER`:
+        const lt_arg = this.client.get().T_EVENT_ARG;
+        // TODO(abap2js): READ TABLE mt_data-nodes INTO DATA(ls_node) WITH KEY id = lt_arg[ 2 ].
+        this.detail_popover({ id: lt_arg[(1) - 1], node: ls_node });
+        break;
+    }
+  }
+
+  view_display() {
+    const view = z2ui5_cl_xml_view.factory();
+    const page = view.page({ title: `abap2UI5 - Network Graph - Org Tree`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    const graph = page.network_graph({ enablewheelzoom: false, orientation: `TopBottom`, nodes: this.client._bind(this.mt_data.nodes), lines: this.client._bind(this.mt_data.lines), layout: `Layered`, searchsuggest: `suggest`, search: `search`, id: `graph` })
+      .get()
+      .layout_algorithm()
+      .layered_layout({ mergeedges: true, nodeplacement: `Simple`, nodespacing: `40` })
+      .get_parent()
+      .get_parent()
+      .nodes(`networkgraph`)
+      .node({ icon: `sap-icon://action-settings`, key: `{ID}`, description: `{TITLE}`, title: `{TITLE}`, width: `90`, collapsed: `{COLLAPSED}`, attributes: `{ATTRIBUTES}`, showactionlinksbutton: false, showdetailbutton: false, descriptionlinesize: `0`, shape: `Box` })
+      .get()
+      .attributes(`networkgraph`)
+      .element_attribute({ label: `{LABEL}`, value: `{VALUE}` })
+      .get_parent()
+      .get_parent()
+      .get()
+      .get_parent()
+      .get_parent()
+      .action_buttons()
+      .action_button({ position: `Left`, title: `Detail`, icon: `sap-icon://employee`, press: this.client._event(`DETAIL_POPOVER`, [`${$source>/id}`, `${ID}`]) })
+      .get_parent()
+      .get_parent()
+      .get()
+      .get_parent()
+      .get_parent()
+      ._generic({ ns: `networkgraph`, name: `image` })
+      .node_image({ src: `{SRC}`, width: `80`, height: `100` })
+      .get_parent()
+      .get_parent()
+      .get_parent()
+      .get_parent()
+      .lines()
+      .line({ from: `{FROM}`, to: `{TO}`, arroworientation: `None`, press: this.client._event(`LINE_PRESS`) });
+    this.client.view_display(view.stringify());
+  }
+
   async main(client) {
     this.client = client;
     if (client.check_on_init()) {
-      const v = z2ui5_cl_xml_view.factory()
-        .Page({ title: "z2ui5_cl_demo_app_182 (TODO: port from abap)" })
-        .Text({ text: "This sample needs to be ported manually from abap2UI5." });
-      client.view_display(v.stringify());
+      this.mt_data = /* TODO(abap2js): VALUE FOR/BASE */ [];
+      this.view_display();
     }
+    this.on_event();
   }
 }
 

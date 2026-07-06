@@ -1,138 +1,34 @@
-/* AUTO-GENERATED scaffolding — abap2UI5 transpile failed; manual port required.
- *
- * Original ABAP source:
- * ====================
- * CLASS z2ui5_cl_demo_app_123 DEFINITION PUBLIC.
- * 
- *   PUBLIC SECTION.
- *     INTERFACES z2ui5_if_app.
- * 
- *     TYPES:
- *       BEGIN OF ty_spot,
- *         tooltip       TYPE string,
- *         type          TYPE string,
- *         pos           TYPE string,
- *         scale         TYPE string,
- *         contentoffset TYPE string,
- *         key           TYPE string,
- *         icon          TYPE string,
- *       END OF ty_spot.
- * 
- *     TYPES:
- *       BEGIN OF ty_route,
- *         position    TYPE string,
- *         routetype   TYPE string,
- *         linedash    TYPE string,
- *         color       TYPE string,
- *         colorborder TYPE string,
- *         linewidth   TYPE string,
- *       END OF ty_route.
- * 
- *     TYPES: BEGIN OF ty_s_legend,
- *              text  TYPE string,
- *              color TYPE string,
- *            END OF ty_s_legend.
- * 
- *     DATA mt_spot TYPE TABLE OF ty_spot.
- * 
- *     DATA
- *       mt_route TYPE TABLE OF ty_route.
- * 
- *     DATA mt_legend TYPE TABLE OF ty_s_legend.
- *   PROTECTED SECTION.
- *   PRIVATE SECTION.
- * ENDCLASS.
- * 
- * 
- * CLASS z2ui5_cl_demo_app_123 IMPLEMENTATION.
- * 
- *   METHOD z2ui5_if_app~main.
- * 
- *     IF client->check_on_init( ).
- * 
- *       mt_spot = VALUE #(
- *         ( pos = `9.98336;53.55024;0`         contentoffset = `0;-6` scale = `1;1;1` key = `Hamburg`     tooltip = `Hamburg`     type = `Default` icon = `factory` )
- *         ( pos = `11.5820;48.1351;0`          contentoffset = `0;-5` scale = `1;1;1` key = `Munich`      tooltip = `Munich`      type = `Default` icon = `factory` )
- *         ( pos = `8.683340000;50.112000000;0` contentoffset = `0;-6` scale = `1;1;1` key = `Frankfurt`   tooltip = `Frankfurt`   type = `Default` icon = `factory` ) ).
- * 
- *       mt_route = VALUE #(
- *         (  position = `2.3522219;48.856614;0; -74.0059731;40.7143528;0`   routetype = `Geodesic` linedash = `10;5` color = `92,186,230` colorborder = `rgb(255,255,255)` linewidth = `25` ) ).
- * 
- *       mt_legend = VALUE #(
- *         (   text = `Dashed flight route` color = `rgb(92,186,230)` )
- *         (   text = `Flight route` color = `rgb(92,186,35)` ) ).
- *     ENDIF.
- * 
- *     DATA(view) = z2ui5_cl_xml_view=>factory( ).
- *     DATA(page) = view->shell(
- *             )->page(
- *                     title          = `abap2UI5 - Map Container`
- *                     navbuttonpress = client->_event_nav_app_leave( )
- *                     shownavbutton  = client->check_app_prev_stack( ) ).
- * 
- *     DATA(map) = page->map_container( autoadjustheight = abap_true
- *          )->content( `vk`
- *              )->container_content(
- *                title = `Analytic Map`
- *                icon  = `sap-icon://geographic-bubble-chart`
- *                  )->content( `vk`
- *                      )->analytic_map(
- *                        initialposition = `9.933573;50;0`
- *                        initialzoom     = `6` ).
- * 
- *     map->vos(
- *       )->spots( client->_bind( mt_spot )
- *       )->spot(
- *         position      = `{POS}`
- *         contentoffset = `{CONTENTOFFSET}`
- *         type          = `{TYPE}`
- *         scale         = `{SCALE}`
- *         tooltip       = `{TOOLTIP}` ).
- * 
- *     map->routes( client->_bind( mt_route ) )->route(
- *       position      = `{POSITION}`
- *         routetype   = `{ROUTETYPE}`
- *         linedash    = `{LINEDASH}`
- *         color       = `{COLOR}`
- *         colorborder = `{COLORBORDER}`
- *       linewidth     = `{LINEWIDTH}`
- * *      RECEIVING
- * *        result    =
- *       ).
- * 
- *     map->legend_area( )->legend(
- * *      EXPORTING
- * *        id      =
- *         items   = client->_bind( mt_legend )
- *         caption = `Legend`
- * *      RECEIVING
- * *        result  =
- *       )->legenditem(
- *       text    = `{TEXT}`
- *         color = `{COLOR}`
- * *      RECEIVING
- * *        result =
- *       ).
- *     client->view_display( page->stringify( ) ).
- * 
- *   ENDMETHOD.
- * 
- * ENDCLASS.
- */
-
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_123 extends z2ui5_if_app {
-  client = null;
+  mt_spot = [];
+  mt_route = [];
+  mt_legend = [];
+
   async main(client) {
-    this.client = client;
     if (client.check_on_init()) {
-      const v = z2ui5_cl_xml_view.factory()
-        .Page({ title: "z2ui5_cl_demo_app_123 (TODO: port from abap)" })
-        .Text({ text: "This sample needs to be ported manually from abap2UI5." });
-      client.view_display(v.stringify());
+      this.mt_spot = [{ pos: `9.98336;53.55024;0`, contentoffset: `0;-6`, scale: `1;1;1`, key: `Hamburg`, tooltip: `Hamburg`, type: `Default`, icon: `factory` }, { pos: `11.5820;48.1351;0`, contentoffset: `0;-5`, scale: `1;1;1`, key: `Munich`, tooltip: `Munich`, type: `Default`, icon: `factory` }, { pos: `8.683340000;50.112000000;0`, contentoffset: `0;-6`, scale: `1;1;1`, key: `Frankfurt`, tooltip: `Frankfurt`, type: `Default`, icon: `factory` }];
+      this.mt_route = [{ position: `2.3522219;48.856614;0; -74.0059731;40.7143528;0`, routetype: `Geodesic`, linedash: `10;5`, color: `92,186,230`, colorborder: `rgb(255,255,255)`, linewidth: `25` }];
+      this.mt_legend = [{ text: `Dashed flight route`, color: `rgb(92,186,230)` }, { text: `Flight route`, color: `rgb(92,186,35)` }];
     }
+    const view = z2ui5_cl_xml_view.factory();
+    const page = view.shell()
+      .page({ title: `abap2UI5 - Map Container`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
+    const map = page.map_container({ autoadjustheight: true })
+      .content(`vk`)
+      .container_content({ title: `Analytic Map`, icon: `sap-icon://geographic-bubble-chart` })
+      .content(`vk`)
+      .analytic_map({ initialposition: `9.933573;50;0`, initialzoom: `6` });
+    map.vos()
+      .spots(client._bind(this.mt_spot))
+      .spot({ position: `{POS}`, contentoffset: `{CONTENTOFFSET}`, type: `{TYPE}`, scale: `{SCALE}`, tooltip: `{TOOLTIP}` });
+    map.routes(client._bind(this.mt_route))
+      .route({ position: `{POSITION}`, routetype: `{ROUTETYPE}`, linedash: `{LINEDASH}`, color: `{COLOR}`, colorborder: `{COLORBORDER}`, linewidth: `{LINEWIDTH}` });
+    map.legend_area()
+      .legend({ items: client._bind(this.mt_legend), caption: `Legend` })
+      .legenditem({ text: `{TEXT}`, color: `{COLOR}` });
+    client.view_display(page.stringify());
   }
 }
 

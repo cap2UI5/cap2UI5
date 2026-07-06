@@ -1,154 +1,68 @@
-/* AUTO-GENERATED scaffolding — abap2UI5 transpile failed; manual port required.
- *
- * Original ABAP source:
- * ====================
- * CLASS z2ui5_cl_demo_app_026 DEFINITION PUBLIC.
- * 
- *   PUBLIC SECTION.
- *     INTERFACES z2ui5_if_app.
- * 
- *     DATA product   TYPE string.
- *     DATA quantity  TYPE string.
- *     DATA placement TYPE string.
- * 
- *   PROTECTED SECTION.
- *     DATA client TYPE REF TO z2ui5_if_client.
- * 
- *     METHODS popover_display
- *       IMPORTING
- *         id TYPE string.
- *     METHODS view_display.
- * 
- *   PRIVATE SECTION.
- * ENDCLASS.
- * 
- * 
- * CLASS z2ui5_cl_demo_app_026 IMPLEMENTATION.
- * 
- *   METHOD z2ui5_if_app~main.
- * 
- *     me->client = client.
- * 
- *     IF client->check_on_init( ).
- * 
- *       placement = `Left`.
- *       product   = `tomato`.
- *       quantity  = `500`.
- * 
- *       view_display( ).
- * 
- *     ELSEIF client->check_on_event( `POPOVER` ).
- *       popover_display( `TEST` ).
- * 
- *     ELSEIF client->check_on_event( `BUTTON_CONFIRM` ).
- * 
- *       client->message_toast_display( `confirm` ).
- *       client->popover_destroy( ).
- * 
- *     ELSEIF client->check_on_event( `BUTTON_CANCEL` ).
- * 
- *       client->message_toast_display( `cancel` ).
- *       client->popover_destroy( ).
- * 
- *     ENDIF.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD popover_display.
- * 
- *     DATA(view) = z2ui5_cl_xml_view=>factory_popup( ).
- *     view->popover(
- *             title     = `Popover Title`
- *             placement = placement
- *         )->footer(
- *         )->overflow_toolbar(
- *             )->toolbar_spacer(
- *             )->button(
- *                 text  = `Cancel`
- *                 press = client->_event( `BUTTON_CANCEL` )
- *             )->button(
- *                 text  = `Confirm`
- *                 press = client->_event( `BUTTON_CONFIRM` )
- *                 type  = `Emphasized`
- *         )->get_parent( )->get_parent(
- *         )->text( `make an input here:`
- *         )->input( `abcd` ).
- * 
- *     client->popover_display(
- *         xml   = view->stringify( )
- *         by_id = id ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD view_display.
- * 
- *     DATA(view) = z2ui5_cl_xml_view=>factory( ).
- *     view->shell(
- *         )->page(
- *             title          = `abap2UI5 - Popover Examples`
- *             navbuttonpress = client->_event_nav_app_leave( )
- *             shownavbutton  = client->check_app_prev_stack( )
- *         )->simple_form( `Popover`
- *         )->content( `form`
- *         )->title( `Input`
- *         )->label( `Link`
- *         )->link(
- *             text = `Documentation UI5 Popover Control`
- *             href = `https://openui5.hana.ondemand.com/entity/sap.m.Popover`
- *         )->label( `placement`
- *         )->segmented_button( client->_bind_edit( placement )
- *             )->items(
- *             )->segmented_button_item(
- *                 key  = `Left`
- *                 icon = `sap-icon://add-favorite`
- *                 text = `Left`
- *             )->segmented_button_item(
- *                 key  = `Top`
- *                 icon = `sap-icon://accept`
- *                 text = `Top`
- *             )->segmented_button_item(
- *                 key  = `Bottom`
- *                 icon = `sap-icon://accept`
- *                 text = `Bottom`
- *             )->segmented_button_item(
- *                 key  = `Right`
- *                 icon = `sap-icon://attachment`
- *                 text = `Right`
- *         )->get_parent( )->get_parent(
- *         )->label( `popover`
- *         )->button(
- *             text  = `show`
- *             press = client->_event( `POPOVER` )
- *             id    = `TEST`
- *         )->button(
- *             text  = `cancel`
- *             press = client->_event( `POPOVER` )
- *         )->button(
- *             text  = `post`
- *             press = client->_event( `POPOVER` ) ).
- * 
- *     client->view_display( view->stringify( ) ).
- * 
- *   ENDMETHOD.
- * 
- * ENDCLASS.
- */
-
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_026 extends z2ui5_if_app {
+  product = ``;
+  quantity = ``;
+  placement = ``;
   client = null;
+
   async main(client) {
     this.client = client;
     if (client.check_on_init()) {
-      const v = z2ui5_cl_xml_view.factory()
-        .Page({ title: "z2ui5_cl_demo_app_026 (TODO: port from abap)" })
-        .Text({ text: "This sample needs to be ported manually from abap2UI5." });
-      client.view_display(v.stringify());
+      this.placement = `Left`;
+      this.product = `tomato`;
+      this.quantity = `500`;
+      this.view_display();
+    } else if (client.check_on_event(`POPOVER`)) {
+      this.popover_display({ id: `TEST` });
+    } else if (client.check_on_event(`BUTTON_CONFIRM`)) {
+      client.message_toast_display(`confirm`);
+      client.popover_destroy();
+    } else if (client.check_on_event(`BUTTON_CANCEL`)) {
+      client.message_toast_display(`cancel`);
+      client.popover_destroy();
     }
+  }
+
+  popover_display({ id } = {}) {
+    const view = z2ui5_cl_xml_view.factory_popup();
+    view.popover({ title: `Popover Title`, placement: this.placement })
+      .footer()
+      .overflow_toolbar()
+      .toolbar_spacer()
+      .button({ text: `Cancel`, press: this.client._event(`BUTTON_CANCEL`) })
+      .button({ text: `Confirm`, press: this.client._event(`BUTTON_CONFIRM`), type: `Emphasized` })
+      .get_parent()
+      .get_parent()
+      .text(`make an input here:`)
+      .input(`abcd`);
+    this.client.popover_display(view.stringify(), id);
+  }
+
+  view_display() {
+    const view = z2ui5_cl_xml_view.factory();
+    view.shell()
+      .page({ title: `abap2UI5 - Popover Examples`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() })
+      .simple_form(`Popover`)
+      .content(`form`)
+      .title(`Input`)
+      .label(`Link`)
+      .link({ text: `Documentation UI5 Popover Control`, href: `https://openui5.hana.ondemand.com/entity/sap.m.Popover` })
+      .label(`placement`)
+      .segmented_button(this.client._bind_edit(this.placement))
+      .items()
+      .segmented_button_item({ key: `Left`, icon: `sap-icon://add-favorite`, text: `Left` })
+      .segmented_button_item({ key: `Top`, icon: `sap-icon://accept`, text: `Top` })
+      .segmented_button_item({ key: `Bottom`, icon: `sap-icon://accept`, text: `Bottom` })
+      .segmented_button_item({ key: `Right`, icon: `sap-icon://attachment`, text: `Right` })
+      .get_parent()
+      .get_parent()
+      .label(`popover`)
+      .button({ text: `show`, press: this.client._event(`POPOVER`), id: `TEST` })
+      .button({ text: `cancel`, press: this.client._event(`POPOVER`) })
+      .button({ text: `post`, press: this.client._event(`POPOVER`) });
+    this.client.view_display(view.stringify());
   }
 }
 

@@ -1,124 +1,59 @@
-/* AUTO-GENERATED scaffolding — abap2UI5 transpile failed; manual port required.
- *
- * Original ABAP source:
- * ====================
- * CLASS z2ui5_cl_demo_app_318 DEFINITION PUBLIC.
- * 
- *   PUBLIC SECTION.
- *     INTERFACES z2ui5_if_app.
- * 
- *     DATA mv_type           TYPE string.
- *     DATA mv_path           TYPE string.
- *     DATA mv_editor         TYPE string.
- *     DATA mv_check_editable TYPE abap_bool.
- * 
- *     DATA client            TYPE REF TO z2ui5_if_client.
- *     DATA lt_types TYPE z2ui5_if_types=>ty_t_name_value.
- * 
- *     DATA lt_types2 TYPE z2ui5_if_types=>ty_t_name_value.
- * 
- *     METHODS view_display.
- *   PROTECTED SECTION.
- *   PRIVATE SECTION.
- * ENDCLASS.
- * 
- * 
- * CLASS z2ui5_cl_demo_app_318 IMPLEMENTATION.
- *   METHOD view_display.
- * 
- *     mv_editor = `<html> ` && |\n| &&
- *                 `    <body> ` && |\n| &&
- *                 `        <h1> Hi there 👋</h1>` && |\n| &&
- *                 `        <p>This example was rendered by providing HTML code to the API. You can also tell the API to convert from a URL. Just remove the html parameter and add the url paramter.</p>` && |\n| &&
- *                 `    </body> ` && |\n| &&
- *                 `</html>`.
- * 
- *     DATA(view) = z2ui5_cl_xml_view=>factory( ).
- * 
- *     DATA(page) = view->shell( )->page( title          = `abap2UI5 - File Editor`
- *                                        navbuttonpress = client->_event_nav_app_leave( )
- *                                        shownavbutton  = client->check_app_prev_stack( ) ).
- * 
- *     DATA(temp) = page->simple_form( title    = `File`
- *                                     editable = abap_true )->content( `form`
- *          )->label( `path`
- *          )->input( client->_bind_edit( mv_path )
- *          )->label( `Option` ).
- * 
- *     lt_types2 = VALUE #( FOR row IN z2ui5_cl_util=>source_get_file_types( )  (
- *             n = shift_right( shift_left( row ) )
- *             v = shift_right( shift_left( row ) ) ) ).
- * 
- *     DATA(temp3) = temp->input( value = client->_bind_edit( mv_type )
- *                    suggestionitems   = client->_bind( lt_types )
- *                     )->get( ).
- * 
- *     temp3->suggestion_items(
- *                 )->list_item( text           = `{N}`
- *                               additionaltext = `{V}` ).
- * 
- *     temp->label( `` )->button( text = `Download`
- *                     press           = client->_event( `DB_LOAD` )
- *                     icon            = `sap-icon://download-from-cloud` ).
- * 
- *     page->code_editor( type     = `html`
- *                        editable = abap_true
- *                        value    = client->_bind( mv_editor ) ).
- * 
- *     page->footer( )->overflow_toolbar(
- *         )->toolbar_spacer(
- *         )->button( text    = `PDF`
- *                    press   = client->_event( `PDF` )
- *                    type    = `Emphasized`
- *                    enabled = xsdbool( mv_editor IS NOT INITIAL ) ).
- * 
- *     client->view_display( page->stringify( ) ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD z2ui5_if_app~main.
- * 
- *     me->client = client.
- * 
- *     IF client->check_on_init( ).
- *       mv_path = `../../demo/text`.
- *       mv_type = `plain_text`.
- *       view_display( ).
- *     ENDIF.
- * 
- *     CASE client->get( )-event.
- * 
- *       WHEN `PDF`.
- * 
- *       WHEN `DB_SAVE`.
- *         client->message_box_display( text = `Upload successful. File saved!`
- *                                      type = `success` ).
- *       WHEN `EDIT`.
- *         mv_check_editable = xsdbool( mv_check_editable = abap_false ).
- *         client->view_model_update( ).
- * 
- *       WHEN `CLEAR`.
- *         mv_editor = ``.
- *     ENDCASE.
- * 
- *   ENDMETHOD.
- * 
- * ENDCLASS.
- */
-
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_318 extends z2ui5_if_app {
+  mv_type = ``;
+  mv_path = ``;
+  mv_editor = ``;
+  mv_check_editable = false;
+  lt_types = [];
+  lt_types2 = [];
   client = null;
+
+  view_display() {
+    this.mv_editor = `<html> ` + `\\n` + ` <body> ` + `\\n` + ` <h1> Hi there 👋</h1>` + `\\n` + ` <p>This example was rendered by providing HTML code to the API. You can also tell the API to convert from a URL. Just remove the html parameter and add the url parameter.</p>` + `\\n` + ` </body> ` + `\\n` + `</html>`;
+    const view = z2ui5_cl_xml_view.factory();
+    const page = view.shell()
+      .page({ title: `abap2UI5 - File Editor`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    const temp = page.simple_form({ title: `File`, editable: true })
+      .content(`form`)
+      .label(`path`)
+      .input(this.client._bind_edit(this.mv_path))
+      .label(`Option`);
+    this.lt_types2 = /* TODO(abap2js): VALUE FOR/BASE */ [];
+    const temp3 = temp.input({ value: this.client._bind_edit(this.mv_type), suggestionitems: this.client._bind(this.lt_types) })
+      .get();
+    temp3.suggestion_items().list_item({ text: `{N}`, additionaltext: `{V}` });
+    temp.label(``)
+      .button({ text: `Download`, press: this.client._event(`DB_LOAD`), icon: `sap-icon://download-from-cloud` });
+    page.code_editor({ type: `html`, editable: true, value: this.client._bind(this.mv_editor) });
+    page.footer()
+      .overflow_toolbar()
+      .toolbar_spacer()
+      .button({ text: `PDF`, press: this.client._event(`PDF`), type: `Emphasized`, enabled: Boolean(this.mv_editor) });
+    this.client.view_display(page.stringify());
+  }
+
   async main(client) {
     this.client = client;
     if (client.check_on_init()) {
-      const v = z2ui5_cl_xml_view.factory()
-        .Page({ title: "z2ui5_cl_demo_app_318 (TODO: port from abap)" })
-        .Text({ text: "This sample needs to be ported manually from abap2UI5." });
-      client.view_display(v.stringify());
+      this.mv_path = `../../demo/text`;
+      this.mv_type = `plain_text`;
+      this.view_display();
+    }
+    switch (client.get().EVENT) {
+      case `PDF`:
+        break;
+      case `DB_SAVE`:
+        client.message_box_display(`Upload successful. File saved!`, `success`);
+        break;
+      case `EDIT`:
+        this.mv_check_editable = /* TODO(abap2js) */ xsdbool(this.mv_check_editable === false);
+        client.view_model_update();
+        break;
+      case `CLEAR`:
+        this.mv_editor = ``;
+        break;
     }
   }
 }

@@ -1,22 +1,17 @@
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_004 extends z2ui5_if_app {
-
-  client    = null;
+  client = null;
   view_main = ``;
 
   async main(client) {
-
     this.client = client;
-
     if (client.check_on_init()) {
       this.on_init();
-
     } else if (client.check_on_event()) {
       this.on_event();
     }
-
   }
 
   on_init() {
@@ -33,66 +28,53 @@ class z2ui5_cl_demo_app_004 extends z2ui5_if_app {
         this.client.nav_app_leave(new z2ui5_cl_demo_app_004());
         break;
       case `BUTTON_CHANGE_VIEW`:
-        if (this.view_main === `MAIN`) this.view_second_display();
-        else if (this.view_main === `SECOND`) this.view_main_display();
+        switch (this.view_main) {
+          case `MAIN`:
+            this.view_second_display();
+            break;
+          case `SECOND`:
+            this.view_main_display();
+            break;
+        }
         break;
-      case `BUTTON_ERROR`: {
-        const dummy = 1 / 0;  // matches abap CX_SY_ZERO_DIVIDE demo
-        return dummy;
-      }
+      case `BUTTON_ERROR`:
+        const dummy = 1 / 0;
+        break;
     }
   }
 
   view_main_display() {
-
     this.view_main = `MAIN`;
-
     const view = z2ui5_cl_xml_view.factory();
-    const page = view.Shell()
-      .Page({
-        title:          `abap2UI5 - Controller`,
-        navButtonPress: this.client._event_nav_app_leave(),
-        showNavButton:  this.client.check_app_prev_stack(),
-      });
-
-    page.Grid({ defaultSpan: `L6 M12 S12` })
-      .content()
-      .SimpleForm({ title: `Controller`, editable: true })
-        .content()
-          .Label({ text: `Roundtrip` })
-          .Button({ text: `Client/Server Interaction`, press: this.client._event(`BUTTON_ROUNDTRIP`) })
-          .Label({ text: `System` })
-          .Button({ text: `Restart App`,                press: this.client._event(`BUTTON_RESTART`)   })
-          .Label({ text: `Change View` })
-          .Button({ text: `Display View SECOND`,        press: this.client._event(`BUTTON_CHANGE_VIEW`) })
-          .Label({ text: `CX_SY_ZERO_DIVIDE` })
-          .Button({ text: `Error not catched by the user`, press: this.client._event(`BUTTON_ERROR`) });
-
+    const page = view.shell()
+      .page({ title: `abap2UI5 - Controller`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    page.grid(`L6 M12 S12`)
+      .content(`layout`)
+      .simple_form({ title: `Controller`, editable: true })
+      .content(`form`)
+      .label(`Roundtrip`)
+      .button({ text: `Client/Server Interaction`, press: this.client._event(`BUTTON_ROUNDTRIP`) })
+      .label(`System`)
+      .button({ text: `Restart App`, press: this.client._event(`BUTTON_RESTART`) })
+      .label(`Change View`)
+      .button({ text: `Display View SECOND`, press: this.client._event(`BUTTON_CHANGE_VIEW`) })
+      .label(`CX_SY_ZERO_DIVIDE`)
+      .button({ text: `Error not catched by the user`, press: this.client._event(`BUTTON_ERROR`) });
     this.client.view_display(view.stringify());
-
   }
 
   view_second_display() {
-
     this.view_main = `SECOND`;
-
     const view = z2ui5_cl_xml_view.factory();
-    const page = view.Shell()
-      .Page({
-        title:          `abap2UI5 - Controller`,
-        navButtonPress: this.client._event_nav_app_leave(),
-        showNavButton:  this.client.check_app_prev_stack(),
-      });
-
-    page.Grid({ defaultSpan: `L12 M12 S12` })
-      .content()
-      .SimpleForm({ title: `View Second` })
-        .content()
-          .Label({ text: `Change View` })
-          .Button({ text: `Display View MAIN`, press: this.client._event(`BUTTON_CHANGE_VIEW`) });
-
+    const page = view.shell()
+      .page({ title: `abap2UI5 - Controller`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    page.grid(`L12 M12 S12`)
+      .content(`layout`)
+      .simple_form(`View Second`)
+      .content(`form`)
+      .label(`Change View`)
+      .button({ text: `Display View MAIN`, press: this.client._event(`BUTTON_CHANGE_VIEW`) });
     this.client.view_display(view.stringify());
-
   }
 }
 

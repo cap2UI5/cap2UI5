@@ -1,53 +1,51 @@
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_247 extends z2ui5_if_app {
-
-
   client = null;
 
-view_display() {
-const page = z2ui5_cl_xml_view.factory( ).shell(
-         ).page({ title: `abap2UI5 - Sample: Splitter Layout - 2 areas`, navbuttonpress: this.client._event_nav_app_leave( ), shownavbutton: this.client.check_app_prev_stack( ) });
-
-    page.header_content(
-       ).button({ id: `hint_icon`, icon: `sap.icon://hint`, tooltip: `Sample information`, press: this.client._event( `POPOVER` ) });
-
-    page.header_content(
-       ).link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.ui.layout.Splitter/sample/sap.ui.layout.sample.Splitter2` });
-
-    const layout = page.splitter({ height: `500px` }).button({ width: `100%`, text: `Content 1` }).get(
-                              ).layout_data(
-                                  ).splitter_layout_data({ size: `300px` }).get_parent( ).get_parent( ).get_parent(
-                          ).button({ width: `100%`, text: `Content 2` }).get(
-                              ).layout_data(
-                                  ).splitter_layout_data({ size: `auto` });
-
-    this.client.view_display( page.stringify( ) );
-
+  view_display({ client } = {}) {
+    const page = z2ui5_cl_xml_view.factory()
+      .shell()
+      .page({ title: `abap2UI5 - Sample: Splitter Layout - 2 areas`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
+    page.header_content()
+      .button({ id: `hint_icon`, icon: `sap-icon://hint`, tooltip: `Sample information`, press: client._event(`POPOVER`) });
+    page.header_content()
+      .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.ui.layout.Splitter/sample/sap.ui.layout.sample.Splitter2` });
+    const layout = page.splitter({ height: `500px` })
+      .button({ width: `100%`, text: `Content 1` })
+      .get()
+      .layout_data()
+      .splitter_layout_data({ size: `300px` })
+      .get_parent()
+      .get_parent()
+      .get_parent()
+      .button({ width: `100%`, text: `Content 2` })
+      .get()
+      .layout_data()
+      .splitter_layout_data({ size: `auto` });
+    client.view_display(page.stringify());
   }
-on_event() {
-if (this.client.check_on_event( `POPOVER` )) {
 
-      popover_display( `hint_icon` );
+  on_event({ client } = {}) {
+    if (client.check_on_event(`POPOVER`)) {
+      this.popover_display({ id: `hint_icon` });
     }
-}
-popover_display() {
-const view = z2ui5_cl_xml_view.factory_popup( );
-    view.quick_view({ placement: `Bottom`, width: `auto` }).quick_view_page({ pageid: `sampleInformationId`, header: `Sample information`, description: `Simple splitter example with two content areas` });
-
-    this.client.popover_display({ xml: view.stringify( ), by_id: id });
-
   }
-async main(client) {
-this.client = this.client;
 
-    if (this.client.check_on_init( )) {
+  popover_display({ id } = {}) {
+    const view = z2ui5_cl_xml_view.factory_popup();
+    view.quick_view({ placement: `Bottom`, width: `auto` })
+      .quick_view_page({ pageid: `sampleInformationId`, header: `Sample information`, description: `Simple splitter example with two content areas` });
+    this.client.popover_display(view.stringify(), id);
+  }
 
-      view_display( this.client );
+  async main(client) {
+    this.client = client;
+    if (client.check_on_init()) {
+      this.view_display({ client: client });
     }
-on_event( this.client );
-
+    this.on_event({ client: client });
   }
 }
 

@@ -1,137 +1,71 @@
-/* AUTO-GENERATED scaffolding — abap2UI5 transpile failed; manual port required.
- *
- * Original ABAP source:
- * ====================
- * CLASS z2ui5_cl_demo_app_045 DEFINITION PUBLIC.
- * 
- *   PUBLIC SECTION.
- *     INTERFACES z2ui5_if_app.
- * 
- *     TYPES:
- *       BEGIN OF ty_row,
- *         count    TYPE i,
- *         value    TYPE string,
- *         descr    TYPE string,
- *         icon     TYPE string,
- *         info     TYPE string,
- *         checkbox TYPE abap_bool,
- *       END OF ty_row.
- *     DATA t_tab TYPE STANDARD TABLE OF ty_row WITH EMPTY KEY.
- * 
- *     DATA mv_info_filter TYPE string.
- * 
- *     METHODS refresh_data.
- * 
- *   PROTECTED SECTION.
- *   PRIVATE SECTION.
- * ENDCLASS.
- * 
- * 
- * CLASS z2ui5_cl_demo_app_045 IMPLEMENTATION.
- * 
- *   METHOD refresh_data.
- * 
- *     DO 1000 TIMES.
- *       DATA(ls_row) = VALUE ty_row( count = sy-index  value = `red`
- *         info = COND #( WHEN sy-index < 50 THEN `completed` ELSE `uncompleted` )
- *         descr = `this is a description` checkbox = abap_true ).
- *       INSERT ls_row INTO TABLE t_tab.
- *     ENDDO.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD z2ui5_if_app~main.
- * 
- *     IF client->check_on_init( ).
- *       refresh_data( ).
- *     ENDIF.
- * 
- *     CASE client->get( )-event.
- * 
- *       WHEN `FLTER_INFO`.
- *         refresh_data( ).
- * 
- *         IF mv_info_filter <> ``.
- *           DELETE t_tab WHERE info <> mv_info_filter.
- *         ENDIF.
- * 
- *       WHEN `BUTTON_POST`.
- *         client->message_box_display( `button post was pressed` ).
- *     ENDCASE.
- * 
- *     DATA(page) = z2ui5_cl_xml_view=>factory( )->shell(
- *         )->page(
- *             title          = `abap2UI5 - Scroll Container with Table and Toolbar`
- *             navbuttonpress = client->_event_nav_app_leave( )
- *             shownavbutton  = client->check_app_prev_stack( )
- *             )->header_content(
- *                 )->link(
- *       )->get_parent( ).
- * 
- *     page->simple_form( title    = `Form Title`
- *                        editable = abap_true
- *                 )->content( `form`
- *                     )->title( `Filter`
- *                     )->label( `info`
- *                     )->input( client->_bind( mv_info_filter )
- *                     )->button(
- *                         text  = `filter`
- *                         press = client->_event( `FLTER_INFO` ) ).
- * 
- *     DATA(tab) = page->scroll_container( height   = `70%`
- *                                         vertical = abap_true
- *         )->table(
- *             growing             = abap_true
- *             growingthreshold    = `20`
- *             growingscrolltoload = abap_true
- *             items               = client->_bind( t_tab )
- *             sticky              = `ColumnHeaders,HeaderToolbar` ).
- * 
- *     tab->header_toolbar(
- *         )->overflow_toolbar(
- *             )->toolbar_spacer( ).
- * 
- *     tab->columns(
- *         )->column(
- *             )->text( `Color` )->get_parent(
- *         )->column(
- *             )->text( `Info` )->get_parent(
- *         )->column(
- *             )->text( `Description` )->get_parent(
- *         )->column(
- *             )->text( `Checkbox` )->get_parent(
- *          )->column(
- *             )->text( `Counter` ).
- * 
- *     tab->items( )->column_list_item( )->cells(
- *        )->text( `{VALUE}`
- *        )->text( `{INFO}`
- *        )->text( `{DESCR}`
- *        )->checkbox( selected = `{CHECKBOX}`
- *                     enabled  = abap_false
- *        )->text( `{COUNT}` ).
- * 
- *     client->view_display( page->stringify( ) ).
- * 
- *   ENDMETHOD.
- * 
- * ENDCLASS.
- */
-
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_045 extends z2ui5_if_app {
-  client = null;
-  async main(client) {
-    this.client = client;
-    if (client.check_on_init()) {
-      const v = z2ui5_cl_xml_view.factory()
-        .Page({ title: "z2ui5_cl_demo_app_045 (TODO: port from abap)" })
-        .Text({ text: "This sample needs to be ported manually from abap2UI5." });
-      client.view_display(v.stringify());
+  t_tab = [];
+  mv_info_filter = ``;
+
+  refresh_data() {
+    for (let sy_index = 1; sy_index <= 1000; sy_index++) {
+      const ls_row = { count: sy_index, value: `red`, info: (sy_index < 50 ? `completed` : `uncompleted`), descr: `this is a description`, checkbox: true };
+      this.t_tab.push(ls_row);
     }
+  }
+
+  async main(client) {
+    if (client.check_on_init()) {
+      this.refresh_data();
+    }
+    switch (client.get().EVENT) {
+      case `FILTER_INFO`:
+        this.refresh_data();
+        if (this.mv_info_filter !== ``) {
+          for (let _i = this.t_tab.length - 1; _i >= 0; _i--) { const row = this.t_tab[_i]; if (row.info !== this.mv_info_filter) this.t_tab.splice(_i, 1); }
+        }
+        break;
+      case `BUTTON_POST`:
+        client.message_box_display(`button post was pressed`);
+        break;
+    }
+    const page = z2ui5_cl_xml_view.factory()
+      .shell()
+      .page({ title: `abap2UI5 - Scroll Container with Table and Toolbar`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() })
+      .header_content()
+      .link()
+      .get_parent();
+    page.simple_form({ title: `Form Title`, editable: true })
+      .content(`form`)
+      .title(`Filter`)
+      .label(`info`)
+      .input(client._bind_edit(this.mv_info_filter))
+      .button({ text: `filter`, press: client._event(`FILTER_INFO`) });
+    const tab = page.scroll_container({ height: `70%`, vertical: true })
+      .table({ growing: true, growingthreshold: `20`, growingscrolltoload: true, items: client._bind(this.t_tab), sticky: `ColumnHeaders,HeaderToolbar` });
+    tab.header_toolbar().overflow_toolbar().toolbar_spacer();
+    tab.columns()
+      .column()
+      .text(`Color`)
+      .get_parent()
+      .column()
+      .text(`Info`)
+      .get_parent()
+      .column()
+      .text(`Description`)
+      .get_parent()
+      .column()
+      .text(`Checkbox`)
+      .get_parent()
+      .column()
+      .text(`Counter`);
+    tab.items()
+      .column_list_item()
+      .cells()
+      .text(`{VALUE}`)
+      .text(`{INFO}`)
+      .text(`{DESCR}`)
+      .checkbox({ selected: `{CHECKBOX}`, enabled: false })
+      .text(`{COUNT}`);
+    client.view_display(page.stringify());
   }
 }
 

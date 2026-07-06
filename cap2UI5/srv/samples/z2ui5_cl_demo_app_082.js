@@ -1,118 +1,45 @@
-/* AUTO-GENERATED scaffolding — abap2UI5 transpile failed; manual port required.
- *
- * Original ABAP source:
- * ====================
- * CLASS z2ui5_cl_demo_app_082 DEFINITION PUBLIC.
- * 
- *   PUBLIC SECTION.
- *     INTERFACES z2ui5_if_app.
- * 
- *     TYPES:
- *       BEGIN OF ty_row,
- *         title    TYPE string,
- *         value    TYPE string,
- *         descr    TYPE string,
- *         icon     TYPE string,
- *         info     TYPE string,
- *         checkbox TYPE abap_bool,
- *       END OF ty_row.
- *     DATA t_tab TYPE STANDARD TABLE OF ty_row WITH EMPTY KEY.
- *     DATA mv_counter TYPE i.
- * 
- *   PROTECTED SECTION.
- *     DATA client TYPE REF TO z2ui5_if_client.
- * 
- *     METHODS on_init.
- *     METHODS on_event.
- *     METHODS view_display.
- * 
- *   PRIVATE SECTION.
- * ENDCLASS.
- * 
- * 
- * CLASS z2ui5_cl_demo_app_082 IMPLEMENTATION.
- * 
- *   METHOD z2ui5_if_app~main.
- * 
- *     me->client     = client.
- * 
- *     IF client->check_on_init( ).
- *       on_init( ).
- *       view_display( ).
- *     ENDIF.
- * 
- *     IF client->get( )-event IS NOT INITIAL.
- *       on_event( ).
- *     ENDIF.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD on_event.
- * 
- *     IF client->check_on_event( `TIMER_FINISHED` ).
- *       mv_counter = mv_counter + 1.
- *       INSERT VALUE #( title = `entry` && mv_counter   info = `completed`   descr = `this is a description` icon = `sap-icon://account` )
- *           INTO TABLE t_tab.
- * 
- *       client->view_model_update( ).
- *     ENDIF.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD on_init.
- * 
- *     mv_counter = 1.
- * 
- *     t_tab = VALUE #(
- *             ( title = `entry` && mv_counter  info = `completed`   descr = `this is a description` icon = `sap-icon://account` ) ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD view_display.
- * 
- *     DATA(lo_view) = z2ui5_cl_xml_view=>factory( ).
- * 
- *     lo_view->_z2ui5( )->timer( finished    = client->_event( `TIMER_FINISHED` )
- *                                delayms     = `2000`
- *                                checkrepeat = abap_true ).
- * 
- *     DATA(page) = lo_view->shell( )->page(
- *              title          = `abap2UI5 - Roundtrip Speed Test`
- *              navbuttonpress = client->_event_nav_app_leave( )
- *              shownavbutton  = client->check_app_prev_stack( ) ).
- * 
- *     page->list(
- *          headertext = `Data auto refresh (2 sec)`
- *          items      = client->_bind( t_tab )
- *          )->standard_list_item(
- *              title       = `{TITLE}`
- *              description = `{DESCR}`
- *              icon        = `{ICON}`
- *              info        = `{INFO}` ).
- * 
- *     client->view_display( lo_view->stringify( ) ).
- * 
- *   ENDMETHOD.
- * 
- * ENDCLASS.
- */
-
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
+const z2ui5_if_client = require("abap2UI5/z2ui5_if_client");
 
 class z2ui5_cl_demo_app_082 extends z2ui5_if_app {
+  t_tab = [];
+  mv_counter = 0;
   client = null;
+
   async main(client) {
     this.client = client;
     if (client.check_on_init()) {
-      const v = z2ui5_cl_xml_view.factory()
-        .Page({ title: "z2ui5_cl_demo_app_082 (TODO: port from abap)" })
-        .Text({ text: "This sample needs to be ported manually from abap2UI5." });
-      client.view_display(v.stringify());
+      this.on_init();
+      this.view_display();
     }
+    if ((client.get().EVENT)) {
+      this.on_event();
+    }
+  }
+
+  on_event() {
+    if (this.client.check_on_event(`TIMER_FINISHED`)) {
+      this.mv_counter = this.mv_counter + 1;
+      this.t_tab.push({ title: `entry${this.mv_counter}`, info: `completed`, descr: `this is a description`, icon: `sap-icon://account` });
+      this.client.action.gen({ val: z2ui5_if_client.cs_event.start_timer, t_arg: [this.client._event(`TIMER_FINISHED`), `2000`] });
+      this.client.view_model_update();
+    }
+  }
+
+  on_init() {
+    this.mv_counter = 1;
+    this.t_tab = [{ title: `entry${this.mv_counter}`, info: `completed`, descr: `this is a description`, icon: `sap-icon://account` }];
+  }
+
+  view_display() {
+    const lo_view = z2ui5_cl_xml_view.factory();
+    const page = lo_view.shell()
+      .page({ title: `abap2UI5 - Roundtrip Speed Test`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    page.list({ headertext: `Data auto refresh (2 sec)`, items: this.client._bind(this.t_tab) })
+      .standard_list_item({ title: `{TITLE}`, description: `{DESCR}`, icon: `{ICON}`, info: `{INFO}` });
+    this.client.view_display(lo_view.stringify());
+    this.client.action.gen({ val: z2ui5_if_client.cs_event.start_timer, t_arg: [this.client._event(`TIMER_FINISHED`), `2000`] });
   }
 }
 

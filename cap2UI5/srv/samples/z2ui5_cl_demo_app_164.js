@@ -1,143 +1,66 @@
-/* AUTO-GENERATED scaffolding — abap2UI5 transpile failed; manual port required.
- *
- * Original ABAP source:
- * ====================
- * CLASS z2ui5_cl_demo_app_164 DEFINITION PUBLIC.
- * 
- *   PUBLIC SECTION.
- *     INTERFACES z2ui5_if_app.
- * 
- *     TYPES:
- *       BEGIN OF ty_s_tab,
- *         selkz            TYPE abap_bool,
- *         product          TYPE string,
- *         create_date      TYPE string,
- *         create_by        TYPE string,
- *         storage_location TYPE string,
- *         quantity         TYPE i,
- *       END OF ty_s_tab.
- *     TYPES ty_t_table TYPE STANDARD TABLE OF ty_s_tab WITH EMPTY KEY.
- * 
- *     DATA mt_table TYPE ty_t_table.
- * 
- *   PROTECTED SECTION.
- *     DATA client TYPE REF TO z2ui5_if_client.
- * 
- *     METHODS on_event.
- *     METHODS view_display.
- *     METHODS set_data.
- * 
- *   PRIVATE SECTION.
- * ENDCLASS.
- * 
- * 
- * CLASS z2ui5_cl_demo_app_164 IMPLEMENTATION.
- * 
- *   METHOD on_event.
- * 
- *     IF client->check_on_event( `BUTTON_START` ).
- *       client->nav_app_call( z2ui5_cl_pop_table=>factory( mt_table ) ).
- *     ENDIF.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD set_data.
- * 
- *     "replace this with a db select here...
- *     mt_table = VALUE #(
- *         ( product = `table`    create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
- *         ( product = `chair`    create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
- *         ( product = `sofa`     create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
- *         ( product = `computer` create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
- *         ( product = `oven`     create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
- *         ( product = `table2`   create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 ) ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD view_display.
- * 
- *     DATA(view) = z2ui5_cl_xml_view=>factory( ).
- * 
- *     view = view->shell( )->page( id = `page_main`
- *              title                  = `abap2UI5 - Popup Display Table`
- *              navbuttonpress         = client->_event_nav_app_leave( )
- *              shownavbutton          = client->check_app_prev_stack( ) ).
- * 
- *     DATA(vbox) = view->vbox( ).
- * 
- *     DATA(tab) = vbox->table(
- *         client->_bind( val = mt_table )
- *            )->header_toolbar(
- *              )->overflow_toolbar(
- *                  )->toolbar_spacer(
- * *                 )->button( text = `Filter` press = client->_event( `PREVIEW_FILTER` ) icon = `sap-icon://filter`
- *            )->button( text  = `Display Popup`
- *                       press = client->_event( `BUTTON_START` )
- *                       type  = `Emphasized`
- *             )->get_parent( )->get_parent( ).
- * 
- *     DATA(lo_columns) = tab->columns( ).
- *     lo_columns->column( )->text( `Product` ).
- *     lo_columns->column( )->text( `Date` ).
- *     lo_columns->column( )->text( `Name` ).
- *     lo_columns->column( )->text( `Location` ).
- *     lo_columns->column( )->text( `Quantity` ).
- * 
- *     DATA(lo_cells) = tab->items( )->column_list_item( ).
- *     lo_cells->text( `{PRODUCT}` ).
- *     lo_cells->text( `{CREATE_DATE}` ).
- *     lo_cells->text( `{CREATE_BY}` ).
- *     lo_cells->text( `{STORAGE_LOCATION}` ).
- *     lo_cells->text( `{QUANTITY}` ).
- * 
- *     client->view_display( view->stringify( ) ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD z2ui5_if_app~main.
- * 
- *     me->client = client.
- * 
- *     IF client->check_on_init( ).
- *       set_data( ).
- *       view_display( ).
- *       RETURN.
- *     ENDIF.
- * 
- *     IF client->get( )-check_on_navigated = abap_true.
- *       TRY.
- *           DATA(lo_popup_table) = CAST z2ui5_cl_pop_table( client->get_app( client->get( )-s_draft-id_prev_app ) ).
- *           set_data( ).
- *           client->view_model_update( ).
- *         CATCH cx_root.
- *       ENDTRY.
- *       RETURN.
- *     ENDIF.
- * 
- *     IF client->get( )-event IS NOT INITIAL.
- *       on_event( ).
- *     ENDIF.
- * 
- *   ENDMETHOD.
- * 
- * ENDCLASS.
- */
-
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
+const z2ui5_cl_pop_table = require("abap2UI5/z2ui5_cl_pop_table");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_164 extends z2ui5_if_app {
+  mt_table = [];
   client = null;
+
+  on_event() {
+    if (this.client.check_on_event(`BUTTON_START`)) {
+      this.client.nav_app_call(z2ui5_cl_pop_table.factory(this.mt_table));
+    }
+  }
+
+  set_data() {
+    this.mt_table = [{ product: `table`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }, { product: `chair`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }, { product: `sofa`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }, { product: `computer`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }, { product: `oven`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }, { product: `table2`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }];
+  }
+
+  view_display() {
+    let view = z2ui5_cl_xml_view.factory();
+    view = view.shell()
+      .page({ id: `page_main`, title: `abap2UI5 - Popup Display Table`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    const vbox = view.vbox();
+    const tab = vbox.table(this.client._bind(this.mt_table))
+      .header_toolbar()
+      .overflow_toolbar()
+      .toolbar_spacer()
+      .button({ text: `Display Popup`, press: this.client._event(`BUTTON_START`), type: `Emphasized` })
+      .get_parent()
+      .get_parent();
+    const lo_columns = tab.columns();
+    lo_columns.column().text(`Product`);
+    lo_columns.column().text(`Date`);
+    lo_columns.column().text(`Name`);
+    lo_columns.column().text(`Location`);
+    lo_columns.column().text(`Quantity`);
+    const lo_cells = tab.items().column_list_item();
+    lo_cells.text(`{PRODUCT}`);
+    lo_cells.text(`{CREATE_DATE}`);
+    lo_cells.text(`{CREATE_BY}`);
+    lo_cells.text(`{STORAGE_LOCATION}`);
+    lo_cells.text(`{QUANTITY}`);
+    this.client.view_display(view.stringify());
+  }
+
   async main(client) {
     this.client = client;
     if (client.check_on_init()) {
-      const v = z2ui5_cl_xml_view.factory()
-        .Page({ title: "z2ui5_cl_demo_app_164 (TODO: port from abap)" })
-        .Text({ text: "This sample needs to be ported manually from abap2UI5." });
-      client.view_display(v.stringify());
+      this.set_data();
+      this.view_display();
+      return;
+    }
+    if (client.get().CHECK_ON_NAVIGATED === true) {
+      try {
+        const lo_popup_table = (client.get_app(client.get().S_DRAFT.ID_PREV_APP));
+        this.set_data();
+        client.view_model_update();
+      } catch (error) {
+      }
+      return;
+    }
+    if ((client.get().EVENT)) {
+      this.on_event();
     }
   }
 }

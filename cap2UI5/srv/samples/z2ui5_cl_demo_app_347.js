@@ -1,156 +1,71 @@
-/* AUTO-GENERATED scaffolding — abap2UI5 transpile failed; manual port required.
- *
- * Original ABAP source:
- * ====================
- * CLASS z2ui5_cl_demo_app_347 DEFINITION PUBLIC.
- * 
- *   PUBLIC SECTION.
- *     INTERFACES z2ui5_if_app.
- * 
- *     DATA mt_data         TYPE STANDARD TABLE OF z2ui5_t_01.
- *     DATA mo_layout_obj   TYPE REF TO z2ui5_cl_demo_app_333.
- * 
- *     METHODS get_data.
- * 
- *     METHODS view_display
- *       IMPORTING
- *         client TYPE REF TO z2ui5_if_client.
- * 
- *   PROTECTED SECTION.
- *     METHODS xml_table
- *       IMPORTING
- *         i_page   TYPE REF TO z2ui5_cl_xml_view
- *         i_client TYPE REF TO z2ui5_if_client.
- * 
- *   PRIVATE SECTION.
- * ENDCLASS.
- * 
- * 
- * CLASS z2ui5_cl_demo_app_347 IMPLEMENTATION.
- * 
- *   METHOD z2ui5_if_app~main.
- * 
- *     IF client->check_on_init( ).
- * 
- *       get_data( ).
- * 
- *       mo_layout_obj = z2ui5_cl_demo_app_333=>factory( i_data   = REF #( mt_data )
- *                                                       vis_cols = 5 ).
- * 
- *       view_display( client ).
- *     ENDIF.
- * 
- *     CASE client->get( )-event.
- *       WHEN `GO`.
- *         DATA(app) = z2ui5_cl_demo_app_336=>factory( ).
- *         client->nav_app_call( app ).
- *     ENDCASE.
- * 
- *     IF client->get( )-check_on_navigated = abap_true
- *         AND client->check_on_init( )          = abap_false.
- *       view_display( client ).
- *     ENDIF.
- * 
- *     IF mo_layout_obj->mr_data IS NOT BOUND.
- *       client->message_toast_display( `ERROR - mo_layout_obj->mr_data is not bound!` ).
- *     ENDIF.
- * 
- *     IF mt_data IS INITIAL.
- *       client->message_toast_display( `ERROR - mt_data is initial!` ).
- *     ENDIF.
- * 
- *     ASSIGN mo_layout_obj->mr_data->* TO FIELD-SYMBOL(<val>).
- * 
- *     IF <val> <> mt_data.
- *       client->message_toast_display( `ERROR - mo_layout_obj_2->mr_data <> mt_data!` ).
- *     ENDIF.
- * 
- *     client->view_model_update( ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD view_display.
- * 
- *     DATA(page) = z2ui5_cl_xml_view=>factory( )->shell( )->page( title          = `RTTI IV`
- *                                                                 navbuttonpress = client->_event_nav_app_leave( )
- *                                                                 shownavbutton  = client->check_app_prev_stack( ) ).
- * 
- *     page->button( text  = `CALL Next App`
- *                   press = client->_event( `GO` )
- *                   type  = `Success` ).
- * 
- *     xml_table( i_page   = page
- *                i_client = client ).
- * 
- *     client->view_display( page->stringify( ) ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD xml_table.
- * 
- *     DATA(table) = i_page->table( width = `auto`
- *                                  items = i_client->_bind_edit( val = mt_data ) ).
- * 
- *     DATA(columns) = table->columns( ).
- * 
- *     LOOP AT mo_layout_obj->ms_data-t_layout REFERENCE INTO DATA(layout).
- *       DATA(lv_index) = sy-tabix.
- * 
- *       columns->column( visible = i_client->_bind( val       = layout->visible
- *                                                   tab       = mo_layout_obj->ms_data-t_layout
- *                                                   tab_index = lv_index )
- *         )->text( layout->name ).
- * 
- *     ENDLOOP.
- * 
- *     DATA(column_list_item) = columns->get_parent( )->items(
- *                                        )->column_list_item( valign = `Middle`
- *                                                             type   = `Inactive` ).
- * 
- *     DATA(cells) = column_list_item->cells( ).
- * 
- *     LOOP AT mo_layout_obj->ms_data-t_layout REFERENCE INTO layout.
- * 
- *       lv_index = sy-tabix.
- * 
- *       cells->object_identifier( text = |\{{ layout->name }\}| ).  "."|\{{ layout->fname }\}| ).
- * 
- *     ENDLOOP.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD get_data.
- * 
- *     SELECT id,
- *            id_prev,
- *            id_prev_app,
- *            id_prev_app_stack,
- *            timestampl
- *       FROM z2ui5_t_01
- *       INTO CORRESPONDING FIELDS OF TABLE @mt_data
- *       UP TO 10 ROWS.
- * 
- *   ENDMETHOD.
- * 
- * ENDCLASS.
- */
-
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
+const z2ui5_cl_demo_app_333 = require("./z2ui5_cl_demo_app_333");
+const z2ui5_cl_demo_app_336 = require("./z2ui5_cl_demo_app_336");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_347 extends z2ui5_if_app {
-  client = null;
+  mt_data = [];
+  mo_layout_obj = null;
+
   async main(client) {
-    this.client = client;
     if (client.check_on_init()) {
-      const v = z2ui5_cl_xml_view.factory()
-        .Page({ title: "z2ui5_cl_demo_app_347 (TODO: port from abap)" })
-        .Text({ text: "This sample needs to be ported manually from abap2UI5." });
-      client.view_display(v.stringify());
+      this.get_data();
+      this.mo_layout_obj = z2ui5_cl_demo_app_333.factory({ i_data: (this.mt_data), vis_cols: 5 });
+      this.view_display({ client: client });
     }
+    switch (client.get().EVENT) {
+      case `GO`:
+        const app = z2ui5_cl_demo_app_336.factory();
+        client.nav_app_call(app);
+        break;
+    }
+    if (client.get().CHECK_ON_NAVIGATED === true && client.check_on_init() === false) {
+      this.view_display({ client: client });
+    }
+    if (this.mo_layout_obj.mr_data != null) {
+      client.message_toast_display(`ERROR - mo_layout_obj->mr_data is not bound!`);
+    }
+    if (!this.mt_data) {
+      client.message_toast_display(`ERROR - mt_data is initial!`);
+    }
+    // TODO(abap2js): ASSIGN mo_layout_obj->mr_data->* TO FIELD-SYMBOL(<val>).
+    if (val !== this.mt_data) {
+      client.message_toast_display(`ERROR - mo_layout_obj_2->mr_data <> mt_data!`);
+    }
+    client.view_model_update();
+  }
+
+  view_display({ client } = {}) {
+    const page = z2ui5_cl_xml_view.factory()
+      .shell()
+      .page({ title: `RTTI IV`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
+    page.button({ text: `CALL Next App`, press: client._event(`GO`), type: `Success` });
+    this.xml_table({ i_page: page, i_client: client });
+    client.view_display(page.stringify());
+  }
+
+  xml_table({ i_page, i_client } = {}) {
+    const table = i_page.table({ width: `auto`, items: i_client._bind_edit({ val: this.mt_data }) });
+    const columns = table.columns();
+    let sy_tabix = 0;
+    for (const layout of this.mo_layout_obj.ms_data.t_layout) {
+      sy_tabix++;
+      let lv_index = sy_tabix;
+      columns.column({ visible: i_client._bind({ val: layout.visible, tab: this.mo_layout_obj.ms_data.t_layout, tab_index: lv_index }) })
+        .text(layout.name);
+    }
+    const column_list_item = columns.get_parent().items().column_list_item({ valign: `Middle`, type: `Inactive` });
+    const cells = column_list_item.cells();
+    let sy_tabix = 0;
+    for (const layout of this.mo_layout_obj.ms_data.t_layout) {
+      sy_tabix++;
+      lv_index = sy_tabix;
+      cells.object_identifier({ text: `{${layout.name}}` });
+    }
+  }
+
+  get_data() {
+    // TODO(abap2js): SELECT id, id_prev, id_prev_app, id_prev_app_stack, timestampl FROM z2ui5_t_01 INTO CORRESPONDING FIELDS OF TABLE @mt_data UP TO 10 ROWS.
   }
 }
 

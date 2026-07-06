@@ -1,208 +1,94 @@
-/* AUTO-GENERATED scaffolding — abap2UI5 transpile failed; manual port required.
- *
- * Original ABAP source:
- * ====================
- * CLASS z2ui5_cl_demo_app_211 DEFINITION PUBLIC.
- * 
- *   PUBLIC SECTION.
- *     INTERFACES if_serializable_object.
- *     INTERFACES z2ui5_if_app.
- * 
- *     TYPES:
- *       BEGIN OF ty_s_t002,
- *         id    TYPE string,
- *         icon  TYPE string,
- *         count TYPE string,
- *         table TYPE string,
- *         descr TYPE string,
- *         class TYPE string,
- *       END OF ty_s_t002.
- *     TYPES ty_t_t002 TYPE STANDARD TABLE OF ty_s_t002 WITH DEFAULT KEY.
- * 
- *     DATA mv_selectedkey     TYPE string.
- *     DATA mv_selectedkey_tmp TYPE string.
- *     DATA mt_t002            TYPE ty_t_t002.
- *     DATA mo_app             TYPE REF TO object.
- * 
- *   PROTECTED SECTION.
- *     DATA mo_main_page      TYPE REF TO z2ui5_cl_xml_view.
- * 
- *     DATA client            TYPE REF TO z2ui5_if_client.
- * 
- *     METHODS on_init.
- *     METHODS on_event.
- *     METHODS view_display.
- * 
- *     METHODS render_sub_app.
- * 
- *   PRIVATE SECTION.
- * ENDCLASS.
- * 
- * 
- * CLASS z2ui5_cl_demo_app_211 IMPLEMENTATION.
- * 
- *   METHOD on_event.
- * 
- *     CASE client->get( )-event.
- *       WHEN `ONSELECTICONTABBAR`.
- * 
- *         CASE mv_selectedkey.
- * 
- *           WHEN space.
- * 
- *           WHEN OTHERS.
- * 
- *         ENDCASE.
- *     ENDCASE.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD on_init.
- * 
- *     mt_t002 = VALUE #( class = `Z2UI5_CL_DEMO_APP_212`
- *                        ( id = `1` count = `5` table = `Z2UI5_T003` descr = `Table 01` icon = `sap-icon://add` )
- * *                       ( id = '2' count = '10' table = 'Z2UI5_T003'  descr = 'Table 01' icon = 'sap-icon://add' )
- *                        ( id = `3` count = `15` table = `Z2UI5_T004`  descr = `Table 02` icon = `sap-icon://accept` ) ).
- * 
- *     mv_selectedkey = `1`.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD view_display.
- * 
- *     DATA(view) = z2ui5_cl_xml_view=>factory( )->shell( ).
- * 
- *     DATA(page) = view->page( id             = `page_main`
- *                              title          = `Customizing`
- *                              navbuttonpress = client->_event_nav_app_leave( )
- *                              shownavbutton  = client->check_app_prev_stack( )
- *                              class          = `sapUiContentPadding` ).
- * 
- *     DATA(lo_items) = page->icon_tab_bar( class       = `sapUiResponsiveContentPadding`
- *                                          selectedkey = client->_bind_edit( mv_selectedkey )
- *                                          select      = client->_event( `ONSELECTICONTABBAR` )
- *                                                        )->items( ).
- * 
- *     LOOP AT mt_t002 REFERENCE INTO DATA(line).
- * 
- *       DATA(text) = line->descr.
- *       DATA(with_icon) = line->icon.
- * 
- *       lo_items->icon_tab_filter( icon      = line->icon
- *                                  iconcolor = `Positive`
- *                                  count     = line->count
- *                                  text      = text
- *                                  key       = line->id
- *                                  showall   = with_icon ).
- * 
- *       lo_items->icon_tab_separator( ).
- * 
- *     ENDLOOP.
- * 
- *     mo_main_page = lo_items.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD z2ui5_if_app~main.
- * 
- *     me->client = client.
- * 
- *     IF client->check_on_init( ).
- * 
- *       on_init( ).
- * 
- *       view_display( ).
- * 
- *     ENDIF.
- * 
- *     on_event( ).
- * 
- *     render_sub_app( ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD render_sub_app.
- * 
- *     READ TABLE mt_t002 REFERENCE INTO DATA(t002)
- *          WITH KEY id = mv_selectedkey.
- * 
- *     IF sy-subrc <> 0.
- *       RETURN.
- *     ENDIF.
- * 
- *     CASE mv_selectedkey.
- * 
- *       WHEN OTHERS.
- * 
- *         IF mv_selectedkey <> mv_selectedkey_tmp.
- *           CREATE OBJECT mo_app TYPE (t002->class).
- *         ENDIF.
- * 
- *         TRY.
- * 
- *             CALL METHOD mo_app->(`SET_APP_DATA`)
- *               EXPORTING table = t002->table.
- * 
- *             view_display( ).
- * 
- *             ASSIGN mo_app->(`MO_PARENT_VIEW`) TO FIELD-SYMBOL(<view>).
- * 
- *             IF <view> IS ASSIGNED.
- *               <view> = mo_main_page.
- *             ENDIF.
- * 
- *             CALL METHOD mo_app->(`Z2UI5_IF_APP~MAIN`)
- *               EXPORTING client = client.
- * 
- *           CATCH cx_root.
- *             RETURN.
- *         ENDTRY.
- * 
- *     ENDCASE.
- * 
- *     ASSIGN mo_app->(`MV_VIEW_DISPLAY`) TO FIELD-SYMBOL(<view_display>).
- * 
- *     IF <view_display> = abap_true.
- *       <view_display> = abap_false.
- *       client->view_display( mo_main_page->stringify( ) ).
- *     ENDIF.
- * 
- *     ASSIGN mo_app->(`MV_VIEW_MODEL_UPDATE`) TO FIELD-SYMBOL(<view_update>).
- * 
- *     IF <view_update> = abap_true.
- *       <view_update> = abap_false.
- *       client->view_model_update( ).
- *     ENDIF.
- * 
- *     IF mv_selectedkey <> mv_selectedkey_tmp.
- * 
- *       client->view_display( mo_main_page->stringify( ) ).
- * 
- *       mv_selectedkey_tmp = mv_selectedkey.
- * 
- *     ENDIF.
- * 
- *   ENDMETHOD.
- * 
- * ENDCLASS.
- */
-
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_211 extends z2ui5_if_app {
+  mv_selectedkey = ``;
+  mv_selectedkey_tmp = ``;
+  mt_t002 = [];
+  mo_app = null;
+  mo_main_page = null;
   client = null;
+
+  on_event() {
+    switch (this.client.get().EVENT) {
+      case `ONSELECTICONTABBAR`:
+        switch (this.mv_selectedkey) {
+          case ``:
+            break;
+          default:
+            break;
+        }
+        break;
+    }
+  }
+
+  on_init() {
+    this.mt_t002 = { class: `Z2UI5_CL_DEMO_APP_212` (id === `1` count === `5` table === `Z2UI5_T003` descr === `Table 01` icon === `sap-icon://add`) (id === `3` count === `15` table === `Z2UI5_T004` descr === `Table 02` icon === `sap-icon://accept`) };
+    this.mv_selectedkey = `1`;
+  }
+
+  view_display() {
+    const view = z2ui5_cl_xml_view.factory().shell();
+    const page = view.page({ id: `page_main`, title: `Customizing`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack(), class: `sapUiContentPadding` });
+    const lo_items = page.icon_tab_bar({ class: `sapUiResponsiveContentPadding`, selectedkey: this.client._bind_edit(this.mv_selectedkey), select: this.client._event(`ONSELECTICONTABBAR`) })
+      .items();
+    let sy_tabix = 0;
+    for (const line of this.mt_t002) {
+      sy_tabix++;
+      const text = line.descr;
+      const with_icon = line.icon;
+      lo_items.icon_tab_filter({ icon: line.icon, iconcolor: `Positive`, count: line.count, text, key: line.id, showall: with_icon });
+      lo_items.icon_tab_separator();
+    }
+    this.mo_main_page = lo_items;
+  }
+
   async main(client) {
     this.client = client;
     if (client.check_on_init()) {
-      const v = z2ui5_cl_xml_view.factory()
-        .Page({ title: "z2ui5_cl_demo_app_211 (TODO: port from abap)" })
-        .Text({ text: "This sample needs to be ported manually from abap2UI5." });
-      client.view_display(v.stringify());
+      this.on_init();
+      this.view_display();
+    }
+    this.on_event();
+    this.render_sub_app();
+  }
+
+  render_sub_app() {
+    // TODO(abap2js): READ TABLE mt_t002 REFERENCE INTO DATA(t002) WITH KEY id = mv_selectedkey.
+    if (sy_subrc !== 0) {
+      return;
+    }
+    switch (this.mv_selectedkey) {
+      default:
+        if (this.mv_selectedkey !== this.mv_selectedkey_tmp) {
+          this.mo_app = null; // TODO(abap2js): CREATE OBJECT mo_app TYPE (t002->class).
+        }
+        try {
+          call method this.mo_app.( `SET_APP_DATA` ) exporting table === t002.table;
+          this.view_display();
+          // TODO(abap2js): ASSIGN mo_app->(`MO_PARENT_VIEW`) TO FIELD-SYMBOL(<view>).
+          if (view != null) {
+            view = this.mo_main_page;
+          }
+          call method this.mo_app.( `Z2UI5_IF_APP~MAIN` ) exporting this.client === this.client;
+        } catch (error) {
+          return;
+        }
+        break;
+    }
+    // TODO(abap2js): ASSIGN mo_app->(`MV_VIEW_DISPLAY`) TO FIELD-SYMBOL(<view_display>).
+    if (view_display === true) {
+      view_display = false;
+      this.client.view_display(this.mo_main_page.stringify());
+    }
+    // TODO(abap2js): ASSIGN mo_app->(`MV_VIEW_MODEL_UPDATE`) TO FIELD-SYMBOL(<view_update>).
+    if (view_update === true) {
+      view_update = false;
+      this.client.view_model_update();
+    }
+    if (this.mv_selectedkey !== this.mv_selectedkey_tmp) {
+      this.client.view_display(this.mo_main_page.stringify());
+      this.mv_selectedkey_tmp = this.mv_selectedkey;
     }
   }
 }

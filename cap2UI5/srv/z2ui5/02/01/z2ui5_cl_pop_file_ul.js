@@ -1,118 +1,70 @@
-const z2ui5_if_app      = require("../z2ui5_if_app");
-const z2ui5_cl_xml_view = require("../z2ui5_cl_xml_view");
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
-/**
- * z2ui5_cl_pop_file_ul — JS port of abap2UI5 z2ui5_cl_pop_file_ul.
- *
- * File-upload dialog. The user picks a file via the z2ui5.FileUploader
- * custom control; on UPLOAD the data URI is base64-decoded and exposed via
- * result().value (UTF-8 string).
- *
- * Usage:
- *   const pop = z2ui5_cl_pop_file_ul.factory();
- *   client.nav_app_call(pop);
- *   // ...later:
- *   const r = pop.result();
- *   if (r.check_confirmed) { ...r.value... }
- */
 class z2ui5_cl_pop_file_ul extends z2ui5_if_app {
-
-  client = null;
-  title               = `File Upload`;
-  question_text       = `Choose the file to upload:`;
-  button_text_confirm = `OK`;
-  button_text_cancel  = `Cancel`;
-
-  mv_path  = ``;
+  ms_result = {};
+  mv_path = ``;
   mv_value = ``;
   check_confirm_enabled = false;
-  ms_result = { value: ``, check_confirmed: false };
+  client = null;
+  title = ``;
+  question_text = ``;
+  button_text_confirm = ``;
+  button_text_cancel = ``;
 
-  static factory({
-    i_text                = `Choose the file to upload:`,
-    i_title               = `File Upload`,
-    i_button_text_confirm = `OK`,
-    i_button_text_cancel  = `Cancel`,
-    i_path                = ``,
-  } = {}) {
-    const r_result = new z2ui5_cl_pop_file_ul();
-    r_result.title               = i_title;
-    r_result.question_text       = i_text;
+  static factory({ i_text = `Choose the file to upload:`, i_title = `File Upload`, i_button_text_confirm = `OK`, i_button_text_cancel = `Cancel`, i_path } = {}) {
+    let r_result = null;
+    r_result = new z2ui5_cl_pop_file_ul();
+    r_result.title = i_title;
+    r_result.question_text = i_text;
     r_result.button_text_confirm = i_button_text_confirm;
-    r_result.button_text_cancel  = i_button_text_cancel;
-    r_result.mv_path             = i_path;
+    r_result.button_text_cancel = i_button_text_cancel;
+    r_result.mv_path = i_path;
     return r_result;
   }
 
-  result() { return this.ms_result; }
+  result() {
+    let result = {};
+    result = this.ms_result;
+    return result;
+  }
 
   view_display() {
-    const c = this.client;
     const popup = z2ui5_cl_xml_view.factory_popup()
-      .Dialog({
-        title:      this.title,
-        afterClose: c._event(`BUTTON_CANCEL`),
-      })
+      .dialog({ title: this.title, afterclose: this.client._event(`BUTTON_CANCEL`) })
       .content()
-        .VBox({ class: `sapUiMediumMargin` })
-          .Label({ text: this.question_text });
-
-    popup._z2ui5().file_uploader({
-      value:       c._bind_edit(this.mv_value),
-      path:        c._bind_edit(this.mv_path),
-      placeholder: `filepath here...`,
-      upload:      c._event(`UPLOAD`),
-    });
-
-    popup.get_parent().get_parent()
+      .vbox(`sapUiMediumMargin`)
+      .label(this.question_text)
+      ._z2ui5()
+      .file_uploader({ value: this.client._bind_edit(this.mv_value), path: this.client._bind_edit(this.mv_path), placeholder: `filepath here...`, upload: this.client._event(`UPLOAD`) })
+      .get_parent()
+      .get_parent()
       .buttons()
-        .Button({
-          text:  this.button_text_cancel,
-          press: c._event(`BUTTON_CANCEL`),
-        })
-        .Button({
-          text:    this.button_text_confirm,
-          press:   c._event(`BUTTON_CONFIRM`),
-          enabled: c._bind(this.check_confirm_enabled),
-          type:    `Emphasized`,
-        });
-
-    c.popup_display(popup.stringify());
+      .button({ text: this.button_text_cancel, press: this.client._event(`BUTTON_CANCEL`) })
+      .button({ text: this.button_text_confirm, press: this.client._event(`BUTTON_CONFIRM`), enabled: this.client._bind(this.check_confirm_enabled), type: `Emphasized` });
+    this.client.popup_display(popup.stringify());
   }
 
   async main(client) {
     this.client = client;
-
     if (client.check_on_init()) {
       this.view_display();
       return;
     }
-
-    switch (client.get().EVENT) {
-      case `UPLOAD`: {
-        // mv_value contains a data URI like "data:text/csv;base64,VGV4dC4uLg=="
-        const v = String(this.mv_value || ``);
-        const commaIdx = v.indexOf(`,`);
-        const b64 = commaIdx >= 0 ? v.slice(commaIdx + 1) : v;
-        try {
-          // Convert base64 → UTF-8 string. Mirrors abap conv_decode_x_base64
-          // followed by conv_get_string_by_xstring.
-          this.ms_result.value = Buffer.from(b64, `base64`).toString(`utf-8`);
-        } catch {
-          this.ms_result.value = ``;
-        }
+    const lv_event = client.get().EVENT;
+    switch (lv_event) {
+      case `UPLOAD`:
+        const lv_data = z2ui5_cl_util.conv_get_xstring_by_data_uri(this.mv_value);
+        this.ms_result.value = z2ui5_cl_util.conv_get_string_by_xstring(lv_data);
         this.check_confirm_enabled = true;
         this.mv_value = ``;
-        this.mv_path  = ``;
+        this.mv_path = ``;
         client.popup_model_update();
         break;
-      }
       case `BUTTON_CONFIRM`:
-        this.ms_result.check_confirmed = true;
-        client.popup_destroy();
-        client.nav_app_leave();
-        break;
       case `BUTTON_CANCEL`:
+        this.ms_result.check_confirmed = /* TODO(abap2js) */ xsdbool(lv_event === `BUTTON_CONFIRM`);
         client.popup_destroy();
         client.nav_app_leave();
         break;

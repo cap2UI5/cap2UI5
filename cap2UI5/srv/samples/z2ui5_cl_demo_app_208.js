@@ -1,40 +1,59 @@
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_208 extends z2ui5_if_app {
-
-
-  client = null;
-
-view_display() {
-const page = z2ui5_cl_xml_view.factory( ).shell(
-         ).page({ title: `abap2UI5 - Sample: Radio Button Group`, navbuttonpress: this.client._event_nav_app_leave( ), shownavbutton: this.client.check_app_prev_stack( ) });
-
-    const layout = page.vbox( `sapUiSmallMargin`
-                          ).label({ labelfor: `rbg1`, text: `An example with 'matrix' layout` }).radio_button_group({ id: `rbg1`, columns: `3`, width: `100%`, class: `sapUiMediumMarginBottom` }).radio_button({ id: `RB1-1`, text: `Long Option Number 1` }).get_parent(
-                              ).radio_button({ id: `RB1-2`, text: `Option 2`, enabled: false }).get_parent(
-                              ).radio_button({ id: `RB1-3`, text: `Nr; 3`, editable: false }).get_parent(
-                              ).radio_button({ id: `RB1-4`, text: `Long Option 4` }).get_parent(
-                              ).radio_button({ id: `RB1-5`, text: `Option 5` }).get_parent(
-                              ).radio_button({ id: `RB1-6`, text: `Nr; 6` }).get_parent( ).get_parent(
-                          ).label({ labelfor: `rbg2`, text: `An example with 3 buttons and 2 columns` }).radio_button_group({ id: `rbg2`, columns: `2`, selectedindex: `2`, class: `sapUiMediumMarginBottom` }).radio_button({ id: `RB2-1`, text: `Option 1` }).get_parent(
-                              ).radio_button({ id: `RB2-2`, text: `Option 2`, editable: false }).get_parent(
-                              ).radio_button({ id: `RB2-3`, text: `Option 3` }).get_parent( ).get_parent(
-                          ).label({ labelfor: `rbg3`, text: `If the number of columns is equal to or exceeds the number of radio buttons they align horizontally` }).radio_button_group({ id: `rbg3`, columns: `5`, valuestate: `Error`, class: `sapUiMediumMarginBottom` }).radio_button({ id: `RB3-1`, text: `Option 1` }).get_parent(
-                              ).radio_button({ id: `RB3-2`, text: `Option 2` }).get_parent(
-                              ).radio_button({ id: `RB3-3`, text: `Option 3` }).get_parent( ).get_parent(
-                          ).label({ labelfor: `rbg4`, text: `An example of a group in warning state` }).radio_button_group({ id: `rbg4`, valuestate: `Warning` }).radio_button({ id: `RB4-1`, text: `Option 1` }).get_parent(
-                              ).radio_button({ id: `RB4-2`, text: `Option 2` }).get_parent( );
-
-    this.client.view_display( page.stringify( ) );
-
+  view_display({ client } = {}) {
+    const page = z2ui5_cl_xml_view.factory()
+      .shell()
+      .page({ title: `abap2UI5 - Sample: Radio Button Group`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
+    const layout = page.vbox(`sapUiSmallMargin`)
+      .label({ labelfor: `rbg1`, text: `An example with 'matrix' layout` })
+      .radio_button_group({ id: `rbg1`, columns: `3`, width: `100%`, class: `sapUiMediumMarginBottom` })
+      .radio_button({ id: `RB1-1`, text: `Long Option Number 1` })
+      .get_parent()
+      .radio_button({ id: `RB1-2`, text: `Option 2`, enabled: false })
+      .get_parent()
+      .radio_button({ id: `RB1-3`, text: `Nr. 3`, editable: false })
+      .get_parent()
+      .radio_button({ id: `RB1-4`, text: `Long Option 4` })
+      .get_parent()
+      .radio_button({ id: `RB1-5`, text: `Option 5` })
+      .get_parent()
+      .radio_button({ id: `RB1-6`, text: `Nr. 6` })
+      .get_parent()
+      .get_parent()
+      .label({ labelfor: `rbg2`, text: `An example with 3 buttons and 2 columns` })
+      .radio_button_group({ id: `rbg2`, columns: `2`, selectedindex: `2`, class: `sapUiMediumMarginBottom` })
+      .radio_button({ id: `RB2-1`, text: `Option 1` })
+      .get_parent()
+      .radio_button({ id: `RB2-2`, text: `Option 2`, editable: false })
+      .get_parent()
+      .radio_button({ id: `RB2-3`, text: `Option 3` })
+      .get_parent()
+      .get_parent()
+      .label({ labelfor: `rbg3`, text: `If the number of columns is equal to or exceeds the number of radio buttons they align horizontally` })
+      .radio_button_group({ id: `rbg3`, columns: `5`, valuestate: `Error`, class: `sapUiMediumMarginBottom` })
+      .radio_button({ id: `RB3-1`, text: `Option 1` })
+      .get_parent()
+      .radio_button({ id: `RB3-2`, text: `Option 2` })
+      .get_parent()
+      .radio_button({ id: `RB3-3`, text: `Option 3` })
+      .get_parent()
+      .get_parent()
+      .label({ labelfor: `rbg4`, text: `An example of a group in warning state` })
+      .radio_button_group({ id: `rbg4`, valuestate: `Warning` })
+      .radio_button({ id: `RB4-1`, text: `Option 1` })
+      .get_parent()
+      .radio_button({ id: `RB4-2`, text: `Option 2` })
+      .get_parent();
+    client.view_display(page.stringify());
   }
-async main(client) {
-if (this.client.check_on_init( )) {
 
-      view_display( this.client );
+  async main(client) {
+    if (client.check_on_init()) {
+      this.view_display({ client: client });
     }
-}
+  }
 }
 
 module.exports = z2ui5_cl_demo_app_208;

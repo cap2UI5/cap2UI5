@@ -1,67 +1,44 @@
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
+const z2ui5_if_client = require("abap2UI5/z2ui5_if_client");
 
 class z2ui5_cl_demo_app_202 extends z2ui5_if_app {
+  av_next = `Step22`;
 
-  av_next = null;
-  client = null;
-
-view_display() {
-const lr_view = z2ui5_cl_xml_view.factory( );
-
-    lr_view._generic({ name: `script`, ns: `html` })._cc_plain_xml( `sap.z2ui5.decideNextStep = (stepId, nextStepId) ; {debugger;` && `\n` &&
-                                                                     ` var wiz = sap.z2ui5.oView.byId('wiz');` && `\n` &&
-                                                                     ` wiz.discardProgress(sap.z2ui5.oView.byId(stepId));` && `\n` &&
-                                                                     ` var step = sap.z2ui5.oView.byId(stepId);` && `\n` &&
-                                                                     ` var nextStep = sap.z2ui5.oView.byId(nextStepId);` && `\n` &&
-                                                                     ` step.setNextStep(nextStep);` && `\n` &&
-                                                                     `}` );
-
-    lr_view = lr_view.shell( ).page({ id: `page_main`, title: `abap2UI5 - Demo Wizard Control`, navbuttonpress: this.client._event_nav_app_leave( ), shownavbutton: this.client.check_app_prev_stack( ) });
-
+  view_display({ client } = {}) {
+    let lr_view = z2ui5_cl_xml_view.factory();
+    lr_view = lr_view.shell()
+      .page({ id: `page_main`, title: `abap2UI5 - Demo Wizard Control`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
     const lr_wizard = lr_view.wizard({ id: `wiz`, enablebranching: true });
     const lr_wiz_step1 = lr_wizard.wizard_step({ title: `STEP1`, validated: true, nextstep: `STEP2` });
-    lr_wiz_step1.message_strip( `STEP1` );
-
+    lr_wiz_step1.message_strip(`STEP1`);
     const lr_wiz_step2 = lr_wizard.wizard_step({ id: `STEP2`, title: `STEP2`, validated: true, subsequentsteps: `STEP22, STEP23` });
-
-    lr_wiz_step2.message_strip( `STEP2` );
-    lr_wiz_step2.button({ text: `Press Step 2.2`, press: this.client._event(`STEP22` ) });
-    lr_wiz_step2.button({ text: `Press Step 2.3`, press: this.client._event( `STEP23` ) });
-
+    lr_wiz_step2.message_strip(`STEP2`);
+    lr_wiz_step2.button({ text: `Press Step 2.2`, press: client._event(`STEP22`) });
+    lr_wiz_step2.button({ text: `Press Step 2.3`, press: client._event(`STEP23`) });
     const lr_wiz_step22 = lr_wizard.wizard_step({ id: `STEP22`, title: `STEP2.2`, validated: true });
-
-    lr_wiz_step22.message_strip( `STEP22` );
-
+    lr_wiz_step22.message_strip(`STEP22`);
     const lr_wiz_step23 = lr_wizard.wizard_step({ id: `STEP23`, title: `STEP2.3`, validated: true });
-
-    lr_wiz_step23.message_strip( `STEP23` );
-
+    lr_wiz_step23.message_strip(`STEP23`);
     const lr_wiz_step3 = lr_wizard.wizard_step({ title: `STEP3`, validated: true });
-
-    lr_wiz_step3.message_strip( `STEP3` );
-
-
-    this.client.view_display( lr_view.stringify( ) );
-
+    lr_wiz_step3.message_strip(`STEP3`);
+    client.view_display(lr_view.stringify());
   }
-async main(client) {
-if (this.client.check_on_init( )) {
 
-      view_display( this.client );
+  async main(client) {
+    if (client.check_on_init()) {
+      this.view_display({ client: client });
       return;
-}
-switch (this.client.get( ).event) {
+    }
+    switch (client.get().EVENT) {
       case `STEP22`:
-this.client.follow_up_action( 'sap.z2ui5.decideNextStep(`STEP2`,`STEP22`);' );
-
+        client.action.gen({ val: z2ui5_if_client.cs_event.wizard_set_next_step, t_arg: [`wiz`, `STEP2`, `STEP22`] });
         break;
       case `STEP23`:
-this.client.follow_up_action( 'sap.z2ui5.decideNextStep(`STEP2`,`STEP23`);' );
-
+        client.action.gen({ val: z2ui5_if_client.cs_event.wizard_set_next_step, t_arg: [`wiz`, `STEP2`, `STEP23`] });
+        break;
     }
-this.client.view_model_update( );
-
+    client.view_model_update();
   }
 }
 

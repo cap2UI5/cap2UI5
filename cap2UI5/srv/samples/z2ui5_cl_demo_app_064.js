@@ -1,168 +1,74 @@
-/* AUTO-GENERATED scaffolding — abap2UI5 transpile failed; manual port required.
- *
- * Original ABAP source:
- * ====================
- * CLASS z2ui5_cl_demo_app_064 DEFINITION PUBLIC.
- * 
- *   PUBLIC SECTION.
- *     INTERFACES z2ui5_if_app.
- * 
- *     TYPES:
- *       BEGIN OF ty_s_tab,
- *         selkz     TYPE abap_bool,
- *         row_id    TYPE string,
- *         carrid    TYPE string,
- *         connid    TYPE string,
- *         fldate    TYPE string,
- *         planetype TYPE string,
- *       END OF ty_s_tab.
- *     TYPES
- *       ty_t_table TYPE STANDARD TABLE OF ty_s_tab WITH DEFAULT KEY.
- *     TYPES:
- *       BEGIN OF ty_s_filter_pop,
- *         option TYPE string,
- *         low    TYPE string,
- *         high   TYPE string,
- *         key    TYPE string,
- *       END OF ty_s_filter_pop.
- * 
- *     DATA mt_mapping TYPE z2ui5_if_types=>ty_t_name_value.
- *     DATA mv_search_value TYPE string.
- *     DATA mt_table TYPE ty_t_table.
- *     DATA lv_selkz TYPE abap_bool.
- *     DATA mv_check_active TYPE abap_bool.
- *     DATA:
- *       BEGIN OF screen,
- *         progress_value TYPE string VALUE `0`,
- *         display_value  TYPE string VALUE ``,
- *       END OF screen.
- * 
- *     DATA mv_percent TYPE i.
- *     DATA mv_check_enabled TYPE abap_bool.
- * 
- *   PROTECTED SECTION.
- *     DATA client TYPE REF TO z2ui5_if_client.
- * 
- *     METHODS on_init.
- *     METHODS on_event.
- * 
- *     METHODS set_selkz
- *       IMPORTING
- *         iv_selkz TYPE abap_bool.
- * 
- *   PRIVATE SECTION.
- * ENDCLASS.
- * 
- * 
- * CLASS z2ui5_cl_demo_app_064 IMPLEMENTATION.
- * 
- *   METHOD set_selkz.
- * 
- *     FIELD-SYMBOLS <ls_table> TYPE ty_s_tab.
- * 
- *     LOOP AT mt_table ASSIGNING <ls_table>.
- *       <ls_table>-selkz = iv_selkz.
- *     ENDLOOP.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD z2ui5_if_app~main.
- * 
- *     me->client = client.
- * 
- *     IF client->check_on_init( ).
- *       on_init( ).
- * 
- *     ELSE.
- *       on_event( ).
- *     ENDIF.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD on_event.
- * 
- *     DATA lt_arg TYPE string_table.
- *     DATA ls_arg TYPE string.
- * 
- *     IF client->check_on_event( `LOAD` ).
- * 
- *       mv_percent = mv_percent + 25.
- *       mv_check_active = abap_true.
- *       mv_check_enabled = abap_false.
- * 
- *       IF mv_percent > 100.
- *         mv_percent = 0.
- *         mv_check_active = abap_false.
- *         mv_check_enabled = abap_true.
- *       ENDIF.
- * 
- *       client->message_toast_display( `loaded` ).
- *       WAIT UP TO 2 SECONDS.
- *       client->view_model_update( ).
- * 
- *     ENDIF.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD on_init.
- * 
- *     DATA temp1 TYPE z2ui5_if_types=>ty_t_name_value.
- *     DATA view TYPE REF TO z2ui5_cl_xml_view.
- *     DATA page1 TYPE REF TO z2ui5_cl_xml_view.
- *     DATA temp5 TYPE abap_bool.
- *     DATA layout TYPE REF TO z2ui5_cl_xml_view.
- *     temp1 = VALUE #( ).
- * 
- *     mv_check_enabled = abap_true.
- *     view = z2ui5_cl_xml_view=>factory( ).
- * 
- *     view->_z2ui5( )->timer(
- *         finished    = client->_event( `LOAD` )
- *         checkactive = client->_bind( mv_check_active ) ).
- * 
- *     temp5 = client->check_app_prev_stack( ).
- *     page1 = view->shell( )->page( id = `page_main`
- *       title                          = `abap2UI5 - Progress Bar while Server Request`
- *       navbuttonpress                 = client->_event_nav_app_leave( )
- *       shownavbutton                  = temp5
- *       class                          = `sapUiContentPadding` ).
- * 
- *     layout = page1->vertical_layout( class = `sapuicontentpadding`
- *                                      width = `100%` ).
- *     layout->vbox( )->progress_indicator(
- *       percentvalue = client->_bind_edit( mv_percent )
- *       displayvalue = client->_bind_edit( screen-display_value )
- *       showvalue    = abap_true
- *            state   = `Success` ).
- * 
- *     layout->button(
- *         text    = `Load`
- *         press   = client->_event( `LOAD` )
- *         enabled = client->_bind( mv_check_enabled ) ).
- * 
- *     client->view_display( view->stringify( ) ).
- * 
- *   ENDMETHOD.
- * 
- * ENDCLASS.
- */
-
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
+const z2ui5_if_client = require("abap2UI5/z2ui5_if_client");
 
 class z2ui5_cl_demo_app_064 extends z2ui5_if_app {
+  mt_mapping = [];
+  mv_search_value = ``;
+  mt_table = [];
+  lv_selkz = false;
+  mv_check_active = false;
+  screen = { progress_value: `0`, display_value: `` };
+  mv_percent = 0;
+  mv_check_enabled = false;
   client = null;
+
+  set_selkz({ iv_selkz } = {}) {
+    // TODO(abap2js): FIELD-SYMBOLS <ls_table> TYPE ty_s_tab.
+    let sy_tabix = 0;
+    for (const fs of this.mt_table) {
+      sy_tabix++;
+      ls_table.selkz = iv_selkz;
+    }
+  }
+
   async main(client) {
     this.client = client;
     if (client.check_on_init()) {
-      const v = z2ui5_cl_xml_view.factory()
-        .Page({ title: "z2ui5_cl_demo_app_064 (TODO: port from abap)" })
-        .Text({ text: "This sample needs to be ported manually from abap2UI5." });
-      client.view_display(v.stringify());
+      this.on_init();
+    } else {
+      this.on_event();
     }
+  }
+
+  on_event() {
+    let lt_arg = [];
+    let ls_arg = ``;
+    if (this.client.check_on_event(`LOAD`)) {
+      this.mv_percent = this.mv_percent + 25;
+      this.mv_check_active = true;
+      this.mv_check_enabled = false;
+      if (this.mv_percent > 100) {
+        this.mv_percent = 0;
+        this.mv_check_active = false;
+        this.mv_check_enabled = true;
+      }
+      this.client.message_toast_display(`loaded`);
+      // TODO(abap2js): WAIT UP TO 2 SECONDS.
+      if (this.mv_check_active === true) {
+        this.client.action.gen({ val: z2ui5_if_client.cs_event.start_timer, t_arg: [this.client._event(`LOAD`), `0`] });
+      }
+      this.client.view_model_update();
+    }
+  }
+
+  on_init() {
+    let temp1 = [];
+    let view = null;
+    let page1 = null;
+    let temp5 = false;
+    let layout = null;
+    temp1 = {};
+    this.mv_check_enabled = true;
+    view = z2ui5_cl_xml_view.factory();
+    temp5 = this.client.check_app_prev_stack();
+    page1 = view.shell()
+      .page({ id: `page_main`, title: `abap2UI5 - Progress Bar while Server Request`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: temp5, class: `sapUiContentPadding` });
+    layout = page1.vertical_layout({ class: `sapuicontentpadding`, width: `100%` });
+    layout.vbox()
+      .progress_indicator({ percentvalue: this.client._bind_edit(this.mv_percent), displayvalue: this.client._bind_edit(this.screen.display_value), showvalue: true, state: `Success` });
+    layout.button({ text: `Load`, press: this.client._event(`LOAD`), enabled: this.client._bind(this.mv_check_enabled) });
+    this.client.view_display(view.stringify());
   }
 }
 

@@ -1,148 +1,51 @@
-/* AUTO-GENERATED scaffolding — abap2UI5 transpile failed; manual port required.
- *
- * Original ABAP source:
- * ====================
- * CLASS z2ui5_cl_demo_app_114 DEFINITION PUBLIC.
- * 
- *   PUBLIC SECTION.
- *     INTERFACES z2ui5_if_app.
- * 
- *     TYPES:
- *       BEGIN OF ty_feed,
- *         author    TYPE string,
- *         authorpic TYPE string,
- *         type      TYPE string,
- *         date      TYPE string,
- *         text      TYPE string,
- *       END OF ty_feed.
- *     DATA mt_feed TYPE TABLE OF ty_feed.
- *     DATA ms_feed TYPE ty_feed.
- *     DATA mv_value TYPE string.
- * 
- *   PROTECTED SECTION.
- *     DATA client TYPE REF TO z2ui5_if_client.
- * 
- *     METHODS on_event.
- *     METHODS set_data.
- *     METHODS view_display.
- * 
- *   PRIVATE SECTION.
- * ENDCLASS.
- * 
- * 
- * CLASS z2ui5_cl_demo_app_114 IMPLEMENTATION.
- * 
- *   METHOD z2ui5_if_app~main.
- * 
- *     me->client = client.
- * 
- *     IF client->check_on_init( ).
- *       set_data( ).
- *       view_display( ).
- * 
- *     ELSE.
- *       on_event( ).
- *     ENDIF.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD on_event.
- * 
- *     IF client->check_on_event( `POST` ).
- * 
- *       IF mv_value IS NOT INITIAL.
- *         ms_feed = VALUE #( ).
- *         ms_feed-author = sy-uname.
- *         ms_feed-type = `Respond`.
- *         ms_feed-text = mv_value.
- *         mv_value = ``.
- *         INSERT ms_feed INTO mt_feed INDEX 1.
- *         client->view_model_update( ).
- * 
- *       ENDIF.
- *     ENDIF.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD set_data.
- * 
- *     mt_feed = VALUE #(
- *                       ( author = `choper725` authorpic = `employee` type = `Request` date = `August 26 2023`
- *                         text = `Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.` &&
- *                           `Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.` &&
- *                           `Lorem ipsum dolor sit amet, consetetur sadipscing elitr, seddiamnonumyeirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.` &&
- *                           `Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.` &&
- *                           `Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.` &&
- *                           `Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna` &&
- *                           `aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.` )
- *       ( author = `choper725` authorpic = `sap-icon://employee` type = `Reply` date = `August 26 2023` text = `this is feed input` ) ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD view_display.
- * 
- *     DATA(lo_view) = z2ui5_cl_xml_view=>factory( ).
- * 
- *     DATA(page) = lo_view->shell( )->page(
- *              title          = `Feed Input`
- *              navbuttonpress = client->_event_nav_app_leave( )
- *              shownavbutton  = client->check_app_prev_stack( ) ).
- * 
- *     page->flex_box(
- *             justifycontent = `Start`
- *             class          = `sapUiSmallMarginEnd`
- *             alignitems     = `Center`
- *             )->avatar(
- *                     class = `sapUiSmallMarginEnd`
- *             )->text_area(
- *                     value       = client->_bind_edit( mv_value )
- *                     rows        = `4`
- *                     cols        = `120`
- *                     class       = `sapUiSmallMarginEnd`
- *                     placeholder = `Post something here...`
- *                     editable    = abap_true
- *                     enabled     = abap_true
- *             )->button(
- *                     icon      = `sap-icon://paper-plane`
- *                     press     = client->_event( `POST` )
- *                     iconfirst = abap_true ).
- * 
- *     page->list(
- *       items          = client->_bind_edit( mt_feed )
- *       showseparators = `Inner`
- *         )->feed_list_item(
- *           sender                   = `{AUTHOR}`
- *           senderpress              = client->_event( `SENDER_PRESS` )
- *           iconpress                = client->_event( `ICON_PRESS` )
- *           icondensityaware         = abap_false
- *           showicon                 = abap_false
- *           info                     = `Reply`
- *           text                     = `{TEXT}`
- *           convertlinkstoanchortags = `All` ).
- * 
- *     client->view_display( lo_view->stringify( ) ).
- * 
- *   ENDMETHOD.
- * 
- * ENDCLASS.
- */
-
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_114 extends z2ui5_if_app {
+  mt_feed = [];
+  ms_feed = {};
+  mv_value = ``;
   client = null;
+
   async main(client) {
     this.client = client;
     if (client.check_on_init()) {
-      const v = z2ui5_cl_xml_view.factory()
-        .Page({ title: "z2ui5_cl_demo_app_114 (TODO: port from abap)" })
-        .Text({ text: "This sample needs to be ported manually from abap2UI5." });
-      client.view_display(v.stringify());
+      this.set_data();
+      this.view_display();
+    } else {
+      this.on_event();
     }
+  }
+
+  on_event() {
+    if (this.client.check_on_event(`POST`)) {
+      if (this.mv_value) {
+        this.ms_feed = {};
+        this.ms_feed.author = sy_uname;
+        this.ms_feed.type = `Respond`;
+        this.ms_feed.text = this.mv_value;
+        this.mv_value = ``;
+        this.mt_feed index 1.push(this.ms_feed);
+        this.client.view_model_update();
+      }
+    }
+  }
+
+  set_data() {
+    this.mt_feed = [{ author: `choper725`, authorpic: `employee`, type: `Request`, date: `August 26 2023`, text: `Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.` + `Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.` + `Lorem ipsum dolor sit amet, consetetur sadipscing elitr, seddiamnonumyeirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.` + `Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.` + `Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.` + `Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna` + `aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.` }, { author: `choper725`, authorpic: `sap-icon://employee`, type: `Reply`, date: `August 26 2023`, text: `this is feed input` }];
+  }
+
+  view_display() {
+    const lo_view = z2ui5_cl_xml_view.factory();
+    const page = lo_view.shell()
+      .page({ title: `Feed Input`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    page.flex_box({ justifycontent: `Start`, class: `sapUiSmallMarginEnd`, alignitems: `Center` })
+      .avatar({ class: `sapUiSmallMarginEnd` })
+      .text_area({ value: this.client._bind_edit(this.mv_value), rows: `4`, cols: `120`, class: `sapUiSmallMarginEnd`, placeholder: `Post something here...`, editable: true, enabled: true })
+      .button({ icon: `sap-icon://paper-plane`, press: this.client._event(`POST`), iconfirst: true });
+    page.list({ items: this.client._bind_edit(this.mt_feed), showseparators: `Inner` })
+      .feed_list_item({ sender: `{AUTHOR}`, senderpress: this.client._event(`SENDER_PRESS`), iconpress: this.client._event(`ICON_PRESS`), icondensityaware: false, showicon: false, info: `Reply`, text: `{TEXT}`, convertlinkstoanchortags: `All` });
+    this.client.view_display(lo_view.stringify());
   }
 }
 

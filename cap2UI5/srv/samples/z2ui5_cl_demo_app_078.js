@@ -1,116 +1,47 @@
-/* AUTO-GENERATED scaffolding — abap2UI5 transpile failed; manual port required.
- *
- * Original ABAP source:
- * ====================
- * CLASS z2ui5_cl_demo_app_078 DEFINITION PUBLIC.
- * 
- *   PUBLIC SECTION.
- *     INTERFACES z2ui5_if_app.
- * 
- *     TYPES:
- *       BEGIN OF ty_s_token,
- *         key      TYPE string,
- *         text     TYPE string,
- *         visible  TYPE abap_bool,
- *         selkz    TYPE abap_bool,
- *         editable TYPE abap_bool,
- *       END OF ty_s_token.
- * 
- *     DATA mv_value          TYPE string.
- *     DATA mt_token          TYPE STANDARD TABLE OF ty_s_token WITH EMPTY KEY.
- *     DATA mt_tokens_added TYPE STANDARD TABLE OF ty_s_token WITH EMPTY KEY.
- *     DATA mt_tokens_removed TYPE STANDARD TABLE OF ty_s_token WITH EMPTY KEY.
- * 
- *   PROTECTED SECTION.
- *   PRIVATE SECTION.
- * ENDCLASS.
- * 
- * 
- * CLASS z2ui5_cl_demo_app_078 IMPLEMENTATION.
- * 
- *   METHOD z2ui5_if_app~main.
- * 
- *     IF client->check_on_init( ).
- * 
- *       DATA(view) = z2ui5_cl_xml_view=>factory( ).
- * 
- *       view = view->shell( )->page( id = `page_main`
- *                title                  = `abap2UI5 - Select-Options`
- *                navbuttonpress         = client->_event_nav_app_leave( )
- *                shownavbutton          = client->check_app_prev_stack( ) ).
- * 
- *       view->_z2ui5( )->multiinput_ext(
- *                             addedtokens   = client->_bind_edit( mt_tokens_added )
- *                             removedtokens = client->_bind_edit( mt_tokens_removed )
- *                             change        = client->_event( `UPDATE_BACKEND` )
- *                             multiinputid  = `test` ).
- * 
- *       view->multi_input(
- *                             id            = `test`
- *                            tokens         = client->_bind_edit( mt_token )
- *                             showclearicon = abap_true
- *                        )->tokens(
- *                            )->token( key      = `{KEY}`
- *                                      text     = `{TEXT}`
- *                                      visible  = `{VISIBLE}`
- *                                      selected = `{SELKZ}`
- *                                      editable = `{EDITABLE}` ).
- * 
- *       DATA(tab) = view->table(
- *         items = client->_bind_edit( mt_token )
- *         mode  = `MultiSelect` ).
- * 
- *       tab->columns(
- *         )->column(
- *            )->text( `KEY` )->get_parent(
- *         )->column(
- *            )->text( `TEXT` ).
- * 
- *       tab->items( )->column_list_item( selected = `{SELKZ}`
- *         )->cells(
- *             )->input( value   = `{KEY}`
- *                       enabled = `{EDITABLE}`
- *             )->input( value   = `{TEXT}`
- *                       enabled = `{EDITABLE}`).
- * 
- *       client->view_display( view->stringify( ) ).
- * 
- *     ENDIF.
- * 
- *     CASE client->get( )-event.
- * 
- *       WHEN `UPDATE_BACKEND`.
- * 
- *         LOOP AT mt_tokens_removed INTO DATA(ls_token).
- *           DELETE mt_token WHERE key = ls_token-key.
- *         ENDLOOP.
- * 
- *         LOOP AT mt_tokens_added INTO ls_token.
- *           INSERT VALUE #( key = ls_token-key text = ls_token-text visible = abap_true editable = abap_true ) INTO TABLE mt_token.
- *         ENDLOOP.
- * 
- *         mt_tokens_removed = VALUE #( ).
- *         mt_tokens_added = VALUE #( ).
- *         client->view_model_update( ).
- *     ENDCASE.
- * 
- *   ENDMETHOD.
- * 
- * ENDCLASS.
- */
-
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_078 extends z2ui5_if_app {
-  client = null;
+  mv_value = ``;
+  mt_token = [];
+  mt_tokens_added = [];
+  mt_tokens_removed = [];
+
   async main(client) {
-    this.client = client;
     if (client.check_on_init()) {
-      const v = z2ui5_cl_xml_view.factory()
-        .Page({ title: "z2ui5_cl_demo_app_078 (TODO: port from abap)" })
-        .Text({ text: "This sample needs to be ported manually from abap2UI5." });
-      client.view_display(v.stringify());
+      let view = z2ui5_cl_xml_view.factory();
+      view = view.shell()
+        .page({ id: `page_main`, title: `abap2UI5 - Select-Options`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
+      view._z2ui5()
+        .multiinput_ext({ addedtokens: client._bind_edit(this.mt_tokens_added), removedtokens: client._bind_edit(this.mt_tokens_removed), change: client._event(`UPDATE_BACKEND`), multiinputid: `test` });
+      view.multi_input({ id: `test`, tokens: client._bind_edit(this.mt_token), showclearicon: true })
+        .tokens()
+        .token({ key: `{KEY}`, text: `{TEXT}`, visible: `{VISIBLE}`, selected: `{SELKZ}`, editable: `{EDITABLE}` });
+      const tab = view.table({ items: client._bind_edit(this.mt_token), mode: `MultiSelect` });
+      tab.columns().column().text(`KEY`).get_parent().column().text(`TEXT`);
+      tab.items()
+        .column_list_item({ selected: `{SELKZ}` })
+        .cells()
+        .input({ value: `{KEY}`, enabled: `{EDITABLE}` })
+        .input({ value: `{TEXT}`, enabled: `{EDITABLE}` });
+      client.view_display(view.stringify());
+    }
+    switch (client.get().EVENT) {
+      case `UPDATE_BACKEND`:
+        let sy_tabix = 0;
+        for (const ls_token of this.mt_tokens_removed) {
+          sy_tabix++;
+          for (let _i = this.mt_token.length - 1; _i >= 0; _i--) { const row = this.mt_token[_i]; if (row.key === ls_token.key) this.mt_token.splice(_i, 1); }
+        }
+        let sy_tabix = 0;
+        for (const ls_token of this.mt_tokens_added) {
+          sy_tabix++;
+          this.mt_token.push({ key: ls_token.key, text: ls_token.text, visible: true, editable: true });
+        }
+        this.mt_tokens_removed = {};
+        this.mt_tokens_added = {};
+        client.view_model_update();
+        break;
     }
   }
 }

@@ -1,24 +1,19 @@
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_006 extends z2ui5_if_app {
-
-  t_tab     = [];
-  client    = null;
+  t_tab = [];
+  client = null;
   check_ui5 = false;
-  key       = ``;
+  key = ``;
 
   async main(client) {
-
     this.client = client;
-
     if (client.check_on_init()) {
       this.on_init();
-
     } else if (client.check_on_event()) {
       this.on_event();
     }
-
   }
 
   on_init() {
@@ -27,85 +22,69 @@ class z2ui5_cl_demo_app_006 extends z2ui5_if_app {
   }
 
   on_event() {
-
     switch (this.client.get().EVENT) {
       case `SORT_ASCENDING`:
-        this.t_tab.sort((a, b) => a.count - b.count);
+        this.t_tab.sort((a, b) => (a.count > b.count ? 1 : a.count < b.count ? -1 : 0));
         this.client.message_toast_display(`sort ascending`);
         break;
       case `SORT_DESCENDING`:
-        this.t_tab.sort((a, b) => b.count - a.count);
+        this.t_tab.sort((a, b) => (a.count > b.count ? 1 : a.count < b.count ? -1 : 0) * -1);
         this.client.message_toast_display(`sort descending`);
         break;
     }
-
     this.view_display();
-
   }
 
   refresh_data() {
-    this.t_tab = [];
-    for (let i = 1; i <= 10000; i++) {
-      this.t_tab.push({
-        count:      i,
-        value:      `red`,
-        descr:      `this is a description`,
-        icon:       ``,
-        info:       ``,
-        checkbox:   true,
-        percentage: 0,
-        valuecolor: `Good`,
-      });
-    }
+    this.t_tab = /* TODO(abap2js): VALUE FOR/BASE */ [];
   }
 
   view_display() {
-
     const view = z2ui5_cl_xml_view.factory();
-    const page = view.Shell()
-      .Page({
-        title:          `abap2UI5 - Scroll Container with Table and Toolbar`,
-        navButtonPress: this.client._event_nav_app_leave(),
-        showNavButton:  this.client.check_app_prev_stack(),
-      });
-
-    const tab = page.ScrollContainer({ height: `70%`, vertical: true })
-      .Table({
-        growing:             true,
-        growingThreshold:    `20`,
-        growingScrollToLoad: true,
-        items:               this.client._bind_edit(this.t_tab),
-        sticky:              `ColumnHeaders,HeaderToolbar`,
-      });
-
-    const tb = tab.headerToolbar().Toolbar();
-    tb.Title({ text: `title of the table` });
-    tb.Button({ text: `letf side button`, icon: `sap-icon://account`, press: this.client._event(`BUTTON_SORT`) });
-    tb.SegmentedButton({ selectedKey: this.client._bind_edit(this.key) })
+    const page = view.shell()
+      .page({ title: `abap2UI5 - Scroll Container with Table and Toolbar`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    const tab = page.scroll_container({ height: `70%`, vertical: true })
+      .table({ growing: true, growingthreshold: `20`, growingscrolltoload: true, items: this.client._bind_edit(this.t_tab), sticky: `ColumnHeaders,HeaderToolbar` });
+    tab.header_toolbar()
+      .toolbar()
+      .title(`title of the table`)
+      .button({ text: `letf side button`, icon: `sap-icon://account`, press: this.client._event(`BUTTON_SORT`) })
+      .segmented_button(this.key)
       .items()
-        .SegmentedButtonItem({ key: `BLUE`,  icon: `sap-icon://accept`,        text: `blue`  })
-        .SegmentedButtonItem({ key: `GREEN`, icon: `sap-icon://add-favorite`, text: `green` });
-    tb.ToolbarSpacer();
-    tb.Button({ icon: `sap-icon://sort-descending`, press: this.client._event(`SORT_DESCENDING`) });
-    tb.Button({ icon: `sap-icon://sort-ascending`,  press: this.client._event(`SORT_ASCENDING`)  });
-
-    const cols = tab.columns();
-    cols.Column().Text({ text: `Color` });
-    cols.Column().Text({ text: `Info` });
-    cols.Column().Text({ text: `Description` });
-    cols.Column().Text({ text: `Checkbox` });
-    cols.Column().Text({ text: `Counter` });
-    cols.Column().Text({ text: `Radial Micro Chart` });
-
-    const cells = tab.items().ColumnListItem().cells();
-    cells.Text({     text:     `{value}` });
-    cells.Text({     text:     `{info}` });
-    cells.Text({     text:     `{descr}` });
-    cells.CheckBox({ selected: `{checkbox}`, enabled: false });
-    cells.Text({     text:     `{count}` });
-
+      .segmented_button_item({ key: `BLUE`, icon: `sap-icon://accept`, text: `blue` })
+      .segmented_button_item({ key: `GREEN`, icon: `sap-icon://add-favorite`, text: `green` })
+      .get_parent()
+      .get_parent()
+      .toolbar_spacer()
+      .button({ icon: `sap-icon://sort-descending`, press: this.client._event(`SORT_DESCENDING`) })
+      .button({ icon: `sap-icon://sort-ascending`, press: this.client._event(`SORT_ASCENDING`) });
+    tab.columns()
+      .column()
+      .text(`Color`)
+      .get_parent()
+      .column()
+      .text(`Info`)
+      .get_parent()
+      .column()
+      .text(`Description`)
+      .get_parent()
+      .column()
+      .text(`Checkbox`)
+      .get_parent()
+      .column()
+      .text(`Counter`)
+      .get_parent()
+      .column()
+      .text(`Radial Micro Chart`);
+    tab.items()
+      .column_list_item()
+      .cells()
+      .text(`{VALUE}`)
+      .text(`{INFO}`)
+      .text(`{DESCR}`)
+      .checkbox({ selected: `{CHECKBOX}`, enabled: false })
+      .text(`{COUNT}`);
     this.client.view_display(view.stringify());
-
   }
 }
 

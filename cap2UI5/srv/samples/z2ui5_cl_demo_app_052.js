@@ -1,204 +1,75 @@
-/* AUTO-GENERATED scaffolding — abap2UI5 transpile failed; manual port required.
- *
- * Original ABAP source:
- * ====================
- * CLASS z2ui5_cl_demo_app_052 DEFINITION PUBLIC.
- * 
- *   PUBLIC SECTION.
- *     INTERFACES z2ui5_if_app.
- * 
- *     TYPES:
- *       BEGIN OF ty_s_tab,
- *         selkz            TYPE abap_bool,
- *         product          TYPE string,
- *         create_date      TYPE string,
- *         create_by        TYPE string,
- *         storage_location TYPE string,
- *         quantity         TYPE i,
- *       END OF ty_s_tab.
- *     TYPES ty_t_table TYPE STANDARD TABLE OF ty_s_tab WITH EMPTY KEY.
- * 
- *     DATA mt_table TYPE ty_t_table.
- * 
- *     DATA client TYPE REF TO z2ui5_if_client.
- * 
- *     DATA mv_check_popover TYPE abap_bool.
- *     DATA mv_product TYPE string.
- * 
- *     METHODS  set_data.
- *     METHODS view_display.
- *     METHODS popover_display
- *       IMPORTING
- *         id TYPE string.
- * 
- *   PROTECTED SECTION.
- *   PRIVATE SECTION.
- * ENDCLASS.
- * 
- * 
- * CLASS z2ui5_cl_demo_app_052 IMPLEMENTATION.
- * 
- *   METHOD popover_display.
- * 
- *     DATA(lo_popover) = z2ui5_cl_xml_view=>factory_popup( ).
- * 
- *     lo_popover->popover( placement    = `Right`
- *                          title        = `abap2UI5 - Popover - ` && mv_product
- *                          contentwidth = `50%`
- *       )->simple_form( editable = abap_true
- *       )->content( `form`
- *           )->label( `Product`
- *           )->text( mv_product
- *           )->label( `info2`
- *           )->text( `this is a text`
- *           )->label( `info3`
- *           )->text( `this is a text`
- *           )->text( `this is a text`
- *         )->get_parent( )->get_parent(
- *         )->footer(
- *          )->overflow_toolbar(
- *             )->toolbar_spacer(
- *             )->button(
- *                 text  = `details`
- *                 press = client->_event( `BUTTON_DETAILS` )
- *                 type  = `Emphasized` ).
- *     client->popover_display( xml   = lo_popover->stringify( )
- *                              by_id = id ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD view_display.
- * 
- *     DATA(view) = z2ui5_cl_xml_view=>factory( ).
- * 
- *     DATA(page) = view->page( id = `page_main`
- *             title               = `abap2UI5 - List Report Features`
- *             navbuttonpress      = client->_event_nav_app_leave( )
- *             shownavbutton       = client->check_app_prev_stack( ) ).
- * 
- *     page = page->dynamic_page( headerexpanded = abap_true
- *                                headerpinned   = abap_true ).
- * 
- *     DATA(cont) = page->content( `f` ).
- *     DATA(tab) = cont->table( id    = `tab`
- *                              items = client->_bind_edit( val = mt_table ) ).
- * 
- *     DATA(lo_columns) = tab->columns( ).
- *     lo_columns->column( )->text( `Product` ).
- *     lo_columns->column( )->text( `Date` ).
- *     lo_columns->column( )->text( `Name` ).
- *     lo_columns->column( )->text( `Location` ).
- *     lo_columns->column( )->text( `Quantity` ).
- * 
- *     DATA(lo_cells) = tab->items( )->column_list_item( ).
- *     lo_cells->link( id    = `link`
- *                     text  = `{PRODUCT}`
- *                     press = client->_event( val = `POPOVER_DETAIL` t_arg = VALUE #( ( `${$source>/id}` ) ( `${PRODUCT}` ) ) ) ).
- *     lo_cells->text( `{CREATE_DATE}` ).
- *     lo_cells->text( `{CREATE_BY}` ).
- *     lo_cells->text( `{STORAGE_LOCATION}` ).
- *     lo_cells->text( `{QUANTITY}` ).
- * 
- *     client->view_display( view->stringify( ) ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD z2ui5_if_app~main.
- * 
- *     me->client = client.
- * 
- *     IF client->check_on_init( ).
- *       view_display( ).
- *       set_data( ).
- *       RETURN.
- *     ENDIF.
- * 
- *     CASE client->get( )-event.
- * 
- *       WHEN `BUTTON_DETAILS`.
- *         client->popover_destroy( ).
- * 
- *       WHEN `POPOVER_DETAIL`.
- *         mv_check_popover = abap_true.
- *         mv_product = client->get_event_arg( 2 ).
- *         popover_display( client->get_event_arg( 1 ) ).
- *     ENDCASE.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD set_data.
- * 
- *     mt_table = VALUE #(
- *         ( product = `table` create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
- *         ( product = `chair` create_date = `01.01.2022` create_by = `James` storage_location = `AREA_001` quantity = 123 )
- *         ( product = `sofa` create_date = `01.05.2021` create_by = `Simone` storage_location = `AREA_001` quantity = 700 )
- *         ( product = `computer` create_date = `27.01.2023` create_by = `Theo` storage_location = `AREA_001` quantity = 200 )
- *         ( product = `printer` create_date = `01.01.2023` create_by = `Hannah` storage_location = `AREA_001` quantity = 90 )
- *         ( product = `table2` create_date = `01.01.2023` create_by = `Julia` storage_location = `AREA_001` quantity = 110 )
- *         ( product = `table` create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
- *         ( product = `chair` create_date = `01.01.2022` create_by = `James` storage_location = `AREA_001` quantity = 123 )
- *         ( product = `sofa` create_date = `01.05.2021` create_by = `Simone` storage_location = `AREA_001` quantity = 700 )
- *         ( product = `computer` create_date = `27.01.2023` create_by = `Theo` storage_location = `AREA_001` quantity = 200 )
- *         ( product = `printer` create_date = `01.01.2023` create_by = `Hannah` storage_location = `AREA_001` quantity = 90 )
- *         ( product = `table2` create_date = `01.01.2023` create_by = `Julia` storage_location = `AREA_001` quantity = 110 )
- *         ( product = `table` create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
- *         ( product = `chair` create_date = `01.01.2022` create_by = `James` storage_location = `AREA_001` quantity = 123 )
- *         ( product = `sofa` create_date = `01.05.2021` create_by = `Simone` storage_location = `AREA_001` quantity = 700 )
- *         ( product = `computer` create_date = `27.01.2023` create_by = `Theo` storage_location = `AREA_001` quantity = 200 )
- *         ( product = `printer` create_date = `01.01.2023` create_by = `Hannah` storage_location = `AREA_001` quantity = 90 )
- *         ( product = `table2` create_date = `01.01.2023` create_by = `Julia` storage_location = `AREA_001` quantity = 110 )
- *         ( product = `table` create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
- *         ( product = `chair` create_date = `01.01.2022` create_by = `James` storage_location = `AREA_001` quantity = 123 )
- *         ( product = `sofa` create_date = `01.05.2021` create_by = `Simone` storage_location = `AREA_001` quantity = 700 )
- *         ( product = `computer` create_date = `27.01.2023` create_by = `Theo` storage_location = `AREA_001` quantity = 200 )
- *         ( product = `printer` create_date = `01.01.2023` create_by = `Hannah` storage_location = `AREA_001` quantity = 90 )
- *         ( product = `table2` create_date = `01.01.2023` create_by = `Julia` storage_location = `AREA_001` quantity = 110 )
- *         ( product = `table` create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
- *         ( product = `chair` create_date = `01.01.2022` create_by = `James` storage_location = `AREA_001` quantity = 123 )
- *         ( product = `sofa` create_date = `01.05.2021` create_by = `Simone` storage_location = `AREA_001` quantity = 700 )
- *         ( product = `computer` create_date = `27.01.2023` create_by = `Theo` storage_location = `AREA_001` quantity = 200 )
- *         ( product = `printer` create_date = `01.01.2023` create_by = `Hannah` storage_location = `AREA_001` quantity = 90 )
- *         ( product = `table2` create_date = `01.01.2023` create_by = `Julia` storage_location = `AREA_001` quantity = 110 )
- *         ( product = `table` create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
- *         ( product = `chair` create_date = `01.01.2022` create_by = `James` storage_location = `AREA_001` quantity = 123 )
- *         ( product = `sofa` create_date = `01.05.2021` create_by = `Simone` storage_location = `AREA_001` quantity = 700 )
- *         ( product = `computer` create_date = `27.01.2023` create_by = `Theo` storage_location = `AREA_001` quantity = 200 )
- *         ( product = `printer` create_date = `01.01.2023` create_by = `Hannah` storage_location = `AREA_001` quantity = 90 )
- *         ( product = `table2` create_date = `01.01.2023` create_by = `Julia` storage_location = `AREA_001` quantity = 110 )
- *         ( product = `table` create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
- *         ( product = `chair` create_date = `01.01.2022` create_by = `James` storage_location = `AREA_001` quantity = 123 )
- *         ( product = `sofa` create_date = `01.05.2021` create_by = `Simone` storage_location = `AREA_001` quantity = 700 )
- *         ( product = `computer` create_date = `27.01.2023` create_by = `Theo` storage_location = `AREA_001` quantity = 200 )
- *         ( product = `printer` create_date = `01.01.2023` create_by = `Hannah` storage_location = `AREA_001` quantity = 90 )
- *         ( product = `table2` create_date = `01.01.2023` create_by = `Julia` storage_location = `AREA_001` quantity = 110 )
- *         ( product = `table` create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
- *         ( product = `chair` create_date = `01.01.2022` create_by = `James` storage_location = `AREA_001` quantity = 123 )
- *         ( product = `sofa` create_date = `01.05.2021` create_by = `Simone` storage_location = `AREA_001` quantity = 700 )
- *         ( product = `computer` create_date = `27.01.2023` create_by = `Theo` storage_location = `AREA_001` quantity = 200 )
- *         ( product = `printer` create_date = `01.01.2023` create_by = `Hannah` storage_location = `AREA_001` quantity = 90 )
- *         ( product = `table2` create_date = `01.01.2023` create_by = `Julia` storage_location = `AREA_001` quantity = 110 ) ).
- * 
- *   ENDMETHOD.
- * 
- * ENDCLASS.
- */
-
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_052 extends z2ui5_if_app {
+  mt_table = [];
+  mv_check_popover = false;
+  mv_product = ``;
   client = null;
+
+  popover_display({ id } = {}) {
+    const lo_popover = z2ui5_cl_xml_view.factory_popup();
+    lo_popover.popover({ placement: `Right`, title: `abap2UI5 - Popover - ${this.mv_product}`, contentwidth: `50%` })
+      .simple_form({ editable: true })
+      .content(`form`)
+      .label(`Product`)
+      .text(this.mv_product)
+      .label(`info2`)
+      .text(`this is a text`)
+      .label(`info3`)
+      .text(`this is a text`)
+      .text(`this is a text`)
+      .get_parent()
+      .get_parent()
+      .footer()
+      .overflow_toolbar()
+      .toolbar_spacer()
+      .button({ text: `details`, press: this.client._event(`BUTTON_DETAILS`), type: `Emphasized` });
+    this.client.popover_display(lo_popover.stringify(), id);
+  }
+
+  view_display() {
+    const view = z2ui5_cl_xml_view.factory();
+    let page = view.page({ id: `page_main`, title: `abap2UI5 - List Report Features`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    page = page.dynamic_page({ headerexpanded: true, headerpinned: true });
+    const cont = page.content(`f`);
+    const tab = cont.table({ id: `tab`, items: this.client._bind_edit(this.mt_table) });
+    const lo_columns = tab.columns();
+    lo_columns.column().text(`Product`);
+    lo_columns.column().text(`Date`);
+    lo_columns.column().text(`Name`);
+    lo_columns.column().text(`Location`);
+    lo_columns.column().text(`Quantity`);
+    const lo_cells = tab.items().column_list_item();
+    lo_cells.link({ id: `link`, text: `{PRODUCT}`, press: this.client._event(`POPOVER_DETAIL`, [`${$source>/id}`, `${PRODUCT}`]) });
+    lo_cells.text(`{CREATE_DATE}`);
+    lo_cells.text(`{CREATE_BY}`);
+    lo_cells.text(`{STORAGE_LOCATION}`);
+    lo_cells.text(`{QUANTITY}`);
+    this.client.view_display(view.stringify());
+  }
+
   async main(client) {
     this.client = client;
     if (client.check_on_init()) {
-      const v = z2ui5_cl_xml_view.factory()
-        .Page({ title: "z2ui5_cl_demo_app_052 (TODO: port from abap)" })
-        .Text({ text: "This sample needs to be ported manually from abap2UI5." });
-      client.view_display(v.stringify());
+      this.view_display();
+      this.set_data();
+      return;
     }
+    switch (client.get().EVENT) {
+      case `BUTTON_DETAILS`:
+        client.popover_destroy();
+        break;
+      case `POPOVER_DETAIL`:
+        this.mv_check_popover = true;
+        this.mv_product = client.get_event_arg(2);
+        this.popover_display({ id: client.get_event_arg(1) });
+        break;
+    }
+  }
+
+  set_data() {
+    this.mt_table = [{ product: `table`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }, { product: `chair`, create_date: `01.01.2022`, create_by: `James`, storage_location: `AREA_001`, quantity: 123 }, { product: `sofa`, create_date: `01.05.2021`, create_by: `Simone`, storage_location: `AREA_001`, quantity: 700 }, { product: `computer`, create_date: `27.01.2023`, create_by: `Theo`, storage_location: `AREA_001`, quantity: 200 }, { product: `printer`, create_date: `01.01.2023`, create_by: `Hannah`, storage_location: `AREA_001`, quantity: 90 }, { product: `table2`, create_date: `01.01.2023`, create_by: `Julia`, storage_location: `AREA_001`, quantity: 110 }, { product: `table`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }, { product: `chair`, create_date: `01.01.2022`, create_by: `James`, storage_location: `AREA_001`, quantity: 123 }, { product: `sofa`, create_date: `01.05.2021`, create_by: `Simone`, storage_location: `AREA_001`, quantity: 700 }, { product: `computer`, create_date: `27.01.2023`, create_by: `Theo`, storage_location: `AREA_001`, quantity: 200 }, { product: `printer`, create_date: `01.01.2023`, create_by: `Hannah`, storage_location: `AREA_001`, quantity: 90 }, { product: `table2`, create_date: `01.01.2023`, create_by: `Julia`, storage_location: `AREA_001`, quantity: 110 }, { product: `table`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }, { product: `chair`, create_date: `01.01.2022`, create_by: `James`, storage_location: `AREA_001`, quantity: 123 }, { product: `sofa`, create_date: `01.05.2021`, create_by: `Simone`, storage_location: `AREA_001`, quantity: 700 }, { product: `computer`, create_date: `27.01.2023`, create_by: `Theo`, storage_location: `AREA_001`, quantity: 200 }, { product: `printer`, create_date: `01.01.2023`, create_by: `Hannah`, storage_location: `AREA_001`, quantity: 90 }, { product: `table2`, create_date: `01.01.2023`, create_by: `Julia`, storage_location: `AREA_001`, quantity: 110 }, { product: `table`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }, { product: `chair`, create_date: `01.01.2022`, create_by: `James`, storage_location: `AREA_001`, quantity: 123 }, { product: `sofa`, create_date: `01.05.2021`, create_by: `Simone`, storage_location: `AREA_001`, quantity: 700 }, { product: `computer`, create_date: `27.01.2023`, create_by: `Theo`, storage_location: `AREA_001`, quantity: 200 }, { product: `printer`, create_date: `01.01.2023`, create_by: `Hannah`, storage_location: `AREA_001`, quantity: 90 }, { product: `table2`, create_date: `01.01.2023`, create_by: `Julia`, storage_location: `AREA_001`, quantity: 110 }, { product: `table`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }, { product: `chair`, create_date: `01.01.2022`, create_by: `James`, storage_location: `AREA_001`, quantity: 123 }, { product: `sofa`, create_date: `01.05.2021`, create_by: `Simone`, storage_location: `AREA_001`, quantity: 700 }, { product: `computer`, create_date: `27.01.2023`, create_by: `Theo`, storage_location: `AREA_001`, quantity: 200 }, { product: `printer`, create_date: `01.01.2023`, create_by: `Hannah`, storage_location: `AREA_001`, quantity: 90 }, { product: `table2`, create_date: `01.01.2023`, create_by: `Julia`, storage_location: `AREA_001`, quantity: 110 }, { product: `table`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }, { product: `chair`, create_date: `01.01.2022`, create_by: `James`, storage_location: `AREA_001`, quantity: 123 }, { product: `sofa`, create_date: `01.05.2021`, create_by: `Simone`, storage_location: `AREA_001`, quantity: 700 }, { product: `computer`, create_date: `27.01.2023`, create_by: `Theo`, storage_location: `AREA_001`, quantity: 200 }, { product: `printer`, create_date: `01.01.2023`, create_by: `Hannah`, storage_location: `AREA_001`, quantity: 90 }, { product: `table2`, create_date: `01.01.2023`, create_by: `Julia`, storage_location: `AREA_001`, quantity: 110 }, { product: `table`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }, { product: `chair`, create_date: `01.01.2022`, create_by: `James`, storage_location: `AREA_001`, quantity: 123 }, { product: `sofa`, create_date: `01.05.2021`, create_by: `Simone`, storage_location: `AREA_001`, quantity: 700 }, { product: `computer`, create_date: `27.01.2023`, create_by: `Theo`, storage_location: `AREA_001`, quantity: 200 }, { product: `printer`, create_date: `01.01.2023`, create_by: `Hannah`, storage_location: `AREA_001`, quantity: 90 }, { product: `table2`, create_date: `01.01.2023`, create_by: `Julia`, storage_location: `AREA_001`, quantity: 110 }, { product: `table`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }, { product: `chair`, create_date: `01.01.2022`, create_by: `James`, storage_location: `AREA_001`, quantity: 123 }, { product: `sofa`, create_date: `01.05.2021`, create_by: `Simone`, storage_location: `AREA_001`, quantity: 700 }, { product: `computer`, create_date: `27.01.2023`, create_by: `Theo`, storage_location: `AREA_001`, quantity: 200 }, { product: `printer`, create_date: `01.01.2023`, create_by: `Hannah`, storage_location: `AREA_001`, quantity: 90 }, { product: `table2`, create_date: `01.01.2023`, create_by: `Julia`, storage_location: `AREA_001`, quantity: 110 }];
   }
 }
 

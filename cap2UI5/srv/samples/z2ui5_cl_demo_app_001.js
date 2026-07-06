@@ -1,38 +1,28 @@
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_001 extends z2ui5_if_app {
-
-  product  = ``;
+  product = ``;
   quantity = ``;
 
   async main(client) {
-
     if (client.check_on_init()) {
-
-      this.product  = `products`;
+      this.product = `products`;
       this.quantity = `500`;
-
       const view = z2ui5_cl_xml_view.factory();
-      view.Shell()
-        .Page({
-          title:          `abap2UI5 - First Example`,
-          navButtonPress: client._event_nav_app_leave(),
-          showNavButton:  client.check_app_prev_stack(),
-        })
-        .SimpleForm({ title: `Form Title`, editable: true })
-          .content()
-            .Label({ text: `quantity` })
-            .Input({ value: client._bind_edit(this.quantity) })
-            .Label({ text: `product` })
-            .Input({ value: this.product, enabled: false })
-            .Button({ text: `post`, press: client._event(`BUTTON_POST`) });
+      view.shell()
+        .page({ title: `abap2UI5 - First Example`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() })
+        .simple_form({ title: `Form Title`, editable: true })
+        .content(`form`)
+        .label(`quantity`)
+        .input(client._bind_edit(this.quantity))
+        .label(`product`)
+        .input({ value: this.product, enabled: false })
+        .button({ text: `post`, press: client._event(`BUTTON_POST`) });
       client.view_display(view.stringify());
-
     } else if (client.check_on_event(`BUTTON_POST`)) {
       client.message_toast_display(`${this.product} ${this.quantity} - send to the server`);
     }
-
   }
 }
 

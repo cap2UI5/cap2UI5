@@ -1,156 +1,118 @@
-/* AUTO-GENERATED scaffolding — abap2UI5 transpile failed; manual port required.
- *
- * Original ABAP source:
- * ====================
- * CLASS z2ui5_cl_demo_app_260 DEFINITION PUBLIC.
- * 
- *   PUBLIC SECTION.
- *     INTERFACES z2ui5_if_app.
- * 
- *   PROTECTED SECTION.
- *     DATA client TYPE REF TO z2ui5_if_client.
- * 
- *     METHODS view_display
- *       IMPORTING
- *         client TYPE REF TO z2ui5_if_client.
- *     METHODS on_event
- *       IMPORTING
- *         client TYPE REF TO z2ui5_if_client.
- *     METHODS popover_display
- *       IMPORTING
- *         id TYPE string.
- * 
- *   PRIVATE SECTION.
- * ENDCLASS.
- * 
- * 
- * CLASS z2ui5_cl_demo_app_260 IMPLEMENTATION.
- * 
- *   METHOD view_display.
- * 
- *     DATA(page) = z2ui5_cl_xml_view=>factory( )->shell(
- *          )->page(
- *             title          = `abap2UI5 - Sample: Nested Splitter Layouts - 7 Areas`
- *             navbuttonpress = client->_event_nav_app_leave( )
- *             shownavbutton  = client->check_app_prev_stack( ) ).
- * 
- *     page->header_content(
- *        )->button( id = `hint_icon`
- *            icon      = `sap-icon://hint`
- *            tooltip   = `Sample information`
- *            press     = client->_event( `POPOVER` ) ).
- * 
- *     page->header_content(
- *        )->link(
- *            text   = `UI5 Demo Kit`
- *            target = `_blank`
- *            href   = `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.ui.layout.Splitter/sample/sap.ui.layout.sample.SplitterNested1` ).
- * 
- *     DATA(layout) = page->splitter( height      = `500px`
- *                                    orientation = `Vertical`
- *                           )->splitter( )->get(
- *                               )->layout_data( `layout`
- *                                   )->splitter_layout_data( size = `50px` )->get_parent( )->get_parent(
- *                               )->content_areas( `layout`
- *                                   )->button( width = `100%`
- *                                              text  = `Content 1` )->get(
- *                                       )->layout_data(
- *                                           )->splitter_layout_data( size = `auto` )->get_parent( )->get_parent( )->get_parent( )->get_parent( )->get_parent(
- *                           )->splitter( )->get(
- *                               )->layout_data( `layout`
- *                                   )->splitter_layout_data( size = `auto` )->get_parent( )->get_parent(
- *                               )->content_areas( `layout`
- *                                   )->button( width = `100%`
- *                                              text  = `Content 2` )->get(
- *                                        )->layout_data(
- *                                            )->splitter_layout_data( size = `300px` )->get_parent( )->get_parent( )->get_parent(
- *                                   )->splitter( orientation = `Vertical`
- *                                       )->button( width = `100%`
- *                                                  text  = `Content 3` )->get(
- *                                           )->layout_data(
- *                                               )->splitter_layout_data( size = `auto` )->get_parent( )->get_parent( )->get_parent(
- *                                       )->button( width = `100%`
- *                                                  text  = `Content 4` )->get(
- *                                           )->layout_data(
- *                                               )->splitter_layout_data( size = `10%` ")->get_parent( )->get_parent( )->get_parent(
- *                                       )->get_parent( )->get_parent( )->get_parent( )->get_parent( )->get_parent(
- *                           )->button( width = `100%`
- *                                      text  = `Content 5` )->get(
- *                               )->layout_data(
- *                                   )->splitter_layout_data( size    = `30%`
- *                                                            minsize = `200px` )->get_parent( )->get_parent( )->get_parent( )->get_parent(
- *                           )->splitter( )->get(
- *                                )->layout_data( `layout`
- *                                    )->splitter_layout_data( size = `50px` )->get_parent( )->get_parent( ")->get_parent(
- *                                )->content_areas( `layout`
- *                                    )->button( width = `100%`
- *                                               text  = `Content 6` )->get(
- *                                        )->layout_data(
- *                                            )->splitter_layout_data( size = `auto` )->get_parent( )->get_parent( )->get_parent(
- *                                    )->button( width = `100%`
- *                                               text  = `Content 7` )->get(
- *                                        )->layout_data(
- *                                            )->splitter_layout_data( size = `auto` )->get_parent( )->get_parent( )->get_parent( ).
- * 
- *     client->view_display( page->stringify( ) ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD on_event.
- * 
- *     CASE client->get( )-event.
- *       WHEN `POPOVER`.
- *         popover_display( `hint_icon` ).
- *     ENDCASE.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD popover_display.
- * 
- *     DATA(view) = z2ui5_cl_xml_view=>factory_popup( ).
- *     view->quick_view( placement = `Bottom`
- *                       width     = `auto`
- *               )->quick_view_page( pageid      = `sampleInformationId`
- *                                   header      = `Sample information`
- *                                   description = `Nested Splitter example with 7 content areas` ).
- * 
- *     client->popover_display(
- *       xml   = view->stringify( )
- *       by_id = id ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD z2ui5_if_app~main.
- * 
- *     me->client = client.
- * 
- *     IF client->check_on_init( ).
- *       view_display( client ).
- *     ENDIF.
- * 
- *     on_event( client ).
- * 
- *   ENDMETHOD.
- * 
- * ENDCLASS.
- */
-
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_260 extends z2ui5_if_app {
   client = null;
+
+  view_display({ client } = {}) {
+    const page = z2ui5_cl_xml_view.factory()
+      .shell()
+      .page({ title: `abap2UI5 - Sample: Nested Splitter Layouts - 7 Areas`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
+    page.header_content()
+      .button({ id: `hint_icon`, icon: `sap-icon://hint`, tooltip: `Sample information`, press: client._event(`POPOVER`) });
+    page.header_content()
+      .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.ui.layout.Splitter/sample/sap.ui.layout.sample.SplitterNested1` });
+    const layout = page.splitter({ height: `500px`, orientation: `Vertical` })
+      .splitter()
+      .get()
+      .layout_data(`layout`)
+      .splitter_layout_data({ size: `50px` })
+      .get_parent()
+      .get_parent()
+      .content_areas(`layout`)
+      .button({ width: `100%`, text: `Content 1` })
+      .get()
+      .layout_data()
+      .splitter_layout_data({ size: `auto` })
+      .get_parent()
+      .get_parent()
+      .get_parent()
+      .get_parent()
+      .get_parent()
+      .splitter()
+      .get()
+      .layout_data(`layout`)
+      .splitter_layout_data({ size: `auto` })
+      .get_parent()
+      .get_parent()
+      .content_areas(`layout`)
+      .button({ width: `100%`, text: `Content 2` })
+      .get()
+      .layout_data()
+      .splitter_layout_data({ size: `300px` })
+      .get_parent()
+      .get_parent()
+      .get_parent()
+      .splitter({ orientation: `Vertical` })
+      .button({ width: `100%`, text: `Content 3` })
+      .get()
+      .layout_data()
+      .splitter_layout_data({ size: `auto` })
+      .get_parent()
+      .get_parent()
+      .get_parent()
+      .button({ width: `100%`, text: `Content 4` })
+      .get()
+      .layout_data()
+      .splitter_layout_data({ size: `10%` })
+      .get_parent()
+      .get_parent()
+      .get_parent()
+      .get_parent()
+      .get_parent()
+      .button({ width: `100%`, text: `Content 5` })
+      .get()
+      .layout_data()
+      .splitter_layout_data({ size: `30%`, minsize: `200px` })
+      .get_parent()
+      .get_parent()
+      .get_parent()
+      .get_parent()
+      .splitter()
+      .get()
+      .layout_data(`layout`)
+      .splitter_layout_data({ size: `50px` })
+      .get_parent()
+      .get_parent()
+      .content_areas(`layout`)
+      .button({ width: `100%`, text: `Content 6` })
+      .get()
+      .layout_data()
+      .splitter_layout_data({ size: `auto` })
+      .get_parent()
+      .get_parent()
+      .get_parent()
+      .button({ width: `100%`, text: `Content 7` })
+      .get()
+      .layout_data()
+      .splitter_layout_data({ size: `auto` })
+      .get_parent()
+      .get_parent()
+      .get_parent();
+    client.view_display(page.stringify());
+  }
+
+  on_event({ client } = {}) {
+    switch (client.get().EVENT) {
+      case `POPOVER`:
+        this.popover_display({ id: `hint_icon` });
+        break;
+    }
+  }
+
+  popover_display({ id } = {}) {
+    const view = z2ui5_cl_xml_view.factory_popup();
+    view.quick_view({ placement: `Bottom`, width: `auto` })
+      .quick_view_page({ pageid: `sampleInformationId`, header: `Sample information`, description: `Nested Splitter example with 7 content areas` });
+    this.client.popover_display(view.stringify(), id);
+  }
+
   async main(client) {
     this.client = client;
     if (client.check_on_init()) {
-      const v = z2ui5_cl_xml_view.factory()
-        .Page({ title: "z2ui5_cl_demo_app_260 (TODO: port from abap)" })
-        .Text({ text: "This sample needs to be ported manually from abap2UI5." });
-      client.view_display(v.stringify());
+      this.view_display({ client: client });
     }
+    this.on_event({ client: client });
   }
 }
 

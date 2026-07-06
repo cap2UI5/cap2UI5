@@ -1,201 +1,109 @@
-/* AUTO-GENERATED scaffolding — abap2UI5 transpile failed; manual port required.
- *
- * Original ABAP source:
- * ====================
- * CLASS z2ui5_cl_demo_app_056 DEFINITION PUBLIC.
- * 
- *   PUBLIC SECTION.
- *     INTERFACES z2ui5_if_app.
- * 
- *     TYPES:
- *       BEGIN OF ty_s_tab,
- *         selkz            TYPE abap_bool,
- *         product          TYPE string,
- *         create_date      TYPE string,
- *         create_by        TYPE string,
- *         storage_location TYPE string,
- *         quantity         TYPE i,
- *       END OF ty_s_tab.
- *     TYPES ty_t_table TYPE STANDARD TABLE OF ty_s_tab WITH EMPTY KEY.
- * 
- *     DATA mt_table TYPE ty_t_table.
- *     DATA mt_token TYPE z2ui5_cl_util=>ty_t_token.
- * 
- *     DATA mt_tokens_added TYPE z2ui5_cl_util=>ty_t_token.
- *     DATA mt_tokens_removed TYPE z2ui5_cl_util=>ty_t_token.
- *   PROTECTED SECTION.
- *     DATA client TYPE REF TO z2ui5_if_client.
- * 
- *     DATA mt_range TYPE z2ui5_cl_pop_get_range=>ty_s_result-t_range.
- * 
- *     METHODS on_event.
- *     METHODS view_display.
- *     METHODS set_data.
- *   PRIVATE SECTION.
- * ENDCLASS.
- * 
- * 
- * CLASS z2ui5_cl_demo_app_056 IMPLEMENTATION.
- * 
- *   METHOD on_event.
- * 
- *     CASE client->get( )-event.
- * 
- *       WHEN `BUTTON_START`.
- *         set_data( ).
- *         client->view_model_update( ).
- * 
- *       WHEN `UPDATE_TOKENS`.
- *         LOOP AT mt_tokens_removed INTO DATA(ls_token).
- *           DELETE mt_token WHERE key = ls_token-key.
- *         ENDLOOP.
- * 
- *         LOOP AT mt_tokens_added INTO ls_token.
- *           INSERT VALUE #( key = ls_token-key text = ls_token-text visible = abap_true editable = abap_true ) INTO TABLE mt_token.
- *         ENDLOOP.
- * 
- *         mt_tokens_removed = VALUE #( ).
- *         mt_tokens_added = VALUE #( ).
- * 
- *         mt_range = z2ui5_cl_util=>filter_get_range_t_by_token_t( mt_token ).
- *         set_data( ).
- *         client->view_model_update( ).
- * 
- *       WHEN `FILTER_VALUE_HELP`.
- *         client->nav_app_call( z2ui5_cl_pop_get_range=>factory( mt_range ) ).
- *     ENDCASE.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD set_data.
- * 
- *     mt_table = VALUE #(
- *         ( product = `table`    create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
- *         ( product = `chair`    create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
- *         ( product = `sofa`     create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
- *         ( product = `computer` create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
- *         ( product = `oven`     create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
- *         ( product = `table2`   create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 ) ).
- * 
- *     DELETE mt_table WHERE product NOT IN mt_range.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD view_display.
- * 
- *     DATA(view) = z2ui5_cl_xml_view=>factory( ).
- * 
- *     view = view->shell( )->page( id = `page_main`
- *              title                  = `abap2UI5 - Select-Options`
- *              navbuttonpress         = client->_event_nav_app_leave( )
- *              shownavbutton          = client->check_app_prev_stack( )
- *         )->get_parent( ).
- * 
- *     DATA(vbox) = view->vbox( ).
- *     vbox->_z2ui5( )->multiinput_ext(
- *                        addedtokens   = client->_bind_edit( mt_tokens_added )
- *                        removedtokens = client->_bind_edit( mt_tokens_removed )
- *                        change        = client->_event( `UPDATE_TOKENS` )
- *                        multiinputid  = `MultiInput` ).
- * 
- *     DATA(tab) = vbox->table(
- *         client->_bind( val = mt_table )
- *            )->header_toolbar(
- *              )->overflow_toolbar(
- *              )->text( `Product:`
- *              )->multi_input(
- *                 width            = `30%`
- *                 id               = `MultiInput`
- *                 tokens           = client->_bind( mt_token )
- *                 showclearicon    = abap_true
- *                 valuehelprequest = client->_event( `FILTER_VALUE_HELP` )
- *             )->item(
- *                     key  = `{KEY}`
- *                     text = `{TEXT}`
- *             )->tokens(
- *                 )->token(
- *                     key      = `{KEY}`
- *                     text     = `{TEXT}`
- *                     visible  = `{VISIBLE}`
- *                     selected = `{SELKZ}`
- *                     editable = `{EDITABLE}`
- *                 )->get_parent( )->get_parent(
- *                  )->toolbar_spacer(
- *                )->button(
- *         text  = `Go`
- *         press = client->_event( `BUTTON_START` )
- *         type  = `Emphasized`
- *             )->get_parent( )->get_parent( ).
- * 
- *     DATA(lo_columns) = tab->columns( ).
- *     lo_columns->column( )->text( `Product` ).
- *     lo_columns->column( )->text( `Date` ).
- *     lo_columns->column( )->text( `Name` ).
- *     lo_columns->column( )->text( `Location` ).
- *     lo_columns->column( )->text( `Quantity` ).
- * 
- *     DATA(lo_cells) = tab->items( )->column_list_item( ).
- *     lo_cells->text( `{PRODUCT}` ).
- *     lo_cells->text( `{CREATE_DATE}` ).
- *     lo_cells->text( `{CREATE_BY}` ).
- *     lo_cells->text( `{STORAGE_LOCATION}` ).
- *     lo_cells->text( `{QUANTITY}` ).
- * 
- *     client->view_display( view->stringify( ) ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD z2ui5_if_app~main.
- * 
- *     me->client = client.
- * 
- *     IF client->check_on_init( ).
- *       view_display( ).
- *       RETURN.
- *     ENDIF.
- * 
- *     IF client->get( )-check_on_navigated = abap_true.
- *       TRY.
- *           DATA(lo_value_help) = CAST z2ui5_cl_pop_get_range( client->get_app( client->get( )-s_draft-id_prev_app ) ).
- * 
- *           IF lo_value_help->result( )-check_confirmed = abap_false.
- *             RETURN.
- *           ENDIF.
- * 
- *           mt_range = lo_value_help->result( )-t_range.
- *           mt_token = z2ui5_cl_util=>filter_get_token_t_by_range_t( mt_range ).
- *           set_data( ).
- *           client->view_model_update( ).
- * 
- *         CATCH cx_root.
- *       ENDTRY.
- *       RETURN.
- *     ENDIF.
- * 
- *     IF client->get( )-event IS NOT INITIAL.
- *       on_event( ).
- *     ENDIF.
- * 
- *   ENDMETHOD.
- * 
- * ENDCLASS.
- */
-
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
+const z2ui5_cl_pop_get_range = require("abap2UI5/z2ui5_cl_pop_get_range");
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_056 extends z2ui5_if_app {
+  mt_table = [];
+  mt_token = [];
+  mt_tokens_added = [];
+  mt_tokens_removed = [];
   client = null;
+  mt_range = null;
+
+  on_event() {
+    switch (this.client.get().EVENT) {
+      case `BUTTON_START`:
+        this.set_data();
+        this.client.view_model_update();
+        break;
+      case `UPDATE_TOKENS`:
+        let sy_tabix = 0;
+        for (const ls_token of this.mt_tokens_removed) {
+          sy_tabix++;
+          for (let _i = this.mt_token.length - 1; _i >= 0; _i--) { const row = this.mt_token[_i]; if (row.key === ls_token.key) this.mt_token.splice(_i, 1); }
+        }
+        let sy_tabix = 0;
+        for (const ls_token of this.mt_tokens_added) {
+          sy_tabix++;
+          this.mt_token.push({ key: ls_token.key, text: ls_token.text, visible: true, editable: true });
+        }
+        this.mt_tokens_removed = {};
+        this.mt_tokens_added = {};
+        this.mt_range = z2ui5_cl_util.filter_get_range_t_by_token_t(this.mt_token);
+        this.set_data();
+        this.client.view_model_update();
+        break;
+      case `FILTER_VALUE_HELP`:
+        this.client.nav_app_call(z2ui5_cl_pop_get_range.factory(this.mt_range));
+        break;
+    }
+  }
+
+  set_data() {
+    this.mt_table = [{ product: `table`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }, { product: `chair`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }, { product: `sofa`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }, { product: `computer`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }, { product: `oven`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }, { product: `table2`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }];
+    for (let _i = this.mt_table.length - 1; _i >= 0; _i--) { const row = this.mt_table[_i]; if (product ! IN this.mt_range) this.mt_table.splice(_i, 1); }
+  }
+
+  view_display() {
+    let view = z2ui5_cl_xml_view.factory();
+    view = view.shell()
+      .page({ id: `page_main`, title: `abap2UI5 - Select-Options`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() })
+      .get_parent();
+    const vbox = view.vbox();
+    vbox._z2ui5()
+      .multiinput_ext({ addedtokens: this.client._bind_edit(this.mt_tokens_added), removedtokens: this.client._bind_edit(this.mt_tokens_removed), change: this.client._event(`UPDATE_TOKENS`), multiinputid: `MultiInput` });
+    const tab = vbox.table(this.client._bind(this.mt_table))
+      .header_toolbar()
+      .overflow_toolbar()
+      .text(`Product:`)
+      .multi_input({ width: `30%`, id: `MultiInput`, tokens: this.client._bind(this.mt_token), showclearicon: true, valuehelprequest: this.client._event(`FILTER_VALUE_HELP`) })
+      .item({ key: `{KEY}`, text: `{TEXT}` })
+      .tokens()
+      .token({ key: `{KEY}`, text: `{TEXT}`, visible: `{VISIBLE}`, selected: `{SELKZ}`, editable: `{EDITABLE}` })
+      .get_parent()
+      .get_parent()
+      .toolbar_spacer()
+      .button({ text: `Go`, press: this.client._event(`BUTTON_START`), type: `Emphasized` })
+      .get_parent()
+      .get_parent();
+    const lo_columns = tab.columns();
+    lo_columns.column().text(`Product`);
+    lo_columns.column().text(`Date`);
+    lo_columns.column().text(`Name`);
+    lo_columns.column().text(`Location`);
+    lo_columns.column().text(`Quantity`);
+    const lo_cells = tab.items().column_list_item();
+    lo_cells.text(`{PRODUCT}`);
+    lo_cells.text(`{CREATE_DATE}`);
+    lo_cells.text(`{CREATE_BY}`);
+    lo_cells.text(`{STORAGE_LOCATION}`);
+    lo_cells.text(`{QUANTITY}`);
+    this.client.view_display(view.stringify());
+  }
+
   async main(client) {
     this.client = client;
     if (client.check_on_init()) {
-      const v = z2ui5_cl_xml_view.factory()
-        .Page({ title: "z2ui5_cl_demo_app_056 (TODO: port from abap)" })
-        .Text({ text: "This sample needs to be ported manually from abap2UI5." });
-      client.view_display(v.stringify());
+      this.view_display();
+      return;
+    }
+    if (client.get().CHECK_ON_NAVIGATED === true) {
+      try {
+        const lo_value_help = (client.get_app(client.get().S_DRAFT.ID_PREV_APP));
+        if (lo_value_help.result().check_confirmed === false) {
+          return;
+        }
+        this.mt_range = lo_value_help.result().t_range;
+        this.mt_token = z2ui5_cl_util.filter_get_token_t_by_range_t(this.mt_range);
+        this.set_data();
+        client.view_model_update();
+      } catch (error) {
+      }
+      return;
+    }
+    if ((client.get().EVENT)) {
+      this.on_event();
     }
   }
 }

@@ -1,102 +1,34 @@
-/* AUTO-GENERATED scaffolding — abap2UI5 transpile failed; manual port required.
- *
- * Original ABAP source:
- * ====================
- * CLASS z2ui5_cl_demo_app_071 DEFINITION PUBLIC.
- * 
- *   PUBLIC SECTION.
- *     INTERFACES z2ui5_if_app.
- * 
- *     TYPES:
- *       BEGIN OF s_combobox,
- *         key  TYPE string,
- *         text TYPE string,
- *       END OF s_combobox.
- *     TYPES ty_t_combo TYPE STANDARD TABLE OF s_combobox WITH EMPTY KEY.
- * 
- *     DATA mv_set_size_limit TYPE i VALUE 100.
- *     DATA mv_combo_number TYPE i VALUE 105.
- *     DATA lt_combo TYPE ty_t_combo.
- * 
- *   PROTECTED SECTION.
- *   PRIVATE SECTION.
- * ENDCLASS.
- * 
- * 
- * CLASS z2ui5_cl_demo_app_071 IMPLEMENTATION.
- * 
- *   METHOD z2ui5_if_app~main.
- * 
- *     CASE client->get( )-event.
- *       WHEN `UPDATE`.
- *         client->follow_up_action( client->_event_client(
- *                                     val   = `SET_SIZE_LIMIT`
- *                                     t_arg = VALUE #( ( CONV #( mv_set_size_limit ) ) ( client->cs_view-main ) )
- *                         ) ).
- *         client->message_toast_display( `SizeLimitUpdated` ).
- *         RETURN.
- * 
- *       WHEN `UPDATE_MODEL`.
- *         CLEAR lt_combo.
- *         DO mv_combo_number TIMES.
- *           INSERT VALUE #( key = sy-index text = sy-index ) INTO TABLE lt_combo.
- *         ENDDO.
- *         client->message_toast_display( `update number of entries` ).
- *         client->view_model_update( ).
- *         RETURN.
- * 
- *     ENDCASE.
- * 
- *     mv_combo_number = 105.
- *     DO mv_combo_number TIMES.
- *       INSERT VALUE #( key = sy-index text = sy-index ) INTO TABLE lt_combo.
- *     ENDDO.
- * 
- *     DATA(view) = z2ui5_cl_xml_view=>factory( ).
- *     client->view_display( view->shell(
- *          )->page(
- *                  title          = `abap2UI5 - First Example`
- *                  navbuttonpress = client->_event_nav_app_leave( )
- *                  shownavbutton  = client->check_app_prev_stack( )
- *              )->simple_form( title = `Form Title` editable = abap_true
- *                  )->content( `form`
- *                      )->title( `Input`
- *                      )->label( `Link`
- *                      )->label( `setSizeLimit`
- *                      )->input( value = client->_bind_edit( mv_set_size_limit )
- *                      )->button(
- *                          text  = `update size limit`
- *                          press = client->_event( val = `UPDATE` )
- *                      )->label( `Number of Entries`
- *                      )->input( value = client->_bind_edit( mv_combo_number )
- *                      )->button(
- *                          text  = `update number entries`
- *                          press = client->_event( val = `UPDATE_MODEL` )
- *                      )->label( `demo`
- *                      )->combobox( items = client->_bind( lt_combo )
- *                         )->item( key = `{KEY}` text = `{TEXT}`
- *                         )->get_parent( )->get_parent(
- * 
- *         )->stringify( ) ).
- * 
- *   ENDMETHOD.
- * 
- * ENDCLASS.
- */
-
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_071 extends z2ui5_if_app {
-  client = null;
+  mv_set_size_limit = 100;
+  mv_combo_number = 105;
+  t_combo = [];
+
   async main(client) {
-    this.client = client;
-    if (client.check_on_init()) {
-      const v = z2ui5_cl_xml_view.factory()
-        .Page({ title: "z2ui5_cl_demo_app_071 (TODO: port from abap)" })
-        .Text({ text: "This sample needs to be ported manually from abap2UI5." });
-      client.view_display(v.stringify());
+    switch (client.get().EVENT) {
+      case `UPDATE`:
+        client.action.gen({ val: `SET_SIZE_LIMIT`, t_arg: [(this.mv_set_size_limit), client.cs_view.main] });
+        client.message_toast_display(`SizeLimitUpdated`);
+        return;
+        break;
+      case `UPDATE_MODEL`:
+        this.t_combo = {};
+        for (let sy_index = 1; sy_index <= this.mv_combo_number; sy_index++) {
+          this.t_combo.push({ key: sy_index, text: sy_index });
+        }
+        client.message_toast_display(`update number of entries`);
+        client.view_model_update();
+        return;
+        break;
     }
+    this.mv_combo_number = 105;
+    for (let sy_index = 1; sy_index <= this.mv_combo_number; sy_index++) {
+      this.t_combo.push({ key: sy_index, text: sy_index });
+    }
+    const view = z2ui5_cl_xml_view.factory();
+    client.view_display(view.shell().page({ title: `abap2UI5 - First Example`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() }).simple_form({ title: `Form Title`, editable: true }).content(`form`).title(`Input`).label(`Link`).label(`setSizeLimit`).input({ value: client._bind_edit(this.mv_set_size_limit) }).button({ text: `update size limit`, press: client._event(`UPDATE`) }).label(`Number of Entries`).input({ value: client._bind_edit(this.mv_combo_number) }).button({ text: `update number entries`, press: client._event(`UPDATE_MODEL`) }).label(`demo`).combobox({ items: client._bind(this.t_combo) }).item({ key: `{KEY}`, text: `{TEXT}` }).get_parent().get_parent().stringify());
   }
 }
 

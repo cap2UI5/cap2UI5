@@ -1,114 +1,30 @@
-/* AUTO-GENERATED scaffolding — abap2UI5 transpile failed; manual port required.
- *
- * Original ABAP source:
- * ====================
- * CLASS z2ui5_cl_demo_app_048 DEFINITION PUBLIC.
- * 
- *   PUBLIC SECTION.
- *     INTERFACES z2ui5_if_app.
- * 
- *     TYPES:
- *       BEGIN OF ty_row,
- *         title         TYPE string,
- *         value         TYPE string,
- *         descr         TYPE string,
- *         icon          TYPE string,
- *         info          TYPE string,
- *         highlight     TYPE string,
- *         wrapcharlimit TYPE i,
- *         selected      TYPE abap_bool,
- *         checkbox      TYPE abap_bool,
- *       END OF ty_row.
- *     DATA t_tab TYPE STANDARD TABLE OF ty_row WITH EMPTY KEY.
- * 
- *   PROTECTED SECTION.
- *   PRIVATE SECTION.
- * ENDCLASS.
- * 
- * 
- * CLASS z2ui5_cl_demo_app_048 IMPLEMENTATION.
- * 
- *   METHOD z2ui5_if_app~main.
- * 
- *     IF client->check_on_init( ).
- * 
- *       t_tab = VALUE #(
- *         ( title = `entry_01`   info = `Information`   descr = `this is a description1 1234567890 1234567890`  icon = `sap-icon://badge`      highlight = `Information` wrapcharlimit = `100` )
- *         ( title = `entry_02`  info = `Success`        descr = `this is a description2 1234567890 1234567890`  icon = `sap-icon://favorite`   highlight = `Success`  wrapcharlimit = `10`)
- *         ( title = `entry_03`  info = `Warning`        descr = `this is a description3 1234567890 1234567890`  icon = `sap-icon://employee`   highlight = `Warning`  wrapcharlimit = `100`)
- *         ( title = `entry_04`  info = `Error`          descr = `this is a description4 1234567890 1234567890`  icon = `sap-icon://accept`     highlight = `Error`  wrapcharlimit = `10` )
- *         ( title = `entry_05`  info = `None`           descr = `this is a description5 1234567890 1234567890`  icon = `sap-icon://activities` highlight = `None`  wrapcharlimit = `10`)
- *         ( title = `entry_06`  info = `Information`    descr = `this is a description6 1234567890 1234567890`  icon = `sap-icon://account`    highlight = `Information`   wrapcharlimit = `100` ) ).
- * 
- *     ENDIF.
- * 
- *     CASE client->get( )-event.
- *       WHEN `EDIT`.
- *         DATA(lv_row_title) = client->get_event_arg( 1 ).
- *         client->message_box_display( `EDIT - ` && lv_row_title ).
- *       WHEN `SELCHANGE`.
- *         DATA(lt_sel) = t_tab.
- *         DELETE lt_sel WHERE selected = abap_false.
- *         client->message_box_display( `SELECTION_CHANGED -` && lt_sel[ 1 ]-title ).
- *     ENDCASE.
- * 
- *     DATA(page) = z2ui5_cl_xml_view=>factory( )->shell(
- *         )->page(
- *             title           = `abap2UI5 - List`
- *             navbuttonpress  = client->_event_nav_app_leave( )
- *               shownavbutton = abap_true
- *             ).
- * 
- *     page->list(
- *         headertext      = `List Output`
- *         items           = client->_bind_edit( t_tab )
- *         mode            = `SingleSelectMaster`
- *         selectionchange = client->_event( `SELCHANGE` )
- *       )->_generic(
- *          name      = `StandardListItem`
- *             t_prop = VALUE #(
- *                 ( n = `title`       v = `{TITLE}` )
- *                 ( n = `description` v = `{DESCR}` )
- *                 ( n = `icon`        v = `{ICON}` )
- *                 ( n = `iconInset`   v = `false` )
- *                 ( n = `highlight`   v = `{HIGHLIGHT}` )
- *                 ( n = `info`        v = `{INFO}` )
- *                 ( n = `infoState`   v = `{HIGHLIGHT}` )
- *                ( n = `infoStateInverted`   v = `true` )
- *               ( n = `type`      v = `Detail` )
- *               ( n = `wrapping`      v = `true` )
- *               ( n = `wrapCharLimit`      v = `{WRAPCHARLIMIT}` )
- *               ( n = `selected`    v = `{SELECTED}` )
- *               ( n = `detailPress`      v = client->_event( val = `EDIT` t_arg = VALUE #( ( `${TITLE}` )
- *                                                                                          ( `${DESCR}` )
- *                                                                                          ( `${ICON}` )
- *                                                                                          ( `${HIGHLIGHT}` )
- *                                                                                          ( `${INFO}` )
- *                                                                                          ( `${WRAPCHARLIMIT}` )
- *                                                                                          ( `${SELECTED}` )
- *                                                                                         ) ) )
- *       ) ).
- * 
- *     client->view_display( page->stringify( ) ).
- * 
- *   ENDMETHOD.
- * 
- * ENDCLASS.
- */
-
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_048 extends z2ui5_if_app {
-  client = null;
+  t_tab = [];
+
   async main(client) {
-    this.client = client;
     if (client.check_on_init()) {
-      const v = z2ui5_cl_xml_view.factory()
-        .Page({ title: "z2ui5_cl_demo_app_048 (TODO: port from abap)" })
-        .Text({ text: "This sample needs to be ported manually from abap2UI5." });
-      client.view_display(v.stringify());
+      this.t_tab = [{ title: `entry_01`, info: `Information`, descr: `this is a description1 1234567890 1234567890`, icon: `sap-icon://badge`, highlight: `Information`, wrapcharlimit: `100` }, { title: `entry_02`, info: `Success`, descr: `this is a description2 1234567890 1234567890`, icon: `sap-icon://favorite`, highlight: `Success`, wrapcharlimit: `10` }, { title: `entry_03`, info: `Warning`, descr: `this is a description3 1234567890 1234567890`, icon: `sap-icon://employee`, highlight: `Warning`, wrapcharlimit: `100` }, { title: `entry_04`, info: `Error`, descr: `this is a description4 1234567890 1234567890`, icon: `sap-icon://accept`, highlight: `Error`, wrapcharlimit: `10` }, { title: `entry_05`, info: `None`, descr: `this is a description5 1234567890 1234567890`, icon: `sap-icon://activities`, highlight: `None`, wrapcharlimit: `10` }, { title: `entry_06`, info: `Information`, descr: `this is a description6 1234567890 1234567890`, icon: `sap-icon://account`, highlight: `Information`, wrapcharlimit: `100` }];
     }
+    switch (client.get().EVENT) {
+      case `EDIT`:
+        const lv_row_title = client.get_event_arg(1);
+        client.message_box_display(`EDIT - ${lv_row_title}`);
+        break;
+      case `SELCHANGE`:
+        const lt_sel = this.t_tab;
+        for (let _i = lt_sel.length - 1; _i >= 0; _i--) { const row = lt_sel[_i]; if (row.selected === false) lt_sel.splice(_i, 1); }
+        client.message_box_display(`SELECTION_CHANGED - ${lt_sel[(1) - 1].title}`);
+        break;
+    }
+    const page = z2ui5_cl_xml_view.factory()
+      .shell()
+      .page({ title: `abap2UI5 - List`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: true });
+    page.list({ headertext: `List Output`, items: client._bind_edit(this.t_tab), mode: `SingleSelectMaster`, selectionchange: client._event(`SELCHANGE`) })
+      ._generic({ name: `StandardListItem`, t_prop: [{ n: `title`, v: `{TITLE}` }, { n: `description`, v: `{DESCR}` }, { n: `icon`, v: `{ICON}` }, { n: `iconInset`, v: `false` }, { n: `highlight`, v: `{HIGHLIGHT}` }, { n: `info`, v: `{INFO}` }, { n: `infoState`, v: `{HIGHLIGHT}` }, { n: `infoStateInverted`, v: `true` }, { n: `type`, v: `Detail` }, { n: `wrapping`, v: `true` }, { n: `wrapCharLimit`, v: `{WRAPCHARLIMIT}` }, { n: `selected`, v: `{SELECTED}` }, { n: `detailPress`, v: client._event(`EDIT`, [`${TITLE}`, `${DESCR}`, `${ICON}`, `${HIGHLIGHT}`, `${INFO}`, `${WRAPCHARLIMIT}`, `${SELECTED}`]) }] });
+    client.view_display(page.stringify());
   }
 }
 

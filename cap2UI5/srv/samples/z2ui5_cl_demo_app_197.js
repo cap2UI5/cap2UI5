@@ -1,214 +1,83 @@
-/* AUTO-GENERATED scaffolding — abap2UI5 transpile failed; manual port required.
- *
- * Original ABAP source:
- * ====================
- * CLASS z2ui5_cl_demo_app_197 DEFINITION PUBLIC.
- * 
- *   PUBLIC SECTION.
- *     INTERFACES z2ui5_if_app.
- * 
- *     TYPES:
- *       BEGIN OF ty_s_tab,
- *         selkz            TYPE abap_bool,
- *         product          TYPE string,
- *         create_date      TYPE string,
- *         create_by        TYPE string,
- *         storage_location TYPE string,
- *         quantity         TYPE i,
- *       END OF ty_s_tab.
- *     TYPES
- *       ty_t_table TYPE STANDARD TABLE OF ty_s_tab WITH EMPTY KEY.
- * 
- *     DATA mt_table TYPE ty_t_table.
- *     DATA mt_table_full TYPE ty_t_table.
- *     DATA mt_table_products TYPE ty_t_table.
- *     DATA client TYPE REF TO z2ui5_if_client.
- *     DATA mv_check_popover TYPE abap_bool.
- *     DATA mv_product TYPE string.
- * 
- *     METHODS set_data.
- *     METHODS view_display.
- * 
- *   PROTECTED SECTION.
- *   PRIVATE SECTION.
- * ENDCLASS.
- * 
- * 
- * CLASS z2ui5_cl_demo_app_197 IMPLEMENTATION.
- * 
- *   METHOD view_display.
- * 
- *     DATA(view) = z2ui5_cl_xml_view=>factory( )->shell( ).
- * 
- *     DATA(page) = view->page( id = `page_main`
- *             title               = `abap2UI5 - List Report Features`
- *             navbuttonpress      = client->_event_nav_app_leave( )
- *             shownavbutton       = client->check_app_prev_stack( ) ).
- * 
- *     DATA(facet) = page->facet_filter( id                  = `idFacetFilter`
- *                                       type                = `Light`
- *                                       showpersonalization = abap_true
- *                                       showreset           = abap_true
- *                                       reset               = client->_event( `RESET` )
- *       )->facet_filter_list( title     = `Products`
- *                             mode      = `MultiSelect`
- *                             items     = client->_bind( mt_table_products )
- *                             listclose = client->_event( val                      = `FILTER`
- * *                                                                           t_arg = VALUE #( ( `${$parameters>/selectedAll}` ) ) )
- * *                                                                           t_arg = VALUE #( ( `$event.mParameters` ) ) )
- *                                                                            t_arg = VALUE #( ( `$event.mParameters.selectedItems` ) ) )
- *         )->facet_filter_item( text = `{PRODUCT}` ).
- * 
- *     DATA(tab) = page->table( id    = `tab`
- *                              items = client->_bind_edit( val = mt_table ) ).
- * 
- *     DATA(lo_columns) = tab->columns( ).
- *     lo_columns->column( )->text( `Product` ).
- *     lo_columns->column( )->text( `Date` ).
- *     lo_columns->column( )->text( `Name` ).
- *     lo_columns->column( )->text( `Location` ).
- *     lo_columns->column( )->text( `Quantity` ).
- * 
- *     DATA(lo_cells) = tab->items( )->column_list_item( ).
- *     lo_cells->link( id    = `link`
- *                     text  = `{PRODUCT}`
- *                     press = client->_event( `POPOVER_DETAIL` ) ).
- *     lo_cells->text( `{CREATE_DATE}` ).
- *     lo_cells->text( `{CREATE_BY}` ).
- *     lo_cells->text( `{STORAGE_LOCATION}` ).
- *     lo_cells->text( `{QUANTITY}` ).
- * 
- *     client->view_display( view->stringify( ) ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD z2ui5_if_app~main.
- * 
- *     DATA lt_range TYPE RANGE OF string.
- * 
- *     me->client = client.
- * 
- *     IF client->check_on_init( ).
- *       view_display( ).
- *       set_data( ).
- *       RETURN.
- *     ENDIF.
- * 
- *     CASE client->get( )-event.
- *       WHEN `RESET`.
- *         mt_table = mt_table_full.
- *         client->view_model_update( ).
- *       WHEN `FILTER`.
- * 
- *         DATA(lt_arg) = client->get( )-t_event_arg.
- *         DATA(lv_json) = lt_arg[ 1 ].
- *         TRY.
- *             DATA(lo_json) = z2ui5_cl_ajson=>parse( lv_json ).
- * 
- *             DATA(l_members) = lo_json->members( `/` ).
- * 
- *             LOOP AT l_members INTO DATA(l_member).
- *               DATA(lv_val) = lo_json->get( `/` && l_member && `/mProperties/text` ).
- * 
- *               APPEND VALUE #( sign = `I` option = `EQ` low = lv_val ) TO lt_range.
- * 
- *             ENDLOOP.
- * 
- *           CATCH cx_root.
- *         ENDTRY.
- * 
- *         mt_table = mt_table_full.
- * 
- *         LOOP AT mt_table INTO DATA(ls_tab).
- *           IF ls_tab-product NOT IN lt_range.
- *             DELETE mt_table.
- *           ENDIF.
- *         ENDLOOP.
- * 
- *         client->view_model_update( ).
- *     ENDCASE.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD set_data.
- * 
- *     mt_table = VALUE #(
- *         ( product = `table` create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
- *         ( product = `chair` create_date = `01.01.2022` create_by = `James` storage_location = `AREA_001` quantity = 123 )
- *         ( product = `sofa` create_date = `01.05.2021` create_by = `Simone` storage_location = `AREA_001` quantity = 700 )
- *         ( product = `computer` create_date = `27.01.2023` create_by = `Theo` storage_location = `AREA_001` quantity = 200 )
- *         ( product = `printer` create_date = `01.01.2023` create_by = `Hannah` storage_location = `AREA_001` quantity = 90 )
- *         ( product = `table2` create_date = `01.01.2023` create_by = `Julia` storage_location = `AREA_001` quantity = 110 )
- *         ( product = `table` create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
- *         ( product = `chair` create_date = `01.01.2022` create_by = `James` storage_location = `AREA_001` quantity = 123 )
- *         ( product = `sofa` create_date = `01.05.2021` create_by = `Simone` storage_location = `AREA_001` quantity = 700 )
- *         ( product = `computer` create_date = `27.01.2023` create_by = `Theo` storage_location = `AREA_001` quantity = 200 )
- *         ( product = `printer` create_date = `01.01.2023` create_by = `Hannah` storage_location = `AREA_001` quantity = 90 )
- *         ( product = `table2` create_date = `01.01.2023` create_by = `Julia` storage_location = `AREA_001` quantity = 110 )
- *         ( product = `table` create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
- *         ( product = `chair` create_date = `01.01.2022` create_by = `James` storage_location = `AREA_001` quantity = 123 )
- *         ( product = `sofa` create_date = `01.05.2021` create_by = `Simone` storage_location = `AREA_001` quantity = 700 )
- *         ( product = `computer` create_date = `27.01.2023` create_by = `Theo` storage_location = `AREA_001` quantity = 200 )
- *         ( product = `printer` create_date = `01.01.2023` create_by = `Hannah` storage_location = `AREA_001` quantity = 90 )
- *         ( product = `table2` create_date = `01.01.2023` create_by = `Julia` storage_location = `AREA_001` quantity = 110 )
- *         ( product = `table` create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
- *         ( product = `chair` create_date = `01.01.2022` create_by = `James` storage_location = `AREA_001` quantity = 123 )
- *         ( product = `sofa` create_date = `01.05.2021` create_by = `Simone` storage_location = `AREA_001` quantity = 700 )
- *         ( product = `computer` create_date = `27.01.2023` create_by = `Theo` storage_location = `AREA_001` quantity = 200 )
- *         ( product = `printer` create_date = `01.01.2023` create_by = `Hannah` storage_location = `AREA_001` quantity = 90 )
- *         ( product = `table2` create_date = `01.01.2023` create_by = `Julia` storage_location = `AREA_001` quantity = 110 )
- *         ( product = `table` create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
- *         ( product = `chair` create_date = `01.01.2022` create_by = `James` storage_location = `AREA_001` quantity = 123 )
- *         ( product = `sofa` create_date = `01.05.2021` create_by = `Simone` storage_location = `AREA_001` quantity = 700 )
- *         ( product = `computer` create_date = `27.01.2023` create_by = `Theo` storage_location = `AREA_001` quantity = 200 )
- *         ( product = `printer` create_date = `01.01.2023` create_by = `Hannah` storage_location = `AREA_001` quantity = 90 )
- *         ( product = `table2` create_date = `01.01.2023` create_by = `Julia` storage_location = `AREA_001` quantity = 110 )
- *         ( product = `table` create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
- *         ( product = `chair` create_date = `01.01.2022` create_by = `James` storage_location = `AREA_001` quantity = 123 )
- *         ( product = `sofa` create_date = `01.05.2021` create_by = `Simone` storage_location = `AREA_001` quantity = 700 )
- *         ( product = `computer` create_date = `27.01.2023` create_by = `Theo` storage_location = `AREA_001` quantity = 200 )
- *         ( product = `printer` create_date = `01.01.2023` create_by = `Hannah` storage_location = `AREA_001` quantity = 90 )
- *         ( product = `table2` create_date = `01.01.2023` create_by = `Julia` storage_location = `AREA_001` quantity = 110 )
- *         ( product = `table` create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
- *         ( product = `chair` create_date = `01.01.2022` create_by = `James` storage_location = `AREA_001` quantity = 123 )
- *         ( product = `sofa` create_date = `01.05.2021` create_by = `Simone` storage_location = `AREA_001` quantity = 700 )
- *         ( product = `computer` create_date = `27.01.2023` create_by = `Theo` storage_location = `AREA_001` quantity = 200 )
- *         ( product = `printer` create_date = `01.01.2023` create_by = `Hannah` storage_location = `AREA_001` quantity = 90 )
- *         ( product = `table2` create_date = `01.01.2023` create_by = `Julia` storage_location = `AREA_001` quantity = 110 )
- *         ( product = `table` create_date = `01.01.2023` create_by = `Peter` storage_location = `AREA_001` quantity = 400 )
- *         ( product = `chair` create_date = `01.01.2022` create_by = `James` storage_location = `AREA_001` quantity = 123 )
- *         ( product = `sofa` create_date = `01.05.2021` create_by = `Simone` storage_location = `AREA_001` quantity = 700 )
- *         ( product = `computer` create_date = `27.01.2023` create_by = `Theo` storage_location = `AREA_001` quantity = 200 )
- *         ( product = `printer` create_date = `01.01.2023` create_by = `Hannah` storage_location = `AREA_001` quantity = 90 )
- *         ( product = `table2` create_date = `01.01.2023` create_by = `Julia` storage_location = `AREA_001` quantity = 110 ) ).
- * 
- *     SORT mt_table BY product.
- *     mt_table_full = mt_table.
- * 
- *     mt_table_products = mt_table.
- * 
- *     DELETE ADJACENT DUPLICATES FROM mt_table_products COMPARING product.
- * 
- *   ENDMETHOD.
- * 
- * ENDCLASS.
- */
-
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
+// TODO(abap2js): unresolved reference z2ui5_cl_ajson — add require manually
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_197 extends z2ui5_if_app {
+  mt_table = [];
+  mt_table_full = [];
+  mt_table_products = [];
+  mv_check_popover = false;
+  mv_product = ``;
   client = null;
+
+  view_display() {
+    const view = z2ui5_cl_xml_view.factory().shell();
+    const page = view.page({ id: `page_main`, title: `abap2UI5 - List Report Features`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    const facet = page.facet_filter({ id: `idFacetFilter`, type: `Light`, showpersonalization: true, showreset: true, reset: this.client._event(`RESET`) })
+      .facet_filter_list({ title: `Products`, mode: `MultiSelect`, items: this.client._bind(this.mt_table_products), listclose: this.client._event(`FILTER`, [`$event.mParameters.selectedItems`]) })
+      .facet_filter_item({ text: `{PRODUCT}` });
+    const tab = page.table({ id: `tab`, items: this.client._bind_edit(this.mt_table) });
+    const lo_columns = tab.columns();
+    lo_columns.column().text(`Product`);
+    lo_columns.column().text(`Date`);
+    lo_columns.column().text(`Name`);
+    lo_columns.column().text(`Location`);
+    lo_columns.column().text(`Quantity`);
+    const lo_cells = tab.items().column_list_item();
+    lo_cells.text(`{PRODUCT}`);
+    lo_cells.text(`{CREATE_DATE}`);
+    lo_cells.text(`{CREATE_BY}`);
+    lo_cells.text(`{STORAGE_LOCATION}`);
+    lo_cells.text(`{QUANTITY}`);
+    this.client.view_display(view.stringify());
+  }
+
   async main(client) {
+    let lt_range = [];
     this.client = client;
     if (client.check_on_init()) {
-      const v = z2ui5_cl_xml_view.factory()
-        .Page({ title: "z2ui5_cl_demo_app_197 (TODO: port from abap)" })
-        .Text({ text: "This sample needs to be ported manually from abap2UI5." });
-      client.view_display(v.stringify());
+      this.view_display();
+      this.set_data();
+      return;
     }
+    switch (client.get().EVENT) {
+      case `RESET`:
+        this.mt_table = this.mt_table_full;
+        client.view_model_update();
+        break;
+      case `FILTER`:
+        const lt_arg = client.get().T_EVENT_ARG;
+        const lv_json = lt_arg[(1) - 1];
+        try {
+          const lo_json = z2ui5_cl_ajson.parse(lv_json);
+          const l_members = lo_json.members(`/`);
+          let sy_tabix = 0;
+          for (const l_member of l_members) {
+            sy_tabix++;
+            const lv_val = lo_json.get(`/` + l_member + `/mProperties/text`);
+            lt_range.push({ sign: `I`, option: `EQ`, low: lv_val });
+          }
+        } catch (error) {
+        }
+        this.mt_table = this.mt_table_full;
+        let sy_tabix = 0;
+        for (const ls_tab of this.mt_table) {
+          sy_tabix++;
+          if (ls_tab.product ! IN lt_range) {
+            // TODO(abap2js): DELETE mt_table.
+          }
+        }
+        client.view_model_update();
+        break;
+    }
+  }
+
+  set_data() {
+    this.mt_table = [{ product: `table`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }, { product: `chair`, create_date: `01.01.2022`, create_by: `James`, storage_location: `AREA_001`, quantity: 123 }, { product: `sofa`, create_date: `01.05.2021`, create_by: `Simone`, storage_location: `AREA_001`, quantity: 700 }, { product: `computer`, create_date: `27.01.2023`, create_by: `Theo`, storage_location: `AREA_001`, quantity: 200 }, { product: `printer`, create_date: `01.01.2023`, create_by: `Hannah`, storage_location: `AREA_001`, quantity: 90 }, { product: `table2`, create_date: `01.01.2023`, create_by: `Julia`, storage_location: `AREA_001`, quantity: 110 }, { product: `table`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }, { product: `chair`, create_date: `01.01.2022`, create_by: `James`, storage_location: `AREA_001`, quantity: 123 }, { product: `sofa`, create_date: `01.05.2021`, create_by: `Simone`, storage_location: `AREA_001`, quantity: 700 }, { product: `computer`, create_date: `27.01.2023`, create_by: `Theo`, storage_location: `AREA_001`, quantity: 200 }, { product: `printer`, create_date: `01.01.2023`, create_by: `Hannah`, storage_location: `AREA_001`, quantity: 90 }, { product: `table2`, create_date: `01.01.2023`, create_by: `Julia`, storage_location: `AREA_001`, quantity: 110 }, { product: `table`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }, { product: `chair`, create_date: `01.01.2022`, create_by: `James`, storage_location: `AREA_001`, quantity: 123 }, { product: `sofa`, create_date: `01.05.2021`, create_by: `Simone`, storage_location: `AREA_001`, quantity: 700 }, { product: `computer`, create_date: `27.01.2023`, create_by: `Theo`, storage_location: `AREA_001`, quantity: 200 }, { product: `printer`, create_date: `01.01.2023`, create_by: `Hannah`, storage_location: `AREA_001`, quantity: 90 }, { product: `table2`, create_date: `01.01.2023`, create_by: `Julia`, storage_location: `AREA_001`, quantity: 110 }, { product: `table`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }, { product: `chair`, create_date: `01.01.2022`, create_by: `James`, storage_location: `AREA_001`, quantity: 123 }, { product: `sofa`, create_date: `01.05.2021`, create_by: `Simone`, storage_location: `AREA_001`, quantity: 700 }, { product: `computer`, create_date: `27.01.2023`, create_by: `Theo`, storage_location: `AREA_001`, quantity: 200 }, { product: `printer`, create_date: `01.01.2023`, create_by: `Hannah`, storage_location: `AREA_001`, quantity: 90 }, { product: `table2`, create_date: `01.01.2023`, create_by: `Julia`, storage_location: `AREA_001`, quantity: 110 }, { product: `table`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }, { product: `chair`, create_date: `01.01.2022`, create_by: `James`, storage_location: `AREA_001`, quantity: 123 }, { product: `sofa`, create_date: `01.05.2021`, create_by: `Simone`, storage_location: `AREA_001`, quantity: 700 }, { product: `computer`, create_date: `27.01.2023`, create_by: `Theo`, storage_location: `AREA_001`, quantity: 200 }, { product: `printer`, create_date: `01.01.2023`, create_by: `Hannah`, storage_location: `AREA_001`, quantity: 90 }, { product: `table2`, create_date: `01.01.2023`, create_by: `Julia`, storage_location: `AREA_001`, quantity: 110 }, { product: `table`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }, { product: `chair`, create_date: `01.01.2022`, create_by: `James`, storage_location: `AREA_001`, quantity: 123 }, { product: `sofa`, create_date: `01.05.2021`, create_by: `Simone`, storage_location: `AREA_001`, quantity: 700 }, { product: `computer`, create_date: `27.01.2023`, create_by: `Theo`, storage_location: `AREA_001`, quantity: 200 }, { product: `printer`, create_date: `01.01.2023`, create_by: `Hannah`, storage_location: `AREA_001`, quantity: 90 }, { product: `table2`, create_date: `01.01.2023`, create_by: `Julia`, storage_location: `AREA_001`, quantity: 110 }, { product: `table`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }, { product: `chair`, create_date: `01.01.2022`, create_by: `James`, storage_location: `AREA_001`, quantity: 123 }, { product: `sofa`, create_date: `01.05.2021`, create_by: `Simone`, storage_location: `AREA_001`, quantity: 700 }, { product: `computer`, create_date: `27.01.2023`, create_by: `Theo`, storage_location: `AREA_001`, quantity: 200 }, { product: `printer`, create_date: `01.01.2023`, create_by: `Hannah`, storage_location: `AREA_001`, quantity: 90 }, { product: `table2`, create_date: `01.01.2023`, create_by: `Julia`, storage_location: `AREA_001`, quantity: 110 }, { product: `table`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }, { product: `chair`, create_date: `01.01.2022`, create_by: `James`, storage_location: `AREA_001`, quantity: 123 }, { product: `sofa`, create_date: `01.05.2021`, create_by: `Simone`, storage_location: `AREA_001`, quantity: 700 }, { product: `computer`, create_date: `27.01.2023`, create_by: `Theo`, storage_location: `AREA_001`, quantity: 200 }, { product: `printer`, create_date: `01.01.2023`, create_by: `Hannah`, storage_location: `AREA_001`, quantity: 90 }, { product: `table2`, create_date: `01.01.2023`, create_by: `Julia`, storage_location: `AREA_001`, quantity: 110 }];
+    this.mt_table.sort((a, b) => (a.product > b.product ? 1 : a.product < b.product ? -1 : 0));
+    this.mt_table_full = this.mt_table;
+    this.mt_table_products = this.mt_table;
+    // TODO(abap2js): DELETE ADJACENT DUPLICATES FROM mt_table_products COMPARING product.
   }
 }
 

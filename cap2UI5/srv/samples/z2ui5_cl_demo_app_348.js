@@ -1,190 +1,81 @@
-/* AUTO-GENERATED scaffolding — abap2UI5 transpile failed; manual port required.
- *
- * Original ABAP source:
- * ====================
- * CLASS z2ui5_cl_demo_app_348 DEFINITION PUBLIC.
- * 
- *   PUBLIC SECTION.
- *     INTERFACES z2ui5_if_app.
- * 
- *     DATA ms_struc      TYPE z2ui5_t_01.
- *     DATA mo_layout_obj TYPE REF TO z2ui5_cl_demo_app_333.
- * 
- *     METHODS get_data.
- *     METHODS get_data2.
- * 
- *     METHODS view_display
- *       IMPORTING
- *         client TYPE REF TO z2ui5_if_client.
- * 
- *   PROTECTED SECTION.
- *     METHODS xml_form
- *       IMPORTING
- *         i_data   TYPE REF TO data
- *         i_page   TYPE REF TO z2ui5_cl_xml_view
- *         i_client TYPE REF TO z2ui5_if_client.
- * 
- *   PRIVATE SECTION.
- * ENDCLASS.
- * 
- * 
- * CLASS z2ui5_cl_demo_app_348 IMPLEMENTATION.
- * 
- *   METHOD z2ui5_if_app~main.
- * 
- *     FIELD-SYMBOLS <row> TYPE z2ui5_t_01.
- * 
- *     IF client->check_on_init( ).
- * 
- *       get_data( ).
- * 
- *       mo_layout_obj = z2ui5_cl_demo_app_333=>factory( i_data   = REF #( ms_struc )
- *                                                       vis_cols = 5 ).
- * 
- *       view_display( client ).
- *     ENDIF.
- * 
- *     CASE client->get( )-event.
- *       WHEN `GO`.
- *         DATA(app) = z2ui5_cl_demo_app_336=>factory( ).
- *         client->nav_app_call( app ).
- * 
- *       WHEN `GET_DATA`.
- * 
- *         get_data2( ).
- * 
- *     ENDCASE.
- * 
- *     IF     client->get( )-check_on_navigated = abap_true
- *        AND client->check_on_init( )          = abap_false.
- *       view_display( client ).
- *     ENDIF.
- * 
- *     IF mo_layout_obj->mr_data IS NOT BOUND.
- *       client->message_toast_display( `ERROR - mo_layout_obj->mr_data is not bound!` ).
- *     ENDIF.
- * 
- *     IF ms_struc IS INITIAL.
- *       client->message_toast_display( `ERROR - ms_struc is initial!` ).
- *     ENDIF.
- * 
- *     ASSIGN mo_layout_obj->mr_data->* TO <row>.
- * 
- *     IF <row> <> ms_struc.
- *       client->message_toast_display( `ERROR - mo_layout_obj->mr_data->*  <> ms_struc!` ).
- *     ENDIF.
- * 
- *     client->view_model_update( ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD view_display.
- * 
- *     DATA(page) = z2ui5_cl_xml_view=>factory( )->shell( )->page( title          = `RTTI IV`
- *                                                                 navbuttonpress = client->_event_nav_app_leave( )
- *                                                                 shownavbutton  = client->check_app_prev_stack( ) ).
- * 
- *     page->button( text  = `CALL Next App`
- *                   press = client->_event( `GO` )
- *                   type  = `Success` ).
- * 
- *     page->button( text  = `Read from DB`
- *                   press = client->_event( `GET_DATA` )
- *                   type  = `Success` ).
- * 
- *     xml_form( i_data   = REF #( ms_struc )
- *               i_page   = page
- *               i_client = client ).
- * 
- *     xml_form( i_data   = mo_layout_obj->mr_data
- *               i_page   = page
- *               i_client = client ).
- * 
- *     client->view_display( page->stringify( ) ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD get_data.
- * 
- *     SELECT SINGLE id,
- *                   id_prev,
- *                   id_prev_app,
- *                   id_prev_app_stack,
- *                   timestampl
- *       FROM z2ui5_t_01
- *       INTO CORRESPONDING FIELDS OF @ms_struc.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD get_data2.
- * 
- *     SELECT SINGLE id,
- *                   id_prev,
- *                   id_prev_app,
- *                   id_prev_app_stack,
- *                   timestampl
- *       FROM z2ui5_t_01
- *       WHERE id <> @ms_struc-id
- *       INTO CORRESPONDING FIELDS OF @ms_struc.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD xml_form.
- * 
- *     FIELD-SYMBOLS <layout> TYPE z2ui5_cl_demo_app_333=>ty_s_layout.
- *     FIELD-SYMBOLS <data>   TYPE any.
- *     FIELD-SYMBOLS <value>  TYPE any.
- * 
- *     DATA(form) = i_page->simple_form( editable        = abap_true
- *                                       layout          = `ResponsiveGridLayout`
- *                                       adjustlabelspan = abap_true
- *                                  )->content( `form` ).
- * 
- *     DATA(index) = 0.
- * 
- *     LOOP AT mo_layout_obj->ms_data-t_layout ASSIGNING <layout>.
- * 
- *       index = index + 1.
- * 
- *       ASSIGN i_data->* TO <data>.
- * 
- *       ASSIGN COMPONENT <layout>-name OF STRUCTURE <data> TO <value>.
- * 
- *       IF <value> IS NOT ASSIGNED.
- *         RETURN.
- *       ENDIF.
- * 
- *       DATA(line) = form->label( wrapping = abap_false
- *                                 text     = <layout>-name ).
- * 
- *       line->input( value   = i_client->_bind( <value> )
- *                    visible = i_client->_bind( val       = <layout>-visible
- *                                               tab       = mo_layout_obj->ms_data-t_layout
- *                                               tab_index = index )
- *                    enabled = abap_false ).
- *     ENDLOOP.
- * 
- *   ENDMETHOD.
- * 
- * ENDCLASS.
- */
-
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
+const z2ui5_cl_demo_app_333 = require("./z2ui5_cl_demo_app_333");
+const z2ui5_cl_demo_app_336 = require("./z2ui5_cl_demo_app_336");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_348 extends z2ui5_if_app {
-  client = null;
+  ms_struc = [];
+  mo_layout_obj = null;
+
   async main(client) {
-    this.client = client;
+    // TODO(abap2js): FIELD-SYMBOLS <row> TYPE z2ui5_t_01.
     if (client.check_on_init()) {
-      const v = z2ui5_cl_xml_view.factory()
-        .Page({ title: "z2ui5_cl_demo_app_348 (TODO: port from abap)" })
-        .Text({ text: "This sample needs to be ported manually from abap2UI5." });
-      client.view_display(v.stringify());
+      this.get_data();
+      this.mo_layout_obj = z2ui5_cl_demo_app_333.factory({ i_data: (this.ms_struc), vis_cols: 5 });
+      this.view_display({ client: client });
+    }
+    switch (client.get().EVENT) {
+      case `GO`:
+        const app = z2ui5_cl_demo_app_336.factory();
+        client.nav_app_call(app);
+        break;
+      case `GET_DATA`:
+        this.get_data2();
+        break;
+    }
+    if (client.get().CHECK_ON_NAVIGATED === true && client.check_on_init() === false) {
+      this.view_display({ client: client });
+    }
+    if (this.mo_layout_obj.mr_data != null) {
+      client.message_toast_display(`ERROR - mo_layout_obj->mr_data is not bound!`);
+    }
+    if (!this.ms_struc) {
+      client.message_toast_display(`ERROR - ms_struc is initial!`);
+    }
+    // TODO(abap2js): ASSIGN mo_layout_obj->mr_data->* TO <row>.
+    if (row !== this.ms_struc) {
+      client.message_toast_display(`ERROR - mo_layout_obj->mr_data->* <> ms_struc!`);
+    }
+    client.view_model_update();
+  }
+
+  view_display({ client } = {}) {
+    const page = z2ui5_cl_xml_view.factory()
+      .shell()
+      .page({ title: `RTTI IV`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
+    page.button({ text: `CALL Next App`, press: client._event(`GO`), type: `Success` });
+    page.button({ text: `Read from DB`, press: client._event(`GET_DATA`), type: `Success` });
+    this.xml_form({ i_data: (this.ms_struc), i_page: page, i_client: client });
+    this.xml_form({ i_data: this.mo_layout_obj.mr_data, i_page: page, i_client: client });
+    client.view_display(page.stringify());
+  }
+
+  get_data() {
+    // TODO(abap2js): SELECT SINGLE id, id_prev, id_prev_app, id_prev_app_stack, timestampl FROM z2ui5_t_01 INTO CORRESPONDING FIELDS OF @ms_struc.
+  }
+
+  get_data2() {
+    // TODO(abap2js): SELECT SINGLE id, id_prev, id_prev_app, id_prev_app_stack, timestampl FROM z2ui5_t_01 WHERE id <> @ms_struc-id INTO CORRESPONDING FIELDS OF @ms_struc.
+  }
+
+  xml_form({ i_data, i_page, i_client } = {}) {
+    // TODO(abap2js): FIELD-SYMBOLS <layout> TYPE z2ui5_cl_demo_app_333=>ty_s_layout.
+    // TODO(abap2js): FIELD-SYMBOLS <data> TYPE any.
+    // TODO(abap2js): FIELD-SYMBOLS <value> TYPE any.
+    const form = i_page.simple_form({ editable: true, layout: `ResponsiveGridLayout`, adjustlabelspan: true })
+      .content(`form`);
+    let index = 0;
+    let sy_tabix = 0;
+    for (const fs of this.mo_layout_obj.ms_data.t_layout) {
+      sy_tabix++;
+      index = index + 1;
+      // TODO(abap2js): ASSIGN i_data->* TO <data>.
+      // TODO(abap2js): ASSIGN COMPONENT <layout>-name OF STRUCTURE <data> TO <value>.
+      if (sy_subrc !== 0) {
+        return;
+      }
+      const line = form.label({ wrapping: false, text: layout.name });
+      line.input({ value: i_client._bind(value), visible: i_client._bind({ val: layout.visible, tab: this.mo_layout_obj.ms_data.t_layout, tab_index: index }), enabled: false });
     }
   }
 }

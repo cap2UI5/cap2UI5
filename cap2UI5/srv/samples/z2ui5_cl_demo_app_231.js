@@ -1,194 +1,70 @@
-/* AUTO-GENERATED scaffolding — abap2UI5 transpile failed; manual port required.
- *
- * Original ABAP source:
- * ====================
- * CLASS z2ui5_cl_demo_app_231 DEFINITION PUBLIC.
- * 
- *   PUBLIC SECTION.
- *     INTERFACES z2ui5_if_app.
- * 
- *     TYPES:
- *       BEGIN OF t_drs,
- *         start TYPE d,
- *         end   TYPE d,
- *       END OF t_drs.
- * 
- *     DATA drs1    TYPE t_drs.
- *     DATA drs2    TYPE t_drs.
- *     DATA drs3    TYPE t_drs.
- *     DATA drs4    TYPE t_drs.
- *     DATA drs5    TYPE t_drs.
- *     DATA mindate TYPE d VALUE `20160101`.
- *     DATA maxdate TYPE d VALUE `20161231`.
- *     DATA text    TYPE string.
- * 
- *   PROTECTED SECTION.
- *     METHODS view_display
- *       IMPORTING
- *         client TYPE REF TO z2ui5_if_client.
- *     METHODS initialize.
- *     METHODS on_event
- *       IMPORTING
- *         client TYPE REF TO z2ui5_if_client.
- * 
- *   PRIVATE SECTION.
- * ENDCLASS.
- * 
- * 
- * CLASS z2ui5_cl_demo_app_231 IMPLEMENTATION.
- * 
- *   METHOD view_display.
- * 
- *     DATA(view) = z2ui5_cl_xml_view=>factory( ).
- * 
- *     view->_generic_property( VALUE #( n = `core:require` v = `{Helper:'z2ui5/Util'}` ) ).
- * 
- *     DATA(page) = view->shell(
- *                     )->page(
- *                         title          = `abap2UI5 - Sample: Date Range Selection`
- *                         navbuttonpress = client->_event_nav_app_leave( )
- *                         shownavbutton  = client->check_app_prev_stack( ) ).
- * 
- *     page->header_content(
- *        )->link(
- *            text   = `UI5 Demo Kit`
- *            target = `_blank`
- *            href   = `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.DateRangeSelection/sample/sap.m.sample.DateRangeSelection` ).
- * 
- *     DATA(vbox) = page->vbox( ).
- * 
- *     " DRS1
- *     vbox->label( text     = `DateRangeSelection displayFormat 'yyyy/MM/dd', set via binding:`
- *                  labelfor = `DRS1`
- *        )->date_range_selection(
- *             id              = `DRS1`
- *             displayformat   = `yyyy/MM/dd`
- *             change          = client->_event( val = `handleChange` t_arg = VALUE #( ( `DRS2` ) ) )
- *             datevalue       = `{= Helper.DateCreateObject($` && client->_bind( drs1-start ) && `) }`
- *             seconddatevalue = `{= Helper.DateCreateObject($` && client->_bind( drs1-end ) && `) }` ).
- * 
- *     " DRS2
- *     vbox->label( text     = `DateRangeSelection with minDate=2016-01-01 and maxDate=2016-12-31:`
- *                  labelfor = `DRS2`
- *        )->date_range_selection(
- *             id              = `DRS2`
- *             mindate         = `{= Helper.DateCreateObject($` && client->_bind( mindate ) && `) }`
- *             maxdate         = `{= Helper.DateCreateObject($` && client->_bind( maxdate ) && `) }`
- *             change          = client->_event( val = `handleChange` t_arg = VALUE #( ( `DRS2` ) ) )
- *             datevalue       = `{= Helper.DateCreateObject($` && client->_bind( drs2-start ) && `) }`
- *             seconddatevalue = `{= Helper.DateCreateObject($` && client->_bind( drs2-end ) && `) }` ).
- * 
- *     " DRS3
- *     vbox->label( text     = `DateRangeSelection with OK button in the footer and with shortcut for today:"`
- *                  labelfor = `DRS3`
- *        )->date_range_selection(
- *             id                    = `DRS3`
- *             showcurrentdatebutton = abap_true
- *             showfooter            = abap_true
- *             change                = client->_event( val = `handleChange` t_arg = VALUE #( ( `DRS3` ) ) )
- *             datevalue             = `{= Helper.DateCreateObject($` && client->_bind( drs3-start ) && `) }`
- *             seconddatevalue       = `{= Helper.DateCreateObject($` && client->_bind( drs3-end ) && `) }` ).
- * 
- *     " DRS4
- *     vbox->label( text     = `DateRangeSelection with displayFormat 'MM/yyyy':`
- *                  labelfor = `DRS3`
- *        )->date_range_selection(
- *             id              = `DRS4`
- *             change          = client->_event( val = `handleChange` t_arg = VALUE #( ( `DRS4` ) ) )
- *             displayformat   = `MM/yyyy`
- *             datevalue       = `{= Helper.DateCreateObject($` && client->_bind( drs4-start ) && `) }`
- *             seconddatevalue = `{= Helper.DateCreateObject($` && client->_bind( drs4-end ) && `) }` ).
- * 
- *     " DRS5
- *     vbox->label( text     = `DateRangeSelection with displayFormat 'MM/yyyy':`
- *                  labelfor = `DRS3`
- *        )->date_range_selection(
- *             id              = `DRS5`
- *             change          = client->_event( val = `handleChange` t_arg = VALUE #( ( `DRS5` ) ) )
- *             displayformat   = `yyyy`
- *             datevalue       = `{= Helper.DateCreateObject($` && client->_bind( drs5-start ) && `) }`
- *             seconddatevalue = `{= Helper.DateCreateObject($` && client->_bind( drs5-end ) && `) }` ).
- * 
- *     vbox->label( text     = `Change event`
- *                  labelfor = `TextEvent` ).
- *     vbox->text( id   = `TextEvent`
- *                 text = client->_bind_edit( text ) ).
- * 
- *     client->view_display( page->stringify( ) ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD initialize.
- * 
- *     drs1-start = `20140202`.
- *     drs1-end   = `20140217`.
- * 
- *     drs2-start = `20160216`.
- *     drs2-end   = `20160218`.
- * 
- *     drs3-start = `20140202`.
- *     drs3-end   = `20140217`.
- * 
- *     drs4-start = `20190401`.
- *     drs4-end   = `20191001`.
- * 
- *     drs5-start = `20150101`.
- *     drs5-end   = `20191001`.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD on_event.
- * 
- *     IF client->check_on_event( `handleChange` ).
- * 
- *       DATA(args) = client->get( )-t_event_arg.
- *       DATA(source) = args[ 1 ].
- * 
- *       ASSIGN me->(source) TO FIELD-SYMBOL(<drs>).
- * 
- *       DATA(drs) = CORRESPONDING t_drs( <drs> ).
- * 
- *       text = |Id: { source }\n|
- *           && |From: { drs-start }\n|
- *           && |To: { drs-end }|.
- * 
- *     ENDIF.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD z2ui5_if_app~main.
- * 
- *     IF client->check_on_init( ).
- *       initialize( ).
- *       view_display( client ).
- * 
- *     ELSE.
- *       client->view_model_update( ).
- *     ENDIF.
- * 
- *     on_event( client ).
- * 
- *   ENDMETHOD.
- * 
- * ENDCLASS.
- */
-
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_231 extends z2ui5_if_app {
-  client = null;
-  async main(client) {
-    this.client = client;
-    if (client.check_on_init()) {
-      const v = z2ui5_cl_xml_view.factory()
-        .Page({ title: "z2ui5_cl_demo_app_231 (TODO: port from abap)" })
-        .Text({ text: "This sample needs to be ported manually from abap2UI5." });
-      client.view_display(v.stringify());
+  drs1 = {};
+  drs2 = {};
+  drs3 = {};
+  drs4 = {};
+  drs5 = {};
+  mindate = `20160101`;
+  maxdate = `20161231`;
+  text = ``;
+
+  view_display({ client } = {}) {
+    const view = z2ui5_cl_xml_view.factory();
+    view._generic_property({ n: `core:require`, v: `{Helper:'z2ui5/Util'}` });
+    const page = view.shell()
+      .page({ title: `abap2UI5 - Sample: Date Range Selection`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
+    page.header_content()
+      .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.DateRangeSelection/sample/sap.m.sample.DateRangeSelection` });
+    const vbox = page.vbox();
+    vbox.label({ text: `DateRangeSelection displayFormat 'yyyy/MM/dd', set via binding:`, labelfor: `DRS1` })
+      .date_range_selection({ id: `DRS1`, displayformat: `yyyy/MM/dd`, change: client._event(`handleChange`, [`DRS2`]), datevalue: `{= Helper.DateCreateObject($` + client._bind(this.drs1.start) + `) }`, seconddatevalue: `{= Helper.DateCreateObject($` + client._bind(this.drs1.end) + `) }` });
+    vbox.label({ text: `DateRangeSelection with minDate=2016-01-01 and maxDate=2016-12-31:`, labelfor: `DRS2` })
+      .date_range_selection({ id: `DRS2`, mindate: `{= Helper.DateCreateObject($` + client._bind(this.mindate) + `) }`, maxdate: `{= Helper.DateCreateObject($` + client._bind(this.maxdate) + `) }`, change: client._event(`handleChange`, [`DRS2`]), datevalue: `{= Helper.DateCreateObject($` + client._bind(this.drs2.start) + `) }`, seconddatevalue: `{= Helper.DateCreateObject($` + client._bind(this.drs2.end) + `) }` });
+    vbox.label({ text: `DateRangeSelection with OK button in the footer and with shortcut for today:"`, labelfor: `DRS3` })
+      .date_range_selection({ id: `DRS3`, showcurrentdatebutton: true, showfooter: true, change: client._event(`handleChange`, [`DRS3`]), datevalue: `{= Helper.DateCreateObject($` + client._bind(this.drs3.start) + `) }`, seconddatevalue: `{= Helper.DateCreateObject($` + client._bind(this.drs3.end) + `) }` });
+    vbox.label({ text: `DateRangeSelection with displayFormat 'MM/yyyy':`, labelfor: `DRS3` })
+      .date_range_selection({ id: `DRS4`, change: client._event(`handleChange`, [`DRS4`]), displayformat: `MM/yyyy`, datevalue: `{= Helper.DateCreateObject($` + client._bind(this.drs4.start) + `) }`, seconddatevalue: `{= Helper.DateCreateObject($` + client._bind(this.drs4.end) + `) }` });
+    vbox.label({ text: `DateRangeSelection with displayFormat 'MM/yyyy':`, labelfor: `DRS3` })
+      .date_range_selection({ id: `DRS5`, change: client._event(`handleChange`, [`DRS5`]), displayformat: `yyyy`, datevalue: `{= Helper.DateCreateObject($` + client._bind(this.drs5.start) + `) }`, seconddatevalue: `{= Helper.DateCreateObject($` + client._bind(this.drs5.end) + `) }` });
+    vbox.label({ text: `Change event`, labelfor: `TextEvent` });
+    vbox.text({ id: `TextEvent`, text: client._bind_edit(this.text) });
+    client.view_display(page.stringify());
+  }
+
+  initialize() {
+    this.drs1.start = `20140202`;
+    this.drs1.end = `20140217`;
+    this.drs2.start = `20160216`;
+    this.drs2.end = `20160218`;
+    this.drs3.start = `20140202`;
+    this.drs3.end = `20140217`;
+    this.drs4.start = `20190401`;
+    this.drs4.end = `20191001`;
+    this.drs5.start = `20150101`;
+    this.drs5.end = `20191001`;
+  }
+
+  on_event({ client } = {}) {
+    if (client.check_on_event(`handleChange`)) {
+      const args = client.get().T_EVENT_ARG;
+      const source = args[(1) - 1];
+      // TODO(abap2js): ASSIGN me->(source) TO FIELD-SYMBOL(<drs>).
+      const drs = ({ ...drs });
+      this.text = `Id: ${source}\\n` + `From: ${drs.start}\\n` + `To: ${drs.end}`;
     }
+  }
+
+  async main(client) {
+    if (client.check_on_init()) {
+      this.initialize();
+      this.view_display({ client: client });
+    } else {
+      client.view_model_update();
+    }
+    this.on_event({ client: client });
   }
 }
 

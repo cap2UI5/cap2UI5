@@ -1,110 +1,42 @@
-/* AUTO-GENERATED scaffolding — abap2UI5 transpile failed; manual port required.
- *
- * Original ABAP source:
- * ====================
- * CLASS z2ui5_cl_demo_app_341 DEFINITION PUBLIC.
- * 
- *   PUBLIC SECTION.
- *     INTERFACES z2ui5_if_app.
- * 
- *     TYPES:
- *       BEGIN OF ty_s_table,
- *         value TYPE string,
- *         index TYPE string,
- *       END OF ty_s_table.
- *     TYPES ty_t_table TYPE STANDARD TABLE OF ty_s_table WITH EMPTY KEY.
- * 
- *     DATA client TYPE REF TO z2ui5_if_client.
- * 
- *     DATA mo_layout1 TYPE REF TO z2ui5_cl_demo_app_333.
- * 
- *     DATA mt_table TYPE ty_t_table.
- * 
- * *    DATA mo_layout   type ref to z2ui5_cl_layo_manager .
- * 
- *     METHODS view_display.
- *   PROTECTED SECTION.
- *   PRIVATE SECTION.
- * ENDCLASS.
- * 
- * 
- * CLASS z2ui5_cl_demo_app_341 IMPLEMENTATION.
- * 
- *   METHOD view_display.
- * 
- *     DATA(lo_main) = z2ui5_cl_xml_view=>factory( )->shell( ).
- *     DATA(page) = lo_main->page( title          = `abap2UI5 - Popups`
- *                                 navbuttonpress = client->_event_nav_app_leave( )
- *                                 shownavbutton  = client->check_app_prev_stack( ) ).
- * 
- *     DATA(grid) = page->grid( `L7 M12 S12` )->content( `layout`
- *         )->simple_form( `Popups` )->content( `form`
- *             )->label( `Demo`
- *             )->button( text  = `Popup to Select`
- *                        press = client->_event( `BUTTON_POPUP_01` )
- *             )->label( `Demo`
- *             )->button( text  = `other Popup`
- *                        press = client->_event( `BUTTON_POPUP_02` ) ).
- * 
- *     client->view_display( lo_main->stringify( ) ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD z2ui5_if_app~main.
- * 
- *     me->client = client.
- * 
- *     IF client->get( )-check_on_navigated = abap_true.
- *       view_display( ).
- * 
- *       mt_table = VALUE ty_t_table( index = 1
- *                                    value = 10
- *                                    ( )
- *                                    ( ) ).
- * 
- *     ENDIF.
- * 
- *     CASE client->get( )-event.
- * 
- *       WHEN `BUTTON_POPUP_01`.
- * 
- *         client->nav_app_call( z2ui5_cl_pop_to_select=>factory( i_tab             = mt_table
- *                                                                i_multiselect     = abap_false
- *                                                                i_event_confirmed = `POPUP_CONFIRMED`
- *                                                                i_event_canceled  = `POPUP_CANCEL` ) ).
- * 
- *       WHEN `BUTTON_POPUP_02`.
- * 
- * *        mo_layout = z2ui5_cl_layo_manager=>factory( control = z2ui5_cl_layo_manager=>m_table
- * *                                                    data    = REF #( mt_table )  ).
- * *
- * *        client->nav_app_call( z2ui5_cl_layo_pop=>factory( layout = mo_layout ) ).
- * 
- *         mo_layout1 = z2ui5_cl_demo_app_333=>factory( i_data  = REF #( mt_table )
- *                                                     vis_cols = 5 ).
- * 
- *         client->nav_app_call( z2ui5_cl_demo_app_340=>factory( io_table  = REF #( mt_table )
- *                                                               io_layout = mo_layout1 ) ).
- *     ENDCASE.
- * 
- *   ENDMETHOD.
- * 
- * ENDCLASS.
- */
-
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
+const z2ui5_cl_demo_app_333 = require("./z2ui5_cl_demo_app_333");
+const z2ui5_cl_demo_app_340 = require("./z2ui5_cl_demo_app_340");
+const z2ui5_cl_pop_to_select = require("abap2UI5/z2ui5_cl_pop_to_select");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_341 extends z2ui5_if_app {
+  mo_layout1 = null;
+  mt_table = [];
   client = null;
+
+  view_display() {
+    const lo_main = z2ui5_cl_xml_view.factory().shell();
+    const page = lo_main.page({ title: `abap2UI5 - Popups`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    const grid = page.grid(`L7 M12 S12`)
+      .content(`layout`)
+      .simple_form(`Popups`)
+      .content(`form`)
+      .label(`Demo`)
+      .button({ text: `Popup to Select`, press: this.client._event(`BUTTON_POPUP_01`) })
+      .label(`Demo`)
+      .button({ text: `other Popup`, press: this.client._event(`BUTTON_POPUP_02`) });
+    this.client.view_display(lo_main.stringify());
+  }
+
   async main(client) {
     this.client = client;
-    if (client.check_on_init()) {
-      const v = z2ui5_cl_xml_view.factory()
-        .Page({ title: "z2ui5_cl_demo_app_341 (TODO: port from abap)" })
-        .Text({ text: "This sample needs to be ported manually from abap2UI5." });
-      client.view_display(v.stringify());
+    if (client.get().CHECK_ON_NAVIGATED === true) {
+      this.view_display();
+      this.mt_table = { index: 1, value: this.10() () };
+    }
+    switch (client.get().EVENT) {
+      case `BUTTON_POPUP_01`:
+        client.nav_app_call(z2ui5_cl_pop_to_select.factory({ i_tab: this.mt_table, i_multiselect: false, i_event_confirmed: `POPUP_CONFIRMED`, i_event_canceled: `POPUP_CANCEL` }));
+        break;
+      case `BUTTON_POPUP_02`:
+        this.mo_layout1 = z2ui5_cl_demo_app_333.factory({ i_data: (this.mt_table), vis_cols: 5 });
+        client.nav_app_call(z2ui5_cl_demo_app_340.factory({ io_table: (this.mt_table), io_layout: this.mo_layout1 }));
+        break;
     }
   }
 }

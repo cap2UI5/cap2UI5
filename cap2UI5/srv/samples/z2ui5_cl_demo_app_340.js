@@ -1,137 +1,70 @@
-/* AUTO-GENERATED scaffolding — abap2UI5 transpile failed; manual port required.
- *
- * Original ABAP source:
- * ====================
- * CLASS z2ui5_cl_demo_app_340 DEFINITION PUBLIC.
- * 
- *   PUBLIC SECTION.
- *     INTERFACES z2ui5_if_app.
- * 
- *     DATA mt_data_tmp TYPE REF TO data.
- *     DATA mt_data     TYPE REF TO data.
- *     DATA ms_data_row TYPE REF TO data.
- * 
- *     DATA mo_layout   TYPE REF TO z2ui5_cl_demo_app_333.
- * 
- *     CLASS-METHODS factory
- *       IMPORTING
- *         io_table      TYPE REF TO data
- *         io_layout     TYPE REF TO z2ui5_cl_demo_app_333 OPTIONAL
- *       RETURNING
- *         VALUE(result) TYPE REF TO z2ui5_cl_demo_app_340.
- * 
- *   PROTECTED SECTION.
- *     METHODS on_event    IMPORTING client TYPE REF TO z2ui5_if_client.
- *     METHODS view_display IMPORTING client TYPE REF TO z2ui5_if_client.
- * 
- *   PRIVATE SECTION.
- * ENDCLASS.
- * 
- * 
- * CLASS z2ui5_cl_demo_app_340 IMPLEMENTATION.
- * 
- *   METHOD on_event.
- * 
- *     IF client->check_on_event( `POPUP_CLOSE` ).
- *       client->popup_destroy( ).
- *       client->nav_app_leave( client->get_app( client->get( )-s_draft-id_prev_app_stack ) ).
- *     ENDIF.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD view_display.
- * 
- *     DATA(popup) = z2ui5_cl_xml_view=>factory_popup( ).
- * 
- *     DATA(simple_form) = popup->dialog( title        = `Test`
- *                                        contentwidth = `60%`
- *                                        afterclose   = client->_event( `POPUP_CLOSE` )
- *           )->simple_form( title    = ``
- *                           layout   = `ResponsiveGridLayout`
- *                           editable = abap_true
- *           )->content( `form` )->label( `Test` )->input( `TEST` ).
- * 
- *     client->popup_display( popup->stringify( ) ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD z2ui5_if_app~main.
- * 
- *     IF client->check_on_init( ).
- *       view_display( client ).
- * 
- *     ENDIF.
- * 
- *     IF mo_layout->mr_data IS INITIAL.
- *       client->message_toast_display( `ERROR - mo_layout_obj->mr_data is initial` ).
- *       RETURN.
- *     ENDIF.
- * 
- *     ASSIGN mo_layout->mr_data->* TO FIELD-SYMBOL(<data>).
- *     ASSIGN mt_data->* TO FIELD-SYMBOL(<table>).
- * 
- *     IF <data> <> <table>.
- *       client->message_toast_display( `ERROR - mo_layout_obj->mr_data->* ne mt_table->*` ).
- *     ENDIF.
- *     on_event( client ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD factory.
- * 
- *     " Add new empty row
- * 
- *     result = NEW #( ).
- * 
- *     result->mo_layout = io_layout.
- * 
- *     TRY.
- *         DATA(comp) = z2ui5_cl_util=>rtti_get_t_attri_by_any( io_table ).
- *       CATCH cx_root.
- *     ENDTRY.
- * 
- *     TRY.
- *         DATA(new_struct_desc) = cl_abap_structdescr=>create( comp ).
- * 
- *         DATA(new_table_desc) = cl_abap_tabledescr=>create( p_line_type  = new_struct_desc
- *                                                            p_table_kind = cl_abap_tabledescr=>tablekind_std ).
- * 
- *         CREATE DATA result->mt_data     TYPE HANDLE new_table_desc.
- *         CREATE DATA result->mt_data_tmp TYPE HANDLE new_table_desc.
- *         CREATE DATA result->ms_data_row TYPE HANDLE new_struct_desc.
- * 
- *       CATCH cx_root.
- *     ENDTRY.
- * 
- *     ASSIGN io_table->* TO FIELD-SYMBOL(<table>).
- * 
- *     ASSIGN result->mt_data->* TO FIELD-SYMBOL(<data>).
- *     <data> = <table>.
- * 
- *     ASSIGN result->mt_data_tmp->* TO <data>.
- *     <data> = <table>.
- * 
- *   ENDMETHOD.
- * 
- * ENDCLASS.
- */
-
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
+// TODO(abap2js): unresolved reference cl_abap_structdescr — add require manually
+// TODO(abap2js): unresolved reference cl_abap_tabledescr — add require manually
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_340 extends z2ui5_if_app {
-  client = null;
-  async main(client) {
-    this.client = client;
-    if (client.check_on_init()) {
-      const v = z2ui5_cl_xml_view.factory()
-        .Page({ title: "z2ui5_cl_demo_app_340 (TODO: port from abap)" })
-        .Text({ text: "This sample needs to be ported manually from abap2UI5." });
-      client.view_display(v.stringify());
+  mt_data_tmp = null;
+  mt_data = null;
+  ms_data_row = null;
+  mo_layout = null;
+
+  on_event({ client } = {}) {
+    if (client.check_on_event(`POPUP_CLOSE`)) {
+      client.popup_destroy();
+      client.nav_app_leave(client.get_app(client.get().S_DRAFT.ID_PREV_APP_STACK));
     }
+  }
+
+  view_display({ client } = {}) {
+    const popup = z2ui5_cl_xml_view.factory_popup();
+    const simple_form = popup.dialog({ title: `Test`, contentwidth: `60%`, afterclose: client._event(`POPUP_CLOSE`) })
+      .simple_form({ title: ``, layout: `ResponsiveGridLayout`, editable: true })
+      .content(`form`)
+      .label(`Test`)
+      .input(`TEST`);
+    client.popup_display(popup.stringify());
+  }
+
+  async main(client) {
+    if (client.check_on_init()) {
+      this.view_display({ client: client });
+    }
+    if (!this.mo_layout.mr_data) {
+      client.message_toast_display(`ERROR - mo_layout_obj->mr_data is initial`);
+      return;
+    }
+    // TODO(abap2js): ASSIGN mo_layout->mr_data->* TO FIELD-SYMBOL(<data>).
+    // TODO(abap2js): ASSIGN mt_data->* TO FIELD-SYMBOL(<table>).
+    if (data !== table) {
+      client.message_toast_display(`ERROR - mo_layout_obj->mr_data->* ne mt_table->*`);
+    }
+    this.on_event({ client: client });
+  }
+
+  static factory({ io_table, io_layout } = {}) {
+    let result = null;
+    result = new z2ui5_cl_demo_app_340();
+    result.mo_layout = io_layout;
+    try {
+      const comp = z2ui5_cl_util.rtti_get_t_attri_by_any(io_table);
+    } catch (error) {
+    }
+    try {
+      const new_struct_desc = cl_abap_structdescr.create(comp);
+      const new_table_desc = cl_abap_tabledescr.create({ p_line_type: new_struct_desc, p_table_kind: cl_abap_tabledescr.tablekind_std });
+      // TODO(abap2js): CREATE DATA result->mt_data TYPE HANDLE new_table_desc.
+      // TODO(abap2js): CREATE DATA result->mt_data_tmp TYPE HANDLE new_table_desc.
+      // TODO(abap2js): CREATE DATA result->ms_data_row TYPE HANDLE new_struct_desc.
+    } catch (error) {
+    }
+    // TODO(abap2js): ASSIGN io_table->* TO FIELD-SYMBOL(<table>).
+    // TODO(abap2js): ASSIGN result->mt_data->* TO FIELD-SYMBOL(<data>).
+    data = table;
+    // TODO(abap2js): ASSIGN result->mt_data_tmp->* TO <data>.
+    data = table;
+    return result;
   }
 }
 

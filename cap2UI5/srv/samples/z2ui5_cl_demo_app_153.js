@@ -1,142 +1,49 @@
-/* AUTO-GENERATED scaffolding — abap2UI5 transpile failed; manual port required.
- *
- * Original ABAP source:
- * ====================
- * CLASS z2ui5_cl_demo_app_153 DEFINITION PUBLIC.
- * 
- *   PUBLIC SECTION.
- *     INTERFACES z2ui5_if_app.
- * 
- *     TYPES:
- *       BEGIN OF ty_dataset2,
- *         label                TYPE string,
- *         data                 TYPE string_table,
- *         border_width         TYPE i,
- *         border_radius        TYPE i,
- *         border_skipped       TYPE abap_bool,
- *         border_skipped_xfeld TYPE abap_bool,
- *       END OF ty_dataset2.
- * 
- *     TYPES:
- *       BEGIN OF ty_dataset,
- *         label          TYPE string,
- *         type           TYPE string,
- *         data           TYPE string_table,
- *         border_width   TYPE i,
- *         border_color   TYPE string,
- *         border_radius  TYPE i,
- *         border_skipped TYPE abap_bool,
- *         show_line      TYPE abap_bool,
- *         lvl2           TYPE ty_dataset2,
- *       END OF ty_dataset.
- *     TYPES ty_datasets TYPE STANDARD TABLE OF ty_dataset WITH DEFAULT KEY.
- * 
- *     TYPES:
- *       BEGIN OF ty_data,
- *         labels   TYPE string_table,
- *         datasets TYPE ty_datasets,
- *       END OF ty_data.
- * 
- *     TYPES:
- *       BEGIN OF ty_chart,
- *         data TYPE ty_data,
- *       END OF ty_chart.
- * 
- *     DATA client TYPE REF TO z2ui5_if_client.
- * 
- *     DATA ms_struc TYPE ty_chart.
- *     DATA ms_struc2 TYPE ty_chart.
- * 
- *     METHODS view_display.
- *     METHODS on_event.
- *   PROTECTED SECTION.
- *   PRIVATE SECTION.
- * ENDCLASS.
- * 
- * 
- * CLASS z2ui5_cl_demo_app_153 IMPLEMENTATION.
- * 
- *   METHOD view_display.
- * 
- *     client->_bind_edit(
- *         val                = ms_struc
- *         custom_mapper      = z2ui5_cl_ajson_mapping=>create_camel_case( iv_first_json_upper = abap_false )
- *         custom_mapper_back = z2ui5_cl_ajson_mapping=>create_to_snake_case( ) ).
- * 
- *     DATA(view) = z2ui5_cl_xml_view=>factory( ).
- *     view->shell(
- *         )->page(
- *                 title          = `abap2UI5 - Binding`
- *                 navbuttonpress = client->_event_nav_app_leave( )
- *                 shownavbutton  = client->check_app_prev_stack( )
- *            )->button(
- *             text  = `Rountrip...`
- *             press = client->_event( `POPUP` ) ).
- * 
- *     client->view_display( view->stringify( ) ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD on_event.
- * 
- *     CASE client->get( )-event.
- * 
- *       WHEN `POPUP`.
- * 
- *         IF ms_struc <> ms_struc2.
- *           client->message_box_display( `structure changed error` ).
- *           RETURN.
- *         ENDIF.
- *         client->message_toast_display( `everything works as expected` ).
- *     ENDCASE.
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD z2ui5_if_app~main.
- * 
- *     me->client = client.
- * 
- *     IF client->check_on_navigated( ).
- * 
- *       ms_struc-data-labels = VALUE #( ( `Jan` ) ( `Feb` ) ( `Mar` ) ( `Apr` ) ( `May` ) ( `Jun` ) ).
- * 
- *       DATA ls_dataset TYPE ty_dataset.
- *       ls_dataset = VALUE #( ).
- *       ls_dataset-label = `Fully Rounded`.
- *       ls_dataset-border_width = 2.
- *       ls_dataset-border_radius = 200.
- * 
- *       ls_dataset-data = VALUE #( ( `1` ) ( `-12` ) ( `19` ) ( `3` ) ( `5` ) ( `-2` ) ( `3` ) ).
- * 
- *       APPEND ls_dataset TO ms_struc-data-datasets.
- *       ms_struc2 = ms_struc.
- * 
- *       view_display( ).
- *       RETURN.
- *     ENDIF.
- * 
- *     on_event( ).
- * 
- *   ENDMETHOD.
- * 
- * ENDCLASS.
- */
-
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
+// TODO(abap2js): unresolved reference z2ui5_cl_ajson_mapping — add require manually
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_153 extends z2ui5_if_app {
+  ms_struc = {};
+  ms_struc2 = {};
   client = null;
+
+  view_display() {
+    this.client._bind_edit({ val: this.ms_struc, custom_mapper: z2ui5_cl_ajson_mapping.create_camel_case({ iv_first_json_upper: false }), custom_mapper_back: z2ui5_cl_ajson_mapping.create_to_snake_case() });
+    const view = z2ui5_cl_xml_view.factory();
+    view.shell()
+      .page({ title: `abap2UI5 - Binding`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() })
+      .button({ text: `Rountrip...`, press: this.client._event(`POPUP`) });
+    this.client.view_display(view.stringify());
+  }
+
+  on_event() {
+    switch (this.client.get().EVENT) {
+      case `POPUP`:
+        if (this.ms_struc !== this.ms_struc2) {
+          this.client.message_box_display(`structure changed error`);
+          return;
+        }
+        this.client.message_toast_display(`everything works as expected`);
+        break;
+    }
+  }
+
   async main(client) {
     this.client = client;
-    if (client.check_on_init()) {
-      const v = z2ui5_cl_xml_view.factory()
-        .Page({ title: "z2ui5_cl_demo_app_153 (TODO: port from abap)" })
-        .Text({ text: "This sample needs to be ported manually from abap2UI5." });
-      client.view_display(v.stringify());
+    if (client.check_on_navigated()) {
+      this.ms_struc.data.labels = [`Jan`, `Feb`, `Mar`, `Apr`, `May`, `Jun`];
+      let ls_dataset = {};
+      ls_dataset = {};
+      ls_dataset.label = `Fully Rounded`;
+      ls_dataset.border_width = 2;
+      ls_dataset.border_radius = 200;
+      ls_dataset.data = [`1`, `-12`, `19`, `3`, `5`, `-2`, `3`];
+      this.ms_struc.data.datasets.push(ls_dataset);
+      this.ms_struc2 = this.ms_struc;
+      this.view_display();
+      return;
     }
+    this.on_event();
   }
 }
 

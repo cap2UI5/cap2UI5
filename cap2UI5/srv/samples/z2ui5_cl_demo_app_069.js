@@ -1,183 +1,66 @@
-/* AUTO-GENERATED scaffolding — abap2UI5 transpile failed; manual port required.
- *
- * Original ABAP source:
- * ====================
- * CLASS z2ui5_cl_demo_app_069 DEFINITION PUBLIC.
- * 
- *   PUBLIC SECTION.
- *     INTERFACES z2ui5_if_app.
- * 
- *     TYPES:
- *       BEGIN OF ty_t_tree3,
- *         is_selected TYPE abap_bool,
- *         text        TYPE string,
- *       END OF ty_t_tree3,
- *       BEGIN OF ty_t_tree2,
- *         is_selected TYPE abap_bool,
- *         text        TYPE string,
- *         nodes       TYPE STANDARD TABLE OF ty_t_tree3 WITH DEFAULT KEY,
- *       END OF ty_t_tree2,
- *       BEGIN OF ty_t_tree1,
- *         is_selected TYPE abap_bool,
- *         text        TYPE string,
- *         nodes       TYPE STANDARD TABLE OF ty_t_tree2 WITH DEFAULT KEY,
- *       END OF ty_t_tree1,
- *       ty_t_tree TYPE STANDARD TABLE OF ty_t_tree1 WITH DEFAULT KEY.
- * 
- *     DATA mt_tree TYPE ty_t_tree.
- *     DATA mv_check_enabled_01 TYPE abap_bool VALUE abap_true.
- *     DATA mv_check_enabled_02 TYPE abap_bool.
- * 
- *   PROTECTED SECTION.
- *     DATA client TYPE REF TO z2ui5_if_client.
- * 
- *     METHODS view_display_master.
- *     METHODS view_display_app_01.
- *     METHODS view_display_app_02.
- * 
- *   PRIVATE SECTION.
- * ENDCLASS.
- * 
- * 
- * CLASS z2ui5_cl_demo_app_069 IMPLEMENTATION.
- * 
- *   METHOD view_display_app_01.
- * 
- *     DATA(lo_view_nested) = z2ui5_cl_xml_view=>factory( ).
- *     DATA(page) = lo_view_nested->page( `APP_01` ).
- * 
- *     page->button( text  = `Update this view`
- *                   press = client->_event( `UPDATE_DETAIL` ) ).
- * 
- *     client->nest_view_display(
- *       val            = lo_view_nested->stringify( )
- *       id             = `test`
- *       method_insert  = `addMidColumnPage`
- *       method_destroy = `removeAllMidColumnPages` ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD view_display_app_02.
- * 
- *     DATA(lo_view_nested) = z2ui5_cl_xml_view=>factory( ).
- *     DATA(page) = lo_view_nested->page( `APP_02` ).
- * 
- *     page->button( text  = `Update this view`
- *                   press = client->_event( `UPDATE_DETAIL` )
- *       )->input( ).
- * 
- *     page->button(
- *           text    = `button 01`
- *           press   = client->_event( `NEST_TEST` )
- *           enabled = client->_bind( mv_check_enabled_01 ) ).
- * 
- *     page->button(
- *           text    = `button 01`
- *           press   = client->_event( `NEST_TEST` )
- *           enabled = client->_bind( mv_check_enabled_01 ) ).
- * 
- *     page->button(
- *         text    = `button 02`
- *         press   = client->_event( `NEST_TEST` )
- *         enabled = client->_bind( mv_check_enabled_02 ) ).
- * 
- *     client->nest_view_display(
- *       val            = lo_view_nested->stringify( )
- *       id             = `test`
- *       method_insert  = `addMidColumnPage`
- *       method_destroy = `removeAllMidColumnPages` ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD view_display_master.
- * 
- *     DATA(view) = z2ui5_cl_xml_view=>factory( ).
- * 
- *     DATA(page) = view->shell( )->page(
- *           title          = `abap2UI5 - Master-Detail View with Nested Views`
- *           navbuttonpress = client->_event_nav_app_leave( )
- *           shownavbutton  = client->check_app_prev_stack( ) ).
- * 
- *     DATA(lr_master) = page->flexible_column_layout( layout = `TwoColumnsBeginExpanded`
- *                                                     id     =`test` )->begin_column_pages( ).
- * 
- *     lr_master->tree( client->_bind( mt_tree ) )->items(
- *         )->standard_tree_item(
- *             type  = `Active`
- *             title = `{TEXT}`
- *             press = client->_event( val = `EVENT_ITEM`
- *                 t_arg                   = VALUE #( ( `${TEXT}` ) )
- *                  ) ).
- * 
- *     client->view_display( page->stringify( ) ).
- * 
- *   ENDMETHOD.
- * 
- * 
- *   METHOD z2ui5_if_app~main.
- * 
- *     me->client = client.
- * 
- *     IF client->check_on_init( ).
- * 
- *       mt_tree = VALUE #( ( text = `Apps`
- *                     nodes       = VALUE #( ( text = `Frontend`
- *                                        nodes      = VALUE #( ( text = `App_001` )
- *                                                         ( text = `App_002` )
- *                   ) ) ) )
- *                   ( text  = `Configuration`
- *                     nodes = VALUE #( ( text  = `User Interface`
- *                                        nodes = VALUE #( ( text = `Theme` )
- *                                                         ( text = `Library` )
- *                                      ) )
- *                                      ( text  = `Database`
- *                                        nodes = VALUE #( ( text = `HANA` )
- *                                                          ( text = `ANY DB` )
- *          ) ) ) ) ).
- * 
- *       view_display_master( ).
- * 
- *     ENDIF.
- * 
- *     CASE client->get( )-event.
- * 
- *       WHEN `UPDATE_DETAIL`.
- *         view_display_app_01( ).
- * 
- *       WHEN `EVENT_ITEM`.
- *         CASE client->get_event_arg( 1 ).
- *           WHEN `App_001`.
- *             view_display_app_01( ).
- *           WHEN `App_002`.
- *             view_display_app_02( ).
- *         ENDCASE.
- * 
- *       WHEN `NEST_TEST`.
- *         mv_check_enabled_01 = xsdbool( mv_check_enabled_01 = abap_false ).
- *         mv_check_enabled_02 = xsdbool( mv_check_enabled_01 = abap_false ).
- * 
- *         client->nest_view_model_update( ).
- *     ENDCASE.
- * 
- *   ENDMETHOD.
- * 
- * ENDCLASS.
- */
-
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_069 extends z2ui5_if_app {
+  mt_tree = [];
+  mv_check_enabled_01 = true;
+  mv_check_enabled_02 = false;
   client = null;
+
+  view_display_app_01() {
+    const lo_view_nested = z2ui5_cl_xml_view.factory();
+    const page = lo_view_nested.page(`APP_01`);
+    page.button({ text: `Update this view`, press: this.client._event(`UPDATE_DETAIL`) });
+    this.client.nest_view_display(lo_view_nested.stringify(), `test`, `addMidColumnPage`, `removeAllMidColumnPages`);
+  }
+
+  view_display_app_02() {
+    const lo_view_nested = z2ui5_cl_xml_view.factory();
+    const page = lo_view_nested.page(`APP_02`);
+    page.button({ text: `Update this view`, press: this.client._event(`UPDATE_DETAIL`) }).input();
+    page.button({ text: `button 01`, press: this.client._event(`NEST_TEST`), enabled: this.client._bind(this.mv_check_enabled_01) });
+    page.button({ text: `button 01`, press: this.client._event(`NEST_TEST`), enabled: this.client._bind(this.mv_check_enabled_01) });
+    page.button({ text: `button 02`, press: this.client._event(`NEST_TEST`), enabled: this.client._bind(this.mv_check_enabled_02) });
+    this.client.nest_view_display(lo_view_nested.stringify(), `test`, `addMidColumnPage`, `removeAllMidColumnPages`);
+  }
+
+  view_display_master() {
+    const view = z2ui5_cl_xml_view.factory();
+    const page = view.shell()
+      .page({ title: `abap2UI5 - Master-Detail View with Nested Views`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    const lr_master = page.flexible_column_layout({ layout: `TwoColumnsBeginExpanded`, id: `test` })
+      .begin_column_pages();
+    lr_master.tree(this.client._bind(this.mt_tree))
+      .items()
+      .standard_tree_item({ type: `Active`, title: `{TEXT}`, press: this.client._event(`EVENT_ITEM`, [`${TEXT}`]) });
+    this.client.view_display(page.stringify());
+  }
+
   async main(client) {
     this.client = client;
     if (client.check_on_init()) {
-      const v = z2ui5_cl_xml_view.factory()
-        .Page({ title: "z2ui5_cl_demo_app_069 (TODO: port from abap)" })
-        .Text({ text: "This sample needs to be ported manually from abap2UI5." });
-      client.view_display(v.stringify());
+      this.mt_tree = [{ text: `Apps`, nodes: [{ text: `Frontend`, nodes: [{ text: `App_001` }, { text: `App_002` }] }] }, { text: `Configuration`, nodes: [{ text: `User Interface`, nodes: [{ text: `Theme` }, { text: `Library` }] }, { text: `Database`, nodes: [{ text: `HANA` }, { text: `ANY DB` }] }] }];
+      this.view_display_master();
+    }
+    switch (client.get().EVENT) {
+      case `UPDATE_DETAIL`:
+        this.view_display_app_01();
+        break;
+      case `EVENT_ITEM`:
+        switch (client.get_event_arg(1)) {
+          case `App_001`:
+            this.view_display_app_01();
+            break;
+          case `App_002`:
+            this.view_display_app_02();
+            break;
+        }
+        break;
+      case `NEST_TEST`:
+        this.mv_check_enabled_01 = /* TODO(abap2js) */ xsdbool(this.mv_check_enabled_01 === false);
+        this.mv_check_enabled_02 = /* TODO(abap2js) */ xsdbool(this.mv_check_enabled_01 === false);
+        client.nest_view_model_update();
+        break;
     }
   }
 }
