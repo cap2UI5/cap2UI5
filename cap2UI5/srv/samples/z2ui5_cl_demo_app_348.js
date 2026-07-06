@@ -59,14 +59,15 @@ class z2ui5_cl_demo_app_348 extends z2ui5_if_app {
   }
 
   xml_form({ i_data, i_page, i_client } = {}) {
+    let sy_tabix = 0;
     // TODO(abap2js): FIELD-SYMBOLS <layout> TYPE z2ui5_cl_demo_app_333=>ty_s_layout.
     // TODO(abap2js): FIELD-SYMBOLS <data> TYPE any.
     // TODO(abap2js): FIELD-SYMBOLS <value> TYPE any.
     const form = i_page.simple_form({ editable: true, layout: `ResponsiveGridLayout`, adjustlabelspan: true })
       .content(`form`);
     let index = 0;
-    let sy_tabix = 0;
-    for (const fs of this.mo_layout_obj.ms_data.t_layout) {
+    sy_tabix = 0;
+    for (const layout of this.mo_layout_obj.ms_data.t_layout) {
       sy_tabix++;
       index = index + 1;
       // TODO(abap2js): ASSIGN i_data->* TO <data>.

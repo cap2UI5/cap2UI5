@@ -1,39 +1,44 @@
-// TODO(abap2js): unresolved reference cl_abap_typedescr — add require manually
-const z2ui5_cl_pop_table = require("abap2UI5/z2ui5_cl_pop_table");
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
+const z2ui5_if_app          = require("../z2ui5_if_app");
+const z2ui5_cl_pop_table    = require("./z2ui5_cl_pop_table");
+const z2ui5_cl_util         = require("../../00/03/z2ui5_cl_util");
 
+/**
+ * z2ui5_cl_pop_data — JS port of abap2UI5 z2ui5_cl_pop_data.
+ *
+ * Generic data viewer that dispatches by type-kind:
+ *   TABLE  → z2ui5_cl_pop_table
+ *   STRUCT → wrap into a single-row table, then z2ui5_cl_pop_table
+ *
+ * Apps don't usually instantiate this directly — they pass it any value and
+ * let the dispatch happen. The popup nav-leaves immediately after dispatch
+ * (mirrors abap impl).
+ */
 class z2ui5_cl_pop_data extends z2ui5_if_app {
-  mr_data = null;
-  title = `Table View`;
-  client = null;
 
-  display() {
-    // TODO(abap2js): FIELD-SYMBOLS <data> TYPE any.
-    // TODO(abap2js): ASSIGN mr_data->* TO <data>.
-    switch (z2ui5_cl_util.rtti_get_type_kind(data)) {
-      case cl_abap_typedescr.typekind_table:
-        this.client.nav_app_call(z2ui5_cl_pop_table.factory({ i_tab: data, i_title: this.title }));
-        break;
-      case cl_abap_typedescr.typekind_struct1:
-      case cl_abap_typedescr.typekind_struct2:
-        const lt_result = z2ui5_cl_util.itab_get_by_struc(data);
-        this.client.nav_app_call(z2ui5_cl_pop_table.factory({ i_tab: lt_result, i_title: this.title }));
-        break;
-    }
-  }
+  client = null;
+  title  = `Table View`;
+  mr_data = null;
 
   static factory({ val, title } = {}) {
-    let r_result = null;
-    // TODO(abap2js): FIELD-SYMBOLS <data> TYPE any.
-    r_result = new z2ui5_cl_pop_data();
-    if (title) {
-      r_result.title = title;
-    }
-    // TODO(abap2js): CREATE DATA r_result->mr_data LIKE val.
-    // TODO(abap2js): ASSIGN r_result->mr_data->* TO <data>.
-    data = val;
+    const r_result = new z2ui5_cl_pop_data();
+    if (title) r_result.title = title;
+    r_result.mr_data = val;
     return r_result;
+  }
+
+  display() {
+    const kind = z2ui5_cl_util.rtti_get_type_kind(this.mr_data);
+    if (kind === `TABLE`) {
+      this.client.nav_app_call(z2ui5_cl_pop_table.factory({
+        i_tab:   this.mr_data,
+        i_title: this.title,
+      }));
+    } else if (kind === `STRUCT`) {
+      this.client.nav_app_call(z2ui5_cl_pop_table.factory({
+        i_tab:   [this.mr_data],
+        i_title: this.title,
+      }));
+    }
   }
 
   async main(client) {

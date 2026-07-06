@@ -15,7 +15,7 @@ class z2ui5_cl_ajson_mapping {
     lt_queue.push(ii_mapper2);
     lt_queue.push(ii_mapper3);
     lt_queue.push(...it_more);
-    for (let _i = lt_queue.length - 1; _i >= 0; _i--) { const row = lt_queue[_i]; if (!table_line) lt_queue.splice(_i, 1); }
+    for (let _i = lt_queue.length - 1; _i >= 0; _i--) { const row = lt_queue[_i]; if (!row.table_line) lt_queue.splice(_i, 1); }
     ri_mapping = null; // TODO(abap2js): CREATE OBJECT ri_mapping TYPE lcl_compound_mapper EXPORTING it_queue = lt_queue.
     return ri_mapping;
   }

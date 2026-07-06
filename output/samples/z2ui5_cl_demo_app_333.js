@@ -8,14 +8,16 @@ class z2ui5_cl_demo_app_333 {
 
   static factory({ i_data, vis_cols } = {}) {
     let result = null;
+    let sy_tabix = 0;
     result = new z2ui5_cl_demo_app_333();
     const t_comp = z2ui5_cl_util.rtti_get_t_attri_by_any(i_data);
     let index = 0;
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const comp of t_comp) {
       sy_tabix++;
       index = index + 1;
-      result.ms_data.t_layout reference into this.data(layout).push({});
+      const layout = {};
+      result.ms_data.t_layout.push(layout);
       layout.name = comp.name;
       if (index <= vis_cols) {
         layout.visible = true;

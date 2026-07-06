@@ -32,7 +32,7 @@ class z2ui5_cl_demo_app_069 extends z2ui5_if_app {
       .begin_column_pages();
     lr_master.tree(this.client._bind(this.mt_tree))
       .items()
-      .standard_tree_item({ type: `Active`, title: `{TEXT}`, press: this.client._event(`EVENT_ITEM`, [`${TEXT}`]) });
+      .standard_tree_item({ type: `Active`, title: `{TEXT}`, press: this.client._event(`EVENT_ITEM`, [`\${TEXT}`]) });
     this.client.view_display(page.stringify());
   }
 

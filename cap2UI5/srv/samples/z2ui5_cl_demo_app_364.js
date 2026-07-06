@@ -20,18 +20,21 @@ class z2ui5_cl_demo_app_364 extends z2ui5_if_app {
   }
 
   on_event() {
+    let sy_tabix = 0;
     switch (this.client.get().EVENT) {
       case `BUTTON_SAVE`:
         let counter = 0;
-        let sy_tabix = 0;
+        sy_tabix = 0;
         for (const s_tree of this.t_tree) {
           sy_tabix++;
-          let sy_tabix = 0;
+          const _sy_tabix_1 = sy_tabix;
+          sy_tabix = 0;
           for (const s_node of s_tree.nodes) {
             sy_tabix++;
             if (!(s_node.validated === true)) continue;
             counter = counter + 1;
           }
+          sy_tabix = _sy_tabix_1;
         }
         this.client.message_toast_display(`Saved ${counter} checkbox(es)`);
         break;

@@ -67,7 +67,7 @@ class z2ui5_cl_demo_app_172 extends z2ui5_if_app {
     columns.ui_column({ width: `8rem`, sortproperty: `LINK`, filterproperty: `LINK` })
       .text(`Link Column`)
       .ui_template()
-      .link({ text: `{LINK}`, press: this.client._event(`LINK_CLICK`, [`${INDEX}`]) });
+      .link({ text: `{LINK}`, press: this.client._event(`LINK_CLICK`, [`\${INDEX}`]) });
     columns.ui_column({ width: `8rem`, sortproperty: `CURRENCY`, filterproperty: `CURRENCY` })
       .text(`Currency Column`)
       .ui_template()
@@ -79,15 +79,15 @@ class z2ui5_cl_demo_app_172 extends z2ui5_if_app {
     columns.ui_column({ width: `8rem`, sortproperty: `INPUT1`, filterproperty: `INPUT1` })
       .text(`Input Column`)
       .ui_template()
-      .input({ value: `{INPUT1}`, enabled: `{BOOL}`, change: this.client._event(`INPUT_CHANGE`, [`${$source>/id}`, `${INDEX}`, `$event.oSource.oParent.sId`, `INPUT1`]), editable: true, type: `Number` });
+      .input({ value: `{INPUT1}`, enabled: `{BOOL}`, change: this.client._event(`INPUT_CHANGE`, [`\${$source>/id}`, `\${INDEX}`, `$event.oSource.oParent.sId`, `INPUT1`]), editable: true, type: `Number` });
     columns.ui_column({ width: `8rem`, sortproperty: `INPUT2`, filterproperty: `INPUT2` })
       .text(`Input Column`)
       .ui_template()
-      .input({ value: `{INPUT2}`, enabled: `{BOOL}`, change: this.client._event(`INPUT_CHANGE`, [`${$source>/id}`, `${INDEX}`, `$event.oSource.oParent.sId`, `INPUT2`]), submit: this.client._event(`INPUT_SUBMIT`), editable: true, type: `Number` });
+      .input({ value: `{INPUT2}`, enabled: `{BOOL}`, change: this.client._event(`INPUT_CHANGE`, [`\${$source>/id}`, `\${INDEX}`, `$event.oSource.oParent.sId`, `INPUT2`]), submit: this.client._event(`INPUT_SUBMIT`), editable: true, type: `Number` });
     columns.ui_column({ width: `8rem`, sortproperty: `INPUT3`, filterproperty: `INPUT3` })
       .text(`Input Column`)
       .ui_template()
-      .input({ value: `{INPUT3}`, enabled: `{BOOL}`, change: this.client._event(`INPUT_CHANGE`, [`${$source>/id}`, `${INDEX}`, `$event.oSource.oParent.sId`, `INPUT3`]), editable: true, type: `Number` });
+      .input({ value: `{INPUT3}`, enabled: `{BOOL}`, change: this.client._event(`INPUT_CHANGE`, [`\${$source>/id}`, `\${INDEX}`, `$event.oSource.oParent.sId`, `INPUT3`]), editable: true, type: `Number` });
     this.client.view_display(view.stringify());
   }
 
@@ -102,13 +102,14 @@ class z2ui5_cl_demo_app_172 extends z2ui5_if_app {
   }
 
   calculate_sum({ i_column } = {}) {
+    let sy_tabix = 0;
     let lv_sum = 0;
     // TODO(abap2js): FIELD-SYMBOLS <f_output> LIKE LINE OF output,
     // TODO(abap2js): FIELD-SYMBOLS <f_input> TYPE any.
-    let sy_tabix = 0;
-    for (const index of this.output) {
+    sy_tabix = 0;
+    for (const f_output of this.output) {
       sy_tabix++;
-      if (!(index > 1)) continue;
+      if (!(f_output.index > 1)) continue;
       // TODO(abap2js): ASSIGN COMPONENT i_column OF STRUCTURE <f_output> TO <f_input>.
       lv_sum = lv_sum + f_input;
     }

@@ -10,9 +10,9 @@ class z2ui5_cl_core_app {
   mo_app = null;
   ms_draft = null;
 
-  static all_xml_parse({ !xml } = {}) {
+  static all_xml_parse({ xml } = {}) {
     let result = null;
-    z2ui5_cl_util.xml_parse(/* TODO(abap2js): out-params */ EXPORTING xml = xml IMPORTING any = result);
+    // TODO(abap2js): z2ui5_cl_util=>xml_parse( EXPORTING xml = xml IMPORTING any = result ).
     return result;
   }
 
@@ -47,7 +47,7 @@ class z2ui5_cl_core_app {
     // TODO(abap2js): CREATE DATA mt_attri.
   }
 
-  static db_load({ !id } = {}) {
+  static db_load({ id } = {}) {
     let result = null;
     const lv_id = (id);
     // TODO(abap2js): READ TABLE mt_buffer REFERENCE INTO DATA(lr_buf) WITH KEY id = lv_id.
@@ -57,7 +57,7 @@ class z2ui5_cl_core_app {
     }
     const lo_db = new z2ui5_cl_core_srv_draft();
     const ls_db = lo_db.read_draft(id);
-    result = z2ui5_cl_core_app.all_xml_parse({ !xml: ls_db.data });
+    result = z2ui5_cl_core_app.all_xml_parse({ xml: ls_db.data });
     result.create_model().main_attri_db_load();
     z2ui5_cl_core_app.mt_buffer.push({ id: lv_id, app: result });
     return result;
@@ -71,7 +71,7 @@ class z2ui5_cl_core_app {
     let result = null;
     const lo_db = new z2ui5_cl_core_srv_draft();
     const ls_db = lo_db.read_draft(app.id_draft);
-    result = z2ui5_cl_core_app.all_xml_parse({ !xml: ls_db.data });
+    result = z2ui5_cl_core_app.all_xml_parse({ xml: ls_db.data });
     result.mo_app = app;
     result.create_model().main_attri_db_load();
     return result;

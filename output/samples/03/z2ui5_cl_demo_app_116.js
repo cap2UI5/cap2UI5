@@ -10,20 +10,23 @@ class z2ui5_cl_demo_app_116 extends z2ui5_if_app {
 
   add_node({ p_prodh } = {}) {
     let sy_tabix = 0;
+    sy_tabix = 0;
     for (const SYMBOL of this.prodh_nodes) {
       sy_tabix++;
       if (fs1.prodh === p_prodh) {
         fs1.counter = fs1.counter + 1;
         break;
       } else {
-        let sy_tabix = 0;
+        const _sy_tabix_1 = sy_tabix;
+        sy_tabix = 0;
         for (const SYMBOL of fs1.nodes) {
           sy_tabix++;
           if (fs2.prodh === p_prodh) {
             fs2.counter = fs2.counter + 1;
             break;
           } else {
-            let sy_tabix = 0;
+            const _sy_tabix_2 = sy_tabix;
+            sy_tabix = 0;
             for (const SYMBOL of fs2.nodes) {
               sy_tabix++;
               if (fs3.prodh === p_prodh) {
@@ -31,8 +34,10 @@ class z2ui5_cl_demo_app_116 extends z2ui5_if_app {
                 break;
               }
             }
+            sy_tabix = _sy_tabix_2;
           }
         }
+        sy_tabix = _sy_tabix_1;
       }
     }
   }
@@ -98,12 +103,12 @@ class z2ui5_cl_demo_app_116 extends z2ui5_if_app {
       .get_parent()
       .tree_column(`Counter`)
       .tree_template()
-      .link({ text: `{COUNTER}`, press: this.client._event(`POPOVER`, [`${$source>/id}`]) })
+      .link({ text: `{COUNTER}`, press: this.client._event(`POPOVER`, [`\${$source>/id}`]) })
       .get_parent()
       .get_parent()
       .tree_column(`ADD`)
       .tree_template()
-      .button({ icon: `sap-icon://add`, press: this.client._event(`ROW_ADD`, [`${PRODH}`]), tooltip: `ADD` })
+      .button({ icon: `sap-icon://add`, press: this.client._event(`ROW_ADD`, [`\${PRODH}`]), tooltip: `ADD` })
       .get_parent()
       .get_parent();
     this.client.view_display(page.stringify());

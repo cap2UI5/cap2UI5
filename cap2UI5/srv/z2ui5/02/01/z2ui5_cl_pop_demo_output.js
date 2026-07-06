@@ -19,11 +19,11 @@ class z2ui5_cl_pop_demo_output extends z2ui5_if_app {
     r_result.stretch = i_stretch;
     r_result.as_page = i_as_page;
     try {
-      call method i_output.( `GET` ) receiving output === r_result.html;
+      // TODO(abap2js): CALL METHOD i_output->('GET') RECEIVING output = r_result->html.
     } catch (error) {
     }
-    r_result.html = r_result.html.replaceAll(`{`, `\{`);
-    r_result.html = r_result.html.replaceAll(`}`, `\}`);
+    r_result.html = r_result.html.replaceAll(`{`, `\\{`);
+    r_result.html = r_result.html.replaceAll(`}`, `\\}`);
     return r_result;
   }
 

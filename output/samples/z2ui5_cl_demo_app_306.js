@@ -81,8 +81,9 @@ class z2ui5_cl_demo_app_306 extends z2ui5_if_app {
   }
 
   rebuild_output() {
-    this.mt_picture_out = {};
     let sy_tabix = 0;
+    this.mt_picture_out = {};
+    sy_tabix = 0;
     for (const ls_pic of this.mt_picture) {
       sy_tabix++;
       this.mt_picture_out.push({ name: `picture ${sy_tabix}`, id: sy_tabix, thumbnail: ls_pic.thumbnail, selected: (sy_tabix === this.selected_picture.id ? true : null) });

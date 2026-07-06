@@ -65,9 +65,9 @@ class z2ui5_cl_demo_app_350 extends z2ui5_if_app {
             lr_view2 = new z2ui5_cl_demo_app_350();
             lr_view2.view_id = 2;
             let lf_new_varkey = ``;
-            lf_new_varkey = this.varkey + this.0(4);
+            lf_new_varkey = String(this.varkey).substr(0, 4);
             lf_new_varkey = lf_new_varkey + 1;
-            lr_view2.varkey = lf_new_varkey + this.0(4);
+            lr_view2.varkey = String(lf_new_varkey).substr(0, 4);
             client.nav_app_call(lr_view2);
             return;
             break;

@@ -24,16 +24,17 @@ class z2ui5_cl_util_msg {
 
   static msg_get_internal({ val } = {}) {
     let result = [];
+    let sy_tabix = 0;
     const lv_kind = z2ui5_cl_util.rtti_get_type_kind(val);
     switch (lv_kind) {
       case cl_abap_datadescr.typekind_table:
         // TODO(abap2js): FIELD-SYMBOLS <tab> TYPE ANY TABLE.
         // TODO(abap2js): ASSIGN val TO <tab>.
-        let sy_tabix = 0;
+        sy_tabix = 0;
         for (const SYMBOL of tab) {
           sy_tabix++;
           let lt_tab = z2ui5_cl_util_msg.msg_get_internal({ val: row });
-          result.push(lines OF lt_tab);
+          result.push(...lt_tab);
         }
         break;
       case cl_abap_datadescr.typekind_struct1:
@@ -46,14 +47,14 @@ class z2ui5_cl_util_msg {
           return result;
         }
         const lt_attri = z2ui5_cl_util.rtti_get_t_attri_by_any(val);
-        let ls_result = value z2ui5_cl_util.ty_s_msg();
-        let sy_tabix = 0;
+        let ls_result = {};
+        sy_tabix = 0;
         for (const ls_attri of lt_attri) {
           sy_tabix++;
           // TODO(abap2js): ASSIGN COMPONENT ls_attri->name OF STRUCTURE val TO FIELD-SYMBOL(<comp>).
           if (ls_attri.name === `ITEM`) {
             lt_tab = z2ui5_cl_util_msg.msg_get_internal({ val: comp });
-            result.push(lines OF lt_tab);
+            result.push(...lt_tab);
             return result;
           } else {
             ls_result = z2ui5_cl_util_msg.msg_map({ name: ls_attri.name, val: comp, is_msg: ls_result });
@@ -70,7 +71,7 @@ class z2ui5_cl_util_msg {
           const lx = (val);
           ls_result = { type: `E`, text: lx.get_text() };
           let lt_attri_o = z2ui5_cl_util.rtti_get_t_attri_by_oref(val);
-          let sy_tabix = 0;
+          sy_tabix = 0;
           for (const ls_attri_o of lt_attri_o) {
             sy_tabix++;
             if (!(ls_attri_o.visibility === `U`)) continue;
@@ -86,19 +87,19 @@ class z2ui5_cl_util_msg {
             let lr_tab = null;
             // TODO(abap2js): CREATE DATA lr_tab TYPE (`if_bali_log=>ty_item_table`).
             // TODO(abap2js): ASSIGN lr_tab->* TO FIELD-SYMBOL(<tab2>).
-            call method obj.( `IF_BALI_LOG~GET_ALL_ITEMS` ) receiving item_table === tab2;
+            // TODO(abap2js): CALL METHOD obj->(`IF_BALI_LOG~GET_ALL_ITEMS`) RECEIVING item_table = <tab2>.
             let lt_tab2 = z2ui5_cl_util_msg.msg_get_internal({ val: tab2 });
-            result.push(lines OF lt_tab2);
+            result.push(...lt_tab2);
           } catch (error) {
             try {
               // TODO(abap2js): CREATE DATA lr_tab TYPE (`BAPIRETTAB`).
               // TODO(abap2js): ASSIGN lr_tab->* TO <tab2>.
-              call method obj.( `ZIF_LOGGER~EXPORT_TO_TABLE` ) receiving rt_bapiret === tab2;
+              // TODO(abap2js): CALL METHOD obj->(`ZIF_LOGGER~EXPORT_TO_TABLE`) RECEIVING rt_bapiret = <tab2>.
               lt_tab2 = z2ui5_cl_util_msg.msg_get_internal({ val: tab2 });
-              result.push(lines OF lt_tab2);
+              result.push(...lt_tab2);
             } catch (lx2) {
               lt_attri_o = z2ui5_cl_util.rtti_get_t_attri_by_oref(val);
-              let sy_tabix = 0;
+              sy_tabix = 0;
               for (const ls_attri_o of lt_attri_o) {
                 sy_tabix++;
                 if (!(ls_attri_o.visibility === `U`)) continue;
@@ -183,8 +184,9 @@ class z2ui5_cl_util_msg {
 
   static check_is_rap_struct({ val } = {}) {
     let result = false;
-    const lt_attri = z2ui5_cl_util.rtti_get_t_attri_by_any(val);
     let sy_tabix = 0;
+    const lt_attri = z2ui5_cl_util.rtti_get_t_attri_by_any(val);
+    sy_tabix = 0;
     for (const ls_attri of lt_attri) {
       sy_tabix++;
       switch (ls_attri.name) {
@@ -196,7 +198,7 @@ class z2ui5_cl_util_msg {
           break;
       }
     }
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const ls_attri of lt_attri) {
       sy_tabix++;
       // TODO(abap2js): ASSIGN COMPONENT ls_attri->name OF STRUCTURE val TO FIELD-SYMBOL(<tab>).
@@ -207,7 +209,8 @@ class z2ui5_cl_util_msg {
         const lo_line = lo_tab.get_table_line_type();
         if (!(lo_line.kind === cl_abap_typedescr.kind_struct)) continue;
         const lt_comps = (lo_line).get_components();
-        let sy_tabix = 0;
+        const _sy_tabix_1 = sy_tabix;
+        sy_tabix = 0;
         for (const ls_comp of lt_comps) {
           sy_tabix++;
           if (ls_comp.name === `%MSG` || ls_comp.name === `%FAIL`) {
@@ -215,6 +218,7 @@ class z2ui5_cl_util_msg {
             return result;
           }
         }
+        sy_tabix = _sy_tabix_1;
       } catch (error) {
       }
     }
@@ -223,6 +227,7 @@ class z2ui5_cl_util_msg {
 
   static msg_get_rap({ val, entity_name } = {}) {
     let result = [];
+    let sy_tabix = 0;
     const lv_kind = z2ui5_cl_util.rtti_get_type_kind(val);
     if (lv_kind !== cl_abap_datadescr.typekind_struct1 && lv_kind !== cl_abap_datadescr.typekind_struct2) {
       return result;
@@ -235,12 +240,12 @@ class z2ui5_cl_util_msg {
       if (msg) {
         try {
           const lt_one = z2ui5_cl_util_msg.msg_get({ val: msg });
-          let sy_tabix = 0;
+          sy_tabix = 0;
           for (const SYMBOL of lt_one) {
             sy_tabix++;
             m.t_meta = lt_meta;
           }
-          result.push(lines OF lt_one);
+          result.push(...lt_one);
         } catch (error) {
         }
       }
@@ -263,7 +268,7 @@ class z2ui5_cl_util_msg {
       return result;
     }
     const lt_attri = z2ui5_cl_util.rtti_get_t_attri_by_any(val);
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const ls_attri of lt_attri) {
       sy_tabix++;
       // TODO(abap2js): ASSIGN COMPONENT ls_attri->name OF STRUCTURE val TO FIELD-SYMBOL(<tab>).
@@ -271,28 +276,31 @@ class z2ui5_cl_util_msg {
       if (!(z2ui5_cl_util.rtti_get_type_kind(tab) === cl_abap_datadescr.typekind_table)) continue;
       // TODO(abap2js): FIELD-SYMBOLS <ftab> TYPE ANY TABLE.
       // TODO(abap2js): ASSIGN <tab> TO <ftab>.
-      let sy_tabix = 0;
+      const _sy_tabix_1 = sy_tabix;
+      sy_tabix = 0;
       for (const SYMBOL of ftab) {
         sy_tabix++;
         if (z2ui5_cl_util.rtti_get_type_kind(row) === cl_abap_datadescr.typekind_oref) {
           if (row) {
             try {
-              result.push(lines OF z2ui5_cl_util_msg.msg_get({ val: row }));
+              result.push(...z2ui5_cl_util_msg.msg_get({ val: row }));
             } catch (error) {
             }
           }
         } else {
-          result.push(lines OF z2ui5_cl_util_msg.msg_get_rap({ val: row, entity_name: ls_attri.name }));
+          result.push(...z2ui5_cl_util_msg.msg_get_rap({ val: row, entity_name: ls_attri.name }));
         }
       }
+      sy_tabix = _sy_tabix_1;
     }
     return result;
   }
 
   static msg_get_rap_element({ val } = {}) {
     let result = ``;
-    const lt_attri = z2ui5_cl_util.rtti_get_t_attri_by_any(val);
     let sy_tabix = 0;
+    const lt_attri = z2ui5_cl_util.rtti_get_t_attri_by_any(val);
+    sy_tabix = 0;
     for (const ls_attri of lt_attri) {
       sy_tabix++;
       if (!(ls_attri.name.length > 9)) continue;
@@ -320,8 +328,9 @@ class z2ui5_cl_util_msg {
 
   static msg_get_rap_action({ val } = {}) {
     let result = ``;
-    const lt_attri = z2ui5_cl_util.rtti_get_t_attri_by_any(val);
     let sy_tabix = 0;
+    const lt_attri = z2ui5_cl_util.rtti_get_t_attri_by_any(val);
+    sy_tabix = 0;
     for (const ls_attri of lt_attri) {
       sy_tabix++;
       if (!(ls_attri.name.length > 12)) continue;
@@ -365,12 +374,13 @@ class z2ui5_cl_util_msg {
 
   static msg_get_rap_flatten({ val } = {}) {
     let result = ``;
+    let sy_tabix = 0;
     const lv_kind = z2ui5_cl_util.rtti_get_type_kind(val);
     if (lv_kind !== cl_abap_datadescr.typekind_struct1 && lv_kind !== cl_abap_datadescr.typekind_struct2) {
       return result;
     }
     const lt_attri = z2ui5_cl_util.rtti_get_t_attri_by_any(val);
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const ls_attri of lt_attri) {
       sy_tabix++;
       // TODO(abap2js): ASSIGN COMPONENT ls_attri->name OF STRUCTURE val TO FIELD-SYMBOL(<comp>).

@@ -53,7 +53,7 @@ class z2ui5_cl_pop_js_loader extends z2ui5_if_app {
     }
     switch (client.get().EVENT) {
       case `INFO_FINISHED`:
-        this.mv_is_open_ui5 = Boolean(this.ui5_gav.toLowerCase().includes(String(`OPEN`).toLowerCase()));
+        this.mv_is_open_ui5 = Boolean(String(this.ui5_gav).toLowerCase().includes(String(`OPEN`).toLowerCase()));
         client.popup_destroy();
         client.nav_app_leave();
         break;

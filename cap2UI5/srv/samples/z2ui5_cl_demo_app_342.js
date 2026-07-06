@@ -1,7 +1,6 @@
 // TODO(abap2js): unresolved reference cl_abap_datadescr — add require manually
 // TODO(abap2js): unresolved reference cl_abap_structdescr — add require manually
 // TODO(abap2js): unresolved reference cl_abap_tabledescr — add require manually
-// TODO(abap2js): unresolved reference cl_abap_typedescr — add require manually
 const z2ui5_cl_demo_app_333 = require("./z2ui5_cl_demo_app_333");
 const z2ui5_cl_demo_app_340 = require("./z2ui5_cl_demo_app_340");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
@@ -18,16 +17,17 @@ class z2ui5_cl_demo_app_342 extends z2ui5_if_app {
 
   get_comp() {
     let result = [];
+    let sy_tabix = 0;
     let selkz = false;
     if (!this.mv_table) {
       this.mv_table = `Z2UI5_T_01`;
     }
     try {
       try {
-        cl_abap_typedescr.describe_by_name(/* TODO(abap2js): out-params */ EXPORTING p_name = mv_table RECEIVING p_descr_ref = DATA ( typedesc ) EXCEPTIONS type_not_found = 1 OTHERS = 2);
+        // TODO(abap2js): cl_abap_typedescr=>describe_by_name( EXPORTING p_name = mv_table RECEIVING p_descr_ref = DATA(typedesc) EXCEPTIONS type_not_found = 1 OTHERS = 2 ).
         const structdesc = (typedesc);
         const comp = structdesc.get_components();
-        let sy_tabix = 0;
+        sy_tabix = 0;
         for (const com of comp) {
           sy_tabix++;
           if (com.as_include === false) {
@@ -36,14 +36,14 @@ class z2ui5_cl_demo_app_342 extends z2ui5_if_app {
         }
       } catch (error) {
       }
-      const component = value cl_abap_structdescr.component_table((name === `SELKZ` type === (cl_abap_datadescr.describe_by_data(selkz))));
+      const component = [{ name: `SELKZ`, type: (cl_abap_datadescr.describe_by_data(selkz)) }];
       result.push(...component);
     } catch (error) {
     }
     return result;
   }
 
-  on_event({ !client } = {}) {
+  on_event({ client } = {}) {
     switch (client.get().EVENT) {
       case `SELECTION_CHANGE`:
         client.nav_app_call(z2ui5_cl_demo_app_340.factory({ io_table: this.mt_data, io_layout: this.mo_lay }));
@@ -54,7 +54,8 @@ class z2ui5_cl_demo_app_342 extends z2ui5_if_app {
     }
   }
 
-  render_main({ !client } = {}) {
+  render_main({ client } = {}) {
+    let sy_tabix = 0;
     if (!this.mo_parent_view) {
       let page = z2ui5_cl_xml_view.factory();
     } else {
@@ -64,7 +65,7 @@ class z2ui5_cl_demo_app_342 extends z2ui5_if_app {
     // TODO(abap2js): ASSIGN mt_data->* TO FIELD-SYMBOL(<table>).
     const table = page.table({ width: `auto`, mode: `SingleSelectLeft`, selectionchange: client._event(`SELECTION_CHANGE`), items: client._bind_edit(table) });
     const columns = table.columns();
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const layout of this.mo_lay.ms_data.t_layout) {
       sy_tabix++;
       let lv_index = sy_tabix;
@@ -75,7 +76,7 @@ class z2ui5_cl_demo_app_342 extends z2ui5_if_app {
       .items()
       .column_list_item({ valign: `Middle`, type: `Inactive`, selected: `{SELKZ}` });
     const cells = column_list_item.cells();
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const layout of this.mo_lay.ms_data.t_layout) {
       sy_tabix++;
       lv_index = sy_tabix;
@@ -88,7 +89,7 @@ class z2ui5_cl_demo_app_342 extends z2ui5_if_app {
     }
   }
 
-  set_app_data({ !table } = {}) {
+  set_app_data() {
     this.mv_table = table;
   }
 
@@ -96,17 +97,17 @@ class z2ui5_cl_demo_app_342 extends z2ui5_if_app {
     if (!this.mv_init) {
       this.mv_init = true;
       this.get_data();
-      this.render_main({ !client: client });
+      this.render_main({ client: client });
     }
     if (client.get().CHECK_ON_NAVIGATED === true && client.check_on_init() === false) {
-      this.render_main({ !client: client });
+      this.render_main({ client: client });
     }
     // TODO(abap2js): ASSIGN mo_lay->mr_data->* TO FIELD-SYMBOL(<data>).
     // TODO(abap2js): ASSIGN mt_data->* TO FIELD-SYMBOL(<table>).
     if (data !== table) {
       client.message_toast_display(`ERROR - mo_lay->mr_data->* ne mt_data->*`);
     }
-    this.on_event({ !client: client });
+    this.on_event({ client: client });
   }
 
   get_data() {
@@ -119,7 +120,7 @@ class z2ui5_cl_demo_app_342 extends z2ui5_if_app {
       // TODO(abap2js): CREATE DATA mt_data_tmp TYPE HANDLE new_table_desc.
       // TODO(abap2js): ASSIGN mt_data->* TO <table>.
       // TODO(abap2js): SELECT * FROM (mv_table) INTO CORRESPONDING FIELDS OF TABLE @<table> UP TO 5 ROWS.
-      // TODO(abap2js): SORT <table>.
+      table.sort();
     } catch (error) {
     }
     this.mt_data_tmp = this.mt_data;

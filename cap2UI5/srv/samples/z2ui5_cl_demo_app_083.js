@@ -28,6 +28,7 @@ class z2ui5_cl_demo_app_083 extends z2ui5_if_app {
   }
 
   on_event() {
+    let sy_tabix = 0;
     let ls_range = null;
     switch (this.client.get().EVENT) {
       case `BUTTON_POST`:
@@ -42,7 +43,7 @@ class z2ui5_cl_demo_app_083 extends z2ui5_if_app {
         break;
       case `FILTER_VALUE_HELP_OK`:
         this.ms_filter.product = {};
-        let sy_tabix = 0;
+        sy_tabix = 0;
         for (const lr_filter of this.mt_filter) {
           sy_tabix++;
           this.ms_filter.product.push({ sign: `I`, option: lr_filter.option, low: lr_filter.low, high: lr_filter.high });
@@ -65,7 +66,7 @@ class z2ui5_cl_demo_app_083 extends z2ui5_if_app {
       case `FILTER_VALUE_HELP`:
         this.popover_display_filter();
         this.mt_filter = {};
-        let sy_tabix = 0;
+        sy_tabix = 0;
         for (const lr_product of this.ms_filter.product) {
           sy_tabix++;
           this.mt_filter.push({ low: lr_product.low, high: lr_product.high, option: lr_product.option, key: z2ui5_cl_util.uuid_get_c32() });
@@ -83,6 +84,7 @@ class z2ui5_cl_demo_app_083 extends z2ui5_if_app {
   }
 
   view_display_main() {
+    let sy_tabix = 0;
     let view = z2ui5_cl_xml_view.factory();
     view = view.page({ id: `page_main`, title: `abap2UI5 - Select-Options`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
     const page = view.dynamic_page({ headerexpanded: true, headerpinned: true });
@@ -103,7 +105,7 @@ class z2ui5_cl_demo_app_083 extends z2ui5_if_app {
       this.mt_02_display = this.mt_02;
       for (let _i = this.mt_02_display.length - 1; _i >= 0; _i--) { const row = this.mt_02_display[_i]; if (row.screen_name !== this.mv_name) this.mt_02_display.splice(_i, 1); }
       this.mt_tab_02_input = /* TODO(abap2js): VALUE FOR/BASE */ [];
-      let sy_tabix = 0;
+      sy_tabix = 0;
       for (const lr_tab of this.mt_02_display) {
         sy_tabix++;
         this.mt_tab_02_input.push({ name: lr_tab.field });
@@ -132,8 +134,8 @@ class z2ui5_cl_demo_app_083 extends z2ui5_if_app {
       .item({ key: `{N}`, text: `{N}` })
       .get_parent()
       .input(`{LOW}`)
-      .input({ value: `{HIGH}`, visible: `{= ${OPTION} === 'BT' }` })
-      .button({ icon: `sap-icon://decline`, type: `Transparent`, press: this.client._event(`POPUP_DELETE`, [`${KEY}`]) });
+      .input({ value: `{HIGH}`, visible: `{= \${OPTION} === 'BT' }` })
+      .button({ icon: `sap-icon://decline`, type: `Transparent`, press: this.client._event(`POPUP_DELETE`, [`\${KEY}`]) });
     lo_popup.footer()
       .overflow_toolbar()
       .button({ text: `Delete All`, icon: `sap-icon://delete`, type: `Transparent`, press: this.client._event(`POPUP_DELETE_ALL`) })

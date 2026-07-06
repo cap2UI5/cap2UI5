@@ -6,7 +6,7 @@ class z2ui5_cl_demo_app_105 extends z2ui5_if_app {
   mr_data = null;
   client = null;
 
-  view_display() {
+  view_display({ xml } = {}) {
     this.mo_view_parent.input({ value: this.client._bind_edit(this.mv_class_1), placeholder: `Input From Class 1` });
   }
 

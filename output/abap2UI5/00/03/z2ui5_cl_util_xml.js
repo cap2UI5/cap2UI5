@@ -23,7 +23,7 @@ class z2ui5_cl_util_xml {
     let result = null;
     const lo_child = new z2ui5_cl_util_xml();
     lo_child.mv_name = n;
-    lo_child.mv_ns = ns;
+    lo_child.mv_ns = false /* TODO(abap2js): NS */;
     lo_child.mt_prop = p;
     if (a) {
       lo_child.mt_prop.push({ n: a, v: v });
@@ -39,14 +39,14 @@ class z2ui5_cl_util_xml {
   _({ n, ns, a, v, p } = {}) {
     let result = null;
     result = this;
-    this.__({ n, ns, a, v, p });
+    this.__({ n, ns: false /* TODO(abap2js): NS */, a, v, p });
     return result;
   }
 
   _if({ when, n, ns, a, v, p } = {}) {
     let result = null;
     if (when === true) {
-      this.__({ n, ns, a, v, p });
+      this.__({ n, ns: false /* TODO(abap2js): NS */, a, v, p });
     }
     result = this;
     return result;
@@ -55,7 +55,7 @@ class z2ui5_cl_util_xml {
   __if({ when, n, ns, a, v, p } = {}) {
     let result = null;
     if (when === true) {
-      result = this.__({ n, ns, a, v, p });
+      result = this.__({ n, ns: false /* TODO(abap2js): NS */, a, v, p });
     } else {
       result = this;
     }
@@ -102,28 +102,29 @@ class z2ui5_cl_util_xml {
     let lt_parts = [];
     if (indent === true) {
       if (from_root === true) {
-        this.mo_root.xml_get_parts_indent(/* TODO(abap2js): out-params */ CHANGING ct_parts = lt_parts);
+        this.mo_root.xml_get_parts_indent({ ct_parts: lt_parts });
       } else {
-        this.xml_get_parts_indent({ iv_depth: /* TODO(abap2js): out-params */ CHANGING ct_parts = lt_parts });
+        this.xml_get_parts_indent({ iv_depth: { ct_parts: lt_parts } });
       }
       result = lt_parts.join(`\\n`);
     } else {
       if (from_root === true) {
-        this.mo_root.xml_get_parts(/* TODO(abap2js): out-params */ CHANGING ct_parts = lt_parts);
+        this.mo_root.xml_get_parts({ ct_parts: lt_parts });
       } else {
-        this.xml_get_parts(/* TODO(abap2js): out-params */ CHANGING ct_parts = lt_parts);
+        this.xml_get_parts({ ct_parts: { ct_parts: lt_parts } });
       }
       result = /* TODO(abap2js) */ concat_lines_of(lt_parts);
     }
     return result;
   }
 
-  xml_get_parts() {
+  xml_get_parts({ ct_parts } = {}) {
+    let sy_tabix = 0;
     if (!this.mv_name) {
-      let sy_tabix = 0;
+      sy_tabix = 0;
       for (const lr_root of this.mt_child) {
         sy_tabix++;
-        (lr_root).xml_get_parts(/* TODO(abap2js): out-params */ CHANGING ct_parts = ct_parts);
+        (lr_root).xml_get_parts({ ct_parts });
       }
       return;
     }
@@ -134,21 +135,21 @@ class z2ui5_cl_util_xml {
       return;
     }
     ct_parts.push(` <${lv_tmp2}${this.mv_name}${lv_tmp3}>`);
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const lr_child of this.mt_child) {
       sy_tabix++;
-      (lr_child).xml_get_parts(/* TODO(abap2js): out-params */ CHANGING ct_parts = ct_parts);
+      (lr_child).xml_get_parts({ ct_parts });
     }
     ct_parts.push(`</${lv_tmp2}${this.mv_name}>`);
   }
 
-  xml_get_parts_indent({ iv_depth = 0 } = {}) {
+  xml_get_parts_indent({ iv_depth = 0, ct_parts } = {}) {
+    let sy_tabix = 0;
     if (!this.mv_name) {
-      let sy_tabix = 0;
+      sy_tabix = 0;
       for (const lr_root of this.mt_child) {
         sy_tabix++;
-        (lr_root)
-          .xml_get_parts_indent(/* TODO(abap2js): out-params */ EXPORTING iv_depth = iv_depth CHANGING ct_parts = ct_parts);
+        (lr_root).xml_get_parts_indent({ iv_depth, ct_parts });
       }
       return;
     }
@@ -160,11 +161,10 @@ class z2ui5_cl_util_xml {
       return;
     }
     ct_parts.push(`${lv_pad}<${lv_ns}${this.mv_name}${lv_attr}>`);
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const lr_child of this.mt_child) {
       sy_tabix++;
-      (lr_child)
-        .xml_get_parts_indent(/* TODO(abap2js): out-params */ EXPORTING iv_depth = iv_depth + 1 CHANGING ct_parts = ct_parts);
+      (lr_child).xml_get_parts_indent({ iv_depth: iv_depth + 1, ct_parts });
     }
     ct_parts.push(`${lv_pad}</${lv_ns}${this.mv_name}>`);
   }

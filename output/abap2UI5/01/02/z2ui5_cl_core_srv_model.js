@@ -1,8 +1,8 @@
 // TODO(abap2js): unresolved reference cl_abap_datadescr — add require manually
 // TODO(abap2js): unresolved reference cl_abap_objectdescr — add require manually
 // TODO(abap2js): unresolved reference cl_abap_typedescr — add require manually
-// TODO(abap2js): unresolved reference z2ui5_cl_ajson — add require manually
-// TODO(abap2js): unresolved reference z2ui5_cl_ajson_mapping — add require manually
+const z2ui5_cl_ajson = require("abap2UI5/z2ui5_cl_ajson");
+const z2ui5_cl_ajson_mapping = require("abap2UI5/z2ui5_cl_ajson_mapping");
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cx_util_error = require("abap2UI5/z2ui5_cx_util_error");
 const z2ui5_if_ajson_types = require("abap2UI5/z2ui5_if_ajson_types");
@@ -16,9 +16,10 @@ class z2ui5_cl_core_srv_model {
   mo_app = null;
 
   main_json_to_attri({ view, model } = {}) {
-    const lv_view = (this.mt_attri.*.some((row) => row.view === view) ? view : z2ui5_if_client.cs_view.main);
     let sy_tabix = 0;
-    for (const lr_attri of this.mt_attri.*) {
+    const lv_view = (this.mt_attri.some((row) => row.view === view) ? view : z2ui5_if_client.cs_view.main);
+    sy_tabix = 0;
+    for (const lr_attri of this.mt_attri) {
       sy_tabix++;
       if (!(lr_attri.bind_type === z2ui5_if_core_types.cs_bind_type.two_way && view === lv_view)) continue;
       try {
@@ -42,7 +43,7 @@ class z2ui5_cl_core_srv_model {
           continue;
         }
         // TODO(abap2js): ASSIGN lr_ref->* TO FIELD-SYMBOL(<val>).
-        lo_val_front.to_abap(/* TODO(abap2js): out-params */ EXPORTING iv_corresponding = abap_true IMPORTING ev_container = <val>);
+        // TODO(abap2js): lo_val_front->to_abap( EXPORTING iv_corresponding = abap_true IMPORTING ev_container = <val> ).
       } catch (x) {
         throw new z2ui5_cx_util_error({ val: `JSON_PARSING_ERROR: ${x.get_text()}` });
       }
@@ -51,6 +52,7 @@ class z2ui5_cl_core_srv_model {
 
   main_json_stringify() {
     let result = ``;
+    let sy_tabix = 0;
     try {
       const ajson_result = (z2ui5_cl_ajson.create_empty());
       const ajson_default = (z2ui5_cl_ajson.create_empty({ ii_custom_mapping: z2ui5_cl_ajson_mapping.create_upper_case() }));
@@ -59,8 +61,8 @@ class z2ui5_cl_core_srv_model {
       // TODO(abap2js): TYPES ajson TYPE REF TO z2ui5_if_ajson,
       // TODO(abap2js): TYPES END OF ty_s_mapper_cache.
       let lt_mapper_cache = [];
-      let sy_tabix = 0;
-      for (const lr_attri of this.mt_attri.*) {
+      sy_tabix = 0;
+      for (const lr_attri of this.mt_attri) {
         sy_tabix++;
         if (!(lr_attri.bind_type !== `` && lr_attri.type_kind !== cl_abap_datadescr.typekind_dref && lr_attri.type_kind !== cl_abap_datadescr.typekind_oref)) continue;
         if (lr_attri.custom_mapper != null) {
@@ -97,19 +99,20 @@ class z2ui5_cl_core_srv_model {
   }
 
   main_attri_db_load() {
+    let sy_tabix = 0;
     this.main_attri_db_load_resolve();
     let lt_child_idx = [];
-    let sy_tabix = 0;
-    for (const lr_pre of this.mt_attri.*) {
+    sy_tabix = 0;
+    for (const lr_pre of this.mt_attri) {
       sy_tabix++;
-      if (!(name_parent)) continue;
+      if (!(lr_pre.name_parent)) continue;
       lt_child_idx.push({ name_parent: lr_pre.name_parent, name: lr_pre.name });
     }
     const lr_child_idx = (lt_child_idx);
-    let sy_tabix = 0;
-    for (const lr_attri of this.mt_attri.*) {
+    sy_tabix = 0;
+    for (const lr_attri of this.mt_attri) {
       sy_tabix++;
-      if (!(name_ref)) continue;
+      if (!(lr_attri.name_ref)) continue;
       switch (lr_attri.type_kind) {
         case cl_abap_datadescr.typekind_table:
           this.main_attri_db_load_table({ ir_attri: lr_attri });
@@ -123,9 +126,10 @@ class z2ui5_cl_core_srv_model {
 
   main_attri_db_load_resolve() {
     let sy_tabix = 0;
-    for (const lr_attri of this.mt_attri.*) {
+    sy_tabix = 0;
+    for (const lr_attri of this.mt_attri) {
       sy_tabix++;
-      if (!(!name_ref)) continue;
+      if (!(!lr_attri.name_ref)) continue;
       try {
         const lr_ref = this.attri_get_val_ref({ iv_path: lr_attri.name });
         lr_attri.o_typedescr = cl_abap_datadescr.describe_by_data_ref(lr_ref);
@@ -158,6 +162,7 @@ class z2ui5_cl_core_srv_model {
   }
 
   main_attri_db_load_dref({ ir_attri, ir_child_idx } = {}) {
+    let sy_tabix = 0;
     const lv_source_path = `MO_APP->${ir_attri.name_ref}`;
     // TODO(abap2js): ASSIGN (lv_source_path) TO FIELD-SYMBOL(<source_ref>).
     if (sy_subrc !== 0) {
@@ -170,8 +175,8 @@ class z2ui5_cl_core_srv_model {
     }
     // TODO(abap2js): GET REFERENCE OF <source_ref> INTO <parent_ref>.
     ir_attri.o_typedescr = cl_abap_datadescr.describe_by_data_ref(parent_ref);
-    let sy_tabix = 0;
-    for (const lr_child_idx of ir_child_idx.*) {
+    sy_tabix = 0;
+    for (const lr_child_idx of ir_child_idx) {
       sy_tabix++;
       if (!(lr_child_idx.name_parent === ir_attri.name)) continue;
       // TODO(abap2js): READ TABLE mt_attri->* REFERENCE INTO DATA(lr_child) WITH KEY name = lr_child_idx->name.
@@ -184,11 +189,12 @@ class z2ui5_cl_core_srv_model {
   }
 
   main_attri_db_save_srtti() {
-    this.dissolve();
     let sy_tabix = 0;
-    for (const lr_attri of this.mt_attri.*) {
+    this.dissolve();
+    sy_tabix = 0;
+    for (const lr_attri of this.mt_attri) {
       sy_tabix++;
-      if (!(!name_ref && lr_attri.type_kind === cl_abap_datadescr.typekind_dref)) continue;
+      if (!(!lr_attri.name_ref && lr_attri.type_kind === cl_abap_datadescr.typekind_dref)) continue;
       const lv_name5 = `MO_APP->${lr_attri.name}`;
       // TODO(abap2js): ASSIGN (lv_name5) TO FIELD-SYMBOL(<ref>).
       if (sy_subrc !== 0) {
@@ -202,10 +208,11 @@ class z2ui5_cl_core_srv_model {
       const lo_descr = cl_abap_datadescr.describe_by_data(val1);
       switch (lo_descr.type_kind) {
         case cl_abap_datadescr.typekind_table:
-          let sy_tabix = 0;
-          for (const lr_attri_child of this.mt_attri.*) {
+          const _sy_tabix_1 = sy_tabix;
+          sy_tabix = 0;
+          for (const lr_attri_child of this.mt_attri) {
             sy_tabix++;
-            if (!(!name_ref && lr_attri_child.type_kind === cl_abap_datadescr.typekind_table && lr_attri_child.name_parent === lr_attri.name)) continue;
+            if (!(!lr_attri_child.name_ref && lr_attri_child.type_kind === cl_abap_datadescr.typekind_table && lr_attri_child.name_parent === lr_attri.name)) continue;
             const lv_name6 = `MO_APP->${lr_attri_child.name}`;
             // TODO(abap2js): ASSIGN (lv_name6) TO FIELD-SYMBOL(<val_ref>).
             if (sy_subrc !== 0) {
@@ -217,6 +224,7 @@ class z2ui5_cl_core_srv_model {
             ref = null;
             break;
           }
+          sy_tabix = _sy_tabix_1;
           break;
         case cl_abap_datadescr.typekind_struct1:
         case cl_abap_datadescr.typekind_struct2:
@@ -224,8 +232,8 @@ class z2ui5_cl_core_srv_model {
           break;
       }
     }
-    let sy_tabix = 0;
-    for (const lr_attri2 of this.mt_attri.*) {
+    sy_tabix = 0;
+    for (const lr_attri2 of this.mt_attri) {
       sy_tabix++;
       if (!(lr_attri2.type_kind === cl_abap_datadescr.typekind_dref)) continue;
       const lv_name8 = `MO_APP->${lr_attri2.name}`;
@@ -292,17 +300,18 @@ class z2ui5_cl_core_srv_model {
 
   attri_search({ val } = {}) {
     let result = null;
+    let sy_tabix = 0;
     const lo_datadescr = cl_abap_datadescr.describe_by_data_ref(val);
     if (lo_datadescr.type_kind === cl_abap_typedescr.typekind_dref || lo_datadescr.type_kind === cl_abap_typedescr.typekind_oref) {
       throw new z2ui5_cx_util_error({ val: `NO DATA REFERENCES FOR BINDING ALLOWED: DEREFERENCE YOUR DATA FIRST` });
     }
-    let sy_tabix = 0;
-    for (const lr_attri of this.mt_attri.*) {
+    sy_tabix = 0;
+    for (const lr_attri of this.mt_attri) {
       sy_tabix++;
-      if (!(!name_ref && lr_attri.type_kind === lo_datadescr.type_kind && lr_attri.kind === lo_datadescr.kind)) continue;
+      if (!(!lr_attri.name_ref && lr_attri.type_kind === lo_datadescr.type_kind && lr_attri.kind === lo_datadescr.kind)) continue;
       const lv_name_attri = lr_attri.o_typedescr.absolute_name;
       const lv_name_val = lo_datadescr.absolute_name;
-      if (lv_name_attri !== lv_name_val && lv_name_attri NS `%` && lv_name_val NS `%`) {
+      if (lv_name_attri !== lv_name_val && !String(lv_name_attri).toLowerCase().includes(String(`%`).toLowerCase()) && !String(lv_name_val).toLowerCase().includes(String(`%`).toLowerCase())) {
         continue;
       }
       try {
@@ -321,7 +330,7 @@ class z2ui5_cl_core_srv_model {
   attri_create_new({ name } = {}) {
     let result = null;
     const lo_descr = cl_abap_datadescr.describe_by_data_ref(this.attri_get_val_ref({ iv_path: name }));
-    result = value z2ui5_if_core_types.ty_s_attri({ name, o_typedescr: lo_descr, type_kind: lo_descr.type_kind, kind: lo_descr.kind });
+    result = { name: name, o_typedescr: lo_descr, type_kind: lo_descr.type_kind, kind: lo_descr.kind };
     return result;
   }
 
@@ -335,12 +344,12 @@ class z2ui5_cl_core_srv_model {
     if (!lr_ref) {
       return result;
     }
-    const ls_attri2 = value z2ui5_if_core_types.ty_s_attri();
+    const ls_attri2 = {};
     ls_attri2.o_typedescr = cl_abap_datadescr.describe_by_data_ref(lr_ref);
     switch (ls_attri2.o_typedescr.kind) {
       case cl_abap_datadescr.kind_struct:
         const lt_attri = this.diss_struc({ ir_attri: ir_attri });
-        result.push(lines OF lt_attri);
+        result.push(...lt_attri);
         break;
       default:
         ls_attri2.name = `${ir_attri.name}->*`;
@@ -355,6 +364,7 @@ class z2ui5_cl_core_srv_model {
 
   diss_oref({ ir_attri } = {}) {
     let result = [];
+    let sy_tabix = 0;
     const lr_val = this.attri_get_val_ref({ iv_path: ir_attri.name });
     if (z2ui5_cl_util.check_unassign_initial(lr_val)) {
       return result;
@@ -362,10 +372,10 @@ class z2ui5_cl_core_srv_model {
     const lr_ref = z2ui5_cl_util.unassign_object(lr_val);
     const lt_attri = z2ui5_cl_util.rtti_get_t_attri_by_oref(lr_ref);
     const lv_prefix = (ir_attri.name ? `${ir_attri.name}->` : null);
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const lr_attri of lt_attri) {
       sy_tabix++;
-      if (!(lr_attri.visibility === cl_abap_objectdescr.public && lr_attri.is_interface === false && lr_attri.is_class === false && lr_attri.is_constant === false)) continue;
+      if (!(lr_attri.visibility === cl_abap_objectdescr.public_ && lr_attri.is_interface === false && lr_attri.is_class === false && lr_attri.is_constant === false)) continue;
       try {
         const ls_new = this.attri_create_new({ name: lv_prefix + lr_attri.name });
         ls_new.name_parent = ir_attri.name;
@@ -378,6 +388,7 @@ class z2ui5_cl_core_srv_model {
 
   diss_struc({ ir_attri } = {}) {
     let result = [];
+    let sy_tabix = 0;
     const lr_val = this.attri_get_val_ref({ iv_path: ir_attri.name });
     if (ir_attri.o_typedescr.kind === cl_abap_typedescr.kind_ref) {
       let lv_name = `${ir_attri.name}->`;
@@ -388,7 +399,7 @@ class z2ui5_cl_core_srv_model {
     }
     if (lr_ref != null) {
       const lt_attri = z2ui5_cl_util.rtti_get_t_attri_by_any(lr_ref);
-      let sy_tabix = 0;
+      sy_tabix = 0;
       for (const ls_attri of lt_attri) {
         sy_tabix++;
         const ls_new = this.attri_create_new({ name: lv_name + ls_attri.name });
@@ -401,7 +412,7 @@ class z2ui5_cl_core_srv_model {
 
   dissolve() {
     let lv_depth = 0;
-    while (this.mt_attri.*.some((row) => row.check_dissolved === false) || !(this.mt_attri.*)) {
+    while (this.mt_attri.some((row) => row.check_dissolved === false) || !this.mt_attri) {
       lv_depth = lv_depth + 1;
       if (lv_depth >= z2ui5_cl_core_srv_model.max_dissolve_depth) {
         return;
@@ -417,9 +428,10 @@ class z2ui5_cl_core_srv_model {
 
   attri_update_entry_refs() {
     let sy_tabix = 0;
-    for (const lr_attri of this.mt_attri.*) {
+    sy_tabix = 0;
+    for (const lr_attri of this.mt_attri) {
       sy_tabix++;
-      if (!(lr_attri.check_dissolved === true && !name_ref)) continue;
+      if (!(lr_attri.check_dissolved === true && !lr_attri.name_ref)) continue;
       try {
         const lr_ref = this.attri_get_val_ref({ iv_path: lr_attri.name });
       } catch (error) {
@@ -427,10 +439,11 @@ class z2ui5_cl_core_srv_model {
       }
       switch (lr_attri.type_kind) {
         case cl_abap_typedescr.typekind_table:
-          let sy_tabix = 0;
-          for (const lr_attri_ref of this.mt_attri.*) {
+          const _sy_tabix_1 = sy_tabix;
+          sy_tabix = 0;
+          for (const lr_attri_ref of this.mt_attri) {
             sy_tabix++;
-            if (!(lr_attri_ref.check_dissolved === true && lr_attri_ref.name !== lr_attri.name && !name_ref && lr_attri_ref.type_kind === cl_abap_typedescr.typekind_table)) continue;
+            if (!(lr_attri_ref.check_dissolved === true && lr_attri_ref.name !== lr_attri.name && !lr_attri_ref.name_ref && lr_attri_ref.type_kind === cl_abap_typedescr.typekind_table)) continue;
             try {
               let lr_attri_ref_ref = this.attri_get_val_ref({ iv_path: lr_attri_ref.name });
             } catch (error) {
@@ -441,13 +454,15 @@ class z2ui5_cl_core_srv_model {
             }
             lr_attri.name_ref = lr_attri_ref.name;
           }
+          sy_tabix = _sy_tabix_1;
           break;
         case cl_abap_typedescr.typekind_dref:
           // TODO(abap2js): ASSIGN lr_ref->* TO FIELD-SYMBOL(<ref>).
-          let sy_tabix = 0;
-          for (const lr_attri_ref of this.mt_attri.*) {
+          const _sy_tabix_2 = sy_tabix;
+          sy_tabix = 0;
+          for (const lr_attri_ref of this.mt_attri) {
             sy_tabix++;
-            if (!(lr_attri_ref.check_dissolved === true && lr_attri_ref.name !== lr_attri.name && !name_ref && (lr_attri_ref.type_kind === cl_abap_typedescr.typekind_struct1 || lr_attri_ref.type_kind === cl_abap_typedescr.typekind_struct2))) continue;
+            if (!(lr_attri_ref.check_dissolved === true && lr_attri_ref.name !== lr_attri.name && !lr_attri_ref.name_ref && (lr_attri_ref.type_kind === cl_abap_typedescr.typekind_struct1 || lr_attri_ref.type_kind === cl_abap_typedescr.typekind_struct2))) continue;
             try {
               lr_attri_ref_ref = this.attri_get_val_ref({ iv_path: lr_attri_ref.name });
             } catch (error) {
@@ -462,6 +477,7 @@ class z2ui5_cl_core_srv_model {
             lr_attri.name_ref = lr_attri_ref.name;
             this.attri_update_refs_children({ ir_attri: lr_attri });
           }
+          sy_tabix = _sy_tabix_2;
           break;
       }
     }
@@ -469,7 +485,8 @@ class z2ui5_cl_core_srv_model {
 
   attri_update_refs_children({ ir_attri } = {}) {
     let sy_tabix = 0;
-    for (const lr_attri_child of this.mt_attri.*) {
+    sy_tabix = 0;
+    for (const lr_attri_child of this.mt_attri) {
       sy_tabix++;
       if (!(lr_attri_child.name_parent === ir_attri.name)) continue;
       const lv_name = (lr_attri_child.name.startsWith(`${ir_attri.name}->`) ? lr_attri_child.name.slice((`${ir_attri.name}->`).length) : lr_attri_child.name);
@@ -478,14 +495,15 @@ class z2ui5_cl_core_srv_model {
   }
 
   dissolve_run() {
-    if (!(this.mt_attri.*)) {
-      const ls_attri = value z2ui5_if_core_types.ty_s_attri();
-      const lt_init = this.diss_oref({ ir_attri: (ls_attri) });
-      this.mt_attri.*.push(lines OF lt_init);
-    }
-    const lt_attri_new = value z2ui5_if_core_types.ty_t_attri();
     let sy_tabix = 0;
-    for (const lr_attri of this.mt_attri.*) {
+    if (!this.mt_attri) {
+      const ls_attri = {};
+      const lt_init = this.diss_oref({ ir_attri: (ls_attri) });
+      this.mt_attri.push(...lt_init);
+    }
+    const lt_attri_new = {};
+    sy_tabix = 0;
+    for (const lr_attri of this.mt_attri) {
       sy_tabix++;
       if (!(lr_attri.check_dissolved === false)) continue;
       lr_attri.check_dissolved = true;
@@ -496,17 +514,17 @@ class z2ui5_cl_core_srv_model {
       switch (lr_attri.o_typedescr.kind) {
         case cl_abap_typedescr.kind_struct:
           const lt_attri_struc = this.diss_struc({ ir_attri: lr_attri });
-          lt_attri_new.push(lines OF lt_attri_struc);
+          lt_attri_new.push(...lt_attri_struc);
           break;
         case cl_abap_typedescr.kind_ref:
           switch (lr_attri.o_typedescr.type_kind) {
             case cl_abap_typedescr.typekind_oref:
               const lt_attri_oref = this.diss_oref({ ir_attri: lr_attri });
-              lt_attri_new.push(lines OF lt_attri_oref);
+              lt_attri_new.push(...lt_attri_oref);
               break;
             case cl_abap_typedescr.typekind_dref:
               const lt_attri_dref = this.diss_dref({ ir_attri: lr_attri });
-              lt_attri_new.push(lines OF lt_attri_dref);
+              lt_attri_new.push(...lt_attri_dref);
               break;
             default:
               if (!(1 === 0)) throw new Error(`ASSERT failed`);
@@ -517,16 +535,17 @@ class z2ui5_cl_core_srv_model {
           break;
       }
     }
-    this.mt_attri.*.push(lines OF lt_attri_new);
+    this.mt_attri.push(...lt_attri_new);
   }
 
   main_attri_refresh() {
-    const lt_attri = this.mt_attri.*;
-    for (let _i = lt_attri.length - 1; _i >= 0; _i--) { const row = lt_attri[_i]; if (!bind_type) lt_attri.splice(_i, 1); }
-    this.mt_attri.* = null;
-    this.dissolve();
     let sy_tabix = 0;
-    for (const lr_attri of this.mt_attri.*) {
+    const lt_attri = this.mt_attri;
+    for (let _i = lt_attri.length - 1; _i >= 0; _i--) { const row = lt_attri[_i]; if (!row.bind_type) lt_attri.splice(_i, 1); }
+    this.mt_attri = null;
+    this.dissolve();
+    sy_tabix = 0;
+    for (const lr_attri of this.mt_attri) {
       sy_tabix++;
       // TODO(abap2js): READ TABLE lt_attri REFERENCE INTO DATA(lr_old) WITH KEY name = lr_attri->name.
       if (sy_subrc === 0) {
@@ -538,6 +557,7 @@ class z2ui5_cl_core_srv_model {
   }
 
   delta_apply_to_table({ io_val_front, iv_name } = {}) {
+    let sy_tabix = 0;
     try {
       const lr_ref_d = this.attri_get_val_ref({ iv_path: iv_name });
     } catch (error) {
@@ -550,7 +570,7 @@ class z2ui5_cl_core_srv_model {
     }
     const lo_delta = io_val_front.slice(`/__delta`);
     const lt_idx = lo_delta.members(`/`);
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const lv_idx_str of lt_idx) {
       sy_tabix++;
       const lv_tabix = (lv_idx_str) + 1;
@@ -561,7 +581,8 @@ class z2ui5_cl_core_srv_model {
       }
       const lo_row_d = lo_delta.slice(`/${lv_idx_str}`);
       const lt_fld = lo_row_d.members(`/`);
-      let sy_tabix = 0;
+      const _sy_tabix_1 = sy_tabix;
+      sy_tabix = 0;
       for (const lv_fld of lt_fld) {
         sy_tabix++;
         // TODO(abap2js): FIELD-SYMBOLS <comp> TYPE any.
@@ -576,6 +597,7 @@ class z2ui5_cl_core_srv_model {
           comp = lo_row_d.get_string(lv_fld_path);
         }
       }
+      sy_tabix = _sy_tabix_1;
     }
   }
 }

@@ -49,9 +49,9 @@ class z2ui5_cl_demo_app_299 extends z2ui5_if_app {
     this.lt_product_collection = {};
     this.lt_product_collection2 = {};
     this.lt_product_collection = [{ product_id: `HT-1001`, name: `Select option 1` }, { product_id: `HT-1002`, name: `Lorem Ipsum is simply dummy text of the printing and typesetting industry.` }, { product_id: `HT-1003`, name: `Select option 3` }, { product_id: `HT-1007`, name: `Select option 4` }, { product_id: `HT-1010`, name: `Select option 5` }];
-    this.lt_product_collection.sort((a, b) => (a.name > b.name ? 1 : a.name < b.name ? -1 : 0));
+    this.lt_product_collection.sort((a, b) => ((a.name > b.name ? 1 : a.name < b.name ? -1 : 0)));
     this.lt_product_collection2 = [{ product_id: `key1`, name: `Select option 1` }, { product_id: `key2`, name: `Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum is simply dummy text of the printing and typesetting industry.` }, { product_id: `key3`, name: `Select option 3` }, { product_id: `key4`, name: `Select option 4` }, { product_id: `key5`, name: `Select option 5` }];
-    this.lt_product_collection2.sort((a, b) => (a.name > b.name ? 1 : a.name < b.name ? -1 : 0));
+    this.lt_product_collection2.sort((a, b) => ((a.name > b.name ? 1 : a.name < b.name ? -1 : 0)));
   }
 }
 

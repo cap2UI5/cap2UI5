@@ -30,6 +30,7 @@ class z2ui5_cl_demo_app_060 extends z2ui5_if_app {
   }
 
   on_event() {
+    let sy_tabix = 0;
     let lt_range = [];
     switch (this.client.get().EVENT) {
       case `START`:
@@ -38,10 +39,10 @@ class z2ui5_cl_demo_app_060 extends z2ui5_if_app {
       case `ON_SUGGEST`:
         lt_range = [{ sign: `I`, option: `CP`, low: `*${this.input}*` }];
         this.mt_suggestion_out = {};
-        let sy_tabix = 0;
+        sy_tabix = 0;
         for (const ls_sugg of this.mt_suggestion) {
           sy_tabix++;
-          if (!(currencyname IN lt_range)) continue;
+          if (!((($v, $r) => !$r || !$r.length || $r.some(($x) => ($x.option === `BT` ? $v >= $x.low && $v <= $x.high : $x.option === `NE` ? $v !== $x.low : $x.option === `CP` ? String($v).includes(String($x.low).replace(/\*/g, "")) : $v === $x.low)))(ls_sugg.currencyname, lt_range))) continue;
           this.mt_suggestion_out.push(ls_sugg);
         }
         this.client.view_model_update();

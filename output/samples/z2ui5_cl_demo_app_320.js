@@ -14,7 +14,7 @@ class z2ui5_cl_demo_app_320 extends z2ui5_if_app {
   async main(client) {
     this.client = client;
     if (client.check_on_init()) {
-      this.items = { mobile: `+89181818181`, phone: `+2828282828`, email: `blabla@blabla` (id === `1` initials === `JD` name === `John Doe` tooltip === `1` jobposition === `Marketing Manager`) (id === `2` initials === `SP` name === `Sarah Parker` tooltip === `2` jobposition === `Visual Designer`) (id === `3` initials === `JG` name === `Jason Goldwell` tooltip === `3` jobposition === `Software Developer`) (id === `4` name === `Christian Bow` jobposition === `Marketing Manager` tooltip === `4`) (id === `5` src === `https://sapui5.hana.ondemand.com/test-resources/sap/f/images/Woman_avatar_01.png` tooltip === `5` name === `Jessica Parker` jobposition === `Visual Designer`) (id === `6` initials === `JB` name === `Jonathan Bale` jobposition === `Software Developer` tooltip === `6`) (id === `7` initials === `GS` name === `Gordon Smith` jobposition === `Marketing Manager` tooltip === `7`) (id === `8` fallbackicon === `sap-icon =//person-placeholder` name === `Simon Jason` tooltip === `8` jobposition === `Visual Designer`) (id === `9` initials === `JS` name === `Jason Swan` jobposition === `Software Developer` tooltip === `9`) (id === `10` initials === `JC` name === `John Carter` jobposition === `Marketing Manager` tooltip === `10`) (id === `11` src === `https://sapui5.hana.ondemand.com/test-resources/sap/f/images/Woman_avatar_02.png` name === `Whitney Parker` tooltip === `11` jobposition === `Visual Designer`) (id === `12` fallbackicon === `sap-icon =//person-placeholder` name === `Jason Goldwell` tooltip === `12` jobposition === `Software Developer`) (id === `13` initials === `CD` name === `Chris Doe` jobposition === `Marketing Manager` tooltip === `13`) (id === `14` initials === `SS` name === `Sarah Smith` jobposition === `Visual Designer` tooltip === `14`) (id === `15` initials === `DC` name === `David Copper` jobposition === `Software Developer` tooltip === `15`) };
+      this.items = [{ mobile: `+89181818181`, phone: `+2828282828`, email: `blabla@blabla`, id: `1`, initials: `JD`, name: `John Doe`, tooltip: `1`, jobposition: `Marketing Manager` }, { mobile: `+89181818181`, phone: `+2828282828`, email: `blabla@blabla`, id: `2`, initials: `SP`, name: `Sarah Parker`, tooltip: `2`, jobposition: `Visual Designer` }, { mobile: `+89181818181`, phone: `+2828282828`, email: `blabla@blabla`, id: `3`, initials: `JG`, name: `Jason Goldwell`, tooltip: `3`, jobposition: `Software Developer` }, { mobile: `+89181818181`, phone: `+2828282828`, email: `blabla@blabla`, id: `4`, name: `Christian Bow`, jobposition: `Marketing Manager`, tooltip: `4` }, { mobile: `+89181818181`, phone: `+2828282828`, email: `blabla@blabla`, id: `5`, src: `https://sapui5.hana.ondemand.com/test-resources/sap/f/images/Woman_avatar_01.png`, tooltip: `5`, name: `Jessica Parker`, jobposition: `Visual Designer` }, { mobile: `+89181818181`, phone: `+2828282828`, email: `blabla@blabla`, id: `6`, initials: `JB`, name: `Jonathan Bale`, jobposition: `Software Developer`, tooltip: `6` }, { mobile: `+89181818181`, phone: `+2828282828`, email: `blabla@blabla`, id: `7`, initials: `GS`, name: `Gordon Smith`, jobposition: `Marketing Manager`, tooltip: `7` }, { mobile: `+89181818181`, phone: `+2828282828`, email: `blabla@blabla`, id: `8`, fallbackicon: `sap-icon =//person-placeholder`, name: `Simon Jason`, tooltip: `8`, jobposition: `Visual Designer` }, { mobile: `+89181818181`, phone: `+2828282828`, email: `blabla@blabla`, id: `9`, initials: `JS`, name: `Jason Swan`, jobposition: `Software Developer`, tooltip: `9` }, { mobile: `+89181818181`, phone: `+2828282828`, email: `blabla@blabla`, id: `10`, initials: `JC`, name: `John Carter`, jobposition: `Marketing Manager`, tooltip: `10` }, { mobile: `+89181818181`, phone: `+2828282828`, email: `blabla@blabla`, id: `11`, src: `https://sapui5.hana.ondemand.com/test-resources/sap/f/images/Woman_avatar_02.png`, name: `Whitney Parker`, tooltip: `11`, jobposition: `Visual Designer` }, { mobile: `+89181818181`, phone: `+2828282828`, email: `blabla@blabla`, id: `12`, fallbackicon: `sap-icon =//person-placeholder`, name: `Jason Goldwell`, tooltip: `12`, jobposition: `Software Developer` }, { mobile: `+89181818181`, phone: `+2828282828`, email: `blabla@blabla`, id: `13`, initials: `CD`, name: `Chris Doe`, jobposition: `Marketing Manager`, tooltip: `13` }, { mobile: `+89181818181`, phone: `+2828282828`, email: `blabla@blabla`, id: `14`, initials: `SS`, name: `Sarah Smith`, jobposition: `Visual Designer`, tooltip: `14` }, { mobile: `+89181818181`, phone: `+2828282828`, email: `blabla@blabla`, id: `15`, initials: `DC`, name: `David Copper`, jobposition: `Software Developer`, tooltip: `15` }];
       this.display_avatar_group_view();
     }
     this.on_event();
@@ -26,11 +26,11 @@ class z2ui5_cl_demo_app_320 extends z2ui5_if_app {
       .slider({ value: this.client._bind_edit(this.viewportpercentwidth) })
       .vertical_layout({ id: `vl1`, width: `${this.client._bind_edit(this.viewportpercentwidth)}%`, class: `sapUiContentPadding` })
       .label({ text: `AvatarGroup control in Individual mode`, class: `sapUiSmallMarginBottom sapUiMediumMarginTop` })
-      .avatar_group({ id: `avatarGroup1`, grouptype: `Individual`, avatardisplaysize: `S`, press: this.client._event(`onIndividualPress`, [`${$source>/id}`, `${$parameters>/groupType}`, `${$parameters>/overflowButtonPressed}`, `${$parameters>/avatarsDisplayed}`, `$event.getParameter("eventSource").getId()`, `$event.oSource.indexOfItem($event.getParameter("eventSource"))`]), items: this.client._bind(this.items) })
+      .avatar_group({ id: `avatarGroup1`, grouptype: `Individual`, avatardisplaysize: `S`, press: this.client._event(`onIndividualPress`, [`\${$source>/id}`, `\${$parameters>/groupType}`, `\${$parameters>/overflowButtonPressed}`, `\${$parameters>/avatarsDisplayed}`, `$event.getParameter("eventSource").getId()`, `$event.oSource.indexOfItem($event.getParameter("eventSource"))`]), items: this.client._bind(this.items) })
       .avatar_group_item({ initials: `{INITIALS}`, fallbackicon: `{FALLBACKICON}`, src: `{SRC}`, tooltip: `{NAME}` })
       .get_parent()
       .label({ text: `AvatarGroup control in Group mode`, class: `sapUiSmallMarginBottom sapUiMediumMarginTop` })
-      .avatar_group({ id: `avatarGroup2`, grouptype: `Group`, tooltip: `Avatar Group`, avatardisplaysize: `M`, press: this.client._event(`onGroupPress`, [`${$source>/id}`, `${$parameters>/groupType}`, `${$parameters>/overflowButtonPressed}`, `${$parameters>/avatarsDisplayed}`]), items: this.client._bind(this.items) })
+      .avatar_group({ id: `avatarGroup2`, grouptype: `Group`, tooltip: `Avatar Group`, avatardisplaysize: `M`, press: this.client._event(`onGroupPress`, [`\${$source>/id}`, `\${$parameters>/groupType}`, `\${$parameters>/overflowButtonPressed}`, `\${$parameters>/avatarsDisplayed}`]), items: this.client._bind(this.items) })
       .avatar_group_item({ initials: `{INITIALS}`, fallbackicon: `{FALLBACKICON}`, src: `{SRC}` });
     this.client.view_display(view.stringify());
     this.client.action.gen({ val: z2ui5_if_client.cs_event.set_title, t_arg: [`Avatar Group Sample`] });
@@ -68,7 +68,7 @@ class z2ui5_cl_demo_app_320 extends z2ui5_if_app {
       .grid({ default_span: `XL6 L6 M6 S12`, content: this.client._bind(this.group_items) })
       .hbox({ alignitems: `Center` })
       .vbox()
-      .avatar({ class: `sapUiTinyMarginEnd`, initials: `{INITIALS}`, fallbackicon: `{FALLBACKICON}`, src: `{SRC}`, badgetooltip: `{NAME}`, backgroundcolor: `{BACKGROUNDCOLOR}`, press: this.client._event(`onAvatarPress`, [`${ID}`]) })
+      .avatar({ class: `sapUiTinyMarginEnd`, initials: `{INITIALS}`, fallbackicon: `{FALLBACKICON}`, src: `{SRC}`, badgetooltip: `{NAME}`, backgroundcolor: `{BACKGROUNDCOLOR}`, press: this.client._event(`onAvatarPress`, [`\${ID}`]) })
       .get_parent()
       .vbox()
       .text(`{NAME}`)
@@ -116,14 +116,14 @@ class z2ui5_cl_demo_app_320 extends z2ui5_if_app {
         if (overflow_button_pressed === true) {
           this.display_group_popover({ id: item_id });
         } else {
-          this.item = (this.items[(item_table_index + 1) - 1] optional);
+          this.item = (() => { try { return this.items[(item_table_index + 1) - 1] ?? null; } catch { return null; } })();
           this.display_individual_popover({ id: item_id });
         }
         this.client.popover_destroy();
         break;
       case `onAvatarPress`:
         const id = lt_arg[(1) - 1];
-        this.item = (this.items.find((row) => row.id === id) optional);
+        this.item = (() => { try { return this.items.find((row) => row.id === id) ?? null; } catch { return null; } })();
         this.content_height = `370px`;
         this.content_width = `250px`;
         this.client.popover_model_update();

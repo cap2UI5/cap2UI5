@@ -11,7 +11,7 @@ class z2ui5_cl_pop_get_range extends z2ui5_if_app {
   static factory({ t_range } = {}) {
     let r_result = null;
     r_result = new z2ui5_cl_pop_get_range();
-    z2ui5_cl_util.itab_corresponding(/* TODO(abap2js): out-params */ EXPORTING val = t_range CHANGING tab = r_result -> ms_result - t_range);
+    z2ui5_cl_util.itab_corresponding({ val: t_range, tab: r_result.ms_result.t_range });
     r_result.ms_result.t_range.push({});
     return r_result;
   }
@@ -33,8 +33,8 @@ class z2ui5_cl_pop_get_range extends z2ui5_if_app {
       .item({ key: `{N}`, text: `{N}` })
       .get_parent()
       .input({ value: `{LOW}`, submit: this.client._event(`BUTTON_CONFIRM`) })
-      .input({ value: `{HIGH}`, visible: `{= ${OPTION} === 'BT' }`, submit: this.client._event(`BUTTON_CONFIRM`) })
-      .button({ icon: `sap-icon://decline`, type: `Transparent`, press: this.client._event(`POPUP_DELETE`, [`${KEY}`]) });
+      .input({ value: `{HIGH}`, visible: `{= \${OPTION} === 'BT' }`, submit: this.client._event(`BUTTON_CONFIRM`) })
+      .button({ icon: `sap-icon://decline`, type: `Transparent`, press: this.client._event(`POPUP_DELETE`, [`\${KEY}`]) });
     lo_popup.buttons()
       .button({ text: `Delete All`, icon: `sap-icon://delete`, type: `Transparent`, press: this.client._event(`POPUP_DELETE_ALL`) })
       .button({ text: `Add Item`, icon: `sap-icon://add`, press: this.client._event(`POPUP_ADD`) })
@@ -44,11 +44,12 @@ class z2ui5_cl_pop_get_range extends z2ui5_if_app {
   }
 
   async main(client) {
+    let sy_tabix = 0;
     this.client = client;
     if (client.check_on_init()) {
       this.mt_mapping = z2ui5_cl_util.filter_get_token_range_mapping();
       this.mt_filter = [];
-      let sy_tabix = 0;
+      sy_tabix = 0;
       for (const lr_range of this.ms_result.t_range) {
         sy_tabix++;
         this.mt_filter.push({ low: lr_range.low, high: lr_range.high, option: lr_range.option, key: z2ui5_cl_util.uuid_get_c32() });
@@ -59,7 +60,7 @@ class z2ui5_cl_pop_get_range extends z2ui5_if_app {
     switch (client.get().EVENT) {
       case `BUTTON_CONFIRM`:
         this.ms_result.t_range = {};
-        let sy_tabix = 0;
+        sy_tabix = 0;
         for (const lr_filter of this.mt_filter) {
           sy_tabix++;
           if (!lr_filter.low && !lr_filter.high) {

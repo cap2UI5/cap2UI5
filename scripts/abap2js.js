@@ -31,6 +31,8 @@ const path = require("path");
 function requirePathFor(className) {
   if (/^z2ui5_cl_demo_/.test(className)) return `./${className}`;
   if (
+    /^z2ui5_(cl|cx)_srt_?/.test(className) ||
+    /^z2ui5_(cl|cx)_ajson/.test(className) ||
     /^z2ui5_if_/.test(className) ||
     /^z2ui5_cl_pop_/.test(className) ||
     /^z2ui5_cl_util/.test(className) ||
@@ -51,7 +53,12 @@ function requirePathFor(className) {
 const KW = (s) => s.toUpperCase();
 
 function tokify(statement) {
-  return statement.getTokens().map((t) => ({ type: t.constructor.name, str: t.getStr() }));
+  return statement.getTokens().map((t) => ({ type: t.constructor.name, str: t.getStr(), row: t.getStart().getRow(), col: t.getStart().getCol() }));
+}
+
+/** true when b starts directly after a with no whitespace (ABAP offset syntax) */
+function isAdjacent(a, b) {
+  return a && b && a.row === b.row && b.col === a.col + a.str.length;
 }
 
 const isParenL = (t) => t.type === "ParenLeft" || t.type === "ParenLeftW" || t.type === "WParenLeft" || t.type === "WParenLeftW";
@@ -113,7 +120,7 @@ function unescAbapTemplate(s) {
   return s.replace(/\\([|{}\\])/g, "$1");
 }
 
-const JS_RESERVED = new Set(["class", "new", "delete", "function", "var", "let", "const", "switch", "case", "return", "this", "typeof", "in", "of", "do", "if", "else", "for", "while", "void", "with", "yield", "await", "static", "import", "export", "extends", "super", "catch", "try", "finally", "throw", "default", "break", "continue", "instanceof", "null", "true", "false", "enum", "arguments"]);
+const JS_RESERVED = new Set(["class", "new", "delete", "function", "var", "let", "const", "switch", "case", "return", "this", "typeof", "in", "of", "do", "if", "else", "for", "while", "void", "with", "yield", "await", "static", "import", "export", "extends", "super", "catch", "try", "finally", "throw", "default", "break", "continue", "instanceof", "null", "true", "false", "enum", "arguments", "interface", "implements", "package", "private", "protected", "public"]);
 
 /** rename identifiers that collide with JS reserved words (class → class_) */
 function safeIdent(name) {
@@ -124,6 +131,27 @@ function safeIdent(name) {
 function singleQuotedToBacktick(raw) {
   const inner = raw.slice(1, -1).replace(/''/g, "'");
   return "`" + escTemplateText(inner) + "`";
+}
+
+/** ABAP `...` literal → JS `...` literal (escapes \, ` and ${ for JS) */
+function backtickToTemplate(raw) {
+  const inner = raw.slice(1, -1).replace(/``/g, "`");
+  return "`" + escTemplateText(inner) + "`";
+}
+
+/** render any ABAP string token as a JS template literal */
+function stringToken(str) {
+  return str.startsWith("'") ? singleQuotedToBacktick(str) : backtickToTemplate(str);
+}
+
+/** parameter names may carry the ABAP escape prefix: !name */
+function paramName(str) {
+  return str.replace(/^!/, "").toLowerCase();
+}
+
+/** free-text ABAP source for a JS block comment — must not close the comment */
+function commentSafe(src, max = 120) {
+  return src.replace(/\*\//g, "* /").slice(0, max);
 }
 
 // ---------------------------------------------------------------------------
@@ -255,10 +283,12 @@ function buildModel(file) {
             mode = up;
             continue;
           }
-          if (mode === "IMPORTING" && isId(toks[i]) && !["TYPE", "LIKE", "REF", "TO", "OF", "OPTIONAL", "DEFAULT", "TABLE", "STANDARD", "SORTED", "HASHED", "WITH", "KEY", "EMPTY", "UNIQUE", "NON-UNIQUE", "LINE", "PREFERRED", "PARAMETER"].includes(up)) {
-            // parameter names are followed by TYPE/LIKE
+          if (["IMPORTING", "EXPORTING", "CHANGING"].includes(mode) && isId(toks[i]) && !["TYPE", "LIKE", "REF", "TO", "OF", "OPTIONAL", "DEFAULT", "TABLE", "STANDARD", "SORTED", "HASHED", "WITH", "KEY", "EMPTY", "UNIQUE", "NON-UNIQUE", "LINE", "PREFERRED", "PARAMETER"].includes(up.replace(/^!/, ""))) {
+            // parameter names are followed by TYPE/LIKE — EXPORTING/CHANGING
+            // params join the destructured signature (JS object refs give the
+            // by-reference semantics for structures and tables)
             if (KW(toks[i + 1]?.str) === "TYPE" || KW(toks[i + 1]?.str) === "LIKE") {
-              const param = { name: toks[i].str.toLowerCase(), defaultToks: null };
+              const param = { name: paramName(toks[i].str), defaultToks: null };
               // scan ahead for DEFAULT <tok...> until next param/section
               for (let j = i + 2; j < toks.length - 1; j++) {
                 const u = KW(toks[j].str);
@@ -281,7 +311,7 @@ function buildModel(file) {
           }
           if (mode === "RETURNING" && KW(toks[i].str) === "VALUE" && isParenL(toks[i + 1])) {
             const close = matchGroup(toks, i + 1);
-            def.returning = { name: toks[i + 2].str.toLowerCase(), typeTokens: toks.slice(close + 2, toks.length - 1).map((t) => t.str) };
+            def.returning = { name: paramName(toks[i + 2].str), typeTokens: toks.slice(close + 2, toks.length - 1).map((t) => t.str) };
           }
         }
         model.methods.set(name, def);
@@ -305,7 +335,7 @@ function buildModel(file) {
 }
 
 function renderLiteralToken(tok) {
-  if (isStr(tok)) return tok.str.startsWith("'") ? singleQuotedToBacktick(tok.str) : tok.str;
+  if (isStr(tok)) return stringToken(tok.str);
   const up = KW(tok.str);
   if (up === "ABAP_TRUE") return "true";
   if (up === "ABAP_FALSE") return "false";
@@ -355,7 +385,7 @@ function clientArgs(meth, groupToks, ctx) {
   const sig = clientSignature()?.get(meth);
   const named = namedArgsOf(groupToks, ctx);
   if (!named || !sig || sig.destructured || !sig.params.length) return null;
-  const pos = sig.params.map((p) => (named.has(p) ? named.get(p) : "undefined"));
+  const pos = sig.params.map((p) => (named.has(p) ? renderNamedVal(named.get(p)) : "undefined"));
   while (pos.length && pos[pos.length - 1] === "undefined") pos.pop();
   if ([...named.keys()].some((k) => !sig.params.includes(k))) return null; // unknown param — keep object
   return pos.join(", ");
@@ -376,6 +406,7 @@ class Ctx {
     this.upperLocals = new Set(); // locals holding client.get() structs (UPPERCASE keys)
     this.requires = null; // shared Set on emitter
     this.todos = null; // shared array
+    this.rowVar = null; // WHERE context: bare names resolve to <rowVar>.<name>
     this.loopDepth = 0;
   }
   isLocal(name) {
@@ -416,21 +447,36 @@ function toAtoms(toks, ctx) {
     const t = toks[i];
     const up = KW(t.str);
 
-    // constructor expressions: VALUE #( ... ), COND #( ... ), NEW type( ... )
-    if (isId(t) && CONSTRUCTORS.has(up) && i + 1 < toks.length && (toks[i + 1].str === "#" || (isId(toks[i + 1]) && isParenL(toks[i + 2] ?? { type: "" })))) {
-      const typeTok = toks[i + 1];
-      const open = i + 2;
-      if (!isParenL(toks[open])) {
-        atoms.push({ kind: "expr", str: t.str });
-        i++;
+    // constructor expressions: VALUE #( ... ), COND #( ... ), NEW type( ... ),
+    // VALUE intf=>ty_s_x( ... ) — the type may span `intf=>type` token chains
+    if (isId(t) && CONSTRUCTORS.has(up) && i + 1 < toks.length) {
+      let open = -1;
+      let typeName = null;
+      if (toks[i + 1].str === "#") {
+        if (isParenL(toks[i + 2] ?? { type: "" })) {
+          open = i + 2;
+          typeName = null;
+        }
+      } else {
+        let k = i + 1;
+        while (k < toks.length && (isId(toks[k]) || isStatArrow(toks[k]))) k++;
+        if (k > i + 1 && toks[k] && isParenL(toks[k])) {
+          open = k;
+          typeName = toks
+            .slice(i + 1, k)
+            .map((x) => x.str)
+            .join("")
+            .toLowerCase();
+        }
+      }
+      if (open >= 0) {
+        const close = matchGroup(toks, open);
+        const inner = toks.slice(open + 1, close);
+        atoms.push({ kind: "expr", str: txConstructor(up, typeName, inner, ctx) });
+        i = close + 1;
+        i = chainSuffix(toks, i, atoms, ctx);
         continue;
       }
-      const close = matchGroup(toks, open);
-      const inner = toks.slice(open + 1, close);
-      atoms.push({ kind: "expr", str: txConstructor(up, typeTok, inner, ctx) });
-      i = close + 1;
-      i = chainSuffix(toks, i, atoms, ctx);
-      continue;
     }
 
     // primaries — note: comparison operators (=, <>, >, ...) lex as
@@ -442,6 +488,18 @@ function toAtoms(toks, ctx) {
       continue;
     }
 
+    // ABAP offset/length substring: var+off(len) — no whitespace around +
+    if (t.str === "+" && atoms.length && atoms[atoms.length - 1].kind === "expr" && isAdjacent(toks[i - 1], t) && isAdjacent(t, toks[i + 1]) && toks[i + 2] && isParenL(toks[i + 2]) && (/^\d+$/.test(toks[i + 1].str) || isId(toks[i + 1]))) {
+      const base = atoms.pop().str;
+      const off = /^\d+$/.test(toks[i + 1].str) ? toks[i + 1].str : txExpr([toks[i + 1]], ctx);
+      const close = matchGroup(toks, i + 2);
+      const lenToks = toks.slice(i + 3, close);
+      const len = lenToks.length === 1 && lenToks[0].str === "*" ? null : txExpr(lenToks, ctx);
+      atoms.push({ kind: "expr", str: len === null ? `String(${base}).substr(${off})` : `String(${base}).substr(${off}, ${len})` });
+      i = close + 1;
+      continue;
+    }
+
     // operators / everything else
     atoms.push({ kind: "op", str: t.str, up });
     i++;
@@ -449,7 +507,7 @@ function toAtoms(toks, ctx) {
   return atoms;
 }
 
-const OPERATOR_WORDS = new Set(["AND", "OR", "NOT", "IS", "IN", "EQ", "NE", "GT", "LT", "GE", "LE", "CS", "CP", "CO", "CN", "CA", "NA", "NS", "NP", "INITIAL", "BOUND", "SUPPLIED", "ASSIGNED", "INSTANCE", "OF", "BETWEEN", "XSDBOOL"]);
+const OPERATOR_WORDS = new Set(["AND", "OR", "NOT", "IS", "IN", "EQ", "NE", "GT", "LT", "GE", "LE", "CS", "CP", "CO", "CN", "CA", "NA", "NS", "NP", "INITIAL", "BOUND", "SUPPLIED", "ASSIGNED", "INSTANCE", "OF", "BETWEEN", "XSDBOOL", "MOD", "DIV"]);
 function isOperatorWord(up) {
   return OPERATOR_WORDS.has(up) && up !== "XSDBOOL";
 }
@@ -460,8 +518,7 @@ function parsePrimary(toks, i, ctx) {
 
   // string literals
   if (isStr(t)) {
-    const str = t.str.startsWith("'") ? singleQuotedToBacktick(t.str) : t.str;
-    return { str, next: i + 1 };
+    return { str: stringToken(t.str), next: i + 1 };
   }
 
   // string templates |a { x } b|
@@ -523,6 +580,11 @@ function txTemplateExpr(exprToks, ctx) {
       break;
     }
   }
+  // a single identifier that collides with an operator word (a variable
+  // named `and`, `in`, ...) is still just a variable here
+  if (exprToks.length === 1 && isId(exprToks[0]) && isOperatorWord(KW(exprToks[0].str))) {
+    return parseIdentChain(exprToks, 0, ctx).str;
+  }
   return txExpr(exprToks, ctx);
 }
 
@@ -579,6 +641,29 @@ function parseIdentChain(toks, i, ctx) {
   let j = i + 1;
 
   const callFollows = j < toks.length && isParenL(toks[j]);
+
+  // interface components: intf~comp — the JS classes flatten interface
+  // members, so own-interface calls go to this.comp, foreign ones to intf.comp
+  if (name.includes("~")) {
+    const [intfRaw, compRaw] = name.split("~");
+    const intf = intfRaw.toLowerCase();
+    const comp = safeIdent(compRaw.toLowerCase());
+    const own = ctx.model.interfaces.includes(intf) || ctx.isOwnMethod(name.toLowerCase()) || ctx.isOwnMethod(comp);
+    if (callFollows) {
+      const close = matchGroup(toks, j);
+      const args = txArgs(toks.slice(j + 1, close), ctx, comp);
+      str = own ? `this.${comp}(${args})` : (ctx.requires?.add(intf), `${intf}.${comp}(${args})`);
+      j = close + 1;
+    } else if (!own && /^z2ui5_/.test(intf)) {
+      ctx.requires?.add(intf);
+      str = `${intf}.${comp}`;
+    } else {
+      str = `this.${comp}`;
+    }
+    const atoms0 = [{ kind: "expr", str }];
+    j = chainSuffix(toks, j, atoms0, ctx);
+    return { str: atoms0.map((a) => a.str).join(""), next: j };
+  }
 
   if (up === "ME") {
     str = "this";
@@ -640,6 +725,9 @@ function parseIdentChain(toks, i, ctx) {
     const close = matchGroup(toks, j);
     str = `this.${lower}(${txArgs(toks.slice(j + 1, close), ctx, lower)})`;
     j = close + 1;
+  } else if (ctx.rowVar && /^[a-z_]/i.test(name)) {
+    // WHERE context: unresolved bare names are components of the loop row
+    str = `${ctx.rowVar}.${lower}`;
   } else {
     str = lower === name ? name : lower;
   }
@@ -655,7 +743,28 @@ function chainSuffix(toks, j, atoms, ctx, upper = false) {
     const t = toks[j];
     if (!t) break;
     if (isInstArrow(t) || isStatArrow(t)) {
-      const meth = toks[j + 1].str.toLowerCase();
+      // obj->* dereference — JS references are transparent
+      if (toks[j + 1]?.str === "*") {
+        j += 2;
+        continue;
+      }
+      // dynamic call: obj->(`METH`) — JS methods are lowercase
+      if (toks[j + 1] && isParenL(toks[j + 1])) {
+        const close = matchGroup(toks, j + 1);
+        const nameExpr = txExpr(toks.slice(j + 2, close), ctx);
+        j = close + 1;
+        let args = "";
+        if (toks[j] && isParenL(toks[j])) {
+          const c2 = matchGroup(toks, j);
+          args = txArgs(toks.slice(j + 1, c2), ctx, "dynamic");
+          j = c2 + 1;
+        }
+        ctx.todos?.push(`dynamic method call approximated: ->(${nameExpr})`);
+        atoms[atoms.length - 1].str += `[String(${nameExpr}).toLowerCase()](${args})`;
+        continue;
+      }
+      // interface prefix on chained calls: obj->intf~meth( ) → obj.meth( )
+      const meth = safeIdent(toks[j + 1].str.toLowerCase().replace(/^.*~/, ""));
       j += 2;
       if (toks[j] && isParenL(toks[j])) {
         const close = matchGroup(toks, j);
@@ -696,7 +805,7 @@ function chainSuffix(toks, j, atoms, ctx, upper = false) {
 function txTableIndex(base, inner, ctx) {
   const named = namedArgsOf(inner, ctx);
   if (named) {
-    const conds = [...named.entries()].map(([k, v]) => `row.${k} === ${v}`).join(" && ");
+    const conds = [...named.entries()].map(([k, v]) => `row.${k} === ${renderNamedVal(v)}`).join(" && ");
     return `${base}.find((row) => ${conds})`;
   }
   return `${base}[(${txExpr(inner, ctx)}) - 1]`;
@@ -711,15 +820,15 @@ function txTableExpr(inner, ctx, verb) {
   const close = matchGroup(inner, bi);
   const named = namedArgsOf(inner.slice(bi + 1, close), ctx);
   if (named) {
-    const conds = [...named.entries()].map(([k, v]) => `row.${k} === ${v}`).join(" && ");
+    const conds = [...named.entries()].map(([k, v]) => `row.${k} === ${renderNamedVal(v)}`).join(" && ");
     return `${base}.${verb}((row) => ${conds})`;
   }
   return `${base}.length >= (${txExpr(inner.slice(bi + 1, close), ctx)})`;
 }
 
 /**
- * If the group consists of `name = expr` pairs at top level, return
- * Map(name → rendered expr); otherwise null.
+ * If the group consists of `name = expr` / `name-comp = expr` pairs at top
+ * level, return Map(name → rendered expr | nested Map); otherwise null.
  */
 function namedArgsOf(groupToks, ctx) {
   // strip leading EXPORTING
@@ -727,51 +836,93 @@ function namedArgsOf(groupToks, ctx) {
   if (toks.length && KW(toks[0].str) === "EXPORTING") toks = toks.slice(1);
   if (toks.some((t) => ["IMPORTING", "CHANGING", "RECEIVING", "EXCEPTIONS"].includes(KW(t.str)) && isId(t))) return null; // handled by caller as TODO
   if (toks.length < 3) return null;
-  if (!(isId(toks[0]) && toks[1]?.str === "=")) return null;
+
+  // a key is id (-id)* directly followed by "=" — returns [path, nextIdx]
+  const keyAt = (k) => {
+    if (!isId(toks[k]) || /^[^a-z_!]/i.test(toks[k].str)) return null;
+    const path = [paramName(toks[k].str)];
+    k++;
+    while (isDash(toks[k] ?? { type: "" }) && isId(toks[k + 1] ?? { type: "" })) {
+      path.push(toks[k + 1].str.toLowerCase());
+      k += 2;
+    }
+    if (toks[k]?.str !== "=") return null;
+    return [path, k + 1];
+  };
+
+  if (!keyAt(0)) return null;
 
   const named = new Map();
+  const setPath = (path, val) => {
+    let m = named;
+    for (let d = 0; d < path.length - 1; d++) {
+      if (!(m.get(path[d]) instanceof Map)) m.set(path[d], new Map());
+      m = m.get(path[d]);
+    }
+    m.set(path[path.length - 1], val);
+  };
+
   let i = 0;
   while (i < toks.length) {
-    if (!(isId(toks[i]) && toks[i + 1]?.str === "=")) return null;
-    const key = toks[i].str.toLowerCase();
-    i += 2;
+    const key = keyAt(i);
+    if (!key) return null;
+    const [path, exprStart] = key;
+    i = exprStart;
     const exprToks = [];
     let depth = 0;
     while (i < toks.length) {
       const t = toks[i];
       depth += depthDelta(t);
-      if (depth === 0 && isId(t) && toks[i + 1]?.str === "=" && exprToks.length > 0) break;
+      if (depth === 0 && exprToks.length > 0 && keyAt(i)) break;
       exprToks.push(t);
       i++;
-      if (depth === 0 && exprToks.length === 1 && (isStr(t) || isTmpl(t))) {
-        // literal value — allow next pair
-      }
     }
-    named.set(key, txExpr(exprToks, ctx));
+    setPath(path, txExpr(exprToks, ctx));
   }
   return named.size ? named : null;
+}
+
+/** render a named-args value that may be a nested Map */
+function renderNamedVal(v) {
+  if (!(v instanceof Map)) return v;
+  return `{ ${[...v.entries()].map(([k, x]) => `${k}: ${renderNamedVal(x)}`).join(", ")} }`;
 }
 
 /** render call arguments: named → object literal, positional → expression */
 function txArgs(groupToks, ctx, methodName) {
   if (groupToks.length === 0) return "";
-  if (groupToks.some((t) => isId(t) && ["IMPORTING", "CHANGING", "RECEIVING", "EXCEPTIONS"].includes(KW(t.str)))) {
-    ctx.todos?.push(`call with IMPORTING/CHANGING params: ${methodName}( ... ) — rewrite manually`);
-    return `/* TODO(abap2js): out-params */ ${groupToks.map((t) => t.str).join(" ")}`;
+  if (groupToks.some((t) => isId(t) && ["IMPORTING", "RECEIVING", "EXCEPTIONS"].includes(KW(t.str)))) {
+    // true out-params need a rewritten callee — keep the call parseable
+    ctx.todos?.push(`call with IMPORTING/RECEIVING/EXCEPTIONS params: ${methodName}( ... ) — rewrite manually`);
+    return `undefined /* TODO(abap2js): out-params ${commentSafe(groupToks.map((t) => t.str).join(" "))} */`;
+  }
+  if (groupToks.some((t) => isId(t) && KW(t.str) === "CHANGING")) {
+    // EXPORTING/CHANGING sections merge into one options object — the callee
+    // signature includes CHANGING params, JS object refs mutate in place
+    const merged = groupToks.filter((t) => !(isId(t) && ["EXPORTING", "CHANGING"].includes(KW(t.str))));
+    const named = namedArgsOf(merged, ctx);
+    if (named) return renderNamedArgs(named);
+    ctx.todos?.push(`CHANGING call not mappable: ${methodName}( ... ) — rewrite manually`);
+    return `undefined /* TODO(abap2js): out-params ${commentSafe(groupToks.map((t) => t.str).join(" "))} */`;
   }
   if (BUILTIN_PREDICATES.has(methodName)) return txCond(groupToks, ctx);
   const named = namedArgsOf(groupToks, ctx);
-  if (named) {
-    return `{ ${[...named.entries()].map(([k, v]) => (k === v ? k : `${k}: ${v}`)).join(", ")} }`;
-  }
+  if (named) return renderNamedArgs(named);
   return txCond(groupToks, ctx);
 }
 
-/** VALUE/COND/NEW/... constructor expressions */
-function txConstructor(kind, typeTok, inner, ctx) {
-  const typeName = typeTok.str === "#" ? null : typeTok.str.toLowerCase();
+function renderNamedArgs(named) {
+  return `{ ${[...named.entries()].map(([k, v]) => (k === v && !JS_RESERVED.has(k) ? k : `${k}: ${renderNamedVal(v)}`)).join(", ")} }`;
+}
+
+/** VALUE/COND/NEW/... constructor expressions — typeName is null for `#` */
+function txConstructor(kind, typeName, inner, ctx) {
   switch (kind) {
     case "NEW": {
+      if (typeName && /[~=>]/.test(typeName)) {
+        ctx.todos?.push(`NEW with nested type ${typeName} — resolve manually`);
+        return `null /* TODO(abap2js): NEW ${commentSafe(typeName)} */`;
+      }
       if (typeName) {
         if (/^z2ui5_/.test(typeName)) ctx.requires?.add(typeName);
         return `new ${typeName}(${txArgs(inner, ctx, typeName)})`;
@@ -791,26 +942,92 @@ function txConstructor(kind, typeTok, inner, ctx) {
     }
     case "VALUE": {
       if (inner.length === 0) return "{}";
-      if (inner.some((t) => isId(t) && ["FOR", "BASE", "LINES"].includes(KW(t.str)))) {
-        ctx.todos?.push(`VALUE #( FOR/BASE ... ) not supported — rewrite manually`);
+      // VALUE #( BASE tab ( row ) ... ) → [...tab, row, ...] /
+      // VALUE #( BASE struct comp = x ) → { ...struct, comp: x }
+      if (KW(inner[0]?.str) === "BASE" && inner[1] && !isParenL(inner[1])) {
+        let k = 1;
+        let depth = 0;
+        while (k < inner.length && !(depth === 0 && (isRowParen(inner[k]) || looksLikeKey(inner, k)))) {
+          depth += depthDelta(inner[k]);
+          k++;
+        }
+        const baseExpr = txExpr(inner.slice(1, k), ctx);
+        const rest = inner.slice(k);
+        if (!rest.length) return `(${baseExpr})`;
+        const restRendered = txConstructor("VALUE", null, rest, ctx);
+        if (restRendered.startsWith("[")) return `[...(${baseExpr} ?? []),${restRendered.slice(1)}`;
+        if (restRendered.startsWith("{")) return `{ ...${baseExpr},${restRendered.slice(1)}`;
+        return restRendered;
+      }
+      // table-expression fallbacks: VALUE #( tab[ ... ] OPTIONAL / DEFAULT x )
+      const optIdx = findTopWord(inner, "OPTIONAL");
+      if (optIdx > 0 && optIdx === inner.length - 1) {
+        return `(() => { try { return ${txExpr(inner.slice(0, optIdx), ctx)} ?? null; } catch { return null; } })()`;
+      }
+      const defIdx = findTopWord(inner, "DEFAULT");
+      if (defIdx > 0 && inner[defIdx + 1]?.str !== "=") {
+        const dflt = txExpr(inner.slice(defIdx + 1), ctx);
+        return `(() => { try { return ${txExpr(inner.slice(0, defIdx), ctx)} ?? ${dflt}; } catch { return ${dflt}; } })()`;
+      }
+      if (inner.some((t, k) => isId(t) && (KW(t.str) === "FOR" || (KW(t.str) === "BASE" && isParenL(inner[k + 1] ?? { type: "" })) || (KW(t.str) === "LINES" && KW(inner[k + 1]?.str ?? "") === "OF")))) {
+        ctx.todos?.push(`VALUE #( FOR/BASE/LINES OF ... ) not supported — rewrite manually`);
         return `/* TODO(abap2js): VALUE FOR/BASE */ []`;
       }
-      // table rows: ( ... ) ( ... )
-      if (isParenL(inner[0])) {
+      // table rows — a standalone top-level paren group (not a call, not a
+      // pair value) is a row; `comp = x` pairs before rows set defaults:
+      // VALUE #( a = 1 ( b = 2 ) ( b = 3 ) ) → [{a:1,b:2}, {a:1,b:3}]
+      let hasRow = false;
+      {
+        let d = 0;
+        let prevEq = false;
+        for (const t of inner) {
+          if (d === 0 && isRowParen(t) && !prevEq) {
+            hasRow = true;
+            break;
+          }
+          if (d === 0) prevEq = t.str === "=";
+          d += depthDelta(t);
+        }
+      }
+      if (hasRow) {
         const rows = [];
+        let defaults = new Map();
         let i = 0;
         while (i < inner.length) {
-          if (!isParenL(inner[i])) break;
-          const close = matchGroup(inner, i);
-          const rowToks = inner.slice(i + 1, close);
-          const named = namedArgsOf(rowToks, ctx);
-          rows.push(named ? `{ ${[...named.entries()].map(([k, v]) => `${k}: ${v}`).join(", ")} }` : txExpr(rowToks, ctx));
-          i = close + 1;
+          if (isParenL(inner[i])) {
+            const close = matchGroup(inner, i);
+            const rowToks = inner.slice(i + 1, close);
+            const named = rowToks.length ? namedArgsOf(rowToks, ctx) ?? null : new Map();
+            if (named) {
+              rows.push(renderNamedVal(new Map([...defaults, ...named])));
+            } else {
+              rows.push(txExpr(rowToks, ctx));
+            }
+            i = close + 1;
+            continue;
+          }
+          // consume one `key = value` default pair (value may hold groups)
+          let j = i;
+          while (j < inner.length && inner[j].str !== "=") j++;
+          j++; // first value token
+          let depth = 0;
+          let consumed = 0;
+          while (j < inner.length) {
+            const t = inner[j];
+            if (depth === 0 && consumed > 0 && (isRowParen(t) || (isId(t) && !isOperatorWord(KW(t.str))) && looksLikeKey(inner, j))) break;
+            depth += depthDelta(t);
+            consumed++;
+            j++;
+          }
+          const named = namedArgsOf(inner.slice(i, j), ctx);
+          if (!named) return `(${txExpr(inner, ctx)})`;
+          defaults = new Map([...defaults, ...named]);
+          i = j;
         }
         return `[${rows.join(", ")}]`;
       }
       const named = namedArgsOf(inner, ctx);
-      if (named) return `{ ${[...named.entries()].map(([k, v]) => `${k}: ${v}`).join(", ")} }`;
+      if (named) return renderNamedVal(named);
       return `(${txExpr(inner, ctx)})`;
     }
     case "COND":
@@ -868,6 +1085,19 @@ function txConstructor(kind, typeTok, inner, ctx) {
       ctx.todos?.push(`${kind} #( ) not supported`);
       return `/* TODO(abap2js): ${kind} */ null`;
   }
+}
+
+/** standalone paren (whitespace before) — a VALUE row, not a call group */
+function isRowParen(t) {
+  return t.type === "WParenLeft" || t.type === "WParenLeftW";
+}
+
+/** id [(- id)*] directly followed by "=" at toks[k] */
+function looksLikeKey(toks, k) {
+  if (!isId(toks[k])) return false;
+  k++;
+  while (isDash(toks[k] ?? { type: "" }) && isId(toks[k + 1] ?? { type: "" })) k += 2;
+  return toks[k]?.str === "=";
 }
 
 function topIndexOfWord(toks, word, from = 0) {
@@ -961,9 +1191,20 @@ function joinAtoms(atoms, ctx) {
         out.push("||");
         break;
       case "NOT": {
-        // NOT <expr>
+        // NOT <expr> <compare-op> ... — the comparison binds tighter than NOT
+        // postfix form: <expr> NOT IN ... — lhs is already on the out stack
         const operand = atoms[i + 1];
-        if (operand?.kind === "expr") {
+        const after = atoms[i + 2];
+        if (operand?.kind === "op" && COMPARE_WORDS.has(operand.up)) {
+          const lhs = out.pop() ?? "undefined";
+          const r = renderCompare(operand.up, lhs, atoms, i + 1, ctx);
+          out.push(`!(${r.str})`);
+          i = r.last;
+        } else if (operand?.kind === "expr" && after?.kind === "op" && COMPARE_WORDS.has(after.up)) {
+          const r = renderCompare(after.up, operand.str, atoms, i + 2, ctx);
+          out.push(`!(${r.str})`);
+          i = r.last;
+        } else if (operand?.kind === "expr") {
           out.push(`!${wrap(operand.str)}`);
           i++;
         } else out.push("!");
@@ -973,19 +1214,30 @@ function joinAtoms(atoms, ctx) {
       case "&":
         out.push("+");
         break;
-      case "CS": {
-        const lhs = out.pop();
+      case "MOD":
+        out.push("%");
+        break;
+      case "DIV": {
+        const lhs = out.pop() ?? "0";
         const rhs = atoms[i + 1];
-        out.push(`${wrap(lhs)}.toLowerCase().includes(String(${rhs.str}).toLowerCase())`);
+        out.push(`Math.trunc(${wrap(lhs)} / ${wrap(rhs?.str ?? "1")})`);
         i++;
         break;
       }
-      case "CP": {
-        const lhs = out.pop();
-        const rhs = atoms[i + 1];
-        ctx.todos?.push(`CP pattern match approximated with includes()`);
-        out.push(`${wrap(lhs)}.includes(String(${rhs.str}).replace(/\\*/g, ""))`);
-        i++;
+      case "CS":
+      case "CP":
+      case "NS":
+      case "NP":
+      case "CO":
+      case "CN":
+      case "CA":
+      case "NA":
+      case "IN":
+      case "BETWEEN": {
+        const lhs = out.pop() ?? "undefined";
+        const r = renderCompare(up, lhs, atoms, i, ctx);
+        out.push(r.str);
+        i = r.last;
         break;
       }
       default:
@@ -993,6 +1245,60 @@ function joinAtoms(atoms, ctx) {
     }
   }
   return out.join(" ").replace(/\s+/g, " ").trim();
+}
+
+const COMPARE_WORDS = new Set(["CS", "CP", "NS", "NP", "CO", "CN", "CA", "NA", "IN", "BETWEEN"]);
+
+/**
+ * ABAP string/range comparison operators — lhs is already rendered, the
+ * operator sits at atoms[opIdx]. Returns the rendered condition and the
+ * index of the last consumed atom.
+ */
+function renderCompare(op, lhs, atoms, opIdx, ctx) {
+  const rhsAtom = atoms[opIdx + 1];
+  if (!rhsAtom || rhsAtom.kind !== "expr") {
+    ctx.todos?.push(`${op} comparison without operand — rewrite manually`);
+    return { str: `false /* TODO(abap2js): ${op} */`, last: opIdx };
+  }
+  const rhs = rhsAtom.str;
+  switch (op) {
+    case "CS":
+      return { str: `String(${lhs}).toLowerCase().includes(String(${rhs}).toLowerCase())`, last: opIdx + 1 };
+    case "NS":
+      return { str: `!String(${lhs}).toLowerCase().includes(String(${rhs}).toLowerCase())`, last: opIdx + 1 };
+    case "CP":
+      ctx.todos?.push(`CP pattern match approximated with includes()`);
+      return { str: `String(${lhs}).includes(String(${rhs}).replace(/\\*/g, ""))`, last: opIdx + 1 };
+    case "NP":
+      ctx.todos?.push(`NP pattern match approximated with includes()`);
+      return { str: `!String(${lhs}).includes(String(${rhs}).replace(/\\*/g, ""))`, last: opIdx + 1 };
+    case "CO":
+      return { str: `[...String(${lhs})].every(($c) => String(${rhs}).includes($c))`, last: opIdx + 1 };
+    case "CN":
+      return { str: `![...String(${lhs})].every(($c) => String(${rhs}).includes($c))`, last: opIdx + 1 };
+    case "CA":
+      return { str: `[...String(${lhs})].some(($c) => String(${rhs}).includes($c))`, last: opIdx + 1 };
+    case "NA":
+      return { str: `![...String(${lhs})].some(($c) => String(${rhs}).includes($c))`, last: opIdx + 1 };
+    case "IN":
+      // range table check (sign/option approximated: I/EQ, BT, CP, NE)
+      ctx.todos?.push(`IN range-table check approximated (sign E ignored)`);
+      return {
+        str: `(($v, $r) => !$r || !$r.length || $r.some(($x) => ($x.option === \`BT\` ? $v >= $x.low && $v <= $x.high : $x.option === \`NE\` ? $v !== $x.low : $x.option === \`CP\` ? String($v).includes(String($x.low).replace(/\\*/g, "")) : $v === $x.low)))(${lhs}, ${rhs})`,
+        last: opIdx + 1,
+      };
+    case "BETWEEN": {
+      const andAtom = atoms[opIdx + 2];
+      const highAtom = atoms[opIdx + 3];
+      if (!andAtom || andAtom.up !== "AND" || !highAtom || highAtom.kind !== "expr") {
+        ctx.todos?.push(`BETWEEN without AND bound — rewrite manually`);
+        return { str: `false /* TODO(abap2js): BETWEEN */`, last: opIdx + 1 };
+      }
+      return { str: `${wrap(lhs)} >= ${rhs} && ${wrap(lhs)} <= ${highAtom.str}`, last: opIdx + 3 };
+    }
+    default:
+      return { str: `false /* TODO(abap2js): ${op} */`, last: opIdx };
+  }
 }
 
 function wrap(s) {
@@ -1047,9 +1353,17 @@ function transpileClass(source, filename) {
   const header = [];
   for (const req of [...requires].sort()) {
     if (req === model.name) continue;
+    if (!/^[a-z_][a-z0-9_]*$/.test(req)) {
+      todos.push(`unresolvable reference skipped: ${req}`);
+      continue;
+    }
     const p = requirePathFor(req);
     if (p) header.push(`const ${req} = require("${p}");`);
-    else {
+    else if (req === base) {
+      // an unresolved superclass would throw at load time — stub it
+      header.push(`const ${req} = class {}; // TODO(abap2js): unresolved superclass — replace stub manually`);
+      todos.push(`unresolved superclass stubbed: ${req}`);
+    } else {
       header.push(`// TODO(abap2js): unresolved reference ${req} — add require manually`);
       todos.push(`unresolved class reference: ${req}`);
     }
@@ -1087,8 +1401,10 @@ function emitMethod(model, body, lines, requires, todos) {
   } else if (def.importing.length) {
     const params = def.importing
       .map((p) => {
-        ctx.locals.add(p.name);
-        return p.defaultToks ? `${p.name} = ${txExpr(p.defaultToks, ctx)}` : p.name;
+        const local = safeIdent(p.name);
+        ctx.locals.add(local);
+        const bind = local === p.name ? p.name : `${p.name}: ${local}`;
+        return p.defaultToks ? `${bind} = ${txExpr(p.defaultToks, ctx)}` : bind;
       })
       .join(", ");
     sig = `${def.isStatic ? "static " : ""}${plainName}({ ${params} } = {})`;
@@ -1097,12 +1413,35 @@ function emitMethod(model, body, lines, requires, todos) {
   }
   lines.push(`  ${sig} {`);
 
-  const st = { indent: 2, caseStack: [], loopStack: [] };
+  const st = { indent: 2, caseStack: [], loopStack: [], tabixSeq: 0, caughtSeq: 0 };
+
+  // annotate multi-CATCH try blocks — JS allows only one catch clause, so
+  // additional CATCHes become an instanceof if/else chain
+  {
+    const tryStack = [];
+    for (const s of body.statements) {
+      if (s.type === "Try") tryStack.push({ catches: 0 });
+      else if (s.type === "Catch" && tryStack.length) {
+        const t = tryStack[tryStack.length - 1];
+        t.catches++;
+        s._catch = { ordinal: t.catches, tryInfo: t };
+      } else if (s.type === "EndTry" && tryStack.length) {
+        s._endTry = tryStack.pop();
+      }
+    }
+  }
   const push = (s) => lines.push("  ".repeat(st.indent) + s);
 
   if (def.returning) {
     ctx.locals.add(def.returning.name);
     push(`let ${def.returning.name} = ${typeDefault(def.returning.typeTokens)};`);
+  }
+
+  // one declaration per method — LOOPs reset/save/restore it (nested loops
+  // in the same block must not redeclare)
+  if (body.statements.some((x) => x.type === "Loop")) {
+    ctx.locals.add("sy_tabix");
+    push(`let sy_tabix = 0;`);
   }
 
   for (const s of body.statements) {
@@ -1156,12 +1495,19 @@ function emitStatement(s, ctx, st, push, assignedTwice, methodDef) {
       if (decl) {
         push(`${assignedTwice.has(decl) ? "let" : "const"} ${decl} = ${rhs};`);
       } else {
+        // offset/length writes (lv_x+off(len) = ...) have no JS counterpart
+        if (toks.slice(i, eq).some((t) => t.str === "+")) return todo();
         const lhs = txExpr(toks.slice(i, eq), ctx);
         push(`${lhs} = ${rhs};`);
       }
       break;
     }
     case "Call": {
+      // CALL METHOD long form / dynamic invocation cannot be mapped inline
+      if (KW(toks[0].str) === "CALL") return todo();
+      // out-params on a plain call statement need a rewritten callee —
+      // EXPORTING/CHANGING-only calls go through txArgs (merged object)
+      if (toks.some((t) => isId(t) && ["IMPORTING", "RECEIVING", "EXCEPTIONS"].includes(KW(t.str)))) return todo();
       push(`${txExpr(toks, ctx)};`);
       break;
     }
@@ -1229,15 +1575,21 @@ function emitStatement(s, ctx, st, push, assignedTwice, methodDef) {
       const tabToks = toks.slice(atIdx + 1, tabEnd.length ? Math.min(...tabEnd) : toks.length);
       const tab = txExpr(tabToks, ctx);
       let rowVar = "row";
-      if (intoIdx > 0 && toks[intoIdx + 2] && isParenL(toks[intoIdx + 2])) rowVar = safeIdent(toks[intoIdx + 3].str.toLowerCase());
-      else if (intoIdx > 0) rowVar = safeIdent(toks[intoIdx + 1].str.toLowerCase());
+      if (intoIdx > 0 && toks[intoIdx + 2] && isParenL(toks[intoIdx + 2])) rowVar = safeIdent(toks[intoIdx + 3].str.replace(/[<>]/g, "").toLowerCase());
+      else if (intoIdx > 0) rowVar = safeIdent(toks[intoIdx + 1].str.replace(/[<>]/g, "").toLowerCase());
       else if (assignIdx > 0) {
-        const fs = toks[assignIdx + 1 + 2]?.str ?? "fs";
+        // ASSIGNING <fs> (pre-declared) or ASSIGNING FIELD-SYMBOL(<fs>)
+        const fs = /^<\w+>$/.test(toks[assignIdx + 1]?.str ?? "") ? toks[assignIdx + 1].str : (toks[assignIdx + 1 + 2]?.str ?? "fs");
         rowVar = safeIdent(fs.replace(/[<>]/g, ""));
       }
       ctx.locals.add(rowVar);
-      ctx.locals.add("sy_tabix");
-      push(`let sy_tabix = 0;`);
+      const loopDepth = st.loopStack.filter((l) => l && l.restoreTabix !== undefined).length;
+      let restoreTabix = null;
+      if (loopDepth > 0) {
+        restoreTabix = `_sy_tabix_${++st.tabixSeq}`;
+        push(`const ${restoreTabix} = sy_tabix;`);
+      }
+      push(`sy_tabix = 0;`);
       push(`for (const ${rowVar} of ${tab}) {`);
       st.indent++;
       push(`sy_tabix++;`);
@@ -1245,14 +1597,16 @@ function emitStatement(s, ctx, st, push, assignedTwice, methodDef) {
         const cond = txWhere(toks.slice(whereIdx + 1), rowVar, ctx);
         push(`if (!(${cond})) continue;`);
       }
-      st.loopStack.push("for");
+      st.loopStack.push({ restoreTabix });
       break;
     }
-    case "EndLoop":
+    case "EndLoop": {
       st.indent--;
       push(`}`);
-      st.loopStack.pop();
+      const closed = st.loopStack.pop();
+      if (closed?.restoreTabix) push(`sy_tabix = ${closed.restoreTabix};`);
       break;
+    }
     case "Do": {
       if (toks.length > 1 && KW(toks[toks.length - 1].str) === "TIMES") {
         ctx.locals.add("sy_index");
@@ -1304,26 +1658,86 @@ function emitStatement(s, ctx, st, push, assignedTwice, methodDef) {
     }
     case "Append": {
       // APPEND [INITIAL LINE TO t | LINES OF t1 TO t2 | expr TO t]
+      //        [REFERENCE INTO DATA(x) | ASSIGNING FIELD-SYMBOL(<x>)]
+      const refIdx = findTopWord(toks, "REFERENCE");
+      const asgIdx = findTopWord(toks, "ASSIGNING");
+      const end = Math.min(...[refIdx, asgIdx, toks.length].filter((x) => x > 0));
+      let refVar = null;
+      if (refIdx > 0 || asgIdx > 0) {
+        // the target name sits inside the DATA( x ) / FIELD-SYMBOL( <x> ) group
+        for (let k = end; k < toks.length; k++) {
+          if (isParenL(toks[k])) {
+            refVar = safeIdent(toks[k + 1].str.replace(/[<>]/g, "").toLowerCase());
+            break;
+          }
+        }
+        if (refVar) ctx.locals.add(refVar);
+      }
       const up1 = KW(toks[1].str);
       if (up1 === "INITIAL") {
-        const tab = txExpr(toks.slice(4), ctx);
-        push(`${tab}.push({});`);
+        const tab = txExpr(toks.slice(4, end), ctx);
+        if (refVar) {
+          push(`const ${refVar} = {};`);
+          push(`${tab}.push(${refVar});`);
+        } else {
+          push(`${tab}.push({});`);
+        }
       } else if (up1 === "LINES") {
         const toIdx = toks.findIndex((t, k) => k > 2 && KW(t.str) === "TO");
-        push(`${txExpr(toks.slice(toIdx + 1), ctx)}.push(...${txExpr(toks.slice(3, toIdx), ctx)});`);
+        push(`${txExpr(toks.slice(toIdx + 1, end), ctx)}.push(...${txExpr(toks.slice(3, toIdx), ctx)});`);
       } else {
         const toIdx = findTopWord(toks, "TO");
-        push(`${txExpr(toks.slice(toIdx + 1), ctx)}.push(${txExpr(toks.slice(1, toIdx), ctx)});`);
+        if (toIdx < 0) return todo();
+        const tab = txExpr(toks.slice(toIdx + 1, end), ctx);
+        const val = txExpr(toks.slice(1, toIdx), ctx);
+        if (refVar) {
+          push(`const ${refVar} = ${val};`);
+          push(`${tab}.push(${refVar});`);
+        } else {
+          push(`${tab}.push(${val});`);
+        }
       }
       break;
     }
     case "InsertInternal": {
-      // INSERT expr INTO TABLE tab.
+      // INSERT [LINES OF] expr INTO [TABLE] tab [INDEX n]
+      //        [REFERENCE INTO [DATA(]x[)] | ASSIGNING FIELD-SYMBOL(<x>)].
       const intoIdx = findTopWord(toks, "INTO");
       if (intoIdx < 0) return todo();
+      const idxIdx = findTopWord(toks, "INDEX");
+      const refIdx = findTopWord(toks, "REFERENCE");
+      const asgIdx = findTopWord(toks, "ASSIGNING");
+      const end = Math.min(...[idxIdx, refIdx, asgIdx, toks.length].filter((x) => x > 0));
       let tabStart = intoIdx + 1;
       if (KW(toks[tabStart].str) === "TABLE") tabStart++;
-      push(`${txExpr(toks.slice(tabStart), ctx)}.push(${txExpr(toks.slice(1, intoIdx), ctx)});`);
+      const tab = txExpr(toks.slice(tabStart, end), ctx);
+      const isLines = KW(toks[1].str) === "LINES" && KW(toks[2].str) === "OF";
+      const isInitial = KW(toks[1].str) === "INITIAL" && KW(toks[2].str) === "LINE";
+      let val = isInitial ? "{}" : txExpr(toks.slice(isLines ? 3 : 1, intoIdx), ctx);
+      const spread = isLines ? "..." : "";
+      // capture the inserted line into a reference/field symbol
+      if ((refIdx > 0 || asgIdx > 0) && !isLines) {
+        const from = refIdx > 0 ? refIdx + 2 : asgIdx + 1;
+        const target = toks.slice(from);
+        const parenAt = target.findIndex(isParenL);
+        if (parenAt >= 0) {
+          // DATA(x) / FINAL(x) / FIELD-SYMBOL(<x>) inline declaration
+          const name = safeIdent(target[parenAt + 1].str.replace(/[<>]/g, "").toLowerCase());
+          ctx.locals.add(name);
+          push(`const ${name} = ${val};`);
+          val = name;
+        } else if (target.length) {
+          const rendered = txExpr(target, ctx);
+          push(`${rendered} = ${val};`);
+          val = rendered;
+        }
+      }
+      if (idxIdx > 0) {
+        const idxEnd = [refIdx, asgIdx].filter((x) => x > idxIdx).sort((a, b) => a - b)[0] ?? toks.length;
+        push(`${tab}.splice((${txExpr(toks.slice(idxIdx + 1, idxEnd), ctx)}) - 1, 0, ${spread}${val});`);
+      } else {
+        push(`${tab}.push(${spread}${val});`);
+      }
       break;
     }
     case "DeleteInternal": {
@@ -1336,14 +1750,31 @@ function emitStatement(s, ctx, st, push, assignedTwice, methodDef) {
       break;
     }
     case "Sort": {
-      // SORT tab BY comp [DESCENDING].
+      // SORT tab [BY comp ... [DESCENDING] | BY (dynamic)].
       const byIdx = findTopWord(toks, "BY");
-      if (byIdx < 0) return todo();
+      if (byIdx < 0) {
+        push(`${txExpr(toks.slice(1), ctx)}.sort();`);
+        break;
+      }
       const tab = txExpr(toks.slice(1, byIdx), ctx);
       const rest = toks.slice(byIdx + 1);
       const desc = rest.some((t) => KW(t.str) === "DESCENDING");
-      const comp = rest[0].str.toLowerCase();
-      push(`${tab}.sort((a, b) => (a.${comp} > b.${comp} ? 1 : a.${comp} < b.${comp} ? -1 : 0)${desc ? " * -1" : ""});`);
+      if (isParenL(rest[0])) {
+        // dynamic component name — ABAP names are uppercase, JS keys lowercase
+        const close = matchGroup(rest, 0);
+        const nameExpr = txExpr(rest.slice(1, close), ctx);
+        push(`{ const _f = String(${nameExpr}).toLowerCase(); ${tab}.sort((a, b) => (a[_f] > b[_f] ? 1 : a[_f] < b[_f] ? -1 : 0)${desc ? " * -1" : ""}); }`);
+        break;
+      }
+      const comps = [];
+      for (const t of rest) {
+        const u = KW(t.str);
+        if (u === "DESCENDING" || u === "ASCENDING" || u === "AS" || u === "TEXT") continue;
+        if (isId(t)) comps.push(t.str.toLowerCase());
+      }
+      if (!comps.length) return todo();
+      const cmp = comps.map((c) => `(a.${c} > b.${c} ? 1 : a.${c} < b.${c} ? -1 : 0)`).join(" || ");
+      push(`${tab}.sort((a, b) => (${cmp})${desc ? " * -1" : ""});`);
       break;
     }
     case "Concatenate": {
@@ -1408,22 +1839,68 @@ function emitStatement(s, ctx, st, push, assignedTwice, methodDef) {
       break;
     case "Catch": {
       // CATCH cx_a cx_b [INTO DATA(x)].
-      st.indent--;
       const intoIdx = findTopWord(toks, "INTO");
-      let varName = "error";
+      let varName = null;
       if (intoIdx > 0) {
         if (toks[intoIdx + 2] && isParenL(toks[intoIdx + 2])) varName = safeIdent(toks[intoIdx + 3].str.toLowerCase());
         else varName = safeIdent(toks[intoIdx + 1].str.toLowerCase());
+        ctx.locals.add(varName);
       }
-      ctx.locals.add(varName);
-      push(`} catch (${varName}) {`);
-      st.indent++;
+      const info = s._catch;
+      if (!info || info.tryInfo.catches <= 1) {
+        st.indent--;
+        push(`} catch (${varName ?? "error"}) {`);
+        st.indent++;
+        if (!varName) ctx.locals.add("error");
+        break;
+      }
+      // multi-CATCH: dispatch on the exception class
+      const tryInfo = info.tryInfo;
+      const classToks = toks.slice(1, intoIdx > 0 ? intoIdx : undefined).filter((t) => isId(t) && !["BEFORE", "UNWIND"].includes(KW(t.str)));
+      const caught = tryInfo.caughtVar ?? (tryInfo.caughtVar = `_caught${++st.caughtSeq}`);
+      const cond = classToks
+        .map((t) => {
+          const cls = t.str.toLowerCase();
+          if (["cx_root", "cx_static_check", "cx_dynamic_check", "cx_no_check"].includes(cls)) return "true";
+          if (/^z2ui5_/.test(cls)) {
+            ctx.requires.add(cls);
+            return `${caught} instanceof ${cls}`;
+          }
+          // unknown platform class — no JS counterpart, never matches
+          return `${caught}?.constructor?.name === ${JSON.stringify(cls)}`;
+        })
+        .join(" || ") || "true";
+      if (info.ordinal === 1) {
+        st.indent--;
+        push(`} catch (${caught}) {`);
+        st.indent++;
+        push(`if (${cond}) {`);
+        st.indent++;
+      } else {
+        st.indent--;
+        push(`} else if (${cond}) {`);
+        st.indent++;
+      }
+      if (varName) push(`const ${varName} = ${caught};`);
       break;
     }
-    case "EndTry":
-      st.indent--;
-      push(`}`);
+    case "EndTry": {
+      const t = s._endTry;
+      if (t && t.catches > 1) {
+        st.indent--;
+        push(`} else {`);
+        st.indent++;
+        push(`throw ${t.caughtVar};`);
+        st.indent--;
+        push(`}`);
+        st.indent--;
+        push(`}`);
+      } else {
+        st.indent--;
+        push(`}`);
+      }
       break;
+    }
     case "Raise": {
       // RAISE EXCEPTION TYPE cx EXPORTING a = b. / RAISE EXCEPTION NEW cx( ) / RAISE EXCEPTION x.
       const typeIdx = findTopWord(toks, "TYPE");
@@ -1433,7 +1910,7 @@ function emitStatement(s, ctx, st, push, assignedTwice, methodDef) {
         const expIdx = findTopWord(toks, "EXPORTING");
         if (expIdx > 0) {
           const named = namedArgsOf(toks.slice(expIdx + 1), ctx);
-          push(`throw new ${cls}({ ${[...(named ?? new Map()).entries()].map(([k, v]) => `${k}: ${v}`).join(", ")} });`);
+          push(`throw new ${cls}({ ${[...(named ?? new Map()).entries()].map(([k, v]) => `${k}: ${renderNamedVal(v)}`).join(", ")} });`);
         } else {
           push(`throw new ${cls}();`);
         }
@@ -1479,12 +1956,9 @@ function txWhere(toks, rowVar, ctx) {
   sub.requires = ctx.requires;
   sub.todos = ctx.todos;
   sub.locals = ctx.locals;
-  const rendered = txCond(toks, sub);
-  // heuristic: identifiers that stayed bare (not this./known) become row fields
-  return rendered.replace(/(^|[^\w.$])([a-z_][a-z0-9_]*)(?=\s*(===|!==|>|<|>=|<=))/g, (m, pre, id) => {
-    if (ctx.isLocal(id) || id === "true" || id === "false") return m;
-    return `${pre}${rowVar}.${id}`;
-  });
+  sub.upperLocals = ctx.upperLocals;
+  sub.rowVar = rowVar; // unresolved bare identifiers become row components
+  return txCond(toks, sub);
 }
 
 // ---------------------------------------------------------------------------
@@ -1515,11 +1989,63 @@ function breakChains(code) {
 }
 
 // ---------------------------------------------------------------------------
+// interfaces — constants become a plain object export (types and method
+// definitions have no JS representation; implementers flatten the methods)
+// ---------------------------------------------------------------------------
+
+function transpileInterface(source, filename) {
+  const reg = new Registry().addFile(new MemoryFile(filename, source));
+  reg.parse();
+  const obj = reg.getFirstObject();
+  if (!obj) throw new Error(`no ABAP object parsed from ${filename}`);
+  const file = obj.getABAPFiles()[0];
+
+  let name = null;
+  const consts = []; // { name, value } — value is a rendered literal or object
+  let structCollector = null;
+
+  for (const s of file.getStatements()) {
+    const T = s.get().constructor.name;
+    const toks = tokify(s);
+    if (T === "Interface") {
+      name = toks[1].str.toLowerCase();
+    } else if (T === "ConstantBegin") {
+      const ofIdx = toks.findIndex((t) => KW(t.str) === "OF");
+      structCollector = { name: toks[ofIdx + 1].str.toLowerCase(), members: [] };
+    } else if (T === "ConstantEnd") {
+      if (structCollector) {
+        consts.push({ name: structCollector.name, value: `{ ${structCollector.members.map((m) => `${m.name}: ${m.value}`).join(", ")} }` });
+        structCollector = null;
+      }
+    } else if (T === "Constant") {
+      const cname = toks[1].str.toLowerCase();
+      const { typeTokens, value } = parseTypeAfter(toks.slice(2, -1), 0);
+      const rendered = value ? renderLiteralToken(value) : typeDefault(typeTokens);
+      if (structCollector) structCollector.members.push({ name: cname, value: rendered });
+      else consts.push({ name: cname, value: rendered });
+    }
+  }
+  if (!name) throw new Error(`no interface found in ${filename}`);
+
+  const lines = [];
+  lines.push(`// transpiled ABAP interface — constants only, types/methods have no JS form`);
+  lines.push(`const ${name} = {`);
+  for (const c of consts) lines.push(`  ${c.name}: ${c.value},`);
+  lines.push(`};`);
+  lines.push("");
+  lines.push(`module.exports = ${name};`);
+  return { code: lines.join("\n") + "\n", todos: [], name };
+}
+
+// ---------------------------------------------------------------------------
 // CLI
 // ---------------------------------------------------------------------------
 
 function transpileFile(inputPath) {
   const source = fs.readFileSync(inputPath, "utf8");
+  if (inputPath.endsWith(".intf.abap")) {
+    return transpileInterface(source, path.basename(inputPath));
+  }
   const { code, todos, name } = transpileClass(source, path.basename(inputPath));
   return { code: breakChains(code), todos, name };
 }
@@ -1577,7 +2103,7 @@ function main(argv) {
     for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
       const full = path.join(dir, entry.name);
       if (entry.isDirectory()) walk(full, root);
-      else if (entry.name.endsWith(".clas.abap") && !entry.name.includes(".testclasses.")) {
+      else if ((entry.name.endsWith(".clas.abap") || entry.name.endsWith(".intf.abap")) && !entry.name.includes(".testclasses.")) {
         files.push({ file: full, relDir: path.relative(root, dir) });
       }
     }

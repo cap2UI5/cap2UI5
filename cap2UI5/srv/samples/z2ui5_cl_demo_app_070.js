@@ -9,9 +9,10 @@ class z2ui5_cl_demo_app_070 extends z2ui5_if_app {
   client = null;
 
   set_selkz({ iv_selkz } = {}) {
-    // TODO(abap2js): FIELD-SYMBOLS <ls_table> TYPE ty_s_tab.
     let sy_tabix = 0;
-    for (const fs of this.mt_table) {
+    // TODO(abap2js): FIELD-SYMBOLS <ls_table> TYPE ty_s_tab.
+    sy_tabix = 0;
+    for (const ls_table of this.mt_table) {
       sy_tabix++;
       ls_table.selkz = iv_selkz;
     }
@@ -142,9 +143,9 @@ class z2ui5_cl_demo_app_070 extends z2ui5_if_app {
     lo_columns.get_parent()
       .ui_row_action_template()
       .ui_row_action()
-      .ui_row_action_item({ type: `Navigation`, press: this.client._event(`ROW_ACTION_ITEM_NAVIGATION`, [`${ROW_ID}`]) })
+      .ui_row_action_item({ type: `Navigation`, press: this.client._event(`ROW_ACTION_ITEM_NAVIGATION`, [`\${ROW_ID}`]) })
       .get_parent()
-      .ui_row_action_item({ icon: `sap-icon://edit`, text: `Edit`, press: this.client._event(`ROW_ACTION_ITEM_EDIT`, [`${ROW_ID}`]) });
+      .ui_row_action_item({ icon: `sap-icon://edit`, text: `Edit`, press: this.client._event(`ROW_ACTION_ITEM_EDIT`, [`\${ROW_ID}`]) });
     this.client.view_display(view.stringify());
   }
 
@@ -153,8 +154,9 @@ class z2ui5_cl_demo_app_070 extends z2ui5_if_app {
   }
 
   set_search() {
+    let sy_tabix = 0;
     if (this.mv_search_value) {
-      let sy_tabix = 0;
+      sy_tabix = 0;
       for (const lr_row of this.mt_table) {
         sy_tabix++;
         let lv_row = ``;
@@ -167,7 +169,7 @@ class z2ui5_cl_demo_app_070 extends z2ui5_if_app {
           lv_row = lv_row + field;
           lv_index = lv_index + 1;
         }
-        if (lv_row NS this.mv_search_value) {
+        if (!String(lv_row).toLowerCase().includes(String(this.mv_search_value).toLowerCase())) {
           // TODO(abap2js): DELETE mt_table.
         }
       }

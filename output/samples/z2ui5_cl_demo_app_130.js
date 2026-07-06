@@ -21,14 +21,16 @@ class z2ui5_cl_demo_app_130 extends z2ui5_if_app {
   mt_fields = [];
 
   get_fields() {
+    let sy_tabix = 0;
     const db_fields = [{ screen_name: `INV`, field: `LGNUM`, field_doma: `/SCWM/LGNUM` }, { screen_name: `LAGP`, field: `LGNUM`, field_doma: `/SCWM/LGNUM` }, { screen_name: `LAGP`, field: `LGPLA`, field_doma: `/SCWM/DE_LGPLA` }, { screen_name: `LAGP`, field: `LGTYP`, field_doma: `/SCWM/DE_LGTYP` }, { screen_name: `QUAN`, field: `LGNUM`, field_doma: `/SCWM/LGNUM` }, { screen_name: `QUAN`, field: `LGPLA`, field_doma: `/SCWM/DE_LGPLA` }, { screen_name: `QUAN`, field: `MATNR`, field_doma: `/SCWM/DE_MATNR` }, { screen_name: `QUAN`, field: `OWNER`, field_doma: `/SCWM/DE_OWNER` }, { screen_name: `TO`, field: `LGNUM`, field_doma: `/SCWM/LGNUM` }, { screen_name: `TO`, field: `MATNR`, field_doma: `/SCWM/DE_MATNR` }, { screen_name: `TO`, field: `PROCTY`, field_doma: `/SCWM/DE_PROCTY` }, { screen_name: `TO`, field: `TOSTAT`, field_doma: `/SCWM/DE_TOSTAT` }, { screen_name: `TO`, field: `VLPLA`, field_doma: `/SCWM/LTAP_VLPLA` }];
     this.mt_fields = {};
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const lr_fields of db_fields) {
       sy_tabix++;
       if (!(lr_fields.screen_name === this.mv_screen)) continue;
-      this.mt_fields reference into this.data(field).push({});
-      field.* = ({ ...lr_fields.* });
+      const field = {};
+      this.mt_fields.push(field);
+      field = ({ ...lr_fields });
     }
   }
 
@@ -45,10 +47,11 @@ class z2ui5_cl_demo_app_130 extends z2ui5_if_app {
   }
 
   get_values() {
+    let sy_tabix = 0;
     const l_variants = [{ screen_name: `QUAN`, var: `E001 - ALL`, descr: `123` }, { screen_name: `TO`, var: `E001`, descr: `123` }, { screen_name: `TO`, var: `E001 - All`, descr: `123` }];
     let var_ = [];
     let var_val = [];
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const a of l_variants) {
       sy_tabix++;
       if (!(a.screen_name === this.mv_screen && var_ === this.mv_variant)) continue;
@@ -56,25 +59,27 @@ class z2ui5_cl_demo_app_130 extends z2ui5_if_app {
       this.mv_description = a.descr;
     }
     const var_vall_all = [{ screen_name: `LTAP`, var: `E001 - All`, field: `LGNUM`, guid: `663192E9D70C1EEE8CC06B0F98CD81A3`, sign: `I`, opt: `EQ` }, { screen_name: `LTAP`, var: `E001 - All`, field: `MATNR`, guid: `663192E9D70C1EEE8CD4E9389CB11403`, sign: `I`, opt: `EQ` }, { screen_name: `LTAP`, var: `E001 - All`, field: `TOSTAT`, guid: `663192E9D70C1EEE8CC06BC66AD581A3`, sign: `I`, opt: `NE` }, { screen_name: `LTAP`, var: `E002 - All`, field: `LGNUM`, guid: `663192E9D70C1EEE8CC06B0F98CD81A3`, sign: `I`, opt: `EQ` }, { screen_name: `LTAP`, var: `E002 - All`, field: `MATNR`, guid: `663192E9D70C1EEE8CD4E9389CB11403`, sign: `I`, opt: `EQ` }, { screen_name: `LTAP`, var: `E002 - All`, field: `TOSTAT`, guid: `663192E9D70C1EEE8CC06BC66AD581A3`, sign: `I`, opt: `NE` }, { screen_name: `QUAN`, var: `E001 - ALL`, field: `LGNUM`, guid: `663192E9D70C1EEE90CEE2FA658C51EE`, sign: `I`, opt: `EQ` }, { screen_name: `QUAN`, var: `E001 - ALL`, field: `LGPLA`, guid: `663192E9D70C1EEE90CEEF4750FD91EE`, sign: `I`, opt: `EQ` }, { screen_name: `TO`, var: `E001 `, field: `LGNUM`, guid: `663192E9D70C1EEE8E87DE5FF8CC512A`, sign: `I`, opt: `EQ` }, { screen_name: `TO`, var: `E001 `, field: `PROCTY`, guid: `663192E9D70C1EEE8E87DD8D1EB8C7F5`, sign: `I`, opt: `EQ` }, { screen_name: `TO`, var: `E001 - All`, field: `LGNUM`, guid: `663192E9D70C1EEE8E86552847635198`, sign: `I`, opt: `EQ` }];
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const b of var_vall_all) {
       sy_tabix++;
       if (!(b.screen_name === this.mv_screen && var_ === this.mv_variant)) continue;
       var_val.push(b);
     }
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const field of this.mt_fields) {
       sy_tabix++;
       field.t_filter = {};
       field.t_token = {};
-      let sy_tabix = 0;
+      const _sy_tabix_1 = sy_tabix;
+      sy_tabix = 0;
       for (const val of var_val) {
         sy_tabix++;
         if (!(field === field.field)) continue;
         const filter = { key: val.guid, option: val.opt, low: val.low, high: val.high };
         field.t_filter.push(filter);
-        this.set_token(/* TODO(abap2js): out-params */ CHANGING field = field);
+        this.set_token({ field: { field } });
       }
+      sy_tabix = _sy_tabix_1;
     }
   }
 
@@ -96,16 +101,17 @@ class z2ui5_cl_demo_app_130 extends z2ui5_if_app {
   popup_filter_ok() {
     // TODO(abap2js): READ TABLE mt_fields REFERENCE INTO DATA(lr_field) WITH KEY field = mv_activ_elemnt.
     if (sy_subrc === 0) {
-      for (let _i = this.mt_filter.length - 1; _i >= 0; _i--) { const row = this.mt_filter[_i]; if (!option) this.mt_filter.splice(_i, 1); }
+      for (let _i = this.mt_filter.length - 1; _i >= 0; _i--) { const row = this.mt_filter[_i]; if (!row.option) this.mt_filter.splice(_i, 1); }
       lr_field.t_filter = this.mt_filter;
       lr_field.t_token = {};
-      this.set_token(/* TODO(abap2js): out-params */ CHANGING field = lr_field);
+      this.set_token({ field: { field: lr_field } });
       this.client.popup_destroy();
       this.view_display();
     }
   }
 
   view_display() {
+    let sy_tabix = 0;
     if (!this.mo_parent_view) {
       const view = z2ui5_cl_xml_view.factory();
       let page = z2ui5_cl_xml_view.factory()
@@ -132,7 +138,7 @@ class z2ui5_cl_demo_app_130 extends z2ui5_if_app {
       .input({ value: this.client._bind_edit(this.mv_description), showvaluehelp: false });
     const content = grid.simple_form(this.get_txt({ roll: `CLASSFEL` })).content(`form`);
     if (this.mt_fields) {
-      let sy_tabix = 0;
+      sy_tabix = 0;
       for (const lr_tab of this.mt_fields) {
         sy_tabix++;
         const lv_tabix = sy_tabix;
@@ -166,8 +172,8 @@ class z2ui5_cl_demo_app_130 extends z2ui5_if_app {
       .item({ key: `{N}`, text: `{N}` })
       .get_parent()
       .input(`{LOW}`)
-      .input({ value: `{HIGH}`, visible: `{= ${OPTION} === 'BT' }` })
-      .button({ icon: `sap-icon://decline`, type: `Transparent`, press: this.client._event(`POPUP_FILTER_DELETE`, [`${KEY}`]) });
+      .input({ value: `{HIGH}`, visible: `{= \${OPTION} === 'BT' }` })
+      .button({ icon: `sap-icon://decline`, type: `Transparent`, press: this.client._event(`POPUP_FILTER_DELETE`, [`\${KEY}`]) });
     lo_popup.footer()
       .overflow_toolbar()
       .button({ text: this.get_txt({ roll: `FC_DELALL` }), icon: `sap-icon://delete`, type: `Transparent`, press: this.client._event(`POPUP_FILTER_DELETE_ALL`) })
@@ -218,12 +224,13 @@ class z2ui5_cl_demo_app_130 extends z2ui5_if_app {
       .overflow_toolbar()
       .toolbar_spacer()
       .button({ text: this.get_txt({ roll: `XEXIT` }), press: this.client._event(`POPUP_COPY_EXIT`), type: `Reject` })
-      .button({ text: this.get_txt({ roll: `/SCWM/DE_LM_LOGSAVE` }), press: this.client._event(`POPUP_COPY_SAVE`), type: `Emphasized`, enabled: `{= ${MV_VARIANT_COPY} !== "" }` });
+      .button({ text: this.get_txt({ roll: `/SCWM/DE_LM_LOGSAVE` }), press: this.client._event(`POPUP_COPY_SAVE`), type: `Emphasized`, enabled: `{= \${MV_VARIANT_COPY} !== "" }` });
     this.client.popup_display(lo_popup.stringify());
   }
 
-  set_token() {
+  set_token({ field } = {}) {
     let sy_tabix = 0;
+    sy_tabix = 0;
     for (const lr_filter of field.t_filter) {
       sy_tabix++;
       const lv_value = this.mt_mapping.find((row) => row.n === lr_filter.option).v;
@@ -234,9 +241,10 @@ class z2ui5_cl_demo_app_130 extends z2ui5_if_app {
   }
 
   varaint_page() {
+    let sy_tabix = 0;
     switch (this.client.get().EVENT) {
       case `INPUT_SCREEN_CHANGE`:
-        this.mv_screen_descr = (this.mt_screens.find((row) => row.screen_name === this.mv_screen).descr optional);
+        this.mv_screen_descr = (() => { try { return this.mt_screens.find((row) => row.screen_name === this.mv_screen).descr ?? null; } catch { return null; } })();
         this.get_fields();
         this.mv_variant = {};
         this.mv_description = {};
@@ -265,22 +273,23 @@ class z2ui5_cl_demo_app_130 extends z2ui5_if_app {
         break;
       case `CALL_POPUP_FILTER`:
         const arg = this.client.get().T_EVENT_ARG;
-        this.mv_activ_elemnt = (arg[(1) - 1] optional);
+        this.mv_activ_elemnt = (() => { try { return arg[(1) - 1] ?? null; } catch { return null; } })();
         // TODO(abap2js): READ TABLE mt_fields REFERENCE INTO DATA(lr_field) WITH KEY field = mv_activ_elemnt.
         this.mt_filter = lr_field.t_filter;
         this.render_popup_filter();
         break;
       case `CALL_POPUP_VARIANT`:
-        let sy_tabix = 0;
+        sy_tabix = 0;
         for (const lr_fields of this.mt_variants) {
           sy_tabix++;
-          this.mt_variants_pop reference into this.data(field).push({});
-          field.* = ({ ...lr_fields.* });
+          const field = {};
+          this.mt_variants_pop.push(field);
+          field = ({ ...lr_fields });
         }
         this.render_popup_varaint({ client: this.client });
         break;
       case `POPUP_VARIANT_CLOSE`:
-        this.mv_variant = (this.mt_variants_pop.find((row) => row.selkz === true).var optional);
+        this.mv_variant = (() => { try { return this.mt_variants_pop.find((row) => row.selkz === true).var ?? null; } catch { return null; } })();
         this.client.popup_destroy();
         this.get_values();
         this.view_display();

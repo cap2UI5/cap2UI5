@@ -1,10 +1,5 @@
-// TODO(abap2js): unresolved reference z2ui5_cx_ajson_error — add require manually
+const z2ui5_cx_ajson_error = require("abap2UI5/z2ui5_cx_ajson_error");
 const z2ui5_if_ajson_types = require("abap2UI5/z2ui5_if_ajson_types");
-const z2ui5_if_ajson~set = require("abap2UI5/z2ui5_if_ajson~set");
-const z2ui5_if_ajson~set_boolean = require("abap2UI5/z2ui5_if_ajson~set_boolean");
-const z2ui5_if_ajson~set_integer = require("abap2UI5/z2ui5_if_ajson~set_integer");
-const z2ui5_if_ajson~set_null = require("abap2UI5/z2ui5_if_ajson~set_null");
-const z2ui5_if_ajson~set_string = require("abap2UI5/z2ui5_if_ajson~set_string");
 
 class z2ui5_cl_ajson {
   static go_float_regex = null;
@@ -18,14 +13,14 @@ class z2ui5_cl_ajson {
     this.format_datetime(iv_format_datetime);
   }
 
-  static create_empty({ !ii_custom_mapping, iv_keep_item_order = false, iv_format_datetime = true, iv_to_abap_corresponding_only = false } = {}) {
+  static create_empty({ ii_custom_mapping, iv_keep_item_order = false, iv_format_datetime = true, iv_to_abap_corresponding_only = false } = {}) {
     let ro_instance = null;
     ro_instance = null; // TODO(abap2js): CREATE OBJECT ro_instance EXPORTING iv_to_abap_corresponding_only = iv_to_abap_corresponding_only iv_format_datetime = iv_format_datetime iv_keep_item_order = iv_keep_item_order.
     ro_instance.mi_custom_mapping = ii_custom_mapping;
     return ro_instance;
   }
 
-  static create_from({ !ii_source_json, !ii_filter, !ii_mapper } = {}) {
+  static create_from({ ii_source_json, ii_filter, ii_mapper } = {}) {
     let ro_instance = null;
     let lo_mutator_queue = null;
     if (ii_source_json != null) {
@@ -37,12 +32,12 @@ class z2ui5_cl_ajson {
     } else {
       lo_mutator_queue = null; // TODO(abap2js): CREATE OBJECT lo_mutator_queue.
       if (ii_mapper != null) {
-        lo_mutator_queue.add(lcl_mapper_runner.new(ii_mapper));
+        lo_mutator_queue.add(lcl_mapper_runner.new_(ii_mapper));
       }
       if (ii_filter != null) {
-        lo_mutator_queue.add(lcl_filter_runner.new(ii_filter));
+        lo_mutator_queue.add(lcl_filter_runner.new_(ii_filter));
       }
-      lo_mutator_queue.lif_mutator_runner~run(/* TODO(abap2js): out-params */ EXPORTING it_source_tree = ii_source_json -> mt_json_tree IMPORTING et_dest_tree = ro_instance -> mt_json_tree);
+      // TODO(abap2js): lo_mutator_queue->lif_mutator_runner~run( EXPORTING it_source_tree = ii_source_json->mt_json_tree IMPORTING et_dest_tree = ro_instance->mt_json_tree ).
     }
     return ro_instance;
   }
@@ -58,7 +53,7 @@ class z2ui5_cl_ajson {
     // TODO(abap2js): DELETE mt_json_tree INDEX sy-tabix.
     if (rs_top_node.children > 0) {
       lv_parent_path = iv_path + iv_name + `/*`;
-      for (let _i = mt_json_tree.length - 1; _i >= 0; _i--) { const row = mt_json_tree[_i]; if (path.includes(String(lv_parent_path).replace(/\*/g, ""))) mt_json_tree.splice(_i, 1); }
+      for (let _i = mt_json_tree.length - 1; _i >= 0; _i--) { const row = mt_json_tree[_i]; if (String(row.path).includes(String(lv_parent_path).replace(/\*/g, ""))) mt_json_tree.splice(_i, 1); }
     }
     if (ir_parent !== undefined) {
       ir_parent.children = ir_parent.children - 1;
@@ -91,7 +86,7 @@ class z2ui5_cl_ajson {
     return rv_path;
   }
 
-  static parse({ !iv_json, !iv_freeze = false, !ii_custom_mapping, !iv_keep_item_order = false } = {}) {
+  static parse({ iv_json, iv_freeze = false, ii_custom_mapping, iv_keep_item_order = false } = {}) {
     let ro_instance = null;
     let lo_parser = null;
     ro_instance = null; // TODO(abap2js): CREATE OBJECT ro_instance.
@@ -113,7 +108,7 @@ class z2ui5_cl_ajson {
     let lv_cur_name = ``;
     let ls_new_node = null;
     lt_path = iv_path.split(`/`);
-    for (let _i = lt_path.length - 1; _i >= 0; _i--) { const row = lt_path[_i]; if (!table_line) lt_path.splice(_i, 1); }
+    for (let _i = lt_path.length - 1; _i >= 0; _i--) { const row = lt_path[_i]; if (!row.table_line) lt_path.splice(_i, 1); }
     while (true) {
       lr_node_parent = rr_end_node;
       // TODO(abap2js): READ TABLE mt_json_tree REFERENCE INTO rr_end_node WITH TABLE KEY path = lv_cur_path name = lv_cur_name.
@@ -128,7 +123,8 @@ class z2ui5_cl_ajson {
         ls_new_node.path = lv_cur_path;
         ls_new_node.name = lv_cur_name;
         ls_new_node.type = z2ui5_if_ajson_types.node_type.object;
-        mt_json_tree reference into rr_end_node.push(ls_new_node);
+        rr_end_node = ls_new_node;
+        mt_json_tree.push(rr_end_node);
       }
       lv_cur_path = lv_cur_path + lv_cur_name + `/`;
       // TODO(abap2js): READ TABLE lt_path INDEX sy-index INTO lv_cur_name.
@@ -146,6 +142,7 @@ class z2ui5_cl_ajson {
   }
 
   array_to_string_table() {
+    let sy_tabix = 0;
     let lv_normalized_path = ``;
     let lr_node = null;
     // TODO(abap2js): FIELD-SYMBOLS <item> LIKE LINE OF mt_json_tree.
@@ -157,10 +154,10 @@ class z2ui5_cl_ajson {
     if (lr_node.type !== z2ui5_if_ajson_types.node_type.array) {
       z2ui5_cx_ajson_error.raise(`Array expected at: ${iv_path}`);
     }
-    let sy_tabix = 0;
-    for (const path of mt_json_tree) {
+    sy_tabix = 0;
+    for (const item of mt_json_tree) {
       sy_tabix++;
-      if (!(path === lv_normalized_path)) continue;
+      if (!(item.path === lv_normalized_path)) continue;
       switch (item.type) {
         case z2ui5_if_ajson_types.node_type.number:
         case z2ui5_if_ajson_types.node_type.string:
@@ -191,7 +188,7 @@ class z2ui5_cl_ajson {
   }
 
   clone() {
-    ri_json = z2ui5_cl_ajson.create_from({ !ii_source_json: this });
+    ri_json = z2ui5_cl_ajson.create_from({ ii_source_json: this });
   }
 
   delete() {
@@ -327,13 +324,14 @@ class z2ui5_cl_ajson {
   }
 
   members() {
+    let sy_tabix = 0;
     let lv_normalized_path = ``;
     // TODO(abap2js): FIELD-SYMBOLS <item> LIKE LINE OF mt_json_tree.
     lv_normalized_path = lcl_utils.normalize_path(iv_path);
-    let sy_tabix = 0;
-    for (const path of mt_json_tree) {
+    sy_tabix = 0;
+    for (const item of mt_json_tree) {
       sy_tabix++;
-      if (!(path === lv_normalized_path)) continue;
+      if (!(item.path === lv_normalized_path)) continue;
       rt_members.push(item.name);
     }
   }
@@ -364,7 +362,7 @@ class z2ui5_cl_ajson {
     if (!(sy_subrc === 0)) throw new Error(`ASSERT failed`);
     lr_new_node.index = lv_new_index;
     lr_parent.children = lv_new_index;
-    mt_json_tree.push(lines OF lt_new_nodes);
+    mt_json_tree.push(...lt_new_nodes);
     ri_json = this;
   }
 
@@ -408,7 +406,7 @@ class z2ui5_cl_ajson {
     }
     if (lt_new_nodes.length > 0) {
       lr_parent.children = lr_parent.children + 1;
-      mt_json_tree.push(lines OF lt_new_nodes);
+      mt_json_tree.push(...lt_new_nodes);
     }
   }
 
@@ -433,25 +431,25 @@ class z2ui5_cl_ajson {
       z2ui5_cl_ajson.go_float_regex = null; // TODO(abap2js): CREATE OBJECT go_float_regex EXPORTING pattern = '^([1-9][0-9]*|0)\.[0-9]+$' .
     }
     if (lv_val === `null`) {
-      z2ui5_if_ajson~set_null (lv_path);
+      this.set_null(lv_path);
     } else if (lv_val === `true`) {
-      z2ui5_if_ajson~set_boolean (iv_path === lv_path iv_val === true);
+      this.set_boolean({ iv_path: lv_path, iv_val: true });
     } else if (lv_val === `false`) {
-      z2ui5_if_ajson~set_boolean (iv_path === lv_path iv_val === false);
-    } else if (lv_val CO `0123456789`) {
+      this.set_boolean({ iv_path: lv_path, iv_val: false });
+    } else if ([...String(lv_val)].every(($c) => String(`0123456789`).includes($c))) {
       lv_int = lv_val;
-      z2ui5_if_ajson~set_integer (iv_path === lv_path iv_val === lv_int);
-    } else if (lv_val CO `0123456789.` && z2ui5_cl_ajson.go_float_regex.create_matcher({ text: lv_val }).match() === true) {
+      this.set_integer({ iv_path: lv_path, iv_val: lv_int });
+    } else if ([...String(lv_val)].every(($c) => String(`0123456789.`).includes($c)) && z2ui5_cl_ajson.go_float_regex.create_matcher({ text: lv_val }).match() === true) {
       lv_dec = lv_val;
-      z2ui5_if_ajson~set (iv_path === lv_path iv_val === lv_dec);
-    } else if (lv_val + this.0(1) === `{` || lv_val + this.0(1) === `[`) {
-      z2ui5_if_ajson~set (iv_path === lv_path iv_val === z2ui5_cl_ajson.parse({ iv_json: lv_val, iv_keep_item_order: this.ms_opts.keep_item_order }));
+      this.set({ iv_path: lv_path, iv_val: lv_dec });
+    } else if (String(lv_val).substr(0, 1) === `{` || String(lv_val).substr(0, 1) === `[`) {
+      this.set({ iv_path: lv_path, iv_val: z2ui5_cl_ajson.parse({ iv_json: lv_val, iv_keep_item_order: this.ms_opts.keep_item_order }) });
     } else {
       lv_last = lv_val.length - 1;
-      if (lv_val + this.0(1) === `"` && lv_val + lv_last (1) === `"`) {
+      if (String(lv_val).substr(0, 1) === `"` && String(lv_val).substr(lv_last, 1) === `"`) {
         lv_val = lv_val.substr(1, lv_last - 1);
       }
-      z2ui5_if_ajson~set_string (iv_path === lv_path iv_val === lv_val);
+      this.set_string({ iv_path: lv_path, iv_val: lv_val });
     }
     ri_json = this;
   }
@@ -460,49 +458,50 @@ class z2ui5_cl_ajson {
     ri_json = this;
     let lv_bool = false;
     lv_bool = Boolean(iv_val);
-    z2ui5_if_ajson~set (iv_ignore_empty === false iv_path === iv_path iv_val === lv_bool);
+    this.set({ iv_ignore_empty: false, iv_path, iv_val: lv_bool });
   }
 
   set_date() {
     ri_json = this;
     let lv_val = ``;
     lv_val = lcl_abap_to_json.format_date(iv_val);
-    z2ui5_if_ajson~set (iv_ignore_empty === false iv_path === iv_path iv_val === lv_val);
+    this.set({ iv_ignore_empty: false, iv_path, iv_val: lv_val });
   }
 
   set_integer() {
     ri_json = this;
-    z2ui5_if_ajson~set (iv_ignore_empty === false iv_path === iv_path iv_val === iv_val);
+    this.set({ iv_ignore_empty: false, iv_path, iv_val });
   }
 
   set_null() {
     ri_json = this;
     let lv_null_ref = null;
-    z2ui5_if_ajson~set (iv_ignore_empty === false iv_path === iv_path iv_val === lv_null_ref);
+    this.set({ iv_ignore_empty: false, iv_path, iv_val: lv_null_ref });
   }
 
   set_string() {
     ri_json = this;
     let lv_val = ``;
     lv_val = iv_val;
-    z2ui5_if_ajson~set (iv_ignore_empty === false iv_path === iv_path iv_val === lv_val);
+    this.set({ iv_ignore_empty: false, iv_path, iv_val: lv_val });
   }
 
   set_timestamp() {
     ri_json = this;
     let lv_timestamp_iso = ``;
     lv_timestamp_iso = lcl_abap_to_json.format_timestamp(iv_val);
-    z2ui5_if_ajson~set (iv_ignore_empty === false iv_path === iv_path iv_val === lv_timestamp_iso);
+    this.set({ iv_ignore_empty: false, iv_path, iv_val: lv_timestamp_iso });
   }
 
   set_timestampl() {
     ri_json = this;
     let lv_timestamp_iso = ``;
     lv_timestamp_iso = lcl_abap_to_json.format_timestampl(iv_val);
-    z2ui5_if_ajson~set (iv_ignore_empty === false iv_path === iv_path iv_val === lv_timestamp_iso);
+    this.set({ iv_ignore_empty: false, iv_path, iv_val: lv_timestamp_iso });
   }
 
   slice() {
+    let sy_tabix = 0;
     let lo_section = null;
     let ls_item = null;
     let lv_normalized_path = ``;
@@ -523,10 +522,10 @@ class z2ui5_cl_ajson {
     ls_item.order = null;
     lo_section.mt_json_tree.push(ls_item);
     lv_path_pattern = lv_normalized_path + `*`;
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const ls_item of mt_json_tree) {
       sy_tabix++;
-      if (!(path.includes(String(lv_path_pattern).replace(/\*/g, "")))) continue;
+      if (!(String(ls_item.path).includes(String(lv_path_pattern).replace(/\*/g, "")))) continue;
       ls_item.path = ls_item.path.substr(lv_path_len - 1);
       lo_section.mt_json_tree.push(ls_item);
     }
@@ -582,7 +581,7 @@ class z2ui5_cl_ajson {
     let lo_to_abap = null;
     ev_container = null;
     lo_to_abap = null; // TODO(abap2js): CREATE OBJECT lo_to_abap EXPORTING iv_corresponding = boolc( iv_corresponding = abap_true OR ms_opts-to_abap_corresponding_only = abap_true ) ii_custom_mapping = mi_custom_mapping ii_refs_initiator = ii_refs_initiator.
-    lo_to_abap.to_abap(/* TODO(abap2js): out-params */ EXPORTING it_nodes = z2ui5_if_ajson~mt_json_tree CHANGING c_container = ev_container);
+    lo_to_abap.to_abap({ it_nodes: this.mt_json_tree, c_container: ev_container });
   }
 
   to_abap_corresponding_only() {

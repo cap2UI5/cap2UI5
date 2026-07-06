@@ -79,9 +79,9 @@ class z2ui5_cl_demo_app_100 extends z2ui5_if_app {
     lo_columns.get_parent()
       .ui_row_action_template()
       .ui_row_action()
-      .ui_row_action_item({ type: `Navigation`, press: this.client._event(`ROW_ACTION_ITEM_NAVIGATION`, [`${ROW_ID}`]) })
+      .ui_row_action_item({ type: `Navigation`, press: this.client._event(`ROW_ACTION_ITEM_NAVIGATION`, [`\${ROW_ID}`]) })
       .get_parent()
-      .ui_row_action_item({ icon: `sap-icon://edit`, text: `Edit`, press: this.client._event(`ROW_ACTION_ITEM_EDIT`, [`${ROW_ID}`]) });
+      .ui_row_action_item({ icon: `sap-icon://edit`, text: `Edit`, press: this.client._event(`ROW_ACTION_ITEM_EDIT`, [`\${ROW_ID}`]) });
     this.client.view_display(view.stringify());
   }
 

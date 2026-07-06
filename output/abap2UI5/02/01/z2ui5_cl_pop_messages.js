@@ -9,8 +9,9 @@ class z2ui5_cl_pop_messages extends z2ui5_if_app {
 
   static factory({ i_messages, i_title = `abap2UI5 - Message Popup` } = {}) {
     let r_result = null;
-    r_result = new z2ui5_cl_pop_messages();
     let sy_tabix = 0;
+    r_result = new z2ui5_cl_pop_messages();
+    sy_tabix = 0;
     for (const lr_row of z2ui5_cl_util.msg_get_t(i_messages)) {
       sy_tabix++;
       r_result.mt_msg.push({ type: z2ui5_cl_util.ui5_get_msg_type(lr_row.type), title: lr_row.text, subtitle: `${lr_row.id} ${lr_row.no}` });

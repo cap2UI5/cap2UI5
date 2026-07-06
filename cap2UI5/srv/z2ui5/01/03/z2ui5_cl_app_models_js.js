@@ -1,9 +1,27 @@
+const fs = require("fs");
+const path = require("path");
 
+/**
+ * z2ui5_cl_app_models_js — JS port of abap2UI5 z2ui5_cl_app_models_js.
+ *
+ * abap holds the source as an ABAP string template; in CAP the file lives on
+ * disk under app/app_v2_new/webapp/model/models.js and is normally served by CAP's
+ * static middleware. This wrapper exposes it for parity with the abap2UI5
+ * src/01/03 layout — useful if you ever want to serve the entire app from
+ * the same CDS endpoint instead of via the static folder.
+ */
 class z2ui5_cl_app_models_js {
-  static get() {
-    let result = ``;
-    result = `sap.ui.define(` + `\\n` + ` ["sap/ui/model/json/JSONModel", "sap/ui/Device"],` + `\\n` + ` (JSONModel, Device) => {` + `\\n` + ` "use strict";` + `\\n` + `` + `\\n` + ` return {` + `\\n` + ` // Creates a read-only JSON model that exposes the current device info` + `\\n` + ` // (phone / tablet / desktop, orientation, ...) to the views.` + `\\n` + ` createDeviceModel() {` + `\\n` + ` const oModel = new JSONModel(Device);` + `\\n` + ` oModel.setDefaultBindingMode("OneWay");` + `\\n` + ` return oModel;` + `\\n` + ` },` + `\\n` + ` };` + `\\n` + ` },` + `\\n` + `);` + `\\n` + `` + `\\n` + ``;
-    return result;
+
+  static MIME = "application/javascript";
+  static FILE_PATH = path.join(__dirname, "../../../../app/app_v2_new/webapp/model/models.js");
+
+  /** Returns the file content as a string (or null if missing). */
+  static get_source() {
+    try {
+      return fs.readFileSync(z2ui5_cl_app_models_js.FILE_PATH, "utf8");
+    } catch {
+      return null;
+    }
   }
 }
 

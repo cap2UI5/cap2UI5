@@ -1,4 +1,4 @@
-// TODO(abap2js): unresolved reference z2ui5_cl_ajson_mapping — add require manually
+const z2ui5_cl_ajson_mapping = require("abap2UI5/z2ui5_cl_ajson_mapping");
 const z2ui5_cl_pop_js_loader = require("abap2UI5/z2ui5_cl_pop_js_loader");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
@@ -51,7 +51,7 @@ class z2ui5_cl_demo_app_090 extends z2ui5_if_app {
     page = page.shell()
       .page({ title: `abap2UI5 - P13N Dialog`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack(), class: `sapUiContentPadding` });
     page = page.vbox();
-    page._generic({ name: `Popup`, ns: `p13n`, t_prop: [{ n: `title`, v: `My Custom View Settings` }, { n: `close`, v: `z2ui5.updateData(${$parameters>/reason})` }, { n: `id`, v: `p13nPopup` }] })
+    page._generic({ name: `Popup`, ns: `p13n`, t_prop: [{ n: `title`, v: `My Custom View Settings` }, { n: `close`, v: `z2ui5.updateData(\${$parameters>/reason})` }, { n: `id`, v: `p13nPopup` }] })
       ._generic({ name: `panels`, ns: `p13n` })
       ._generic({ name: `SelectionPanel`, ns: `p13n`, t_prop: [{ n: `id`, v: `columnsPanel` }, { n: `title`, v: `Columns` }] })
       .get_parent()

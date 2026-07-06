@@ -24,7 +24,7 @@ Everything that is not deployed with the CAP project lives up here:
 | `npm run mirror_abap2ui5` / `mirror_samples` | snapshot upstream into `input/` |
 | `npm run transpile_abap2ui5` / `transpile_samples` | transpile `input/*/src` → `output/` |
 | `npm run prepare_app` | `input/abap2UI5/app/webapp` → `output/app` (+ patches) |
-| `npm run copy_into_cap` | plain copy `output/*` → cap2UI5 project |
+| `npm run copy_into_cap` | copy `output/*` → cap2UI5 project (backend fill-in, samples overwrite, app replace) |
 | `scripts/`, `test/`, `jest.config.js` | sources of the above |
 
 ```
@@ -50,14 +50,20 @@ locally via the npm scripts.
 | 3 | 3 transpile abap2UI5 | `transpile_abap2ui5` | all abap2UI5 classes (whole `src/` tree) → `output/abap2UI5/` + report |
 | 4 | 4 transpile samples | `transpile_samples` | all sample classes → `output/samples/` + report |
 | 5 | 5 prepare app | `prepare_app` | `input/abap2UI5/app/webapp` + patches → `output/app/` |
-| 6 | 6 copy into cap | `copy_into_cap` | plain copy: `output/abap2UI5` → `cap2UI5/srv/z2ui5`, `output/samples` → `cap2UI5/srv/samples`, `output/app` → `cap2UI5/app/z2ui5/webapp` |
+| 6 | 6 copy into cap | `copy_into_cap` | `output/abap2UI5` → `cap2UI5/srv/z2ui5` (fill-in only), `output/samples` → `cap2UI5/srv/samples` (overwrite), `output/app` → `cap2UI5/app/z2ui5/webapp` (replace) |
 
 After step 5 the `output/` folder holds the three deployable pieces —
-`abap2UI5/`, `samples/`, `app/` — and step 6 is nothing but copy & paste.
-Classes with `TODO(abap2js)` markers are listed in
-`output/*/transpile-report.json` and need manual follow-up. Jest runs after
-the copy for visibility. `MIRROR_SOURCE=/path` lets the mirror steps use a
-local checkout instead of cloning.
+`abap2UI5/`, `samples/`, `app/`. Step 6 applies them with per-tree policies:
+the backend tree `srv/z2ui5` is the hand-maintained CAP architecture
+adaptation, so transpiled classes are only **added** there and never copied
+over an existing file (promoting one is a deliberate manual step);
+`srv/samples` is fully owned by the transpiler and gets overwritten; the
+webapp is replaced 1:1. Transpiled files that do not parse are skipped and
+reported. Classes with `TODO(abap2js)` markers or `parseError` entries are
+listed in `output/*/transpile-report.json` and need manual follow-up. Jest
+runs after the copy and gates the sync commit — only a green suite is
+pushed. `MIRROR_SOURCE=/path` lets the mirror steps use a local checkout
+instead of cloning.
 
 ## Frontend
 

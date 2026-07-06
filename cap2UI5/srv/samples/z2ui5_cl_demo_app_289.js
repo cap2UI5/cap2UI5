@@ -30,7 +30,7 @@ class z2ui5_cl_demo_app_289 extends z2ui5_if_app {
       .get_parent()
       .object_marker({ type: `{TYPE}`, additionalinfo: `{ADDITIONALINFO}` })
       .get_parent()
-      .object_marker({ type: `{TYPE}`, additionalinfo: `{ADDITIONALINFO}`, press: client._event(`onPress`, [`${TYPE}`]) });
+      .object_marker({ type: `{TYPE}`, additionalinfo: `{ADDITIONALINFO}`, press: client._event(`onPress`, [`\${TYPE}`]) });
     client.view_display(page.stringify());
   }
 

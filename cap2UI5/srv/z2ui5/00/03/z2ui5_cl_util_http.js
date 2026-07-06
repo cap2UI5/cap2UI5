@@ -1,147 +1,172 @@
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-
+/**
+ * z2ui5_cl_util_http — JS port of abap2UI5 z2ui5_cl_util_http.
+ *
+ * Thin facade over an HTTP request/response pair. ABAP supports two server
+ * backends (on-prem ICF object vs. cloud IF_WEB_HTTP_REQUEST). In Node we
+ * have one shape: the Express req/res objects. The class still distinguishes
+ * the two via factory() / factory_cloud() so call sites stay identical.
+ *
+ * For CAP, callers construct via factory_cloud(req, res) — the request and
+ * response objects are Express-style, and CAP's middleware has already
+ * parsed body / cookies before this class touches them.
+ *
+ * ty_s_http_req shape — same field names as the abap TYPES block:
+ *   { method, body, path, t_params: [{n, v}, ...] }
+ */
 class z2ui5_cl_util_http {
-  mo_server_onprem = null;
-  mo_request_cloud = null;
-  mo_response_cloud = null;
 
-  delete_response_cookie({ val } = {}) {
-    const lv_val = (val);
-    if (this.mo_server_onprem != null) {
-      let object = null;
-      // TODO(abap2js): FIELD-SYMBOLS <any> TYPE any.
-      // TODO(abap2js): ASSIGN mo_server_onprem->(`RESPONSE`) TO <any>.
-      object = any;
-      call method object.( `DELETE_COOKIE` ) exporting name === lv_val;
-    } else {
-    }
+  constructor() {
+    this.mo_server_onprem  = null;
+    this.mo_request_cloud  = null;
+    this.mo_response_cloud = null;
   }
 
-  get_response_cookie({ val } = {}) {
-    let result = ``;
-    let object = null;
-    // TODO(abap2js): FIELD-SYMBOLS <any> TYPE any.
-    const lv_val = (val);
-    if (this.mo_server_onprem != null) {
-      // TODO(abap2js): ASSIGN mo_server_onprem->(`RESPONSE`) TO <any>.
-      object = any;
-      call method object.( `GET_COOKIE` ) exporting name === lv_val importing value === result;
-    } else {
-    }
-    return result;
+  static factory(server) {
+    const r = new z2ui5_cl_util_http();
+    r.mo_server_onprem = server;
+    return r;
   }
 
-  get_header_field({ val } = {}) {
-    let result = ``;
-    let object = null;
-    // TODO(abap2js): FIELD-SYMBOLS <any> TYPE any.
-    const lv_val = (val);
-    if (this.mo_server_onprem != null) {
-      // TODO(abap2js): ASSIGN mo_server_onprem->(`REQUEST`) TO <any>.
-      object = any;
-      call method object.( `GET_HEADER_FIELD` ) exporting name === lv_val receiving value === result;
-    } else {
-      call method this.mo_request_cloud.( `IF_WEB_HTTP_REQUEST~GET_HEADER_FIELD` ) exporting i_name === lv_val receiving r_value === result;
-    }
-    return result;
+  static factory_cloud(req, res) {
+    const r = new z2ui5_cl_util_http();
+    r.mo_request_cloud  = req;
+    r.mo_response_cloud = res;
+    return r;
   }
 
-  set_header_field({ !n, v } = {}) {
-    let object = null;
-    // TODO(abap2js): FIELD-SYMBOLS <any> TYPE any.
-    const lv_n = (n);
-    const lv_v = (v);
-    if (this.mo_server_onprem != null) {
-      // TODO(abap2js): ASSIGN mo_server_onprem->(`RESPONSE`) TO <any>.
-      object = any;
-      call method object.( `SET_HEADER_FIELD` ) exporting name === lv_n value === lv_v;
-    } else {
-      call method this.mo_response_cloud.( `IF_WEB_HTTP_RESPONSE~SET_HEADER_FIELD` ) exporting i_name === lv_n i_value === lv_v;
-    }
-  }
+  // ---- Request side ----
 
-  static factory({ server } = {}) {
-    let result = null;
-    result = new z2ui5_cl_util_http();
-    result.mo_server_onprem = server;
-    return result;
-  }
-
-  static factory_cloud({ req, res } = {}) {
-    let result = null;
-    result = new z2ui5_cl_util_http();
-    result.mo_request_cloud = req;
-    result.mo_response_cloud = res;
-    return result;
-  }
-
-  get_cdata() {
-    let result = ``;
-    let object = null;
-    // TODO(abap2js): FIELD-SYMBOLS <any> TYPE any.
-    if (this.mo_server_onprem != null) {
-      // TODO(abap2js): ASSIGN mo_server_onprem->(`REQUEST`) TO <any>.
-      object = any;
-      call method object.( `GET_CDATA` ) receiving data === result;
-    } else {
-      call method this.mo_request_cloud.( `IF_WEB_HTTP_REQUEST~GET_TEXT` ) receiving r_value === result;
-    }
-    return result;
+  /**
+   * @returns {{ method:string, body:string, path:string, t_params:Array<{n:string,v:string}>}}
+   */
+  get_req_info() {
+    const url = this._req_url();
+    const t_params = z2ui5_cl_util_http.url_param_get_tab(url);
+    return {
+      body:     this.get_cdata(),
+      method:   this.get_method(),
+      path:     this._req_path(),
+      t_params,
+    };
   }
 
   get_method() {
-    let result = ``;
-    let object = null;
-    // TODO(abap2js): FIELD-SYMBOLS <any> TYPE any.
-    if (this.mo_server_onprem != null) {
-      // TODO(abap2js): ASSIGN mo_server_onprem->(`REQUEST`) TO <any>.
-      object = any;
-      call method object.( `IF_HTTP_REQUEST~GET_METHOD` ) receiving method === result;
-    } else {
-      call method this.mo_request_cloud.( `IF_WEB_HTTP_REQUEST~GET_METHOD` ) receiving r_value === result;
-    }
-    return result;
+    if (this.mo_server_onprem) return String(this.mo_server_onprem?.request?.method || ``);
+    return String(this.mo_request_cloud?.method || ``);
   }
 
-  set_cdata({ val } = {}) {
-    let object = null;
-    // TODO(abap2js): FIELD-SYMBOLS <any> TYPE any.
-    if (this.mo_server_onprem != null) {
-      // TODO(abap2js): ASSIGN mo_server_onprem->(`RESPONSE`) TO <any>.
-      object = any;
-      call method object.( `SET_CDATA` ) exporting data === val;
-    } else {
-      call method this.mo_response_cloud.( `IF_WEB_HTTP_RESPONSE~SET_TEXT` ) exporting i_text === val;
+  get_cdata() {
+    if (this.mo_server_onprem) {
+      const b = this.mo_server_onprem?.request?.body;
+      return typeof b === `string` ? b : JSON.stringify(b ?? ``);
+    }
+    const b = this.mo_request_cloud?.body;
+    if (b == null) return ``;
+    return typeof b === `string` ? b : JSON.stringify(b);
+  }
+
+  /**
+   * Mirrors abap get_header_field. Special-cases the abap pseudo-headers
+   * `~path` and `~request_uri` since express exposes them differently.
+   */
+  get_header_field(val) {
+    const key = String(val || ``);
+    if (key === `~path`)        return this._req_path();
+    if (key === `~request_uri`) return this._req_url();
+
+    const req = this.mo_request_cloud || this.mo_server_onprem?.request;
+    if (!req) return ``;
+    const headers = req.headers || {};
+    return String(headers[key.toLowerCase()] || ``);
+  }
+
+  // ---- Response side ----
+
+  set_cdata(val) {
+    const res = this.mo_response_cloud || this.mo_server_onprem?.response;
+    if (res?.send) res.send(val);
+    else if (res) res.body = val;
+  }
+
+  set_status(code, reason) {
+    const res = this.mo_response_cloud || this.mo_server_onprem?.response;
+    if (res?.status) {
+      res.status(code);
+      if (reason && res.statusMessage !== undefined) res.statusMessage = reason;
+    } else if (res) {
+      res.statusCode = code;
+      res.statusMessage = reason;
     }
   }
 
-  set_status({ !code, reason } = {}) {
-    let object = null;
-    // TODO(abap2js): FIELD-SYMBOLS <any> TYPE any.
-    const lv_reason = (reason);
-    if (this.mo_server_onprem != null) {
-      // TODO(abap2js): ASSIGN mo_server_onprem->(`RESPONSE`) TO <any>.
-      object = any;
-      call method object.( `IF_HTTP_RESPONSE~SET_STATUS` ) exporting code === code reason === lv_reason;
-    } else {
-      call method this.mo_response_cloud.( `IF_WEB_HTTP_RESPONSE~SET_STATUS` ) exporting i_code === code i_reason === lv_reason;
-    }
+  set_header_field(n, v) {
+    const res = this.mo_response_cloud || this.mo_server_onprem?.response;
+    if (res?.setHeader) res.setHeader(String(n), String(v));
   }
 
-  set_session_stateful({ val } = {}) {
-    if (this.mo_server_onprem != null) {
-      call method this.mo_server_onprem.( `SET_SESSION_STATEFUL` ) exporting stateful === val;
-    } else {
-    }
+  /**
+   * Sticky-session toggle. ABAP forwards `stateful` (0/1/2) to ICF. Node has
+   * no native sticky-session concept — apps may use the value for routing
+   * affinity or session stores. For now we record on the response object so
+   * a custom middleware can pick it up.
+   */
+  set_session_stateful(val) {
+    const res = this.mo_response_cloud || this.mo_server_onprem?.response;
+    if (res) res.locals = { ...(res.locals || {}), z2ui5_session_stateful: val };
   }
 
-  get_req_info() {
-    let result = {};
-    result.body = this.get_cdata();
-    result.method = this.get_method();
-    result.path = this.get_header_field({ val: `~path` });
-    result.t_params = z2ui5_cl_util.url_param_get_tab(this.get_header_field({ val: `~request_uri` }));
-    return result;
+  get_response_cookie(val) {
+    const req = this.mo_request_cloud || this.mo_server_onprem?.request;
+    if (!req) return ``;
+    if (req.cookies && val in req.cookies) return String(req.cookies[val]);
+    const raw = req.headers?.cookie || ``;
+    const m = raw.match(new RegExp(`(?:^|;\\s*)${val}=([^;]*)`));
+    return m ? decodeURIComponent(m[1]) : ``;
+  }
+
+  delete_response_cookie(val) {
+    const res = this.mo_response_cloud || this.mo_server_onprem?.response;
+    if (res?.clearCookie) res.clearCookie(String(val));
+  }
+
+  // ---- helpers ----
+
+  _req_url() {
+    return this.mo_request_cloud?.originalUrl
+      || this.mo_request_cloud?.url
+      || this.mo_server_onprem?.request?.originalUrl
+      || this.mo_server_onprem?.request?.url
+      || ``;
+  }
+
+  _req_path() {
+    const url = this._req_url();
+    const idx = url.indexOf(`?`);
+    return idx >= 0 ? url.slice(0, idx) : url;
+  }
+
+  /**
+   * Parses URL query string into [{n, v}, …]. Mirrors
+   * z2ui5_cl_util=>url_param_get_tab. Lives on this class as a static so it
+   * stays usable without instantiating; z2ui5_cl_util re-exports the same
+   * implementation under that name.
+   */
+  static url_param_get_tab(url) {
+    const out = [];
+    const q = String(url || ``).split(`?`)[1];
+    if (!q) return out;
+    for (const pair of q.split(`&`)) {
+      if (!pair) continue;
+      const eq = pair.indexOf(`=`);
+      const n = eq >= 0 ? pair.slice(0, eq) : pair;
+      const v = eq >= 0 ? pair.slice(eq + 1) : ``;
+      try {
+        out.push({ n: decodeURIComponent(n), v: decodeURIComponent(v) });
+      } catch {
+        out.push({ n, v });
+      }
+    }
+    return out;
   }
 }
 

@@ -35,6 +35,7 @@ class z2ui5_cl_demo_app_074 extends z2ui5_if_app {
   }
 
   view_display() {
+    let sy_tabix = 0;
     const view = z2ui5_cl_xml_view.factory();
     const page = view.shell()
       .page({ title: `abap2UI5 - CSV to ABAP internal Table`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
@@ -50,13 +51,13 @@ class z2ui5_cl_demo_app_074 extends z2ui5_if_app {
         .get_parent();
       const lr_fields = z2ui5_cl_util.rtti_get_t_attri_by_any(tab);
       const lo_cols = tab.columns();
-      let sy_tabix = 0;
+      sy_tabix = 0;
       for (const lr_col of lr_fields) {
         sy_tabix++;
         lo_cols.column().text(lr_col.name);
       }
       const lo_cells = tab.items().column_list_item().cells();
-      let sy_tabix = 0;
+      sy_tabix = 0;
       for (const lr_col of lr_fields) {
         sy_tabix++;
         lo_cells.text(`{${lr_col.name}}`);

@@ -97,8 +97,9 @@ class z2ui5_cl_core_action {
   }
 
   reset_view_update_flags() {
-    let lt_slot = z2ui5_if_core_types.cs_view_slot_list.split(`,`);
     let sy_tabix = 0;
+    let lt_slot = z2ui5_if_core_types.cs_view_slot_list.split(`,`);
+    sy_tabix = 0;
     for (const lv_slot of lt_slot) {
       sy_tabix++;
       // TODO(abap2js): ASSIGN COMPONENT lv_slot OF STRUCTURE ms_next-s_set TO FIELD-SYMBOL(<slot>).

@@ -14,12 +14,12 @@ class z2ui5_cl_demo_app_163 extends z2ui5_if_app {
     const action_sheet_view = z2ui5_cl_xml_view.factory_popup();
     action_sheet_view._generic_property({ n: `core:require`, v: `{ MessageToast: 'sap/m/MessageToast' }` });
     action_sheet_view.action_sheet({ placement: `Botton`, showcancelbutton: true, title: `Choose Your Action` })
-      .button({ text: `Accept`, icon: `sap-icon://accept`, press: `MessageToast.show('selected action is ' + ${$source>/text})` })
-      .button({ text: `Reject`, icon: `sap-icon://decline`, press: `MessageToast.show('selected action is ' + ${$source>/text})` })
-      .button({ text: `Email`, icon: `sap-icon://email`, press: `MessageToast.show('selected action is ' + ${$source>/text})` })
-      .button({ text: `Forward`, icon: `sap-icon://forward`, press: `MessageToast.show('selected action is ' + ${$source>/text})` })
-      .button({ text: `Delete`, icon: `sap-icon://delete`, press: `MessageToast.show('selected action is ' + ${$source>/text})` })
-      .button({ text: `Other`, press: `MessageToast.show('selected action is ' + ${$source>/text})` });
+      .button({ text: `Accept`, icon: `sap-icon://accept`, press: `MessageToast.show('selected action is ' + \${$source>/text})` })
+      .button({ text: `Reject`, icon: `sap-icon://decline`, press: `MessageToast.show('selected action is ' + \${$source>/text})` })
+      .button({ text: `Email`, icon: `sap-icon://email`, press: `MessageToast.show('selected action is ' + \${$source>/text})` })
+      .button({ text: `Forward`, icon: `sap-icon://forward`, press: `MessageToast.show('selected action is ' + \${$source>/text})` })
+      .button({ text: `Delete`, icon: `sap-icon://delete`, press: `MessageToast.show('selected action is ' + \${$source>/text})` })
+      .button({ text: `Other`, press: `MessageToast.show('selected action is ' + \${$source>/text})` });
     this.client.popover_display(action_sheet_view.stringify(), `actionSheet`);
   }
 

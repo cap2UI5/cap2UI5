@@ -6,10 +6,11 @@ class z2ui5_cl_demo_app_144 extends z2ui5_if_app {
   client = null;
 
   set_view() {
+    let sy_tabix = 0;
     const view = z2ui5_cl_xml_view.factory();
     const page = view.shell()
       .page({ title: `abap2UI5 - Binding Cell Level`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const lr_row of this.t_tab) {
       sy_tabix++;
       const lv_tabix = sy_tabix;
@@ -46,7 +47,7 @@ class z2ui5_cl_demo_app_144 extends z2ui5_if_app {
     this.client = client;
     if (client.check_on_init()) {
       for (let sy_index = 1; sy_index <= 1; sy_index++) {
-        this.t_tab = /* TODO(abap2js): VALUE FOR/BASE */ [];
+        this.t_tab = [...(this.t_tab ?? []),{ title: `entry 01`, value: `red` }, { title: `entry 02`, value: `blue` }];
       }
       this.set_view();
     }

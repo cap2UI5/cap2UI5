@@ -30,7 +30,7 @@ class z2ui5_cl_demo_app_176 extends z2ui5_if_app {
       .column_list_item()
       .cells()
       .template_repeat({ list: `{template>/MT_LAYOUT}`, var: `LO2` })
-      .object_identifier({ text: `{= '{' + ${LO2>FNAME} + '}' }` });
+      .object_identifier({ text: `{= '{' + \${LO2>FNAME} + '}' }` });
     i_client.nest_view_display({ val: lo_view_nested.stringify(), id: `test`, method_insert: `addContent` });
   }
 

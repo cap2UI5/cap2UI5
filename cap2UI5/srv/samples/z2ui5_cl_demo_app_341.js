@@ -27,7 +27,7 @@ class z2ui5_cl_demo_app_341 extends z2ui5_if_app {
     this.client = client;
     if (client.get().CHECK_ON_NAVIGATED === true) {
       this.view_display();
-      this.mt_table = { index: 1, value: this.10() () };
+      this.mt_table = [{ index: 1, value: 10 }, { index: 1, value: 10 }];
     }
     switch (client.get().EVENT) {
       case `BUTTON_POPUP_01`:

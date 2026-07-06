@@ -32,10 +32,10 @@ class z2ui5_cl_demo_app_365 extends z2ui5_if_app {
     const xml = `<?xml version="1.0" encoding="UTF-8"?>` + `<flightplan>` + `<flight carrid="LH" connid="0400" cityfrom="FRANKFURT" cityto="NEW YORK"/>` + `<flight carrid="AA" connid="0017" cityfrom="NEW YORK" cityto="SAN FRANCISCO"/>` + `</flightplan>`;
     let output = null;
     const classname = `CL_DEMO_OUTPUT`;
-    call this.method(classname).( `NEW` ) receiving output === output;
-    call method output.( `WRITE_TEXT` ) exporting text === `The HTML below is produced by the standard SAP class CL_DEMO_OUTPUT` + ` and rendered inside abap2UI5 - either as a popup or as a fullscreen` + ` app with a back button. It contains text, table data and XML.`;
-    call method output.( `WRITE_DATA` ) exporting value === t_carriers;
-    call method output.( `WRITE_XML` ) exporting xml === xml;
+    // TODO(abap2js): CALL METHOD (classname)=>(`NEW`) RECEIVING output = output.
+    // TODO(abap2js): CALL METHOD output->(`WRITE_TEXT`) EXPORTING text = `The HTML below is produced by the standard SAP class CL_DEMO_OUTPUT` && ` and rendered inside abap2UI5 - either as a popup or as a fullscreen` && ` app with a back button. It contains text, table data and XML.`.
+    // TODO(abap2js): CALL METHOD output->(`WRITE_DATA`) EXPORTING value = t_carriers.
+    // TODO(abap2js): CALL METHOD output->(`WRITE_XML`) EXPORTING xml = xml.
     this.client.nav_app_call(z2ui5_cl_pop_demo_output.factory({ i_output: output, i_as_page: as_page }));
   }
 }

@@ -1,70 +1,75 @@
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cx_util_error = require("abap2UI5/z2ui5_cx_util_error");
+const { randomUUID } = require("crypto");
 
+/**
+ * z2ui5_cl_util_db — JS port of abap2UI5 z2ui5_cl_util_db.
+ *
+ * Generic key-value store keyed by (uname, handle, handle2, handle3) — same
+ * 4-part composite key abap uses on table z2ui5_t_91. ABAP commits to the
+ * actual DB; the JS port defaults to an in-memory Map for parity with abap
+ * `IS NOT INITIAL` semantics. Callers who want persistence should call
+ * `set_store(custom)` once at boot, providing an object with the same
+ * { get(k), set(k, v), delete(k), has(k) } shape as Map.
+ *
+ * Abap signatures preserved 1:1:
+ *   delete_by_handle({ uname?, handle?, handle2?, handle3?, check_commit })
+ *   save({ uname?, handle?, handle2?, handle3?, data, check_commit }) → id
+ *   load_by_id({ id })                                                → data
+ *   load_by_handle({ uname?, handle?, handle2?, handle3? })           → data
+ */
 class z2ui5_cl_util_db {
+
+  // Composite-key store + secondary id index — abap z2ui5_t_91 layout.
+  static _store = new Map();      // key=`${uname}|${h}|${h2}|${h3}` → { id, data }
+  static _by_id = new Map();      // id → key
+
+  /** Replace the backing store (e.g. a CDS-backed wrapper). */
+  static set_store(store) {
+    z2ui5_cl_util_db._store = store;
+  }
+
+  static _composite_key({ uname = ``, handle = ``, handle2 = ``, handle3 = `` } = {}) {
+    return `${uname}|${handle}|${handle2}|${handle3}`;
+  }
+
   static delete_by_handle({ uname, handle, handle2, handle3, check_commit = true } = {}) {
-    // TODO(abap2js): DELETE FROM z2ui5_t_91 WHERE uname = @uname AND handle = @handle AND handle2 = @handle2 AND handle3 = @handle3.
-    if (check_commit === true) {
-      // TODO(abap2js): COMMIT WORK AND WAIT.
+    const key = z2ui5_cl_util_db._composite_key({ uname, handle, handle2, handle3 });
+    const entry = z2ui5_cl_util_db._store.get(key);
+    if (entry) {
+      z2ui5_cl_util_db._by_id.delete(entry.id);
+      z2ui5_cl_util_db._store.delete(key);
     }
-  }
-
-  static load_by_handle({ uname, handle, handle2, handle3 } = {}) {
-    // TODO(abap2js): SELECT SINGLE data FROM z2ui5_t_91 WHERE uname = @uname AND handle = @handle AND handle2 = @handle2 AND handle3 = @handle3 INTO @DATA(lv_data).
-    if (sy_subrc !== 0) {
-      throw new z2ui5_cx_util_error({ val: `NO_ENTRY_FOR_HANDLE_EXISTS` });
-    }
-    z2ui5_cl_util.xml_parse(/* TODO(abap2js): out-params */ EXPORTING xml = lv_data IMPORTING any = result);
-  }
-
-  static load_multi_by_handle({ uname, handle, handle2, handle3 } = {}) {
-    let result = [];
-    let lr_uname = [];
-    let lr_handle = [];
-    let lr_handle2 = [];
-    let lr_handle3 = [];
-    if (uname !== undefined) {
-      lr_uname = [{ sign: `I`, option: `EQ`, low: uname }];
-    }
-    if (handle !== undefined) {
-      lr_handle = [{ sign: `I`, option: `EQ`, low: handle }];
-    }
-    if (handle2 !== undefined) {
-      lr_handle2 = [{ sign: `I`, option: `EQ`, low: handle2 }];
-    }
-    if (handle3 !== undefined) {
-      lr_handle3 = [{ sign: `I`, option: `EQ`, low: handle3 }];
-    }
-    // TODO(abap2js): SELECT FROM z2ui5_t_91 FIELDS * WHERE uname IN @lr_uname AND handle IN @lr_handle AND handle2 IN @lr_handle2 AND handle3 IN @lr_handle3 INTO CORRESPONDING FIELDS OF TABLE @result.
-    return result;
-  }
-
-  static load_by_id({ id } = {}) {
-    // TODO(abap2js): SELECT SINGLE data FROM z2ui5_t_91 WHERE id = @id INTO @DATA(lv_data).
-    if (sy_subrc !== 0) {
-      throw new z2ui5_cx_util_error({ val: `NO_ENTRY_FOR_ID_EXISTS: ${id}` });
-    }
-    z2ui5_cl_util.xml_parse(/* TODO(abap2js): out-params */ EXPORTING xml = lv_data IMPORTING any = result);
+    // check_commit is a no-op in the in-memory store; honoured by db-backed
+    // store implementations that need explicit transaction control.
+    void check_commit;
   }
 
   static save({ uname, handle, handle2, handle3, data, check_commit = true } = {}) {
-    let result = ``;
-    // TODO(abap2js): SELECT SINGLE id FROM z2ui5_t_91 WHERE uname = @uname AND handle = @handle AND handle2 = @handle2 AND handle3 = @handle3 INTO @DATA(lv_id) .
-    const ls_db = { uname: uname, handle: handle, handle2: handle2, handle3: handle3, data: z2ui5_cl_util.xml_stringify(data) };
-    if (lv_id) {
-      ls_db.id = lv_id;
-    } else {
-      ls_db.id = z2ui5_cl_util.uuid_get_c32();
+    const key = z2ui5_cl_util_db._composite_key({ uname, handle, handle2, handle3 });
+    const existing = z2ui5_cl_util_db._store.get(key);
+    const id = existing?.id || randomUUID().replace(/-/g, ``);
+    z2ui5_cl_util_db._store.set(key, { id, uname, handle, handle2, handle3, data });
+    z2ui5_cl_util_db._by_id.set(id, key);
+    void check_commit;
+    return id;
+  }
+
+  static load_by_id({ id } = {}) {
+    const key = z2ui5_cl_util_db._by_id.get(id);
+    if (!key) {
+      const z2ui5_cx_util_error = require("../z2ui5_cx_util_error");
+      throw new z2ui5_cx_util_error(`NO_ENTRY_FOR_ID_EXISTS`);
     }
-    // TODO(abap2js): MODIFY z2ui5_t_91 FROM @ls_db.
-    if (sy_subrc !== 0) {
-      throw new z2ui5_cx_util_error({ val: `DB_SAVE_FAILED` });
+    return z2ui5_cl_util_db._store.get(key)?.data;
+  }
+
+  static load_by_handle({ uname, handle, handle2, handle3 } = {}) {
+    const key = z2ui5_cl_util_db._composite_key({ uname, handle, handle2, handle3 });
+    const entry = z2ui5_cl_util_db._store.get(key);
+    if (!entry) {
+      const z2ui5_cx_util_error = require("../z2ui5_cx_util_error");
+      throw new z2ui5_cx_util_error(`NO_ENTRY_FOR_HANDLE_EXISTS`);
     }
-    if (check_commit === true) {
-      // TODO(abap2js): COMMIT WORK AND WAIT.
-    }
-    result = ls_db.id;
-    return result;
+    return entry.data;
   }
 }
 

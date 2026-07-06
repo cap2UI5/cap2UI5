@@ -14,9 +14,10 @@ class z2ui5_cl_demo_app_064 extends z2ui5_if_app {
   client = null;
 
   set_selkz({ iv_selkz } = {}) {
-    // TODO(abap2js): FIELD-SYMBOLS <ls_table> TYPE ty_s_tab.
     let sy_tabix = 0;
-    for (const fs of this.mt_table) {
+    // TODO(abap2js): FIELD-SYMBOLS <ls_table> TYPE ty_s_tab.
+    sy_tabix = 0;
+    for (const ls_table of this.mt_table) {
       sy_tabix++;
       ls_table.selkz = iv_selkz;
     }

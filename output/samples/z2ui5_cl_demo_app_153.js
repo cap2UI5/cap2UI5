@@ -1,4 +1,4 @@
-// TODO(abap2js): unresolved reference z2ui5_cl_ajson_mapping — add require manually
+const z2ui5_cl_ajson_mapping = require("abap2UI5/z2ui5_cl_ajson_mapping");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 

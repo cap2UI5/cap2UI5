@@ -28,7 +28,7 @@ class z2ui5_cl_demo_app_098 extends z2ui5_if_app {
     lo_columns.get_parent()
       .ui_row_action_template()
       .ui_row_action()
-      .ui_row_action_item({ type: `Navigation`, press: this.client._event(`ROW_NAVIGATE`, [`${TITLE}`]) });
+      .ui_row_action_item({ type: `Navigation`, press: this.client._event(`ROW_NAVIGATE`, [`\${TITLE}`]) });
     this.client.nest_view_display(lo_view_nested.stringify(), `test`, `addMidColumnPage`, `removeAllMidColumnPages`);
   }
 

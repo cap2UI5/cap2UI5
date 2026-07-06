@@ -59,9 +59,10 @@ class z2ui5_cl_demo_app_349 extends z2ui5_if_app {
   }
 
   xml_table({ i_page, i_client } = {}) {
+    let sy_tabix = 0;
     const table = i_page.table({ width: `auto`, items: i_client._bind_edit({ val: this.mt_data }) });
     const columns = table.columns();
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const layout of this.mo_layout_obj.ms_data.t_layout) {
       sy_tabix++;
       let lv_index = sy_tabix;
@@ -70,7 +71,7 @@ class z2ui5_cl_demo_app_349 extends z2ui5_if_app {
     }
     const column_list_item = columns.get_parent().items().column_list_item({ valign: `Middle`, type: `Inactive` });
     const cells = column_list_item.cells();
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const layout of this.mo_layout_obj.ms_data.t_layout) {
       sy_tabix++;
       lv_index = sy_tabix;
@@ -80,14 +81,15 @@ class z2ui5_cl_demo_app_349 extends z2ui5_if_app {
 
   get_data() {
     // TODO(abap2js): SELECT id, id_prev, id_prev_app, id_prev_app_stack, timestampl FROM z2ui5_t_01 INTO CORRESPONDING FIELDS OF TABLE @mt_data UP TO 10 ROWS.
-    this.ms_data = (this.mt_data[(1) - 1] optional);
+    this.ms_data = (() => { try { return this.mt_data[(1) - 1] ?? null; } catch { return null; } })();
   }
 
   xml_form({ i_page, i_client } = {}) {
+    let sy_tabix = 0;
     const form = i_page.simple_form({ editable: true, layout: `ResponsiveGridLayout`, adjustlabelspan: true })
       .content(`form`);
     let index = 0;
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const layout of this.mo_layout_obj.ms_data.t_layout) {
       sy_tabix++;
       index = index + 1;

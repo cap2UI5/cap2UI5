@@ -12,18 +12,19 @@ class z2ui5_cl_demo_app_056 extends z2ui5_if_app {
   mt_range = null;
 
   on_event() {
+    let sy_tabix = 0;
     switch (this.client.get().EVENT) {
       case `BUTTON_START`:
         this.set_data();
         this.client.view_model_update();
         break;
       case `UPDATE_TOKENS`:
-        let sy_tabix = 0;
+        sy_tabix = 0;
         for (const ls_token of this.mt_tokens_removed) {
           sy_tabix++;
           for (let _i = this.mt_token.length - 1; _i >= 0; _i--) { const row = this.mt_token[_i]; if (row.key === ls_token.key) this.mt_token.splice(_i, 1); }
         }
-        let sy_tabix = 0;
+        sy_tabix = 0;
         for (const ls_token of this.mt_tokens_added) {
           sy_tabix++;
           this.mt_token.push({ key: ls_token.key, text: ls_token.text, visible: true, editable: true });
@@ -42,7 +43,7 @@ class z2ui5_cl_demo_app_056 extends z2ui5_if_app {
 
   set_data() {
     this.mt_table = [{ product: `table`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }, { product: `chair`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }, { product: `sofa`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }, { product: `computer`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }, { product: `oven`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }, { product: `table2`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }];
-    for (let _i = this.mt_table.length - 1; _i >= 0; _i--) { const row = this.mt_table[_i]; if (product ! IN this.mt_range) this.mt_table.splice(_i, 1); }
+    for (let _i = this.mt_table.length - 1; _i >= 0; _i--) { const row = this.mt_table[_i]; if (!((($v, $r) => !$r || !$r.length || $r.some(($x) => ($x.option === `BT` ? $v >= $x.low && $v <= $x.high : $x.option === `NE` ? $v !== $x.low : $x.option === `CP` ? String($v).includes(String($x.low).replace(/\*/g, "")) : $v === $x.low)))(row.product, this.mt_range))) this.mt_table.splice(_i, 1); }
   }
 
   view_display() {

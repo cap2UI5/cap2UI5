@@ -18,7 +18,7 @@ class z2ui5_cl_demo_app_095 extends z2ui5_if_app {
 
   on_event_sub() {
     this.mo_app_sub.mo_view_parent = this.mo_grid_sub;
-    this.mo_app_sub.z2ui5_if_app~main(this.client);
+    this.mo_app_sub.main(this.client);
   }
 
   on_init() {
@@ -29,7 +29,7 @@ class z2ui5_cl_demo_app_095 extends z2ui5_if_app {
   on_init_sub() {
     this.mo_app_sub = /* TODO(abap2js): NEW #( ) */ null;
     this.mo_app_sub.mo_view_parent = this.mo_grid_sub;
-    this.mo_app_sub.z2ui5_if_app~main(this.client);
+    this.mo_app_sub.main(this.client);
     this.client.view_display(this.page.stringify());
   }
 

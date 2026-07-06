@@ -9,6 +9,7 @@ class z2ui5_cl_pop_table extends z2ui5_if_app {
   client = null;
 
   display() {
+    let sy_tabix = 0;
     // TODO(abap2js): FIELD-SYMBOLS <tab_out> TYPE STANDARD TABLE.
     // TODO(abap2js): ASSIGN mr_tab->* TO <tab_out>.
     const popup = z2ui5_cl_xml_view.factory_popup()
@@ -18,17 +19,17 @@ class z2ui5_cl_pop_table extends z2ui5_if_app {
     const lt_comp = z2ui5_cl_util.rtti_get_t_attri_by_any(tab_out);
     const list = tab.column_list_item({ valign: `Top` });
     const cells = list.cells();
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const ls_comp of lt_comp) {
       sy_tabix++;
       cells.text(`{${ls_comp.name}}`);
     }
     const columns = tab.columns();
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const ls_comp of lt_comp) {
       sy_tabix++;
       if (ls_comp.type != null && ls_comp.type.is_ddic_type() === true) {
-        const lv_name = this.substring_after({ val: (ls_comp.type).absolute_name, sub: `\TYPE=` });
+        const lv_name = this.substring_after({ val: (ls_comp.type).absolute_name, sub: `\\TYPE=` });
         const lv_ddic_field_label = z2ui5_cl_util.rtti_get_data_element_text_l(lv_name);
         if (lv_ddic_field_label) {
           columns.column(`8rem`).header(``).text(lv_ddic_field_label);

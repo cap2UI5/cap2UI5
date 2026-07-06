@@ -14,7 +14,7 @@ class z2ui5_cl_util_db {
     if (sy_subrc !== 0) {
       throw new z2ui5_cx_util_error({ val: `NO_ENTRY_FOR_HANDLE_EXISTS` });
     }
-    z2ui5_cl_util.xml_parse(/* TODO(abap2js): out-params */ EXPORTING xml = lv_data IMPORTING any = result);
+    // TODO(abap2js): z2ui5_cl_util=>xml_parse( EXPORTING xml = lv_data IMPORTING any = result ).
   }
 
   static load_multi_by_handle({ uname, handle, handle2, handle3 } = {}) {
@@ -44,7 +44,7 @@ class z2ui5_cl_util_db {
     if (sy_subrc !== 0) {
       throw new z2ui5_cx_util_error({ val: `NO_ENTRY_FOR_ID_EXISTS: ${id}` });
     }
-    z2ui5_cl_util.xml_parse(/* TODO(abap2js): out-params */ EXPORTING xml = lv_data IMPORTING any = result);
+    // TODO(abap2js): z2ui5_cl_util=>xml_parse( EXPORTING xml = lv_data IMPORTING any = result ).
   }
 
   static save({ uname, handle, handle2, handle3, data, check_commit = true } = {}) {

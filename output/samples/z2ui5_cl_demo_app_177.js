@@ -24,11 +24,11 @@ class z2ui5_cl_demo_app_177 extends z2ui5_if_app {
     }
     switch (client.get().EVENT) {
       case `SORT_ASCENDING`:
-        this.t_tab.sort((a, b) => (a.count > b.count ? 1 : a.count < b.count ? -1 : 0));
+        this.t_tab.sort((a, b) => ((a.count > b.count ? 1 : a.count < b.count ? -1 : 0)));
         client.message_toast_display(`sort ascending`);
         break;
       case `SORT_DESCENDING`:
-        this.t_tab.sort((a, b) => (a.count > b.count ? 1 : a.count < b.count ? -1 : 0) * -1);
+        this.t_tab.sort((a, b) => ((a.count > b.count ? 1 : a.count < b.count ? -1 : 0)) * -1);
         client.message_toast_display(`sort descending`);
         break;
       case `BUTTON_POST`:

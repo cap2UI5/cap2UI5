@@ -35,7 +35,7 @@ class z2ui5_cl_demo_app_072 extends z2ui5_if_app {
     const view = z2ui5_cl_xml_view.factory();
     const page = view.shell()
       .page({ id: `page_main`, showheader: /* TODO(abap2js) */ xsdbool(false === this.client.get().CHECK_LAUNCHPAD_ACTIVE), title: `abap2UI5 - IconTabBar`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack(), class: `sapUiContentPadding` });
-    const lo_items = page.icon_tab_bar({ class: `sapUiResponsiveContentPadding`, selectedkey: this.client._bind_edit(this.lv_selectedkey), select: this.client._event(`OnSelectIconTabBar`, [`${LV_SELECTEDKEY}`]) })
+    const lo_items = page.icon_tab_bar({ class: `sapUiResponsiveContentPadding`, selectedkey: this.client._bind_edit(this.lv_selectedkey), select: this.client._event(`OnSelectIconTabBar`, [`\${LV_SELECTEDKEY}`]) })
       .items();
     lo_items.icon_tab_filter({ count: this.client._bind_edit(this.lv_cnt_total), text: `Products`, key: `ALL`, showall: true });
     lo_items.icon_tab_separator();
@@ -89,10 +89,10 @@ class z2ui5_cl_demo_app_072 extends z2ui5_if_app {
       case `ALL`:
         break;
       case `OK`:
-        for (let _i = this.mt_table.length - 1; _i >= 0; _i--) { const row = this.mt_table[_i]; if (!measure BETWEEN 0 && 100) this.mt_table.splice(_i, 1); }
+        for (let _i = this.mt_table.length - 1; _i >= 0; _i--) { const row = this.mt_table[_i]; if (!(row.measure >= 0 && row.measure <= 100)) this.mt_table.splice(_i, 1); }
         break;
       case `HEAVY`:
-        for (let _i = this.mt_table.length - 1; _i >= 0; _i--) { const row = this.mt_table[_i]; if (!measure BETWEEN 101 && 500) this.mt_table.splice(_i, 1); }
+        for (let _i = this.mt_table.length - 1; _i >= 0; _i--) { const row = this.mt_table[_i]; if (!(row.measure >= 101 && row.measure <= 500)) this.mt_table.splice(_i, 1); }
         break;
       case `OVERWEIGHT`:
         for (let _i = this.mt_table.length - 1; _i >= 0; _i--) { const row = this.mt_table[_i]; if (!row.measure > 500) this.mt_table.splice(_i, 1); }

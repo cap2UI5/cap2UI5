@@ -1,4 +1,3 @@
-// TODO(abap2js): unresolved reference cl_abap_elemdescr — add require manually
 // TODO(abap2js): unresolved reference cl_abap_structdescr — add require manually
 // TODO(abap2js): unresolved reference cl_abap_typedescr — add require manually
 // TODO(abap2js): unresolved reference cx_sy_dyn_call_illegal_class — add require manually
@@ -13,7 +12,7 @@ class z2ui5_cl_util_api_s {
     try {
       const lv_result = {};
       const lv_class = `CL_ABAP_CONTEXT_INFO`;
-      call this.method(lv_class).( `GET_USER_BUSINESS_PARTNER_ID` ) receiving rv_business_partner_id === lv_result;
+      // TODO(abap2js): CALL METHOD (lv_class)=>(`GET_USER_BUSINESS_PARTNER_ID`) RECEIVING rv_business_partner_id = lv_result.
       result = lv_result;
     } catch (x) {
       throw new z2ui5_cx_util_error({ previous: x });
@@ -40,6 +39,7 @@ class z2ui5_cl_util_api_s {
 
   static rtti_get_t_fixvalues({ elemdescr, langu } = {}) {
     let result = [];
+    let sy_tabix = 0;
     // TODO(abap2js): TYPES BEGIN OF fixvalue,
     // TODO(abap2js): TYPES low TYPE c LENGTH 10,
     // TODO(abap2js): TYPES high TYPE c LENGTH 10,
@@ -55,8 +55,8 @@ class z2ui5_cl_util_api_s {
     let temp2 = null;
     lv_langu = ` `;
     lv_langu = langu;
-    call method elemdescr.( `GET_DDIC_FIXED_VALUES` ) exporting p_langu === lv_langu receiving p_fixed_values === lt_values exceptions not_found === 1 no_ddic_type === 2 others === 3;
-    let sy_tabix = 0;
+    // TODO(abap2js): CALL METHOD elemdescr->(`GET_DDIC_FIXED_VALUES`) EXPORTING p_langu = lv_langu RECEIVING p_fixed_values = lt_values EXCEPTIONS not_found = 1 no_ddic_type = 2 OTHERS = 3.
+    sy_tabix = 0;
     for (const lr_fix of lt_values) {
       sy_tabix++;
       temp2 = null;
@@ -74,10 +74,10 @@ class z2ui5_cl_util_api_s {
     let classname = ``;
     try {
       lv_web_http_name = `CL_WEB_HTTP_UTILITY`;
-      call this.method(lv_web_http_name).( `DECODE_X_BASE64` ) exporting encoded === val receiving decoded === result;
+      // TODO(abap2js): CALL METHOD (lv_web_http_name)=>(`DECODE_X_BASE64`) EXPORTING encoded = val RECEIVING decoded = result.
     } catch (error) {
       classname = `CL_HTTP_UTILITY`;
-      call this.method(classname).( `DECODE_X_BASE64` ) exporting encoded === val receiving decoded === result;
+      // TODO(abap2js): CALL METHOD (classname)=>(`DECODE_X_BASE64`) EXPORTING encoded = val RECEIVING decoded = result.
     }
     return result;
   }
@@ -88,10 +88,10 @@ class z2ui5_cl_util_api_s {
     let classname = ``;
     try {
       lv_web_http_name = `CL_WEB_HTTP_UTILITY`;
-      call this.method(lv_web_http_name).( `ENCODE_X_BASE64` ) exporting unencoded === val receiving encoded === result;
+      // TODO(abap2js): CALL METHOD (lv_web_http_name)=>(`ENCODE_X_BASE64`) EXPORTING unencoded = val RECEIVING encoded = result.
     } catch (error) {
       classname = `CL_HTTP_UTILITY`;
-      call this.method(classname).( `ENCODE_X_BASE64` ) exporting unencoded === val receiving encoded === result;
+      // TODO(abap2js): CALL METHOD (classname)=>(`ENCODE_X_BASE64`) EXPORTING unencoded = val RECEIVING encoded = result.
     }
     return result;
   }
@@ -103,12 +103,12 @@ class z2ui5_cl_util_api_s {
     let conv_in_class = ``;
     try {
       conv_codepage = `CL_ABAP_CONV_CODEPAGE`;
-      call this.method(conv_codepage).create_in receiving instance === conv;
-      call method conv.( `IF_ABAP_CONV_IN~CONVERT` ) exporting source === val receiving result === result;
+      // TODO(abap2js): CALL METHOD (conv_codepage)=>create_in RECEIVING instance = conv.
+      // TODO(abap2js): CALL METHOD conv->(`IF_ABAP_CONV_IN~CONVERT`) EXPORTING source = val RECEIVING result = result.
     } catch (error) {
       conv_in_class = `CL_ABAP_CONV_IN_CE`;
-      call this.method(conv_in_class).create exporting encoding === `UTF-8` receiving conv === conv;
-      call method conv.( `CONVERT` ) exporting input === val importing data === result;
+      // TODO(abap2js): CALL METHOD (conv_in_class)=>create EXPORTING encoding = `UTF-8` RECEIVING conv = conv.
+      // TODO(abap2js): CALL METHOD conv->(`CONVERT`) EXPORTING input = val IMPORTING data = result.
     }
     return result;
   }
@@ -120,18 +120,19 @@ class z2ui5_cl_util_api_s {
     let conv_out_class = ``;
     try {
       conv_codepage = `CL_ABAP_CONV_CODEPAGE`;
-      call this.method(conv_codepage).create_out receiving instance === conv;
-      call method conv.( `IF_ABAP_CONV_OUT~CONVERT` ) exporting source === val receiving result === result;
+      // TODO(abap2js): CALL METHOD (conv_codepage)=>create_out RECEIVING instance = conv.
+      // TODO(abap2js): CALL METHOD conv->(`IF_ABAP_CONV_OUT~CONVERT`) EXPORTING source = val RECEIVING result = result.
     } catch (error) {
       conv_out_class = `CL_ABAP_CONV_OUT_CE`;
-      call this.method(conv_out_class).create exporting encoding === `UTF-8` receiving conv === conv;
-      call method conv.( `CONVERT` ) exporting data === val importing buffer === result;
+      // TODO(abap2js): CALL METHOD (conv_out_class)=>create EXPORTING encoding = `UTF-8` RECEIVING conv = conv.
+      // TODO(abap2js): CALL METHOD conv->(`CONVERT`) EXPORTING data = val IMPORTING buffer = result.
     }
     return result;
   }
 
   static source_get_method({ iv_classname, iv_methodname } = {}) {
     let result = [];
+    let sy_tabix = 0;
     let object = null;
     // TODO(abap2js): FIELD-SYMBOLS <any> TYPE any.
     let lt_source = [];
@@ -147,27 +148,27 @@ class z2ui5_cl_util_api_s {
       lv_class = iv_classname.toUpperCase();
       lv_method = iv_methodname.toUpperCase();
       xco_cp_abap = `XCO_CP_ABAP`;
-      call this.method(xco_cp_abap).( `CLASS` ) exporting iv_name === lv_class receiving ro_class === object;
+      // TODO(abap2js): CALL METHOD (xco_cp_abap)=>(`CLASS`) EXPORTING iv_name = lv_class RECEIVING ro_class = object.
       // TODO(abap2js): ASSIGN object->(`IF_XCO_AO_CLASS~IMPLEMENTATION`) TO <any>.
       if (!(sy_subrc === 0)) throw new Error(`ASSERT failed`);
       object = any;
-      call method object.( `IF_XCO_CLAS_IMPLEMENTATION~METHOD` ) exporting iv_name === lv_method receiving ro_method === object;
-      call method object.( `IF_XCO_CLAS_I_METHOD~CONTENT` ) receiving ro_content === object;
-      call method object.( `IF_XCO_CLAS_I_METHOD_CONTENT~GET_SOURCE` ) receiving rt_source === result;
+      // TODO(abap2js): CALL METHOD object->(`IF_XCO_CLAS_IMPLEMENTATION~METHOD`) EXPORTING iv_name = lv_method RECEIVING ro_method = object.
+      // TODO(abap2js): CALL METHOD object->(`IF_XCO_CLAS_I_METHOD~CONTENT`) RECEIVING ro_content = object.
+      // TODO(abap2js): CALL METHOD object->(`IF_XCO_CLAS_I_METHOD_CONTENT~GET_SOURCE`) RECEIVING rt_source = result.
     } catch (error) {
       lv_name = `CL_OO_FACTORY`;
-      call this.method(lv_name).( `CREATE_INSTANCE` ) receiving result === object;
-      call method object.( `IF_OO_CLIF_SOURCE_FACTORY~CREATE_CLIF_SOURCE` ) exporting clif_name === lv_class receiving result === object;
-      call method object.( `IF_OO_CLIF_SOURCE~GET_SOURCE` ) importing source === lt_source;
+      // TODO(abap2js): CALL METHOD (lv_name)=>(`CREATE_INSTANCE`) RECEIVING result = object.
+      // TODO(abap2js): CALL METHOD object->(`IF_OO_CLIF_SOURCE_FACTORY~CREATE_CLIF_SOURCE`) EXPORTING clif_name = lv_class RECEIVING result = object.
+      // TODO(abap2js): CALL METHOD object->(`IF_OO_CLIF_SOURCE~GET_SOURCE`) IMPORTING source = lt_source.
       lv_check_method = false;
-      let sy_tabix = 0;
+      sy_tabix = 0;
       for (const lv_source of lt_source) {
         sy_tabix++;
         lv_source_upper = lv_source.toUpperCase();
-        if (lv_source_upper.toLowerCase().includes(String(`ENDMETHOD`).toLowerCase())) {
+        if (String(lv_source_upper).toLowerCase().includes(String(`ENDMETHOD`).toLowerCase())) {
           lv_check_method = false;
         }
-        if (lv_source_upper.toLowerCase().includes(String(`METHOD ${lv_method}`).toLowerCase())) {
+        if (String(lv_source_upper).toLowerCase().includes(String(`METHOD ${lv_method}`).toLowerCase())) {
           lv_check_method = true;
           continue;
         }
@@ -182,6 +183,7 @@ class z2ui5_cl_util_api_s {
 
   static rtti_get_classes_impl_intf({ val } = {}) {
     let result = [];
+    let sy_tabix = 0;
     let obj = null;
     // TODO(abap2js): FIELD-SYMBOLS <any> TYPE any.
     let lt_implementation_names = [];
@@ -212,7 +214,7 @@ class z2ui5_cl_util_api_s {
     try {
       ls_clskey.clsname = val;
       xco_cp_abap = `XCO_CP_ABAP`;
-      call this.method(xco_cp_abap).interface exporting iv_name === ls_clskey.clsname receiving ro_interface === obj;
+      // TODO(abap2js): CALL METHOD (xco_cp_abap)=>interface EXPORTING iv_name = ls_clskey-clsname RECEIVING ro_interface = obj.
       // TODO(abap2js): ASSIGN obj->(`IF_XCO_AO_INTERFACE~IMPLEMENTATIONS`) TO <any>.
       if (sy_subrc !== 0) {
         throw new cx_sy_dyn_call_illegal_class();
@@ -223,9 +225,9 @@ class z2ui5_cl_util_api_s {
         throw new cx_sy_dyn_call_illegal_class();
       }
       obj = any;
-      call method obj.( `IF_XCO_INTF_IMPLEMENTATIONS~GET_NAMES` ) receiving rt_names === lt_implementation_names;
+      // TODO(abap2js): CALL METHOD obj->(`IF_XCO_INTF_IMPLEMENTATIONS~GET_NAMES`) RECEIVING rt_names = lt_implementation_names.
       temp3 = null;
-      let sy_tabix = 0;
+      sy_tabix = 0;
       for (const implementation_name of lt_implementation_names) {
         sy_tabix++;
         temp4.classname = implementation_name;
@@ -266,13 +268,13 @@ class z2ui5_cl_util_api_s {
       // TODO(abap2js): CREATE DATA ddic_ref TYPE HANDLE struct_desrc.
       // TODO(abap2js): ASSIGN ddic_ref->* TO <ddic>.
       if (!(sy_subrc === 0)) throw new Error(`ASSERT failed`);
-      cl_abap_elemdescr.describe_by_name(/* TODO(abap2js): out-params */ EXPORTING p_name = data_element_name RECEIVING p_descr_ref = lo_typedescr EXCEPTIONS OTHERS = 1);
+      // TODO(abap2js): cl_abap_elemdescr=>describe_by_name( EXPORTING p_name = data_element_name RECEIVING p_descr_ref = lo_typedescr EXCEPTIONS OTHERS = 1 ).
       if (sy_subrc !== 0) {
         return result;
       }
       temp8 = lo_typedescr;
       data_descr = temp8;
-      call method data_descr.( `GET_DDIC_FIELD` ) receiving p_flddescr === ddic exceptions not_found === 1 no_ddic_type === 2 others === 3;
+      // TODO(abap2js): CALL METHOD data_descr->(`GET_DDIC_FIELD`) RECEIVING p_flddescr = <ddic> EXCEPTIONS not_found = 1 no_ddic_type = 2 OTHERS = 3.
       if (sy_subrc !== 0) {
         return result;
       }
@@ -285,16 +287,16 @@ class z2ui5_cl_util_api_s {
       try {
         let lv_xco_cp_abap_dictionary = ``;
         lv_xco_cp_abap_dictionary = `XCO_CP_ABAP_DICTIONARY`;
-        call this.method(lv_xco_cp_abap_dictionary).( `DATA_ELEMENT` ) exporting iv_name === data_element_name receiving ro_data_element === data_element;
-        call method data_element.( `IF_XCO_AD_DATA_ELEMENT~EXISTS` ) receiving rv_exists === exists;
+        // TODO(abap2js): CALL METHOD (lv_xco_cp_abap_dictionary)=>(`DATA_ELEMENT`) EXPORTING iv_name = data_element_name RECEIVING ro_data_element = data_element.
+        // TODO(abap2js): CALL METHOD data_element->(`IF_XCO_AD_DATA_ELEMENT~EXISTS`) RECEIVING rv_exists = exists.
         if (exists === false) {
           return result;
         }
-        call method data_element.( `IF_XCO_AD_DATA_ELEMENT~CONTENT` ) receiving ro_content === content;
-        call method content.( `IF_XCO_DTEL_CONTENT~GET_HEADING_FIELD_LABEL` ) receiving rs_heading_field_label === result.header;
-        call method content.( `IF_XCO_DTEL_CONTENT~GET_SHORT_FIELD_LABEL` ) receiving rs_short_field_label === result.short;
-        call method content.( `IF_XCO_DTEL_CONTENT~GET_MEDIUM_FIELD_LABEL` ) receiving rs_medium_field_label === result.medium;
-        call method content.( `IF_XCO_DTEL_CONTENT~GET_LONG_FIELD_LABEL` ) receiving rs_long_field_label === result.long;
+        // TODO(abap2js): CALL METHOD data_element->(`IF_XCO_AD_DATA_ELEMENT~CONTENT`) RECEIVING ro_content = content.
+        // TODO(abap2js): CALL METHOD content->(`IF_XCO_DTEL_CONTENT~GET_HEADING_FIELD_LABEL`) RECEIVING rs_heading_field_label = result-header.
+        // TODO(abap2js): CALL METHOD content->(`IF_XCO_DTEL_CONTENT~GET_SHORT_FIELD_LABEL`) RECEIVING rs_short_field_label = result-short.
+        // TODO(abap2js): CALL METHOD content->(`IF_XCO_DTEL_CONTENT~GET_MEDIUM_FIELD_LABEL`) RECEIVING rs_medium_field_label = result-medium.
+        // TODO(abap2js): CALL METHOD content->(`IF_XCO_DTEL_CONTENT~GET_LONG_FIELD_LABEL`) RECEIVING rs_long_field_label = result-long.
       } catch (x) {
         const error = x.get_text();
       }
@@ -316,7 +318,7 @@ class z2ui5_cl_util_api_s {
     try {
       try {
         lv_classname = `CL_SYSTEM_UUID`;
-        call this.method(lv_classname).if_system_uuid_static~create_uuid_c22 receiving uuid === lv_uuid;
+        // TODO(abap2js): CALL METHOD (lv_classname)=>if_system_uuid_static~create_uuid_c22 RECEIVING uuid = lv_uuid.
       } catch (error) {
         lv_fm = `GUID_CREATE`;
         // TODO(abap2js): CALL FUNCTION lv_fm IMPORTING ev_guid_22 = lv_uuid.
@@ -340,7 +342,7 @@ class z2ui5_cl_util_api_s {
     try {
       try {
         lv_classname = `CL_SYSTEM_UUID`;
-        call this.method(lv_classname).if_system_uuid_static~create_uuid_c32 receiving uuid === lv_uuid;
+        // TODO(abap2js): CALL METHOD (lv_classname)=>if_system_uuid_static~create_uuid_c32 RECEIVING uuid = lv_uuid.
       } catch (error) {
         lv_fm = `GUID_CREATE`;
         // TODO(abap2js): CALL FUNCTION lv_fm IMPORTING ev_guid_32 = lv_uuid.
@@ -361,9 +363,9 @@ class z2ui5_cl_util_api_s {
       let xco_cp_abap = ``;
       lv_classname = i_classname;
       xco_cp_abap = `XCO_CP_ABAP`;
-      call this.method(xco_cp_abap).( `CLASS` ) exporting iv_name === lv_classname receiving ro_class === obj;
-      call method obj.( `IF_XCO_AO_CLASS~CONTENT` ) receiving ro_content === content;
-      call method content.( `IF_XCO_CLAS_CONTENT~GET_SHORT_DESCRIPTION` ) receiving rv_short_description === result;
+      // TODO(abap2js): CALL METHOD (xco_cp_abap)=>(`CLASS`) EXPORTING iv_name = lv_classname RECEIVING ro_class = obj.
+      // TODO(abap2js): CALL METHOD obj->(`IF_XCO_AO_CLASS~CONTENT`) RECEIVING ro_content = content.
+      // TODO(abap2js): CALL METHOD content->(`IF_XCO_CLAS_CONTENT~GET_SHORT_DESCRIPTION`) RECEIVING rv_short_description = result.
     } catch (x) {
       const lv_dummy = x.get_text();
     }
@@ -407,7 +409,7 @@ class z2ui5_cl_util_api_s {
     return result;
   }
 
-  static conv_get_itab_by_xlsx({ val } = {}) {
+  static conv_get_itab_by_xlsx({ val, result } = {}) {
   }
 
   static bal_create({ object, subobject, id, t_log } = {}) {
@@ -451,6 +453,7 @@ class z2ui5_cl_util_api_s {
 
   static bal_read({ object, subobject, id } = {}) {
     let result = [];
+    let sy_tabix = 0;
     let lv_fm = ``;
     let lr_handles = null;
     let lr_single = null;
@@ -474,8 +477,8 @@ class z2ui5_cl_util_api_s {
       // TODO(abap2js): ASSIGN lr_msgh->* TO <msgh>.
       // TODO(abap2js): CREATE DATA lr_msg TYPE ('BAL_S_MSG').
       // TODO(abap2js): ASSIGN lr_msg->* TO <msg>.
-      let sy_tabix = 0;
-      for (const fs of handles) {
+      sy_tabix = 0;
+      for (const handle of handles) {
         sy_tabix++;
         single = null;
         single.push(handle);
@@ -485,8 +488,9 @@ class z2ui5_cl_util_api_s {
         if (sy_subrc !== 0) {
           continue;
         }
-        let sy_tabix = 0;
-        for (const fs of msgh) {
+        const _sy_tabix_1 = sy_tabix;
+        sy_tabix = 0;
+        for (const mh of msgh) {
           sy_tabix++;
           msg = null;
           lv_fm = `BAL_LOG_MSG_READ`;
@@ -495,6 +499,7 @@ class z2ui5_cl_util_api_s {
             result.push(z2ui5_cl_util_api_s.bal_map_msg({ msg: msg }));
           }
         }
+        sy_tabix = _sy_tabix_1;
       }
     } catch (lx_read) {
       throw new z2ui5_cx_util_error({ val: lx_read });
@@ -548,13 +553,14 @@ class z2ui5_cl_util_api_s {
   }
 
   static bal_msg_add({ handle, t_log } = {}) {
+    let sy_tabix = 0;
     let lv_fm = ``;
     let lr_msg = null;
     let lv_msgty = ``;
     let lv_text = ``;
     // TODO(abap2js): FIELD-SYMBOLS <msg> TYPE any.
     // TODO(abap2js): FIELD-SYMBOLS <comp> TYPE any.
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const ls_log of t_log) {
       sy_tabix++;
       if (ls_log.id && ls_log.no) {
@@ -614,13 +620,13 @@ class z2ui5_cl_util_api_s {
     // TODO(abap2js): FIELD-SYMBOLS <filter> TYPE any.
     // TODO(abap2js): CREATE DATA result TYPE ('BAL_S_LFIL').
     // TODO(abap2js): ASSIGN result->* TO <filter>.
-    z2ui5_cl_util_api_s.bal_filter_add({ comp: /* TODO(abap2js): out-params */ EXPORTING comp = `OBJECT` value = object CHANGING filter = <filter> });
-    z2ui5_cl_util_api_s.bal_filter_add({ comp: /* TODO(abap2js): out-params */ EXPORTING comp = `SUBOBJECT` value = subobject CHANGING filter = <filter> });
-    z2ui5_cl_util_api_s.bal_filter_add({ comp: /* TODO(abap2js): out-params */ EXPORTING comp = `EXTNUMBER` value = id CHANGING filter = <filter> });
+    z2ui5_cl_util_api_s.bal_filter_add({ comp: { comp: `OBJECT`, value: object, filter } });
+    z2ui5_cl_util_api_s.bal_filter_add({ comp: { comp: `SUBOBJECT`, value: subobject, filter } });
+    z2ui5_cl_util_api_s.bal_filter_add({ comp: { comp: `EXTNUMBER`, value: id, filter } });
     return result;
   }
 
-  static bal_filter_add({ comp, value } = {}) {
+  static bal_filter_add({ comp, value, filter } = {}) {
     let lr_line = null;
     // TODO(abap2js): FIELD-SYMBOLS <range> TYPE STANDARD TABLE.
     // TODO(abap2js): FIELD-SYMBOLS <line> TYPE any.
@@ -691,6 +697,7 @@ class z2ui5_cl_util_api_s {
   }
 
   static tr_copy_objects({ source, destination } = {}) {
+    let sy_tabix = 0;
     try {
       let lr_headers = null;
       // TODO(abap2js): FIELD-SYMBOLS <headers> TYPE ANY TABLE.
@@ -705,8 +712,8 @@ class z2ui5_cl_util_api_s {
       if (sy_subrc !== 0) {
         throw new z2ui5_cx_util_error({ val: `TR_READ_REQUEST_WITH_TASKS failed` });
       }
-      let sy_tabix = 0;
-      for (const fs of headers) {
+      sy_tabix = 0;
+      for (const header of headers) {
         sy_tabix++;
         // TODO(abap2js): ASSIGN COMPONENT `TRKORR` OF STRUCTURE <header> TO <trkorr>.
         // TODO(abap2js): ASSIGN COMPONENT `STRKORR` OF STRUCTURE <header> TO <strkorr>.
@@ -719,10 +726,16 @@ class z2ui5_cl_util_api_s {
           throw new z2ui5_cx_util_error({ val: `TR_COPY_COMM failed` });
         }
       }
-    } catch (lx_known) {
-      throw lx_known;
-    } catch (x) {
-      throw new z2ui5_cx_util_error({ previous: x });
+    } catch (_caught1) {
+      if (_caught1 instanceof z2ui5_cx_util_error) {
+        const lx_known = _caught1;
+        throw lx_known;
+      } else if (true) {
+        const x = _caught1;
+        throw new z2ui5_cx_util_error({ previous: x });
+      } else {
+        throw _caught1;
+      }
     }
   }
 
@@ -756,15 +769,21 @@ class z2ui5_cl_util_api_s {
         throw new z2ui5_cx_util_error({ val: `TMS_MGR_IMPORT_TR_REQUEST failed` });
       }
       result = lv_retcode;
-    } catch (lx_known) {
-      throw lx_known;
-    } catch (x) {
-      throw new z2ui5_cx_util_error({ previous: x });
+    } catch (_caught1) {
+      if (_caught1 instanceof z2ui5_cx_util_error) {
+        const lx_known = _caught1;
+        throw lx_known;
+      } else if (true) {
+        const x = _caught1;
+        throw new z2ui5_cx_util_error({ previous: x });
+      } else {
+        throw _caught1;
+      }
     }
     return result;
   }
 
-  static tr_check_status({ trkorr, system } = {}) {
+  static tr_check_status({ trkorr, system, imported, rc } = {}) {
     try {
       let lr_settings = null;
       let lr_cofile = null;
@@ -794,10 +813,16 @@ class z2ui5_cl_util_api_s {
       imported = comp;
       // TODO(abap2js): ASSIGN COMPONENT `RC` OF STRUCTURE <cofile> TO <comp>.
       rc = comp;
-    } catch (lx_known) {
-      throw lx_known;
-    } catch (x) {
-      throw new z2ui5_cx_util_error({ previous: x });
+    } catch (_caught1) {
+      if (_caught1 instanceof z2ui5_cx_util_error) {
+        const lx_known = _caught1;
+        throw lx_known;
+      } else if (true) {
+        const x = _caught1;
+        throw new z2ui5_cx_util_error({ previous: x });
+      } else {
+        throw _caught1;
+      }
     }
   }
 }

@@ -11,6 +11,7 @@ class z2ui5_cl_demo_app_328 extends z2ui5_if_app {
   mo_table_obj = null;
 
   async main(client) {
+    let sy_tabix = 0;
     // TODO(abap2js): FIELD-SYMBOLS <line> TYPE any.
     // TODO(abap2js): FIELD-SYMBOLS <tab> TYPE ANY TABLE.
     if (client.check_on_init()) {
@@ -24,8 +25,8 @@ class z2ui5_cl_demo_app_328 extends z2ui5_if_app {
         break;
       case `GO`:
         // TODO(abap2js): ASSIGN mt_table->* TO <tab>.
-        let sy_tabix = 0;
-        for (const fs of tab) {
+        sy_tabix = 0;
+        for (const line of tab) {
           sy_tabix++;
           // TODO(abap2js): ASSIGN COMPONENT `SELKZ` OF STRUCTURE <line> TO FIELD-SYMBOL(<selkz>).
           if (sy_subrc !== 0) {
@@ -77,7 +78,7 @@ class z2ui5_cl_demo_app_328 extends z2ui5_if_app {
     let selkz = false;
     // TODO(abap2js): FIELD-SYMBOLS <table> TYPE STANDARD TABLE.
     const t_comp = z2ui5_cl_util.rtti_get_t_attri_by_table_name(`Z2UI5_T_01`);
-    t_comp.push(...value cl_abap_structdescr.component_table((name === `SELKZ` type === (cl_abap_datadescr.describe_by_data(selkz)))));
+    t_comp.push(...[{ name: `SELKZ`, type: (cl_abap_datadescr.describe_by_data(selkz)) }]);
     try {
       const new_struct_desc = cl_abap_structdescr.create(t_comp);
       const new_table_desc = cl_abap_tabledescr.create({ p_line_type: new_struct_desc, p_table_kind: cl_abap_tabledescr.tablekind_std });

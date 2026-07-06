@@ -37,11 +37,11 @@ class z2ui5_cl_demo_app_288 extends z2ui5_if_app {
       .vbox()
       .hbox({ alignitems: `Center` })
       .label({ text: `Enabled:`, class: `sapUiTinyMarginEnd` })
-      .switch({ type: `AcceptReject`, state: client._bind_edit(this.enabled) })
+      .switch_({ type: `AcceptReject`, state: client._bind_edit(this.enabled) })
       .get_parent()
       .hbox({ alignitems: `Center` })
       .label({ text: `Editable:`, class: `sapUiTinyMarginEnd` })
-      .switch({ type: `AcceptReject`, state: client._bind_edit(this.editable) })
+      .switch_({ type: `AcceptReject`, state: client._bind_edit(this.editable) })
       .get_parent()
       .get_parent()
       .get_parent()
@@ -75,11 +75,11 @@ class z2ui5_cl_demo_app_288 extends z2ui5_if_app {
       this.selected_product2 = `HT-1001`;
       this.selected_product3 = `HT-1001`;
       this.lt_product_collection = [{ product_id: `HT-1000`, name: `Notebook Basic 15` }, { product_id: `HT-1001`, name: `Notebook Basic 17` }, { product_id: `HT-1002`, name: `Notebook Basic 18` }, { product_id: `HT-1003`, name: `Notebook Basic 19` }, { product_id: `HT-1007`, name: `ITelO Vault` }];
-      this.lt_product_collection.sort((a, b) => (a.name > b.name ? 1 : a.name < b.name ? -1 : 0));
+      this.lt_product_collection.sort((a, b) => ((a.name > b.name ? 1 : a.name < b.name ? -1 : 0)));
       this.lt_product_collection2 = [{ product_id: `HT-1000`, name: `Notebook Basic 15` }, { product_id: `HT-1001`, name: `Notebook Basic 17` }, { product_id: `HT-1002`, name: `Notebook Basic 18` }, { product_id: `HT-1003`, name: `Notebook Basic 19` }, { product_id: `HT-1007`, name: `ITelO Vault` }];
-      this.lt_product_collection2.sort((a, b) => (a.name > b.name ? 1 : a.name < b.name ? -1 : 0));
+      this.lt_product_collection2.sort((a, b) => ((a.name > b.name ? 1 : a.name < b.name ? -1 : 0)));
       this.lt_product_collection3 = [{ product_id: `HT-1000`, name: `Notebook Basic 15` }, { product_id: `HT-1001`, name: `Notebook Basic 17` }, { product_id: `HT-1002`, name: `Notebook Basic 18` }, { product_id: `HT-1003`, name: `Notebook Basic 19` }, { product_id: `HT-1007`, name: `ITelO Vault` }];
-      this.lt_product_collection3.sort((a, b) => (a.name > b.name ? 1 : a.name < b.name ? -1 : 0));
+      this.lt_product_collection3.sort((a, b) => ((a.name > b.name ? 1 : a.name < b.name ? -1 : 0)));
       this.editable = true;
       this.enabled = true;
     }

@@ -57,6 +57,7 @@ class z2ui5_cl_util_range {
   static get_sql_multi({ t_sql } = {}) {
     let result = ``;
     let sy_tabix = 0;
+    sy_tabix = 0;
     for (const lv_sql of t_sql) {
       sy_tabix++;
       if (!lv_sql) {
@@ -77,13 +78,14 @@ class z2ui5_cl_util_range {
 
   get_sql() {
     let result = ``;
+    let sy_tabix = 0;
     // TODO(abap2js): FIELD-SYMBOLS <lt_range> TYPE STANDARD TABLE.
     // TODO(abap2js): ASSIGN me->mr_range->* TO <lt_range>.
     if (Boolean(!lt_range) === true) {
       return result;
     }
     result = `(`;
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const SYMBOL of lt_range) {
       sy_tabix++;
       // TODO(abap2js): ASSIGN COMPONENT `SIGN` OF STRUCTURE <ls_range_item> TO FIELD-SYMBOL(<lv_sign>).

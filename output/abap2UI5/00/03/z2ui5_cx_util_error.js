@@ -1,11 +1,11 @@
 // TODO(abap2js): unresolved reference cl_abap_char_utilities — add require manually
-// TODO(abap2js): unresolved reference cx_no_check — add require manually
+const cx_no_check = class {}; // TODO(abap2js): unresolved superclass — replace stub manually
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 
 class z2ui5_cx_util_error extends cx_no_check {
   ms_error = { x_root: null, uuid: ``, text: `` };
 
-  constructor({ val, !previous } = {}) {
+  constructor({ val, previous } = {}) {
     super.constructor({ previous });
     textid = null;
     try {

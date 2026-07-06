@@ -24,6 +24,7 @@ class z2ui5_cl_demo_app_099 extends z2ui5_if_app {
   }
 
   on_event() {
+    let sy_tabix = 0;
     switch (this.client.get().EVENT) {
       case `ALL`:
         this.view_display_settings_popup();
@@ -42,9 +43,11 @@ class z2ui5_cl_demo_app_099 extends z2ui5_if_app {
         if (lt_arg) {
           const sort_field = lt_arg[(1) - 1];
           if (this.mv_sort_descending === true) {
-            this.t_tab.sort((a, b) => (a.( > b.( ? 1 : a.( < b.( ? -1 : 0) * -1);
+            { const _f = String(sort_field)
+              .toLowerCase(); this.t_tab.sort((a, b) => (a[_f] > b[_f] ? 1 : a[_f] < b[_f] ? -1 : 0) * -1); }
           } else {
-            this.t_tab.sort((a, b) => (a.( > b.( ? 1 : a.( < b.( ? -1 : 0));
+            { const _f = String(sort_field)
+              .toLowerCase(); this.t_tab.sort((a, b) => (a[_f] > b[_f] ? 1 : a[_f] < b[_f] ? -1 : 0)); }
           }
           this.client.view_model_update();
         }
@@ -60,17 +63,17 @@ class z2ui5_cl_demo_app_099 extends z2ui5_if_app {
           let [lv_field, lv_values] = filter_string.split(`(`);
           // TODO(abap2js): TRANSLATE lv_field TO UPPER CASE.
           const lv_values_len = lv_values.length - 1;
-          lv_values = lv_values + this.0(lv_values_len);
+          lv_values = String(lv_values).substr(0, lv_values_len);
           let lt_values = lv_values.split(`,`);
           if (sy_subrc === 0) {
-            let sy_tabix = 0;
+            sy_tabix = 0;
             for (const lv_val of lt_values) {
               sy_tabix++;
               this.mv_filter = this.mv_filter + `{path:'` + lv_field + `',operator: 'EQ',value1:'` + lv_val + `'},`;
             }
           }
           const mv_filter_len = this.mv_filter.length - 1;
-          this.mv_filter = this.mv_filter + this.0(mv_filter_len);
+          this.mv_filter = String(this.mv_filter).substr(0, mv_filter_len);
           this.view_display();
         }
         break;
@@ -80,17 +83,21 @@ class z2ui5_cl_demo_app_099 extends z2ui5_if_app {
           const group_field = lt_arg[(1) - 1];
           if (group_field) {
             if (this.mv_group_descending === true) {
-              this.t_tab.sort((a, b) => (a.( > b.( ? 1 : a.( < b.( ? -1 : 0) * -1);
+              { const _f = String(group_field)
+                .toLowerCase(); this.t_tab.sort((a, b) => (a[_f] > b[_f] ? 1 : a[_f] < b[_f] ? -1 : 0) * -1); }
             } else {
-              this.t_tab.sort((a, b) => (a.( > b.( ? 1 : a.( < b.( ? -1 : 0));
+              { const _f = String(group_field)
+                .toLowerCase(); this.t_tab.sort((a, b) => (a[_f] > b[_f] ? 1 : a[_f] < b[_f] ? -1 : 0)); }
             }
             this.mv_sorter_group = group_field;
             // TODO(abap2js): TRANSLATE mv_sorter_group TO UPPER CASE.
           } else {
             if (this.mv_group_descending === true) {
-              this.t_tab.sort((a, b) => (a.( > b.( ? 1 : a.( < b.( ? -1 : 0) * -1);
+              { const _f = String(group_field)
+                .toLowerCase(); this.t_tab.sort((a, b) => (a[_f] > b[_f] ? 1 : a[_f] < b[_f] ? -1 : 0) * -1); }
             } else {
-              this.t_tab.sort((a, b) => (a.( > b.( ? 1 : a.( < b.( ? -1 : 0));
+              { const _f = String(group_field)
+                .toLowerCase(); this.t_tab.sort((a, b) => (a[_f] > b[_f] ? 1 : a[_f] < b[_f] ? -1 : 0)); }
             }
             this.mv_sorter_group = {};
           }
@@ -153,7 +160,7 @@ class z2ui5_cl_demo_app_099 extends z2ui5_if_app {
 
   view_display_filter_popup() {
     const popup_filter = z2ui5_cl_xml_view.factory_popup();
-    const filter_view = popup_filter.view_settings_dialog({ filteritems: this.client._bind_edit(this.t_tab_filter), confirm: this.client._event(`CONFIRM_FILTER`, [`${$parameters>/filterString}`]) })
+    const filter_view = popup_filter.view_settings_dialog({ filteritems: this.client._bind_edit(this.t_tab_filter), confirm: this.client._event(`CONFIRM_FILTER`, [`\${$parameters>/filterString}`]) })
       .filter_items()
       .view_settings_filter_item({ multiselect: true, text: `{TEXT}`, key: `{KEY}` })
       .items()
@@ -164,7 +171,7 @@ class z2ui5_cl_demo_app_099 extends z2ui5_if_app {
 
   view_display_group_popup() {
     const popup_group = z2ui5_cl_xml_view.factory_popup();
-    const group_view = popup_group.view_settings_dialog({ confirm: this.client._event(`CONFIRM_GROUP`, [`${$parameters>/groupItem/mProperties/key}`]), reset: this.client._event(`RESET_GROUP`), groupdescending: this.client._bind_edit(this.mv_group_descending), groupitems: this.client._bind_edit(this.t_tab_group) })
+    const group_view = popup_group.view_settings_dialog({ confirm: this.client._event(`CONFIRM_GROUP`, [`\${$parameters>/groupItem/mProperties/key}`]), reset: this.client._event(`RESET_GROUP`), groupdescending: this.client._bind_edit(this.mv_group_descending), groupitems: this.client._bind_edit(this.t_tab_group) })
       .group_items()
       .view_settings_item({ text: `{TEXT}`, key: `{KEY}`, selected: `{SELECTED}` });
     this.client.popup_display(group_view.stringify());
@@ -190,7 +197,7 @@ class z2ui5_cl_demo_app_099 extends z2ui5_if_app {
 
   view_display_sort_popup() {
     const popup_sort = z2ui5_cl_xml_view.factory_popup();
-    const sort_view = popup_sort.view_settings_dialog({ confirm: this.client._event(`CONFIRM_SORT`, [`${$parameters>/sortItem/mProperties/key}`]), sortitems: this.client._bind_edit(this.t_tab_sort), sortdescending: this.client._bind_edit(this.mv_sort_descending) })
+    const sort_view = popup_sort.view_settings_dialog({ confirm: this.client._event(`CONFIRM_SORT`, [`\${$parameters>/sortItem/mProperties/key}`]), sortitems: this.client._bind_edit(this.t_tab_sort), sortdescending: this.client._bind_edit(this.mv_sort_descending) })
       .sort_items()
       .view_settings_item({ text: `{TEXT}`, key: `{KEY}`, selected: `{SELECTED}` });
     this.client.popup_display(sort_view.stringify());
