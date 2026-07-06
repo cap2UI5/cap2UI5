@@ -33,7 +33,7 @@
     "typescript": "^6.0.3"
   },
   "scripts": {
-    "mirror_frontend": "rm -rf .mirror_tmp ../static/webapp && git clone --depth 1 https://github.com/abap2UI5/abap2UI5 .mirror_tmp && mkdir -p ../static && cp -r .mirror_tmp/app/webapp ../static/webapp && node scripts/patch-frontend.js ../static/webapp && rm -rf .mirror_tmp",
+    "mirror_frontend": "rm -rf .mirror_tmp app/z2ui5/webapp && git clone --depth 1 https://github.com/abap2UI5/abap2UI5 .mirror_tmp && mkdir -p app/z2ui5 && cp -r .mirror_tmp/app/webapp app/z2ui5/webapp && node scripts/patch-frontend.js app/z2ui5/webapp && rm -rf .mirror_tmp",
     "start": "cds-serve",
     "watch-z2ui5": "cds watch --open z2ui5/webapp/index.html?sap-ui-xx-viewCache=false",
     "undeploy": "cf undeploy ordersched --delete-services --delete-service-keys --delete-service-brokers",

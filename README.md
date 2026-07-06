@@ -7,10 +7,8 @@ The CAP project lives in [`cap2UI5/`](cap2UI5/), see its README for details.
 
 ## Frontend
 
-The UI5 frontend in `static/webapp` is a 1:1 mirror of the `app/webapp`
-folder from abap2UI5. It lives outside the CAP project on purpose — the
-`cap2UI5/` folder contains only hand-maintained sources. The CAP server
-serves it at `/z2ui5/webapp` (see `cap2UI5/srv/server.js`).
+The UI5 frontend in `cap2UI5/app/z2ui5/webapp` is a 1:1 mirror of the
+`app/webapp` folder from abap2UI5, served by CAP at `/z2ui5/webapp`.
 
 Only two values are cap2UI5-specific and get patched in place after each
 mirror run by `cap2UI5/scripts/patch-frontend.js` (no stored copies):
