@@ -135,6 +135,8 @@ function typeDefault(typeTokens) {
   if (/REF TO/.test(t)) return "null";
   if (/TABLE OF|TABLE$|_TAB$|^TY_T_|_T_|STANDARD TABLE|SORTED TABLE|HASHED TABLE|TT_|RANGE OF/.test(t)) return "[]";
   if (/ABAP_BOOL|XSDBOOLEAN|^XFELD/.test(t)) return "false";
+  // structure types by naming convention (ty_s_result, ts_data, ...)
+  if (/^TY_S_|^TS_|^S_[A-Z0-9_]/.test(t)) return "{}";
   if (/^I$|^INT4|^INT8|^F$|^P |^P$|DECFLOAT/.test(t)) return "0";
   if (/^STRING|^C |^C$|CLIKE|^CHAR|^N |^N$|CSEQUENCE/.test(t)) return "``";
   return "null";
