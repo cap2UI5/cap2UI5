@@ -1,4 +1,4 @@
-[![mirror frontend](https://github.com/cap2UI5/cap2UI5/actions/workflows/mirror_frontend.yml/badge.svg)](https://github.com/cap2UI5/cap2UI5/actions/workflows/mirror_frontend.yml)
+[![sync pipeline](https://github.com/cap2UI5/dev/actions/workflows/sync.yml/badge.svg)](https://github.com/cap2UI5/dev/actions/workflows/sync.yml)
 
 # 🚀 cap2UI5
 

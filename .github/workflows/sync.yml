@@ -1,7 +1,9 @@
-name: sync from abap2UI5
+name: sync pipeline
 
-# Full pipeline: mirror input -> mirror frontend -> transpile backend.
-# The individual steps can also be run standalone via their own workflows.
+# Full pipeline: 1 mirror abap2UI5 -> 2 mirror samples -> 3 transpile abap2UI5
+# -> 4 transpile samples -> 5 copy backend -> 6 copy frontend.
+# Every step also runs standalone via its own workflow. Step 7 (manual work)
+# is what the TODO reports in output/*/transpile-report.json point at.
 
 on:
   workflow_dispatch:
@@ -12,11 +14,20 @@ permissions:
   contents: write
 
 jobs:
-  input:
-    uses: ./.github/workflows/mirror_input.yml
-  frontend:
-    needs: input
-    uses: ./.github/workflows/mirror_frontend.yml
-  backend:
-    needs: frontend
-    uses: ./.github/workflows/sync_backend.yml
+  mirror_abap2ui5:
+    uses: ./.github/workflows/1_mirror_abap2ui5.yml
+  mirror_samples:
+    needs: mirror_abap2ui5
+    uses: ./.github/workflows/2_mirror_samples.yml
+  transpile_abap2ui5:
+    needs: mirror_samples
+    uses: ./.github/workflows/3_transpile_abap2ui5.yml
+  transpile_samples:
+    needs: transpile_abap2ui5
+    uses: ./.github/workflows/4_transpile_samples.yml
+  copy_backend:
+    needs: transpile_samples
+    uses: ./.github/workflows/5_copy_backend.yml
+  copy_frontend:
+    needs: copy_backend
+    uses: ./.github/workflows/6_copy_frontend.yml

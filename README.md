@@ -1,5 +1,13 @@
 # cap2UI5 dev
 
+[![sync pipeline](https://github.com/cap2UI5/dev/actions/workflows/sync.yml/badge.svg)](https://github.com/cap2UI5/dev/actions/workflows/sync.yml)
+[![1 mirror abap2UI5](https://github.com/cap2UI5/dev/actions/workflows/1_mirror_abap2ui5.yml/badge.svg)](https://github.com/cap2UI5/dev/actions/workflows/1_mirror_abap2ui5.yml)
+[![2 mirror samples](https://github.com/cap2UI5/dev/actions/workflows/2_mirror_samples.yml/badge.svg)](https://github.com/cap2UI5/dev/actions/workflows/2_mirror_samples.yml)
+[![3 transpile abap2UI5](https://github.com/cap2UI5/dev/actions/workflows/3_transpile_abap2ui5.yml/badge.svg)](https://github.com/cap2UI5/dev/actions/workflows/3_transpile_abap2ui5.yml)
+[![4 transpile samples](https://github.com/cap2UI5/dev/actions/workflows/4_transpile_samples.yml/badge.svg)](https://github.com/cap2UI5/dev/actions/workflows/4_transpile_samples.yml)
+[![5 copy backend](https://github.com/cap2UI5/dev/actions/workflows/5_copy_backend.yml/badge.svg)](https://github.com/cap2UI5/dev/actions/workflows/5_copy_backend.yml)
+[![6 copy frontend](https://github.com/cap2UI5/dev/actions/workflows/6_copy_frontend.yml/badge.svg)](https://github.com/cap2UI5/dev/actions/workflows/6_copy_frontend.yml)
+
 Development repository for [cap2UI5](cap2UI5/) — bringing the
 [abap2UI5](https://github.com/abap2UI5/abap2UI5) concept to CAP/Node.js.
 
@@ -29,15 +37,26 @@ Statements outside the supported subset are emitted as
 dropped silently. The core engine (handler, binding, model, draft) is a
 hand-maintained architecture adaptation and is not a transpile target.
 
-## Sync workflows
+## Sync pipeline
 
-GitHub Actions under `.github/workflows/` automate the same steps:
+GitHub Actions under `.github/workflows/` — each step runs standalone via
+dispatch, `sync.yml` chains 1→6 (dispatch or weekly). The same steps run
+locally via the npm scripts.
 
-1. **1 mirror input** — snapshot abap2UI5 into `input/` (versioned, reviewable)
-2. **2 mirror frontend** — `input/app/webapp` → `cap2UI5/app/z2ui5/webapp` + patches
-3. **3 sync backend** — transpile `z2ui5_cl_app_*`/`z2ui5_cl_pop_*` from `input/src/02`;
-   TODO-marked results never replace existing files, jest must pass before commit
-4. **sync from abap2UI5** — runs 1→2→3 (dispatch or weekly)
+| # | Workflow | npm script | What it does |
+|---|---|---|---|
+| 1 | 1 mirror abap2UI5 | `mirror_abap2ui5` | snapshot abap2UI5 (src/ + app/webapp) → `input/abap2UI5/` |
+| 2 | 2 mirror samples | `mirror_samples` | snapshot abap2UI5/samples (src/) → `input/samples/` |
+| 3 | 3 transpile abap2UI5 | `transpile_abap2ui5` | app layer (`z2ui5_cl_app_*`, `z2ui5_cl_pop_*`) → `output/abap2UI5/` + report |
+| 4 | 4 transpile samples | `transpile_samples` | all sample classes → `output/samples/` + report |
+| 5 | 5 copy backend | `copy_backend` | `output/` → `cap2UI5/srv` — TODO-gate + jest must pass |
+| 6 | 6 copy frontend | `copy_frontend` | `input/abap2UI5/app/webapp` → `cap2UI5/app/z2ui5/webapp` + patches |
+| 7 | — manual | — | see `output/*/transpile-report.json`: TODO-gated classes, core-engine drift, embedded frontend (GET route) |
+
+Safety gates in step 5: a transpile result with `TODO(abap2js)` markers never
+replaces an existing file (kept + reported), and the jest suite must pass
+before anything is committed. `MIRROR_SOURCE=/path` lets the mirror steps use
+a local checkout instead of cloning.
 
 ## Frontend
 

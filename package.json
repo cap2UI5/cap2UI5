@@ -8,9 +8,12 @@
     "test": "jest --verbose",
     "test:watch": "jest --watch",
     "transpile": "node scripts/abap2js.js",
-    "mirror_frontend": "node scripts/mirror-frontend.js",
-    "mirror_input": "node scripts/mirror-input.js",
-    "sync_backend": "node scripts/sync-backend.js"
+    "mirror_abap2ui5": "node scripts/mirror-input.js abap2UI5",
+    "mirror_samples": "node scripts/mirror-input.js samples",
+    "transpile_abap2ui5": "node scripts/transpile-tree.js abap2UI5",
+    "transpile_samples": "node scripts/transpile-tree.js samples",
+    "copy_backend": "node scripts/copy-into-cap.js",
+    "copy_frontend": "node scripts/mirror-frontend.js"
   },
   "devDependencies": {
     "@abaplint/core": "^2.119.56",

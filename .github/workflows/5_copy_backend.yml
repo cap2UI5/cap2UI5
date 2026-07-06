@@ -1,10 +1,8 @@
-name: 3 sync backend
+name: 5 copy backend
 
-# Transpiles the abap2UI5 app layer (z2ui5_cl_app_*, z2ui5_cl_pop_* under
-# src/02) from input/src into cap2UI5/srv/z2ui5/02 via scripts/abap2js.js.
-# A transpile result with TODO(abap2js) markers never replaces an existing
-# file (reported as skipped), and the jest suite must pass before anything
-# is committed. Requires input/ — run "1 mirror input" first.
+# Step 5: copy the transpiled classes from output/ into cap2UI5 (srv/z2ui5/02
+# and srv/samples). Gate: TODO-marked results never replace existing files,
+# and the jest suite must pass before anything is committed.
 
 on:
   workflow_dispatch:
@@ -14,7 +12,7 @@ permissions:
   contents: write
 
 jobs:
-  backend:
+  run:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,17 +24,17 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm ci --prefix cap2UI5
-      - run: npm run sync_backend
+      - run: npm run copy_backend
       - run: npm test
-      - name: commit backend
+      - name: commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add cap2UI5/srv
           if git diff --cached --quiet; then
-            echo "backend unchanged — nothing to commit"
+            echo "nothing to commit"
           else
-            git commit -m "sync: transpile app layer from input/ ($(cut -c1-12 input/UPSTREAM_COMMIT))"
+            git commit -m "sync: copy transpiled backend into cap2UI5"
             git pull --rebase origin "${{ github.ref_name }}"
             git push origin "HEAD:${{ github.ref_name }}"
           fi
