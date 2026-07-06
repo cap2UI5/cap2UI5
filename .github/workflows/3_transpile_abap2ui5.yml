@@ -1,7 +1,7 @@
 name: 3 transpile abap2UI5
 
-# Step 3: transpile the abap2UI5 app layer (z2ui5_cl_app_*, z2ui5_cl_pop_*
-# under src/02) from input/abap2UI5 into output/abap2UI5 + transpile report.
+# Step 3: transpile every abap2UI5 class (whole src/ tree) from
+# input/abap2UI5 into output/abap2UI5 + transpile report.
 
 on:
   workflow_dispatch:

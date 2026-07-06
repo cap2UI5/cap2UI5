@@ -1366,10 +1366,39 @@ function emitStatement(s, ctx, st, push, assignedTwice, methodDef) {
       const sep = txExpr(toks.slice(atIdx + 1, intoIdx), ctx);
       let rest = toks.slice(intoIdx + 1);
       if (KW(rest[0].str) === "TABLE") {
-        push(`${txExpr(rest.slice(1), ctx)} = ${src}.split(${sep});`);
+        rest = rest.slice(1);
+        if ((KW(rest[0].str) === "DATA" || KW(rest[0].str) === "FINAL") && rest[1] && isParenL(rest[1])) {
+          const name = safeIdent(rest[2].str.toLowerCase());
+          ctx.locals.add(name);
+          push(`let ${name} = ${src}.split(${sep});`);
+        } else {
+          push(`${txExpr(rest, ctx)} = ${src}.split(${sep});`);
+        }
       } else {
-        const targets = rest.map((t) => txExpr([t], ctx));
-        push(`[${targets.join(", ")}] = ${src}.split(${sep});`);
+        // target list: DATA(x) / FINAL(x) inline decls or identifier chains (a-b, a->b, a=>b)
+        const targets = [];
+        const decls = [];
+        let k = 0;
+        while (k < rest.length) {
+          if ((KW(rest[k].str) === "DATA" || KW(rest[k].str) === "FINAL") && rest[k + 1] && isParenL(rest[k + 1])) {
+            const name = safeIdent(rest[k + 2].str.toLowerCase());
+            ctx.locals.add(name);
+            decls.push(name);
+            targets.push(name);
+            k += 4;
+            continue;
+          }
+          let end = k + 1;
+          while (end + 1 < rest.length && (isDash(rest[end]) || isInstArrow(rest[end]) || isStatArrow(rest[end]))) end += 2;
+          targets.push(txExpr(rest.slice(k, end), ctx));
+          k = end;
+        }
+        if (decls.length === targets.length) {
+          push(`let [${targets.join(", ")}] = ${src}.split(${sep});`);
+        } else {
+          for (const d of decls) push(`let ${d};`);
+          push(`[${targets.join(", ")}] = ${src}.split(${sep});`);
+        }
       }
       break;
     }

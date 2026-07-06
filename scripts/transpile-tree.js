@@ -5,10 +5,8 @@
  * transpile-report.json with the TODO count per class. The copy step
  * (copy-into-cap.js) uses that report as its safety gate.
  *
- *   node scripts/transpile-tree.js abap2UI5   → app layer only:
- *                                               z2ui5_cl_app_* / z2ui5_cl_pop_* under src/02
- *                                               (core engine + view builder stay hand-maintained)
- *   node scripts/transpile-tree.js samples    → every class
+ *   node scripts/transpile-tree.js abap2UI5   → every class under src/
+ *   node scripts/transpile-tree.js samples    → every class under src/
  */
 "use strict";
 
@@ -17,7 +15,7 @@ const path = require("path");
 const { transpileFile } = require("./abap2js");
 
 const TARGETS = {
-  abap2UI5: { base: ["src", "02"], filter: (f) => /^z2ui5_cl_(app|pop)_/.test(f) },
+  abap2UI5: { base: ["src"], filter: () => true },
   samples: { base: ["src"], filter: () => true },
 };
 

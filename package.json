@@ -12,8 +12,8 @@
     "mirror_samples": "node scripts/mirror-input.js samples",
     "transpile_abap2ui5": "node scripts/transpile-tree.js abap2UI5",
     "transpile_samples": "node scripts/transpile-tree.js samples",
-    "copy_backend": "node scripts/copy-into-cap.js",
-    "copy_frontend": "node scripts/mirror-frontend.js"
+    "prepare_app": "node scripts/prepare-app.js",
+    "copy_into_cap": "node scripts/copy-into-cap.js"
   },
   "devDependencies": {
     "@abaplint/core": "^2.119.56",
