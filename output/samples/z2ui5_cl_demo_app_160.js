@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -26,7 +27,7 @@ class z2ui5_cl_demo_app_160 extends z2ui5_if_app {
     let lv_id_parent;
     let lt_event_arguments = [];
     if (this.client.check_on_event(`PL_TOTAL_CHANGE`)) {
-      lt_event_arguments = this.client.get().T_EVENT_ARG;
+      lt_event_arguments = z2ui5_cl_util.struct_lower_keys(this.client.get().T_EVENT_ARG);
       lv_id_event = lt_event_arguments[(1) - 1];
       lv_tab_index = lt_event_arguments[(2) - 1];
       ls_row_submit = this.mt_output[(lv_tab_index) - 1];

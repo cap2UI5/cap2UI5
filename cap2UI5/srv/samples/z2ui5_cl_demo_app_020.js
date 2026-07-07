@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -24,7 +25,7 @@ class z2ui5_cl_demo_app_020 extends z2ui5_if_app {
     switch (client.get().EVENT) {
       case this.cancel_event:
       case this.confirm_event:
-        this.event = client.get().EVENT;
+        this.event = z2ui5_cl_util.struct_lower_keys(client.get().EVENT);
         client.popup_destroy();
         client.nav_app_leave();
         return;

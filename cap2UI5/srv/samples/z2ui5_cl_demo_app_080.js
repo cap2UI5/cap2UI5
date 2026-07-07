@@ -12,7 +12,7 @@ class z2ui5_cl_demo_app_080 extends z2ui5_if_app {
     view._generic_property({ n: `core:require`, v: `{Helper:'z2ui5/Util'}` });
     const page = view.page({ id: `page_main`, title: `abap2UI5 - Planning Calendar`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack(), class: `sapUiContentPadding` });
     const lo_vbox = page.vbox(`sapUiSmallMargin`);
-    const lo_planningcalendar = lo_vbox.planning_calendar({ startdate: `{= Helper.DateCreateObject($` + this.client._bind(this.lv_s_date) + `) }`, rows: `{path: '` + this.client._bind({ val: this.mt_people, path: true }) + `'}`, appointmentselect: this.client._event(`AppSelected`, [`\${$parameters>/appointment/mProperties/title}`]), showweeknumbers: true });
+    const lo_planningcalendar = lo_vbox.planning_calendar({ startdate: `{= Helper.DateCreateObject($` + this.client._bind(this.lv_s_date) + `) }`, rows: `{path: '` + this.client._bind(this.mt_people, { path: true }) + `'}`, appointmentselect: this.client._event(`AppSelected`, [`\${$parameters>/appointment/mProperties/title}`]), showweeknumbers: true });
     const lo_rows = lo_planningcalendar.rows();
     const lo_planningcalendarrow = lo_rows.planning_calendar_row({ appointments: `{path:'APPOINTMENTS', templateShareable: false}`, icon: `{PIC}`, title: `{NAME}`, text: `{ROLE}`, intervalheaders: `{path:'HEADERS', templateShareable: false}` });
     lo_planningcalendarrow.appointments()

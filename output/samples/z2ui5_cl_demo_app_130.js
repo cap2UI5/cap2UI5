@@ -156,7 +156,7 @@ class z2ui5_cl_demo_app_130 extends z2ui5_if_app {
         lv_tabix = sy_tabix;
         scrtext = this.get_txt({ roll: lr_tab.field_doma });
         content.label(scrtext)
-          .multi_input({ tokens: this.client._bind({ val: lr_tab.t_token, tab: this.mt_fields, tab_index: lv_tabix }), showclearicon: true, id: lr_tab.field, valuehelprequest: this.client._event(`CALL_POPUP_FILTER`, [lr_tab.field]) })
+          .multi_input({ tokens: this.client._bind(lr_tab.t_token, { tab: this.mt_fields, tab_index: lv_tabix }), showclearicon: true, id: lr_tab.field, valuehelprequest: this.client._event(`CALL_POPUP_FILTER`, [lr_tab.field]) })
           .item({ key: `{KEY}`, text: `{TEXT}` })
           .tokens()
           .token({ key: `{KEY}`, text: `{TEXT}`, visible: `{VISIBLE}`, selected: `{SELKZ}`, editable: `{EDITABLE}` });

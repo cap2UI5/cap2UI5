@@ -105,7 +105,7 @@ class z2ui5_cl_pop_to_select extends z2ui5_if_app {
       selected: `{ZZSELKZ}`,
     });
     const cells = list.cells();
-    for (const c of cols) cells.Text({ text: `{${c}}` });
+    for (const c of cols) cells.Text({ text: `{${String(c).toUpperCase()}}` });
 
     const columns = tab.columns();
     for (const c of cols) columns.Column({ width: `8rem` }).header().Text({ text: c });

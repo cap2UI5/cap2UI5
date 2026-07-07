@@ -45,19 +45,19 @@ class z2ui5_cl_demo_app_094 extends z2ui5_if_app {
     const o_grid = this.page.grid(`L6 M12 S12`).content(`layout`);
     const content = o_grid.simple_form(`Input`).content(`form`);
     content.label(`structure level 01`)
-      .input(this.client._bind_edit(this.ms_screen.input))
+      .input(this.client._bind_edit(this.ms_screen.input, { name: `ms_screen-input` }))
       .label(`ref data`)
       .input(this.client._bind_edit(fs_input))
       .label(`ref data struc field`)
       .input(this.client._bind_edit(fs_screen.input))
       .label(`struc deep dissolve`)
-      .input(this.client._bind_edit(this.ms_screen.ty_s_02.input))
+      .input(this.client._bind_edit(this.ms_screen.ty_s_02.input, { name: `ms_screen-ty_s_02-input` }))
       .label(`struc deep switch guid name`)
-      .input(this.client._bind_edit(this.ms_screen.ty_s_02.ty_s_03.ty_s_04.input))
+      .input(this.client._bind_edit(this.ms_screen.ty_s_02.ty_s_03.ty_s_04.input, { name: `ms_screen-ty_s_02-ty_s_03-ty_s_04-input` }))
       .label(`instance attribute val`)
-      .input(this.client._bind_edit(this.mo_app.mv_val))
+      .input(this.client._bind_edit(this.mo_app.mv_val, { name: `mo_app-mv_val` }))
       .label(`instance attribute struc`)
-      .input(this.client._bind_edit(this.mo_app.ms_screen.input));
+      .input(this.client._bind_edit(this.mo_app.ms_screen.input, { name: `mo_app-ms_screen-input` }));
     this.page.footer()
       .overflow_toolbar()
       .toolbar_spacer()

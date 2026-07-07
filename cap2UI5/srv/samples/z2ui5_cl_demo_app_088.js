@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -19,7 +20,7 @@ class z2ui5_cl_demo_app_088 extends z2ui5_if_app {
   on_event() {
     switch (this.client.get().EVENT) {
       default:
-        this.mv_page = this.client.get().EVENT;
+        this.mv_page = z2ui5_cl_util.struct_lower_keys(this.client.get().EVENT);
         this.view_display();
         break;
     }

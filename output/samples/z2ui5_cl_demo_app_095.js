@@ -40,7 +40,7 @@ class z2ui5_cl_demo_app_095 extends z2ui5_if_app {
     const o_grid = this.page.grid(`L6 M12 S12`).content(`layout`);
     const content = o_grid.simple_form(`Input`).content(`form`);
     content.label(`main app`)
-      .input({ value: this.client._bind_edit(this.ms_screen.input), submit: this.client._event(`INPUT`) });
+      .input({ value: this.client._bind_edit(this.ms_screen.input, { name: `ms_screen-input` }), submit: this.client._event(`INPUT`) });
     this.mo_grid_sub = this.page.grid(`L12 M12 S12`).content(`layout`);
     this.page.footer()
       .overflow_toolbar()

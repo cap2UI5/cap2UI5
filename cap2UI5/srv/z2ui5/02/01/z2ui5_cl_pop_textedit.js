@@ -22,7 +22,7 @@ class z2ui5_cl_pop_textedit extends z2ui5_if_app {
     const popup = z2ui5_cl_xml_view.factory_popup()
       .dialog({ afterclose: this.client._event(`BUTTON_TEXTAREA_CANCEL`), stretch: this.mv_stretch_active, title: this.mv_title, icon: `sap-icon://edit` })
       .content()
-      .text_area({ growing: true, editable: this.mv_check_editable, value: this.client._bind_edit(this.ms_result.text) })
+      .text_area({ growing: true, editable: this.mv_check_editable, value: this.client._bind_edit(this.ms_result.text, { name: `ms_result-text` }) })
       .get_parent()
       .buttons()
       .button({ text: `Cancel`, press: this.client._event(`BUTTON_TEXTAREA_CANCEL`) })

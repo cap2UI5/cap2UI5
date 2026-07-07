@@ -60,6 +60,26 @@ class z2ui5_cl_util {
   }
 
   /**
+   * Deep-copy a value with all plain-object keys lowercased. Used by
+   * transpiled code when a struct from `client->get( )` (UPPERCASE wire
+   * keys) is assigned to a class attribute that the app reads with the
+   * transpiler's lowercase naming. Class instances pass through untouched.
+   */
+  static struct_lower_keys(val) {
+    if (Array.isArray(val)) return val.map((v) => z2ui5_cl_util.struct_lower_keys(v));
+    if (val !== null && typeof val === `object`) {
+      const proto = Object.getPrototypeOf(val);
+      if (proto !== Object.prototype && proto !== null) return val;
+      const out = {};
+      for (const k of Object.keys(val)) {
+        out[String(k).toLowerCase()] = z2ui5_cl_util.struct_lower_keys(val[k]);
+      }
+      return out;
+    }
+    return val;
+  }
+
+  /**
    * Returns one of: "TABLE" | "STRUCT" | "STRING" | "NUMERIC" | "BOOLEAN" |
    * "DREF" | "OREF" | "OTHER". Mirrors abap rtti_get_type_kind in spirit.
    */

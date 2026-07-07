@@ -42,7 +42,7 @@ class z2ui5_cl_demo_app_129 extends z2ui5_if_app {
     page = page.shell()
       .page({ title: `abap2UI5 - Selection-Screen Example`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: true });
     let grid = page.grid(`L6 M12 S12`).content(`layout`);
-    grid = grid.text(client._bind_edit({ val: this.lv_text, view: client.cs_view.main }));
+    grid = grid.text(client._bind_edit(this.lv_text, { view: client.cs_view.main }));
     page.footer()
       .overflow_toolbar()
       .toolbar_spacer()

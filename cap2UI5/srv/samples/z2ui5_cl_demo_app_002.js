@@ -43,7 +43,7 @@ class z2ui5_cl_demo_app_002 extends z2ui5_if_app {
     grid.simple_form({ title: `Input`, editable: true })
       .content(`form`)
       .label(`Input with suggestion items`)
-      .input({ id: `suggInput`, value: this.client._bind_edit(this.s_screen.colour), placeholder: `Fill in your favorite color`, suggestionitems: this.client._bind(this.t_suggestions), showsuggestion: true })
+      .input({ id: `suggInput`, value: this.client._bind_edit(this.s_screen.colour, { name: `s_screen-colour` }), placeholder: `Fill in your favorite color`, suggestionitems: this.client._bind(this.t_suggestions), showsuggestion: true })
       .get()
       .suggestion_items()
       .get()
@@ -51,35 +51,35 @@ class z2ui5_cl_demo_app_002 extends z2ui5_if_app {
     grid.simple_form({ title: `Time Inputs`, editable: true })
       .content(`form`)
       .label(`Date`)
-      .date_picker(this.client._bind_edit(this.s_screen.date))
+      .date_picker(this.client._bind_edit(this.s_screen.date, { name: `s_screen-date` }))
       .label(`Date and Time`)
-      .date_time_picker(this.client._bind_edit(this.s_screen.date_time))
+      .date_time_picker(this.client._bind_edit(this.s_screen.date_time, { name: `s_screen-date_time` }))
       .label(`Time Begin/End`)
-      .time_picker(this.client._bind_edit(this.s_screen.time_start))
-      .time_picker(this.client._bind_edit(this.s_screen.time_end));
+      .time_picker(this.client._bind_edit(this.s_screen.time_start, { name: `s_screen-time_start` }))
+      .time_picker(this.client._bind_edit(this.s_screen.time_end, { name: `s_screen-time_end` }));
     const content = page.grid(`L12 M12 S12`)
       .content(`layout`)
       .simple_form({ title: `Input with select options`, editable: true })
       .content(`form`);
     content.label(`Checkbox`)
-      .checkbox({ selected: this.client._bind_edit(this.s_screen.check_is_active), text: `this is a checkbox`, enabled: true });
+      .checkbox({ selected: this.client._bind_edit(this.s_screen.check_is_active, { name: `s_screen-check_is_active` }), text: `this is a checkbox`, enabled: true });
     content.label(`Combobox`)
-      .combobox({ selectedkey: this.client._bind_edit(this.s_screen.combo_key), items: this.client._bind(this.t_combo) })
+      .combobox({ selectedkey: this.client._bind_edit(this.s_screen.combo_key, { name: `s_screen-combo_key` }), items: this.client._bind(this.t_combo) })
       .item({ key: `{KEY}`, text: `{TEXT}` });
     content.label(`Combobox2`)
-      .combobox({ selectedkey: this.client._bind_edit(this.s_screen.combo_key2), items: this.client._bind(this.t_combo) })
+      .combobox({ selectedkey: this.client._bind_edit(this.s_screen.combo_key2, { name: `s_screen-combo_key2` }), items: this.client._bind(this.t_combo) })
       .item({ key: `{KEY}`, text: `{TEXT}` });
     content.label(`Segmented Button`)
-      .segmented_button(this.client._bind_edit(this.s_screen.segment_key))
+      .segmented_button(this.client._bind_edit(this.s_screen.segment_key, { name: `s_screen-segment_key` }))
       .items()
       .segmented_button_item({ key: `BLUE`, icon: `sap-icon://accept`, text: `blue` })
       .segmented_button_item({ key: `GREEN`, icon: `sap-icon://add-favorite`, text: `green` })
       .segmented_button_item({ key: `BLACK`, icon: `sap-icon://attachment`, text: `black` });
     content.label(`Switch disabled`).switch({ enabled: false, customtexton: `A`, customtextoff: `B` });
     content.label(`Switch accept/reject`)
-      .switch({ state: this.client._bind_edit(this.s_screen.check_switch_01), customtexton: `on`, customtextoff: `off`, type: `AcceptReject` });
+      .switch({ state: this.client._bind_edit(this.s_screen.check_switch_01, { name: `s_screen-check_switch_01` }), customtexton: `on`, customtextoff: `off`, type: `AcceptReject` });
     content.label(`Switch normal`)
-      .switch({ state: this.client._bind_edit(this.s_screen.check_switch_02), customtexton: `YES`, customtextoff: `NO` });
+      .switch({ state: this.client._bind_edit(this.s_screen.check_switch_02, { name: `s_screen-check_switch_02` }), customtexton: `YES`, customtextoff: `NO` });
     page.footer()
       .overflow_toolbar()
       .toolbar_spacer()

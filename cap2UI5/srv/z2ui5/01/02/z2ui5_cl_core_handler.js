@@ -124,6 +124,17 @@ class z2ui5_cl_core_handler {
     }
     oClient.oApp  = li_app;
 
+    // Rehydrate the binding list persisted with the draft — an event
+    // roundtrip that only calls view_model_update() (no re-render, so no
+    // _bind calls) must still serialize the app's bound attributes into the
+    // response model, like abap keeps mt_attri on the draft. Values are read
+    // fresh from the app at serialize time (main_json_stringify).
+    if (Array.isArray(li_app?.__aBind)) {
+      oClient.aBind = li_app.__aBind
+        .filter((e) => e && typeof e.name === `string`)
+        .map((e) => ({ ...e, val: li_app[e.name] }));
+    }
+
     // Rehydrate nav stack on the client so check_app_prev_stack() / nav_app_back() work.
     if (this.mo_action._navStack) oClient._navStack.push(...this.mo_action._navStack);
     if (this.mo_action._navPrev)  oClient._navPrev = this.mo_action._navPrev;
@@ -177,12 +188,19 @@ class z2ui5_cl_core_handler {
 
   async main_end(oClient) {
     const previousId  = this.ms_request?.S_FRONT?.ID || null;
+
+    // Persist the binding metadata (name/type/mappers — not the value
+    // snapshot) with the draft so the next roundtrip can rebuild the model
+    // without the app re-running its view code. Mirrors abap's mt_attri on
+    // the draft table.
+    oClient.oApp.__aBind = oClient.aBind.map(({ val, ...meta }) => meta);
+
     const generatedId = await z2ui5_cl_core_app.db_save(oClient.oApp, oClient, previousId);
 
     // main_json_stringify returns the model as a plain object; the wire format
     // wants it as JSON (abap returns string from this method). Stringify here
     // so response_abap_to_json can splice it raw alongside the front payload.
-    const oModelObj = z2ui5_cl_core_srv_model.main_json_stringify(oClient.aBind);
+    const oModelObj = z2ui5_cl_core_srv_model.main_json_stringify(oClient.aBind, oClient.oApp);
     const oModel = typeof oModelObj === `string` ? oModelObj : JSON.stringify(oModelObj);
 
     this.ms_response = {

@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -35,7 +36,7 @@ class z2ui5_cl_demo_app_033 extends z2ui5_if_app {
         client.message_box_display(`Action of illustrated message`);
         break;
       default:
-        this.mv_type = client.get().EVENT;
+        this.mv_type = z2ui5_cl_util.struct_lower_keys(client.get().EVENT);
         break;
     }
     this.view_display();

@@ -10,15 +10,15 @@ class z2ui5_cl_demo_app_166 extends z2ui5_if_app {
     const view = z2ui5_cl_xml_view.factory();
     const page = view.shell()
       .page({ title: `abap2UI5 - Binding Structure Level`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
-    page.input(this.client._bind_edit(this.ms_struc.title));
-    page.input(this.client._bind_edit(this.ms_struc.value));
-    page.input(this.client._bind_edit(this.ms_struc.value2));
-    page.input(this.client._bind_edit(this.ms_struc2.title));
-    page.input(this.client._bind_edit(this.ms_struc2.value));
-    page.input(this.client._bind_edit(this.ms_struc2.value2));
-    page.input(this.client._bind_edit(this.ms_struc2.incl_title));
-    page.input(this.client._bind_edit(this.ms_struc2.incl_value));
-    page.input(this.client._bind_edit(this.ms_struc2.incl_value2));
+    page.input(this.client._bind_edit(this.ms_struc.title, { name: `ms_struc-title` }));
+    page.input(this.client._bind_edit(this.ms_struc.value, { name: `ms_struc-value` }));
+    page.input(this.client._bind_edit(this.ms_struc.value2, { name: `ms_struc-value2` }));
+    page.input(this.client._bind_edit(this.ms_struc2.title, { name: `ms_struc2-title` }));
+    page.input(this.client._bind_edit(this.ms_struc2.value, { name: `ms_struc2-value` }));
+    page.input(this.client._bind_edit(this.ms_struc2.value2, { name: `ms_struc2-value2` }));
+    page.input(this.client._bind_edit(this.ms_struc2.incl_title, { name: `ms_struc2-incl_title` }));
+    page.input(this.client._bind_edit(this.ms_struc2.incl_value, { name: `ms_struc2-incl_value` }));
+    page.input(this.client._bind_edit(this.ms_struc2.incl_value2, { name: `ms_struc2-incl_value2` }));
     this.client.view_display(view.stringify());
   }
 

@@ -26,30 +26,151 @@ class z2ui5_cl_core_srv_bind {
   //  Static API (client-facing)
   // ============================================================
 
+  // Option keys the ABAP _bind / _bind_edit signatures know. Used to detect
+  // the transpiler's named-argument form: `_bind_edit({ val: x, tab: t, ... })`
+  // (emitted when an ABAP call uses parameters beyond `val`).
+  static _NAMED_ARG_KEYS = new Set([
+    `val`, `tab`, `tab_index`, `path`, `path_only`, `name`, `view`,
+    `custom_mapper`, `custom_mapper_back`, `custom_filter`, `custom_filter_back`,
+    `switch_default_model`,
+  ]);
+
   /**
-   * One-way binding: returns `{/path}` (or raw `/path` when opts.path===true).
+   * One-way binding: returns `{/PATH}` (or raw `/PATH` when opts.path===true).
    * The data is exposed at the top of the response model (no XX namespace).
    */
   static main_one_way(client, val, opts = {}) {
+    return z2ui5_cl_core_srv_bind._main(client, val, opts, z2ui5_if_core_types.cs_bind_type.one_way, `__bind`);
+  }
+
+  /**
+   * Two-way binding: returns `{/XX/PATH}`. Data is exposed under XX so the
+   * frontend's JSONModel can write back through the delta channel.
+   */
+  static main_two_way(client, val, opts = {}) {
+    return z2ui5_cl_core_srv_bind._main(client, val, opts, z2ui5_if_core_types.cs_bind_type.two_way, `__edit`);
+  }
+
+  /**
+   * Shared implementation of the two directions. Model paths use UPPERCASE
+   * names — the abap2UI5 wire format (ABAP component names are uppercase),
+   * which the sample views' literal bindings (`{TITLE}`) rely on. Writeback
+   * maps them onto the real (lowercase) JS properties case-insensitively in
+   * core_srv_model.
+   */
+  static _main(client, val, opts, type, prefix) {
+    ({ val, opts } = z2ui5_cl_core_srv_bind._unpack_named_args(val, opts));
+    if (opts.path_only) opts = { ...opts, path: true };
+
+    const modelPrefix =
+      type === z2ui5_if_core_types.cs_bind_type.two_way
+        ? `/${z2ui5_if_core_types.cs_ui5.two_way_model}`
+        : ``;
+
+    let full = null;
     const explicit = typeof opts.path === `string` ? opts.path : null;
-    const path = explicit
-      ?? z2ui5_cl_core_srv_bind._find_or_create(client, val, z2ui5_if_core_types.cs_bind_type.one_way, `__bind`, opts);
-    const full = `/${path}`;
+    if (explicit) {
+      full = `${modelPrefix}/${explicit}`;
+    } else if (z2ui5_cl_core_srv_bind._is_filled_tab(opts.tab)) {
+      full = `${modelPrefix}/${z2ui5_cl_core_srv_bind._path_tab_cell(client, val, type, prefix, opts)}`;
+    } else if (opts.name) {
+      const byName = z2ui5_cl_core_srv_bind._path_by_name(client, val, type, opts);
+      if (byName) full = `${modelPrefix}/${byName}`;
+    }
+    if (full === null) {
+      const prop = z2ui5_cl_core_srv_bind._find_or_create(client, val, type, prefix, opts);
+      full = `${modelPrefix}/${prop.toUpperCase()}`;
+    }
+
     if (opts.path === true) return full;
     return z2ui5_cl_core_srv_bind._build_expr(full, opts);
   }
 
   /**
-   * Two-way binding: returns `{/XX/path}`. Data is exposed under XX so the
-   * frontend's JSONModel can write back through the delta channel.
+   * Accept the transpiler's single-object named-argument form:
+   * `_bind_edit({ val: x, tab: t, tab_index: i })` — an object whose keys are
+   * all known ABAP parameter names and that carries `val` is treated as
+   * (val, opts), not as the bound value itself.
    */
-  static main_two_way(client, val, opts = {}) {
-    const explicit = typeof opts.path === `string` ? opts.path : null;
-    const path = explicit
-      ?? z2ui5_cl_core_srv_bind._find_or_create(client, val, z2ui5_if_core_types.cs_bind_type.two_way, `__edit`, opts);
-    const full = `/${z2ui5_if_core_types.cs_ui5.two_way_model}/${path}`;
-    if (opts.path === true) return full;
-    return z2ui5_cl_core_srv_bind._build_expr(full, opts);
+  static _unpack_named_args(val, opts = {}) {
+    if (
+      val !== null && typeof val === `object` && !Array.isArray(val)
+      && Object.prototype.hasOwnProperty.call(val, `val`)
+      && Object.keys(val).every((k) => z2ui5_cl_core_srv_bind._NAMED_ARG_KEYS.has(k))
+    ) {
+      const { val: inner, ...rest } = val;
+      return { val: inner, opts: { ...rest, ...opts } };
+    }
+    return { val, opts };
+  }
+
+  static _is_filled_tab(tab) {
+    return Array.isArray(tab) && tab.length > 0;
+  }
+
+  /**
+   * Cell-level binding (ABAP: `_bind_edit( val = <cell> tab = tab tab_index = i )`).
+   * Registers the table itself on aBind and returns `TAB/<row>/<COL>`.
+   */
+  static _path_tab_cell(client, val, type, prefix, opts) {
+    const tab = opts.tab;
+    const tabProp = z2ui5_cl_core_srv_bind._find_or_create(client, tab, type, prefix, {});
+    const idx = (opts.tab_index || 1) - 1;
+    const row = tab[idx];
+    if (!row || typeof row !== `object`) {
+      throw new z2ui5_cx_util_error(
+        `BINDING_ERROR_TAB_CELL_LEVEL - No class attribute for binding found - Please check if the bound values are public attributes of your class`
+      );
+    }
+    for (const colName of Object.keys(row)) {
+      if (Object.is(row[colName], val) || row[colName] === val) {
+        return `${tabProp.toUpperCase()}/${idx}/${colName.toUpperCase()}`;
+      }
+    }
+    throw new z2ui5_cx_util_error(
+      `BINDING_ERROR_TAB_CELL_LEVEL - No class attribute for binding found - Please check if the bound values are public attributes of your class`
+    );
+  }
+
+  /**
+   * Attribute-path binding (opts.name = `ms_home-classname` or
+   * `ms_home/classname`). ABAP identifies nested struct members through
+   * reference semantics; JS values carry no identity, so the transpiler (and
+   * hand-written apps) pass the member path explicitly. Registers the ROOT
+   * attribute by reference and returns the full member path. Returns null
+   * when the path does not resolve on the app — caller falls back to the
+   * value-equality lookup.
+   */
+  static _path_by_name(client, val, type, opts) {
+    const segs = String(opts.name)
+      .replace(/->/g, `/`).replace(/-/g, `/`)
+      .split(`/`).map((s) => s.trim()).filter(Boolean);
+    if (!segs.length) return null;
+
+    let cur = client.oApp;
+    const resolved = [];
+    for (const seg of segs) {
+      if (cur === null || typeof cur !== `object`) return null;
+      const key = z2ui5_cl_core_srv_bind._match_key(cur, seg);
+      if (key === undefined) return null;
+      resolved.push(key);
+      cur = cur[key];
+    }
+
+    const rootProp = resolved[0];
+    const existing = client.aBind.find((b) => b.name === rootProp && b.type === type);
+    if (!existing) {
+      z2ui5_cl_core_srv_bind.check_raise_new(opts);
+      client.aBind.push(z2ui5_cl_core_srv_bind._entry({ name: rootProp, val: client.oApp[rootProp], type, opts }));
+    }
+    return resolved.map((s) => s.toUpperCase()).join(`/`);
+  }
+
+  /** Find an own key on obj matching `name` case-insensitively. */
+  static _match_key(obj, name) {
+    if (Object.prototype.hasOwnProperty.call(obj, name)) return name;
+    const lower = String(name).toLowerCase();
+    return Object.keys(obj).find((k) => k.toLowerCase() === lower);
   }
 
   /**
@@ -79,14 +200,14 @@ class z2ui5_cl_core_srv_bind {
    * impl reads off mo_app->mt_attri instead.
    */
   main(client, val, type, config = {}) {
-    if (z2ui5_cl_util.check_bound_a_not_initial(config.tab)) {
-      return this.main_cell(client, val, type, config);
-    }
     this.ms_config = config;
     this.mv_type   = type;
 
     const opts = {
       path: !!config.path_only ? true : config.path,
+      tab:                config.tab,
+      tab_index:          config.tab_index,
+      name:               config.name,
       custom_mapper:      config.custom_mapper,
       custom_mapper_back: config.custom_mapper_back,
       custom_filter:      config.custom_filter,
@@ -115,29 +236,11 @@ class z2ui5_cl_core_srv_bind {
   }
 
   /**
-   * Cell-level binding. abap parity. Resolves the table path first, then
-   * appends the row index + matching column.
+   * Cell-level binding. abap parity — kept as a thin wrapper over the shared
+   * static implementation (tab/tab_index route in _main).
    */
   main_cell(client, val, type, config = {}) {
-    this.ms_config = config;
-    this.mv_type   = type;
-
-    const sub = new z2ui5_cl_core_srv_bind(this.mo_app);
-    let result = sub.main(client, config.tab, type, { path_only: true });
-
-    // sub.main returned `{/path}` because path_only flag flows through opts;
-    // strip the braces if present to get the raw path.
-    if (typeof result === `string` && result.startsWith(`{`) && result.endsWith(`}`)) {
-      result = result.slice(1, -1);
-    }
-    result = z2ui5_cl_core_srv_bind.bind_tab_cell({
-      iv_name: result,
-      iv_val:  val,
-      ms_config: config,
-    });
-
-    if (!config.path_only) result = `{${result}}`;
-    return result;
+    return this.main(client, val, type, config);
   }
 
   // ============================================================

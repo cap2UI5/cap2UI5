@@ -40,10 +40,10 @@ class z2ui5_cl_demo_app_312 extends z2ui5_if_app {
     const lr_filter_bar = lr_header.filter_bar({ usetoolbar: `false` }).filter_group_items();
     const lr_filter = lr_filter_bar.filter_group_item({ name: `VizFrameType`, label: `VizFrame type`, groupname: `GroupVizFrameType`, visibleinfilterbar: `true` })
       .filter_control();
-    lr_filter.combobox({ selectedkey: this.client._bind_edit(this.ms_screen.viztypesel), change: this.client._event(`EVT_VIZTYPE_CHANGE`), showclearicon: true, items: this.client._bind(this.mt_viztypes) })
+    lr_filter.combobox({ selectedkey: this.client._bind_edit(this.ms_screen.viztypesel, { name: `ms_screen-viztypesel` }), change: this.client._event(`EVT_VIZTYPE_CHANGE`), showclearicon: true, items: this.client._bind(this.mt_viztypes) })
       .item({ key: `{N}`, text: `{V}` });
     const lr_content = lr_dyn_page.content(`f`);
-    const lr_vizframe = lr_content.viz_frame({ id: `idVizFrame`, vizproperties: this.mv_prop, viztype: this.client._bind(this.ms_screen.viztype), height: `500px`, width: `100%`, selectdata: this.client._event(`EVT_DATA_SELECT`, [`\${$parameters>/data/0/data/}`]) });
+    const lr_vizframe = lr_content.viz_frame({ id: `idVizFrame`, vizproperties: this.mv_prop, viztype: this.client._bind(this.ms_screen.viztype, { name: `ms_screen-viztype` }), height: `500px`, width: `100%`, selectdata: this.client._event(`EVT_DATA_SELECT`, [`\${$parameters>/data/0/data/}`]) });
     const lr_dataset = lr_vizframe.viz_dataset();
     const lr_flatteneddataset = lr_dataset.viz_flattened_dataset(this.client._bind(this.mt_data_chart));
     const lr_dimensions = lr_flatteneddataset.viz_dimensions();

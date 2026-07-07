@@ -49,7 +49,7 @@ class z2ui5_cl_demo_app_364 extends z2ui5_if_app {
     page.overflow_toolbar()
       .content()
       .button({ icon: `sap-icon://save`, text: `Save`, press: this.client._event(`BUTTON_SAVE`) });
-    const columns = page.tree_table({ id: `treeTable`, rows: `{path:'` + this.client._bind_edit({ val: this.t_tree, path: true }) + `', parameters: {arrayNames:['NODES'], numberOfExpandedLevels: 1}}`, selectionmode: `None` })
+    const columns = page.tree_table({ id: `treeTable`, rows: `{path:'` + this.client._bind_edit(this.t_tree, { path: true }) + `', parameters: {arrayNames:['NODES'], numberOfExpandedLevels: 1}}`, selectionmode: `None` })
       .tree_columns();
     columns.tree_column(`User`).tree_template().text(`{USER}`);
     columns.tree_column(`Validated`)

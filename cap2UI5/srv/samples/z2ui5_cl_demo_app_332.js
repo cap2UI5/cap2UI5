@@ -45,7 +45,7 @@ class z2ui5_cl_demo_app_332 extends z2ui5_if_app {
         return;
       }
       line = form.label({ wrapping: false, text: layout.name });
-      line.input({ value: client._bind(fs_value), visible: client._bind({ val: layout.visible, tab: this.mo_table_obj.ms_data.t_layout, tab_index: index }), enabled: false });
+      line.input({ value: client._bind(fs_value), visible: client._bind(layout.visible, { tab: this.mo_table_obj.ms_data.t_layout, tab_index: index }), enabled: false });
     }
     client.view_display(page.stringify());
   }

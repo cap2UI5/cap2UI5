@@ -391,6 +391,35 @@ function isClientReceiver(recv) {
   return recv === "client" || recv === "this.client" || /\.client$/.test(recv);
 }
 
+// _bind / _bind_edit: ABAP identifies nested struct members via reference
+// semantics (REF #). JS values carry no identity, so the runtime needs the
+// attribute path passed explicitly. Keep `val` positional, move all other
+// ABAP parameters into the opts object, and derive `name` whenever the bound
+// value is a member chain of an app attribute (rendered as `this.a.b`).
+const BIND_METHS = new Set(["_bind", "_bind_edit"]);
+const APP_MEMBER_PATH = /^this\.([A-Za-z0-9_$]+(?:\.[A-Za-z0-9_$]+)+)$/;
+
+function bindArgs(meth, groupToks, ctx) {
+  if (!BIND_METHS.has(meth)) return null;
+  const named = namedArgsOf(groupToks, ctx);
+  let valExpr;
+  const extra = [];
+  if (named) {
+    if (!named.has("val")) return null;
+    for (const [k, v] of named.entries()) {
+      if (k === "val") valExpr = renderNamedVal(v);
+      else extra.push(`${k}: ${renderNamedVal(v)}`);
+    }
+  } else {
+    valExpr = txArgs(groupToks, ctx, meth);
+    if (!valExpr || !APP_MEMBER_PATH.test(valExpr)) return null;
+  }
+  const m = APP_MEMBER_PATH.exec(valExpr || "");
+  if (m) extra.unshift(`name: \`${m[1].replace(/\./g, "-")}\``);
+  if (!valExpr) return null;
+  return extra.length ? `${valExpr}, { ${extra.join(", ")} }` : valExpr;
+}
+
 /** named args on a client method → positional args in JS signature order */
 function clientArgs(meth, groupToks, ctx) {
   const sig = clientSignature()?.get(meth);
@@ -786,7 +815,9 @@ function chainSuffix(toks, j, atoms, ctx, upper = false) {
         const close = matchGroup(toks, j);
         const group = toks.slice(j + 1, close);
         let args = null;
-        if (isClientReceiver(atoms[atoms.length - 1].str)) args = clientArgs(meth, group, ctx);
+        if (isClientReceiver(atoms[atoms.length - 1].str)) {
+          args = bindArgs(meth, group, ctx) ?? clientArgs(meth, group, ctx);
+        }
         if (args === null) args = txArgs(group, ctx, meth);
         // client.get() returns the request struct with UPPERCASE keys
         if (meth === "get" && isClientReceiver(atoms[atoms.length - 1].str)) upper = true;
@@ -1746,6 +1777,17 @@ function emitStatement(s, ctx, st, push, assignedTwice, methodDef) {
         if (rhs === "{}") {
           const f = ctx.model.fields.get(lhs.replace(/^this\./, ""));
           if (f && f.default.startsWith("{")) rhs2 = f.default;
+        }
+        // A struct copied out of client.get() carries UPPERCASE wire keys,
+        // but non-local targets are read with the lowercase naming later on —
+        // rebuild the copy with lowercase keys (scalars/class refs pass
+        // through struct_lower_keys unchanged).
+        if (
+          /^\(\{ \.\.\.[^{}]*client\.get\(\)[^{}]*\}\)$/.test(rhs2) ||
+          /client\.get\(\)(\.[A-Za-z0-9_]+)+$/.test(rhs2)
+        ) {
+          ctx.requires?.add("z2ui5_cl_util");
+          rhs2 = `z2ui5_cl_util.struct_lower_keys(${rhs2})`;
         }
         push(`${lhs} = ${rhs2};`);
         // writes through a backed field symbol propagate into the structure

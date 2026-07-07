@@ -53,7 +53,7 @@ class z2ui5_cl_core_client {
   // Property names declared on z2ui5_if_app that must be excluded from
   // _bind / _bind_edit auto-discovery — they share defaults ("" / false) with
   // many user fields and would otherwise be matched first.
-  static _FRAMEWORK_FIELDS = new Set(["id_draft", "id_app", "check_initialized", "check_sticky"]);
+  static _FRAMEWORK_FIELDS = new Set(["id_draft", "id_app", "check_initialized", "check_sticky", "__aBind", "__navStackIds"]);
 
   // Instance-level alias matching abap2UI5 client->cs_event-X / client->cs_view-X access pattern.
   get cs_event() {
@@ -505,11 +505,13 @@ class z2ui5_cl_core_client {
       SEARCH:   sFront.SEARCH   || "",
       HASH:     sFront.HASH     || "",
     };
-    // browser state — the frontend sends these next to EVENT/ID; abap
-    // guarantees the components exist, so default every slot
+    // browser state — the frontend sends these inside S_FRONT.CONFIG
+    // (see webapp/core/Server.js roundtrip()); older payloads carried them
+    // next to EVENT/ID, so accept both. abap guarantees the components
+    // exist, so default every slot.
     const scrollDefault = () => ({ ID: "", X: 0, Y: 0 });
-    const sScroll = sFront.S_SCROLL || {};
-    const sDevice = sFront.S_DEVICE || {};
+    const sScroll = sFront.S_SCROLL || sFront.CONFIG?.S_SCROLL || {};
+    const sDevice = sFront.S_DEVICE || sFront.CONFIG?.S_DEVICE || {};
     return {
       EVENT: event,
       T_EVENT_ARG: args,
