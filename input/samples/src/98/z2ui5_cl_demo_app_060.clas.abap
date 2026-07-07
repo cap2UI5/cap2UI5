@@ -1,4 +1,4 @@
-CLASS z2ui5_cl_demo_app_201 DEFINITION PUBLIC.
+CLASS z2ui5_cl_demo_app_060 DEFINITION PUBLIC.
 
   PUBLIC SECTION.
     INTERFACES z2ui5_if_app.
@@ -10,12 +10,8 @@ CLASS z2ui5_cl_demo_app_201 DEFINITION PUBLIC.
         currencyname      TYPE string,
         currencyshortname TYPE string,
       END OF ty_s_currency.
-
-    DATA
-      mt_suggestion_out TYPE STANDARD TABLE OF ty_s_currency.
-    DATA
-      mt_suggestion TYPE STANDARD TABLE OF ty_s_currency.
-
+    DATA mt_suggestion_out TYPE STANDARD TABLE OF ty_s_currency.
+    DATA mt_suggestion TYPE STANDARD TABLE OF ty_s_currency.
     DATA input TYPE string.
 
   PROTECTED SECTION.
@@ -29,7 +25,7 @@ CLASS z2ui5_cl_demo_app_201 DEFINITION PUBLIC.
 ENDCLASS.
 
 
-CLASS z2ui5_cl_demo_app_201 IMPLEMENTATION.
+CLASS z2ui5_cl_demo_app_060 IMPLEMENTATION.
 
   METHOD set_data.
 
@@ -261,12 +257,21 @@ CLASS z2ui5_cl_demo_app_201 IMPLEMENTATION.
 
     IF client->check_on_init( ).
 
-* ---------- This script will skip the frontend suggestion filtering ------------------------------
       DATA(lv_script) = `   debugger;` && |\n| &&
                   `function setInputFIlter(){` && |\n| &&
-                  ` var inp = sap.z2ui5.oView.byId('suggInput');` && |\n| &&
+                  ` var inp = z2ui5.oView.byId('suggInput');` && |\n| &&
                   ` inp.setFilterFunction(function(sValue, oItem){` && |\n| &&
+        `   var aSplit = sValue.split(" ");` && |\n| &&
+                  `   if (aSplit.length > 0) {` && |\n| &&
+                  `     var sTermNew = aSplit.slice(-1)[0];` && |\n| &&
+                  `     sTermNew.trim();` && |\n| &&
+                  `     if (sTermNew) {` && |\n| &&
+                  `       if (oItem.mAggregations.cells[0].mProperties.text.match(new RegExp(sTermNew, "i"))` && |\n| &&
+                  `           || oItem.mAggregations.cells[1].mProperties.text.match(new RegExp(sTermNew, "i")) ) {` && |\n| &&
                   `         return true;` && |\n| &&
+                  `       } else return false;` && |\n| &&
+                  `     }` && |\n| &&
+                  `   }` && |\n| &&
                   ` });` && |\n| &&
                   `}`.
 
