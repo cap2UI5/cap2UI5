@@ -32,7 +32,7 @@ class z2ui5_cl_pop_input_val extends z2ui5_if_app {
       .content()
       .vbox(`sapUiMediumMargin`)
       .label(this.question_text)
-      .input({ value: this.client._bind_edit(this.ms_result.value), submit: this.client._event(`BUTTON_CONFIRM`) })
+      .input({ value: this.client._bind_edit(this.ms_result.value, { name: `ms_result-value` }), submit: this.client._event(`BUTTON_CONFIRM`) })
       .get_parent()
       .get_parent()
       .buttons()

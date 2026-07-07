@@ -23,7 +23,7 @@ class z2ui5_cl_pop_get_range_m extends z2ui5_if_app {
     let lo_popup = z2ui5_cl_xml_view.factory_popup();
     lo_popup = lo_popup.dialog({ afterclose: this.client._event(`BUTTON_CANCEL`), contentheight: `50%`, contentwidth: `50%`, title: `Define Filter Conditions` });
     const vbox = lo_popup.vbox({ height: `100%`, justifycontent: `SpaceBetween` });
-    const item = vbox.list({ nodata: `No conditions defined`, items: this.client._bind(this.ms_result.t_filter) })
+    const item = vbox.list({ nodata: `No conditions defined`, items: this.client._bind(this.ms_result.t_filter, { name: `ms_result-t_filter` }) })
       .custom_list_item();
     const grid = item.grid({ class: `sapUiSmallMarginTop sapUiSmallMarginBottom sapUiSmallMarginBegin` });
     grid.text(`{NAME}`);

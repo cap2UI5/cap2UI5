@@ -83,14 +83,14 @@ class z2ui5_cl_app_startup extends z2ui5_if_app {
       .link({ text: `(Example)`, target: `_blank`, href: `https://github.com/abap2UI5/abap2UI5/blob/main/src/02/z2ui5_cl_app_hello_world.clas.abap` })
       .label(`Step 4`);
     if (this.ms_home.class_editable === true) {
-      simple_form.input({ placeholder: `fill in the class name and press 'check'`, enabled: this.client._bind(this.ms_home.class_editable), value: this.client._bind_edit(this.ms_home.classname), submit: this.client._event(this.ms_home.btn_event_id), valuehelprequest: this.client._event(z2ui5_cl_app_startup.cs_event.value_help), showvaluehelp: true, width: `70%` });
+      simple_form.input({ placeholder: `fill in the class name and press 'check'`, enabled: this.client._bind(this.ms_home.class_editable, { name: `ms_home-class_editable` }), value: this.client._bind_edit(this.ms_home.classname, { name: `ms_home-classname` }), submit: this.client._event(this.ms_home.btn_event_id), valuehelprequest: this.client._event(z2ui5_cl_app_startup.cs_event.value_help), showvaluehelp: true, width: `70%` });
     } else {
       simple_form.text(this.ms_home.classname);
     }
     simple_form.label();
-    simple_form.button({ press: this.client._event(this.ms_home.btn_event_id), text: this.client._bind(this.ms_home.btn_text), icon: this.client._bind(this.ms_home.btn_icon), width: `70%` });
+    simple_form.button({ press: this.client._event(this.ms_home.btn_event_id), text: this.client._bind(this.ms_home.btn_text, { name: `ms_home-btn_text` }), icon: this.client._bind(this.ms_home.btn_icon, { name: `ms_home-btn_icon` }), width: `70%` });
     simple_form.label(`Step 5`)
-      .link({ text: `Link to the Application`, target: `_blank`, href: this.client._bind(this.ms_home.url), enabled: `{= $${this.client._bind(this.ms_home.class_editable)} === false }` });
+      .link({ text: `Link to the Application`, target: `_blank`, href: this.client._bind(this.ms_home.url, { name: `ms_home-url` }), enabled: `{= $${this.client._bind(this.ms_home.class_editable, { name: `ms_home-class_editable` })} === false }` });
     simple_form.toolbar().title(`What's next?`);
     if (z2ui5_cl_util.rtti_check_class_exists(`z2ui5_cl_demo_app_000`)) {
       lv_url_samples = this.get_app_url({ classname: `z2ui5_cl_demo_app_000` });
