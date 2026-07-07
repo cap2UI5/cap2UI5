@@ -81,6 +81,9 @@ CLASS zcl_feature DEFINITION PUBLIC.
         i_val         TYPE string
       RETURNING
         VALUE(result) TYPE string.
+    METHODS title
+      RETURNING
+        VALUE(result) TYPE string.
   PROTECTED SECTION.
   PRIVATE SECTION.
 ENDCLASS.
@@ -108,6 +111,11 @@ CLASS zcl_feature IMPLEMENTATION.
       WHEN OTHERS.
         result = COND #( WHEN i_val IS INITIAL THEN \`empty\` ELSE to_upper( i_val ) ).
     ENDCASE.
+  ENDMETHOD.
+
+  METHOD title.
+    CONSTANTS c_title TYPE string VALUE \` abap2UI5 - Samples\`.
+    result = c_title.
   ENDMETHOD.
 
   METHOD z2ui5_if_app~main.
@@ -139,6 +147,11 @@ ENDCLASS.
     test("DO n TIMES with sy-index, EXIT, comparisons", () => {
       const f = Feature.factory();
       expect(f.sum_even({ i_max: 10 })).toBe(1 + 2 + 3 + 4);
+    });
+
+    test("method-local CONSTANTS becomes a const declaration", () => {
+      const f = Feature.factory();
+      expect(f.title()).toBe(" abap2UI5 - Samples");
     });
 
     test("CASE with multi-WHEN, string template escapes, COND, builtins", () => {

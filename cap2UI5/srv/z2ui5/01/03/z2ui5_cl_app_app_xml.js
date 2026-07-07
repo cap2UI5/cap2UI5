@@ -3,7 +3,7 @@
  *
  * Returns the static App.view.xml shell that hosts the dynamically rendered
  * z2ui5 views. ABAP inlines this into _http_get's preload bundle. CAP serves
- * the same XML statically out of /app_v2_new/webapp/view/App.view.xml; this
+ * the same XML statically out of /z2ui5/webapp/view/App.view.xml; this
  * port exists so a user-exit or any other code path can re-emit the canonical
  * shell on demand without round-tripping through the static file server.
  */
