@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -42,7 +43,7 @@ class z2ui5_cl_demo_app_098 extends z2ui5_if_app {
 
   view_display_master() {
     const page = z2ui5_cl_xml_view.factory()
-      .page({ showheader: (false === this.client.get().CHECK_LAUNCHPAD_ACTIVE), title: `abap2UI5 - Master Detail Page with Nested View`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: true });
+      .page({ showheader: (!((this.client.get().CHECK_LAUNCHPAD_ACTIVE) === true || (this.client.get().CHECK_LAUNCHPAD_ACTIVE) === `X`)), title: `abap2UI5 - Master Detail Page with Nested View`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: true });
     const col_layout = page.flexible_column_layout({ layout: this.client._bind_edit(this.mv_layout), id: `test` });
     const lr_master = col_layout.begin_column_pages();
     const lr_list = lr_master.list({ headertext: `List Output`, items: this.client._bind_edit(this.t_tab, { view: this.client.cs_view.main }), mode: `SingleSelectMaster`, selectionchange: this.client._event(`SELCHANGE`) })
@@ -54,7 +55,7 @@ class z2ui5_cl_demo_app_098 extends z2ui5_if_app {
     let sy_subrc = 0;
     let lt_sel;
     let ls_sel;
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.t_tab = [{ title: `row_01`, info: `completed`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `row_02`, info: `incompleted`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `row_03`, info: `working`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `row_04`, info: `working`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `row_05`, info: `completed`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `row_06`, info: `completed`, descr: `this is a description`, icon: `sap-icon://account` }];
       this.mv_layout = `OneColumn`;
@@ -72,8 +73,8 @@ class z2ui5_cl_demo_app_098 extends z2ui5_if_app {
         this.view_display_detail_detail();
         break;
       case `SELCHANGE`:
-        lt_sel = this.t_tab;
-        for (let _i = lt_sel.length - 1; _i >= 0; _i--) { const row = lt_sel[_i]; if (row.selected === false) lt_sel.splice(_i, 1); }
+        lt_sel = z2ui5_cl_util.abap_copy(this.t_tab);
+        for (let _i = lt_sel.length - 1; _i >= 0; _i--) { const row = lt_sel[_i]; if (!(row.selected === true || row.selected === `X`)) lt_sel.splice(_i, 1); }
         ls_sel = {};
         {
           const _t = lt_sel;

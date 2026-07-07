@@ -85,15 +85,15 @@ class z2ui5_cl_demo_app_056 extends z2ui5_if_app {
 
   async main(client) {
     let lo_value_help;
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.view_display();
       return;
     }
-    if (client.get().CHECK_ON_NAVIGATED === true) {
+    if (((client.get().CHECK_ON_NAVIGATED) === true || (client.get().CHECK_ON_NAVIGATED) === `X`)) {
       try {
         lo_value_help = (client.get_app(client.get().S_DRAFT.ID_PREV_APP));
-        if (lo_value_help.result().check_confirmed === false) {
+        if (!((lo_value_help.result().check_confirmed) === true || (lo_value_help.result().check_confirmed) === `X`)) {
           return;
         }
         this.mt_range = lo_value_help.result().t_range;

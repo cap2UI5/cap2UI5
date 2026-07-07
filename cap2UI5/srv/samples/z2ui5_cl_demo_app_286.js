@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -33,7 +34,7 @@ class z2ui5_cl_demo_app_286 extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.view_display({ client: client });
       this.lt_o_model = [{ title: `Title text`, desc: `Description text`, icon: `sap-icon://favorite`, highlight: `Success`, info: `Completed` }, { title: `Title text`, desc: `Description text`, icon: `sap-icon://employee`, highlight: `Error`, info: `Incomplete` }, { title: `Title text`, icon: `sap-icon://accept`, highlight: `Information`, info: `Information` }, { title: `Title text`, icon: `sap-icon://activities`, highlight: `None`, info: `None` }, { title: `Title text`, desc: `Description text`, icon: `sap-icon://badge`, highlight: `Warning`, info: `Warning` }];

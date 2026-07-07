@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -16,8 +17,8 @@ class z2ui5_cl_demo_app_048 extends z2ui5_if_app {
         client.message_box_display(`EDIT - ${lv_row_title}`);
         break;
       case `SELCHANGE`:
-        lt_sel = this.t_tab;
-        for (let _i = lt_sel.length - 1; _i >= 0; _i--) { const row = lt_sel[_i]; if (row.selected === false) lt_sel.splice(_i, 1); }
+        lt_sel = z2ui5_cl_util.abap_copy(this.t_tab);
+        for (let _i = lt_sel.length - 1; _i >= 0; _i--) { const row = lt_sel[_i]; if (!(row.selected === true || row.selected === `X`)) lt_sel.splice(_i, 1); }
         client.message_box_display(`SELECTION_CHANGED - ${lt_sel[(1) - 1].title}`);
         break;
     }

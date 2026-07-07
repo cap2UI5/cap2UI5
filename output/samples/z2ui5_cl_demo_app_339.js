@@ -3,6 +3,7 @@
 // TODO(abap2js): unresolved reference cl_abap_tabledescr — add require manually
 const z2ui5_cl_demo_app_333 = require("./z2ui5_cl_demo_app_333");
 const z2ui5_cl_demo_app_340 = require("./z2ui5_cl_demo_app_340");
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -33,7 +34,7 @@ class z2ui5_cl_demo_app_339 extends z2ui5_if_app {
         sy_tabix = 0;
         for (const com of comp) {
           sy_tabix++;
-          if (com.as_include === false) {
+          if (!(com.as_include === true || com.as_include === `X`)) {
             result.push(com);
           }
         }
@@ -76,7 +77,7 @@ class z2ui5_cl_demo_app_339 extends z2ui5_if_app {
     sy_tabix = 0;
     for (const layout of this.mo_layout.ms_data.t_layout) {
       sy_tabix++;
-      lv_index = sy_tabix;
+      lv_index = z2ui5_cl_util.abap_copy(sy_tabix);
       columns.column({ visible: client._bind(layout.visible, { tab: this.mo_layout.ms_data.t_layout, tab_index: lv_index }) })
         .text(layout.name);
     }
@@ -87,7 +88,7 @@ class z2ui5_cl_demo_app_339 extends z2ui5_if_app {
     sy_tabix = 0;
     for (const layout of this.mo_layout.ms_data.t_layout) {
       sy_tabix++;
-      lv_index = sy_tabix;
+      lv_index = z2ui5_cl_util.abap_copy(sy_tabix);
       cells.object_identifier({ text: `{${layout.name}}` });
     }
     if (!this.mo_parent_view) {
@@ -98,7 +99,7 @@ class z2ui5_cl_demo_app_339 extends z2ui5_if_app {
   }
 
   set_app_data() {
-    this.mv_table = table;
+    this.mv_table = z2ui5_cl_util.abap_copy(table);
   }
 
   async main(client) {
@@ -107,12 +108,12 @@ class z2ui5_cl_demo_app_339 extends z2ui5_if_app {
     let _fs$fs_data = null;
     let fs_table = null;
     let _fs$fs_table = null;
-    if (this.mv_init === false) {
+    if (!(this.mv_init === true || this.mv_init === `X`)) {
       this.mv_init = true;
       this.get_data();
       this.view_display({ client: client });
     }
-    if (client.get().CHECK_ON_NAVIGATED === true && client.check_on_init() === false) {
+    if (((client.get().CHECK_ON_NAVIGATED) === true || (client.get().CHECK_ON_NAVIGATED) === `X`) && !(client.check_on_init() === true || client.check_on_init() === `X`)) {
       this.view_display({ client: client });
     }
     // TODO(abap2js): ASSIGN mo_layout->mr_data->* TO FIELD-SYMBOL(<data>).
@@ -140,7 +141,7 @@ class z2ui5_cl_demo_app_339 extends z2ui5_if_app {
       fs_table.sort();
     } catch (error) {
     }
-    this.mt_table_tmp = this.mt_table;
+    this.mt_table_tmp = z2ui5_cl_util.abap_copy(this.mt_table);
   }
 }
 

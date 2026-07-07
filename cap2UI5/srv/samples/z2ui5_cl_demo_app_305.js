@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -32,7 +33,7 @@ class z2ui5_cl_demo_app_305 extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.t_tab = [{ title: `entry 01`, value: `red` }, { title: `entry 02`, value: `blue` }, { title: `entry 03`, value: `green` }, { title: `entry 04`, value: `yellow` }, { title: `entry 05`, value: `orange` }, { title: `entry 06`, value: `grey` }];
       this.set_view();

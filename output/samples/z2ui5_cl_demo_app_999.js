@@ -37,7 +37,7 @@ class z2ui5_cl_demo_app_999 extends z2ui5_if_app {
     page.hbox()
       .button({ press: client._event(`expand-all`), icon: `sap-icon://expand-all` })
       .button({ press: client._event(`collapse-all`), icon: `sap-icon://collapse-all` });
-    const page2 = page;
+    const page2 = z2ui5_cl_util.abap_copy(page);
     let panel = null;
     page = page2.panel({ expandable: true, expanded: client._bind_edit(this.ms_check_expanded.getting_started, { name: `ms_check_expanded-getting_started` }), headertext: `1. Getting Started` });
     panel = page.panel({ expandable: false, expanded: true, headertext: `Hello World / Basics` });

@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -56,7 +57,7 @@ class z2ui5_cl_demo_app_231 extends z2ui5_if_app {
     let drs;
     if (client.check_on_event(`handleChange`)) {
       args = client.get().T_EVENT_ARG;
-      source = args[(1) - 1];
+      source = z2ui5_cl_util.abap_copy(args[(1) - 1]);
       // TODO(abap2js): ASSIGN me->(source) TO FIELD-SYMBOL(<drs>).
       drs = ({ ...fs_drs });
       this.text = `Id: ${source}\\n` + `From: ${drs.start}\\n` + `To: ${drs.end}`;

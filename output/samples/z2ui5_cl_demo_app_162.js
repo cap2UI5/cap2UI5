@@ -55,17 +55,17 @@ class z2ui5_cl_demo_app_162 extends z2ui5_if_app {
 
   async main(client) {
     let lo_value_help;
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.mt_filter = z2ui5_cl_util.filter_get_multi_by_data(this.mt_table);
       for (let _i = this.mt_filter.length - 1; _i >= 0; _i--) { const row = this.mt_filter[_i]; if (row.name === `SELKZ`) this.mt_filter.splice(_i, 1); }
       this.view_display();
       return;
     }
-    if (client.get().CHECK_ON_NAVIGATED === true) {
+    if (((client.get().CHECK_ON_NAVIGATED) === true || (client.get().CHECK_ON_NAVIGATED) === `X`)) {
       try {
         lo_value_help = (client.get_app(client.get().S_DRAFT.ID_PREV_APP));
-        if (lo_value_help.result().check_confirmed === true) {
+        if (((lo_value_help.result().check_confirmed) === true || (lo_value_help.result().check_confirmed) === `X`)) {
           this.mt_filter = lo_value_help.result().t_filter;
           this.set_data();
           client.view_model_update();

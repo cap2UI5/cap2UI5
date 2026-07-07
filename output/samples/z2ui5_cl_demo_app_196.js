@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -17,7 +18,7 @@ class z2ui5_cl_demo_app_196 extends z2ui5_if_app {
     view._generic({ ns: `html`, name: `style` })
       ._cc_plain_xml(`.SICursorStyle:hover {` + ` cursor: pointer;` + `}` + `.SIBorderStyle {` + ` border: 1px solid #cccccc;` + `}` + `.SIPanelStyle .sapMPanelContent{` + ` overflow: visible;` + `}`);
     const page = view.shell()
-      .page({ showheader: (false === this.client.get().CHECK_LAUNCHPAD_ACTIVE), title: `abap2UI5 - Status Indicators Library`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+      .page({ showheader: (!((this.client.get().CHECK_LAUNCHPAD_ACTIVE) === true || (this.client.get().CHECK_LAUNCHPAD_ACTIVE) === `X`)), title: `abap2UI5 - Status Indicators Library`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
     const panel = page.panel({ class: `sapUiResponsiveMargin SIPanelStyle`, width: `95%` });
     panel.text(`Use the slider for adjusting the fill`);
     panel.slider({ class: `sapUiLargeMarginBottom`, enabletickmarks: true, value: this.client._bind_edit(this.mv_slider_value) })
@@ -42,7 +43,7 @@ class z2ui5_cl_demo_app_196 extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.initialize();
       this.view_display();

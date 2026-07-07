@@ -36,9 +36,38 @@ if (!webapp || !fs.existsSync(path.join(webapp, "index.html"))) {
 // index.html — point the bootstrap at the CDN
 const indexPath = path.join(webapp, "index.html");
 const index = fs.readFileSync(indexPath, "utf8");
-const patchedIndex = index.replace(/src="(?:https:\/\/[^"]*\/)?resources\/sap-ui-core\.js"/, `src="${UI5_CDN}"`);
+let patchedIndex = index.replace(/src="(?:https:\/\/[^"]*\/)?resources\/sap-ui-core\.js"/, `src="${UI5_CDN}"`);
+
+// index.html — hyphenate the bootstrap config attributes. The camelCase /
+// lowercase aliases still work but are deprecated since UI5 1.12x and log a
+// "Deprecated configuration option ..." console warning on every app start.
+const ATTR_RENAMES = [
+  [/data-sap-ui-resourceroots(?==)/gi, "data-sap-ui-resource-roots"],
+  [/data-sap-ui-oninit(?==)/gi, "data-sap-ui-on-init"],
+  [/data-sap-ui-compatversion(?==)/gi, "data-sap-ui-compat-version"],
+  [/data-sap-ui-frameoptions(?==)/gi, "data-sap-ui-frame-options"],
+];
+for (const [from, to] of ATTR_RENAMES) patchedIndex = patchedIndex.replace(from, to);
+
 if (patchedIndex !== index) fs.writeFileSync(indexPath, patchedIndex);
-console.log(`index.html:    bootstrap src ${patchedIndex !== index ? "patched" : "already patched"} -> ${UI5_CDN}`);
+console.log(`index.html:    bootstrap src ${patchedIndex !== index ? "patched" : "already patched"} -> ${UI5_CDN} (+ hyphenated config attributes)`);
+
+// view/App.view.xml — give the empty shell App an initial placeholder page.
+// The root App control renders before the first backend roundtrip returns a
+// view; with zero pages sap.m.NavContainer logs "page stack is empty but
+// should have been initialized" (3x) to the console on every start. The
+// placeholder is dropped by the regular removeAllPages()+insertPage() cycle
+// as soon as the first real view arrives (View1.controller displayView).
+const appViewPath = path.join(webapp, "view", "App.view.xml");
+if (fs.existsSync(appViewPath)) {
+  const appView = fs.readFileSync(appViewPath, "utf8");
+  const patchedAppView = appView.replace(
+    /(<App id="app">)\s*(<\/App>)/,
+    `$1<Page showHeader="false"/>$2`
+  );
+  if (patchedAppView !== appView) fs.writeFileSync(appViewPath, patchedAppView);
+  console.log(`App.view.xml:  initial placeholder page ${patchedAppView !== appView ? "patched" : "already patched"}`);
+}
 
 // manifest.json — point the data source at the CDS REST endpoint
 const manifestPath = path.join(webapp, "manifest.json");

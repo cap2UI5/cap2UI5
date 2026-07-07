@@ -1,4 +1,5 @@
 const z2ui5_cl_demo_app_001 = require("./z2ui5_cl_demo_app_001");
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -11,7 +12,7 @@ class z2ui5_cl_demo_app_025 extends z2ui5_if_app {
   client = null;
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       if (this.event_backend === `NEW_APP_EVENT`) {
         client.message_box_display(`new app called and event NEW_APP_EVENT raised`);
@@ -37,7 +38,7 @@ class z2ui5_cl_demo_app_025 extends z2ui5_if_app {
         break;
       case `BUTTON_READ_PREVIOUS`:
         app_024 = (this.client.get_app(this.client.get().S_DRAFT.ID_PREV_APP));
-        this.input_previous = app_024.input2;
+        this.input_previous = z2ui5_cl_util.abap_copy(app_024.input2);
         this.client.message_toast_display(`data of previous app read`);
         break;
       case `SHOW_VIEW_MAIN`:

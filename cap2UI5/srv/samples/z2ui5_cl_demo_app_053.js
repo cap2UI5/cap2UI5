@@ -8,7 +8,7 @@ class z2ui5_cl_demo_app_053 extends z2ui5_if_app {
   client = null;
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.set_data();
       this.view_display();

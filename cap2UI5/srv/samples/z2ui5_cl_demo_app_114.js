@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -8,7 +9,7 @@ class z2ui5_cl_demo_app_114 extends z2ui5_if_app {
   client = null;
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.set_data();
       this.view_display();
@@ -21,9 +22,9 @@ class z2ui5_cl_demo_app_114 extends z2ui5_if_app {
     if (this.client.check_on_event(`POST`)) {
       if (this.mv_value) {
         this.ms_feed = {};
-        this.ms_feed.author = sy_uname;
+        this.ms_feed.author = z2ui5_cl_util.abap_copy(sy_uname);
         this.ms_feed.type = `Respond`;
-        this.ms_feed.text = this.mv_value;
+        this.ms_feed.text = z2ui5_cl_util.abap_copy(this.mv_value);
         this.mv_value = ``;
         this.mt_feed.splice((1) - 1, 0, this.ms_feed);
         this.client.view_model_update();

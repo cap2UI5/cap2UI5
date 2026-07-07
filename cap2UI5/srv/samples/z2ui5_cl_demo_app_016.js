@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -11,7 +12,7 @@ class z2ui5_cl_demo_app_016 extends z2ui5_if_app {
   view_display() {
     const view = z2ui5_cl_xml_view.factory();
     const container = view.shell()
-      .page({ showheader: (false === this.client.get().CHECK_LAUNCHPAD_ACTIVE), title: `abap2UI5 - Visualization`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() })
+      .page({ showheader: (!((this.client.get().CHECK_LAUNCHPAD_ACTIVE) === true || (this.client.get().CHECK_LAUNCHPAD_ACTIVE) === `X`)), title: `abap2UI5 - Visualization`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() })
       .tab_container();
     const grid = container.tab({ text: `Bar Chart`, selected: this.client._bind(this.tab_bar_active) })
       .grid(`XL6 L6 M6 S12`);
@@ -50,7 +51,7 @@ class z2ui5_cl_demo_app_016 extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.view_display();
     }

@@ -30,14 +30,14 @@ class z2ui5_cl_demo_app_174 extends z2ui5_if_app {
         lr = client.get().R_EVENT_DATA;
         // TODO(abap2js): ASSIGN lr->* TO FIELD-SYMBOL(<t>).
         lt3 = (fs_t);
-        if (this.mv_multiselect === false) {
+        if (!(this.mv_multiselect === true || this.mv_multiselect === `X`)) {
           client.message_box_display(`callback after popup to select: ${lt3[(1) - 1].title}`);
         } else {
           client.nav_app_call(z2ui5_cl_pop_table.factory({ i_tab: lt3, i_title: `Selected rows` }));
         }
         break;
       case `MULTISELECT_TOGGLE`:
-        this.mv_preselect = (this.mv_multiselect === false ? false : this.mv_preselect);
+        this.mv_preselect = (!(this.mv_multiselect === true || this.mv_multiselect === `X`) ? false : this.mv_preselect);
         client.view_model_update();
         break;
     }

@@ -7,7 +7,7 @@ class z2ui5_cl_demo_app_059 extends z2ui5_if_app {
   client = null;
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.set_data();
       this.view_display();
@@ -17,7 +17,7 @@ class z2ui5_cl_demo_app_059 extends z2ui5_if_app {
   }
 
   on_event() {
-    this.client = this.client;
+    this.client = z2ui5_cl_util.abap_copy(this.client);
     if (this.client.check_on_event(`BUTTON_SEARCH`)) {
       this.set_data();
       z2ui5_cl_util.itab_filter_by_val({ val: this.client.get_event_arg(1), tab: this.mt_table });

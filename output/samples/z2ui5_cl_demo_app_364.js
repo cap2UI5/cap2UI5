@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -6,7 +7,7 @@ class z2ui5_cl_demo_app_364 extends z2ui5_if_app {
   client = null;
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.on_init();
     } else if (client.check_on_event()) {
@@ -32,7 +33,7 @@ class z2ui5_cl_demo_app_364 extends z2ui5_if_app {
           sy_tabix = 0;
           for (const s_node of s_tree.nodes) {
             sy_tabix++;
-            if (!(s_node.validated === true)) continue;
+            if (!((s_node.validated === true || s_node.validated === `X`))) continue;
             counter = counter + 1;
           }
           sy_tabix = _sy_tabix_1;

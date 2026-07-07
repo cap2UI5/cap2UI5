@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -14,7 +15,7 @@ class z2ui5_cl_demo_app_144 extends z2ui5_if_app {
     sy_tabix = 0;
     for (const lr_row of this.t_tab) {
       sy_tabix++;
-      lv_tabix = sy_tabix;
+      lv_tabix = z2ui5_cl_util.abap_copy(sy_tabix);
       page.input(this.client._bind_edit(lr_row.title, { tab: this.t_tab, tab_index: lv_tabix }));
       page.input(this.client._bind_edit(lr_row.value, { tab: this.t_tab, tab_index: lv_tabix }));
     }
@@ -45,7 +46,7 @@ class z2ui5_cl_demo_app_144 extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       for (let sy_index = 1; sy_index <= 1; sy_index++) {
         this.t_tab = [...(this.t_tab ?? []),{ title: `entry 01`, value: `red` }, { title: `entry 02`, value: `blue` }];

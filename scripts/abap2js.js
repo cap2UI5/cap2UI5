@@ -1016,6 +1016,10 @@ function txConstructor(kind, typeName, inner, ctx) {
         const dflt = txExpr(inner.slice(defIdx + 1), ctx);
         return `(() => { try { return ${txExpr(inner.slice(0, defIdx), ctx)} ?? ${dflt}; } catch { return ${dflt}; } })()`;
       }
+      if (isId(inner[0]) && KW(inner[0].str) === "FOR") {
+        const rendered = txValueFor(inner, ctx);
+        if (rendered) return rendered;
+      }
       if (inner.some((t, k) => isId(t) && (KW(t.str) === "FOR" || (KW(t.str) === "BASE" && isParenL(inner[k + 1] ?? { type: "" })) || (KW(t.str) === "LINES" && KW(inner[k + 1]?.str ?? "") === "OF")))) {
         ctx.todos?.push(`VALUE #( FOR/BASE/LINES OF ... ) not supported — rewrite manually`);
         return `/* TODO(abap2js): VALUE FOR/BASE */ []`;
@@ -1135,6 +1139,122 @@ function txConstructor(kind, typeName, inner, ctx) {
 }
 
 /** standalone paren (whitespace before) — a VALUE row, not a call group */
+/**
+ * VALUE #( FOR ... ) table comprehensions. Two supported forms:
+ *
+ *   FOR i = start [THEN expr] UNTIL|WHILE cond ( row ) ...
+ *   FOR row IN tab [INDEX INTO idx] [WHERE ( cond )] ( row ) ...
+ *
+ * Renders an IIFE that accumulates the row groups per iteration. Returns
+ * null for shapes outside this subset (nested FOR, LET, FROM/TO, GROUPS) —
+ * the caller then falls back to the TODO comment.
+ */
+function txValueFor(inner, ctx) {
+  const varTok = inner[1];
+  if (!varTok || !isId(varTok) || !/^[a-z_]\w*$/i.test(varTok.str)) return null;
+  const varName = varTok.str.toLowerCase();
+
+  // Locate where the row groups begin — the first standalone top-level paren
+  // that does not belong to a WHERE ( ... ) clause.
+  let rowsStart = -1;
+  {
+    let k = 2;
+    let d = 0;
+    while (k < inner.length) {
+      const t = inner[k];
+      if (d === 0 && isId(t) && KW(t.str) === "WHERE" && isParenL(inner[k + 1] ?? { type: "" })) {
+        k = matchGroup(inner, k + 1) + 1;
+        continue;
+      }
+      if (d === 0 && isRowParen(t)) {
+        rowsStart = k;
+        break;
+      }
+      d += depthDelta(t);
+      k++;
+    }
+  }
+  if (rowsStart < 0) return null;
+
+  const head = inner.slice(2, rowsStart);
+  const rest = inner.slice(rowsStart);
+  // unsupported shapes inside this comprehension
+  const UNSUPPORTED = new Set(["LET", "GROUPS", "FROM", "TO", "STEP"]);
+  if (head.some((t) => isId(t) && UNSUPPORTED.has(KW(t.str)))) return null;
+  {
+    let d = 0;
+    for (const t of rest) {
+      if (d === 0 && isId(t) && KW(t.str) === "FOR") return null; // nested FOR
+      d += depthDelta(t);
+    }
+  }
+
+  const addedLocal = !ctx.locals.has(varName);
+  if (addedLocal) ctx.locals.add(varName);
+  const done = (result) => {
+    if (addedLocal) ctx.locals.delete(varName);
+    return result;
+  };
+
+  // Row groups render exactly like a plain VALUE row list. Rendered lazily —
+  // AFTER all comprehension locals (loop var, INDEX INTO var) are registered,
+  // so row expressions referencing them resolve as locals, not `this.` fields.
+  const renderRows = () => {
+    const rendered = txConstructor("VALUE", null, rest, ctx);
+    return rendered.startsWith("[") ? rendered : null;
+  };
+
+  if (head[0]?.str === "=") {
+    // FOR i = start [THEN expr] UNTIL|WHILE cond
+    const thenIdx = findTopWord(head, "THEN");
+    const untilIdx = findTopWord(head, "UNTIL");
+    const whileIdx = findTopWord(head, "WHILE");
+    const condKw = untilIdx >= 0 ? untilIdx : whileIdx;
+    if (condKw < 1) return done(null);
+    const startExpr = txExpr(head.slice(1, thenIdx >= 0 ? thenIdx : condKw), ctx);
+    const stepExpr = thenIdx >= 0 ? txExpr(head.slice(thenIdx + 1, condKw), ctx) : `${varName} + 1`;
+    const cond = txCond(head.slice(condKw + 1), ctx);
+    const test = untilIdx >= 0 ? `!(${cond})` : `(${cond})`;
+    const rowsRendered = renderRows();
+    if (!rowsRendered) return done(null);
+    return done(
+      `(() => { const __out = []; let __guard = 0; for (let ${varName} = ${startExpr}; ${test}; ${varName} = ${stepExpr}) { if (++__guard > 1000000) throw new Error(\`VALUE FOR: loop guard exceeded\`); __out.push(...${rowsRendered}); } return __out; })()`
+    );
+  }
+
+  if (isId(head[0]) && KW(head[0].str) === "IN") {
+    // FOR row IN tab [INDEX INTO idx] [WHERE ( cond )]
+    const idxKw = findTopWord(head, "INDEX");
+    const whereKw = findTopWord(head, "WHERE");
+    let tabEnd = head.length;
+    if (idxKw > 0) tabEnd = Math.min(tabEnd, idxKw);
+    if (whereKw > 0) tabEnd = Math.min(tabEnd, whereKw);
+    const tabExpr = txExpr(head.slice(1, tabEnd), ctx);
+
+    let idxVar = null;
+    if (idxKw > 0) {
+      if (KW(head[idxKw + 1]?.str ?? "") !== "INTO" || !isId(head[idxKw + 2] ?? { type: "" })) return done(null);
+      idxVar = head[idxKw + 2].str.toLowerCase();
+      if (!ctx.locals.has(idxVar)) ctx.locals.add(idxVar);
+    }
+    let whereCond = null;
+    if (whereKw > 0) {
+      whereCond = txWhere(head.slice(whereKw + 1), varName, ctx);
+    }
+
+    const idxDecl = idxVar ? `let ${idxVar} = 0; ` : ``;
+    const idxInc = idxVar ? `${idxVar} += 1; ` : ``;
+    const whereGuard = whereCond ? `if (!(${whereCond})) continue; ` : ``;
+    const rowsRendered = renderRows();
+    if (!rowsRendered) return done(null);
+    return done(
+      `(() => { const __out = []; ${idxDecl}for (const ${varName} of (${tabExpr} ?? [])) { ${idxInc}${whereGuard}__out.push(...${rowsRendered}); } return __out; })()`
+    );
+  }
+
+  return done(null);
+}
+
 function isRowParen(t) {
   return t.type === "WParenLeft" || t.type === "WParenLeftW";
 }
@@ -1206,15 +1326,29 @@ function joinAtoms(atoms, ctx) {
     }
     switch (up) {
       case "=":
-        out.push("===");
-        break;
       case "EQ":
-        out.push("===");
-        break;
       case "<>":
-      case "NE":
-        out.push("!==");
+      case "NE": {
+        const eq = up === "=" || up === "EQ";
+        // abap_bool comparisons need truthiness semantics, not identity:
+        // depending on origin the value is true/false (JS literals), `X`/``
+        // (ABAP char1 convention) or unset (row field never initialized), so
+        // `selkz = abap_false` must match ``/undefined too. abap_true/false
+        // render as bare true/false literals — no other source produces them.
+        const rhsAtom = atoms[i + 1];
+        const lhsStr = out.length ? out[out.length - 1] : null;
+        const isBoolLit = (s) => s === "true" || s === "false";
+        if (rhsAtom?.kind === "expr" && lhsStr !== null && (isBoolLit(rhsAtom.str) || isBoolLit(lhsStr))) {
+          out.pop();
+          const [expr, lit] = isBoolLit(rhsAtom.str) ? [lhsStr, rhsAtom.str] : [rhsAtom.str, lhsStr];
+          const truthy = `(${wrap(expr)} === true || ${wrap(expr)} === \`X\`)`;
+          out.push((lit === "true") === eq ? truthy : `!${truthy}`);
+          i++;
+        } else {
+          out.push(eq ? "===" : "!==");
+        }
         break;
+      }
       case ">":
       case "GT":
         out.push(">");
@@ -1267,8 +1401,25 @@ function joinAtoms(atoms, ctx) {
       case "DIV": {
         const lhs = out.pop() ?? "0";
         const rhs = atoms[i + 1];
-        out.push(`Math.trunc(${wrap(lhs)} / ${wrap(rhs?.str ?? "1")})`);
+        ctx.requires?.add("z2ui5_cl_util");
+        out.push(`Math.trunc(z2ui5_cl_util.abap_div(${wrap(lhs)}, ${wrap(rhs?.str ?? "1")}))`);
         i++;
+        break;
+      }
+      case "/": {
+        // ABAP raises CX_SY_ZERO_DIVIDE on division by zero (0 / 0 is 0);
+        // plain JS `/` would silently yield Infinity/NaN. Route through the
+        // runtime helper when both operands are proper expressions.
+        const rhs = atoms[i + 1];
+        const lhs = out.length ? out[out.length - 1] : null;
+        if (rhs?.kind === "expr" && lhs && !/^[+\-*/%&|!<>=]+$/.test(lhs)) {
+          out.pop();
+          ctx.requires?.add("z2ui5_cl_util");
+          out.push(`z2ui5_cl_util.abap_div(${wrap(lhs)}, ${wrap(rhs.str)})`);
+          i++;
+        } else {
+          out.push(a.str);
+        }
         break;
       }
       case "CS":
@@ -1761,9 +1912,19 @@ function emitStatement(s, ctx, st, push, assignedTwice, methodDef) {
         }
       }
       if (eq < 0) return todo();
-      const rhs = txExpr(toks.slice(eq + 1), ctx);
+      let rhs = txExpr(toks.slice(eq + 1), ctx);
       // vars initialized from client.get() carry UPPERCASE component keys
       if (decl && /(?:^|\.)client\.get\(\)/.test(rhs)) ctx.upperLocals.add(decl);
+      // ABAP assignments have VALUE semantics: copying a table/struct variable
+      // must not alias it (a later DELETE on the copy would empty the source
+      // too). When the RHS is a plain reference into existing data — a bare
+      // variable/attribute chain, optionally with index access — route it
+      // through the runtime copy helper (class refs pass through unchanged).
+      // Constructor expressions / calls already produce fresh values.
+      if (/^(this\.)?[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\[[^\[\]]*\])*$/.test(rhs) && !/^(true|false|null|undefined)$/.test(rhs)) {
+        ctx.requires?.add("z2ui5_cl_util");
+        rhs = `z2ui5_cl_util.abap_copy(${rhs})`;
+      }
       if (decl) {
         const kw = ctx.hoisted?.has(decl) ? "" : `${assignedTwice.has(decl) ? "let" : "const"} `;
         push(`${kw}${decl} = ${rhs};`);

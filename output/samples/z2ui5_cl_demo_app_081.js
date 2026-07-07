@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -55,7 +56,7 @@ class z2ui5_cl_demo_app_081 extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.on_init();
       this.view_display();
@@ -68,7 +69,7 @@ class z2ui5_cl_demo_app_081 extends z2ui5_if_app {
     let lt_sel;
     switch (this.client.get().EVENT) {
       case `SEL_CHANGE`:
-        lt_sel = this.mt_tab;
+        lt_sel = z2ui5_cl_util.abap_copy(this.mt_tab);
         for (let _i = lt_sel.length - 1; _i >= 0; _i--) { const row = lt_sel[_i]; if (!row.selected) lt_sel.splice(_i, 1); }
         break;
       case `POPOVER_LIST`:

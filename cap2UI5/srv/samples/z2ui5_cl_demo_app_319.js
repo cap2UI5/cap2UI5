@@ -1,4 +1,5 @@
 const z2ui5_cl_ajson = require("abap2UI5/z2ui5_cl_ajson");
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -7,7 +8,7 @@ class z2ui5_cl_demo_app_319 extends z2ui5_if_app {
   m_client = null;
 
   async main(client) {
-    this.m_client = client;
+    this.m_client = z2ui5_cl_util.abap_copy(client);
     if (this.m_client.check_on_init()) {
       this.on_init();
       return;

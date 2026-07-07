@@ -19,7 +19,7 @@ class z2ui5_cl_demo_app_083 extends z2ui5_if_app {
   mt_cols = [];
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.on_init();
     } else {
@@ -103,9 +103,9 @@ class z2ui5_cl_demo_app_083 extends z2ui5_if_app {
     vbox.button({ text: `read`, press: this.client._event(`BUTTON_POST`) });
     vbox = lo_box.vbox();
     if (this.mt_02) {
-      this.mt_02_display = this.mt_02;
+      this.mt_02_display = z2ui5_cl_util.abap_copy(this.mt_02);
       for (let _i = this.mt_02_display.length - 1; _i >= 0; _i--) { const row = this.mt_02_display[_i]; if (row.screen_name !== this.mv_name) this.mt_02_display.splice(_i, 1); }
-      this.mt_tab_02_input = /* TODO(abap2js): VALUE FOR/BASE */ [];
+      this.mt_tab_02_input = (() => { const __out = []; for (const line of (this.mt_cols ?? [])) { __out.push(...[{ name: line }]); } return __out; })();
       sy_tabix = 0;
       for (const lr_tab of this.mt_02_display) {
         sy_tabix++;

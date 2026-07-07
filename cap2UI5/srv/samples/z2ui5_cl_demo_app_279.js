@@ -1,4 +1,5 @@
 const z2ui5_cl_pop_to_confirm = require("abap2UI5/z2ui5_cl_pop_to_confirm");
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 const z2ui5_if_client = require("abap2UI5/z2ui5_if_client");
@@ -24,7 +25,7 @@ class z2ui5_cl_demo_app_279 extends z2ui5_if_app {
   on_event() {
     switch (this.client.get().EVENT) {
       case `BACK`:
-        if (this.dirty === true) {
+        if ((this.dirty === true || this.dirty === `X`)) {
           this.security_check_popup();
         } else {
           this.client.nav_app_leave();
@@ -45,8 +46,8 @@ class z2ui5_cl_demo_app_279 extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = client;
-    if (client.get().CHECK_ON_NAVIGATED === true) {
+    this.client = z2ui5_cl_util.abap_copy(client);
+    if (((client.get().CHECK_ON_NAVIGATED) === true || (client.get().CHECK_ON_NAVIGATED) === `X`)) {
       this.on_navigation();
     }
     this.on_event();
@@ -65,7 +66,7 @@ class z2ui5_cl_demo_app_279 extends z2ui5_if_app {
       confirm_leave = (prev).result();
     } catch (error) {
     }
-    if (confirm_leave === true) {
+    if ((confirm_leave === true || confirm_leave === `X`)) {
       this.dirty = {};
       this.client.nav_app_leave();
     }

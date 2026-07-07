@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 const z2ui5_if_client = require("abap2UI5/z2ui5_if_client");
@@ -18,12 +19,12 @@ class z2ui5_cl_demo_app_064 extends z2ui5_if_app {
     sy_tabix = 0;
     for (const fs_ls_table of this.mt_table) {
       sy_tabix++;
-      fs_ls_table.selkz = iv_selkz;
+      fs_ls_table.selkz = z2ui5_cl_util.abap_copy(iv_selkz);
     }
   }
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.on_init();
     } else {
@@ -45,7 +46,7 @@ class z2ui5_cl_demo_app_064 extends z2ui5_if_app {
       }
       this.client.message_toast_display(`loaded`);
       // TODO(abap2js): WAIT UP TO 2 SECONDS.
-      if (this.mv_check_active === true) {
+      if ((this.mv_check_active === true || this.mv_check_active === `X`)) {
         this.client.action.gen({ val: z2ui5_if_client.cs_event.start_timer, t_arg: [this.client._event(`LOAD`), `0`] });
       }
       this.client.view_model_update();

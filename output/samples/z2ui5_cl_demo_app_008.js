@@ -1,4 +1,5 @@
 // TODO(abap2js): unresolved reference cl_abap_char_utilities — add require manually
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -8,7 +9,7 @@ class z2ui5_cl_demo_app_008 extends z2ui5_if_app {
   strip_type = ``;
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.view_display();
     } else if (client.check_on_event()) {
@@ -65,7 +66,7 @@ class z2ui5_cl_demo_app_008 extends z2ui5_if_app {
       .header_content()
       .link()
       .get_parent();
-    if (this.check_strip_active === true) {
+    if ((this.check_strip_active === true || this.check_strip_active === `X`)) {
       page.message_strip({ text: `This is a Message Strip`, type: this.strip_type });
     }
     page.grid(`L6 M12 S12`)

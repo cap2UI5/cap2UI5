@@ -40,10 +40,8 @@
   {
     "class": "z2ui5_cl_demo_app_006",
     "path": "z2ui5_cl_demo_app_006.js",
-    "todos": 1,
-    "todoDetails": [
-      "VALUE #( FOR/BASE/LINES OF ... ) not supported — rewrite manually"
-    ]
+    "todos": 0,
+    "todoDetails": []
   },
   {
     "class": "z2ui5_cl_demo_app_008",
@@ -200,9 +198,10 @@
   {
     "class": "z2ui5_cl_demo_app_035",
     "path": "z2ui5_cl_demo_app_035.js",
-    "todos": 1,
+    "todos": 2,
     "todoDetails": [
-      "VALUE #( FOR/BASE/LINES OF ... ) not supported — rewrite manually"
+      "builtin shift_left( ) not mapped",
+      "builtin shift_left( ) not mapped"
     ]
   },
   {
@@ -477,10 +476,9 @@
   {
     "class": "z2ui5_cl_demo_app_083",
     "path": "z2ui5_cl_demo_app_083.js",
-    "todos": 2,
+    "todos": 1,
     "todoDetails": [
-      "unsupported statement: CREATE DATA mt_table TYPE (mv_name).",
-      "VALUE #( FOR/BASE/LINES OF ... ) not supported — rewrite manually"
+      "unsupported statement: CREATE DATA mt_table TYPE (mv_name)."
     ]
   },
   {
@@ -1871,9 +1869,10 @@
   {
     "class": "z2ui5_cl_demo_app_318",
     "path": "z2ui5_cl_demo_app_318.js",
-    "todos": 1,
+    "todos": 2,
     "todoDetails": [
-      "VALUE #( FOR/BASE/LINES OF ... ) not supported — rewrite manually"
+      "builtin shift_left( ) not mapped",
+      "builtin shift_left( ) not mapped"
     ]
   },
   {

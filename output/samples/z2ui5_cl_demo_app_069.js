@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -37,7 +38,7 @@ class z2ui5_cl_demo_app_069 extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.mt_tree = [{ text: `Apps`, nodes: [{ text: `Frontend`, nodes: [{ text: `App_001` }, { text: `App_002` }] }] }, { text: `Configuration`, nodes: [{ text: `User Interface`, nodes: [{ text: `Theme` }, { text: `Library` }] }, { text: `Database`, nodes: [{ text: `HANA` }, { text: `ANY DB` }] }] }];
       this.view_display_master();
@@ -57,8 +58,8 @@ class z2ui5_cl_demo_app_069 extends z2ui5_if_app {
         }
         break;
       case `NEST_TEST`:
-        this.mv_check_enabled_01 = (this.mv_check_enabled_01 === false);
-        this.mv_check_enabled_02 = (this.mv_check_enabled_01 === false);
+        this.mv_check_enabled_01 = (!(this.mv_check_enabled_01 === true || this.mv_check_enabled_01 === `X`));
+        this.mv_check_enabled_02 = (!(this.mv_check_enabled_01 === true || this.mv_check_enabled_01 === `X`));
         client.nest_view_model_update();
         break;
     }

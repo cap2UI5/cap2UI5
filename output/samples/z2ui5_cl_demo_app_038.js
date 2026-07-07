@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -39,7 +40,7 @@ class z2ui5_cl_demo_app_038 extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.t_msg = [{ description: `descr`, subtitle: `subtitle`, title: `title`, type: `Error`, group: `group 01` }, { description: `descr`, subtitle: `subtitle`, title: `title`, type: `Information`, group: `group 01` }, { description: `descr`, subtitle: `subtitle`, title: `title`, type: `Information`, group: `group 02` }, { description: `descr`, subtitle: `subtitle`, title: `title`, type: `Success`, group: `group 03` }];
       this.view_display();

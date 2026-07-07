@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 const z2ui5_if_client = require("abap2UI5/z2ui5_if_client");
@@ -7,7 +8,7 @@ class z2ui5_cl_demo_app_307 extends z2ui5_if_app {
   client = null;
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.initialization();
       this.view_display({ client: client });
@@ -60,8 +61,8 @@ class z2ui5_cl_demo_app_307 extends z2ui5_if_app {
       try {
         drag_position = (ondropparameters[(1) - 1]) + 1;
         drop_position = (ondropparameters[(2) - 1]) + 1;
-        insert_position = ondropparameters[(3) - 1];
-        item = this.items[(drag_position) - 1];
+        insert_position = z2ui5_cl_util.abap_copy(ondropparameters[(3) - 1]);
+        item = z2ui5_cl_util.abap_copy(this.items[(drag_position) - 1]);
       } catch (error) {
         return;
       }

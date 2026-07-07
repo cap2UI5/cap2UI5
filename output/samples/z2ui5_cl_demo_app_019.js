@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -66,15 +67,15 @@ class z2ui5_cl_demo_app_019 extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.sel_mode = `None`;
       this.t_tab = [{ descr: `this is a description`, title: `title_01`, value: `value_01` }, { descr: `this is a description`, title: `title_02`, value: `value_02` }, { descr: `this is a description`, title: `title_03`, value: `value_03` }, { descr: `this is a description`, title: `title_04`, value: `value_04` }, { descr: `this is a description`, title: `title_05`, value: `value_05` }];
     } else if (client.check_on_event(`BUTTON_SEGMENT_CHANGE`)) {
       client.message_toast_display(`Selection Mode changed`);
     } else if (client.check_on_event(`BUTTON_READ_SEL`)) {
-      this.t_tab_sel = this.t_tab;
-      for (let _i = this.t_tab_sel.length - 1; _i >= 0; _i--) { const row = this.t_tab_sel[_i]; if (row.selkz !== true) this.t_tab_sel.splice(_i, 1); }
+      this.t_tab_sel = z2ui5_cl_util.abap_copy(this.t_tab);
+      for (let _i = this.t_tab_sel.length - 1; _i >= 0; _i--) { const row = this.t_tab_sel[_i]; if (!(row.selkz === true || row.selkz === `X`)) this.t_tab_sel.splice(_i, 1); }
     }
     this.view_display();
   }

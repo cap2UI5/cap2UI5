@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -8,7 +9,7 @@ class z2ui5_cl_demo_app_006 extends z2ui5_if_app {
   key = ``;
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.on_init();
     } else if (client.check_on_event()) {
@@ -36,7 +37,7 @@ class z2ui5_cl_demo_app_006 extends z2ui5_if_app {
   }
 
   refresh_data() {
-    this.t_tab = /* TODO(abap2js): VALUE FOR/BASE */ [];
+    this.t_tab = (() => { const __out = []; let __guard = 0; for (let i = 1; !(i > 10000); i = i + 1) { if (++__guard > 1000000) throw new Error(`VALUE FOR: loop guard exceeded`); __out.push(...[{ count: i, value: `red`, descr: `this is a description`, checkbox: true, valuecolor: `Good` }]); } return __out; })();
   }
 
   view_display() {

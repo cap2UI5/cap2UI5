@@ -50,7 +50,7 @@ class z2ui5_cl_demo_app_136 extends z2ui5_if_app {
       .page({ title: `abap2UI5 - CSV to ABAP internal Table`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
     if (this.mr_table) {
       // TODO(abap2js): ASSIGN mr_table->* TO <tab>.
-      tab = page.table((this.mv_check_edit === true ? this.client._bind_edit(fs_tab) : this.client._bind_edit(fs_tab)))
+      tab = page.table(((this.mv_check_edit === true || this.mv_check_edit === `X`) ? this.client._bind_edit(fs_tab) : this.client._bind_edit(fs_tab)))
         .header_toolbar()
         .overflow_toolbar()
         .title(`CSV Content`)
@@ -78,12 +78,12 @@ class z2ui5_cl_demo_app_136 extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.view_display();
       return;
     }
-    if (client.get().CHECK_ON_NAVIGATED === true) {
+    if (((client.get().CHECK_ON_NAVIGATED) === true || (client.get().CHECK_ON_NAVIGATED) === `X`)) {
       this.view_display();
     }
     this.on_event();

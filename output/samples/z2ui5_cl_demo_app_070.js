@@ -14,12 +14,12 @@ class z2ui5_cl_demo_app_070 extends z2ui5_if_app {
     sy_tabix = 0;
     for (const fs_ls_table of this.mt_table) {
       sy_tabix++;
-      fs_ls_table.selkz = iv_selkz;
+      fs_ls_table.selkz = z2ui5_cl_util.abap_copy(iv_selkz);
     }
   }
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.on_init();
     } else {

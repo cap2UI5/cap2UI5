@@ -1,5 +1,6 @@
 const z2ui5_cl_pop_table = require("abap2UI5/z2ui5_cl_pop_table");
 const z2ui5_cl_pop_to_select = require("abap2UI5/z2ui5_cl_pop_to_select");
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -14,11 +15,11 @@ class z2ui5_cl_demo_app_152 extends z2ui5_if_app {
     switch (this.client.get().EVENT) {
       case `POPUP`:
         this.mt_tab = [{ descr: `this is a description`, zzselkz: this.mv_preselect, title: `title_01`, value: `value_01` }, { descr: `this is a description`, zzselkz: this.mv_preselect, title: `title_02`, value: `value_02` }, { descr: `this is a description`, zzselkz: this.mv_preselect, title: `title_03`, value: `value_03` }, { descr: `this is a description`, zzselkz: this.mv_preselect, title: `title_04`, value: `value_04` }, { descr: `this is a description`, zzselkz: this.mv_preselect, title: `title_05`, value: `value_05` }];
-        lo_app = z2ui5_cl_pop_to_select.factory({ i_tab: this.mt_tab, i_multiselect: this.mv_multiselect, i_title: (this.mv_multiselect === true ? `Multi select` : `Single select`) });
+        lo_app = z2ui5_cl_pop_to_select.factory({ i_tab: this.mt_tab, i_multiselect: this.mv_multiselect, i_title: ((this.mv_multiselect === true || this.mv_multiselect === `X`) ? `Multi select` : `Single select`) });
         this.client.nav_app_call(lo_app);
         break;
       case `MULTISELECT_TOGGLE`:
-        this.mv_preselect = (this.mv_multiselect === false ? false : this.mv_preselect);
+        this.mv_preselect = (!(this.mv_multiselect === true || this.mv_multiselect === `X`) ? false : this.mv_preselect);
         this.client.view_model_update();
         break;
     }
@@ -41,8 +42,8 @@ class z2ui5_cl_demo_app_152 extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = client;
-    if (client.get().CHECK_ON_NAVIGATED === true) {
+    this.client = z2ui5_cl_util.abap_copy(client);
+    if (((client.get().CHECK_ON_NAVIGATED) === true || (client.get().CHECK_ON_NAVIGATED) === `X`)) {
       if (client.check_on_init()) {
         this.view_display();
       } else {
@@ -64,11 +65,11 @@ class z2ui5_cl_demo_app_152 extends z2ui5_if_app {
     try {
       lo_prev = this.client.get_app(this.client.get().S_DRAFT.ID_PREV_APP);
       ls_result = (lo_prev).result();
-      if (ls_result.check_confirmed === false) {
+      if (!(ls_result.check_confirmed === true || ls_result.check_confirmed === `X`)) {
         this.client.message_box_display(`Popup was cancelled`);
         return;
       }
-      if (this.mv_multiselect === false) {
+      if (!(this.mv_multiselect === true || this.mv_multiselect === `X`)) {
         // TODO(abap2js): ASSIGN ls_result-row->* TO <row>.
         this.client.message_box_display(`callback after popup to select: ${fs_row.title}`);
       } else {

@@ -57,7 +57,7 @@ class z2ui5_cl_demo_app_130 extends z2ui5_if_app {
       sy_tabix++;
       if (!(a.screen_name === this.mv_screen && var_ === this.mv_variant)) continue;
       var_.push(a);
-      this.mv_description = a.descr;
+      this.mv_description = z2ui5_cl_util.abap_copy(a.descr);
     }
     const var_vall_all = [{ screen_name: `LTAP`, var: `E001 - All`, field: `LGNUM`, guid: `663192E9D70C1EEE8CC06B0F98CD81A3`, sign: `I`, opt: `EQ` }, { screen_name: `LTAP`, var: `E001 - All`, field: `MATNR`, guid: `663192E9D70C1EEE8CD4E9389CB11403`, sign: `I`, opt: `EQ` }, { screen_name: `LTAP`, var: `E001 - All`, field: `TOSTAT`, guid: `663192E9D70C1EEE8CC06BC66AD581A3`, sign: `I`, opt: `NE` }, { screen_name: `LTAP`, var: `E002 - All`, field: `LGNUM`, guid: `663192E9D70C1EEE8CC06B0F98CD81A3`, sign: `I`, opt: `EQ` }, { screen_name: `LTAP`, var: `E002 - All`, field: `MATNR`, guid: `663192E9D70C1EEE8CD4E9389CB11403`, sign: `I`, opt: `EQ` }, { screen_name: `LTAP`, var: `E002 - All`, field: `TOSTAT`, guid: `663192E9D70C1EEE8CC06BC66AD581A3`, sign: `I`, opt: `NE` }, { screen_name: `QUAN`, var: `E001 - ALL`, field: `LGNUM`, guid: `663192E9D70C1EEE90CEE2FA658C51EE`, sign: `I`, opt: `EQ` }, { screen_name: `QUAN`, var: `E001 - ALL`, field: `LGPLA`, guid: `663192E9D70C1EEE90CEEF4750FD91EE`, sign: `I`, opt: `EQ` }, { screen_name: `TO`, var: `E001 `, field: `LGNUM`, guid: `663192E9D70C1EEE8E87DE5FF8CC512A`, sign: `I`, opt: `EQ` }, { screen_name: `TO`, var: `E001 `, field: `PROCTY`, guid: `663192E9D70C1EEE8E87DD8D1EB8C7F5`, sign: `I`, opt: `EQ` }, { screen_name: `TO`, var: `E001 - All`, field: `LGNUM`, guid: `663192E9D70C1EEE8E86552847635198`, sign: `I`, opt: `EQ` }];
     sy_tabix = 0;
@@ -95,8 +95,8 @@ class z2ui5_cl_demo_app_130 extends z2ui5_if_app {
   }
 
   popup_copy_save() {
-    this.mv_variant = this.mv_variant_copy;
-    this.mv_description = this.mv_description_copy;
+    this.mv_variant = z2ui5_cl_util.abap_copy(this.mv_variant_copy);
+    this.mv_description = z2ui5_cl_util.abap_copy(this.mv_description_copy);
   }
 
   popup_filter_ok() {
@@ -110,7 +110,7 @@ class z2ui5_cl_demo_app_130 extends z2ui5_if_app {
     }
     if (sy_subrc === 0) {
       for (let _i = this.mt_filter.length - 1; _i >= 0; _i--) { const row = this.mt_filter[_i]; if (!row.option) this.mt_filter.splice(_i, 1); }
-      lr_field.t_filter = this.mt_filter;
+      lr_field.t_filter = z2ui5_cl_util.abap_copy(this.mt_filter);
       lr_field.t_token = {};
       this.set_token({ field: { field: lr_field } });
       this.client.popup_destroy();
@@ -153,7 +153,7 @@ class z2ui5_cl_demo_app_130 extends z2ui5_if_app {
       sy_tabix = 0;
       for (const lr_tab of this.mt_fields) {
         sy_tabix++;
-        lv_tabix = sy_tabix;
+        lv_tabix = z2ui5_cl_util.abap_copy(sy_tabix);
         scrtext = this.get_txt({ roll: lr_tab.field_doma });
         content.label(scrtext)
           .multi_input({ tokens: this.client._bind(lr_tab.t_token, { tab: this.mt_fields, tab_index: lv_tabix }), showclearicon: true, id: lr_tab.field, valuehelprequest: this.client._event(`CALL_POPUP_FILTER`, [lr_tab.field]) })
@@ -298,7 +298,7 @@ class z2ui5_cl_demo_app_130 extends z2ui5_if_app {
           sy_subrc = _i >= 0 && _i < _t.length ? 0 : 4;
           if (sy_subrc === 0) lr_field = _t[_i];
         }
-        this.mt_filter = lr_field.t_filter;
+        this.mt_filter = z2ui5_cl_util.abap_copy(lr_field.t_filter);
         this.render_popup_filter();
         break;
       case `CALL_POPUP_VARIANT`:
@@ -337,7 +337,7 @@ class z2ui5_cl_demo_app_130 extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.on_init();
       return;

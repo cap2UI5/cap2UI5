@@ -262,27 +262,31 @@ describe("z2ui5_cl_core_client", () => {
   // ===== _event =====
 
   describe("_event", () => {
+    // Control slots are emitted only when a flag is set, and then as
+    // UNQUOTED JS literals (abap parity). Quoted empty slots would inject
+    // phantom args into the frontend's quote-split custom-JS parser when an
+    // .eB(...) snippet is embedded in an .eF(...) follow-up action.
     test("single event name (no t_arg)", () => {
-      expect(client._event("CLICK")).toBe(".eB(['CLICK','','',''])");
+      expect(client._event("CLICK")).toBe(".eB(['CLICK'])");
     });
 
     test("event with t_arg array (modern signature)", () => {
-      expect(client._event("NAV", ["app1"])).toBe(".eB(['NAV','','',''],'app1')");
+      expect(client._event("NAV", ["app1"])).toBe(".eB(['NAV'],'app1')");
     });
 
     test("event with multiple t_arg values", () => {
       expect(client._event("DO", ["a", "b", "c"])).toBe(
-        ".eB(['DO','','',''],'a','b','c')"
+        ".eB(['DO'],'a','b','c')"
       );
     });
 
     test("legacy single string arg is auto-wrapped to t_arg", () => {
-      expect(client._event("NAV", "app1")).toBe(".eB(['NAV','','',''],'app1')");
+      expect(client._event("NAV", "app1")).toBe(".eB(['NAV'],'app1')");
     });
 
     test("s_ctrl flags set positions [2] and [3]", () => {
       expect(client._event("CLICK", [], { bypass_busy: true, force_main_model: true })).toBe(
-        ".eB(['CLICK','','X','X'])"
+        ".eB(['CLICK',false,true,true])"
       );
     });
   });
@@ -475,12 +479,15 @@ describe("z2ui5_cl_core_client", () => {
   describe("action convenience methods", () => {
     test("clipboard_copy queues CLIPBOARD_COPY eF", () => {
       client.clipboard_copy("hello");
-      expect(client._follow_up_actions).toEqual([".eF(['CLIPBOARD_COPY','hello'])"]);
+      expect(client._follow_up_actions).toEqual([".eF('CLIPBOARD_COPY','hello')"]);
     });
 
-    test("clipboard_copy escapes apostrophes", () => {
+    test("clipboard_copy passes apostrophes through unescaped", () => {
+      // abap parity: get_t_arg does not escape quotes either — the frontend's
+      // quote-split parser cannot honor escapes, so escaping only garbles the
+      // parsed args differently. Known shared limitation.
       client.clipboard_copy("it's");
-      expect(client._follow_up_actions[0]).toBe(".eF(['CLIPBOARD_COPY','it\\'s'])");
+      expect(client._follow_up_actions[0]).toBe(".eF('CLIPBOARD_COPY','it's')");
     });
 
     test("history_back queues no-arg eF", () => {
@@ -491,7 +498,7 @@ describe("z2ui5_cl_core_client", () => {
     test("file_download queues two args", () => {
       client.file_download("data:text/plain;base64,SGk=", "hi.txt");
       expect(client._follow_up_actions[0]).toBe(
-        ".eF(['DOWNLOAD_B64_FILE','data:text/plain;base64,SGk=','hi.txt'])"
+        ".eF('DOWNLOAD_B64_FILE','data:text/plain;base64,SGk=','hi.txt')"
       );
     });
 
@@ -502,7 +509,7 @@ describe("z2ui5_cl_core_client", () => {
 
     test("system_logout with custom URL", () => {
       client.system_logout("/my/logoff");
-      expect(client._follow_up_actions[0]).toBe(".eF(['SYSTEM_LOGOUT','/my/logoff'])");
+      expect(client._follow_up_actions[0]).toBe(".eF('SYSTEM_LOGOUT','/my/logoff')");
     });
 
     test("multiple convenience calls accumulate in order", () => {

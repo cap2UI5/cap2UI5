@@ -9,7 +9,7 @@ class z2ui5_cl_demo_app_057 extends z2ui5_if_app {
   app = { view_main: ``, view_popup: ``, get: null };
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     this.app.get = client.get();
     if (client.check_on_init()) {
       this.on_init();
@@ -50,7 +50,7 @@ class z2ui5_cl_demo_app_057 extends z2ui5_if_app {
     let lv_base64;
     let view = z2ui5_cl_xml_view.factory();
     view = view.page({ id: `page_main`, title: `abap2UI5 - List Report Features`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
-    if (this.mv_check_download === true) {
+    if ((this.mv_check_download === true || this.mv_check_download === `X`)) {
       this.mv_check_download = false;
       lv_csv = z2ui5_cl_util.itab_get_csv_by_itab(this.mt_table);
       lv_csv_x = z2ui5_cl_util.conv_get_xstring_by_string(lv_csv);

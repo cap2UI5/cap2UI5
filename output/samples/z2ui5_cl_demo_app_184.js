@@ -1,6 +1,7 @@
 // TODO(abap2js): unresolved reference cl_abap_datadescr — add require manually
 // TODO(abap2js): unresolved reference cl_abap_structdescr — add require manually
 // TODO(abap2js): unresolved reference cl_abap_tabledescr — add require manually
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -51,14 +52,14 @@ class z2ui5_cl_demo_app_184 extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.on_init();
     }
   }
 
   set_app_data({ count } = {}) {
-    this.mv_table = table;
+    this.mv_table = z2ui5_cl_util.abap_copy(table);
   }
 
   get_data() {
@@ -80,7 +81,7 @@ class z2ui5_cl_demo_app_184 extends z2ui5_if_app {
     } catch (error) {
     }
     // TODO(abap2js): ASSIGN mt_table_tmp->* TO <table_tmp>.
-    fs_table_tmp = fs_table;
+    fs_table_tmp = z2ui5_cl_util.abap_copy(fs_table);
     if (_fs$fs_table_tmp) _fs$fs_table_tmp.o[_fs$fs_table_tmp.k] = fs_table_tmp;
   }
 
@@ -99,7 +100,7 @@ class z2ui5_cl_demo_app_184 extends z2ui5_if_app {
         sy_tabix = 0;
         for (const com of comp) {
           sy_tabix++;
-          if (com.as_include === false) {
+          if (!(com.as_include === true || com.as_include === `X`)) {
             result.push(com);
           }
         }

@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 const z2ui5_if_client = require("abap2UI5/z2ui5_if_client");
@@ -41,7 +42,7 @@ class z2ui5_cl_demo_app_327 extends z2ui5_if_app {
         client.view_model_update();
         break;
       case `GET_STORED_VALUE`:
-        this.storage.value = this.stored_value;
+        this.storage.value = z2ui5_cl_util.abap_copy(this.stored_value);
         client.view_model_update();
         break;
     }

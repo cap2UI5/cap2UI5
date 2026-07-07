@@ -423,6 +423,43 @@ class z2ui5_cl_util {
     if (condition) z2ui5_cl_util.x_raise(text || `assertion failed`);
   }
 
+  /**
+   * ABAP value semantics for assignments — `a = b` copies tables and
+   * structures, it never aliases them (JS assignment shares the reference,
+   * so a later DELETE on the copy would mutate the original too). Arrays
+   * and plain data objects are cloned deeply; class instances (object
+   * references in ABAP) pass through unchanged, exactly like TYPE REF TO.
+   */
+  static abap_copy(val) {
+    if (Array.isArray(val)) return val.map((v) => z2ui5_cl_util.abap_copy(v));
+    if (val !== null && typeof val === `object`) {
+      const proto = Object.getPrototypeOf(val);
+      if (proto === Object.prototype || proto === null) {
+        const out = {};
+        for (const k of Object.keys(val)) out[k] = z2ui5_cl_util.abap_copy(val[k]);
+        return out;
+      }
+    }
+    return val;
+  }
+
+  /**
+   * ABAP division semantics — division by zero raises CX_SY_ZERO_DIVIDE
+   * (except 0 / 0, which ABAP defines as 0). JS silently yields
+   * Infinity/NaN instead, so the transpiler routes `/` and DIV through
+   * this helper and an uncaught zero divide surfaces as the framework
+   * error popup, same as on an ABAP system.
+   */
+  static abap_div(lhs, rhs) {
+    const l = Number(lhs);
+    const r = Number(rhs);
+    if (r === 0) {
+      if (l === 0) return 0;
+      z2ui5_cl_util.x_raise(`CX_SY_ZERO_DIVIDE - division by zero`);
+    }
+    return l / r;
+  }
+
   /** SAP T100 message store has no JS analogue. */
   static x_get_last_t100() {
     return { id: ``, no: ``, text: `` };

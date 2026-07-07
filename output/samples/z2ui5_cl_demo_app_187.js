@@ -22,7 +22,7 @@ class z2ui5_cl_demo_app_187 extends z2ui5_if_app {
         break;
       case `CX_ROOT`:
         try {
-          lv_val = 1 / 0;
+          lv_val = z2ui5_cl_util.abap_div(1, 0);
         } catch (lx) {
           client.message_box_display(lx);
         }

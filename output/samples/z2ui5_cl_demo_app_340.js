@@ -59,7 +59,7 @@ class z2ui5_cl_demo_app_340 extends z2ui5_if_app {
     let new_struct_desc;
     let new_table_desc;
     result = new z2ui5_cl_demo_app_340();
-    result.mo_layout = io_layout;
+    result.mo_layout = z2ui5_cl_util.abap_copy(io_layout);
     try {
       comp = z2ui5_cl_util.rtti_get_t_attri_by_any(io_table);
     } catch (error) {
@@ -74,10 +74,10 @@ class z2ui5_cl_demo_app_340 extends z2ui5_if_app {
     }
     // TODO(abap2js): ASSIGN io_table->* TO FIELD-SYMBOL(<table>).
     // TODO(abap2js): ASSIGN result->mt_data->* TO FIELD-SYMBOL(<data>).
-    fs_data = fs_table;
+    fs_data = z2ui5_cl_util.abap_copy(fs_table);
     if (_fs$fs_data) _fs$fs_data.o[_fs$fs_data.k] = fs_data;
     // TODO(abap2js): ASSIGN result->mt_data_tmp->* TO <data>.
-    fs_data = fs_table;
+    fs_data = z2ui5_cl_util.abap_copy(fs_table);
     if (_fs$fs_data) _fs$fs_data.o[_fs$fs_data.k] = fs_data;
     return result;
   }

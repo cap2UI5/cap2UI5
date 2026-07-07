@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -60,14 +61,14 @@ class z2ui5_cl_demo_app_013 extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.counts = [{ text: `1st`, percent: `10.0` }, { text: `2nd`, percent: `60.0` }, { text: `3rd`, percent: `30.0` }];
-      this.total_count = this.counts.length;
+      this.total_count = z2ui5_cl_util.abap_copy(this.counts.length);
       this.view_display();
     } else if (client.check_on_event(`UPDATE_CHART_DATA`)) {
       this.counts = [{ text: `1st`, percent: `60.0` }, { text: `2nd`, percent: `10.0` }, { text: `3rd`, percent: `15.0` }, { text: `4th`, percent: `15.0` }];
-      this.total_count = this.counts.length;
+      this.total_count = z2ui5_cl_util.abap_copy(this.counts.length);
       client.view_model_update();
     }
   }

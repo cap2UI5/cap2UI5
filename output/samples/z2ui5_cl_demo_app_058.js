@@ -15,7 +15,7 @@ class z2ui5_cl_demo_app_058 extends z2ui5_if_app {
   app = { view_main: ``, view_popup: ``, get: null };
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     this.app.get = client.get();
     this.app.view_popup = ``;
     if (client.check_on_init()) {
@@ -94,7 +94,7 @@ class z2ui5_cl_demo_app_058 extends z2ui5_if_app {
     sy_tabix = 0;
     for (const lr_field of this.ms_layout.t_cols) {
       sy_tabix++;
-      if (!(lr_field.visible === true)) continue;
+      if (!((lr_field.visible === true || lr_field.visible === `X`))) continue;
       lo_columns.column({ minscreenwidth: this.shift_right((lv_width)) + `px`, demandpopin: true, width: lr_field.length })
         .text(lr_field.title);
       lv_width = lv_width + 10;
@@ -105,8 +105,8 @@ class z2ui5_cl_demo_app_058 extends z2ui5_if_app {
     sy_tabix = 0;
     for (const lr_field of this.ms_layout.t_cols) {
       sy_tabix++;
-      if (!(lr_field.visible === true)) continue;
-      if (lr_field.editable === true) {
+      if (!((lr_field.visible === true || lr_field.visible === `X`))) continue;
+      if ((lr_field.editable === true || lr_field.editable === `X`)) {
         lo_cells.input(`{` + lr_field.name + `}`);
       } else {
         lo_cells.text(`{` + lr_field.name + `}`);

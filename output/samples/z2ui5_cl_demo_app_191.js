@@ -40,7 +40,7 @@ class z2ui5_cl_demo_app_191 extends z2ui5_if_app {
       lo_items.icon_tab_filter({ text: line.class, count: line.count, key: line.id });
       lo_items.icon_tab_separator();
     }
-    this.mo_main_page = lo_items;
+    this.mo_main_page = z2ui5_cl_util.abap_copy(lo_items);
   }
 
   render_sub_app() {
@@ -69,7 +69,7 @@ class z2ui5_cl_demo_app_191 extends z2ui5_if_app {
           this.view_display();
           // TODO(abap2js): ASSIGN mo_app->(`MO_PARENT_VIEW`) TO FIELD-SYMBOL(<view>).
           if (fs_view != null) {
-            fs_view = this.mo_main_page;
+            fs_view = z2ui5_cl_util.abap_copy(this.mo_main_page);
             if (_fs$fs_view) _fs$fs_view.o[_fs$fs_view.k] = fs_view;
           }
           // TODO(abap2js): CALL METHOD mo_app->(`Z2UI5_IF_APP~MAIN`) EXPORTING client = client.
@@ -80,19 +80,19 @@ class z2ui5_cl_demo_app_191 extends z2ui5_if_app {
     }
     this.client.view_model_update();
     // TODO(abap2js): ASSIGN mo_app->(`MV_VIEW_DISPLAY`) TO <view_display>.
-    if (fs_view_display === true) {
+    if ((fs_view_display === true || fs_view_display === `X`)) {
       fs_view_display = false;
       if (_fs$fs_view_display) _fs$fs_view_display.o[_fs$fs_view_display.k] = fs_view_display;
       this.client.view_display(this.mo_main_page.stringify());
     }
     if (this.mv_selectedkey !== this.mv_selectedkey_tmp) {
       this.client.view_display(this.mo_main_page.stringify());
-      this.mv_selectedkey_tmp = this.mv_selectedkey;
+      this.mv_selectedkey_tmp = z2ui5_cl_util.abap_copy(this.mv_selectedkey);
     }
   }
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.on_init();
       this.view_display();

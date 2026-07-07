@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -6,7 +7,7 @@ class z2ui5_cl_demo_app_004 extends z2ui5_if_app {
   view_main = ``;
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.on_init();
     } else if (client.check_on_event()) {
@@ -39,7 +40,7 @@ class z2ui5_cl_demo_app_004 extends z2ui5_if_app {
         }
         break;
       case `BUTTON_ERROR`:
-        dummy = 1 / 0;
+        dummy = z2ui5_cl_util.abap_div(1, 0);
         break;
     }
   }

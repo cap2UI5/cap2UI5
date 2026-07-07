@@ -10,7 +10,7 @@ class z2ui5_cl_demo_app_000 extends z2ui5_if_app {
   async main(client) {
     let lv_classname;
     const c_title = ` abap2UI5 - Samples`;
-    if (client.get().CHECK_ON_NAVIGATED === true && this.s_scroll.id) {
+    if (((client.get().CHECK_ON_NAVIGATED) === true || (client.get().CHECK_ON_NAVIGATED) === `X`) && this.s_scroll.id) {
       client.action.gen({ val: z2ui5_if_client.cs_event.scroll_to, t_arg: [this.s_scroll.id, `${this.s_scroll.y}`, `${this.s_scroll.x}`] });
     }
     switch (client.get().EVENT) {
@@ -39,14 +39,14 @@ class z2ui5_cl_demo_app_000 extends z2ui5_if_app {
       .toolbar_spacer()
       .link({ text: `Install with abapGit from GitHub`, target: `_blank`, href: `https://github.com/abap2UI5/samples` })
       .get_parent();
-    if (client.get().CHECK_LAUNCHPAD_ACTIVE === true) {
+    if (((client.get().CHECK_LAUNCHPAD_ACTIVE) === true || (client.get().CHECK_LAUNCHPAD_ACTIVE) === `X`)) {
       client.action.gen({ val: z2ui5_if_client.cs_event.set_title_launchpad, t_arg: [c_title] });
     }
     page.formatted_text(`<p><strong>Explore and copy code samples!</strong> All samples are abap2UI5 implementations of the <a href="https://sapui5.` + `hana.ondemand.com/#/controls" style="color:blue; font-weight:600;">SAP UI5 sample page.</a> If you miss a control or find a b` + `ug please create an ` + `<a href="https://github.com/abap2UI5/abap2UI5/issues" style="color:blue; font-weight:600;">issue</a> or send a <a href="https` + `://github.com/abap2UI5/samples/pulls" style="color:blue; font-weight:600;">PR</a>` + `.</p>` + `<p>Always press CTRL+F12 to see code samples and classname of the app.</p>`);
     page.hbox()
       .button({ press: client._event(`expand-all`), icon: `sap-icon://expand-all` })
       .button({ press: client._event(`collapse-all`), icon: `sap-icon://collapse-all` });
-    const page2 = page;
+    const page2 = z2ui5_cl_util.abap_copy(page);
     page = page.panel({ expandable: true, expanded: client._bind_edit(this.ms_check_expanded.basics, { name: `ms_check_expanded-basics` }), headertext: `General` });
     let panel = page.panel({ expandable: false, expanded: true, headertext: `Binding` });
     panel.generic_tile({ header: `Binding I`, subheader: `Simple - Send values to the backend`, press: client._event(`Z2UI5_CL_DEMO_APP_001`), mode: `LineMode`, class: `sapUiTinyMarginEnd sapUiTinyMarginBottom` });
