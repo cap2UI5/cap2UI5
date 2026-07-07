@@ -1,0 +1,59 @@
+name: 7 build web
+
+# Step 7 (on demand): build the static browser variant into web/dist —
+# the unchanged UI5 frontend plus the whole cap2UI5 backend (framework +
+# samples) bundled into a single JS file, roundtrips answered in-process.
+# See web/README.md for how it works.
+#
+# The build is uploaded as the workflow artifact `cap2ui5-web`. With the
+# deploy_pages input checked it is additionally published to GitHub Pages
+# (requires Pages to be set to "GitHub Actions" in the repo settings).
+
+on:
+  workflow_dispatch:
+    inputs:
+      deploy_pages:
+        description: "Deploy the build to GitHub Pages"
+        type: boolean
+        default: false
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - run: npm ci
+        working-directory: web
+      - run: npm run build
+        working-directory: web
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cap2ui5-web
+          path: web/dist
+      - uses: actions/upload-pages-artifact@v3
+        if: ${{ inputs.deploy_pages }}
+        with:
+          path: web/dist
+
+  deploy:
+    if: ${{ inputs.deploy_pages }}
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

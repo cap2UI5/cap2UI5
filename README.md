@@ -25,7 +25,9 @@ Everything that is not deployed with the CAP project lives up here:
 | `npm run transpile_abap2ui5` / `transpile_samples` | transpile `input/*/src` → `output/` |
 | `npm run prepare_app` | `input/abap2UI5/app/webapp` → `output/app` (+ patches) |
 | `npm run copy_into_cap` | copy `output/*` → cap2UI5 project (backend fill-in, samples overwrite, app replace) |
+| `npm run build_web` | browser build: bundle backend + samples + frontend into a static site (`web/dist`), see [`web/README.md`](web/README.md) |
 | `scripts/`, `test/`, `jest.config.js` | sources of the above |
+| `web/` | browser-build tooling (esbuild bundle, class registry generator, stubs) |
 
 ```
 npm run transpile -- path/to/z2ui5_cl_my_app.clas.abap --stdout
@@ -59,6 +61,7 @@ secret `ACTION_KEY_CAP` in abap2UI5) — that push starts the pipeline. The
 | 4 | 4 transpile samples | `transpile_samples` | all sample classes → `output/samples/` + report |
 | 5 | 5 prepare app | `prepare_app` | `input/abap2UI5/app/webapp` + patches → `output/app/` |
 | 6 | 6 copy into cap | `copy_into_cap` | `output/abap2UI5` → `cap2UI5/srv/z2ui5` (fill-in only), `output/samples` → `cap2UI5/srv/samples` (overwrite), `output/app` → `cap2UI5/app/z2ui5/webapp` (replace) |
+| 7 | 7 build web | `build_web` | on demand (not part of `sync.yml`): static browser build → workflow artifact `cap2ui5-web`, optionally deployed to GitHub Pages — see [`web/README.md`](web/README.md) |
 
 After step 5 the `output/` folder holds the three deployable pieces —
 `abap2UI5/`, `samples/`, `app/`. Step 6 applies them with per-tree policies:

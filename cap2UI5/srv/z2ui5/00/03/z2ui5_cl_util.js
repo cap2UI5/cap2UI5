@@ -468,11 +468,15 @@ class z2ui5_cl_util {
 
   /** Returns true if a class file exists in the well-known app folders. */
   static rtti_check_class_exists(className) {
+    if (z2ui5_cl_util._registered_classes.has(String(className).toLowerCase())) return true;
     return this._findClassFile(className) !== null;
   }
 
-  /** Loads a class by name from the well-known app folders, or returns null. */
+  /** Loads a class by name — runtime registry first, then the well-known
+   *  app folders. Returns null when nothing matches. */
   static rtti_get_class(className) {
+    const registered = z2ui5_cl_util._registered_classes.get(String(className).toLowerCase());
+    if (registered) return registered;
     const filePath = this._findClassFile(className);
     if (!filePath) return null;
     try {
@@ -498,13 +502,18 @@ class z2ui5_cl_util {
   static rtti_get_classes_impl_intf(intf) {
     if (typeof intf === "string") {
       const lower = intf.toLowerCase();
-      const candidates = [
-        path.join(__dirname, "../../02", `${lower}.js`),
-        path.join(__dirname, "../../01/02", `${lower}.js`),
-      ];
-      const found = candidates.find((p) => fs.existsSync(p));
-      if (!found) return [];
-      try { intf = require(found); } catch { return []; }
+      const registered = z2ui5_cl_util._registered_classes.get(lower);
+      if (registered) {
+        intf = registered;
+      } else {
+        const candidates = [
+          path.join(__dirname, "../../02", `${lower}.js`),
+          path.join(__dirname, "../../01/02", `${lower}.js`),
+        ];
+        const found = candidates.find((p) => fs.existsSync(p));
+        if (!found) return [];
+        try { intf = require(found); } catch { return []; }
+      }
     }
 
     const isClassContract  = typeof intf === "function" && intf.prototype;
@@ -513,26 +522,33 @@ class z2ui5_cl_util {
 
     const results = [];
     const seen = new Set();
+    const consider = (className, loadClass) => {
+      if (seen.has(className)) return;
+      try {
+        const Cls = loadClass();
+        let matches = false;
+        if (isClassContract) {
+          matches = Cls?.prototype instanceof intf;
+        } else if (typeof Cls === "function" && Cls.prototype) {
+          matches = intf.METHOD_NAMES.every((m) => typeof Cls.prototype[m] === "function");
+        }
+        if (matches) {
+          seen.add(className);
+          results.push({ classname: className, KEY: className, TEXT: className });
+        }
+      } catch {
+        // ignore broken modules
+      }
+    };
+    // Runtime registry first — the only source available in bundled/browser
+    // builds where the filesystem walk below finds nothing.
+    for (const [className, Cls] of z2ui5_cl_util._registered_classes) {
+      consider(className, () => Cls);
+    }
     for (const dir of z2ui5_cl_util._app_dirs()) {
       if (!fs.existsSync(dir)) continue;
       for (const filePath of z2ui5_cl_util._walkClassFiles(dir)) {
-        const className = path.basename(filePath, ".js");
-        if (seen.has(className)) continue;
-        try {
-          const Cls = require(filePath);
-          let matches = false;
-          if (isClassContract) {
-            matches = Cls?.prototype instanceof intf;
-          } else if (typeof Cls === "function" && Cls.prototype) {
-            matches = intf.METHOD_NAMES.every((m) => typeof Cls.prototype[m] === "function");
-          }
-          if (matches) {
-            seen.add(className);
-            results.push({ classname: className, KEY: className, TEXT: className });
-          }
-        } catch {
-          // ignore broken modules
-        }
+        consider(path.basename(filePath, ".js"), () => require(filePath));
       }
     }
     return results;
@@ -564,6 +580,20 @@ class z2ui5_cl_util {
   // ============================================================
 
   static _registered_dirs = [];
+
+  // Class registry — name (lowercase) → constructor. Checked before any
+  // filesystem lookup, which makes it the mechanism for environments
+  // without a filesystem at all (browser bundles, see web/ at the repo
+  // root) and a faster path for Node callers that know their classes
+  // upfront.
+  static _registered_classes = new Map();
+
+  /** Register a class under its name (case-insensitive). Idempotent —
+   *  re-registering a name replaces the previous entry. */
+  static register_app_class(name, Cls) {
+    if (typeof name !== "string" || !name || typeof Cls !== "function") return;
+    z2ui5_cl_util._registered_classes.set(name.toLowerCase(), Cls);
+  }
 
   /** Add a directory to the app-class search path. Idempotent. */
   static register_app_dir(dir) {

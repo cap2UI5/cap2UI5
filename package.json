@@ -13,7 +13,8 @@
     "transpile_abap2ui5": "node scripts/transpile-tree.js abap2UI5",
     "transpile_samples": "node scripts/transpile-tree.js samples",
     "prepare_app": "node scripts/prepare-app.js",
-    "copy_into_cap": "node scripts/copy-into-cap.js"
+    "copy_into_cap": "node scripts/copy-into-cap.js",
+    "build_web": "npm --prefix web install --no-audit --no-fund && npm --prefix web run build"
   },
   "devDependencies": {
     "@abaplint/core": "^2.119.56",
