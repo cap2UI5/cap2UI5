@@ -1,4 +1,5 @@
 const z2ui5_cl_demo_app_020 = require("./z2ui5_cl_demo_app_020");
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -8,7 +9,7 @@ class z2ui5_cl_demo_app_012 extends z2ui5_if_app {
 
   on_navigation() {
     let app;
-    if (this.check_popup === true) {
+    if ((this.check_popup === true || this.check_popup === `X`)) {
       this.check_popup = false;
       app = (this.client.get_app(this.client.get().S_DRAFT.ID_PREV_APP));
       this.client.message_toast_display(`${app.event} pressed`);
@@ -105,7 +106,7 @@ class z2ui5_cl_demo_app_012 extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.view_display();
     } else if (client.check_on_navigated()) {

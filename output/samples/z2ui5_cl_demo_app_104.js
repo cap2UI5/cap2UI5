@@ -21,7 +21,7 @@ class z2ui5_cl_demo_app_104 extends z2ui5_if_app {
     let _fs$fs_fs = null;
     if (this.mo_app_sub != null) {
       // TODO(abap2js): ASSIGN mo_app_sub->(`MO_VIEW_PARENT`) TO FIELD-SYMBOL(<fs>).
-      fs_fs = this.mo_grid_sub;
+      fs_fs = z2ui5_cl_util.abap_copy(this.mo_grid_sub);
       if (_fs$fs_fs) _fs$fs_fs.o[_fs$fs_fs.k] = fs_fs;
       // TODO(abap2js): CALL METHOD mo_app_sub->(`Z2UI5_IF_APP~MAIN`) EXPORTING client = client.
     }
@@ -34,7 +34,7 @@ class z2ui5_cl_demo_app_104 extends z2ui5_if_app {
     this.classname = this.classname.toUpperCase();
     this.mo_app_sub = (() => { const _n = String(this.classname); const _c = z2ui5_cl_util.rtti_get_class(_n.toLowerCase()); if (!_c) throw new Error(`CREATE OBJECT: class ${_n} not found`); return new _c(); })();
     // TODO(abap2js): ASSIGN mo_app_sub->(`MO_VIEW_PARENT`) TO FIELD-SYMBOL(<fs>).
-    fs_fs = this.mo_grid_sub;
+    fs_fs = z2ui5_cl_util.abap_copy(this.mo_grid_sub);
     if (_fs$fs_fs) _fs$fs_fs.o[_fs$fs_fs.k] = fs_fs;
     // TODO(abap2js): CALL METHOD mo_app_sub->(`Z2UI5_IF_APP~MAIN`) EXPORTING client = client.
   }
@@ -59,7 +59,7 @@ class z2ui5_cl_demo_app_104 extends z2ui5_if_app {
     let sy_subrc = 0;
     let lt_sel;
     let ls_sel;
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.t_tab = [{ title: `Class 1`, info: `z2ui5_cl_demo_app_105`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `Class 2`, info: `z2ui5_cl_demo_app_112`, descr: `this is a description`, icon: `sap-icon://account` }];
       this.mv_layout = `OneColumn`;
@@ -68,8 +68,8 @@ class z2ui5_cl_demo_app_104 extends z2ui5_if_app {
     }
     switch (client.get().EVENT) {
       case `SELCHANGE`:
-        lt_sel = this.t_tab;
-        for (let _i = lt_sel.length - 1; _i >= 0; _i--) { const row = lt_sel[_i]; if (row.selected === false) lt_sel.splice(_i, 1); }
+        lt_sel = z2ui5_cl_util.abap_copy(this.t_tab);
+        for (let _i = lt_sel.length - 1; _i >= 0; _i--) { const row = lt_sel[_i]; if (!(row.selected === true || row.selected === `X`)) lt_sel.splice(_i, 1); }
         ls_sel = {};
         {
           const _t = lt_sel;
@@ -81,7 +81,7 @@ class z2ui5_cl_demo_app_104 extends z2ui5_if_app {
         if (this.classname) {
           this.view_display_master();
         }
-        this.classname = ls_sel.info;
+        this.classname = z2ui5_cl_util.abap_copy(ls_sel.info);
         this.mv_layout = `TwoColumnsMidExpanded`;
         client.view_model_update();
         this.view_display_detail();

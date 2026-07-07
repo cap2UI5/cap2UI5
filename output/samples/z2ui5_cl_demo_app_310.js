@@ -53,7 +53,7 @@ class z2ui5_cl_demo_app_310 extends z2ui5_if_app {
       .header_content()
       .link()
       .get_parent();
-    if (this.check_strip_active === true) {
+    if ((this.check_strip_active === true || this.check_strip_active === `X`)) {
       page.message_strip({ text: `This is a Message Strip`, type: this.strip_type });
     }
     page.grid(`L6 M12 S12`)

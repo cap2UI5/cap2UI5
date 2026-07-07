@@ -56,7 +56,7 @@ class z2ui5_cl_demo_app_199 extends z2ui5_if_app {
     let sy_subrc = 0;
     let fs_tab = null;
     let _fs$fs_tab = null;
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.on_init();
     }
@@ -87,7 +87,7 @@ class z2ui5_cl_demo_app_199 extends z2ui5_if_app {
     let _fs$fs_tab = null;
     // TODO(abap2js): ASSIGN mt_table->* TO <tab>.
     fs_tab.push(...fs_tab);
-    this.mv_counter = fs_tab.length;
+    this.mv_counter = z2ui5_cl_util.abap_copy(fs_tab.length);
   }
 }
 

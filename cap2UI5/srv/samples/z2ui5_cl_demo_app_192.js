@@ -1,6 +1,7 @@
 // TODO(abap2js): unresolved reference cl_abap_structdescr — add require manually
 // TODO(abap2js): unresolved reference cl_abap_tabledescr — add require manually
 const z2ui5_cl_demo_app_193 = require("./z2ui5_cl_demo_app_193");
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -19,7 +20,7 @@ class z2ui5_cl_demo_app_192 extends z2ui5_if_app {
 
   async main(client) {
     this.xml_parse();
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     this.get_data();
     this.view_display();
     this.xml_stringify();
@@ -45,7 +46,7 @@ class z2ui5_cl_demo_app_192 extends z2ui5_if_app {
       // TODO(abap2js): CREATE DATA lo_new_data->mt_kopf TYPE HANDLE lr_tabdescr.
       // TODO(abap2js): ASSIGN lo_new_data->mt_kopf->* TO <fs_t_head_new>.
       fs_fs_t_head_new.push({});
-      fs_fs_s_head_new = fs_fs_s_head;
+      fs_fs_s_head_new = z2ui5_cl_util.abap_copy(fs_fs_s_head);
     }
   }
 

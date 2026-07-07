@@ -8,7 +8,7 @@ class z2ui5_cl_demo_app_088 extends z2ui5_if_app {
   mv_page = ``;
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.mv_page = `page1`;
       this.view_display();

@@ -17,7 +17,7 @@ class z2ui5_cl_demo_app_085 extends z2ui5_if_app {
   check_detail_active = false;
 
   sort() {
-    if (this.lv_sort_desc === true) {
+    if ((this.lv_sort_desc === true || this.lv_sort_desc === `X`)) {
       this.mt_table.sort((a, b) => ((a.productid > b.productid ? 1 : a.productid < b.productid ? -1 : 0)));
       this.lv_sort_desc = false;
     } else {
@@ -203,14 +203,14 @@ class z2ui5_cl_demo_app_085 extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.set_data();
       this.sort();
       this.view_display_master();
       return;
     }
-    if (client.get().CHECK_ON_NAVIGATED === true) {
+    if (((client.get().CHECK_ON_NAVIGATED) === true || (client.get().CHECK_ON_NAVIGATED) === `X`)) {
       this.view_display_master();
       this.view_display_detail();
       return;
@@ -225,7 +225,7 @@ class z2ui5_cl_demo_app_085 extends z2ui5_if_app {
     switch (this.client.get().EVENT) {
       case `ONGOTOSUPPLIER`:
         lo_app_next = new z2ui5_cl_demo_app_086();
-        lo_app_next.ls_detail_supplier = this.ls_detail_supplier;
+        lo_app_next.ls_detail_supplier = z2ui5_cl_util.abap_copy(this.ls_detail_supplier);
         this.client.nav_app_call(lo_app_next);
         break;
       case `ONEXITFULLSCREENMODE`:
@@ -260,7 +260,7 @@ class z2ui5_cl_demo_app_085 extends z2ui5_if_app {
         }
         this.client.message_toast_display(`Event Press Supplier List Name: ${lt_arg[(1) - 1]} `);
         lo_app_next = new z2ui5_cl_demo_app_086();
-        lo_app_next.ls_detail_supplier = this.ls_detail_supplier;
+        lo_app_next.ls_detail_supplier = z2ui5_cl_util.abap_copy(this.ls_detail_supplier);
         this.client.nav_app_call(lo_app_next);
         break;
       case `ONPRESSMASTER`:
@@ -279,7 +279,7 @@ class z2ui5_cl_demo_app_085 extends z2ui5_if_app {
           if (sy_subrc === 0) this.ls_detail_supplier = _t[_i];
         }
         this.lv_layout = `TwoColumnsMidExpanded`;
-        if (this.check_detail_active === false) {
+        if (!(this.check_detail_active === true || this.check_detail_active === `X`)) {
           this.view_display_master();
         }
         this.view_display_detail();
@@ -316,7 +316,7 @@ class z2ui5_cl_demo_app_085 extends z2ui5_if_app {
   set_data() {
     this.mt_table = [{ key: `1`, productid: `1`, productname: `table`, suppliername: `Company 1`, width: `10`, depth: `20`, height: `30`, dimunit: `CM`, measure: 100, unit: `ST`, price: `1000.50`, waers: `EUR`, state_price: `Success`, state_measure: `Warning`, pic: `HT-1010.jpg`, rating: `0`, process: `0` }, { key: `2`, productid: `2`, productname: `chair`, suppliername: `Company 2`, width: `10`, depth: `20`, height: `30`, dimunit: `CM`, measure: 123, unit: `ST`, price: `2000.55`, waers: `USD`, state_price: `Error`, state_measure: `Error`, pic: `HT-2001.jpg`, rating: `1`, process: `10` }, { key: `3`, productid: `3`, productname: `sofa`, suppliername: `Company 3`, width: `10`, depth: `20`, height: `30`, dimunit: `CM`, measure: 700, unit: `ST`, price: `3000.11`, waers: `CNY`, state_price: `Success`, state_measure: `Warning`, pic: `HT-1251.jpg`, rating: `2`, process: `15` }, { key: `4`, productid: `4`, productname: `computer`, suppliername: `Company 4`, width: `10`, depth: `20`, height: `30`, dimunit: `CM`, measure: 200, unit: `ST`, price: `4000.88`, waers: `USD`, state_price: `Success`, state_measure: `Success`, pic: `HT-6100.jpg`, rating: `3`, process: `38` }, { key: `5`, productid: `5`, productname: `printer`, suppliername: `Company 5`, width: `10`, depth: `20`, height: `30`, dimunit: `CM`, measure: 90, unit: `ST`, price: `5000.47`, waers: `EUR`, state_price: `Error`, state_measure: `Warning`, pic: `HT-1000.jpg`, rating: `4`, process: `66` }, { key: `6`, productid: `6`, productname: `table2`, suppliername: `Company 6`, width: `10`, depth: `20`, height: `30`, dimunit: `CM`, measure: 600, unit: `ST`, price: `6000.33`, waers: `GBP`, state_price: `Success`, state_measure: `Information`, pic: `HT-1137.jpg`, rating: `2`, process: `91` }, { key: `7`, productid: `7`, productname: `table3`, suppliername: `Company 7`, width: `10`, depth: `20`, height: `30`, dimunit: `CM`, measure: 600, unit: `ST`, price: `6000.33`, waers: `GBP`, state_price: `Success`, state_measure: `Warning`, pic: `HT-7000.jpg`, rating: `6`, process: `5` }, { key: `8`, productid: `8`, productname: `table4`, suppliername: `Company 8`, width: `10`, depth: `20`, height: `30`, dimunit: `CM`, measure: 600, unit: `ST`, price: `6000.33`, waers: `GBP`, state_price: `Warning`, state_measure: `Error`, pic: `HT-9997.jpg`, rating: `0`, process: `75` }, { key: `9`, productid: `9`, productname: `table5`, suppliername: `Company 9`, width: `10`, depth: `20`, height: `30`, dimunit: `CM`, measure: 600, unit: `ST`, price: `6000.33`, waers: `GBP`, state_price: `Information`, state_measure: `Success`, pic: `HT-7020.jpg`, rating: `1`, process: `81` }, { key: `10`, productid: `10`, productname: `table6`, suppliername: `Company 10`, width: `10`, depth: `20`, height: `30`, dimunit: `CM`, measure: 600, unit: `ST`, price: `6000.33`, waers: `GBP`, state_price: `Success`, state_measure: `Information`, pic: `HT-1023.jpg`, rating: `4`, process: `24` }, { key: `11`, productid: `11`, productname: `table7`, suppliername: `Company 11`, width: `10`, depth: `20`, height: `30`, dimunit: `CM`, measure: 600, unit: `ST`, price: `6000.33`, waers: `GBP`, state_price: `Information`, state_measure: `Success`, pic: `HT-1085.jpg`, rating: `5`, process: `46` }];
     this.mt_table_supplier = [{ suppliername: `Company 1`, email: `company1@sap.com`, phone: `+49 1234567890`, country: `Germany`, city: `Dresden`, street: `Neumarkt`, zipcode: `01067` }, { suppliername: `Company 2`, email: `company2@sap.com`, phone: `+49 1234567890`, country: `Germany`, city: `Erfurt`, street: `Domplatz`, zipcode: `99084` }, { suppliername: `Company 3`, email: `company3@sap.com`, phone: `+49 1234567890`, country: `Germany`, city: `Suhl`, street: `Carl-Fiedler-Straße 58`, zipcode: `98527` }, { suppliername: `Company 4`, email: `company4@sap.com`, phone: `+49 1234567890`, country: `Germany`, city: `Hildburgheusen`, street: `Markt`, zipcode: `98646` }, { suppliername: `Company 5`, email: `company5@sap.com`, phone: `+49 1234567890`, country: `Germany`, city: `Sonneberg`, street: `Beethovenstraße 10`, zipcode: `96515` }, { suppliername: `Company 6`, email: `company6@sap.com`, phone: `+49 1234567890`, country: `Germany`, city: `Meiningen`, street: `Schloßplatz 1`, zipcode: `98617` }, { suppliername: `Company 7`, email: `company7@sap.com`, phone: `+49 1234567890`, country: `Germany`, city: `Leipzig`, street: `Pfaffendorfer Str. 29`, zipcode: `04105` }, { suppliername: `Company 8`, email: `company8@sap.com`, phone: `+49 1234567890`, country: `Germany`, city: `Magdeburg`, street: `Am Dom 1`, zipcode: `39104` }, { suppliername: `Company 9`, email: `company9@sap.com`, phone: `+49 1234567890`, country: `Germany`, city: `Schwerin`, street: `Lennéstraße 1`, zipcode: `19053` }, { suppliername: `Company 10`, email: `company10@sap.com`, phone: `+49 1234567890`, country: `Germany`, city: `Rostock`, street: `Rungestraße 79-78`, zipcode: `18055` }, { suppliername: `Company 11`, email: `company11@sap.com`, phone: `+49 1234567890`, country: `Germany`, city: `Cottbus`, street: `Marktstraße`, zipcode: `03046` }, { suppliername: `Company 12`, email: `company12@sap.com`, phone: `+49 1234567890`, country: `Germany`, city: `Halle (Saale)`, street: `Marktpl. 1`, zipcode: `06108` }];
-    this.ls_detail = this.mt_table[(1) - 1];
+    this.ls_detail = z2ui5_cl_util.abap_copy(this.mt_table[(1) - 1]);
   }
 
   set_search() {

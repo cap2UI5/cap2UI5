@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -20,7 +21,7 @@ class z2ui5_cl_demo_app_318 extends z2ui5_if_app {
       .label(`path`)
       .input(this.client._bind_edit(this.mv_path))
       .label(`Option`);
-    this.lt_types2 = /* TODO(abap2js): VALUE FOR/BASE */ [];
+    this.lt_types2 = (() => { const __out = []; for (const row of (z2ui5_cl_util.source_get_file_types() ?? [])) { __out.push(...[{ n: this.shift_right(/* TODO(abap2js) */ shift_left(row)), v: this.shift_right(/* TODO(abap2js) */ shift_left(row)) }]); } return __out; })();
     const temp3 = temp.input({ value: this.client._bind_edit(this.mv_type), suggestionitems: this.client._bind(this.lt_types) })
       .get();
     temp3.suggestion_items().list_item({ text: `{N}`, additionaltext: `{V}` });
@@ -35,7 +36,7 @@ class z2ui5_cl_demo_app_318 extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.mv_path = `../../demo/text`;
       this.mv_type = `plain_text`;
@@ -48,7 +49,7 @@ class z2ui5_cl_demo_app_318 extends z2ui5_if_app {
         client.message_box_display(`Upload successful. File saved!`, `success`);
         break;
       case `EDIT`:
-        this.mv_check_editable = (this.mv_check_editable === false);
+        this.mv_check_editable = (!(this.mv_check_editable === true || this.mv_check_editable === `X`));
         client.view_model_update();
         break;
       case `CLEAR`:

@@ -13,11 +13,11 @@ class z2ui5_cl_demo_app_020 extends z2ui5_if_app {
   static factory({ i_text, i_cancel_text, i_cancel_event, i_confirm_text, i_confirm_event } = {}) {
     let result = null;
     result = new z2ui5_cl_demo_app_020();
-    result.text = i_text;
-    result.cancel_text = i_cancel_text;
-    result.cancel_event = i_cancel_event;
-    result.confirm_text = i_confirm_text;
-    result.confirm_event = i_confirm_event;
+    result.text = z2ui5_cl_util.abap_copy(i_text);
+    result.cancel_text = z2ui5_cl_util.abap_copy(i_cancel_text);
+    result.cancel_event = z2ui5_cl_util.abap_copy(i_cancel_event);
+    result.confirm_text = z2ui5_cl_util.abap_copy(i_confirm_text);
+    result.confirm_event = z2ui5_cl_util.abap_copy(i_confirm_event);
     return result;
   }
 

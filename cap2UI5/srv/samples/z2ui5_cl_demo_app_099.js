@@ -15,7 +15,7 @@ class z2ui5_cl_demo_app_099 extends z2ui5_if_app {
   client = null;
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.set_data();
       this.view_display();
@@ -49,8 +49,8 @@ class z2ui5_cl_demo_app_099 extends z2ui5_if_app {
       case `CONFIRM_SORT`:
         lt_arg = this.client.get().T_EVENT_ARG;
         if (lt_arg) {
-          sort_field = lt_arg[(1) - 1];
-          if (this.mv_sort_descending === true) {
+          sort_field = z2ui5_cl_util.abap_copy(lt_arg[(1) - 1]);
+          if ((this.mv_sort_descending === true || this.mv_sort_descending === `X`)) {
             { const _f = String(sort_field)
               .toLowerCase(); this.t_tab.sort((a, b) => (a[_f] > b[_f] ? 1 : a[_f] < b[_f] ? -1 : 0) * -1); }
           } else {
@@ -64,7 +64,7 @@ class z2ui5_cl_demo_app_099 extends z2ui5_if_app {
         this.mv_filter = {};
         lt_arg = z2ui5_cl_util.struct_lower_keys(this.client.get().T_EVENT_ARG);
         if (lt_arg) {
-          filter_string = lt_arg[(1) - 1];
+          filter_string = z2ui5_cl_util.abap_copy(lt_arg[(1) - 1]);
           let lv_dummy;
           [lv_dummy, filter_string] = filter_string.split(`:`);
           // TODO(abap2js): CONDENSE filter_string NO-GAPS.
@@ -88,19 +88,19 @@ class z2ui5_cl_demo_app_099 extends z2ui5_if_app {
       case `CONFIRM_GROUP`:
         lt_arg = z2ui5_cl_util.struct_lower_keys(this.client.get().T_EVENT_ARG);
         if (lt_arg) {
-          group_field = lt_arg[(1) - 1];
+          group_field = z2ui5_cl_util.abap_copy(lt_arg[(1) - 1]);
           if (group_field) {
-            if (this.mv_group_descending === true) {
+            if ((this.mv_group_descending === true || this.mv_group_descending === `X`)) {
               { const _f = String(group_field)
                 .toLowerCase(); this.t_tab.sort((a, b) => (a[_f] > b[_f] ? 1 : a[_f] < b[_f] ? -1 : 0) * -1); }
             } else {
               { const _f = String(group_field)
                 .toLowerCase(); this.t_tab.sort((a, b) => (a[_f] > b[_f] ? 1 : a[_f] < b[_f] ? -1 : 0)); }
             }
-            this.mv_sorter_group = group_field;
+            this.mv_sorter_group = z2ui5_cl_util.abap_copy(group_field);
             // TODO(abap2js): TRANSLATE mv_sorter_group TO UPPER CASE.
           } else {
-            if (this.mv_group_descending === true) {
+            if ((this.mv_group_descending === true || this.mv_group_descending === `X`)) {
               { const _f = String(group_field)
                 .toLowerCase(); this.t_tab.sort((a, b) => (a[_f] > b[_f] ? 1 : a[_f] < b[_f] ? -1 : 0) * -1); }
             } else {

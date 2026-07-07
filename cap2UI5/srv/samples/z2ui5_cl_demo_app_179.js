@@ -46,7 +46,7 @@ class z2ui5_cl_demo_app_179 extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.set_mock_data();
       this.set_view();

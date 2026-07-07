@@ -46,7 +46,7 @@ class z2ui5_cl_demo_app_154 extends z2ui5_if_app {
         break;
       case `POPUP_EXCEPTION`:
         try {
-          lv_dummy = 1 / 0;
+          lv_dummy = z2ui5_cl_util.abap_div(1, 0);
         } catch (lx) {
         }
         lo_app = z2ui5_cl_pop_error.factory(lx);
@@ -66,7 +66,7 @@ class z2ui5_cl_demo_app_154 extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.view_display();
     } else {

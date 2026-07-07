@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -9,7 +10,7 @@ class z2ui5_cl_demo_app_177 extends z2ui5_if_app {
   refresh_data() {
     for (let sy_index = 1; sy_index <= 50; sy_index++) {
       let ls_row = {};
-      ls_row.count = sy_index;
+      ls_row.count = z2ui5_cl_util.abap_copy(sy_index);
       ls_row.value = `red`;
       ls_row.descr = `this is a description`;
       ls_row.checkbox = true;

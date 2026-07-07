@@ -1,4 +1,5 @@
 const z2ui5_cl_pop_table = require("abap2UI5/z2ui5_cl_pop_table");
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -45,13 +46,13 @@ class z2ui5_cl_demo_app_164 extends z2ui5_if_app {
 
   async main(client) {
     let lo_popup_table;
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.set_data();
       this.view_display();
       return;
     }
-    if (client.get().CHECK_ON_NAVIGATED === true) {
+    if (((client.get().CHECK_ON_NAVIGATED) === true || (client.get().CHECK_ON_NAVIGATED) === `X`)) {
       try {
         lo_popup_table = (client.get_app(client.get().S_DRAFT.ID_PREV_APP));
         this.set_data();

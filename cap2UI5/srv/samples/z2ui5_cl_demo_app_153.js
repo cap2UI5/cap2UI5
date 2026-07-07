@@ -1,4 +1,5 @@
 const z2ui5_cl_ajson_mapping = require("abap2UI5/z2ui5_cl_ajson_mapping");
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -29,7 +30,7 @@ class z2ui5_cl_demo_app_153 extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_navigated()) {
       this.ms_struc.data.labels = [`Jan`, `Feb`, `Mar`, `Apr`, `May`, `Jun`];
       let ls_dataset = {};
@@ -39,7 +40,7 @@ class z2ui5_cl_demo_app_153 extends z2ui5_if_app {
       ls_dataset.border_radius = 200;
       ls_dataset.data = [`1`, `-12`, `19`, `3`, `5`, `-2`, `3`];
       this.ms_struc.data.datasets.push(ls_dataset);
-      this.ms_struc2 = this.ms_struc;
+      this.ms_struc2 = z2ui5_cl_util.abap_copy(this.ms_struc);
       this.view_display();
       return;
     }

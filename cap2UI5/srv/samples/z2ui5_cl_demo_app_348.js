@@ -26,7 +26,7 @@ class z2ui5_cl_demo_app_348 extends z2ui5_if_app {
         this.get_data2();
         break;
     }
-    if (client.get().CHECK_ON_NAVIGATED === true && client.check_on_init() === false) {
+    if (((client.get().CHECK_ON_NAVIGATED) === true || (client.get().CHECK_ON_NAVIGATED) === `X`) && !(client.check_on_init() === true || client.check_on_init() === `X`)) {
       this.view_display({ client: client });
     }
     if (this.mo_layout_obj.mr_data != null) {

@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 const z2ui5_if_client = require("abap2UI5/z2ui5_if_client");
@@ -15,13 +16,13 @@ class z2ui5_cl_demo_app_353 extends z2ui5_if_app {
 
   read_device_info() {
     const ls_get = this.client.get();
-    this.device_browser = ls_get.S_DEVICE.BROWSER.NAME;
-    this.device_os = ls_get.S_DEVICE.OS.NAME;
-    this.device_systemtype = ls_get.S_DEVICE.SYSTEM;
+    this.device_browser = z2ui5_cl_util.abap_copy(ls_get.S_DEVICE.BROWSER.NAME);
+    this.device_os = z2ui5_cl_util.abap_copy(ls_get.S_DEVICE.OS.NAME);
+    this.device_systemtype = z2ui5_cl_util.abap_copy(ls_get.S_DEVICE.SYSTEM);
     this.device_height = (ls_get.S_DEVICE.RESIZE.HEIGHT);
     this.device_width = (ls_get.S_DEVICE.RESIZE.WIDTH);
-    this.ui5_version = ls_get.S_UI5.VERSION;
-    this.ui5_theme = ls_get.S_UI5.THEME;
+    this.ui5_version = z2ui5_cl_util.abap_copy(ls_get.S_UI5.VERSION);
+    this.ui5_theme = z2ui5_cl_util.abap_copy(ls_get.S_UI5.THEME);
   }
 
   start_timer() {
@@ -53,7 +54,7 @@ class z2ui5_cl_demo_app_353 extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.read_device_info();
       this.render();

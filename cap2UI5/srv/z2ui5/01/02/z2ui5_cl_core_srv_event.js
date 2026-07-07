@@ -31,13 +31,17 @@ class z2ui5_cl_core_srv_event {
       }
     }
 
-    const ctrl = [
-      val,
-      "",
-      s_ctrl.bypass_busy ? "X" : "",
-      s_ctrl.force_main_model ? "X" : "",
-    ];
-    const ctrlStr = ctrl.map(this._quote_for_xml).join(",");
+    // Control slots after the event name are emitted as UNQUOTED JS literals
+    // and only when a flag is set (abap emits `.eB(['EVENT'])` resp.
+    // `.eB(['EVENT',false,true])`). This matters beyond cosmetics: when an
+    // .eB(...) snippet is embedded in an .eF(...) follow-up action, the
+    // frontend's _runCustomJs quote-split parser treats every 'quoted' chunk
+    // as an argument — quoted empty ctrl slots would inject phantom args and
+    // shift the real ones (broke e.g. the START_TIMER delay in app 028).
+    let ctrlStr = this._quote_for_xml(val);
+    if (s_ctrl.bypass_busy || s_ctrl.force_main_model) {
+      ctrlStr += `,false,${s_ctrl.bypass_busy ? `true` : `false`},${s_ctrl.force_main_model ? `true` : `false`}`;
+    }
     if (t_arg.length === 0) return `.eB([${ctrlStr}])`;
     const argsStr = t_arg.map(this._quote_for_xml).join(",");
     return `.eB([${ctrlStr}],${argsStr})`;
@@ -55,29 +59,41 @@ class z2ui5_cl_core_srv_event {
 
     let result = `.eF('${val}'`;
     for (const a of t_arg) {
-      const v = String(a ?? "");
-      if (v === "") continue;
-      const trimmed = v.trim();
-      if (trimmed.startsWith("$") || trimmed.startsWith("{")) {
-        result += `,${v}`;
-      } else {
-        result += `,'${v.replace(/\\/g, "\\\\").replace(/'/g, "\\'")}'`;
-      }
+      result += this._ef_arg(a);
     }
     return result + `)`;
   }
 
   /**
    * Builds an .eF(...) string for a CS_EVENT action plus its positional args.
-   * Used by the frontend convenience methods (clipboard_copy, open_new_tab, …).
-   * Always single-quoted, never wraps as binding expression.
+   * Used by client.action.gen() and the frontend convenience methods
+   * (clipboard_copy, open_new_tab, …). Same flat format as get_event_client —
+   * these strings end up in S_FOLLOW_UP_ACTION.CUSTOM_JS, where the
+   * frontend's quote-split parser (Server._runCustomJs) extracts the args.
    */
   static build_ef(action, args = []) {
-    if (args.length === 0) return `.eF('${action}')`;
-    const parts = [action, ...args].map((a) =>
-      `'${String(a ?? "").replace(/\\/g, "\\\\").replace(/'/g, "\\'")}'`
-    );
-    return `.eF([${parts.join(",")}])`;
+    let result = `.eF('${action}'`;
+    for (const a of args) {
+      result += this._ef_arg(a);
+    }
+    return result + `)`;
+  }
+
+  /**
+   * Renders one .eF(...) argument — mirrors abap get_t_arg: empty args are
+   * skipped, and args that are binding expressions ($.../{...}) or embedded
+   * .eB(...) event snippets pass through UNQUOTED (the frontend's quote-split
+   * parser then picks the event name out of the embedded snippet — quoting or
+   * escaping them would garble the parsed argument list).
+   */
+  static _ef_arg(a) {
+    const v = String(a ?? "");
+    if (v === "") return ``;
+    const trimmed = v.trim();
+    if (trimmed.startsWith("$") || trimmed.startsWith("{") || trimmed.startsWith(".eB(")) {
+      return `,${v}`;
+    }
+    return `,'${v}'`;
   }
 
   /**

@@ -1,4 +1,5 @@
 const z2ui5_cl_pop_image_editor = require("abap2UI5/z2ui5_cl_pop_image_editor");
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -44,12 +45,12 @@ class z2ui5_cl_demo_app_306 extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.facing_modes = [{ key: ``, text: `` }, { key: `environment`, text: `environment` }, { key: `user`, text: `user` }, { key: `left`, text: `left` }, { key: `right`, text: `right` }];
       this.view_display();
     }
-    if (client.get().CHECK_ON_NAVIGATED === true) {
+    if (((client.get().CHECK_ON_NAVIGATED) === true || (client.get().CHECK_ON_NAVIGATED) === `X`)) {
       this.on_navigation();
       this.rebuild_output();
       this.view_display();
@@ -64,7 +65,7 @@ class z2ui5_cl_demo_app_306 extends z2ui5_if_app {
         break;
       case `DISPLAY`:
         this.selected_picture = this.mt_picture_out.find((row) => row.selected === true);
-        this.mv_pic_display = this.mt_picture[(this.selected_picture.id) - 1].data;
+        this.mv_pic_display = z2ui5_cl_util.abap_copy(this.mt_picture[(this.selected_picture.id) - 1].data);
         this.rebuild_output();
         this.view_display();
         return;
@@ -99,14 +100,14 @@ class z2ui5_cl_demo_app_306 extends z2ui5_if_app {
     try {
       lo_prev = this.client.get_app(this.client.get().S_DRAFT.ID_PREV_APP);
       result = (lo_prev).result();
-      if (result.check_confirmed === true) {
-        this.mv_pic_display = result.image;
+      if ((result.check_confirmed === true || result.check_confirmed === `X`)) {
+        this.mv_pic_display = z2ui5_cl_util.abap_copy(result.image);
         fs_picture = this.mt_picture[(this.selected_picture.id) - 1];
         _fs$fs_picture = null;
         sy_subrc = 0;
         if (sy_subrc === 0) {
-          fs_picture.data = this.mv_pic_display;
-          fs_picture.thumbnail = this.mv_pic_display;
+          fs_picture.data = z2ui5_cl_util.abap_copy(this.mv_pic_display);
+          fs_picture.thumbnail = z2ui5_cl_util.abap_copy(this.mv_pic_display);
         }
       }
     } catch (error) {

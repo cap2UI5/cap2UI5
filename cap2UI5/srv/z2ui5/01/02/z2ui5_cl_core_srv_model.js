@@ -80,9 +80,13 @@ class z2ui5_cl_core_srv_model {
       if (!row || typeof row !== `object`) continue;
       const patch = delta[rowIdxStr] || {};
       for (const fld of Object.keys(patch)) {
+        // Fields with no counterpart on the row are CREATED as lowercase
+        // (transpiler convention) rather than dropped — e.g. a SELKZ
+        // selection flag bound in the view but absent from the row literals
+        // the app built in on_init (ABAP structs always carry every typed
+        // field; JS object literals only carry the initialized ones).
         const key = z2ui5_cl_core_srv_model._match_key(row, fld);
-        if (key === undefined) continue;
-        row[key] = patch[fld];
+        row[key !== undefined ? key : String(fld).toLowerCase()] = patch[fld];
       }
     }
   }

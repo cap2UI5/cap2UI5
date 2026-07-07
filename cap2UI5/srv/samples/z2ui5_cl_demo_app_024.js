@@ -1,4 +1,5 @@
 const z2ui5_cl_demo_app_025 = require("./z2ui5_cl_demo_app_025");
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -10,7 +11,7 @@ class z2ui5_cl_demo_app_024 extends z2ui5_if_app {
 
   async main(client) {
     let app_025;
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.view_display();
     } else if (client.check_on_navigated()) {
@@ -39,7 +40,7 @@ class z2ui5_cl_demo_app_024 extends z2ui5_if_app {
         break;
       case `CALL_NEW_APP_READ`:
         app_next = new z2ui5_cl_demo_app_025();
-        app_next.input_previous_set = this.input;
+        app_next.input_previous_set = z2ui5_cl_util.abap_copy(this.input);
         this.client.nav_app_call(app_next);
         break;
       case `CALL_NEW_APP_EVENT`:

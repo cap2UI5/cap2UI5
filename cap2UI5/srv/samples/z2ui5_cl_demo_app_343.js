@@ -19,7 +19,7 @@ class z2ui5_cl_demo_app_343 extends z2ui5_if_app {
         sy_tabix = 0;
         for (const com of comp) {
           sy_tabix++;
-          if (com.as_include === false) {
+          if (!(com.as_include === true || com.as_include === `X`)) {
             result.push(com);
           }
         }
@@ -66,7 +66,7 @@ class z2ui5_cl_demo_app_343 extends z2ui5_if_app {
       this.get_data();
       this.view_display({ client: client });
     }
-    if (client.get().CHECK_ON_NAVIGATED === true && client.check_on_init() === false) {
+    if (((client.get().CHECK_ON_NAVIGATED) === true || (client.get().CHECK_ON_NAVIGATED) === `X`) && !(client.check_on_init() === true || client.check_on_init() === `X`)) {
       this.view_display({ client: client });
     }
   }

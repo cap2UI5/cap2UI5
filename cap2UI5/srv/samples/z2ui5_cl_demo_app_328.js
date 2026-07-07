@@ -42,12 +42,12 @@ class z2ui5_cl_demo_app_328 extends z2ui5_if_app {
           if (sy_subrc !== 0) {
             continue;
           }
-          if (fs_selkz === true) {
+          if ((fs_selkz === true || fs_selkz === `X`)) {
             okay = true;
             break;
           }
         }
-        if (okay === true) {
+        if ((okay === true || okay === `X`)) {
           this.get_data();
           this.mo_table_obj = z2ui5_cl_demo_app_329.factory(this.mt_table);
           this.view_display({ client: client });

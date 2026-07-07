@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -14,7 +15,7 @@ class z2ui5_cl_demo_app_072 extends z2ui5_if_app {
   client = null;
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.set_data();
       this.on_init();
@@ -34,7 +35,7 @@ class z2ui5_cl_demo_app_072 extends z2ui5_if_app {
   on_init() {
     const view = z2ui5_cl_xml_view.factory();
     const page = view.shell()
-      .page({ id: `page_main`, showheader: (false === this.client.get().CHECK_LAUNCHPAD_ACTIVE), title: `abap2UI5 - IconTabBar`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack(), class: `sapUiContentPadding` });
+      .page({ id: `page_main`, showheader: (!((this.client.get().CHECK_LAUNCHPAD_ACTIVE) === true || (this.client.get().CHECK_LAUNCHPAD_ACTIVE) === `X`)), title: `abap2UI5 - IconTabBar`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack(), class: `sapUiContentPadding` });
     const lo_items = page.icon_tab_bar({ class: `sapUiResponsiveContentPadding`, selectedkey: this.client._bind_edit(this.lv_selectedkey), select: this.client._event(`OnSelectIconTabBar`, [`\${LV_SELECTEDKEY}`]) })
       .items();
     lo_items.icon_tab_filter({ count: this.client._bind_edit(this.lv_cnt_total), text: `Products`, key: `ALL`, showall: true });
@@ -77,7 +78,7 @@ class z2ui5_cl_demo_app_072 extends z2ui5_if_app {
 
   set_data() {
     this.mt_table = [{ productid: `1`, productname: `table`, suppliername: `Company 1`, width: `10`, depth: `20`, height: `30`, dimunit: `CM`, measure: 100, unit: `ST`, price: `1000.50`, waers: `EUR`, state_price: `Success`, rating: `0`, state_measure: `Warning` }, { productid: `2`, productname: `chair`, suppliername: `Company 2`, width: `10`, depth: `20`, height: `30`, dimunit: `CM`, measure: 123, unit: `ST`, price: `2000.55`, waers: `USD`, state_price: `Error`, rating: `1`, state_measure: `Warning` }, { productid: `3`, productname: `sofa`, suppliername: `Company 3`, width: `10`, depth: `20`, height: `30`, dimunit: `CM`, measure: 700, unit: `ST`, price: `3000.11`, waers: `CNY`, state_price: `Success`, rating: `2`, state_measure: `Warning` }, { productid: `4`, productname: `computer`, suppliername: `Company 4`, width: `10`, depth: `20`, height: `30`, dimunit: `CM`, measure: 200, unit: `ST`, price: `4000.88`, waers: `USD`, state_price: `Success`, rating: `3`, state_measure: `Success` }, { productid: `5`, productname: `printer`, suppliername: `Company 5`, width: `10`, depth: `20`, height: `30`, dimunit: `CM`, measure: 90, unit: `ST`, price: `5000.47`, waers: `EUR`, state_price: `Error`, rating: `4`, state_measure: `Warning` }, { productid: `6`, productname: `table2`, suppliername: `Company 6`, width: `10`, depth: `20`, height: `30`, dimunit: `CM`, measure: 600, unit: `ST`, price: `6000.33`, waers: `GBP`, state_price: `Success`, rating: `5`, state_measure: `Information` }];
-    this.lv_cnt_total = this.mt_table.length;
+    this.lv_cnt_total = z2ui5_cl_util.abap_copy(this.mt_table.length);
     this.lv_cnt_pos = /* TODO(abap2js): REDUCE */ null;
     this.lv_cnt_heavy = /* TODO(abap2js): REDUCE */ null;
     this.lv_cnt_neg = /* TODO(abap2js): REDUCE */ null;

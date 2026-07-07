@@ -18,7 +18,7 @@ class z2ui5_cl_demo_app_333 {
       index = index + 1;
       const layout = {};
       result.ms_data.t_layout.push(layout);
-      layout.name = comp.name;
+      layout.name = z2ui5_cl_util.abap_copy(comp.name);
       if (index <= vis_cols) {
         layout.visible = true;
       }
@@ -27,7 +27,7 @@ class z2ui5_cl_demo_app_333 {
       result.ms_data.guid = z2ui5_cl_util.uuid_get_c32();
     } catch (error) {
     }
-    result.mr_data = i_data;
+    result.mr_data = z2ui5_cl_util.abap_copy(i_data);
     return result;
   }
 }

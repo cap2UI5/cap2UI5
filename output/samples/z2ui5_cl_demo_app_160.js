@@ -10,7 +10,7 @@ class z2ui5_cl_demo_app_160 extends z2ui5_if_app {
     let ls_output = {};
     this.mt_output = {};
     for (let sy_index = 1; sy_index <= 10; sy_index++) {
-      ls_output.index = sy_index;
+      ls_output.index = z2ui5_cl_util.abap_copy(sy_index);
       ls_output.set_sk = `Test`;
       ls_output.matnr = `1234567`;
       ls_output.description = `Test`;
@@ -28,10 +28,10 @@ class z2ui5_cl_demo_app_160 extends z2ui5_if_app {
     let lt_event_arguments = [];
     if (this.client.check_on_event(`PL_TOTAL_CHANGE`)) {
       lt_event_arguments = z2ui5_cl_util.struct_lower_keys(this.client.get().T_EVENT_ARG);
-      lv_id_event = lt_event_arguments[(1) - 1];
-      lv_tab_index = lt_event_arguments[(2) - 1];
-      ls_row_submit = this.mt_output[(lv_tab_index) - 1];
-      lv_id_parent = lt_event_arguments[(3) - 1];
+      lv_id_event = z2ui5_cl_util.abap_copy(lt_event_arguments[(1) - 1]);
+      lv_tab_index = z2ui5_cl_util.abap_copy(lt_event_arguments[(2) - 1]);
+      ls_row_submit = z2ui5_cl_util.abap_copy(this.mt_output[(lv_tab_index) - 1]);
+      lv_id_parent = z2ui5_cl_util.abap_copy(lt_event_arguments[(3) - 1]);
       this.client.message_box_display(lv_tab_index + lv_id_event + lv_id_parent);
     }
     this.client.view_model_update();
@@ -159,7 +159,7 @@ class z2ui5_cl_demo_app_160 extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.load_output_table();
       this.render_main_screen();

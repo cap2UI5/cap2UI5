@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -11,7 +12,7 @@ class z2ui5_cl_demo_app_009 extends z2ui5_if_app {
   t_employees = [];
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.on_init();
     } else if (client.check_on_event()) {
@@ -29,7 +30,7 @@ class z2ui5_cl_demo_app_009 extends z2ui5_if_app {
   on_event() {
     switch (this.client.get().EVENT) {
       case `POPUP_TABLE_value`:
-        this.t_suggestion_sel = this.t_suggestion;
+        this.t_suggestion_sel = z2ui5_cl_util.abap_copy(this.t_suggestion);
         this.popup_value_suggestion();
         break;
       case `POPUP_TABLE_value_CUSTOM`:
@@ -37,25 +38,25 @@ class z2ui5_cl_demo_app_009 extends z2ui5_if_app {
         this.popup_value_employee();
         break;
       case `SEARCH`:
-        this.t_employees_sel = this.t_employees;
+        this.t_employees_sel = z2ui5_cl_util.abap_copy(this.t_employees);
         if (this.s_screen.city) {
           for (let _i = this.t_employees_sel.length - 1; _i >= 0; _i--) { const row = this.t_employees_sel[_i]; if (row.city !== this.s_screen.city) this.t_employees_sel.splice(_i, 1); }
         }
         this.popup_value_employee();
         break;
       case `POPUP_TABLE_value_CUSTOM_CONTINUE`:
-        for (let _i = this.t_employees_sel.length - 1; _i >= 0; _i--) { const row = this.t_employees_sel[_i]; if (row.selkz === false) this.t_employees_sel.splice(_i, 1); }
+        for (let _i = this.t_employees_sel.length - 1; _i >= 0; _i--) { const row = this.t_employees_sel[_i]; if (!(row.selkz === true || row.selkz === `X`)) this.t_employees_sel.splice(_i, 1); }
         if (this.t_employees_sel.length === 1) {
-          this.s_screen.name = this.t_employees_sel[(1) - 1].name;
-          this.s_screen.lastname = this.t_employees_sel[(1) - 1].lastname;
+          this.s_screen.name = z2ui5_cl_util.abap_copy(this.t_employees_sel[(1) - 1].name);
+          this.s_screen.lastname = z2ui5_cl_util.abap_copy(this.t_employees_sel[(1) - 1].lastname);
           this.client.message_toast_display(`value selected`);
           this.client.popup_destroy();
         }
         break;
       case `POPUP_TABLE_value_CONTINUE`:
-        for (let _i = this.t_suggestion_sel.length - 1; _i >= 0; _i--) { const row = this.t_suggestion_sel[_i]; if (row.selkz === false) this.t_suggestion_sel.splice(_i, 1); }
+        for (let _i = this.t_suggestion_sel.length - 1; _i >= 0; _i--) { const row = this.t_suggestion_sel[_i]; if (!(row.selkz === true || row.selkz === `X`)) this.t_suggestion_sel.splice(_i, 1); }
         if (this.t_suggestion_sel.length === 1) {
-          this.s_screen.color_02 = this.t_suggestion_sel[(1) - 1].value;
+          this.s_screen.color_02 = z2ui5_cl_util.abap_copy(this.t_suggestion_sel[(1) - 1].value);
           this.client.message_toast_display(`value selected`);
           this.client.popup_destroy();
         }

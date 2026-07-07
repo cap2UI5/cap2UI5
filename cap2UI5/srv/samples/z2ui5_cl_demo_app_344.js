@@ -3,6 +3,7 @@
 // TODO(abap2js): unresolved reference cl_abap_tabledescr — add require manually
 const z2ui5_cl_demo_app_333 = require("./z2ui5_cl_demo_app_333");
 const z2ui5_cl_demo_app_336 = require("./z2ui5_cl_demo_app_336");
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -36,7 +37,7 @@ class z2ui5_cl_demo_app_344 extends z2ui5_if_app {
         client.nav_app_call(app);
         break;
     }
-    if (client.get().CHECK_ON_NAVIGATED === true && client.check_on_init() === false) {
+    if (((client.get().CHECK_ON_NAVIGATED) === true || (client.get().CHECK_ON_NAVIGATED) === `X`) && !(client.check_on_init() === true || client.check_on_init() === `X`)) {
       this.view_display({ client: client });
     }
     if (this.mo_layout_obj.mr_data != null) {
@@ -80,7 +81,7 @@ class z2ui5_cl_demo_app_344 extends z2ui5_if_app {
     sy_tabix = 0;
     for (const layout of i_layout.ms_data.t_layout) {
       sy_tabix++;
-      lv_index = sy_tabix;
+      lv_index = z2ui5_cl_util.abap_copy(sy_tabix);
       columns.column({ visible: i_client._bind({ val: layout.visible, tab: i_layout.ms_data.t_layout, tab_index: lv_index }) })
         .text(layout.name);
     }
@@ -89,7 +90,7 @@ class z2ui5_cl_demo_app_344 extends z2ui5_if_app {
     sy_tabix = 0;
     for (const layout of i_layout.ms_data.t_layout) {
       sy_tabix++;
-      lv_index = sy_tabix;
+      lv_index = z2ui5_cl_util.abap_copy(sy_tabix);
       cells.object_identifier({ text: `{${layout.name}}` });
     }
   }
@@ -145,7 +146,7 @@ class z2ui5_cl_demo_app_344 extends z2ui5_if_app {
         sy_tabix = 0;
         for (const com of comp) {
           sy_tabix++;
-          if (com.as_include === false) {
+          if (!(com.as_include === true || com.as_include === `X`)) {
             result.push(com);
           }
         }
