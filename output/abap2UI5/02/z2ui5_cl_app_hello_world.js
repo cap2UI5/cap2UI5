@@ -14,7 +14,7 @@ class z2ui5_cl_app_hello_world extends z2ui5_if_app {
         .title({ ns: `core`, text: `Enter a value and send it to the server...` })
         .label(`Name`)
         .input(client._bind_edit(this.name))
-        .button({ text: `Send`, press: client._event(`BUTTON_POST`) });
+        .button({ text: `Post`, press: client._event(`BUTTON_POST`) });
       client.view_display(view.stringify());
     } else if (client.check_on_event(`BUTTON_POST`)) {
       client.message_box_display(`Your name is ${this.name}`);
