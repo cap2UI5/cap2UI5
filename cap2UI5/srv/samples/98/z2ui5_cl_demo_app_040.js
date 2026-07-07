@@ -31,7 +31,7 @@ class z2ui5_cl_demo_app_040 extends z2ui5_if_app {
       lv_xml = lv_xml + `<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"> </script>`;
     }
     if (this.mv_barcode) {
-      lv_xml = lv_xml + `<script> $("#" + sap.z2ui5.oView.createId( 'barcode' ) )
+      lv_xml = lv_xml + `<script> $("#" + z2ui5.oView.createId( 'barcode' ) )
         .JsBarcode("` + this.mv_barcode + `") </script>`;
     }
     lv_xml = lv_xml + `</body>` + `\\n` + `</html> ` + `\\n` + `</mvc:View>`;

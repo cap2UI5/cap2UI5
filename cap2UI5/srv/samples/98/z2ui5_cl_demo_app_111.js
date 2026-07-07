@@ -72,7 +72,7 @@ class z2ui5_cl_demo_app_111 extends z2ui5_if_app {
 
   view_display() {
     const view = z2ui5_cl_xml_view.factory();
-    this.client.view_display(z2ui5_cl_xml_view.factory()._generic({ ns: `html`, name: `script` })._cc_plain_xml(`sap.z2ui5.InitSvm();`).stringify());
+    this.client.view_display(z2ui5_cl_xml_view.factory()._generic({ ns: `html`, name: `script` })._cc_plain_xml(`z2ui5.InitSvm();`).stringify());
     const page1 = view.page({ id: `page_main`, title: `abap2UI5 - List Report Features`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
     const page = page1.dynamic_page({ headerexpanded: true, headerpinned: true });
     const header_title = page.title({ ns: `f` }).get().dynamic_page_title();
@@ -80,11 +80,11 @@ class z2ui5_cl_demo_app_111 extends z2ui5_if_app {
     header_title.expanded_content(`f`);
     header_title.snapped_content(`f`);
     const lo_fb = page.header().dynamic_page_header(true);
-    lo_fb.filter_bar({ id: `fbar`, persistencykey: `myPersKey`, usetoolbar: false, search: `sap.z2ui5.onSearch();` })
+    lo_fb.filter_bar({ id: `fbar`, persistencykey: `myPersKey`, usetoolbar: false, search: `z2ui5.onSearch();` })
       .filter_group_items()
       .filter_group_item({ name: `PRODUCT`, label: `Product`, groupname: `group1`, visibleinfilterbar: true })
       .fb_control()
-      .input({ value: this.client._bind_edit(this.mv_product), suggest: true, suggestionitems: `{/EDIT/MT_TABLE}`, change: `sap.z2ui5.onChange();` })
+      .input({ value: this.client._bind_edit(this.mv_product), suggest: true, suggestionitems: `{/EDIT/MT_TABLE}`, change: `z2ui5.onChange();` })
       .get()
       .suggestion_items()
       .item({ text: `{PRODUCT}` })
@@ -94,22 +94,22 @@ class z2ui5_cl_demo_app_111 extends z2ui5_if_app {
       .get_parent()
       .filter_group_item({ name: `CREATE_DATE`, label: `Create Date`, groupname: `group1`, visibleinfilterbar: true })
       .fb_control()
-      .input({ value: this.client._bind_edit(this.mv_create_date), change: `sap.z2ui5.onChange();` })
+      .input({ value: this.client._bind_edit(this.mv_create_date), change: `z2ui5.onChange();` })
       .get_parent()
       .get_parent()
       .filter_group_item({ name: `CREATE_BY`, label: `Create By`, groupname: `group1`, visibleinfilterbar: true })
       .fb_control()
-      .input({ value: this.client._bind_edit(this.mv_create_by), change: `sap.z2ui5.onChange();` })
+      .input({ value: this.client._bind_edit(this.mv_create_by), change: `z2ui5.onChange();` })
       .get_parent()
       .get_parent()
       .filter_group_item({ name: `STORAGE_LOCATION`, label: `Storage Location`, groupname: `group1`, visibleinfilterbar: true })
       .fb_control()
-      .input({ value: this.client._bind_edit(this.mv_storage_location), change: `sap.z2ui5.onChange();` })
+      .input({ value: this.client._bind_edit(this.mv_storage_location), change: `z2ui5.onChange();` })
       .get_parent()
       .get_parent()
       .filter_group_item({ name: `QUANTITY`, label: `Quantity`, groupname: `group1`, visibleinfilterbar: true })
       .fb_control()
-      .input({ suggest: true, suggestionitems: `{/EDIT/MT_TABLE}`, value: this.client._bind_edit(this.mv_quantity), change: `sap.z2ui5.onChange($event);` })
+      .input({ suggest: true, suggestionitems: `{/EDIT/MT_TABLE}`, value: this.client._bind_edit(this.mv_quantity), change: `z2ui5.onChange($event);` })
       .get()
       .suggestion_items()
       .item({ text: `{QUANTITY}` })
@@ -135,11 +135,11 @@ class z2ui5_cl_demo_app_111 extends z2ui5_if_app {
 
   get_custom_js() {
     let result = ``;
-    result = `sap.z2ui5.InitSvm = () => {` + `\\n` + ` var oView = sap.z2ui5.oView` + `\\n` + ` var oSmartVariantManagement = oView.byId("svm");` + `\\n` + ` var oFilterBar = oView.byId("fbar");` + `\\n` + ` var aData = _registerFetchData(oFilterBar);` + `\\n` + ` oFilterBar.registerFetchData( aData );` + `\\n` + ` oFilterBar.registerApplyData( _registerApplyData(oFilterBar, aData));` + `\\n` + ` oFilterBar.registerGetFiltersWithValues( _registerGetFiltersWithValues(oFilterBar));` + `\\n` + ` var oPersInfo = new sap.ui.comp.smartvariants.PersonalizableInfo({` + `\\n` + ` type: "filterBar",` + `\\n` + ` keyName: "persistencyKey",` + `\\n` + ` dataSource: "",` + `\\n` + ` control: oFilterBar` + `\\n` + ` });` + `\\n` + ` oSmartVariantManagement.addPersonalizableControl(oPersInfo);` + `\\n` + ` oSmartVariantManagement.initialise(function () {oSmartVariantManagement.currentVariantSetModified(false);}, oFilterBar);` + `\\n` + `};` + `\\n` + `_registerFetchData = (oFilterBar) => {` + `\\n` + ` var aData = oFilterBar.getAllFilterItems()
+    result = `z2ui5.InitSvm = () => {` + `\\n` + ` var oView = z2ui5.oView` + `\\n` + ` var oSmartVariantManagement = oView.byId("svm");` + `\\n` + ` var oFilterBar = oView.byId("fbar");` + `\\n` + ` var aData = _registerFetchData(oFilterBar);` + `\\n` + ` oFilterBar.registerFetchData( aData );` + `\\n` + ` oFilterBar.registerApplyData( _registerApplyData(oFilterBar, aData));` + `\\n` + ` oFilterBar.registerGetFiltersWithValues( _registerGetFiltersWithValues(oFilterBar));` + `\\n` + ` var oPersInfo = new sap.ui.comp.smartvariants.PersonalizableInfo({` + `\\n` + ` type: "filterBar",` + `\\n` + ` keyName: "persistencyKey",` + `\\n` + ` dataSource: "",` + `\\n` + ` control: oFilterBar` + `\\n` + ` });` + `\\n` + ` oSmartVariantManagement.addPersonalizableControl(oPersInfo);` + `\\n` + ` oSmartVariantManagement.initialise(function () {oSmartVariantManagement.currentVariantSetModified(false);}, oFilterBar);` + `\\n` + `};` + `\\n` + `_registerFetchData = (oFilterBar) => {` + `\\n` + ` var aData = oFilterBar.getAllFilterItems()
       .reduce(function (aResult, oFilterItem) {` + `\\n` + ` aResult.push({` + `\\n` + ` groupName: oFilterItem.getGroupName(),` + `\\n` + ` fieldName: oFilterItem.getName(),` + `\\n` + ` fieldData: oFilterItem.getControl().getValue()` + `\\n` + ` });` + `\\n` + ` return aResult;` + `\\n` + ` }, []);` + `\\n` + ` return aData;` + `\\n` + `};` + `\\n` + `_registerApplyData = (oFilterBar, aData) => {` + `\\n` + ` aData.forEach(function (oDataObject) {` + `\\n` + ` var oControl = oFilterBar.determineControlByName(oDataObject.fieldName, oDataObject.groupName);` + `\\n` + ` oControl.setValue(oDataObject.fieldData);` + `\\n` + ` });` + `\\n` + `};` + `\\n` + `_registerGetFiltersWithValues = (oFilterBar) => {` + `\\n` + ` var aFiltersWithValue = oFilterBar.getFilterGroupItems()
-      .reduce(function (aResult, oFilterGroupItem) {` + `\\n` + ` var oControl = oFilterGroupItem.getControl();` + `\\n` + ` if (oControl &amp;&amp; oControl.getValue &amp;&amp; oControl.getValue().length > 0) {` + `\\n` + ` aResult.push(oFilterGroupItem);` + `\\n` + ` }` + `\\n` + ` return aResult;` + `\\n` + ` }, []);` + `\\n` + ` return aFiltersWithValue;` + `\\n` + `};` + `\\n` + `sap.z2ui5.onSearch = () => {` + `\\n` + ` var oView = sap.z2ui5.oView` + `\\n` + ` var oFilterBar = oView.byId("fbar");` + `\\n` + ` var oTable = oView.byId("table1");` + `\\n` + ` var aTableFilters = oFilterBar.getFilterGroupItems()
+      .reduce(function (aResult, oFilterGroupItem) {` + `\\n` + ` var oControl = oFilterGroupItem.getControl();` + `\\n` + ` if (oControl &amp;&amp; oControl.getValue &amp;&amp; oControl.getValue().length > 0) {` + `\\n` + ` aResult.push(oFilterGroupItem);` + `\\n` + ` }` + `\\n` + ` return aResult;` + `\\n` + ` }, []);` + `\\n` + ` return aFiltersWithValue;` + `\\n` + `};` + `\\n` + `z2ui5.onSearch = () => {` + `\\n` + ` var oView = z2ui5.oView` + `\\n` + ` var oFilterBar = oView.byId("fbar");` + `\\n` + ` var oTable = oView.byId("table1");` + `\\n` + ` var aTableFilters = oFilterBar.getFilterGroupItems()
       .reduce(function (aResult, oFilterGroupItem) {` + `\\n` + ` var oControl = oFilterGroupItem.getControl(),` + `\\n` + ` aSelectedKey = oControl.getValue(),` + `\\n` + ` aFilters = return new sap.ui.model.Filter({` + `\\n` + ` path: oFilterGroupItem.getName(),` + `\\n` + ` operator: "Contains",` + `\\n` + ` value1: sSelectedKey` + `\\n` + ` });` + `\\n` + ` if (aSelectedKey.length > 0) {` + `\\n` + ` aResult.push(new sap.ui.model.Filter({` + `\\n` + ` filters: aFilters,` + `\\n` + ` and: false` + `\\n` + ` }));` + `\\n` + ` }` + `\\n` + ` return aResult;` + `\\n` + ` }, []);` + `\\n` + ` oTable.getBinding("items")
-      .filter(aTableFilters);` + `\\n` + `};` + `\\n` + `sap.z2ui5.onChange = (oEvent) => {` + `\\n` + ` var oView = sap.z2ui5.oView` + `\\n` + ` var oFilterBar = oView.byId("fbar");` + `\\n` + ` var oSmartVariantManagement = oView.byId("svm");` + `\\n` + ` oSmartVariantManagement.currentVariantSetModified(true);` + `\\n` + ` oFilterBar.fireFilterChange(oEvent);` + `\\n` + `}`;
+      .filter(aTableFilters);` + `\\n` + `};` + `\\n` + `z2ui5.onChange = (oEvent) => {` + `\\n` + ` var oView = z2ui5.oView` + `\\n` + ` var oFilterBar = oView.byId("fbar");` + `\\n` + ` var oSmartVariantManagement = oView.byId("svm");` + `\\n` + ` oSmartVariantManagement.currentVariantSetModified(true);` + `\\n` + ` oFilterBar.fireFilterChange(oEvent);` + `\\n` + `}`;
     return result;
   }
 }

@@ -49,7 +49,7 @@ class z2ui5_cl_demo_app_172 extends z2ui5_if_app {
         this.calculate_sum({ i_column: lv_column });
         break;
     }
-    this.client.follow_up_action(`sap.z2ui5.afterBE()`);
+    this.client.follow_up_action(`z2ui5.afterBE()`);
     this.client.view_model_update();
   }
 
@@ -61,7 +61,7 @@ class z2ui5_cl_demo_app_172 extends z2ui5_if_app {
       .link()
       .get_parent();
     page._generic({ name: `script`, ns: `html` })
-      ._cc_plain_xml(`sap.z2ui5.afterBE = () => { setTimeout( () => { let input = document.activeElement.childNodes[0].childNodes[0].childNodes[0].childNodes[0]; input.focus( ); input.select(); } , 100 ); }`);
+      ._cc_plain_xml(`z2ui5.afterBE = () => { setTimeout( () => { let input = document.activeElement.childNodes[0].childNodes[0].childNodes[0].childNodes[0]; input.focus( ); input.select(); } , 100 ); }`);
     const table = page.ui_table({ id: `tab`, alternaterowcolors: `true`, visiblerowcountmode: `Auto`, fixedrowcount: `1`, selectionmode: `None`, rows: this.client._bind_edit(this.output) });
     const columns = table.ui_columns();
     columns.ui_column({ width: `8rem`, sortproperty: `TEXT`, filterproperty: `TEXT` })

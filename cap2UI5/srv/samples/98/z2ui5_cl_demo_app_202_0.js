@@ -7,7 +7,7 @@ class z2ui5_cl_demo_app_202_0 extends z2ui5_if_app {
   view_display({ client } = {}) {
     let lr_view = z2ui5_cl_xml_view.factory();
     lr_view._generic({ name: `script`, ns: `html` })
-      ._cc_plain_xml(`sap.z2ui5.decideNextStep = (stepId, nextStepId) => {debugger;` + `\\n` + ` var wiz = sap.z2ui5.oView.byId('wiz');` + `\\n` + ` wiz.discardProgress(sap.z2ui5.oView.byId(stepId));` + `\\n` + ` var step = sap.z2ui5.oView.byId(stepId);` + `\\n` + ` var nextStep = sap.z2ui5.oView.byId(nextStepId);` + `\\n` + ` step.setNextStep(nextStep);` + `\\n` + `}`);
+      ._cc_plain_xml(`z2ui5.decideNextStep = (stepId, nextStepId) => {debugger;` + `\\n` + ` var wiz = z2ui5.oView.byId('wiz');` + `\\n` + ` wiz.discardProgress(z2ui5.oView.byId(stepId));` + `\\n` + ` var step = z2ui5.oView.byId(stepId);` + `\\n` + ` var nextStep = z2ui5.oView.byId(nextStepId);` + `\\n` + ` step.setNextStep(nextStep);` + `\\n` + `}`);
     lr_view = lr_view.shell()
       .page({ id: `page_main`, title: `abap2UI5 - Demo Wizard Control`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
     const lr_wizard = lr_view.wizard({ id: `wiz`, enablebranching: true });
@@ -33,10 +33,10 @@ class z2ui5_cl_demo_app_202_0 extends z2ui5_if_app {
     }
     switch (client.get().EVENT) {
       case `STEP22`:
-        client.follow_up_action(`sap.z2ui5.decideNextStep(\`STEP2\`,\`STEP22\`);`);
+        client.follow_up_action(`z2ui5.decideNextStep(\`STEP2\`,\`STEP22\`);`);
         break;
       case `STEP23`:
-        client.follow_up_action(`sap.z2ui5.decideNextStep(\`STEP2\`,\`STEP23\`);`);
+        client.follow_up_action(`z2ui5.decideNextStep(\`STEP2\`,\`STEP23\`);`);
         break;
     }
     client.view_model_update();

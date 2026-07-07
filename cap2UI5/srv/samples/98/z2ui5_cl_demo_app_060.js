@@ -21,7 +21,7 @@ class z2ui5_cl_demo_app_060 extends z2ui5_if_app {
     let lv_script;
     this.client = client;
     if (client.check_on_init()) {
-      lv_script = ` debugger;` + `\\n` + `function setInputFIlter(){` + `\\n` + ` var inp = sap.z2ui5.oView.byId('suggInput');` + `\\n` + ` inp.setFilterFunction(function(sValue, oItem){` + `\\n` + ` var aSplit = sValue.split(" ");` + `\\n` + ` if (aSplit.length > 0) {` + `\\n` + ` var sTermNew = aSplit.slice(-1)[0];` + `\\n` + ` sTermNew.trim();` + `\\n` + ` if (sTermNew) {` + `\\n` + ` if (oItem.mAggregations.cells[0].mProperties.text.match(new RegExp(sTermNew, "i"))` + `\\n` + ` || oItem.mAggregations.cells[1].mProperties.text.match(new RegExp(sTermNew, "i")) ) {` + `\\n` + ` return true;` + `\\n` + ` } else return false;` + `\\n` + ` }` + `\\n` + ` }` + `\\n` + ` });` + `\\n` + `}`;
+      lv_script = ` debugger;` + `\\n` + `function setInputFIlter(){` + `\\n` + ` var inp = z2ui5.oView.byId('suggInput');` + `\\n` + ` inp.setFilterFunction(function(sValue, oItem){` + `\\n` + ` var aSplit = sValue.split(" ");` + `\\n` + ` if (aSplit.length > 0) {` + `\\n` + ` var sTermNew = aSplit.slice(-1)[0];` + `\\n` + ` sTermNew.trim();` + `\\n` + ` if (sTermNew) {` + `\\n` + ` if (oItem.mAggregations.cells[0].mProperties.text.match(new RegExp(sTermNew, "i"))` + `\\n` + ` || oItem.mAggregations.cells[1].mProperties.text.match(new RegExp(sTermNew, "i")) ) {` + `\\n` + ` return true;` + `\\n` + ` } else return false;` + `\\n` + ` }` + `\\n` + ` }` + `\\n` + ` });` + `\\n` + `}`;
       this.set_data();
       client.view_display(z2ui5_cl_xml_view.factory()._z2ui5().timer(client._event(`START`))._generic({ ns: `html`, name: `script` })._cc_plain_xml(lv_script).stringify());
     }
