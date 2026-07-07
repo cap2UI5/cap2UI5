@@ -10,11 +10,10 @@ class z2ui5_cl_demo_app_070 extends z2ui5_if_app {
 
   set_selkz({ iv_selkz } = {}) {
     let sy_tabix = 0;
-    // TODO(abap2js): FIELD-SYMBOLS <ls_table> TYPE ty_s_tab.
     sy_tabix = 0;
-    for (const ls_table of this.mt_table) {
+    for (const fs_ls_table of this.mt_table) {
       sy_tabix++;
-      ls_table.selkz = iv_selkz;
+      fs_ls_table.selkz = iv_selkz;
     }
   }
 
@@ -28,6 +27,7 @@ class z2ui5_cl_demo_app_070 extends z2ui5_if_app {
   }
 
   on_event() {
+    let sy_subrc = 0;
     switch (this.client.get().EVENT) {
       case `BUTTON_SEARCH`:
       case `BUTTON_START`:
@@ -55,21 +55,37 @@ class z2ui5_cl_demo_app_070 extends z2ui5_if_app {
         break;
       case `ROWEDIT`:
         lt_arg = this.client.get().T_EVENT_ARG;
-        // TODO(abap2js): READ TABLE lt_arg INTO DATA(ls_arg) INDEX 1.
+        let ls_arg = {};
+        {
+          const _t = lt_arg;
+          const _i = (1) - 1;
+          sy_subrc = _i >= 0 && _i < _t.length ? 0 : 4;
+          if (sy_subrc === 0) ls_arg = _t[_i];
+        }
         if (sy_subrc === 0) {
           this.client.message_toast_display(`Event ROWEDIT Row Index ${ls_arg} `);
         }
         break;
       case `ROW_ACTION_ITEM_NAVIGATION`:
         lt_arg = this.client.get().T_EVENT_ARG;
-        // TODO(abap2js): READ TABLE lt_arg INTO ls_arg INDEX 1.
+        {
+          const _t = lt_arg;
+          const _i = (1) - 1;
+          sy_subrc = _i >= 0 && _i < _t.length ? 0 : 4;
+          if (sy_subrc === 0) ls_arg = _t[_i];
+        }
         if (sy_subrc === 0) {
           this.client.message_toast_display(`Event ROW_ACTION_ITEM_NAVIGATION Row Index ${ls_arg} `);
         }
         break;
       case `ROW_ACTION_ITEM_EDIT`:
         lt_arg = this.client.get().T_EVENT_ARG;
-        // TODO(abap2js): READ TABLE lt_arg INTO ls_arg INDEX 1.
+        {
+          const _t = lt_arg;
+          const _i = (1) - 1;
+          sy_subrc = _i >= 0 && _i < _t.length ? 0 : 4;
+          if (sy_subrc === 0) ls_arg = _t[_i];
+        }
         if (sy_subrc === 0) {
           this.client.message_toast_display(`Event ROW_ACTION_ITEM_EDIT Row Index ${ls_arg} `);
         }
@@ -155,18 +171,23 @@ class z2ui5_cl_demo_app_070 extends z2ui5_if_app {
 
   set_search() {
     let sy_tabix = 0;
+    let sy_subrc = 0;
+    let fs_field = null;
+    let _fs$fs_field = null;
     if (this.mv_search_value) {
       sy_tabix = 0;
       for (const lr_row of this.mt_table) {
         sy_tabix++;
         let lv_row = ``;
         let lv_index = 1;
-        while (true) {
-          // TODO(abap2js): ASSIGN COMPONENT lv_index OF STRUCTURE lr_row->* TO FIELD-SYMBOL(<field>).
+        for (let sy_index = 1; ; sy_index++) {
+          _fs$fs_field = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(lr_row, lv_index);
+          fs_field = _fs$fs_field ? _fs$fs_field.o[_fs$fs_field.k] : null;
+          sy_subrc = _fs$fs_field ? 0 : 4;
           if (sy_subrc !== 0) {
             break;
           }
-          lv_row = lv_row + field;
+          lv_row = lv_row + fs_field;
           lv_index = lv_index + 1;
         }
         if (!String(lv_row).toLowerCase().includes(String(this.mv_search_value).toLowerCase())) {

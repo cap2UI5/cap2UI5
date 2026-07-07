@@ -19,6 +19,11 @@ class z2ui5_cl_demo_app_331 extends z2ui5_if_app {
   }
 
   view_display({ client } = {}) {
+    let sy_subrc = 0;
+    let fs_val = null;
+    let _fs$fs_val = null;
+    let fs_value = null;
+    let _fs$fs_value = null;
     const page = z2ui5_cl_xml_view.factory()
       .shell()
       .page({ title: `RTTI IV`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
@@ -26,12 +31,14 @@ class z2ui5_cl_demo_app_331 extends z2ui5_if_app {
     const form = page.simple_form({ editable: true, layout: `ResponsiveGridLayout`, adjustlabelspan: true })
       .content(`form`);
     // TODO(abap2js): ASSIGN mo_table_obj->mr_data->* TO FIELD-SYMBOL(<val>).
-    // TODO(abap2js): ASSIGN COMPONENT `ID` OF STRUCTURE <val> TO FIELD-SYMBOL(<value>).
-    if (!(value != null)) {
+    _fs$fs_value = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_val, `ID`);
+    fs_value = _fs$fs_value ? _fs$fs_value.o[_fs$fs_value.k] : null;
+    sy_subrc = _fs$fs_value ? 0 : 4;
+    if (!(fs_value != null)) {
       return;
     }
     const line = form.label({ wrapping: false, text: `ID` });
-    line.input(client._bind(value));
+    line.input(client._bind(fs_value));
     client.view_display(page.stringify());
   }
 

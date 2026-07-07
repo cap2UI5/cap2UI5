@@ -13,7 +13,6 @@ class z2ui5_cl_demo_app_190 extends z2ui5_if_app {
   client = null;
 
   on_event() {
-    // TODO(abap2js): FIELD-SYMBOLS <row> TYPE any.
   }
 
   on_init() {
@@ -23,14 +22,16 @@ class z2ui5_cl_demo_app_190 extends z2ui5_if_app {
 
   view_display() {
     let sy_tabix = 0;
-    // TODO(abap2js): FIELD-SYMBOLS <tab> TYPE data.
+    let sy_subrc = 0;
+    let fs_tab = null;
+    let _fs$fs_tab = null;
     if (!this.mo_parent_view) {
       let page = z2ui5_cl_xml_view.factory();
     } else {
       page = this.mo_parent_view.get(`Page`);
     }
     // TODO(abap2js): ASSIGN mt_table->* TO <tab>.
-    const table = page.table({ growing: `true`, width: `auto`, items: this.client._bind(tab) });
+    const table = page.table({ growing: `true`, width: `auto`, items: this.client._bind(fs_tab) });
     const columns = table.columns();
     sy_tabix = 0;
     for (const comp of this.mt_comp) {
@@ -67,8 +68,9 @@ class z2ui5_cl_demo_app_190 extends z2ui5_if_app {
   }
 
   get_data() {
-    // TODO(abap2js): FIELD-SYMBOLS <table> TYPE STANDARD TABLE.
-    // TODO(abap2js): FIELD-SYMBOLS <table_tmp> TYPE STANDARD TABLE.
+    let sy_subrc = 0;
+    let fs_table = null;
+    let _fs$fs_table = null;
     this.mt_comp = this.get_comp();
     try {
       const new_struct_desc = cl_abap_structdescr.create(this.mt_comp);

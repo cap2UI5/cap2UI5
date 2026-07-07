@@ -29,13 +29,20 @@ class z2ui5_cl_demo_app_182 extends z2ui5_if_app {
   }
 
   on_event() {
+    let sy_subrc = 0;
     switch (this.client.get().EVENT) {
       case `LINE_PRESS`:
         this.client.message_toast_display(`LINE_PRESSED`);
         break;
       case `DETAIL_POPOVER`:
         const lt_arg = this.client.get().T_EVENT_ARG;
-        // TODO(abap2js): READ TABLE mt_data-nodes INTO DATA(ls_node) WITH KEY id = lt_arg[ 2 ].
+        let ls_node = {};
+        {
+          const _t = this.mt_data.nodes;
+          const _i = _t.findIndex((_r) => _r.id === lt_arg[(2) - 1]);
+          sy_subrc = _i >= 0 && _i < _t.length ? 0 : 4;
+          if (sy_subrc === 0) ls_node = _t[_i];
+        }
         this.detail_popover({ id: lt_arg[(1) - 1], node: ls_node });
         break;
     }

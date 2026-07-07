@@ -53,7 +53,11 @@ class z2ui5_cl_demo_app_152 extends z2ui5_if_app {
   }
 
   on_navigation() {
-    // TODO(abap2js): FIELD-SYMBOLS <row> TYPE ty_s_row.
+    let sy_subrc = 0;
+    let fs_row = null;
+    let _fs$fs_row = null;
+    let fs_table = null;
+    let _fs$fs_table = null;
     try {
       const lo_prev = this.client.get_app(this.client.get().S_DRAFT.ID_PREV_APP);
       const ls_result = (lo_prev).result();
@@ -63,10 +67,10 @@ class z2ui5_cl_demo_app_152 extends z2ui5_if_app {
       }
       if (this.mv_multiselect === false) {
         // TODO(abap2js): ASSIGN ls_result-row->* TO <row>.
-        this.client.message_box_display(`callback after popup to select: ${row.title}`);
+        this.client.message_box_display(`callback after popup to select: ${fs_row.title}`);
       } else {
         // TODO(abap2js): ASSIGN ls_result-table->* TO FIELD-SYMBOL(<table>).
-        this.client.nav_app_call(z2ui5_cl_pop_table.factory({ i_tab: table, i_title: `Selected rows` }));
+        this.client.nav_app_call(z2ui5_cl_pop_table.factory({ i_tab: fs_table, i_title: `Selected rows` }));
       }
     } catch (error) {
     }

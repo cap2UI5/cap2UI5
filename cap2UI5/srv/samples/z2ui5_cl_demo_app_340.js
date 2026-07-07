@@ -28,6 +28,11 @@ class z2ui5_cl_demo_app_340 extends z2ui5_if_app {
   }
 
   async main(client) {
+    let sy_subrc = 0;
+    let fs_data = null;
+    let _fs$fs_data = null;
+    let fs_table = null;
+    let _fs$fs_table = null;
     if (client.check_on_init()) {
       this.view_display({ client: client });
     }
@@ -37,7 +42,7 @@ class z2ui5_cl_demo_app_340 extends z2ui5_if_app {
     }
     // TODO(abap2js): ASSIGN mo_layout->mr_data->* TO FIELD-SYMBOL(<data>).
     // TODO(abap2js): ASSIGN mt_data->* TO FIELD-SYMBOL(<table>).
-    if (data !== table) {
+    if (fs_data !== fs_table) {
       client.message_toast_display(`ERROR - mo_layout_obj->mr_data->* ne mt_table->*`);
     }
     this.on_event({ client: client });
@@ -45,6 +50,11 @@ class z2ui5_cl_demo_app_340 extends z2ui5_if_app {
 
   static factory({ io_table, io_layout } = {}) {
     let result = null;
+    let sy_subrc = 0;
+    let fs_table = null;
+    let _fs$fs_table = null;
+    let fs_data = null;
+    let _fs$fs_data = null;
     result = new z2ui5_cl_demo_app_340();
     result.mo_layout = io_layout;
     try {
@@ -61,9 +71,11 @@ class z2ui5_cl_demo_app_340 extends z2ui5_if_app {
     }
     // TODO(abap2js): ASSIGN io_table->* TO FIELD-SYMBOL(<table>).
     // TODO(abap2js): ASSIGN result->mt_data->* TO FIELD-SYMBOL(<data>).
-    data = table;
+    fs_data = fs_table;
+    if (_fs$fs_data) _fs$fs_data.o[_fs$fs_data.k] = fs_data;
     // TODO(abap2js): ASSIGN result->mt_data_tmp->* TO <data>.
-    data = table;
+    fs_data = fs_table;
+    if (_fs$fs_data) _fs$fs_data.o[_fs$fs_data.k] = fs_data;
     return result;
   }
 }

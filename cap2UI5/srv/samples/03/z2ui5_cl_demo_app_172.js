@@ -103,19 +103,33 @@ class z2ui5_cl_demo_app_172 extends z2ui5_if_app {
 
   calculate_sum({ i_column } = {}) {
     let sy_tabix = 0;
+    let sy_subrc = 0;
+    let fs_f_input = null;
+    let _fs$fs_f_input = null;
+    let fs_f_output = null;
+    let _fs$fs_f_output = null;
     let lv_sum = 0;
-    // TODO(abap2js): FIELD-SYMBOLS <f_output> LIKE LINE OF output,
-    // TODO(abap2js): FIELD-SYMBOLS <f_input> TYPE any.
     sy_tabix = 0;
-    for (const f_output of this.output) {
+    for (const fs_f_output of this.output) {
       sy_tabix++;
-      if (!(f_output.index > 1)) continue;
-      // TODO(abap2js): ASSIGN COMPONENT i_column OF STRUCTURE <f_output> TO <f_input>.
-      lv_sum = lv_sum + f_input;
+      if (!(fs_f_output.index > 1)) continue;
+      _fs$fs_f_input = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_f_output, i_column);
+      fs_f_input = _fs$fs_f_input ? _fs$fs_f_input.o[_fs$fs_f_input.k] : null;
+      sy_subrc = _fs$fs_f_input ? 0 : 4;
+      lv_sum = lv_sum + fs_f_input;
     }
-    // TODO(abap2js): READ TABLE output INDEX 1 ASSIGNING <f_output>.
-    // TODO(abap2js): ASSIGN COMPONENT i_column OF STRUCTURE <f_output> TO <f_input>.
-    f_input = lv_sum;
+    {
+      const _t = this.output;
+      const _i = (1) - 1;
+      sy_subrc = _i >= 0 && _i < _t.length ? 0 : 4;
+      fs_f_output = sy_subrc === 0 ? _t[_i] : null;
+      _fs$fs_f_output = sy_subrc === 0 ? { o: _t, k: _i } : null;
+    }
+    _fs$fs_f_input = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_f_output, i_column);
+    fs_f_input = _fs$fs_f_input ? _fs$fs_f_input.o[_fs$fs_f_input.k] : null;
+    sy_subrc = _fs$fs_f_input ? 0 : 4;
+    fs_f_input = lv_sum;
+    if (_fs$fs_f_input) _fs$fs_f_input.o[_fs$fs_f_input.k] = fs_f_input;
   }
 }
 

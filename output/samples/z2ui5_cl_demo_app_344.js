@@ -13,6 +13,15 @@ class z2ui5_cl_demo_app_344 extends z2ui5_if_app {
   mo_layout_obj2 = null;
 
   async main(client) {
+    let sy_subrc = 0;
+    let fs_table = null;
+    let _fs$fs_table = null;
+    let fs_val = null;
+    let _fs$fs_val = null;
+    let fs_table2 = null;
+    let _fs$fs_table2 = null;
+    let fs_val2 = null;
+    let _fs$fs_val2 = null;
     if (client.check_on_init()) {
       this.get_data({ iv_tabname: `Z2UI5_T_01` });
       this.get_data2({ iv_tabname: `Z2UI5_T_01` });
@@ -37,12 +46,12 @@ class z2ui5_cl_demo_app_344 extends z2ui5_if_app {
     }
     // TODO(abap2js): ASSIGN mt_data->* TO FIELD-SYMBOL(<table>).
     // TODO(abap2js): ASSIGN mo_layout_obj->mr_data->* TO FIELD-SYMBOL(<val>).
-    if (val !== table) {
+    if (fs_val !== fs_table) {
       client.message_toast_display(`ERROR - mo_layout_obj_2->mr_data <> mt_data!`);
     }
     // TODO(abap2js): ASSIGN mt_data2->* TO FIELD-SYMBOL(<table2>).
     // TODO(abap2js): ASSIGN mo_layout_obj2->mr_data->* TO FIELD-SYMBOL(<val2>).
-    if (table2 !== val2) {
+    if (fs_table2 !== fs_val2) {
       client.message_toast_display(`ERROR - mo_layout_obj_2->mr_data <> ms_data!`);
     }
     client.view_model_update();
@@ -60,8 +69,11 @@ class z2ui5_cl_demo_app_344 extends z2ui5_if_app {
 
   xml_table({ i_page, i_client, i_data, i_layout } = {}) {
     let sy_tabix = 0;
+    let sy_subrc = 0;
+    let fs_table = null;
+    let _fs$fs_table = null;
     // TODO(abap2js): ASSIGN i_data->* TO FIELD-SYMBOL(<table>).
-    const table = i_page.table({ width: `auto`, items: i_client._bind_edit({ val: table }) });
+    const table = i_page.table({ width: `auto`, items: i_client._bind_edit({ val: fs_table }) });
     const columns = table.columns();
     sy_tabix = 0;
     for (const layout of i_layout.ms_data.t_layout) {
@@ -81,7 +93,9 @@ class z2ui5_cl_demo_app_344 extends z2ui5_if_app {
   }
 
   get_data({ iv_tabname } = {}) {
-    // TODO(abap2js): FIELD-SYMBOLS <table> TYPE STANDARD TABLE.
+    let sy_subrc = 0;
+    let fs_table = null;
+    let _fs$fs_table = null;
     const t_comp = this.get_comp({ iv_tabname: iv_tabname });
     try {
       const new_struct_desc = cl_abap_structdescr.create(t_comp);
@@ -89,13 +103,15 @@ class z2ui5_cl_demo_app_344 extends z2ui5_if_app {
       // TODO(abap2js): CREATE DATA mt_data TYPE HANDLE new_table_desc.
       // TODO(abap2js): ASSIGN mt_data->* TO <table>.
       // TODO(abap2js): SELECT * FROM (iv_tabname) INTO CORRESPONDING FIELDS OF TABLE @<table> UP TO 3 ROWS.
-      table.sort();
+      fs_table.sort();
     } catch (error) {
     }
   }
 
   get_data2({ iv_tabname } = {}) {
-    // TODO(abap2js): FIELD-SYMBOLS <table> TYPE STANDARD TABLE.
+    let sy_subrc = 0;
+    let fs_table = null;
+    let _fs$fs_table = null;
     const t_comp = this.get_comp({ iv_tabname: iv_tabname });
     try {
       const new_struct_desc = cl_abap_structdescr.create(t_comp);
@@ -103,7 +119,7 @@ class z2ui5_cl_demo_app_344 extends z2ui5_if_app {
       // TODO(abap2js): CREATE DATA mt_data2 TYPE HANDLE new_table_desc.
       // TODO(abap2js): ASSIGN mt_data2->* TO <table>.
       // TODO(abap2js): SELECT * FROM (iv_tabname) INTO CORRESPONDING FIELDS OF TABLE @<table> UP TO 4 ROWS.
-      table.sort();
+      fs_table.sort();
     } catch (error) {
     }
   }

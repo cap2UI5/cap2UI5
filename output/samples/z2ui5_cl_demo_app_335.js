@@ -9,7 +9,9 @@ class z2ui5_cl_demo_app_335 extends z2ui5_if_app {
   mo_layout_obj_2 = null;
 
   async main(client) {
-    // TODO(abap2js): FIELD-SYMBOLS <row> TYPE z2ui5_t_01.
+    let sy_subrc = 0;
+    let fs_row = null;
+    let _fs$fs_row = null;
     if (client.check_on_init()) {
       this.get_data();
       this.mo_layout_obj = z2ui5_cl_demo_app_333.factory({ i_data: (this.ms_struc), vis_cols: 3 });
@@ -38,11 +40,11 @@ class z2ui5_cl_demo_app_335 extends z2ui5_if_app {
       client.message_toast_display(`ERROR - mo_layout_obj_2->mr_data is not bound!`);
     }
     // TODO(abap2js): ASSIGN mo_layout_obj_2->mr_data->* TO <row>.
-    if (row.id !== this.ms_struc.id) {
+    if (fs_row.id !== this.ms_struc.id) {
       client.message_toast_display(`ERROR - mo_layout_obj_2->mr_data->id does not match ms_struc-id!`);
     }
     // TODO(abap2js): ASSIGN mo_layout_obj->mr_data->* TO <row>.
-    if (row.id !== this.ms_struc.id) {
+    if (fs_row.id !== this.ms_struc.id) {
       client.message_toast_display(`ERROR - mo_layout_obj->mr_data->id does not match ms_struc-id!`);
     }
     client.view_model_update();
@@ -50,6 +52,11 @@ class z2ui5_cl_demo_app_335 extends z2ui5_if_app {
 
   view_display({ client } = {}) {
     let sy_tabix = 0;
+    let sy_subrc = 0;
+    let fs_val = null;
+    let _fs$fs_val = null;
+    let fs_value = null;
+    let _fs$fs_value = null;
     const page = z2ui5_cl_xml_view.factory()
       .shell()
       .page({ title: `RTTI IV`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
@@ -63,12 +70,14 @@ class z2ui5_cl_demo_app_335 extends z2ui5_if_app {
       sy_tabix++;
       index = index + 1;
       // TODO(abap2js): ASSIGN mo_layout_obj->mr_data->* TO FIELD-SYMBOL(<val>).
-      // TODO(abap2js): ASSIGN COMPONENT layout->name OF STRUCTURE <val> TO FIELD-SYMBOL(<value>).
+      _fs$fs_value = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_val, layout.name);
+      fs_value = _fs$fs_value ? _fs$fs_value.o[_fs$fs_value.k] : null;
+      sy_subrc = _fs$fs_value ? 0 : 4;
       if (sy_subrc !== 0) {
         return;
       }
       const line = form.label({ wrapping: false, text: layout.name });
-      line.input({ value: client._bind(value), visible: client._bind({ val: layout.visible, tab: this.mo_layout_obj.ms_data.t_layout, tab_index: index }), enabled: false });
+      line.input({ value: client._bind(fs_value), visible: client._bind({ val: layout.visible, tab: this.mo_layout_obj.ms_data.t_layout, tab_index: index }), enabled: false });
     }
     client.view_display(page.stringify());
   }

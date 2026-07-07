@@ -29,7 +29,9 @@ class z2ui5_cl_demo_app_343 extends z2ui5_if_app {
   }
 
   get_data() {
-    // TODO(abap2js): FIELD-SYMBOLS <table1> TYPE STANDARD TABLE.
+    let sy_subrc = 0;
+    let fs_table1 = null;
+    let _fs$fs_table1 = null;
     const t_comp = this.get_comp();
     try {
       const new_struct_desc = cl_abap_structdescr.create(t_comp);

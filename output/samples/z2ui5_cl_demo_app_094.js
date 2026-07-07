@@ -11,15 +11,19 @@ class z2ui5_cl_demo_app_094 extends z2ui5_if_app {
   page = null;
 
   on_init() {
-    // TODO(abap2js): FIELD-SYMBOLS <input> TYPE any.
-    // TODO(abap2js): FIELD-SYMBOLS <screen> TYPE ty_s_01.
+    let sy_subrc = 0;
+    let fs_input = null;
+    let _fs$fs_input = null;
+    let fs_screen = null;
+    let _fs$fs_screen = null;
     this.ms_screen.input = `structure level 01 - working`;
     // TODO(abap2js): CREATE DATA mr_input TYPE string.
     // TODO(abap2js): ASSIGN mr_input->* TO <input>.
-    input = `ref data - working`;
+    fs_input = `ref data - working`;
+    if (_fs$fs_input) _fs$fs_input.o[_fs$fs_input.k] = fs_input;
     // TODO(abap2js): CREATE DATA mr_screen TYPE ty_s_01.
     // TODO(abap2js): ASSIGN mr_screen->* TO <screen>.
-    screen.input = `ref data struc - working`;
+    fs_screen.input = `ref data struc - working`;
     this.ms_screen.ty_s_02.input = `struc deep dissolve - working`;
     this.ms_screen.ty_s_02.ty_s_03.ty_s_04.input = `struc deep switch guid name - working`;
     this.mo_app = /* TODO(abap2js): NEW #( ) */ null;
@@ -28,8 +32,11 @@ class z2ui5_cl_demo_app_094 extends z2ui5_if_app {
   }
 
   view_build() {
-    // TODO(abap2js): FIELD-SYMBOLS <input> TYPE any.
-    // TODO(abap2js): FIELD-SYMBOLS <screen> TYPE ty_s_01.
+    let sy_subrc = 0;
+    let fs_input = null;
+    let _fs$fs_input = null;
+    let fs_screen = null;
+    let _fs$fs_screen = null;
     // TODO(abap2js): ASSIGN mr_input->* TO <input>.
     // TODO(abap2js): ASSIGN mr_screen->* TO <screen>.
     this.page = z2ui5_cl_xml_view.factory()
@@ -40,9 +47,9 @@ class z2ui5_cl_demo_app_094 extends z2ui5_if_app {
     content.label(`structure level 01`)
       .input(this.client._bind_edit(this.ms_screen.input))
       .label(`ref data`)
-      .input(this.client._bind_edit(input))
+      .input(this.client._bind_edit(fs_input))
       .label(`ref data struc field`)
-      .input(this.client._bind_edit(screen.input))
+      .input(this.client._bind_edit(fs_screen.input))
       .label(`struc deep dissolve`)
       .input(this.client._bind_edit(this.ms_screen.ty_s_02.input))
       .label(`struc deep switch guid name`)
