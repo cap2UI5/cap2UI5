@@ -9,6 +9,9 @@ class z2ui5_cl_demo_app_154 extends z2ui5_if_app {
   client = null;
 
   on_event() {
+    let lt_msg;
+    let lv_dummy;
+    let lo_app;
     // TODO(abap2js): TYPES BEGIN OF ty_s_log_entry.
     // TODO(abap2js): TYPES msgnumber TYPE n LENGTH 6.
     // TODO(abap2js): TYPES msgty TYPE c LENGTH 1.
@@ -34,7 +37,7 @@ class z2ui5_cl_demo_app_154 extends z2ui5_if_app {
     let lt_bal = [];
     switch (this.client.get().EVENT) {
       case `POPUP_BAPIRET`:
-        const lt_msg = [{ type: `E`, id: `MSG1`, number: `001`, message: `An empty Report field causes an empty XML Message to be sent` }, { type: `I`, id: `MSG2`, number: `002`, message: `Product already in use` }];
+        lt_msg = [{ type: `E`, id: `MSG1`, number: `001`, message: `An empty Report field causes an empty XML Message to be sent` }, { type: `I`, id: `MSG2`, number: `002`, message: `Product already in use` }];
         this.client.nav_app_call(z2ui5_cl_pop_messages.factory(lt_msg));
         break;
       case `POPUP_BALLOG`:
@@ -43,10 +46,10 @@ class z2ui5_cl_demo_app_154 extends z2ui5_if_app {
         break;
       case `POPUP_EXCEPTION`:
         try {
-          const lv_dummy = 1 / 0;
+          lv_dummy = 1 / 0;
         } catch (lx) {
         }
-        const lo_app = z2ui5_cl_pop_error.factory(lx);
+        lo_app = z2ui5_cl_pop_error.factory(lx);
         this.client.nav_app_call(lo_app);
         break;
     }

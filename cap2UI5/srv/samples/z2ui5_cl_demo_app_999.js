@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -5,6 +6,7 @@ class z2ui5_cl_demo_app_999 extends z2ui5_if_app {
   ms_check_expanded = { getting_started: false, binding: false, events: false, input: false, display: false, layouts: false, popups: false, files: false, advanced: false, experimental: false };
 
   async main(client) {
+    let lv_classname;
     const c_title = `abap2UI5 - Samples (new structure)`;
     switch (client.get().EVENT) {
       case `expand-all`:
@@ -15,9 +17,9 @@ class z2ui5_cl_demo_app_999 extends z2ui5_if_app {
         break;
       default:
         try {
-          const lv_classname = client.get().EVENT.toUpperCase();
+          lv_classname = client.get().EVENT.toUpperCase();
           let li_app = null;
-          li_app = null; // TODO(abap2js): CREATE OBJECT li_app TYPE (lv_classname).
+          li_app = (() => { const _n = String(lv_classname); const _c = z2ui5_cl_util.rtti_get_class(_n.toLowerCase()); if (!_c) throw new Error(`CREATE OBJECT: class ${_n} not found`); return new _c(); })();
           client.nav_app_call(li_app);
           return;
         } catch (error) {

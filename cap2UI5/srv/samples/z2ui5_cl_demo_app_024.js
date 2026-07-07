@@ -9,12 +9,13 @@ class z2ui5_cl_demo_app_024 extends z2ui5_if_app {
   client = null;
 
   async main(client) {
+    let app_025;
     this.client = client;
     if (client.check_on_init()) {
       this.view_display();
     } else if (client.check_on_navigated()) {
       if (this.backend_event === `CALL_PREVIOUS_APP_INPUT_RETURN`) {
-        const app_025 = (client.get_app_prev());
+        app_025 = (client.get_app_prev());
         this.backend_event = {};
         client.message_box_display(`Input made in the previous app: ${app_025.input}`);
       }
@@ -25,17 +26,19 @@ class z2ui5_cl_demo_app_024 extends z2ui5_if_app {
   }
 
   on_event() {
+    let app;
+    let app_next;
     switch (this.client.get().EVENT) {
       case `CALL_NEW_APP`:
         this.client.nav_app_call(new z2ui5_cl_demo_app_025());
         break;
       case `CALL_NEW_APP_VIEW`:
-        const app = new z2ui5_cl_demo_app_025();
+        app = new z2ui5_cl_demo_app_025();
         app.show_view = `SECOND`;
         this.client.nav_app_call(app);
         break;
       case `CALL_NEW_APP_READ`:
-        let app_next = new z2ui5_cl_demo_app_025();
+        app_next = new z2ui5_cl_demo_app_025();
         app_next.input_previous_set = this.input;
         this.client.nav_app_call(app_next);
         break;

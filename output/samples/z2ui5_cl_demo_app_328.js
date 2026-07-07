@@ -21,6 +21,7 @@ class z2ui5_cl_demo_app_328 extends z2ui5_if_app {
     let _fs$fs_table = null;
     let fs_val = null;
     let _fs$fs_val = null;
+    let okay;
     if (client.check_on_init()) {
       this.get_data();
       this.mo_table_obj = z2ui5_cl_demo_app_329.factory(this.mt_table);
@@ -42,7 +43,7 @@ class z2ui5_cl_demo_app_328 extends z2ui5_if_app {
             continue;
           }
           if (fs_selkz === true) {
-            const okay = true;
+            okay = true;
             break;
           }
         }
@@ -90,12 +91,14 @@ class z2ui5_cl_demo_app_328 extends z2ui5_if_app {
     let sy_subrc = 0;
     let fs_table = null;
     let _fs$fs_table = null;
+    let new_struct_desc;
+    let new_table_desc;
     let selkz = false;
     const t_comp = z2ui5_cl_util.rtti_get_t_attri_by_table_name(`Z2UI5_T_01`);
     t_comp.push(...[{ name: `SELKZ`, type: (cl_abap_datadescr.describe_by_data(selkz)) }]);
     try {
-      const new_struct_desc = cl_abap_structdescr.create(t_comp);
-      const new_table_desc = cl_abap_tabledescr.create({ p_line_type: new_struct_desc, p_table_kind: cl_abap_tabledescr.tablekind_std });
+      new_struct_desc = cl_abap_structdescr.create(t_comp);
+      new_table_desc = cl_abap_tabledescr.create({ p_line_type: new_struct_desc, p_table_kind: cl_abap_tabledescr.tablekind_std });
       // TODO(abap2js): CREATE DATA mt_table TYPE HANDLE new_table_desc.
       // TODO(abap2js): ASSIGN mt_table->* TO <table>.
       // TODO(abap2js): SELECT id FROM z2ui5_t_01 INTO CORRESPONDING FIELDS OF TABLE @<table> UP TO 4 ROWS.

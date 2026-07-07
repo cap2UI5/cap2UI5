@@ -18,6 +18,9 @@ class z2ui5_cl_demo_app_342 extends z2ui5_if_app {
   get_comp() {
     let result = [];
     let sy_tabix = 0;
+    let structdesc;
+    let comp;
+    let component;
     let selkz = false;
     if (!this.mv_table) {
       this.mv_table = `Z2UI5_T_01`;
@@ -25,8 +28,8 @@ class z2ui5_cl_demo_app_342 extends z2ui5_if_app {
     try {
       try {
         // TODO(abap2js): cl_abap_typedescr=>describe_by_name( EXPORTING p_name = mv_table RECEIVING p_descr_ref = DATA(typedesc) EXCEPTIONS type_not_found = 1 OTHERS = 2 ).
-        const structdesc = (typedesc);
-        const comp = structdesc.get_components();
+        structdesc = (typedesc);
+        comp = structdesc.get_components();
         sy_tabix = 0;
         for (const com of comp) {
           sy_tabix++;
@@ -36,7 +39,7 @@ class z2ui5_cl_demo_app_342 extends z2ui5_if_app {
         }
       } catch (error) {
       }
-      const component = [{ name: `SELKZ`, type: (cl_abap_datadescr.describe_by_data(selkz)) }];
+      component = [{ name: `SELKZ`, type: (cl_abap_datadescr.describe_by_data(selkz)) }];
       result.push(...component);
     } catch (error) {
     }
@@ -59,8 +62,10 @@ class z2ui5_cl_demo_app_342 extends z2ui5_if_app {
     let sy_subrc = 0;
     let fs_table = null;
     let _fs$fs_table = null;
+    let page;
+    let lv_index;
     if (!this.mo_parent_view) {
-      let page = z2ui5_cl_xml_view.factory();
+      page = z2ui5_cl_xml_view.factory();
     } else {
       page = this.mo_parent_view.get(`Page`);
     }
@@ -71,7 +76,7 @@ class z2ui5_cl_demo_app_342 extends z2ui5_if_app {
     sy_tabix = 0;
     for (const layout of this.mo_lay.ms_data.t_layout) {
       sy_tabix++;
-      let lv_index = sy_tabix;
+      lv_index = sy_tabix;
       columns.column({ visible: client._bind({ val: layout.visible, tab: this.mo_lay.ms_data.t_layout, tab_index: lv_index }) })
         .text(layout.name);
     }
@@ -122,10 +127,12 @@ class z2ui5_cl_demo_app_342 extends z2ui5_if_app {
     let sy_subrc = 0;
     let fs_table = null;
     let _fs$fs_table = null;
+    let new_struct_desc;
+    let new_table_desc;
     const t_comp = this.get_comp();
     try {
-      const new_struct_desc = cl_abap_structdescr.create(t_comp);
-      const new_table_desc = cl_abap_tabledescr.create({ p_line_type: new_struct_desc, p_table_kind: cl_abap_tabledescr.tablekind_std });
+      new_struct_desc = cl_abap_structdescr.create(t_comp);
+      new_table_desc = cl_abap_tabledescr.create({ p_line_type: new_struct_desc, p_table_kind: cl_abap_tabledescr.tablekind_std });
       // TODO(abap2js): CREATE DATA mt_data TYPE HANDLE new_table_desc.
       // TODO(abap2js): CREATE DATA mt_data_tmp TYPE HANDLE new_table_desc.
       // TODO(abap2js): ASSIGN mt_data->* TO <table>.

@@ -11,7 +11,7 @@ class z2ui5_cl_demo_app_016 extends z2ui5_if_app {
   view_display() {
     const view = z2ui5_cl_xml_view.factory();
     const container = view.shell()
-      .page({ showheader: /* TODO(abap2js) */ xsdbool(false === this.client.get().CHECK_LAUNCHPAD_ACTIVE), title: `abap2UI5 - Visualization`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() })
+      .page({ showheader: (false === this.client.get().CHECK_LAUNCHPAD_ACTIVE), title: `abap2UI5 - Visualization`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() })
       .tab_container();
     const grid = container.tab({ text: `Bar Chart`, selected: this.client._bind(this.tab_bar_active) })
       .grid(`XL6 L6 M6 S12`);

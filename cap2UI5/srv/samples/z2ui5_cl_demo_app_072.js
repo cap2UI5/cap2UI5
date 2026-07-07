@@ -34,7 +34,7 @@ class z2ui5_cl_demo_app_072 extends z2ui5_if_app {
   on_init() {
     const view = z2ui5_cl_xml_view.factory();
     const page = view.shell()
-      .page({ id: `page_main`, showheader: /* TODO(abap2js) */ xsdbool(false === this.client.get().CHECK_LAUNCHPAD_ACTIVE), title: `abap2UI5 - IconTabBar`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack(), class: `sapUiContentPadding` });
+      .page({ id: `page_main`, showheader: (false === this.client.get().CHECK_LAUNCHPAD_ACTIVE), title: `abap2UI5 - IconTabBar`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack(), class: `sapUiContentPadding` });
     const lo_items = page.icon_tab_bar({ class: `sapUiResponsiveContentPadding`, selectedkey: this.client._bind_edit(this.lv_selectedkey), select: this.client._event(`OnSelectIconTabBar`, [`\${LV_SELECTEDKEY}`]) })
       .items();
     lo_items.icon_tab_filter({ count: this.client._bind_edit(this.lv_cnt_total), text: `Products`, key: `ALL`, showall: true });

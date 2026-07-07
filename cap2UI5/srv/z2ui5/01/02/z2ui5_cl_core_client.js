@@ -251,6 +251,19 @@ class z2ui5_cl_core_client {
     this._follow_up_actions.push(val);
   }
 
+  /**
+   * Mirrors abap `client->action->gen( val = <cs_event-...> t_arg = [...] )` —
+   * generates the `.eF([...])` follow-up action for a frontend event.
+   * Transpiled apps call this as `client.action.gen({ val, t_arg })`.
+   */
+  get action() {
+    return {
+      gen: ({ val, t_arg = [] } = {}) => {
+        this.follow_up_action(this._buildEf(val, t_arg));
+      },
+    };
+  }
+
   // ============================================================
   //  JS-only ergonomic wrappers
   //
@@ -492,6 +505,11 @@ class z2ui5_cl_core_client {
       SEARCH:   sFront.SEARCH   || "",
       HASH:     sFront.HASH     || "",
     };
+    // browser state — the frontend sends these next to EVENT/ID; abap
+    // guarantees the components exist, so default every slot
+    const scrollDefault = () => ({ ID: "", X: 0, Y: 0 });
+    const sScroll = sFront.S_SCROLL || {};
+    const sDevice = sFront.S_DEVICE || {};
     return {
       EVENT: event,
       T_EVENT_ARG: args,
@@ -500,6 +518,19 @@ class z2ui5_cl_core_client {
       },
       S_CONFIG: config,
       S_DRAFT: { ID: sFront.ID || null },
+      S_SCROLL: {
+        MAIN:    { ...scrollDefault(), ...(sScroll.MAIN || {}) },
+        NEST:    { ...scrollDefault(), ...(sScroll.NEST || {}) },
+        NEST2:   { ...scrollDefault(), ...(sScroll.NEST2 || {}) },
+        POPUP:   { ...scrollDefault(), ...(sScroll.POPUP || {}) },
+        POPOVER: { ...scrollDefault(), ...(sScroll.POPOVER || {}) },
+      },
+      S_DEVICE: {
+        BROWSER: { NAME: "", VERSION: "", ...(sDevice.BROWSER || {}) },
+        OS:      { NAME: "", VERSION: "", ...(sDevice.OS || {}) },
+        RESIZE:  { WIDTH: 0, HEIGHT: 0, ...(sDevice.RESIZE || {}) },
+        SUPPORT: { TOUCH: false, POINTER: false, RETINA: false, ...(sDevice.SUPPORT || {}) },
+      },
       CHECK_LAUNCHPAD_ACTIVE: !!config?.ComponentData?.startupParameters,
       CHECK_ON_NAVIGATED: this._check_on_navigated,
       _S_NAV: {

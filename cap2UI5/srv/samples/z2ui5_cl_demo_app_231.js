@@ -51,11 +51,14 @@ class z2ui5_cl_demo_app_231 extends z2ui5_if_app {
     let sy_subrc = 0;
     let fs_drs = null;
     let _fs$fs_drs = null;
+    let args;
+    let source;
+    let drs;
     if (client.check_on_event(`handleChange`)) {
-      const args = client.get().T_EVENT_ARG;
-      const source = args[(1) - 1];
+      args = client.get().T_EVENT_ARG;
+      source = args[(1) - 1];
       // TODO(abap2js): ASSIGN me->(source) TO FIELD-SYMBOL(<drs>).
-      const drs = ({ ...fs_drs });
+      drs = ({ ...fs_drs });
       this.text = `Id: ${source}\\n` + `From: ${drs.start}\\n` + `To: ${drs.end}`;
     }
   }

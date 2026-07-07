@@ -7,9 +7,11 @@ class z2ui5_cl_demo_app_313 extends z2ui5_if_app {
   mv_key = ``;
 
   async main(client) {
+    let view;
+    let page;
     if (client.check_on_init()) {
-      const view = z2ui5_cl_xml_view.factory();
-      const page = view.shell()
+      view = z2ui5_cl_xml_view.factory();
+      page = view.shell()
         .page({ title: `abap2UI5 - Smart Controls with Variants`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
       page.smart_filter_bar({ id: `smartFilterBar`, persistencykey: `SmartFilterPKey`, entityset: `BookingSupplement` })
         ._control_configuration()

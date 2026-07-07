@@ -26,6 +26,10 @@ class z2ui5_cl_demo_app_172 extends z2ui5_if_app {
   }
 
   on_event() {
+    let lv_id_event;
+    let ls_row_submit;
+    let lv_id_parent;
+    let lv_column;
     let lt_event_arguments = [];
     let lv_tab_index = ``;
     let lv_message = ``;
@@ -37,11 +41,11 @@ class z2ui5_cl_demo_app_172 extends z2ui5_if_app {
         this.client.message_toast_display(lv_message);
         break;
       case `INPUT_CHANGE`:
-        const lv_id_event = lt_event_arguments[(1) - 1];
+        lv_id_event = lt_event_arguments[(1) - 1];
         lv_tab_index = lt_event_arguments[(2) - 1];
-        const ls_row_submit = this.output[(lv_tab_index) - 1];
-        const lv_id_parent = lt_event_arguments[(3) - 1];
-        const lv_column = lt_event_arguments[(4) - 1];
+        ls_row_submit = this.output[(lv_tab_index) - 1];
+        lv_id_parent = lt_event_arguments[(3) - 1];
+        lv_column = lt_event_arguments[(4) - 1];
         this.calculate_sum({ i_column: lv_column });
         break;
     }

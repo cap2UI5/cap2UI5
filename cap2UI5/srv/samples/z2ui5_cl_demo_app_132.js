@@ -11,12 +11,15 @@ class z2ui5_cl_demo_app_132 extends z2ui5_if_app {
   get_comp() {
     let result = [];
     let sy_tabix = 0;
+    let structdesc;
+    let comp;
+    let component;
     let index = 0;
     try {
       try {
         // TODO(abap2js): cl_abap_typedescr=>describe_by_name( EXPORTING p_name = `Z2UI5_T_01` RECEIVING p_descr_ref = DATA(typedesc) EXCEPTIONS type_not_found = 1 OTHERS = 2 ).
-        const structdesc = (typedesc);
-        const comp = structdesc.get_components();
+        structdesc = (typedesc);
+        comp = structdesc.get_components();
         sy_tabix = 0;
         for (const com of comp) {
           sy_tabix++;
@@ -26,7 +29,7 @@ class z2ui5_cl_demo_app_132 extends z2ui5_if_app {
         }
       } catch (error) {
       }
-      const component = [{ name: `ROW_ID`, type: (cl_abap_datadescr.describe_by_data(index)) }];
+      component = [{ name: `ROW_ID`, type: (cl_abap_datadescr.describe_by_data(index)) }];
       result.push(...component);
     } catch (error) {
     }
@@ -34,8 +37,9 @@ class z2ui5_cl_demo_app_132 extends z2ui5_if_app {
   }
 
   view_display() {
+    let page;
     if (!this.mo_parent_view) {
-      let page = z2ui5_cl_xml_view.factory();
+      page = z2ui5_cl_xml_view.factory();
     } else {
       page = this.mo_parent_view.get(`Page`);
     }

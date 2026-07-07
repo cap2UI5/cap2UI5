@@ -25,12 +25,16 @@ class z2ui5_cl_demo_app_317 extends z2ui5_if_app {
 
   build_tree() {
     let sy_tabix = 0;
+    let ls_root;
+    let ls_root2;
+    let ls_root3;
+    let ls_root4;
     this.mt_tree = {};
     sy_tabix = 0;
     for (const ls_node of this.mt_node) {
       sy_tabix++;
       if (!(!ls_node.id_parent)) continue;
-      const ls_root = ({ ...ls_node });
+      ls_root = ({ ...ls_node });
       this.mt_tree.push(ls_root);
     }
     sy_tabix = 0;
@@ -41,7 +45,7 @@ class z2ui5_cl_demo_app_317 extends z2ui5_if_app {
       for (const ls_node of this.mt_node) {
         sy_tabix++;
         if (!(ls_node.id_parent === lr_node.id)) continue;
-        const ls_root2 = ({ ...ls_node });
+        ls_root2 = ({ ...ls_node });
         lr_node.nodes.push(ls_root2);
       }
       sy_tabix = _sy_tabix_1;
@@ -58,7 +62,7 @@ class z2ui5_cl_demo_app_317 extends z2ui5_if_app {
         for (const ls_node of this.mt_node) {
           sy_tabix++;
           if (!(ls_node.id_parent === lr_node2.id)) continue;
-          const ls_root3 = ({ ...ls_node });
+          ls_root3 = ({ ...ls_node });
           lr_node2.nodes.push(ls_root3);
         }
         sy_tabix = _sy_tabix_3;
@@ -81,7 +85,7 @@ class z2ui5_cl_demo_app_317 extends z2ui5_if_app {
           for (const ls_node of this.mt_node) {
             sy_tabix++;
             if (!(ls_node.id_parent === lr_node3.id)) continue;
-            const ls_root4 = ({ ...ls_node });
+            ls_root4 = ({ ...ls_node });
             lr_node3.nodes.push(ls_root4);
           }
           sy_tabix = _sy_tabix_6;

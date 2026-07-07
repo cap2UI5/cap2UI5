@@ -31,7 +31,7 @@ class z2ui5_cl_demo_app_279 extends z2ui5_if_app {
         }
         break;
       case `submit`:
-        this.dirty = Boolean(this.text_input);
+        this.dirty = (this.text_input);
         break;
       case `reset`:
         this.dirty = {};
@@ -58,9 +58,11 @@ class z2ui5_cl_demo_app_279 extends z2ui5_if_app {
   }
 
   on_navigation() {
+    let prev;
+    let confirm_leave;
     try {
-      const prev = this.client.get_app(this.client.get().S_DRAFT.ID_PREV_APP);
-      const confirm_leave = (prev).result();
+      prev = this.client.get_app(this.client.get().S_DRAFT.ID_PREV_APP);
+      confirm_leave = (prev).result();
     } catch (error) {
     }
     if (confirm_leave === true) {

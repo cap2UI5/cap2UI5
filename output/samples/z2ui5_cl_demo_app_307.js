@@ -50,13 +50,18 @@ class z2ui5_cl_demo_app_307 extends z2ui5_if_app {
   }
 
   on_event({ client } = {}) {
+    let ondropparameters;
+    let drag_position;
+    let drop_position;
+    let insert_position;
+    let item;
     if (client.check_on_event(`onDrop`)) {
-      const ondropparameters = client.get().T_EVENT_ARG;
+      ondropparameters = client.get().T_EVENT_ARG;
       try {
-        const drag_position = (ondropparameters[(1) - 1]) + 1;
-        let drop_position = (ondropparameters[(2) - 1]) + 1;
-        const insert_position = ondropparameters[(3) - 1];
-        const item = this.items[(drag_position) - 1];
+        drag_position = (ondropparameters[(1) - 1]) + 1;
+        drop_position = (ondropparameters[(2) - 1]) + 1;
+        insert_position = ondropparameters[(3) - 1];
+        item = this.items[(drag_position) - 1];
       } catch (error) {
         return;
       }

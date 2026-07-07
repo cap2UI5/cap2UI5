@@ -1,0 +1,307 @@
+[
+  {
+    "name": "z2ui5_cl_demo_app_017",
+    "verdict": "error-popup",
+    "detail": "lcl_help is not defined"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_020",
+    "verdict": "not-started",
+    "detail": "handler answered with z2ui5_cl_app_startup"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_033",
+    "verdict": "error-popup",
+    "detail": "page.illustrated_message(...).additional_content is not a function"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_042",
+    "verdict": "error-popup",
+    "detail": "lcl_help is not defined"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_043",
+    "verdict": "no-view",
+    "detail": "started but no main view XML"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_047",
+    "verdict": "error-popup",
+    "detail": "sy_datum is not defined"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_054",
+    "verdict": "no-view",
+    "detail": "started but no main view XML"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_055",
+    "verdict": "no-view",
+    "detail": "started but no main view XML"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_058",
+    "verdict": "error-popup",
+    "detail": "this.shift_right is not a function"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_061",
+    "verdict": "error-popup",
+    "detail": "Cannot read properties of null (reading 'push')"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_080",
+    "verdict": "error-popup",
+    "detail": "lo_planningcalendar.rows is not a function"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_088",
+    "verdict": "error-popup",
+    "detail": "page.nav_container(...).pages is not a function"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_090",
+    "verdict": "not-started",
+    "detail": "handler answered with z2ui5_cl_pop_js_loader"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_094",
+    "verdict": "error-popup",
+    "detail": "Cannot set properties of null (setting 'input')"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_095",
+    "verdict": "error-popup",
+    "detail": "Cannot set properties of null (setting 'mo_view_parent')"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_096",
+    "verdict": "error-popup",
+    "detail": "Cannot read properties of null (reading 'input')"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_105",
+    "verdict": "error-popup",
+    "detail": "Cannot read properties of null (reading 'input')"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_110",
+    "verdict": "error-popup",
+    "detail": "view.shell(...).page(...).simple_form(...).label(...).mask_input(...).get(...).rules is not a function"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_111",
+    "verdict": "not-started",
+    "detail": "handler answered with z2ui5_cl_pop_js_loader"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_112",
+    "verdict": "error-popup",
+    "detail": "Cannot read properties of null (reading 'input')"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_116",
+    "verdict": "error-popup",
+    "detail": "sy_uname is not defined"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_118",
+    "verdict": "error-popup",
+    "detail": "sy_datum is not defined"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_122",
+    "verdict": "error-popup",
+    "detail": "Cannot read properties of undefined (reading 'system')"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_138",
+    "verdict": "error-popup",
+    "detail": "ms_data is not defined"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_153",
+    "verdict": "error-popup",
+    "detail": "Cannot set properties of undefined (setting 'labels')"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_160",
+    "verdict": "error-popup",
+    "detail": "this.mt_output.push is not a function"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_171",
+    "verdict": "no-view",
+    "detail": "started but no main view XML"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_172",
+    "verdict": "error-popup",
+    "detail": "this.output.push is not a function"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_192",
+    "verdict": "error-popup",
+    "detail": "this.mt_new_data2 is not iterable"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_193",
+    "verdict": "error-popup",
+    "detail": "li_app.main is not a function"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_194",
+    "verdict": "error-popup",
+    "detail": "cl_abap_structdescr is not defined"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_199",
+    "verdict": "error-popup",
+    "detail": "Cannot read properties of null (reading 'length')"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_212",
+    "verdict": "error-popup",
+    "detail": "cl_abap_structdescr is not defined"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_235",
+    "verdict": "error-popup",
+    "detail": "page_01.page(...).header_content(...).button(...).get_parent(...).sub_header(...).toolbar(...).button(...).toolbar_spacer(...).title(...).toolbar_spacer(...).get_parent(...).get_parent(...).content(.."
+  },
+  {
+    "name": "z2ui5_cl_demo_app_258",
+    "verdict": "error-popup",
+    "detail": "navlist.navigation_list_item(...).get_child is not a function"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_266",
+    "verdict": "error-popup",
+    "detail": "page_01.page(...).custom_header(...).bar is not a function"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_273",
+    "verdict": "error-popup",
+    "detail": "page.message_strip(...).list(...).custom_list_item(...).hbox(...).image(...).get(...).detail_box is not a function"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_278",
+    "verdict": "error-popup",
+    "detail": "page.generic_tile(...).tile_content(...).feed_content(...).get_parent(...).get_parent(...).get_parent(...).slide_tile(...).tiles is not a function"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_290",
+    "verdict": "error-popup",
+    "detail": "page.list(...).object_list_item(...).first_status is not a function"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_294",
+    "verdict": "error-popup",
+    "detail": "this.lt_a_data.push is not a function"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_317",
+    "verdict": "error-popup",
+    "detail": "this.mt_tree.push is not a function"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_319",
+    "verdict": "error-popup",
+    "detail": "m_selection is not defined"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_328",
+    "verdict": "error-popup",
+    "detail": "cl_abap_datadescr is not defined"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_329",
+    "verdict": "error-popup",
+    "detail": "li_app.main is not a function"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_331",
+    "verdict": "no-view",
+    "detail": "started but no main view XML"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_332",
+    "verdict": "error-popup",
+    "detail": "this.mo_table_obj.ms_data.t_layout is not iterable"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_333",
+    "verdict": "error-popup",
+    "detail": "li_app.main is not a function"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_334",
+    "verdict": "error-popup",
+    "detail": "this.mo_layout_obj.ms_data.t_layout is not iterable"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_335",
+    "verdict": "error-popup",
+    "detail": "this.mo_layout_obj.ms_data.t_layout is not iterable"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_337",
+    "verdict": "error-popup",
+    "detail": "this.mo_layout_obj.ms_data.t_layout is not iterable"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_339",
+    "verdict": "error-popup",
+    "detail": "this.mo_layout.ms_data.t_layout is not iterable"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_340",
+    "verdict": "error-popup",
+    "detail": "Cannot read properties of null (reading 'mr_data')"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_342",
+    "verdict": "error-popup",
+    "detail": "this.mo_lay.ms_data.t_layout is not iterable"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_344",
+    "verdict": "error-popup",
+    "detail": "i_layout.ms_data.t_layout is not iterable"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_345",
+    "verdict": "error-popup",
+    "detail": "i_layout.ms_data.t_layout is not iterable"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_347",
+    "verdict": "error-popup",
+    "detail": "this.mo_layout_obj.ms_data.t_layout is not iterable"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_348",
+    "verdict": "error-popup",
+    "detail": "this.mo_layout_obj.ms_data.t_layout is not iterable"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_349",
+    "verdict": "error-popup",
+    "detail": "this.mo_layout_obj.ms_data.t_layout is not iterable"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_353",
+    "verdict": "error-popup",
+    "detail": "Cannot read properties of undefined (reading 'VERSION')"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_354",
+    "verdict": "error-popup",
+    "detail": "page._z2ui5(...).uploadset_ext is not a function"
+  },
+  {
+    "name": "z2ui5_cl_demo_app_s_03_0",
+    "verdict": "not-started",
+    "detail": "handler answered with z2ui5_cl_app_startup"
+  }
+]

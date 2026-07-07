@@ -5,9 +5,10 @@ class z2ui5_cl_demo_app_022 extends z2ui5_if_app {
   progress_value = ``;
 
   async main(client) {
+    let view;
     if (client.check_on_init()) {
       this.progress_value = `3`;
-      const view = z2ui5_cl_xml_view.factory();
+      view = z2ui5_cl_xml_view.factory();
       view.shell()
         .page({ title: `abap2UI5 - Progress Indicator Example`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() })
         .vertical_layout({ class: `sapUiContentPadding`, width: `100%` })

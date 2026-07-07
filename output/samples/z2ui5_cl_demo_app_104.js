@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -31,7 +32,7 @@ class z2ui5_cl_demo_app_104 extends z2ui5_if_app {
     let fs_fs = null;
     let _fs$fs_fs = null;
     this.classname = this.classname.toUpperCase();
-    this.mo_app_sub = null; // TODO(abap2js): CREATE OBJECT mo_app_sub TYPE (classname).
+    this.mo_app_sub = (() => { const _n = String(this.classname); const _c = z2ui5_cl_util.rtti_get_class(_n.toLowerCase()); if (!_c) throw new Error(`CREATE OBJECT: class ${_n} not found`); return new _c(); })();
     // TODO(abap2js): ASSIGN mo_app_sub->(`MO_VIEW_PARENT`) TO FIELD-SYMBOL(<fs>).
     fs_fs = this.mo_grid_sub;
     if (_fs$fs_fs) _fs$fs_fs.o[_fs$fs_fs.k] = fs_fs;
@@ -56,6 +57,8 @@ class z2ui5_cl_demo_app_104 extends z2ui5_if_app {
 
   async main(client) {
     let sy_subrc = 0;
+    let lt_sel;
+    let ls_sel;
     this.client = client;
     if (client.check_on_init()) {
       this.t_tab = [{ title: `Class 1`, info: `z2ui5_cl_demo_app_105`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `Class 2`, info: `z2ui5_cl_demo_app_112`, descr: `this is a description`, icon: `sap-icon://account` }];
@@ -65,9 +68,9 @@ class z2ui5_cl_demo_app_104 extends z2ui5_if_app {
     }
     switch (client.get().EVENT) {
       case `SELCHANGE`:
-        const lt_sel = this.t_tab;
+        lt_sel = this.t_tab;
         for (let _i = lt_sel.length - 1; _i >= 0; _i--) { const row = lt_sel[_i]; if (row.selected === false) lt_sel.splice(_i, 1); }
-        let ls_sel = {};
+        ls_sel = {};
         {
           const _t = lt_sel;
           const _i = (1) - 1;

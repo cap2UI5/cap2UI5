@@ -95,10 +95,16 @@ class z2ui5_cl_demo_app_320 extends z2ui5_if_app {
   }
 
   on_event() {
+    let group_id;
+    let overflow_button_pressed;
+    let items_displayed;
+    let item_id;
+    let item_table_index;
+    let id;
     const lt_arg = this.client.get().T_EVENT_ARG;
     switch (this.client.get().EVENT) {
       case `onGroupPress`:
-        const group_id = lt_arg[(1) - 1];
+        group_id = lt_arg[(1) - 1];
         this.group_items = this.items;
         this.content_height = this.calculate_content_height({ lines: this.group_items.length });
         this.content_width = `450px`;
@@ -106,10 +112,10 @@ class z2ui5_cl_demo_app_320 extends z2ui5_if_app {
         this.client.popover_destroy();
         break;
       case `onIndividualPress`:
-        const overflow_button_pressed = lt_arg[(3) - 1];
-        const items_displayed = lt_arg[(4) - 1];
-        const item_id = lt_arg[(5) - 1];
-        const item_table_index = lt_arg[(6) - 1];
+        overflow_button_pressed = lt_arg[(3) - 1];
+        items_displayed = lt_arg[(4) - 1];
+        item_id = lt_arg[(5) - 1];
+        item_table_index = lt_arg[(6) - 1];
         this.group_items = /* TODO(abap2js): VALUE FOR/BASE */ [];
         this.content_height = this.calculate_content_height({ lines: this.group_items.length });
         this.content_width = `450px`;
@@ -122,7 +128,7 @@ class z2ui5_cl_demo_app_320 extends z2ui5_if_app {
         this.client.popover_destroy();
         break;
       case `onAvatarPress`:
-        const id = lt_arg[(1) - 1];
+        id = lt_arg[(1) - 1];
         this.item = (() => { try { return this.items.find((row) => row.id === id) ?? null; } catch { return null; } })();
         this.content_height = `370px`;
         this.content_width = `250px`;

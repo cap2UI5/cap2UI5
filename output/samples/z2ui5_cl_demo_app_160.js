@@ -20,13 +20,17 @@ class z2ui5_cl_demo_app_160 extends z2ui5_if_app {
   }
 
   on_event() {
+    let lv_id_event;
+    let lv_tab_index;
+    let ls_row_submit;
+    let lv_id_parent;
     let lt_event_arguments = [];
     if (this.client.check_on_event(`PL_TOTAL_CHANGE`)) {
       lt_event_arguments = this.client.get().T_EVENT_ARG;
-      const lv_id_event = lt_event_arguments[(1) - 1];
-      const lv_tab_index = lt_event_arguments[(2) - 1];
-      const ls_row_submit = this.mt_output[(lv_tab_index) - 1];
-      const lv_id_parent = lt_event_arguments[(3) - 1];
+      lv_id_event = lt_event_arguments[(1) - 1];
+      lv_tab_index = lt_event_arguments[(2) - 1];
+      ls_row_submit = this.mt_output[(lv_tab_index) - 1];
+      lv_id_parent = lt_event_arguments[(3) - 1];
       this.client.message_box_display(lv_tab_index + lv_id_event + lv_id_parent);
     }
     this.client.view_model_update();

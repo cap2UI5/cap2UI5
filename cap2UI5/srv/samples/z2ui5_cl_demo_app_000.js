@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 const z2ui5_if_client = require("abap2UI5/z2ui5_if_client");
@@ -7,6 +8,7 @@ class z2ui5_cl_demo_app_000 extends z2ui5_if_app {
   s_scroll = { id: ``, x: 0, y: 0 };
 
   async main(client) {
+    let lv_classname;
     const c_title = ` abap2UI5 - Samples`;
     if (client.get().CHECK_ON_NAVIGATED === true && this.s_scroll.id) {
       client.action.gen({ val: z2ui5_if_client.cs_event.scroll_to, t_arg: [this.s_scroll.id, `${this.s_scroll.y}`, `${this.s_scroll.x}`] });
@@ -20,9 +22,9 @@ class z2ui5_cl_demo_app_000 extends z2ui5_if_app {
         break;
       default:
         try {
-          const lv_classname = client.get().EVENT.toUpperCase();
+          lv_classname = client.get().EVENT.toUpperCase();
           let li_app = null;
-          li_app = null; // TODO(abap2js): CREATE OBJECT li_app TYPE (lv_classname).
+          li_app = (() => { const _n = String(lv_classname); const _c = z2ui5_cl_util.rtti_get_class(_n.toLowerCase()); if (!_c) throw new Error(`CREATE OBJECT: class ${_n} not found`); return new _c(); })();
           this.s_scroll = ({ ...client.get().S_SCROLL.MAIN });
           client.nav_app_call(li_app);
           return;

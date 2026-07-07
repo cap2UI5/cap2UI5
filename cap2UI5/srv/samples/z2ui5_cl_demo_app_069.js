@@ -57,8 +57,8 @@ class z2ui5_cl_demo_app_069 extends z2ui5_if_app {
         }
         break;
       case `NEST_TEST`:
-        this.mv_check_enabled_01 = /* TODO(abap2js) */ xsdbool(this.mv_check_enabled_01 === false);
-        this.mv_check_enabled_02 = /* TODO(abap2js) */ xsdbool(this.mv_check_enabled_01 === false);
+        this.mv_check_enabled_01 = (this.mv_check_enabled_01 === false);
+        this.mv_check_enabled_02 = (this.mv_check_enabled_01 === false);
         client.nest_view_model_update();
         break;
     }

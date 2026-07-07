@@ -49,8 +49,9 @@ class z2ui5_cl_demo_app_194 extends z2ui5_if_app {
     let sy_subrc = 0;
     let fs_tab = null;
     let _fs$fs_tab = null;
+    let page;
     if (!this.mo_parent_view) {
-      let page = z2ui5_cl_xml_view.factory();
+      page = z2ui5_cl_xml_view.factory();
     } else {
       page = this.mo_parent_view.get(`Page`);
     }
@@ -97,10 +98,12 @@ class z2ui5_cl_demo_app_194 extends z2ui5_if_app {
     let _fs$fs_table = null;
     let fs_table_tmp = null;
     let _fs$fs_table_tmp = null;
+    let new_struct_desc;
+    let new_table_desc;
     this.mt_comp = this.get_comp();
     try {
-      const new_struct_desc = cl_abap_structdescr.create(this.mt_comp);
-      const new_table_desc = cl_abap_tabledescr.create({ p_line_type: new_struct_desc, p_table_kind: cl_abap_tabledescr.tablekind_std });
+      new_struct_desc = cl_abap_structdescr.create(this.mt_comp);
+      new_table_desc = cl_abap_tabledescr.create({ p_line_type: new_struct_desc, p_table_kind: cl_abap_tabledescr.tablekind_std });
       // TODO(abap2js): CREATE DATA mt_table TYPE HANDLE new_table_desc.
       // TODO(abap2js): CREATE DATA mt_table_tmp TYPE HANDLE new_table_desc.
       // TODO(abap2js): CREATE DATA ms_table_row TYPE HANDLE new_struct_desc.
@@ -139,12 +142,15 @@ class z2ui5_cl_demo_app_194 extends z2ui5_if_app {
   get_comp() {
     let result = [];
     let sy_tabix = 0;
+    let structdesc;
+    let comp;
+    let component;
     let index = 0;
     try {
       try {
         // TODO(abap2js): cl_abap_typedescr=>describe_by_name( EXPORTING p_name = mv_table RECEIVING p_descr_ref = DATA(typedesc) EXCEPTIONS type_not_found = 1 OTHERS = 2 ).
-        const structdesc = (typedesc);
-        const comp = structdesc.get_components();
+        structdesc = (typedesc);
+        comp = structdesc.get_components();
         sy_tabix = 0;
         for (const com of comp) {
           sy_tabix++;
@@ -154,7 +160,7 @@ class z2ui5_cl_demo_app_194 extends z2ui5_if_app {
         }
       } catch (error) {
       }
-      const component = [{ name: `ROW_ID`, type: (cl_abap_datadescr.describe_by_data(index)) }];
+      component = [{ name: `ROW_ID`, type: (cl_abap_datadescr.describe_by_data(index)) }];
       result.push(...component);
     } catch (error) {
     }

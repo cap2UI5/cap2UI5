@@ -4,11 +4,14 @@ const z2ui5_if_client = require("abap2UI5/z2ui5_if_client");
 
 class z2ui5_cl_demo_app_315 extends z2ui5_if_app {
   async main(client) {
+    let view;
+    let page;
+    let tab;
     if (client.check_on_init()) {
-      const view = z2ui5_cl_xml_view.factory();
-      const page = view.shell()
+      view = z2ui5_cl_xml_view.factory();
+      page = view.shell()
         .page({ title: `abap2UI5 - Table with odata source`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
-      let tab = page.table({ items: `{TRAVEL>/Currency}`, growing: true });
+      tab = page.table({ items: `{TRAVEL>/Currency}`, growing: true });
       tab.header_toolbar().toolbar().title(`table with OData model TRAVEL`);
       tab.columns()
         .column()

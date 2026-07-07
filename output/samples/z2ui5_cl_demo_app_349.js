@@ -15,6 +15,7 @@ class z2ui5_cl_demo_app_349 extends z2ui5_if_app {
     let _fs$fs_val = null;
     let fs_val2 = null;
     let _fs$fs_val2 = null;
+    let app;
     if (client.check_on_init()) {
       this.get_data();
       this.mo_layout_obj = z2ui5_cl_demo_app_333.factory({ i_data: (this.mt_data), vis_cols: 5 });
@@ -23,7 +24,7 @@ class z2ui5_cl_demo_app_349 extends z2ui5_if_app {
     }
     switch (client.get().EVENT) {
       case `GO`:
-        const app = z2ui5_cl_demo_app_336.factory();
+        app = z2ui5_cl_demo_app_336.factory();
         client.nav_app_call(app);
         break;
     }
@@ -65,12 +66,13 @@ class z2ui5_cl_demo_app_349 extends z2ui5_if_app {
 
   xml_table({ i_page, i_client } = {}) {
     let sy_tabix = 0;
+    let lv_index;
     const table = i_page.table({ width: `auto`, items: i_client._bind_edit({ val: this.mt_data }) });
     const columns = table.columns();
     sy_tabix = 0;
     for (const layout of this.mo_layout_obj.ms_data.t_layout) {
       sy_tabix++;
-      let lv_index = sy_tabix;
+      lv_index = sy_tabix;
       columns.column({ visible: i_client._bind({ val: layout.visible, tab: this.mo_layout_obj.ms_data.t_layout, tab_index: lv_index }) })
         .text(layout.name);
     }
@@ -94,6 +96,7 @@ class z2ui5_cl_demo_app_349 extends z2ui5_if_app {
     let sy_subrc = 0;
     let fs_value = null;
     let _fs$fs_value = null;
+    let line;
     const form = i_page.simple_form({ editable: true, layout: `ResponsiveGridLayout`, adjustlabelspan: true })
       .content(`form`);
     let index = 0;
@@ -107,7 +110,7 @@ class z2ui5_cl_demo_app_349 extends z2ui5_if_app {
       if (sy_subrc !== 0) {
         return;
       }
-      const line = form.label({ wrapping: false, text: layout.name });
+      line = form.label({ wrapping: false, text: layout.name });
       line.input({ value: i_client._bind(fs_value), visible: i_client._bind({ val: layout.visible, tab: this.mo_layout_obj.ms_data.t_layout, tab_index: index }), enabled: false });
     }
   }

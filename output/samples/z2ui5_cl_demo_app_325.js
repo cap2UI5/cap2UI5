@@ -7,15 +7,19 @@ class z2ui5_cl_demo_app_325 extends z2ui5_if_app {
   text = ``;
 
   async main(client) {
+    let view;
+    let page;
+    let header_title;
+    let sections;
     if (client.check_on_init()) {
-      const view = z2ui5_cl_xml_view.factory();
-      const page = view.shell()
+      view = z2ui5_cl_xml_view.factory();
+      page = view.shell()
         .page({ title: `Clipboard`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() })
         .object_page_layout({ showtitleinheadercontent: true, showeditheaderbutton: true, uppercaseanchorbar: false });
-      const header_title = page.header_title().object_page_dyn_header_title();
+      header_title = page.header_title().object_page_dyn_header_title();
       header_title.expanded_heading().hbox().title({ text: `Test`, wrapping: true });
       header_title.snapped_heading().flex_box({ alignitems: `Center` }).title({ text: `Test`, wrapping: true });
-      const sections = page.sections();
+      sections = page.sections();
       sections.object_page_section({ titleuppercase: false, id: `id_sec1`, title: `...` })
         .heading(`uxap`)
         .get_parent()

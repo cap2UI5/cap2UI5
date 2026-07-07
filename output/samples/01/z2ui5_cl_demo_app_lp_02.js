@@ -6,12 +6,14 @@ class z2ui5_cl_demo_app_lp_02 extends z2ui5_if_app {
   mv_title = `my title`;
 
   async main(client) {
+    let view;
+    let page;
     if (client.check_on_init()) {
       if (client.get().CHECK_LAUNCHPAD_ACTIVE === false) {
         client.message_box_display(`No Launchpad Active, Sample not working!`);
       }
-      const view = z2ui5_cl_xml_view.factory();
-      const page = view.shell()
+      view = z2ui5_cl_xml_view.factory();
+      page = view.shell()
         .page({ showheader: false, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
       page.simple_form({ title: `Set Launchpad Title Dynamically`, editable: true })
         .content(`form`)

@@ -34,10 +34,10 @@ class z2ui5_cl_demo_app_122 extends z2ui5_if_app {
     this.device_orientation = ls_get.S_DEVICE.ORIENTATION;
     this.device_height = (ls_get.S_DEVICE.RESIZE.HEIGHT);
     this.device_width = (ls_get.S_DEVICE.RESIZE.WIDTH);
-    this.device_phone = /* TODO(abap2js) */ xsdbool(ls_get.S_DEVICE.SYSTEM === z2ui5_if_types.cs_device.system.phone);
-    this.device_desktop = /* TODO(abap2js) */ xsdbool(ls_get.S_DEVICE.SYSTEM === z2ui5_if_types.cs_device.system.desktop);
-    this.device_tablet = /* TODO(abap2js) */ xsdbool(ls_get.S_DEVICE.SYSTEM === z2ui5_if_types.cs_device.system.tablet);
-    this.device_combi = /* TODO(abap2js) */ xsdbool(ls_get.S_DEVICE.SYSTEM === z2ui5_if_types.cs_device.system.combi);
+    this.device_phone = (ls_get.S_DEVICE.SYSTEM === z2ui5_if_types.cs_device.system.phone);
+    this.device_desktop = (ls_get.S_DEVICE.SYSTEM === z2ui5_if_types.cs_device.system.desktop);
+    this.device_tablet = (ls_get.S_DEVICE.SYSTEM === z2ui5_if_types.cs_device.system.tablet);
+    this.device_combi = (ls_get.S_DEVICE.SYSTEM === z2ui5_if_types.cs_device.system.combi);
     this.device_touch = ls_get.S_DEVICE.SUPPORT.TOUCH;
     this.device_pointer = ls_get.S_DEVICE.SUPPORT.POINTER;
     this.device_retina = ls_get.S_DEVICE.SUPPORT.RETINA;

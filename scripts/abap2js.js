@@ -659,7 +659,7 @@ function parseIdentChain(toks, i, ctx) {
   if (name.includes("~")) {
     const [intfRaw, compRaw] = name.split("~");
     const intf = intfRaw.toLowerCase();
-    const comp = safeIdent(compRaw.toLowerCase());
+    const comp = compRaw.toLowerCase();
     const own = ctx.model.interfaces.includes(intf) || ctx.isOwnMethod(name.toLowerCase()) || ctx.isOwnMethod(comp);
     if (callFollows) {
       const close = matchGroup(toks, j);
@@ -698,7 +698,11 @@ function parseIdentChain(toks, i, ctx) {
     const inner = toks.slice(j + 1, close);
     const named = namedArgsOf(inner, ctx);
     let rendered = null;
-    if (named) rendered = renderBuiltinNamed(lower, named, ctx);
+    if (lower === "xsdbool" || lower === "boolc") {
+      // the argument is a logical expression — `x = y` inside is a
+      // comparison, not a named parameter
+      rendered = `(${txCond(inner, ctx)})`;
+    } else if (named) rendered = renderBuiltinNamed(lower, named, ctx);
     else if (BUILTIN_FN[lower]) rendered = BUILTIN_FN[lower]([txExpr(inner, ctx)]);
     if (rendered === null) {
       ctx.todos?.push(`builtin ${lower}( ) not mapped`);
@@ -776,7 +780,7 @@ function chainSuffix(toks, j, atoms, ctx, upper = false) {
         continue;
       }
       // interface prefix on chained calls: obj->intf~meth( ) → obj.meth( )
-      const meth = safeIdent(toks[j + 1].str.toLowerCase().replace(/^.*~/, ""));
+      const meth = toks[j + 1].str.toLowerCase().replace(/^.*~/, "");
       j += 2;
       if (toks[j] && isParenL(toks[j])) {
         const close = matchGroup(toks, j);
@@ -1394,14 +1398,35 @@ function emitMethod(model, body, lines, requires, todos) {
   ctx.requires = requires;
   ctx.todos = todos;
 
-  // find reassigned locals to pick const/let
+  // find reassigned locals to pick const/let; inline declarations inside a
+  // nested block are hoisted to the method top (ABAP DATA(x) is
+  // method-scoped, a JS let/const at the site would be block-scoped)
   const assignedTwice = new Set();
   const declared = new Set();
-  for (const s of body.statements) {
-    if (s.type === "Move") {
-      const toks = s.toks;
-      if (KW(toks[0].str) === "DATA" && isParenL(toks[1])) declared.add(toks[2].str.toLowerCase());
-      else if (isId(toks[0]) && toks[1]?.str === "=" && declared.has(toks[0].str.toLowerCase())) assignedTwice.add(toks[0].str.toLowerCase());
+  const hoisted = new Set();
+  {
+    const OPEN = new Set(["If", "Case", "Loop", "Do", "While", "Try"]);
+    const CLOSE = new Set(["EndIf", "EndCase", "EndLoop", "EndDo", "EndWhile", "EndTry"]);
+    let depth = 0;
+    for (const s of body.statements) {
+      if (OPEN.has(s.type)) depth++;
+      else if (CLOSE.has(s.type)) depth = Math.max(0, depth - 1);
+      if (s.type === "Move") {
+        const toks = s.toks;
+        if ((KW(toks[0].str) === "DATA" || KW(toks[0].str) === "FINAL") && isParenL(toks[1])) {
+          const n = toks[2].str.toLowerCase();
+          if (declared.has(n) || depth > 0) hoisted.add(safeIdent(n));
+          declared.add(n);
+        } else if (isId(toks[0]) && toks[1]?.str === "=" && declared.has(toks[0].str.toLowerCase())) {
+          assignedTwice.add(toks[0].str.toLowerCase());
+        }
+      } else if (s.type === "ReadTable" && depth > 0) {
+        const toks = s.toks;
+        const intoIdx = findTopWord(toks, "INTO");
+        if (intoIdx > 0 && ["DATA", "FINAL"].includes(KW(toks[intoIdx + 1]?.str ?? "")) && isParenL(toks[intoIdx + 2] ?? { type: "" })) {
+          hoisted.add(safeIdent(toks[intoIdx + 3].str.toLowerCase()));
+        }
+      }
     }
   }
 
@@ -1473,6 +1498,15 @@ function emitMethod(model, body, lines, requires, todos) {
     ctx.fsBacked.set(name, `_fs$${name}`);
     push(`let ${name} = null;`);
     push(`let _fs$${name} = null;`);
+  }
+
+  // inline DATA(x) declarations that sit inside nested blocks — hoist to the
+  // method top, the declaration sites then assign only
+  ctx.hoisted = hoisted;
+  for (const name of hoisted) {
+    if (ctx.locals.has(name)) continue;
+    ctx.locals.add(name);
+    push(`let ${name};`);
   }
 
   for (const s of body.statements) {
@@ -1625,7 +1659,7 @@ function emitStatement(s, ctx, st, push, assignedTwice, methodDef) {
             }
           }
           const val = txExpr(toks.slice(k + 2, end), ctx);
-          conds.push(comp === "table_line" ? `_r === ${val}` : `_r.${safeIdent(comp)} === ${val}`);
+          conds.push(comp === "table_line" ? `_r === ${val}` : `_r.${comp} === ${val}`);
           k = end;
         }
         if (!conds.length) return todo();
@@ -1644,8 +1678,12 @@ function emitStatement(s, ctx, st, push, assignedTwice, methodDef) {
         let tAt = intoIdx + 1;
         if (["DATA", "FINAL"].includes(KW(toks[tAt]?.str ?? "")) && isParenL(toks[tAt + 1] ?? { type: "" })) {
           const name = safeIdent(toks[tAt + 2].str.toLowerCase());
-          ctx.locals.add(name);
-          push(`let ${name} = {};`);
+          if (ctx.hoisted?.has(name)) {
+            push(`${name} = {};`);
+          } else {
+            ctx.locals.add(name);
+            push(`let ${name} = {};`);
+          }
           target = { name, isFs: false };
         } else {
           const end = stops.filter((x) => x > tAt).sort((a, b) => a - b)[0] ?? toks.length;
@@ -1696,7 +1734,8 @@ function emitStatement(s, ctx, st, push, assignedTwice, methodDef) {
       // vars initialized from client.get() carry UPPERCASE component keys
       if (decl && /(?:^|\.)client\.get\(\)/.test(rhs)) ctx.upperLocals.add(decl);
       if (decl) {
-        push(`${assignedTwice.has(decl) ? "let" : "const"} ${decl} = ${rhs};`);
+        const kw = ctx.hoisted?.has(decl) ? "" : `${assignedTwice.has(decl) ? "let" : "const"} `;
+        push(`${kw}${decl} = ${rhs};`);
       } else {
         // offset/length writes (lv_x+off(len) = ...) have no JS counterpart
         if (toks.slice(i, eq).some((t) => t.str === "+")) return todo();
@@ -1725,8 +1764,27 @@ function emitStatement(s, ctx, st, push, assignedTwice, methodDef) {
       break;
     }
     case "CreateObject": {
-      // CREATE OBJECT x TYPE (dynamic) — no JS equivalent, needs a registry
+      // CREATE OBJECT x TYPE (name) — dynamic instantiation resolves through
+      // the framework's app-class registry (the same lookup app_start uses).
+      // A miss throws, mirroring ABAP's cx_sy_create_object_error.
       const target = txExpr([toks[2]], ctx);
+      const typeIdx = toks.findIndex((t) => isId(t) && KW(t.str) === "TYPE");
+      if (typeIdx > 0 && isParenL(toks[typeIdx + 1])) {
+        const close = matchGroup(toks, typeIdx + 1);
+        if (close === toks.length - 1) {
+          const nameExpr = txExpr(toks.slice(typeIdx + 2, close), ctx);
+          ctx.requires?.add("z2ui5_cl_util");
+          push(`${target} = (() => { const _n = String(${nameExpr}); const _c = z2ui5_cl_util.rtti_get_class(_n.toLowerCase()); if (!_c) throw new Error(\`CREATE OBJECT: class \${_n} not found\`); return new _c(); })();`);
+          break;
+        }
+      }
+      // static TYPE cls without EXPORTING
+      if (typeIdx > 0 && typeIdx === toks.length - 2 && isId(toks[typeIdx + 1])) {
+        const cls = toks[typeIdx + 1].str.toLowerCase();
+        if (/^z2ui5_/.test(cls)) ctx.requires?.add(cls);
+        push(`${target} = new ${safeIdent(cls)}();`);
+        break;
+      }
       ctx.todos.push(`CREATE OBJECT: ${s.src}`);
       push(`${target} = null; // TODO(abap2js): ${s.src}`);
       break;

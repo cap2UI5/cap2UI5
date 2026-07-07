@@ -30,13 +30,15 @@ class z2ui5_cl_demo_app_182 extends z2ui5_if_app {
 
   on_event() {
     let sy_subrc = 0;
+    let lt_arg;
+    let ls_node;
     switch (this.client.get().EVENT) {
       case `LINE_PRESS`:
         this.client.message_toast_display(`LINE_PRESSED`);
         break;
       case `DETAIL_POPOVER`:
-        const lt_arg = this.client.get().T_EVENT_ARG;
-        let ls_node = {};
+        lt_arg = this.client.get().T_EVENT_ARG;
+        ls_node = {};
         {
           const _t = this.mt_data.nodes;
           const _i = _t.findIndex((_r) => _r.id === lt_arg[(2) - 1]);

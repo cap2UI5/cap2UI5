@@ -45,12 +45,14 @@ class z2ui5_cl_demo_app_111 extends z2ui5_if_app {
     let sy_subrc = 0;
     let fs_field = null;
     let _fs$fs_field = null;
+    let lv_row;
+    let lv_index;
     if (this.mv_search_value) {
       sy_tabix = 0;
       for (const lr_row of this.mt_table) {
         sy_tabix++;
-        let lv_row = ``;
-        let lv_index = 1;
+        lv_row = ``;
+        lv_index = 1;
         for (let sy_index = 1; ; sy_index++) {
           _fs$fs_field = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(lr_row, lv_index);
           fs_field = _fs$fs_field ? _fs$fs_field.o[_fs$fs_field.k] : null;

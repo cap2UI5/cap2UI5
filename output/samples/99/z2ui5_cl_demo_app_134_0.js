@@ -54,6 +54,7 @@ class z2ui5_cl_demo_app_134_0 extends z2ui5_if_app {
   }
 
   async main(client) {
+    let lv_pos;
     if (client.check_on_init()) {
       this.init({ client: client });
       return;
@@ -67,7 +68,7 @@ class z2ui5_cl_demo_app_134_0 extends z2ui5_if_app {
         client.view_model_update();
         break;
       case `BUTTON_SCROLL_UP`:
-        let lv_pos = (this.mt_scroll.find((row) => row.n === `id_page`).v);
+        lv_pos = (this.mt_scroll.find((row) => row.n === `id_page`).v);
         lv_pos = lv_pos - 500;
         if (lv_pos < 0) {
           lv_pos = 0;

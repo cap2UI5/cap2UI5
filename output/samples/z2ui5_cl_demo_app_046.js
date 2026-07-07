@@ -6,6 +6,7 @@ class z2ui5_cl_demo_app_046 extends z2ui5_if_app {
   mv_display = ``;
 
   async main(client) {
+    let tab;
     if (client.check_on_init()) {
       this.mv_display = `LIST`;
       this.t_tab = [{ title: `Peter`, info: `completed`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `Peter`, info: `incompleted`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `Peter`, info: `working`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `Peter`, info: `working`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `Peter`, info: `completed`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `Peter`, info: `completed`, descr: `this is a description`, icon: `sap-icon://account` }];
@@ -30,7 +31,7 @@ class z2ui5_cl_demo_app_046 extends z2ui5_if_app {
           .standard_list_item({ title: `{TITLE}`, description: `{DESCR}`, icon: `{ICON}`, info: `{INFO}` });
         break;
       case `TABLE`:
-        const tab = page.table({ headertext: `Table Control`, items: client._bind(this.t_tab) });
+        tab = page.table({ headertext: `Table Control`, items: client._bind(this.t_tab) });
         tab.columns()
           .column()
           .text(`Title`)

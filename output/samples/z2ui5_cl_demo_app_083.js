@@ -29,6 +29,7 @@ class z2ui5_cl_demo_app_083 extends z2ui5_if_app {
 
   on_event() {
     let sy_tabix = 0;
+    let lt_item;
     let ls_range = null;
     switch (this.client.get().EVENT) {
       case `BUTTON_POST`:
@@ -55,7 +56,7 @@ class z2ui5_cl_demo_app_083 extends z2ui5_if_app {
         this.client.popup_model_update();
         break;
       case `POPUP_DELETE`:
-        const lt_item = this.client.get().T_EVENT_ARG;
+        lt_item = this.client.get().T_EVENT_ARG;
         for (let _i = this.mt_filter.length - 1; _i >= 0; _i--) { const row = this.mt_filter[_i]; if (row.key === lt_item[(1) - 1]) this.mt_filter.splice(_i, 1); }
         this.client.popup_model_update();
         break;

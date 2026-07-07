@@ -7,13 +7,14 @@ class z2ui5_cl_demo_app_144 extends z2ui5_if_app {
 
   set_view() {
     let sy_tabix = 0;
+    let lv_tabix;
     const view = z2ui5_cl_xml_view.factory();
     const page = view.shell()
       .page({ title: `abap2UI5 - Binding Cell Level`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
     sy_tabix = 0;
     for (const lr_row of this.t_tab) {
       sy_tabix++;
-      const lv_tabix = sy_tabix;
+      lv_tabix = sy_tabix;
       page.input(this.client._bind_edit({ val: lr_row.title, tab: this.t_tab, tab_index: lv_tabix }));
       page.input(this.client._bind_edit({ val: lr_row.value, tab: this.t_tab, tab_index: lv_tabix }));
     }

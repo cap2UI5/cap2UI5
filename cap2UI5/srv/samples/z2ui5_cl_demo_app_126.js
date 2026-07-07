@@ -17,12 +17,15 @@ class z2ui5_cl_demo_app_126 extends z2ui5_if_app {
   get_comp() {
     let result = [];
     let sy_tabix = 0;
+    let structdesc;
+    let comp;
+    let component;
     let index = 0;
     try {
       try {
         // TODO(abap2js): cl_abap_typedescr=>describe_by_name( EXPORTING p_name = `Z2UI5_T_UTIL_01` RECEIVING p_descr_ref = DATA(typedesc) EXCEPTIONS type_not_found = 1 OTHERS = 2 ).
-        const structdesc = (typedesc);
-        const comp = structdesc.get_components();
+        structdesc = (typedesc);
+        comp = structdesc.get_components();
         sy_tabix = 0;
         for (const com of comp) {
           sy_tabix++;
@@ -32,7 +35,7 @@ class z2ui5_cl_demo_app_126 extends z2ui5_if_app {
         }
       } catch (error) {
       }
-      const component = [{ name: `ROW_ID`, type: (cl_abap_datadescr.describe_by_data(index)) }];
+      component = [{ name: `ROW_ID`, type: (cl_abap_datadescr.describe_by_data(index)) }];
       result.push(...component);
     } catch (error) {
     }
@@ -45,10 +48,12 @@ class z2ui5_cl_demo_app_126 extends z2ui5_if_app {
     let _fs$fs_table = null;
     let fs_table_tmp = null;
     let _fs$fs_table_tmp = null;
+    let new_struct_desc;
+    let new_table_desc;
     const t_comp = this.get_comp();
     try {
-      const new_struct_desc = cl_abap_structdescr.create(t_comp);
-      const new_table_desc = cl_abap_tabledescr.create({ p_line_type: new_struct_desc, p_table_kind: cl_abap_tabledescr.tablekind_std });
+      new_struct_desc = cl_abap_structdescr.create(t_comp);
+      new_table_desc = cl_abap_tabledescr.create({ p_line_type: new_struct_desc, p_table_kind: cl_abap_tabledescr.tablekind_std });
       // TODO(abap2js): CREATE DATA mt_table TYPE HANDLE new_table_desc.
       // TODO(abap2js): CREATE DATA mt_table_del TYPE HANDLE new_table_desc.
       // TODO(abap2js): CREATE DATA mt_table_tmp TYPE HANDLE new_table_desc.
@@ -68,8 +73,9 @@ class z2ui5_cl_demo_app_126 extends z2ui5_if_app {
   }
 
   view_display() {
+    let page;
     if (!this.mo_parent_view) {
-      let page = z2ui5_cl_xml_view.factory();
+      page = z2ui5_cl_xml_view.factory();
     } else {
       page = this.mo_parent_view.get(`Page`);
     }

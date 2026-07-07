@@ -96,6 +96,11 @@ CLASS zcl_feature DEFINITION PUBLIC.
         i_key         TYPE string
       RETURNING
         VALUE(result) TYPE string.
+    METHODS make_app
+      IMPORTING
+        i_name        TYPE string
+      RETURNING
+        VALUE(result) TYPE REF TO object.
   PROTECTED SECTION.
   PRIVATE SECTION.
 ENDCLASS.
@@ -142,6 +147,12 @@ CLASS zcl_feature IMPLEMENTATION.
 
   METHOD collapse_all.
     ms_flags = VALUE #( ).
+  ENDMETHOD.
+
+  METHOD make_app.
+    DATA lo_app TYPE REF TO object.
+    CREATE OBJECT lo_app TYPE (i_name).
+    result = lo_app.
   ENDMETHOD.
 
   METHOD read_second.
@@ -207,6 +218,13 @@ ENDCLASS.
       expect(f.ms_flags).toEqual({ one: false, two: false });
       f.expand_all();
       expect(f.ms_flags).toEqual({ one: true, two: true });
+    });
+
+    test("dynamic CREATE OBJECT resolves through the class registry", () => {
+      const f = Feature.factory();
+      const HelloWorld = require("abap2UI5/z2ui5_cl_app_hello_world");
+      expect(f.make_app({ i_name: "Z2UI5_CL_APP_HELLO_WORLD" })).toBeInstanceOf(HelloWorld);
+      expect(() => f.make_app({ i_name: "Z2UI5_NO_SUCH_CLASS" })).toThrow(/not found/);
     });
 
     test("READ TABLE INDEX / WITH KEY sets sy-subrc", () => {

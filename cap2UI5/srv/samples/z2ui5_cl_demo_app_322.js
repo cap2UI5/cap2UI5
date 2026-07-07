@@ -5,8 +5,9 @@ class z2ui5_cl_demo_app_322 extends z2ui5_if_app {
   mv_quantity = ``;
 
   async main(client) {
+    let view;
     if (client.check_on_navigated()) {
-      const view = z2ui5_cl_xml_view.factory();
+      view = z2ui5_cl_xml_view.factory();
       client.view_display(view.shell().page({ title: `abap2UI5 - Navigation with app state`, navbuttonpress: client._event_client(`HISTORY_BACK`), shownavbutton: client.check_app_prev_stack() }).simple_form({ title: `Form Title`, editable: true }).content(`form`).title(`Input`).label(`quantity`).input(client._bind_edit(this.mv_quantity)).button({ text: `post`, press: client._event(`BUTTON_POST`) }).button({ text: `back`, press: client._event_client(`HISTORY_BACK`) }).stringify());
       if (client.check_app_prev_stack()) {
         client.set_push_state(`/head/pos/` + client.get().S_DRAFT.ID);

@@ -3,11 +3,12 @@ const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_042 extends z2ui5_if_app {
   async main(client) {
+    let lv_dummy;
     if (client.check_on_init()) {
     }
     switch (client.get().EVENT) {
       case `BUTTON_ROUNDTRIP`:
-        const lv_dummy = `user pressed a button, your custom implementation can be called here`;
+        lv_dummy = `user pressed a button, your custom implementation can be called here`;
         break;
       case `BUTTON_MSG_BOX`:
         client.message_box_display(`this is a message box with a custom text`, `success`);
