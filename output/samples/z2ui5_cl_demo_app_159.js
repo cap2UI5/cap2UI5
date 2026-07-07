@@ -13,9 +13,11 @@ class z2ui5_cl_demo_app_159 extends z2ui5_if_app {
   }
 
   on_navigation() {
+    let lo_prev;
+    let lv_text;
     try {
-      const lo_prev = this.client.get_app(this.client.get().S_DRAFT.ID_PREV_APP);
-      const lv_text = (lo_prev).result().text;
+      lo_prev = this.client.get_app(this.client.get().S_DRAFT.ID_PREV_APP);
+      lv_text = (lo_prev).result().text;
       this.client.message_box_display(`pdf viewer closed`);
     } catch (error) {
     }
@@ -30,10 +32,12 @@ class z2ui5_cl_demo_app_159 extends z2ui5_if_app {
   }
 
   on_event() {
+    let lv_pdf;
+    let lo_app;
     switch (this.client.get().EVENT) {
       case `POPUP`:
-        const lv_pdf = this.get_example_pdf();
-        const lo_app = z2ui5_cl_pop_pdf.factory(lv_pdf);
+        lv_pdf = this.get_example_pdf();
+        lo_app = z2ui5_cl_pop_pdf.factory(lv_pdf);
         this.client.nav_app_call(lo_app);
         break;
     }

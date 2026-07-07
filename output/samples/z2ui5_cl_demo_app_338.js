@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -36,7 +37,7 @@ class z2ui5_cl_demo_app_338 extends z2ui5_if_app {
     sy_tabix = 0;
     for (const line of this.mt_t002) {
       sy_tabix++;
-      lo_items.icon_tab_filter({ text: line.class_, count: line.count, key: line.id });
+      lo_items.icon_tab_filter({ text: line.class, count: line.count, key: line.id });
       lo_items.icon_tab_separator();
     }
     this.mo_main_page = lo_items;
@@ -71,7 +72,7 @@ class z2ui5_cl_demo_app_338 extends z2ui5_if_app {
     switch (this.mv_selectedkey) {
       default:
         if (this.mv_selectedkey !== this.mv_selectedkey_tmp) {
-          this.mo_app = null; // TODO(abap2js): CREATE OBJECT mo_app TYPE (t002->class).
+          this.mo_app = (() => { const _n = String(t002.class); const _c = z2ui5_cl_util.rtti_get_class(_n.toLowerCase()); if (!_c) throw new Error(`CREATE OBJECT: class ${_n} not found`); return new _c(); })();
         }
         try {
           // TODO(abap2js): CALL METHOD mo_app->(`SET_APP_DATA`) EXPORTING table = t002->table.

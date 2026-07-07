@@ -349,8 +349,8 @@ describe("z2ui5_cl_util_api", () => {
 //  z2ui5_if_client / z2ui5_if_exit / z2ui5_cl_exit
 // =============================================================
 describe("z2ui5_if_client", () => {
-  test("cs_event has the 21 expected entries", () => {
-    expect(Object.keys(z2ui5_if_client.cs_event)).toHaveLength(21);
+  test("cs_event has the 31 upstream entries", () => {
+    expect(Object.keys(z2ui5_if_client.cs_event)).toHaveLength(31);
     expect(z2ui5_if_client.cs_event.popup_close).toBe("POPUP_CLOSE");
   });
 

@@ -9,11 +9,13 @@ class z2ui5_cl_demo_app_343 extends z2ui5_if_app {
   get_comp() {
     let result = [];
     let sy_tabix = 0;
+    let structdesc;
+    let comp;
     try {
       try {
         // TODO(abap2js): cl_abap_typedescr=>describe_by_name( EXPORTING p_name = `Z2UI5_T_01` RECEIVING p_descr_ref = DATA(typedesc) EXCEPTIONS type_not_found = 1 OTHERS = 2 ).
-        const structdesc = (typedesc);
-        const comp = structdesc.get_components();
+        structdesc = (typedesc);
+        comp = structdesc.get_components();
         sy_tabix = 0;
         for (const com of comp) {
           sy_tabix++;
@@ -32,10 +34,12 @@ class z2ui5_cl_demo_app_343 extends z2ui5_if_app {
     let sy_subrc = 0;
     let fs_table1 = null;
     let _fs$fs_table1 = null;
+    let new_struct_desc;
+    let new_table_desc;
     const t_comp = this.get_comp();
     try {
-      const new_struct_desc = cl_abap_structdescr.create(t_comp);
-      const new_table_desc = cl_abap_tabledescr.create({ p_line_type: new_struct_desc, p_table_kind: cl_abap_tabledescr.tablekind_std });
+      new_struct_desc = cl_abap_structdescr.create(t_comp);
+      new_table_desc = cl_abap_tabledescr.create({ p_line_type: new_struct_desc, p_table_kind: cl_abap_tabledescr.tablekind_std });
       // TODO(abap2js): CREATE DATA mt_data1 TYPE HANDLE new_table_desc.
       // TODO(abap2js): ASSIGN mt_data1->* TO <table1>.
       // TODO(abap2js): SELECT * FROM z2ui5_t_01 INTO TABLE @<table1> UP TO 5 ROWS.
@@ -44,11 +48,12 @@ class z2ui5_cl_demo_app_343 extends z2ui5_if_app {
   }
 
   view_display({ client } = {}) {
+    let table;
     const page = z2ui5_cl_xml_view.factory()
       .shell()
       .page({ title: `RTTI IV`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
     try {
-      const table = page.table({ width: `auto`, items: client._bind(this.mt_data1) });
+      table = page.table({ width: `auto`, items: client._bind(this.mt_data1) });
       client.message_box_display(`error - reference processed in binding without error`);
     } catch (error) {
       client.message_box_display(`success - reference not allowed for binding thrown`);

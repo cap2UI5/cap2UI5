@@ -55,15 +55,18 @@ class z2ui5_cl_demo_app_340 extends z2ui5_if_app {
     let _fs$fs_table = null;
     let fs_data = null;
     let _fs$fs_data = null;
+    let comp;
+    let new_struct_desc;
+    let new_table_desc;
     result = new z2ui5_cl_demo_app_340();
     result.mo_layout = io_layout;
     try {
-      const comp = z2ui5_cl_util.rtti_get_t_attri_by_any(io_table);
+      comp = z2ui5_cl_util.rtti_get_t_attri_by_any(io_table);
     } catch (error) {
     }
     try {
-      const new_struct_desc = cl_abap_structdescr.create(comp);
-      const new_table_desc = cl_abap_tabledescr.create({ p_line_type: new_struct_desc, p_table_kind: cl_abap_tabledescr.tablekind_std });
+      new_struct_desc = cl_abap_structdescr.create(comp);
+      new_table_desc = cl_abap_tabledescr.create({ p_line_type: new_struct_desc, p_table_kind: cl_abap_tabledescr.tablekind_std });
       // TODO(abap2js): CREATE DATA result->mt_data TYPE HANDLE new_table_desc.
       // TODO(abap2js): CREATE DATA result->mt_data_tmp TYPE HANDLE new_table_desc.
       // TODO(abap2js): CREATE DATA result->ms_data_row TYPE HANDLE new_struct_desc.

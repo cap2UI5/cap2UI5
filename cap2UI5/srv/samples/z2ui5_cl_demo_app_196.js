@@ -17,7 +17,7 @@ class z2ui5_cl_demo_app_196 extends z2ui5_if_app {
     view._generic({ ns: `html`, name: `style` })
       ._cc_plain_xml(`.SICursorStyle:hover {` + ` cursor: pointer;` + `}` + `.SIBorderStyle {` + ` border: 1px solid #cccccc;` + `}` + `.SIPanelStyle .sapMPanelContent{` + ` overflow: visible;` + `}`);
     const page = view.shell()
-      .page({ showheader: /* TODO(abap2js) */ xsdbool(false === this.client.get().CHECK_LAUNCHPAD_ACTIVE), title: `abap2UI5 - Status Indicators Library`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+      .page({ showheader: (false === this.client.get().CHECK_LAUNCHPAD_ACTIVE), title: `abap2UI5 - Status Indicators Library`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
     const panel = page.panel({ class: `sapUiResponsiveMargin SIPanelStyle`, width: `95%` });
     panel.text(`Use the slider for adjusting the fill`);
     panel.slider({ class: `sapUiLargeMarginBottom`, enabletickmarks: true, value: this.client._bind_edit(this.mv_slider_value) })

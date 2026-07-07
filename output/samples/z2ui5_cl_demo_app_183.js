@@ -20,12 +20,13 @@ class z2ui5_cl_demo_app_183 extends z2ui5_if_app {
   }
 
   async main(client) {
+    let lt_arg;
     if (client.check_on_init()) {
       this.refresh_data();
     }
     switch (client.get().EVENT) {
       case `GET_OPENED_COL`:
-        let lt_arg = client.get().T_EVENT_ARG;
+        lt_arg = client.get().T_EVENT_ARG;
         return;
         break;
       case `ONSORT`:

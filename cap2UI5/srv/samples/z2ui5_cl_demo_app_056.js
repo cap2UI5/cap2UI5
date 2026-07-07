@@ -84,6 +84,7 @@ class z2ui5_cl_demo_app_056 extends z2ui5_if_app {
   }
 
   async main(client) {
+    let lo_value_help;
     this.client = client;
     if (client.check_on_init()) {
       this.view_display();
@@ -91,7 +92,7 @@ class z2ui5_cl_demo_app_056 extends z2ui5_if_app {
     }
     if (client.get().CHECK_ON_NAVIGATED === true) {
       try {
-        const lo_value_help = (client.get_app(client.get().S_DRAFT.ID_PREV_APP));
+        lo_value_help = (client.get_app(client.get().S_DRAFT.ID_PREV_APP));
         if (lo_value_help.result().check_confirmed === false) {
           return;
         }

@@ -48,6 +48,7 @@ class z2ui5_cl_demo_app_130 extends z2ui5_if_app {
 
   get_values() {
     let sy_tabix = 0;
+    let filter;
     const l_variants = [{ screen_name: `QUAN`, var: `E001 - ALL`, descr: `123` }, { screen_name: `TO`, var: `E001`, descr: `123` }, { screen_name: `TO`, var: `E001 - All`, descr: `123` }];
     let var_ = [];
     let var_val = [];
@@ -75,7 +76,7 @@ class z2ui5_cl_demo_app_130 extends z2ui5_if_app {
       for (const val of var_val) {
         sy_tabix++;
         if (!(field === field.field)) continue;
-        const filter = { key: val.guid, option: val.opt, low: val.low, high: val.high };
+        filter = { key: val.guid, option: val.opt, low: val.low, high: val.high };
         field.t_filter.push(filter);
         this.set_token({ field: { field } });
       }
@@ -119,9 +120,13 @@ class z2ui5_cl_demo_app_130 extends z2ui5_if_app {
 
   view_display() {
     let sy_tabix = 0;
+    let view;
+    let page;
+    let lv_tabix;
+    let scrtext;
     if (!this.mo_parent_view) {
-      const view = z2ui5_cl_xml_view.factory();
-      let page = z2ui5_cl_xml_view.factory()
+      view = z2ui5_cl_xml_view.factory();
+      page = z2ui5_cl_xml_view.factory()
         .shell()
         .page({ title: this.get_txt({ roll: `/SCWM/DE_TW_COND_CHECK_SELECT` }), navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
     } else {
@@ -148,8 +153,8 @@ class z2ui5_cl_demo_app_130 extends z2ui5_if_app {
       sy_tabix = 0;
       for (const lr_tab of this.mt_fields) {
         sy_tabix++;
-        const lv_tabix = sy_tabix;
-        const scrtext = this.get_txt({ roll: lr_tab.field_doma });
+        lv_tabix = sy_tabix;
+        scrtext = this.get_txt({ roll: lr_tab.field_doma });
         content.label(scrtext)
           .multi_input({ tokens: this.client._bind({ val: lr_tab.t_token, tab: this.mt_fields, tab_index: lv_tabix }), showclearicon: true, id: lr_tab.field, valuehelprequest: this.client._event(`CALL_POPUP_FILTER`, [lr_tab.field]) })
           .item({ key: `{KEY}`, text: `{TEXT}` })
@@ -237,10 +242,11 @@ class z2ui5_cl_demo_app_130 extends z2ui5_if_app {
 
   set_token({ field } = {}) {
     let sy_tabix = 0;
+    let lv_value;
     sy_tabix = 0;
     for (const lr_filter of field.t_filter) {
       sy_tabix++;
-      const lv_value = this.mt_mapping.find((row) => row.n === lr_filter.option).v;
+      lv_value = this.mt_mapping.find((row) => row.n === lr_filter.option).v;
       // TODO(abap2js): REPLACE `{LOW}` IN lv_value WITH lr_filter->low.
       // TODO(abap2js): REPLACE `{HIGH}` IN lv_value WITH lr_filter->high.
       field.t_token.push({ key: lv_value, text: lv_value, visible: true, editable: false });
@@ -250,6 +256,9 @@ class z2ui5_cl_demo_app_130 extends z2ui5_if_app {
   varaint_page() {
     let sy_tabix = 0;
     let sy_subrc = 0;
+    let lt_item;
+    let arg;
+    let lr_field;
     switch (this.client.get().EVENT) {
       case `INPUT_SCREEN_CHANGE`:
         this.mv_screen_descr = (() => { try { return this.mt_screens.find((row) => row.screen_name === this.mv_screen).descr ?? null; } catch { return null; } })();
@@ -271,7 +280,7 @@ class z2ui5_cl_demo_app_130 extends z2ui5_if_app {
         this.client.popup_model_update();
         break;
       case `POPUP_FILTER_DELETE`:
-        const lt_item = this.client.get().T_EVENT_ARG;
+        lt_item = this.client.get().T_EVENT_ARG;
         for (let _i = this.mt_filter.length - 1; _i >= 0; _i--) { const row = this.mt_filter[_i]; if (row.key === lt_item[(1) - 1]) this.mt_filter.splice(_i, 1); }
         this.client.popup_model_update();
         break;
@@ -280,9 +289,9 @@ class z2ui5_cl_demo_app_130 extends z2ui5_if_app {
         this.client.popup_model_update();
         break;
       case `CALL_POPUP_FILTER`:
-        const arg = this.client.get().T_EVENT_ARG;
+        arg = this.client.get().T_EVENT_ARG;
         this.mv_activ_elemnt = (() => { try { return arg[(1) - 1] ?? null; } catch { return null; } })();
-        let lr_field = {};
+        lr_field = {};
         {
           const _t = this.mt_fields;
           const _i = _t.findIndex((_r) => _r.field === this.mv_activ_elemnt);
@@ -334,7 +343,7 @@ class z2ui5_cl_demo_app_130 extends z2ui5_if_app {
       return;
     }
     this.varaint_page();
-    this.mv_button_active = Boolean(this.mv_screen && this.mv_variant);
+    this.mv_button_active = (this.mv_screen && this.mv_variant);
     client.view_model_update();
   }
 }

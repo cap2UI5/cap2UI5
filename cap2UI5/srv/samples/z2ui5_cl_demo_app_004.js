@@ -20,6 +20,7 @@ class z2ui5_cl_demo_app_004 extends z2ui5_if_app {
   }
 
   on_event() {
+    let dummy;
     switch (this.client.get().EVENT) {
       case `BUTTON_ROUNDTRIP`:
         this.client.message_box_display(`server-client roundtrip, method on_event of the abap controller was called`);
@@ -38,7 +39,7 @@ class z2ui5_cl_demo_app_004 extends z2ui5_if_app {
         }
         break;
       case `BUTTON_ERROR`:
-        const dummy = 1 / 0;
+        dummy = 1 / 0;
         break;
     }
   }

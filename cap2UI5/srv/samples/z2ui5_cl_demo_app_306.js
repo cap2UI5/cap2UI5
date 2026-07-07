@@ -94,9 +94,11 @@ class z2ui5_cl_demo_app_306 extends z2ui5_if_app {
     let sy_subrc = 0;
     let fs_picture = null;
     let _fs$fs_picture = null;
+    let lo_prev;
+    let result;
     try {
-      const lo_prev = this.client.get_app(this.client.get().S_DRAFT.ID_PREV_APP);
-      const result = (lo_prev).result();
+      lo_prev = this.client.get_app(this.client.get().S_DRAFT.ID_PREV_APP);
+      result = (lo_prev).result();
       if (result.check_confirmed === true) {
         this.mv_pic_display = result.image;
         fs_picture = this.mt_picture[(this.selected_picture.id) - 1];

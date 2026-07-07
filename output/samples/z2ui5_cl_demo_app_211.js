@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -29,6 +30,8 @@ class z2ui5_cl_demo_app_211 extends z2ui5_if_app {
 
   view_display() {
     let sy_tabix = 0;
+    let text;
+    let with_icon;
     const view = z2ui5_cl_xml_view.factory().shell();
     const page = view.page({ id: `page_main`, title: `Customizing`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack(), class: `sapUiContentPadding` });
     const lo_items = page.icon_tab_bar({ class: `sapUiResponsiveContentPadding`, selectedkey: this.client._bind_edit(this.mv_selectedkey), select: this.client._event(`ONSELECTICONTABBAR`) })
@@ -36,8 +39,8 @@ class z2ui5_cl_demo_app_211 extends z2ui5_if_app {
     sy_tabix = 0;
     for (const line of this.mt_t002) {
       sy_tabix++;
-      const text = line.descr;
-      const with_icon = line.icon;
+      text = line.descr;
+      with_icon = line.icon;
       lo_items.icon_tab_filter({ icon: line.icon, iconcolor: `Positive`, count: line.count, text, key: line.id, showall: with_icon });
       lo_items.icon_tab_separator();
     }
@@ -75,7 +78,7 @@ class z2ui5_cl_demo_app_211 extends z2ui5_if_app {
     switch (this.mv_selectedkey) {
       default:
         if (this.mv_selectedkey !== this.mv_selectedkey_tmp) {
-          this.mo_app = null; // TODO(abap2js): CREATE OBJECT mo_app TYPE (t002->class).
+          this.mo_app = (() => { const _n = String(t002.class); const _c = z2ui5_cl_util.rtti_get_class(_n.toLowerCase()); if (!_c) throw new Error(`CREATE OBJECT: class ${_n} not found`); return new _c(); })();
         }
         try {
           // TODO(abap2js): CALL METHOD mo_app->(`SET_APP_DATA`) EXPORTING table = t002->table.

@@ -14,18 +14,14 @@
   {
     "class": "z2ui5_cl_demo_app_lp_03",
     "path": "01/z2ui5_cl_demo_app_lp_03.js",
-    "todos": 1,
-    "todoDetails": [
-      "builtin xsdbool( ) not mapped"
-    ]
+    "todos": 0,
+    "todoDetails": []
   },
   {
     "class": "z2ui5_cl_demo_app_lp_04",
     "path": "01/z2ui5_cl_demo_app_lp_04.js",
-    "todos": 1,
-    "todoDetails": [
-      "builtin xsdbool( ) not mapped"
-    ]
+    "todos": 0,
+    "todoDetails": []
   },
   {
     "class": "z2ui5_cl_demo_app_355",
@@ -110,10 +106,8 @@
   {
     "class": "z2ui5_cl_demo_app_084",
     "path": "03/z2ui5_cl_demo_app_084.js",
-    "todos": 1,
-    "todoDetails": [
-      "builtin xsdbool( ) not mapped"
-    ]
+    "todos": 0,
+    "todoDetails": []
   },
   {
     "class": "z2ui5_cl_demo_app_093",
@@ -284,10 +278,8 @@
   {
     "class": "z2ui5_cl_demo_app_000",
     "path": "z2ui5_cl_demo_app_000.js",
-    "todos": 1,
-    "todoDetails": [
-      "CREATE OBJECT: CREATE OBJECT li_app TYPE (lv_classname)."
-    ]
+    "todos": 0,
+    "todoDetails": []
   },
   {
     "class": "z2ui5_cl_demo_app_001",
@@ -352,10 +344,8 @@
   {
     "class": "z2ui5_cl_demo_app_011",
     "path": "z2ui5_cl_demo_app_011.js",
-    "todos": 1,
-    "todoDetails": [
-      "builtin xsdbool( ) not mapped"
-    ]
+    "todos": 0,
+    "todoDetails": []
   },
   {
     "class": "z2ui5_cl_demo_app_012",
@@ -384,10 +374,8 @@
   {
     "class": "z2ui5_cl_demo_app_016",
     "path": "z2ui5_cl_demo_app_016.js",
-    "todos": 1,
-    "todoDetails": [
-      "builtin xsdbool( ) not mapped"
-    ]
+    "todos": 0,
+    "todoDetails": []
   },
   {
     "class": "z2ui5_cl_demo_app_017",
@@ -488,10 +476,9 @@
   {
     "class": "z2ui5_cl_demo_app_035",
     "path": "z2ui5_cl_demo_app_035.js",
-    "todos": 2,
+    "todos": 1,
     "todoDetails": [
-      "VALUE #( FOR/BASE/LINES OF ... ) not supported — rewrite manually",
-      "builtin xsdbool( ) not mapped"
+      "VALUE #( FOR/BASE/LINES OF ... ) not supported — rewrite manually"
     ]
   },
   {
@@ -680,11 +667,8 @@
   {
     "class": "z2ui5_cl_demo_app_069",
     "path": "z2ui5_cl_demo_app_069.js",
-    "todos": 2,
-    "todoDetails": [
-      "builtin xsdbool( ) not mapped",
-      "builtin xsdbool( ) not mapped"
-    ]
+    "todos": 0,
+    "todoDetails": []
   },
   {
     "class": "z2ui5_cl_demo_app_070",
@@ -703,9 +687,8 @@
   {
     "class": "z2ui5_cl_demo_app_072",
     "path": "z2ui5_cl_demo_app_072.js",
-    "todos": 4,
+    "todos": 3,
     "todoDetails": [
-      "builtin xsdbool( ) not mapped",
       "REDUCE #( ) not supported",
       "REDUCE #( ) not supported",
       "REDUCE #( ) not supported"
@@ -851,10 +834,8 @@
   {
     "class": "z2ui5_cl_demo_app_098",
     "path": "z2ui5_cl_demo_app_098.js",
-    "todos": 1,
-    "todoDetails": [
-      "builtin xsdbool( ) not mapped"
-    ]
+    "todos": 0,
+    "todoDetails": []
   },
   {
     "class": "z2ui5_cl_demo_app_099",
@@ -889,11 +870,10 @@
   {
     "class": "z2ui5_cl_demo_app_104",
     "path": "z2ui5_cl_demo_app_104.js",
-    "todos": 5,
+    "todos": 4,
     "todoDetails": [
       "unsupported statement: ASSIGN mo_app_sub->(`MO_VIEW_PARENT`) TO FIELD-SYMBOL(<fs>).",
       "unsupported statement: CALL METHOD mo_app_sub->(`Z2UI5_IF_APP~MAIN`) EXPORTING client = client.",
-      "CREATE OBJECT: CREATE OBJECT mo_app_sub TYPE (classname).",
       "unsupported statement: ASSIGN mo_app_sub->(`MO_VIEW_PARENT`) TO FIELD-SYMBOL(<fs>).",
       "unsupported statement: CALL METHOD mo_app_sub->(`Z2UI5_IF_APP~MAIN`) EXPORTING client = client."
     ]
@@ -951,9 +931,8 @@
   {
     "class": "z2ui5_cl_demo_app_117",
     "path": "z2ui5_cl_demo_app_117.js",
-    "todos": 5,
+    "todos": 4,
     "todoDetails": [
-      "CREATE OBJECT: CREATE OBJECT mo_app TYPE (t002->class).",
       "unsupported statement: CALL METHOD mo_app->(`SET_APP_DATA`) EXPORTING data = t002->count.",
       "unsupported statement: ASSIGN mo_app->(`MO_PARENT_VIEW`) TO FIELD-SYMBOL(<view>).",
       "unsupported statement: CALL METHOD mo_app->(`Z2UI5_IF_APP~MAIN`) EXPORTING client = client.",
@@ -990,13 +969,8 @@
   {
     "class": "z2ui5_cl_demo_app_122",
     "path": "z2ui5_cl_demo_app_122.js",
-    "todos": 4,
-    "todoDetails": [
-      "builtin xsdbool( ) not mapped",
-      "builtin xsdbool( ) not mapped",
-      "builtin xsdbool( ) not mapped",
-      "builtin xsdbool( ) not mapped"
-    ]
+    "todos": 0,
+    "todoDetails": []
   },
   {
     "class": "z2ui5_cl_demo_app_123",
@@ -1007,10 +981,8 @@
   {
     "class": "z2ui5_cl_demo_app_124",
     "path": "z2ui5_cl_demo_app_124.js",
-    "todos": 1,
-    "todoDetails": [
-      "builtin xsdbool( ) not mapped"
-    ]
+    "todos": 0,
+    "todoDetails": []
   },
   {
     "class": "z2ui5_cl_demo_app_125",
@@ -1054,9 +1026,8 @@
   {
     "class": "z2ui5_cl_demo_app_131",
     "path": "z2ui5_cl_demo_app_131.js",
-    "todos": 5,
+    "todos": 4,
     "todoDetails": [
-      "CREATE OBJECT: CREATE OBJECT mo_app TYPE (t002->class).",
       "unsupported statement: CALL METHOD mo_app->(`SET_APP_DATA`) EXPORTING count = t002->count table = t002->table.",
       "unsupported statement: ASSIGN mo_app->(`MO_PARENT_VIEW`) TO FIELD-SYMBOL(<view>).",
       "unsupported statement: CALL METHOD mo_app->(`Z2UI5_IF_APP~MAIN`) EXPORTING client = client.",
@@ -1344,9 +1315,8 @@
   {
     "class": "z2ui5_cl_demo_app_185",
     "path": "z2ui5_cl_demo_app_185.js",
-    "todos": 5,
+    "todos": 4,
     "todoDetails": [
-      "CREATE OBJECT: CREATE OBJECT mo_app TYPE (t002->class).",
       "unsupported statement: CALL METHOD mo_app->(`SET_APP_DATA`) EXPORTING count = t002->count table = t002->table.",
       "unsupported statement: ASSIGN mo_app->(`MO_PARENT_VIEW`) TO FIELD-SYMBOL(<view>).",
       "unsupported statement: CALL METHOD mo_app->(`Z2UI5_IF_APP~MAIN`) EXPORTING client = client.",
@@ -1356,10 +1326,8 @@
   {
     "class": "z2ui5_cl_demo_app_186",
     "path": "z2ui5_cl_demo_app_186.js",
-    "todos": 1,
-    "todoDetails": [
-      "builtin xsdbool( ) not mapped"
-    ]
+    "todos": 0,
+    "todoDetails": []
   },
   {
     "class": "z2ui5_cl_demo_app_187",
@@ -1391,9 +1359,8 @@
   {
     "class": "z2ui5_cl_demo_app_191",
     "path": "z2ui5_cl_demo_app_191.js",
-    "todos": 5,
+    "todos": 4,
     "todoDetails": [
-      "CREATE OBJECT: CREATE OBJECT mo_app TYPE (t002->class).",
       "unsupported statement: CALL METHOD mo_app->(`SET_APP_DATA`) EXPORTING count = t002->count table = t002->table.",
       "unsupported statement: ASSIGN mo_app->(`MO_PARENT_VIEW`) TO FIELD-SYMBOL(<view>).",
       "unsupported statement: CALL METHOD mo_app->(`Z2UI5_IF_APP~MAIN`) EXPORTING client = client.",
@@ -1451,9 +1418,8 @@
   {
     "class": "z2ui5_cl_demo_app_195",
     "path": "z2ui5_cl_demo_app_195.js",
-    "todos": 5,
+    "todos": 4,
     "todoDetails": [
-      "CREATE OBJECT: CREATE OBJECT mo_app TYPE (t002->class).",
       "unsupported statement: CALL METHOD mo_app->(`SET_APP_DATA`) EXPORTING table = t002->table.",
       "unsupported statement: ASSIGN mo_app->(`MO_PARENT_VIEW`) TO FIELD-SYMBOL(<view>).",
       "unsupported statement: CALL METHOD mo_app->(`Z2UI5_IF_APP~MAIN`) EXPORTING client = client.",
@@ -1463,10 +1429,8 @@
   {
     "class": "z2ui5_cl_demo_app_196",
     "path": "z2ui5_cl_demo_app_196.js",
-    "todos": 1,
-    "todoDetails": [
-      "builtin xsdbool( ) not mapped"
-    ]
+    "todos": 0,
+    "todoDetails": []
   },
   {
     "class": "z2ui5_cl_demo_app_197",
@@ -1536,9 +1500,8 @@
   {
     "class": "z2ui5_cl_demo_app_211",
     "path": "z2ui5_cl_demo_app_211.js",
-    "todos": 6,
+    "todos": 5,
     "todoDetails": [
-      "CREATE OBJECT: CREATE OBJECT mo_app TYPE (t002->class).",
       "unsupported statement: CALL METHOD mo_app->(`SET_APP_DATA`) EXPORTING table = t002->table.",
       "unsupported statement: ASSIGN mo_app->(`MO_PARENT_VIEW`) TO FIELD-SYMBOL(<view>).",
       "unsupported statement: CALL METHOD mo_app->(`Z2UI5_IF_APP~MAIN`) EXPORTING client = client.",
@@ -2190,10 +2153,9 @@
   {
     "class": "z2ui5_cl_demo_app_318",
     "path": "z2ui5_cl_demo_app_318.js",
-    "todos": 2,
+    "todos": 1,
     "todoDetails": [
-      "VALUE #( FOR/BASE/LINES OF ... ) not supported — rewrite manually",
-      "builtin xsdbool( ) not mapped"
+      "VALUE #( FOR/BASE/LINES OF ... ) not supported — rewrite manually"
     ]
   },
   {
@@ -2341,9 +2303,8 @@
   {
     "class": "z2ui5_cl_demo_app_338",
     "path": "z2ui5_cl_demo_app_338.js",
-    "todos": 5,
+    "todos": 4,
     "todoDetails": [
-      "CREATE OBJECT: CREATE OBJECT mo_app TYPE (t002->class).",
       "unsupported statement: CALL METHOD mo_app->(`SET_APP_DATA`) EXPORTING table = t002->table.",
       "unsupported statement: ASSIGN mo_app->(`MO_PARENT_VIEW`) TO FIELD-SYMBOL(<view>).",
       "unsupported statement: CALL METHOD mo_app->(`Z2UI5_IF_APP~MAIN`) EXPORTING client = client.",
@@ -2553,9 +2514,7 @@
   {
     "class": "z2ui5_cl_demo_app_999",
     "path": "z2ui5_cl_demo_app_999.js",
-    "todos": 1,
-    "todoDetails": [
-      "CREATE OBJECT: CREATE OBJECT li_app TYPE (lv_classname)."
-    ]
+    "todos": 0,
+    "todoDetails": []
   }
 ]

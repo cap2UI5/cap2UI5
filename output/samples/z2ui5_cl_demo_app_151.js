@@ -6,9 +6,10 @@ class z2ui5_cl_demo_app_151 extends z2ui5_if_app {
   client = null;
 
   on_event() {
+    let lo_app;
     switch (this.client.get().EVENT) {
       case `POPUP`:
-        const lo_app = z2ui5_cl_pop_to_inform.factory(`this is a question`);
+        lo_app = z2ui5_cl_pop_to_inform.factory(`this is a question`);
         this.client.nav_app_call(lo_app);
         break;
     }
@@ -33,9 +34,11 @@ class z2ui5_cl_demo_app_151 extends z2ui5_if_app {
   }
 
   on_navigation() {
+    let lo_prev;
+    let lo_dummy;
     try {
-      const lo_prev = this.client.get_app(this.client.get().S_DRAFT.ID_PREV_APP);
-      const lo_dummy = (lo_prev);
+      lo_prev = this.client.get_app(this.client.get().S_DRAFT.ID_PREV_APP);
+      lo_dummy = (lo_prev);
       this.client.message_box_display(`callback after popup to inform`);
     } catch (error) {
     }

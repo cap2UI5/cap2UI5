@@ -8,12 +8,16 @@ class z2ui5_cl_demo_app_350 extends z2ui5_if_app {
 
   async main(client) {
     let sy_subrc = 0;
+    let view;
+    let page;
+    let lr_view2;
+    let lv_fm;
     if (!this.view_id || this.view_id === 1) {
       this.view_id = 1;
       try {
         if (client.check_on_init() || client.check_on_navigated()) {
-          const view = z2ui5_cl_xml_view.factory();
-          const page = view.shell().page(`Startview`);
+          view = z2ui5_cl_xml_view.factory();
+          page = view.shell().page(`Startview`);
           page.simple_form()
             .content(`form`)
             .button({ text: client._bind_edit(this.text), width: `20%`, press: client._event(`CALL_BOOKING_MASK`) });
@@ -23,7 +27,7 @@ class z2ui5_cl_demo_app_350 extends z2ui5_if_app {
         switch (client.get().EVENT) {
           case `CALL_BOOKING_MASK`:
             let lf_key = ``;
-            let lr_view2 = new z2ui5_cl_demo_app_350();
+            lr_view2 = new z2ui5_cl_demo_app_350();
             lr_view2.view_id = 2;
             lr_view2.varkey = `001`;
             client.nav_app_call(lr_view2);
@@ -41,7 +45,7 @@ class z2ui5_cl_demo_app_350 extends z2ui5_if_app {
     } else if (this.view_id === 2) {
       try {
         if (client.check_on_init()) {
-          const lv_fm = `ENQUEUE_E_TABLE`;
+          lv_fm = `ENQUEUE_E_TABLE`;
           // TODO(abap2js): CALL FUNCTION lv_fm EXPORTING tabname = `ZTEST` varkey = varkey EXCEPTIONS foreign_lock = 1 system_failure = 2 OTHERS = 3.
           if (sy_subrc !== 0) {
             client.set_session_stateful(false);

@@ -36,6 +36,7 @@ class z2ui5_cl_demo_app_334 extends z2ui5_if_app {
     let _fs$fs_val = null;
     let fs_value = null;
     let _fs$fs_value = null;
+    let line;
     const page = z2ui5_cl_xml_view.factory()
       .shell()
       .page({ title: `RTTI IV`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
@@ -54,7 +55,7 @@ class z2ui5_cl_demo_app_334 extends z2ui5_if_app {
       if (sy_subrc !== 0) {
         return;
       }
-      const line = form.label({ wrapping: false, text: layout.name });
+      line = form.label({ wrapping: false, text: layout.name });
       line.input({ value: client._bind(fs_value), visible: client._bind({ val: layout.visible, tab: this.mo_layout_obj.ms_data.t_layout, tab_index: index }), enabled: false });
     }
     client.view_display(page.stringify());

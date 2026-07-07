@@ -21,9 +21,10 @@ class z2ui5_cl_demo_app_364 extends z2ui5_if_app {
 
   on_event() {
     let sy_tabix = 0;
+    let counter;
     switch (this.client.get().EVENT) {
       case `BUTTON_SAVE`:
-        let counter = 0;
+        counter = 0;
         sy_tabix = 0;
         for (const s_tree of this.t_tree) {
           sy_tabix++;

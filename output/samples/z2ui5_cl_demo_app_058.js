@@ -29,6 +29,8 @@ class z2ui5_cl_demo_app_058 extends z2ui5_if_app {
   }
 
   on_event() {
+    let ls_layout2;
+    let ls_layout;
     switch (this.app.get.event) {
       case `BUTTON_START`:
         this.set_data();
@@ -40,12 +42,12 @@ class z2ui5_cl_demo_app_058 extends z2ui5_if_app {
         this.app.view_popup = `POPUP_SAVE`;
         break;
       case `POPUP_LAYOUT_LOAD`:
-        const ls_layout2 = this.mt_db_layout.find((row) => row.selkz === true);
+        ls_layout2 = this.mt_db_layout.find((row) => row.selkz === true);
         // TODO(abap2js): z2ui5_cl_util=>xml_parse( EXPORTING xml = ls_layout2-data IMPORTING any = ms_layout ).
         this.app.view_popup = `POPUP_SAVE`;
         break;
       case `BUTTON_SAVE_LAYOUT`:
-        const ls_layout = { data: z2ui5_cl_util.xml_stringify(this.ms_layout), name: this.mv_layout };
+        ls_layout = { data: z2ui5_cl_util.xml_stringify(this.ms_layout), name: this.mv_layout };
         this.mt_db_layout.push(ls_layout);
         this.app.view_popup = `POPUP_SAVE`;
         break;

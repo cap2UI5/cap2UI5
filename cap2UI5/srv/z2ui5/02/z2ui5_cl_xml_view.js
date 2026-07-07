@@ -2311,7 +2311,7 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  numeric_content({ icon, withmargin, adaptivefontsize, animatetextchange, formattervalue, icondescription, indicator, nullifyvalue, scale, state, truncatevalueto, valuecolor, visible, width, class: cssClass, press } = {}) {
+  numeric_content({ icon, withmargin, adaptivefontsize, animatetextchange, formattervalue, icondescription, indicator, nullifyvalue, scale, state, truncatevalueto, valuecolor, visible, width, class: cssClass, press, value } = {}) {
     return this._container({
       name: "NumericContent",
       aProp: this._filterProps([
@@ -2675,7 +2675,7 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  code_editor({ type, height, width, editable } = {}) {
+  code_editor({ type, height, width, editable, value } = {}) {
     return this._leaf({
       name: "CodeEditor",
       ns: "editor",
@@ -2716,7 +2716,7 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  multi_input({ showclearicon, showvaluehelp, valuehelponly, name, suggestionitems, tokenupdate, width, id, tokens, submit, valuehelprequest, enabled, class: cssClass, change, required, valuestate, valuestatetext, placeholder, showsuggestion, visible } = {}) {
+  multi_input({ showclearicon, showvaluehelp, valuehelponly, name, suggestionitems, tokenupdate, width, id, tokens, submit, valuehelprequest, enabled, class: cssClass, change, required, valuestate, valuestatetext, placeholder, showsuggestion, visible, value } = {}) {
     return this._container({
       name: "MultiInput",
       aProp: this._filterProps([
@@ -2936,7 +2936,7 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  interact_donut_chart_segment({ label, displayedvalue, selected, color } = {}) {
+  interact_donut_chart_segment({ label, displayedvalue, selected, color, value } = {}) {
     return this._container({
       name: "InteractiveDonutChartSegment",
       ns: "mchart",
@@ -2980,7 +2980,7 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  interact_bar_chart_bar({ label, displayedvalue, selected, color } = {}) {
+  interact_bar_chart_bar({ label, displayedvalue, selected, color, value } = {}) {
     return this._container({
       name: "InteractiveBarChartBar",
       ns: "mchart",
@@ -3023,7 +3023,7 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  interact_line_chart_point({ label, secondarylabel, displayedvalue, selected } = {}) {
+  interact_line_chart_point({ label, secondarylabel, displayedvalue, selected, value } = {}) {
     return this._container({
       name: "InteractiveLineChartPoint",
       ns: "mchart",
@@ -3091,7 +3091,7 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  field({ ns, id, editmode, showemptyindicator } = {}) {
+  field({ ns, id, editmode, showemptyindicator, value } = {}) {
     return this._container({
       name: "Field",
       aProp: this._filterProps([
@@ -3127,7 +3127,7 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  core_custom_data({ key, writetodom } = {}) {
+  core_custom_data({ key, writetodom, value } = {}) {
     return this._leaf({
       name: "CustomData",
       ns: "core",
@@ -3139,7 +3139,7 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  badge_custom_data({ key, visible } = {}) {
+  badge_custom_data({ key, visible, value } = {}) {
     return this._leaf({
       name: "BadgeCustomData",
       aProp: this._filterProps([
@@ -3191,7 +3191,7 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  search_field({ search, width, id, class: cssClass, change, livechange, suggest, enabled, enablesuggestions, maxlength, placeholder, showrefreshbutton, showsearchbutton, visible } = {}) {
+  search_field({ search, width, id, class: cssClass, change, livechange, suggest, enabled, enablesuggestions, maxlength, placeholder, showrefreshbutton, showsearchbutton, visible, value } = {}) {
     return this._leaf({
       name: "SearchField",
       aProp: this._filterProps([
@@ -3463,6 +3463,44 @@ class z2ui5_cl_xml_view {
     });
   }
 
+  header_toolbar(args = {}) {
+    return this._container({
+      name: "headerToolbar",
+      ns: this._aggNs(args),
+      aProp: [],
+    });
+  }
+
+  suggestion_items(args = {}) {
+    return this._container({
+      name: "suggestionItems",
+      ns: this._aggNs(args),
+      aProp: [],
+    });
+  }
+
+  custom_header(args = {}) {
+    return this._container({
+      name: "customHeader",
+      ns: this._aggNs(args),
+      aProp: [],
+    });
+  }
+
+  custom_list_item(args = {}) {
+    return this._container({
+      name: "CustomListItem",
+      ns: this._aggNs(args),
+      aProp: [],
+    });
+  }
+
+  /** add a single raw property onto the current element — abap parity */
+  _generic_property({ n, v } = {}) {
+    this.aProp.push({ n, v });
+    return this;
+  }
+
   tab_container() {
     return this._container({
       name: "TabContainer",
@@ -3639,7 +3677,7 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  date_picker({ placeholder, displayformat, valueformat, required, valuestate, valuestatetext, enabled, showcurrentdatebutton, change, hideinput, showfooter, visible, showvaluestatemessage, mindate, maxdate, editable, width, id, calendarweeknumbering, displayformattype, class: cssClass, textdirection, textalign, name, datevalue, initialfocuseddatevalue } = {}) {
+  date_picker({ placeholder, displayformat, valueformat, required, valuestate, valuestatetext, enabled, showcurrentdatebutton, change, hideinput, showfooter, visible, showvaluestatemessage, mindate, maxdate, editable, width, id, calendarweeknumbering, displayformattype, class: cssClass, textdirection, textalign, name, datevalue, initialfocuseddatevalue, value } = {}) {
     return this._leaf({
       name: "DatePicker",
       aProp: this._filterProps([
@@ -3674,7 +3712,7 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  time_picker({ placeholder, enabled, valuestate, displayformat, valueformat, required, width, datevalue, localeid, mask, maskmode, minutesstep, name, placeholdersymbol, secondsstep, textalign, textdirection, title, showcurrenttimebutton, showvaluestatemessage, support2400, initialfocuseddatevalue, hideinput, editable, visible, valuestatetext, livechange, change, aftervaluehelpopen, aftervaluehelpclose } = {}) {
+  time_picker({ placeholder, enabled, valuestate, displayformat, valueformat, required, width, datevalue, localeid, mask, maskmode, minutesstep, name, placeholdersymbol, secondsstep, textalign, textdirection, title, showcurrenttimebutton, showvaluestatemessage, support2400, initialfocuseddatevalue, hideinput, editable, visible, valuestatetext, livechange, change, aftervaluehelpopen, aftervaluehelpclose, value } = {}) {
     return this._leaf({
       name: "TimePicker",
       aProp: this._filterProps([
@@ -3713,7 +3751,7 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  date_time_picker({ placeholder, enabled, valuestate } = {}) {
+  date_time_picker({ placeholder, enabled, valuestate, value } = {}) {
     return this._leaf({
       name: "DateTimePicker",
       aProp: this._filterProps([
@@ -3988,7 +4026,7 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  text_area({ rows, cols, height, class: cssClass, width, valueliveupdate, editable, enabled, growing, growingmaxlines, id, required, placeholder, valuestate, valuestatetext, wrapping, maxlength, textalign, textdirection, showvaluestatemessage, showexceededtext } = {}) {
+  text_area({ rows, cols, height, class: cssClass, width, valueliveupdate, editable, enabled, growing, growingmaxlines, id, required, placeholder, valuestate, valuestatetext, wrapping, maxlength, textalign, textdirection, showvaluestatemessage, showexceededtext, value } = {}) {
     return this._leaf({
       name: "TextArea",
       aProp: this._filterProps([
@@ -4018,7 +4056,7 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  range_slider({ max, min, step, startvalue, endvalue, showtickmarks, labelinterval, width, class: cssClass, id, value2, change } = {}) {
+  range_slider({ max, min, step, startvalue, endvalue, showtickmarks, labelinterval, width, class: cssClass, id, value2, change, value } = {}) {
     return this._leaf({
       name: "RangeSlider",
       aProp: this._filterProps([
@@ -4119,7 +4157,7 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  step_input({ id, min, max, step, width, valuestate, enabled, description, displayvalueprecision, largerstep, stepmode, editable, fieldwidth, textalign, validationmode, change } = {}) {
+  step_input({ id, min, max, step, width, valuestate, enabled, description, displayvalueprecision, largerstep, stepmode, editable, fieldwidth, textalign, validationmode, change, value } = {}) {
     return this._leaf({
       name: "StepInput",
       aProp: this._filterProps([
@@ -4537,7 +4575,7 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  currency({ currency, usesymbol, maxprecision, stringvalue } = {}) {
+  currency({ currency, usesymbol, maxprecision, stringvalue, value } = {}) {
     return this._container({
       name: "Currency",
       ns: "u",
@@ -5143,7 +5181,7 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  rating_indicator({ maxvalue, enabled, class: cssClass, iconsize, tooltip, displayonly, change, id, editable } = {}) {
+  rating_indicator({ maxvalue, enabled, class: cssClass, iconsize, tooltip, displayonly, change, id, editable, value } = {}) {
     return this._container({
       name: "RatingIndicator",
       aProp: this._filterProps([
@@ -5598,7 +5636,7 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  feed_input({ buttontooltip, enabled, growing, growingmaxlines, icon, icondensityaware, icondisplayshape, iconinitials, iconsize, maxlength, placeholder, rows, showexceededtext, showicon, post, class: cssClass } = {}) {
+  feed_input({ buttontooltip, enabled, growing, growingmaxlines, icon, icondensityaware, icondisplayshape, iconinitials, iconsize, maxlength, placeholder, rows, showexceededtext, showicon, post, class: cssClass, value } = {}) {
     return this._container({
       name: "FeedInput",
       aProp: this._filterProps([
@@ -5665,7 +5703,7 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  feed_content({ contenttext, subheader, class: cssClass, press } = {}) {
+  feed_content({ contenttext, subheader, class: cssClass, press, value } = {}) {
     return this._container({
       name: "FeedContent",
       aProp: this._filterProps([
@@ -5702,7 +5740,7 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  mask_input({ placeholder, mask, name, textalign, textdirection, width, valuestate, valuestatetext, placeholdersymbol, required, showclearicon, showvaluestatemessage, visible, fieldwidth, livechange, change } = {}) {
+  mask_input({ placeholder, mask, name, textalign, textdirection, width, valuestate, valuestatetext, placeholdersymbol, required, showclearicon, showvaluestatemessage, visible, fieldwidth, livechange, change, value } = {}) {
     return this._leaf({
       name: "MaskInput",
       aProp: this._filterProps([
@@ -6089,7 +6127,7 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  column_micro_chart_data({ label, displayvalue, color, press } = {}) {
+  column_micro_chart_data({ label, displayvalue, color, press, value } = {}) {
     return this._leaf({
       name: "ColumnMicroChartData",
       ns: "mchart",
@@ -6124,7 +6162,7 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  comparison_micro_chart_data({ color, press, displayvalue, title } = {}) {
+  comparison_micro_chart_data({ color, press, displayvalue, title, value } = {}) {
     return this._container({
       name: "ComparisonMicroChartData",
       ns: "mchart",
@@ -6246,7 +6284,7 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  rich_text_editor({ buttongroups, customtoolbar, editable, editortype, height, plugins, required, sanitizevalue, showgroupclipboard, showgroupfont, showgroupfontstyle, showgroupinsert, showgrouplink, showgroupstructure, showgrouptextalign, showgroupundo, textdirection, uselegacytheme, width, wrapping, beforeeditorinit, change, ready, readyrecurring } = {}) {
+  rich_text_editor({ buttongroups, customtoolbar, editable, editortype, height, plugins, required, sanitizevalue, showgroupclipboard, showgroupfont, showgroupfontstyle, showgroupinsert, showgrouplink, showgroupstructure, showgrouptextalign, showgroupundo, textdirection, uselegacytheme, width, wrapping, beforeeditorinit, change, ready, readyrecurring, value } = {}) {
     return this._container({
       name: "RichTextEditor",
       ns: "text",
@@ -6280,7 +6318,7 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  slider({ max, min, step, enabletickmarks, width, class: cssClass, id, enabled, change, inputsastooltips, showadvancedtooltip, showhandletooltip, livechange } = {}) {
+  slider({ max, min, step, enabletickmarks, width, class: cssClass, id, enabled, change, inputsastooltips, showadvancedtooltip, showhandletooltip, livechange, value } = {}) {
     return this._leaf({
       name: "Slider",
       aProp: this._filterProps([
@@ -6483,7 +6521,7 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  quick_view_group_element({ emailsubject, label, pagelinkid, target, type, url, visible } = {}) {
+  quick_view_group_element({ emailsubject, label, pagelinkid, target, type, url, visible, value } = {}) {
     return this._container({
       name: "QuickViewGroupElement",
       aProp: this._filterProps([
@@ -6499,7 +6537,7 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  date_range_selection({ placeholder, displayformat, valueformat, required, valuestate, valuestatetext, enabled, showcurrentdatebutton, change, hideinput, showfooter, visible, showvaluestatemessage, mindate, maxdate, editable, width, id, calendarweeknumbering, displayformattype, class: cssClass, textdirection, textalign, name, datevalue, seconddatevalue, initialfocuseddatevalue, delimiter } = {}) {
+  date_range_selection({ placeholder, displayformat, valueformat, required, valuestate, valuestatetext, enabled, showcurrentdatebutton, change, hideinput, showfooter, visible, showvaluestatemessage, mindate, maxdate, editable, width, id, calendarweeknumbering, displayformattype, class: cssClass, textdirection, textalign, name, datevalue, seconddatevalue, initialfocuseddatevalue, delimiter, value } = {}) {
     return this._leaf({
       name: "DateRangeSelection",
       aProp: this._filterProps([
@@ -7536,7 +7574,7 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  line({ id, class: cssClass, arroworientation, arrowposition, description, from, linetype, selected, status, stretchtocenter, title, visible, press, hover } = {}) {
+  line({ id, class: cssClass, arroworientation, arrowposition, description, from, linetype, selected, status, stretchtocenter, title, visible, press, hover, to } = {}) {
     return this._container({
       name: "Line",
       ns: "networkgraph",
@@ -7721,7 +7759,7 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  element_attribute({ ns, label } = {}) {
+  element_attribute({ ns, label, value } = {}) {
     return this._container({
       name: "ElementAttribute",
       aProp: this._filterProps([
@@ -8042,7 +8080,7 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  status_indicator({ id, class: cssClass, height, labelposition, showlabel, size, viewbox, width, visible, press } = {}) {
+  status_indicator({ id, class: cssClass, height, labelposition, showlabel, size, viewbox, width, visible, press, value } = {}) {
     return this._container({
       name: "StatusIndicator",
       ns: "si",
@@ -8194,7 +8232,7 @@ class z2ui5_cl_xml_view {
       { n: "id", v: id },
       { n: "legendVisible", v: legendvisible },
       { n: "vizCustomizations", v: vizcustomizations },
-      { n: "vizProperties", v: lv_vizproperties },
+      { n: "vizProperties", v: vizproperties },
       { n: "vizScales", v: vizscales },
       { n: "vizType", v: viztype },
       { n: "height", v: height },
@@ -8236,7 +8274,7 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  viz_dimension_definition({ axis, datatype, displayvalue, identity, name, sorter } = {}) {
+  viz_dimension_definition({ axis, datatype, displayvalue, identity, name, sorter, value } = {}) {
     return this._container({
       name: "DimensionDefinition",
       ns: "viz.data",
@@ -8262,7 +8300,7 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  viz_measure_definition({ format, group, identity, name, range, unit } = {}) {
+  viz_measure_definition({ format, group, identity, name, range, unit, value } = {}) {
     return this._container({
       name: "MeasureDefinition",
       ns: "viz.data",
@@ -8301,7 +8339,7 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  smart_multi_input({ id, entityset, supportranges, enableodataselect, requestatleastfields, singletokenmode, supportmultiselect, textseparator, textlabel, tooltiplabel, textineditmodesource, mandatory, maxlength } = {}) {
+  smart_multi_input({ id, entityset, supportranges, enableodataselect, requestatleastfields, singletokenmode, supportmultiselect, textseparator, textlabel, tooltiplabel, textineditmodesource, mandatory, maxlength, value } = {}) {
     return this._container({
       name: "SmartMultiInput",
       ns: "smi",

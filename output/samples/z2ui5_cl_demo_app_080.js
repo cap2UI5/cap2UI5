@@ -35,8 +35,9 @@ class z2ui5_cl_demo_app_080 extends z2ui5_if_app {
   }
 
   on_event() {
+    let ls_client;
     if (this.client.check_on_event(`AppSelected`)) {
-      const ls_client = this.client.get();
+      ls_client = this.client.get();
       this.client.message_toast_display(`Event AppSelected with appointment ${ls_client.T_EVENT_ARG[(1) - 1]}`);
     }
   }

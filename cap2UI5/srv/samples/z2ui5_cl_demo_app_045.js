@@ -6,8 +6,9 @@ class z2ui5_cl_demo_app_045 extends z2ui5_if_app {
   mv_info_filter = ``;
 
   refresh_data() {
+    let ls_row;
     for (let sy_index = 1; sy_index <= 1000; sy_index++) {
-      const ls_row = { count: sy_index, value: `red`, info: (sy_index < 50 ? `completed` : `uncompleted`), descr: `this is a description`, checkbox: true };
+      ls_row = { count: sy_index, value: `red`, info: (sy_index < 50 ? `completed` : `uncompleted`), descr: `this is a description`, checkbox: true };
       this.t_tab.push(ls_row);
     }
   }

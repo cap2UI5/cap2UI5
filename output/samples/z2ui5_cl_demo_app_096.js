@@ -28,8 +28,9 @@ class z2ui5_cl_demo_app_096 extends z2ui5_if_app {
   }
 
   view_display({ xml } = {}) {
+    let page;
     if (this.mo_view_parent != null) {
-      const page = z2ui5_cl_xml_view.factory()
+      page = z2ui5_cl_xml_view.factory()
         .shell()
         .page({ title: `Main View`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
       this.mo_view_parent = page.grid(`L6 M12 S12`).content(`layout`);

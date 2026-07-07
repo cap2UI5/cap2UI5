@@ -54,6 +54,7 @@ class z2ui5_cl_demo_app_162 extends z2ui5_if_app {
   }
 
   async main(client) {
+    let lo_value_help;
     this.client = client;
     if (client.check_on_init()) {
       this.mt_filter = z2ui5_cl_util.filter_get_multi_by_data(this.mt_table);
@@ -63,7 +64,7 @@ class z2ui5_cl_demo_app_162 extends z2ui5_if_app {
     }
     if (client.get().CHECK_ON_NAVIGATED === true) {
       try {
-        const lo_value_help = (client.get_app(client.get().S_DRAFT.ID_PREV_APP));
+        lo_value_help = (client.get_app(client.get().S_DRAFT.ID_PREV_APP));
         if (lo_value_help.result().check_confirmed === true) {
           this.mt_filter = lo_value_help.result().t_filter;
           this.set_data();

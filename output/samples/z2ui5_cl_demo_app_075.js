@@ -12,6 +12,7 @@ class z2ui5_cl_demo_app_075 extends z2ui5_if_app {
   client = null;
 
   on_event() {
+    let lv_data2;
     try {
       switch (this.client.get().EVENT) {
         case `START`:
@@ -21,7 +22,7 @@ class z2ui5_cl_demo_app_075 extends z2ui5_if_app {
         case `UPLOAD`:
           let [lv_dummy, lv_data] = this.mv_value.split(`;`);
           [lv_dummy, lv_data] = lv_data.split(`,`);
-          const lv_data2 = z2ui5_cl_util.conv_decode_x_base64(lv_data);
+          lv_data2 = z2ui5_cl_util.conv_decode_x_base64(lv_data);
           this.mv_file = z2ui5_cl_util.conv_get_string_by_xstring(lv_data2);
           this.client.message_box_display(`CSV loaded to table`);
           this.view_display();

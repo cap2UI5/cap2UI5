@@ -30,7 +30,7 @@ class z2ui5_cl_demo_app_318 extends z2ui5_if_app {
     page.footer()
       .overflow_toolbar()
       .toolbar_spacer()
-      .button({ text: `PDF`, press: this.client._event(`PDF`), type: `Emphasized`, enabled: Boolean(this.mv_editor) });
+      .button({ text: `PDF`, press: this.client._event(`PDF`), type: `Emphasized`, enabled: (this.mv_editor) });
     this.client.view_display(page.stringify());
   }
 
@@ -48,7 +48,7 @@ class z2ui5_cl_demo_app_318 extends z2ui5_if_app {
         client.message_box_display(`Upload successful. File saved!`, `success`);
         break;
       case `EDIT`:
-        this.mv_check_editable = /* TODO(abap2js) */ xsdbool(this.mv_check_editable === false);
+        this.mv_check_editable = (this.mv_check_editable === false);
         client.view_model_update();
         break;
       case `CLEAR`:

@@ -42,7 +42,7 @@ class z2ui5_cl_demo_app_098 extends z2ui5_if_app {
 
   view_display_master() {
     const page = z2ui5_cl_xml_view.factory()
-      .page({ showheader: /* TODO(abap2js) */ xsdbool(false === this.client.get().CHECK_LAUNCHPAD_ACTIVE), title: `abap2UI5 - Master Detail Page with Nested View`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: true });
+      .page({ showheader: (false === this.client.get().CHECK_LAUNCHPAD_ACTIVE), title: `abap2UI5 - Master Detail Page with Nested View`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: true });
     const col_layout = page.flexible_column_layout({ layout: this.client._bind_edit(this.mv_layout), id: `test` });
     const lr_master = col_layout.begin_column_pages();
     const lr_list = lr_master.list({ headertext: `List Output`, items: this.client._bind_edit({ val: this.t_tab, view: this.client.cs_view.main }), mode: `SingleSelectMaster`, selectionchange: this.client._event(`SELCHANGE`) })
@@ -52,6 +52,8 @@ class z2ui5_cl_demo_app_098 extends z2ui5_if_app {
 
   async main(client) {
     let sy_subrc = 0;
+    let lt_sel;
+    let ls_sel;
     this.client = client;
     if (client.check_on_init()) {
       this.t_tab = [{ title: `row_01`, info: `completed`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `row_02`, info: `incompleted`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `row_03`, info: `working`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `row_04`, info: `working`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `row_05`, info: `completed`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `row_06`, info: `completed`, descr: `this is a description`, icon: `sap-icon://account` }];
@@ -70,9 +72,9 @@ class z2ui5_cl_demo_app_098 extends z2ui5_if_app {
         this.view_display_detail_detail();
         break;
       case `SELCHANGE`:
-        const lt_sel = this.t_tab;
+        lt_sel = this.t_tab;
         for (let _i = lt_sel.length - 1; _i >= 0; _i--) { const row = lt_sel[_i]; if (row.selected === false) lt_sel.splice(_i, 1); }
-        let ls_sel = {};
+        ls_sel = {};
         {
           const _t = lt_sel;
           const _i = (1) - 1;

@@ -8,7 +8,7 @@ class z2ui5_cl_demo_app_219 extends z2ui5_if_app {
       .page({ title: `abap2UI5 - Sample: Input List Item`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
     const layout = page.list({ headertext: `Input` })
       .input_list_item(`WLAN`)
-      .switch_({ state: `true` })
+      .switch({ state: `true` })
       .get_parent()
       .input_list_item(`Flight Mode`)
       .checkbox(`true`)

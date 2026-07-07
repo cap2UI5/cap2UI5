@@ -26,6 +26,12 @@ class z2ui5_cl_demo_app_099 extends z2ui5_if_app {
   on_event() {
     let sy_tabix = 0;
     let sy_subrc = 0;
+    let lt_arg;
+    let sort_field;
+    let filter_string;
+    let lv_values_len;
+    let mv_filter_len;
+    let group_field;
     switch (this.client.get().EVENT) {
       case `ALL`:
         this.view_display_settings_popup();
@@ -40,9 +46,9 @@ class z2ui5_cl_demo_app_099 extends z2ui5_if_app {
         this.view_display_group_popup();
         break;
       case `CONFIRM_SORT`:
-        let lt_arg = this.client.get().T_EVENT_ARG;
+        lt_arg = this.client.get().T_EVENT_ARG;
         if (lt_arg) {
-          const sort_field = lt_arg[(1) - 1];
+          sort_field = lt_arg[(1) - 1];
           if (this.mv_sort_descending === true) {
             { const _f = String(sort_field)
               .toLowerCase(); this.t_tab.sort((a, b) => (a[_f] > b[_f] ? 1 : a[_f] < b[_f] ? -1 : 0) * -1); }
@@ -57,13 +63,13 @@ class z2ui5_cl_demo_app_099 extends z2ui5_if_app {
         this.mv_filter = {};
         lt_arg = this.client.get().T_EVENT_ARG;
         if (lt_arg) {
-          const filter_string = lt_arg[(1) - 1];
+          filter_string = lt_arg[(1) - 1];
           let lv_dummy;
           [lv_dummy, filter_string] = filter_string.split(`:`);
           // TODO(abap2js): CONDENSE filter_string NO-GAPS.
           let [lv_field, lv_values] = filter_string.split(`(`);
           // TODO(abap2js): TRANSLATE lv_field TO UPPER CASE.
-          const lv_values_len = lv_values.length - 1;
+          lv_values_len = lv_values.length - 1;
           lv_values = String(lv_values).substr(0, lv_values_len);
           let lt_values = lv_values.split(`,`);
           if (sy_subrc === 0) {
@@ -73,7 +79,7 @@ class z2ui5_cl_demo_app_099 extends z2ui5_if_app {
               this.mv_filter = this.mv_filter + `{path:'` + lv_field + `',operator: 'EQ',value1:'` + lv_val + `'},`;
             }
           }
-          const mv_filter_len = this.mv_filter.length - 1;
+          mv_filter_len = this.mv_filter.length - 1;
           this.mv_filter = String(this.mv_filter).substr(0, mv_filter_len);
           this.view_display();
         }
@@ -81,7 +87,7 @@ class z2ui5_cl_demo_app_099 extends z2ui5_if_app {
       case `CONFIRM_GROUP`:
         lt_arg = this.client.get().T_EVENT_ARG;
         if (lt_arg) {
-          const group_field = lt_arg[(1) - 1];
+          group_field = lt_arg[(1) - 1];
           if (group_field) {
             if (this.mv_group_descending === true) {
               { const _f = String(group_field)

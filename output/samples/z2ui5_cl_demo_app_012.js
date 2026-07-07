@@ -7,9 +7,10 @@ class z2ui5_cl_demo_app_012 extends z2ui5_if_app {
   client = null;
 
   on_navigation() {
+    let app;
     if (this.check_popup === true) {
       this.check_popup = false;
-      const app = (this.client.get_app(this.client.get().S_DRAFT.ID_PREV_APP));
+      app = (this.client.get_app(this.client.get().S_DRAFT.ID_PREV_APP));
       this.client.message_toast_display(`${app.event} pressed`);
     }
     this.view_display();

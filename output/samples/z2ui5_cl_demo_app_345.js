@@ -12,11 +12,13 @@ class z2ui5_cl_demo_app_345 extends z2ui5_if_app {
   get_comp() {
     let result = [];
     let sy_tabix = 0;
+    let structdesc;
+    let comp;
     try {
       try {
         // TODO(abap2js): cl_abap_typedescr=>describe_by_name( EXPORTING p_name = `Z2UI5_T_01` RECEIVING p_descr_ref = DATA(typedesc) EXCEPTIONS type_not_found = 1 OTHERS = 2 ).
-        const structdesc = (typedesc);
-        const comp = structdesc.get_components();
+        structdesc = (typedesc);
+        comp = structdesc.get_components();
         sy_tabix = 0;
         for (const com of comp) {
           sy_tabix++;
@@ -35,10 +37,12 @@ class z2ui5_cl_demo_app_345 extends z2ui5_if_app {
     let sy_subrc = 0;
     let fs_table1 = null;
     let _fs$fs_table1 = null;
+    let new_struct_desc;
+    let new_table_desc;
     const t_comp = this.get_comp();
     try {
-      const new_struct_desc = cl_abap_structdescr.create(t_comp);
-      const new_table_desc = cl_abap_tabledescr.create({ p_line_type: new_struct_desc, p_table_kind: cl_abap_tabledescr.tablekind_std });
+      new_struct_desc = cl_abap_structdescr.create(t_comp);
+      new_table_desc = cl_abap_tabledescr.create({ p_line_type: new_struct_desc, p_table_kind: cl_abap_tabledescr.tablekind_std });
       // TODO(abap2js): CREATE DATA mt_data1 TYPE HANDLE new_table_desc.
       // TODO(abap2js): ASSIGN mt_data1->* TO <table1>.
       // TODO(abap2js): SELECT * FROM z2ui5_t_01 INTO TABLE @<table1> UP TO 5 ROWS.
@@ -61,13 +65,14 @@ class z2ui5_cl_demo_app_345 extends z2ui5_if_app {
     let sy_subrc = 0;
     let fs_data = null;
     let _fs$fs_data = null;
+    let lv_index;
     // TODO(abap2js): ASSIGN i_data->* TO FIELD-SYMBOL(<data>).
     const table = i_page.table({ width: `auto`, items: i_client._bind(fs_data) });
     const columns = table.columns();
     sy_tabix = 0;
     for (const layout of i_layout.ms_data.t_layout) {
       sy_tabix++;
-      let lv_index = sy_tabix;
+      lv_index = sy_tabix;
       columns.column({ visible: i_client._bind({ val: layout.visible, tab: i_layout.ms_data.t_layout, tab_index: lv_index }) })
         .text(layout.name);
     }
@@ -87,13 +92,14 @@ class z2ui5_cl_demo_app_345 extends z2ui5_if_app {
     let _fs$fs_table = null;
     let fs_val = null;
     let _fs$fs_val = null;
+    let app;
     if (client.check_on_init()) {
       this.get_data();
       this.view_display({ client: client });
     }
     switch (client.get().EVENT) {
       case `GO`:
-        const app = z2ui5_cl_demo_app_336.factory();
+        app = z2ui5_cl_demo_app_336.factory();
         client.nav_app_call(app);
         break;
     }

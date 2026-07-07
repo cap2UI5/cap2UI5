@@ -11,8 +11,9 @@ class z2ui5_cl_demo_app_120 extends z2ui5_if_app {
   mt_spot = [];
 
   async main(client) {
+    let view;
     if (client.check_on_init()) {
-      let view = z2ui5_cl_xml_view.factory();
+      view = z2ui5_cl_xml_view.factory();
       client.view_display(view.shell().page({ title: `abap2UI5 - Device Capabilities`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() })._z2ui5().geolocation({ finished: client._event(`GEOLOCATION_LOADED`), longitude: client._bind_edit(this.longitude), latitude: client._bind_edit(this.latitude), altitude: client._bind_edit(this.altitude), altitudeaccuracy: client._bind_edit(this.altitudeaccuracy), accuracy: client._bind_edit(this.accuracy), speed: client._bind_edit(this.speed) }).simple_form({ title: `Geolocation`, editable: true }).content(`form`).label(`Longitude`).input(client._bind_edit(this.longitude)).label(`Latitude`).input(client._bind_edit(this.latitude)).label(`Altitude`).input(client._bind_edit(this.altitude)).label(`Accuracy`).input(client._bind_edit(this.accuracy)).label(`AltitudeAccuracy`).input(client._bind_edit(this.altitudeaccuracy)).label(`Speed`).input(client._bind_edit(this.speed)).label(`MapContainer`).button({ text: `Display`, press: client._event(`MAP_CONTAINER_DISPLAY`) }).stringify());
       return;
     }

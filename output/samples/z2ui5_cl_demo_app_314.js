@@ -6,6 +6,9 @@ class z2ui5_cl_demo_app_314 extends z2ui5_if_app {
   mv_val = ``;
 
   async main(client) {
+    let view;
+    let page;
+    let tab;
     if (client.check_on_init()) {
       for (let sy_index = 1; sy_index <= 10; sy_index++) {
         let ls_row = {};
@@ -16,13 +19,13 @@ class z2ui5_cl_demo_app_314 extends z2ui5_if_app {
         ls_row.valuecolor = `Good`;
         this.t_tab.push(ls_row);
       }
-      const view = z2ui5_cl_xml_view.factory();
-      const page = view.shell()
+      view = z2ui5_cl_xml_view.factory();
+      page = view.shell()
         .page({ title: `abap2UI5 - Device Model, HTTP Model, OData Model`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
       page.input({ description: `device model`, value: `{device>/resize/width}`, enabled: false });
       this.mv_val = `input value with http model`;
       page.input(client._bind_edit({ val: this.mv_val, switch_default_model: true }));
-      let tab = page.table(client._bind_edit({ val: this.t_tab, switch_default_model: true }));
+      tab = page.table(client._bind_edit({ val: this.t_tab, switch_default_model: true }));
       tab.header_toolbar().toolbar().title(`table with http model (framework default)`);
       tab.columns()
         .column()

@@ -7,9 +7,10 @@ class z2ui5_cl_demo_app_084 extends z2ui5_if_app {
   client = null;
 
   async main(client) {
+    let lv_script;
     this.client = client;
     if (client.check_on_init()) {
-      const lv_script = `` + `\\n` + `function setInputFIlter(){` + `\\n` + ` var inp = sap.z2ui5.oView.byId('suggInput');` + `\\n` + ` inp.setFilterFunction(function(sValue, oItem){` + `\\n` + ` var aSplit = sValue.split(" ");` + `\\n` + ` if (aSplit.length > 0) {` + `\\n` + ` var sTermNew = aSplit.slice(-1)[0];` + `\\n` + ` sTermNew.trim();` + `\\n` + ` if (sTermNew) {` + `\\n` + ` return oItem.getText().match(new RegExp(sTermNew, "i"));` + `\\n` + ` }` + `\\n` + ` }` + `\\n` + ` });` + `\\n` + `}`;
+      lv_script = `` + `\\n` + `function setInputFIlter(){` + `\\n` + ` var inp = sap.z2ui5.oView.byId('suggInput');` + `\\n` + ` inp.setFilterFunction(function(sValue, oItem){` + `\\n` + ` var aSplit = sValue.split(" ");` + `\\n` + ` if (aSplit.length > 0) {` + `\\n` + ` var sTermNew = aSplit.slice(-1)[0];` + `\\n` + ` sTermNew.trim();` + `\\n` + ` if (sTermNew) {` + `\\n` + ` return oItem.getText().match(new RegExp(sTermNew, "i"));` + `\\n` + ` }` + `\\n` + ` }` + `\\n` + ` });` + `\\n` + `}`;
       client.view_display(z2ui5_cl_xml_view.factory()._z2ui5().timer(client._event(`START`))._generic({ ns: `html`, name: `script` })._cc_plain_xml(lv_script).stringify());
       this.on_init();
     } else {
@@ -63,7 +64,7 @@ class z2ui5_cl_demo_app_084 extends z2ui5_if_app {
     view._generic({ name: `script`, ns: `html` })
       ._cc_plain_xml(`function callMessageToast(sAction) { sap.m.MessageToast.show('Hello there !!'); }`);
     const page = view.shell()
-      .page({ showheader: /* TODO(abap2js) */ xsdbool(false === this.client.get().CHECK_LAUNCHPAD_ACTIVE), title: `abap2UI5 - Selection-Screen Example`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+      .page({ showheader: (false === this.client.get().CHECK_LAUNCHPAD_ACTIVE), title: `abap2UI5 - Selection-Screen Example`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
     const grid = page.grid(`L6 M12 S12`).content(`layout`);
     grid.simple_form({ title: `Input`, editable: true })
       .content(`form`)

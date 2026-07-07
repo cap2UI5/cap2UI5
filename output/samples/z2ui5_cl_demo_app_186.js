@@ -23,7 +23,7 @@ class z2ui5_cl_demo_app_186 extends z2ui5_if_app {
     let lv_script = ``;
     const view = z2ui5_cl_xml_view.factory();
     const page = view.shell()
-      .page({ showheader: /* TODO(abap2js) */ xsdbool(false === this.client.get().CHECK_LAUNCHPAD_ACTIVE), title: `abap2UI5 - Download Base64 File`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+      .page({ showheader: (false === this.client.get().CHECK_LAUNCHPAD_ACTIVE), title: `abap2UI5 - Download Base64 File`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
     page.flex_box({ width: `100%`, height: `600px`, alignitems: `Center`, justifycontent: `SpaceAround` })
       .vbox()
       .text(`Base64 String:`)

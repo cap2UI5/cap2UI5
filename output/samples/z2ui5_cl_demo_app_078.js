@@ -9,8 +9,10 @@ class z2ui5_cl_demo_app_078 extends z2ui5_if_app {
 
   async main(client) {
     let sy_tabix = 0;
+    let view;
+    let tab;
     if (client.check_on_init()) {
-      let view = z2ui5_cl_xml_view.factory();
+      view = z2ui5_cl_xml_view.factory();
       view = view.shell()
         .page({ id: `page_main`, title: `abap2UI5 - Select-Options`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
       view._z2ui5()
@@ -18,7 +20,7 @@ class z2ui5_cl_demo_app_078 extends z2ui5_if_app {
       view.multi_input({ id: `test`, tokens: client._bind_edit(this.mt_token), showclearicon: true })
         .tokens()
         .token({ key: `{KEY}`, text: `{TEXT}`, visible: `{VISIBLE}`, selected: `{SELKZ}`, editable: `{EDITABLE}` });
-      const tab = view.table({ items: client._bind_edit(this.mt_token), mode: `MultiSelect` });
+      tab = view.table({ items: client._bind_edit(this.mt_token), mode: `MultiSelect` });
       tab.columns().column().text(`KEY`).get_parent().column().text(`TEXT`);
       tab.items()
         .column_list_item({ selected: `{SELKZ}` })

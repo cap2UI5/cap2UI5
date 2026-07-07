@@ -6,9 +6,10 @@ class z2ui5_cl_demo_app_365 extends z2ui5_if_app {
   client = null;
 
   async main(client) {
+    let view;
     this.client = client;
     if (client.check_on_navigated()) {
-      const view = z2ui5_cl_xml_view.factory();
+      view = z2ui5_cl_xml_view.factory();
       view.shell()
         .page({ title: `abap2UI5 - CL_DEMO_OUTPUT`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() })
         .button({ text: `Open in Popup`, press: client._event(`POPUP`) })

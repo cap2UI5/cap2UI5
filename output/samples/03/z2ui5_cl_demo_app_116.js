@@ -121,13 +121,16 @@ class z2ui5_cl_demo_app_116 extends z2ui5_if_app {
   }
 
   async main(client) {
+    let lv_save_state_js;
+    let lv_reset_state_js;
+    let lv_open_by_id;
     let lt_event_arg = [];
     this.client = client;
     if (client.check_on_init()) {
       this.on_init();
-      const lv_save_state_js = `function saveState() {debugger;` + `\\n` + ` var treeTable = sap.z2ui5.oView.byId("treeTable");` + `\\n` + ` sap.z2ui5.treeState = treeTable.getBinding('rows')
+      lv_save_state_js = `function saveState() {debugger;` + `\\n` + ` var treeTable = sap.z2ui5.oView.byId("treeTable");` + `\\n` + ` sap.z2ui5.treeState = treeTable.getBinding('rows')
         .getCurrentTreeState();` + `\\n` + ` }; `;
-      const lv_reset_state_js = `function setState() {debugger;` + `\\n` + ` var treeTable = sap.z2ui5.oView.byId("treeTable");` + `\\n` + ` if( sap.z2ui5.treeState == undefined ) {` + `\\n` + ` sap.z2ui5.treeState = treeTable.getBinding('rows')
+      lv_reset_state_js = `function setState() {debugger;` + `\\n` + ` var treeTable = sap.z2ui5.oView.byId("treeTable");` + `\\n` + ` if( sap.z2ui5.treeState == undefined ) {` + `\\n` + ` sap.z2ui5.treeState = treeTable.getBinding('rows')
         .getCurrentTreeState();` + `\\n` + ` } else {` + `\\n` + ` treeTable.getBinding("rows")
         .setTreeState(sap.z2ui5.treeState);` + `\\n` + ` treeTable.getBinding("rows")
         .refresh();` + `\\n` + ` sap.z2ui5.treeState = treeTable.getBinding('rows')
@@ -147,7 +150,7 @@ class z2ui5_cl_demo_app_116 extends z2ui5_if_app {
         break;
       case `POPOVER`:
         lt_event_arg = client.get().T_EVENT_ARG;
-        const lv_open_by_id = lt_event_arg[(1) - 1];
+        lv_open_by_id = lt_event_arg[(1) - 1];
         this.popover_display({ id: lv_open_by_id });
         break;
       case `ROW_ADD`:

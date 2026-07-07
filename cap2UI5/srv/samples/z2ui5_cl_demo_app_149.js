@@ -6,9 +6,11 @@ class z2ui5_cl_demo_app_149 extends z2ui5_if_app {
   client = null;
 
   on_navigation() {
+    let lo_prev;
+    let lo_dummy;
     try {
-      const lo_prev = this.client.get_app(this.client.get().S_DRAFT.ID_PREV_APP);
-      const lo_dummy = (lo_prev);
+      lo_prev = this.client.get_app(this.client.get().S_DRAFT.ID_PREV_APP);
+      lo_dummy = (lo_prev);
       this.client.message_box_display(`callback after popup to inform`);
     } catch (error) {
     }
@@ -23,9 +25,10 @@ class z2ui5_cl_demo_app_149 extends z2ui5_if_app {
   }
 
   on_event() {
+    let lo_app;
     switch (this.client.get().EVENT) {
       case `POPUP`:
-        const lo_app = z2ui5_cl_pop_html.factory(`<h2>HTML Links</h2>` + `\\n` + `<p>HTML links are defined with the a tag:</p>` + `\\n` + `\\n` + `<a href="https://www.w3schools.com" target="_blank">This is a link</a>`);
+        lo_app = z2ui5_cl_pop_html.factory(`<h2>HTML Links</h2>` + `\\n` + `<p>HTML links are defined with the a tag:</p>` + `\\n` + `\\n` + `<a href="https://www.w3schools.com" target="_blank">This is a link</a>`);
         this.client.nav_app_call(lo_app);
         break;
     }

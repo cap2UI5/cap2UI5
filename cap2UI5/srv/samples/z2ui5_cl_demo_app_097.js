@@ -43,6 +43,10 @@ class z2ui5_cl_demo_app_097 extends z2ui5_if_app {
 
   async main(client) {
     let sy_subrc = 0;
+    let lt_arg;
+    let ls_arg;
+    let lt_sel;
+    let ls_sel;
     this.client = client;
     if (client.check_on_init()) {
       this.t_tab = [{ title: `row_01`, info: `completed`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `row_02`, info: `incompleted`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `row_03`, info: `working`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `row_04`, info: `working`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `row_05`, info: `completed`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `row_06`, info: `completed`, descr: `this is a description`, icon: `sap-icon://account` }];
@@ -52,8 +56,8 @@ class z2ui5_cl_demo_app_097 extends z2ui5_if_app {
     }
     switch (client.get().EVENT) {
       case `ROW_DELETE`:
-        const lt_arg = client.get().T_EVENT_ARG;
-        let ls_arg = {};
+        lt_arg = client.get().T_EVENT_ARG;
+        ls_arg = {};
         {
           const _t = lt_arg;
           const _i = (1) - 1;
@@ -66,9 +70,9 @@ class z2ui5_cl_demo_app_097 extends z2ui5_if_app {
         client.nest_view_model_update();
         break;
       case `SELCHANGE`:
-        const lt_sel = this.t_tab;
+        lt_sel = this.t_tab;
         for (let _i = lt_sel.length - 1; _i >= 0; _i--) { const row = lt_sel[_i]; if (row.selected === false) lt_sel.splice(_i, 1); }
-        let ls_sel = {};
+        ls_sel = {};
         {
           const _t = lt_sel;
           const _i = (1) - 1;

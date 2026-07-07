@@ -11,6 +11,7 @@ class z2ui5_cl_demo_app_348 extends z2ui5_if_app {
     let sy_subrc = 0;
     let fs_row = null;
     let _fs$fs_row = null;
+    let app;
     if (client.check_on_init()) {
       this.get_data();
       this.mo_layout_obj = z2ui5_cl_demo_app_333.factory({ i_data: (this.ms_struc), vis_cols: 5 });
@@ -18,7 +19,7 @@ class z2ui5_cl_demo_app_348 extends z2ui5_if_app {
     }
     switch (client.get().EVENT) {
       case `GO`:
-        const app = z2ui5_cl_demo_app_336.factory();
+        app = z2ui5_cl_demo_app_336.factory();
         client.nav_app_call(app);
         break;
       case `GET_DATA`:
@@ -67,6 +68,7 @@ class z2ui5_cl_demo_app_348 extends z2ui5_if_app {
     let _fs$fs_data = null;
     let fs_value = null;
     let _fs$fs_value = null;
+    let line;
     const form = i_page.simple_form({ editable: true, layout: `ResponsiveGridLayout`, adjustlabelspan: true })
       .content(`form`);
     let index = 0;
@@ -81,7 +83,7 @@ class z2ui5_cl_demo_app_348 extends z2ui5_if_app {
       if (sy_subrc !== 0) {
         return;
       }
-      const line = form.label({ wrapping: false, text: fs_layout.name });
+      line = form.label({ wrapping: false, text: fs_layout.name });
       line.input({ value: i_client._bind(fs_value), visible: i_client._bind({ val: fs_layout.visible, tab: this.mo_layout_obj.ms_data.t_layout, tab_index: index }), enabled: false });
     }
   }

@@ -6,9 +6,11 @@ class z2ui5_cl_demo_app_156 extends z2ui5_if_app {
   client = null;
 
   on_navigation() {
+    let lo_prev;
+    let lv_text;
     try {
-      const lo_prev = this.client.get_app(this.client.get().S_DRAFT.ID_PREV_APP);
-      const lv_text = (lo_prev).result().value;
+      lo_prev = this.client.get_app(this.client.get().S_DRAFT.ID_PREV_APP);
+      lv_text = (lo_prev).result().value;
       this.client.message_box_display(`the input is ${lv_text}`);
     } catch (error) {
     }
@@ -23,9 +25,10 @@ class z2ui5_cl_demo_app_156 extends z2ui5_if_app {
   }
 
   on_event() {
+    let lo_app;
     switch (this.client.get().EVENT) {
       case `POPUP`:
-        const lo_app = z2ui5_cl_pop_input_val.factory({ text: `Amount of products:` });
+        lo_app = z2ui5_cl_pop_input_val.factory({ text: `Amount of products:` });
         this.client.nav_app_call(lo_app);
         break;
     }

@@ -25,7 +25,7 @@ class z2ui5_cl_demo_app_173 extends z2ui5_if_app {
       .template_repeat({ list: `{template>/MT_LAYOUT}`, var: `L1` })
       .object_identifier({ text: `{= '{' + \${L1>FNAME} + '}' }` });
     view.label(`IF Template (with re-rendering)`);
-    view.switch_({ state: this.client._bind_edit(this.mv_flag), change: this.client._event(`CHANGE_FLAG`) });
+    view.switch({ state: this.client._bind_edit(this.mv_flag), change: this.client._event(`CHANGE_FLAG`) });
     view = view.vbox();
     view.template_if(`{template>/XX/MV_FLAG}`)
       .template_then()

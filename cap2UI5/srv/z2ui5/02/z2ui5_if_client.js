@@ -37,6 +37,16 @@ const cs_event = Object.freeze({
   store_data:                `STORE_DATA`,
   image_editor_popup_close:  `IMAGE_EDITOR_POPUP_CLOSE`,
   system_logout:             `SYSTEM_LOGOUT`,
+  set_title:                 `SET_TITLE`,
+  set_title_launchpad:       `SET_TITLE_LAUNCHPAD`,
+  set_focus:                 `SET_FOCUS`,
+  scroll_to:                 `SCROLL_TO`,
+  scroll_into_view:          `SCROLL_INTO_VIEW`,
+  start_timer:               `START_TIMER`,
+  keyboard_set_mode:         `KEYBOARD_SET_MODE`,
+  z2ui5:                     `Z2UI5`,
+  wizard_set_next_step:      `WIZARD_SET_NEXT_STEP`,
+  play_audio:                `PLAY_AUDIO`,
 });
 
 const cs_view = Object.freeze({

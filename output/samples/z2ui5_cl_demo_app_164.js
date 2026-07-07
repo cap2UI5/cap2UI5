@@ -44,6 +44,7 @@ class z2ui5_cl_demo_app_164 extends z2ui5_if_app {
   }
 
   async main(client) {
+    let lo_popup_table;
     this.client = client;
     if (client.check_on_init()) {
       this.set_data();
@@ -52,7 +53,7 @@ class z2ui5_cl_demo_app_164 extends z2ui5_if_app {
     }
     if (client.get().CHECK_ON_NAVIGATED === true) {
       try {
-        const lo_popup_table = (client.get_app(client.get().S_DRAFT.ID_PREV_APP));
+        lo_popup_table = (client.get_app(client.get().S_DRAFT.ID_PREV_APP));
         this.set_data();
         client.view_model_update();
       } catch (error) {

@@ -12,6 +12,7 @@ class z2ui5_cl_demo_app_335 extends z2ui5_if_app {
     let sy_subrc = 0;
     let fs_row = null;
     let _fs$fs_row = null;
+    let app;
     if (client.check_on_init()) {
       this.get_data();
       this.mo_layout_obj = z2ui5_cl_demo_app_333.factory({ i_data: (this.ms_struc), vis_cols: 3 });
@@ -20,7 +21,7 @@ class z2ui5_cl_demo_app_335 extends z2ui5_if_app {
     }
     switch (client.get().EVENT) {
       case `GO`:
-        const app = z2ui5_cl_demo_app_336.factory();
+        app = z2ui5_cl_demo_app_336.factory();
         client.nav_app_call(app);
         break;
       case `CHANGE`:
@@ -57,6 +58,7 @@ class z2ui5_cl_demo_app_335 extends z2ui5_if_app {
     let _fs$fs_val = null;
     let fs_value = null;
     let _fs$fs_value = null;
+    let line;
     const page = z2ui5_cl_xml_view.factory()
       .shell()
       .page({ title: `RTTI IV`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
@@ -76,7 +78,7 @@ class z2ui5_cl_demo_app_335 extends z2ui5_if_app {
       if (sy_subrc !== 0) {
         return;
       }
-      const line = form.label({ wrapping: false, text: layout.name });
+      line = form.label({ wrapping: false, text: layout.name });
       line.input({ value: client._bind(fs_value), visible: client._bind({ val: layout.visible, tab: this.mo_layout_obj.ms_data.t_layout, tab_index: index }), enabled: false });
     }
     client.view_display(page.stringify());

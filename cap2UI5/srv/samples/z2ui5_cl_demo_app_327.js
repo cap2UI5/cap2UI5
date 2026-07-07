@@ -8,10 +8,11 @@ class z2ui5_cl_demo_app_327 extends z2ui5_if_app {
   storage_types = [];
 
   async main(client) {
+    let view;
     if (client.check_on_init()) {
       this.storage_types = [{ type: `local` }, { type: `session` }];
       this.storage = { type: `local`, prefix: `prefix1`, key: `key1` };
-      const view = z2ui5_cl_xml_view.factory();
+      view = z2ui5_cl_xml_view.factory();
       view.shell()
         .page({ title: `abap2UI5 - Storage`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() })
         .simple_form({ title: `Local/Session Storage`, editable: true })

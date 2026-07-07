@@ -6,8 +6,9 @@ class z2ui5_cl_demo_app_168 extends z2ui5_if_app {
   client = null;
 
   on_navigation() {
+    let lo_prev;
     try {
-      const lo_prev = this.client.get_app(this.client.get().S_DRAFT.ID_PREV_APP);
+      lo_prev = this.client.get_app(this.client.get().S_DRAFT.ID_PREV_APP);
       if ((lo_prev).result()) {
         this.client.message_box_display(`the input is downloaded`);
       }
@@ -24,9 +25,10 @@ class z2ui5_cl_demo_app_168 extends z2ui5_if_app {
   }
 
   on_event() {
+    let lo_app;
     switch (this.client.get().EVENT) {
       case `POPUP`:
-        const lo_app = z2ui5_cl_pop_file_dl.factory(this.get_file());
+        lo_app = z2ui5_cl_pop_file_dl.factory(this.get_file());
         this.client.nav_app_call(lo_app);
         break;
     }

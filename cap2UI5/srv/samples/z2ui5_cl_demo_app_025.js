@@ -23,6 +23,8 @@ class z2ui5_cl_demo_app_025 extends z2ui5_if_app {
   }
 
   on_event() {
+    let app_024;
+    let app_back;
     switch (this.client.get().EVENT) {
       case `BUTTON_ROUNDTRIP`:
         this.client.message_box_display(`server-client roundtrip, method on_event of the abap controller was called`);
@@ -34,7 +36,7 @@ class z2ui5_cl_demo_app_025 extends z2ui5_if_app {
         this.client.nav_app_call(new z2ui5_cl_demo_app_001());
         break;
       case `BUTTON_READ_PREVIOUS`:
-        const app_024 = (this.client.get_app(this.client.get().S_DRAFT.ID_PREV_APP));
+        app_024 = (this.client.get_app(this.client.get().S_DRAFT.ID_PREV_APP));
         this.input_previous = app_024.input2;
         this.client.message_toast_display(`data of previous app read`);
         break;
@@ -42,7 +44,7 @@ class z2ui5_cl_demo_app_025 extends z2ui5_if_app {
         this.show_view = `MAIN`;
         break;
       case `BACK_WITH_EVENT`:
-        const app_back = (this.client.get_app(this.client.get().S_DRAFT.ID_PREV_APP_STACK));
+        app_back = (this.client.get_app(this.client.get().S_DRAFT.ID_PREV_APP_STACK));
         app_back.backend_event = `CALL_PREVIOUS_APP_INPUT_RETURN`;
         this.client.nav_app_leave(app_back);
         break;

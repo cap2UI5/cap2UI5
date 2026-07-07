@@ -34,6 +34,11 @@ class z2ui5_cl_demo_app_197 extends z2ui5_if_app {
 
   async main(client) {
     let sy_tabix = 0;
+    let lt_arg;
+    let lv_json;
+    let lo_json;
+    let l_members;
+    let lv_val;
     let lt_range = [];
     this.client = client;
     if (client.check_on_init()) {
@@ -47,15 +52,15 @@ class z2ui5_cl_demo_app_197 extends z2ui5_if_app {
         client.view_model_update();
         break;
       case `FILTER`:
-        const lt_arg = client.get().T_EVENT_ARG;
-        const lv_json = lt_arg[(1) - 1];
+        lt_arg = client.get().T_EVENT_ARG;
+        lv_json = lt_arg[(1) - 1];
         try {
-          const lo_json = z2ui5_cl_ajson.parse(lv_json);
-          const l_members = lo_json.members(`/`);
+          lo_json = z2ui5_cl_ajson.parse(lv_json);
+          l_members = lo_json.members(`/`);
           sy_tabix = 0;
           for (const l_member of l_members) {
             sy_tabix++;
-            const lv_val = lo_json.get(`/` + l_member + `/mProperties/text`);
+            lv_val = lo_json.get(`/` + l_member + `/mProperties/text`);
             lt_range.push({ sign: `I`, option: `EQ`, low: lv_val });
           }
         } catch (error) {

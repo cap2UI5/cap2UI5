@@ -30,6 +30,7 @@ class z2ui5_cl_demo_app_192 extends z2ui5_if_app {
     let sy_subrc = 0;
     let fs_fs_t_head_new = null;
     let _fs$fs_fs_t_head_new = null;
+    let lo_new_data;
     let lr_structdescr = null;
     let lr_tabdescr = null;
     this.mt_out = [{ aa: `aa`, bb: `bb`, cc: `cc` }, { aa: `a1`, bb: `b1`, cc: `c1` }];
@@ -37,7 +38,7 @@ class z2ui5_cl_demo_app_192 extends z2ui5_if_app {
     sy_tabix = 0;
     for (const fs_fs_s_head of kopf) {
       sy_tabix++;
-      const lo_new_data = new z2ui5_cl_demo_app_193();
+      lo_new_data = new z2ui5_cl_demo_app_193();
       this.mt_new_data2.push(lo_new_data);
       lr_structdescr = cl_abap_structdescr.describe_by_data(fs_fs_s_head);
       lr_tabdescr = cl_abap_tabledescr.create(lr_structdescr);

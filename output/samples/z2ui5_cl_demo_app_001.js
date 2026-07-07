@@ -6,10 +6,11 @@ class z2ui5_cl_demo_app_001 extends z2ui5_if_app {
   quantity = ``;
 
   async main(client) {
+    let view;
     if (client.check_on_init()) {
       this.product = `products`;
       this.quantity = `500`;
-      const view = z2ui5_cl_xml_view.factory();
+      view = z2ui5_cl_xml_view.factory();
       view.shell()
         .page({ title: `abap2UI5 - First Example`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() })
         .simple_form({ title: `Form Title`, editable: true })

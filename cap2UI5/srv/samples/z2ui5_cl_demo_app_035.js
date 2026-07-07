@@ -31,7 +31,7 @@ class z2ui5_cl_demo_app_035 extends z2ui5_if_app {
       .button({ text: `Clear`, press: this.client._event(`CLEAR`), icon: `sap-icon://delete` })
       .toolbar_spacer()
       .button({ text: `Edit`, press: this.client._event(`EDIT`), icon: `sap-icon://edit` })
-      .button({ text: `Upload`, press: this.client._event(`DB_SAVE`), type: `Emphasized`, icon: `sap-icon://upload-to-cloud`, enabled: Boolean(this.mv_editor) });
+      .button({ text: `Upload`, press: this.client._event(`DB_SAVE`), type: `Emphasized`, icon: `sap-icon://upload-to-cloud`, enabled: (this.mv_editor) });
     this.client.view_display(page.stringify());
   }
 
@@ -52,7 +52,7 @@ class z2ui5_cl_demo_app_035 extends z2ui5_if_app {
         client.message_box_display(`Upload successful. File saved!`, `success`);
         break;
       case `EDIT`:
-        this.mv_check_editable = /* TODO(abap2js) */ xsdbool(this.mv_check_editable === false);
+        this.mv_check_editable = (this.mv_check_editable === false);
         client.view_model_update();
         break;
       case `CLEAR`:

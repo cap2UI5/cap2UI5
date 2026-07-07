@@ -12,8 +12,9 @@ class z2ui5_cl_demo_app_079 extends z2ui5_if_app {
   }
 
   async main(client) {
+    let view;
     if (client.check_on_init()) {
-      const view = z2ui5_cl_xml_view.factory()
+      view = z2ui5_cl_xml_view.factory()
         .shell()
         .page({ title: `PDF Output`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() })
         ._generic({ ns: `html`, name: `iframe`, t_prop: [{ n: `src`, v: this.get_example_pdf() }, { n: `height`, v: `90%` }, { n: `width`, v: `90%` }] });
