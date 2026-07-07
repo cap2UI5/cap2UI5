@@ -30,21 +30,23 @@ class z2ui5_cl_core_client {
 
   check_on_event() {
     if (val) {
-      result = Boolean(this.mo_action.ms_actual.event === val);
+      result = (this.mo_action.ms_actual.event === val);
     } else {
-      result = Boolean(this.mo_action.ms_actual.event);
+      result = (this.mo_action.ms_actual.event);
     }
   }
 
   get() {
     let sy_tabix = 0;
-    result = { event: this.mo_action.ms_actual.event, check_launchpad_active: this.mo_action.mo_http_post.ms_request.s_control.check_launchpad, t_event_arg: this.mo_action.ms_actual.t_event_arg, s_draft: ({ ...this.mo_action.mo_app.ms_draft }), check_on_navigated: this.mo_action.ms_actual.check_on_navigated, s_config: ({ ...this.mo_action.mo_http_post.ms_request.s_front }), s_device: this.mo_action.mo_http_post.ms_request.s_front.s_device, s_focus: this.mo_action.mo_http_post.ms_request.s_front.s_focus, s_scroll: this.mo_action.mo_http_post.ms_request.s_front.s_scroll, s_ui5: this.mo_action.mo_http_post.ms_request.s_front.s_ui5, r_event_data: this.mo_action.ms_actual.r_data, _s_nav: { check_call: Boolean(this.mo_action.ms_next.o_app_call), check_leave: Boolean(this.mo_action.ms_next.o_app_leave) } };
+    let lo_comp;
+    let lo_params;
+    result = { event: this.mo_action.ms_actual.event, check_launchpad_active: this.mo_action.mo_http_post.ms_request.s_control.check_launchpad, t_event_arg: this.mo_action.ms_actual.t_event_arg, s_draft: ({ ...this.mo_action.mo_app.ms_draft }), check_on_navigated: this.mo_action.ms_actual.check_on_navigated, s_config: ({ ...this.mo_action.mo_http_post.ms_request.s_front }), s_device: this.mo_action.mo_http_post.ms_request.s_front.s_device, s_focus: this.mo_action.mo_http_post.ms_request.s_front.s_focus, s_scroll: this.mo_action.mo_http_post.ms_request.s_front.s_scroll, s_ui5: this.mo_action.mo_http_post.ms_request.s_front.s_ui5, r_event_data: this.mo_action.ms_actual.r_data, _s_nav: { check_call: (this.mo_action.ms_next.o_app_call), check_leave: (this.mo_action.ms_next.o_app_leave) } };
     try {
-      const lo_comp = this.mo_action.mo_http_post.ms_request.s_front.o_comp_data;
+      lo_comp = this.mo_action.mo_http_post.ms_request.s_front.o_comp_data;
       if (lo_comp != null) {
         return;
       }
-      const lo_params = lo_comp.slice(`/startupParameters/`);
+      lo_params = lo_comp.slice(`/startupParameters/`);
       if (lo_params != null) {
         return;
       }
@@ -66,8 +68,9 @@ class z2ui5_cl_core_client {
   }
 
   get_app() {
+    let lo_app;
     if (id) {
-      const lo_app = z2ui5_cl_core_app.db_load(id);
+      lo_app = z2ui5_cl_core_app.db_load(id);
       result = (lo_app.mo_app);
     } else {
       result = this.get_if_app();
@@ -75,12 +78,13 @@ class z2ui5_cl_core_client {
   }
 
   message_box_display() {
+    let ls_msg_box;
     let lv_text = ``;
     let lv_type = ``;
     let lv_title = ``;
     let lv_details = ``;
     if (z2ui5_cl_util.rtti_check_clike(text) === false) {
-      const ls_msg_box = z2ui5_cl_util.ui5_msg_box_format(text);
+      ls_msg_box = z2ui5_cl_util.ui5_msg_box_format(text);
       if (ls_msg_box.skip === true) {
         return;
       }
@@ -248,16 +252,16 @@ class z2ui5_cl_core_client {
     }
     this.mo_action.ms_next.s_set.s_stateful.active = (val === true ? 1 : 0);
     li_app.check_sticky = val;
-    this.mo_action.ms_next.s_set.s_stateful.switched = Boolean(this.mo_action.ms_next.s_set.s_stateful.switched === false);
+    this.mo_action.ms_next.s_set.s_stateful.switched = (this.mo_action.ms_next.s_set.s_stateful.switched === false);
   }
 
   check_app_prev_stack() {
-    result = Boolean(this.mo_action.mo_app.ms_draft.id_prev_app_stack);
+    result = (this.mo_action.mo_app.ms_draft.id_prev_app_stack);
   }
 
   check_on_init() {
     const li_app = this.get_if_app();
-    result = Boolean(li_app.check_initialized === false);
+    result = (li_app.check_initialized === false);
   }
 
   check_on_navigated() {

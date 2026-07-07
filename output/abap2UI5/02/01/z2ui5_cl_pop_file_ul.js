@@ -47,6 +47,7 @@ class z2ui5_cl_pop_file_ul extends z2ui5_if_app {
   }
 
   async main(client) {
+    let lv_data;
     this.client = client;
     if (client.check_on_init()) {
       this.view_display();
@@ -55,7 +56,7 @@ class z2ui5_cl_pop_file_ul extends z2ui5_if_app {
     const lv_event = client.get().EVENT;
     switch (lv_event) {
       case `UPLOAD`:
-        const lv_data = z2ui5_cl_util.conv_get_xstring_by_data_uri(this.mv_value);
+        lv_data = z2ui5_cl_util.conv_get_xstring_by_data_uri(this.mv_value);
         this.ms_result.value = z2ui5_cl_util.conv_get_string_by_xstring(lv_data);
         this.check_confirm_enabled = true;
         this.mv_value = ``;
@@ -64,7 +65,7 @@ class z2ui5_cl_pop_file_ul extends z2ui5_if_app {
         break;
       case `BUTTON_CONFIRM`:
       case `BUTTON_CANCEL`:
-        this.ms_result.check_confirmed = /* TODO(abap2js) */ xsdbool(lv_event === `BUTTON_CONFIRM`);
+        this.ms_result.check_confirmed = (lv_event === `BUTTON_CONFIRM`);
         client.popup_destroy();
         client.nav_app_leave();
         break;

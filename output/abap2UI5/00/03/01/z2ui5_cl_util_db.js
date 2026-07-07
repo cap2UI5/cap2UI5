@@ -10,6 +10,7 @@ class z2ui5_cl_util_db {
   }
 
   static load_by_handle({ uname, handle, handle2, handle3 } = {}) {
+    let sy_subrc = 0;
     // TODO(abap2js): SELECT SINGLE data FROM z2ui5_t_91 WHERE uname = @uname AND handle = @handle AND handle2 = @handle2 AND handle3 = @handle3 INTO @DATA(lv_data).
     if (sy_subrc !== 0) {
       throw new z2ui5_cx_util_error({ val: `NO_ENTRY_FOR_HANDLE_EXISTS` });
@@ -40,6 +41,7 @@ class z2ui5_cl_util_db {
   }
 
   static load_by_id({ id } = {}) {
+    let sy_subrc = 0;
     // TODO(abap2js): SELECT SINGLE data FROM z2ui5_t_91 WHERE id = @id INTO @DATA(lv_data).
     if (sy_subrc !== 0) {
       throw new z2ui5_cx_util_error({ val: `NO_ENTRY_FOR_ID_EXISTS: ${id}` });
@@ -49,6 +51,7 @@ class z2ui5_cl_util_db {
 
   static save({ uname, handle, handle2, handle3, data, check_commit = true } = {}) {
     let result = ``;
+    let sy_subrc = 0;
     // TODO(abap2js): SELECT SINGLE id FROM z2ui5_t_91 WHERE uname = @uname AND handle = @handle AND handle2 = @handle2 AND handle3 = @handle3 INTO @DATA(lv_id) .
     const ls_db = { uname: uname, handle: handle, handle2: handle2, handle3: handle3, data: z2ui5_cl_util.xml_stringify(data) };
     if (lv_id) {

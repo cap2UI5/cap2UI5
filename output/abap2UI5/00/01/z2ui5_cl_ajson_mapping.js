@@ -46,7 +46,7 @@ class z2ui5_cl_ajson_mapping {
 
   static create_to_snake_case() {
     let ri_mapping = null;
-    ri_mapping = null; // TODO(abap2js): CREATE OBJECT ri_mapping TYPE lcl_to_snake.
+    ri_mapping = new lcl_to_snake();
     return ri_mapping;
   }
 

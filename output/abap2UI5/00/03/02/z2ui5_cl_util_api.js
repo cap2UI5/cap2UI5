@@ -1,6 +1,7 @@
 // TODO(abap2js): unresolved reference cl_abap_structdescr — add require manually
 // TODO(abap2js): unresolved reference cl_abap_typedescr — add require manually
 // TODO(abap2js): unresolved reference cx_sy_dyn_call_illegal_class — add require manually
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_util_api_c = require("abap2UI5/z2ui5_cl_util_api_c");
 const z2ui5_cl_util_api_s = require("abap2UI5/z2ui5_cl_util_api_s");
 const z2ui5_cx_util_error = require("abap2UI5/z2ui5_cx_util_error");
@@ -131,8 +132,10 @@ class z2ui5_cl_util_api {
 
   static source_get_method({ iv_classname, iv_methodname } = {}) {
     let result = [];
+    let sy_subrc = 0;
+    let fs_any = null;
+    let _fs$fs_any = null;
     let object = null;
-    // TODO(abap2js): FIELD-SYMBOLS <any> TYPE any.
     let lt_source = [];
     let lt_string = [];
     let lv_class = ``;
@@ -149,7 +152,7 @@ class z2ui5_cl_util_api {
       // TODO(abap2js): CALL METHOD (xco_cp_abap)=>(`CLASS`) EXPORTING iv_name = lv_class RECEIVING ro_class = object.
       // TODO(abap2js): ASSIGN object->(`IF_XCO_AO_CLASS~IMPLEMENTATION`) TO <any>.
       if (!(sy_subrc === 0)) throw new Error(`ASSERT failed`);
-      object = any;
+      object = fs_any;
       // TODO(abap2js): CALL METHOD object->(`IF_XCO_CLAS_IMPLEMENTATION~METHOD`) EXPORTING iv_name = lv_method RECEIVING ro_method = object.
       // TODO(abap2js): CALL METHOD object->(`IF_XCO_CLAS_I_METHOD~CONTENT`) RECEIVING ro_content = object.
       // TODO(abap2js): CALL METHOD object->(`IF_XCO_CLAS_I_METHOD_CONTENT~GET_SOURCE`) RECEIVING rt_source = result.
@@ -162,8 +165,14 @@ class z2ui5_cl_util_api {
   static rtti_get_classes_impl_intf({ val } = {}) {
     let result = [];
     let sy_tabix = 0;
+    let sy_subrc = 0;
+    let fs_any = null;
+    let _fs$fs_any = null;
+    let fs_class = null;
+    let _fs$fs_class = null;
+    let fs_description = null;
+    let _fs$fs_description = null;
     let obj = null;
-    // TODO(abap2js): FIELD-SYMBOLS <any> TYPE any.
     let lt_implementation_names = [];
     // TODO(abap2js): TYPES BEGIN OF ty_s_impl.
     // TODO(abap2js): TYPES clsname TYPE c LENGTH 30.
@@ -183,10 +192,8 @@ class z2ui5_cl_util_api {
     let implementation_name = null;
     let temp4 = null;
     let type = ``;
-    // TODO(abap2js): FIELD-SYMBOLS <class> TYPE data.
     let temp5 = null;
     let lr_impl = null;
-    // TODO(abap2js): FIELD-SYMBOLS <description> TYPE any.
     let temp6 = null;
     if (z2ui5_cl_util_api.context_check_abap_cloud()) {
       ls_clskey.clsname = val;
@@ -196,12 +203,12 @@ class z2ui5_cl_util_api {
       if (sy_subrc !== 0) {
         throw new cx_sy_dyn_call_illegal_class();
       }
-      obj = any;
+      obj = fs_any;
       // TODO(abap2js): ASSIGN obj->(`IF_XCO_INTF_IMPLEMENTATIONS_FC~ALL`) TO <any>.
       if (sy_subrc !== 0) {
         throw new cx_sy_dyn_call_illegal_class();
       }
-      obj = any;
+      obj = fs_any;
       // TODO(abap2js): CALL METHOD obj->(`IF_XCO_INTF_IMPLEMENTATIONS~GET_NAMES`) RECEIVING rt_names = lt_implementation_names.
       temp3 = null;
       sy_tabix = 0;
@@ -226,18 +233,21 @@ class z2ui5_cl_util_api {
       sy_tabix = 0;
       for (const lr_impl of lt_impl) {
         sy_tabix++;
-        class_ = null;
+        fs_class = null;
+        if (_fs$fs_class) _fs$fs_class.o[_fs$fs_class.k] = fs_class;
         ls_clskey.clsname = lr_impl.clsname;
         lv_fm = `SEO_CLASS_READ`;
         // TODO(abap2js): CALL FUNCTION lv_fm EXPORTING clskey = ls_clskey IMPORTING class = <class> EXCEPTIONS error_message = 1 OTHERS = 2.
         if (sy_subrc !== 0) {
           throw new z2ui5_cx_util_error();
         }
-        // TODO(abap2js): ASSIGN COMPONENT `DESCRIPT` OF STRUCTURE <class> TO <description>.
+        _fs$fs_description = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_class, `DESCRIPT`);
+        fs_description = _fs$fs_description ? _fs$fs_description.o[_fs$fs_description.k] : null;
+        sy_subrc = _fs$fs_description ? 0 : 4;
         if (!(sy_subrc === 0)) throw new Error(`ASSERT failed`);
         temp6 = null;
         temp6.classname = lr_impl.clsname;
-        temp6.description = description;
+        temp6.description = fs_description;
         result.push(temp6);
       }
     }
@@ -246,6 +256,10 @@ class z2ui5_cl_util_api {
 
   static rtti_get_data_element_texts({ val } = {}) {
     let result = {};
+    let sy_subrc = 0;
+    let fs_ddic = null;
+    let _fs$fs_ddic = null;
+    let error;
     let ddic_ref = null;
     let data_element = null;
     let content = null;
@@ -259,7 +273,6 @@ class z2ui5_cl_util_api {
     let data_element_name = ``;
     let temp7 = null;
     let struct_desrc = null;
-    // TODO(abap2js): FIELD-SYMBOLS <ddic> TYPE data.
     let lo_typedescr = null;
     let temp8 = null;
     let data_descr = null;
@@ -301,7 +314,7 @@ class z2ui5_cl_util_api {
         // TODO(abap2js): CALL METHOD content->(`IF_XCO_DTEL_CONTENT~GET_MEDIUM_FIELD_LABEL`) RECEIVING rs_medium_field_label = result-medium.
         // TODO(abap2js): CALL METHOD content->(`IF_XCO_DTEL_CONTENT~GET_LONG_FIELD_LABEL`) RECEIVING rs_long_field_label = result-long.
       } catch (x) {
-        const error = x.get_text();
+        error = x.get_text();
       }
     }
     if (!result) {
@@ -359,6 +372,7 @@ class z2ui5_cl_util_api {
 
   static rtti_get_class_descr_on_cloud({ i_classname } = {}) {
     let result = ``;
+    let lv_error;
     try {
       let obj = null;
       let content = null;
@@ -370,23 +384,25 @@ class z2ui5_cl_util_api {
       // TODO(abap2js): CALL METHOD obj->(`IF_XCO_AO_CLASS~CONTENT`) RECEIVING ro_content = content.
       // TODO(abap2js): CALL METHOD content->(`IF_XCO_CLAS_CONTENT~GET_SHORT_DESCRIPTION`) RECEIVING rv_short_description = result.
     } catch (x) {
-      const lv_error = x.get_text();
+      lv_error = x.get_text();
     }
     return result;
   }
 
   static rtti_get_table_desrc({ tabname, langu } = {}) {
     let result = ``;
+    let lan;
+    let lv_tabname;
     let ddtext = ``;
     if (!(langu !== undefined)) {
-      let lan = sy_langu;
+      lan = sy_langu;
     } else {
       lan = langu;
     }
     if (z2ui5_cl_util_api.context_check_abap_cloud()) {
       ddtext = tabname;
     } else {
-      const lv_tabname = `dd02t`;
+      lv_tabname = `dd02t`;
       // TODO(abap2js): SELECT SINGLE ddtext FROM (lv_tabname) WHERE tabname = @tabname AND ddlanguage = @lan INTO @ddtext.
     }
     if (ddtext) {
@@ -406,7 +422,7 @@ class z2ui5_cl_util_api {
     let result = [];
     let lo_util = null;
     if (z2ui5_cl_util_api.context_check_abap_cloud()) {
-      lo_util = null; // TODO(abap2js): CREATE OBJECT lo_util TYPE (`Z2UI5_CL_UTIL_API_C`).
+      lo_util = (() => { const _n = String(`Z2UI5_CL_UTIL_API_C`); const _c = z2ui5_cl_util.rtti_get_class(_n.toLowerCase()); if (!_c) throw new Error(`CREATE OBJECT: class ${_n} not found`); return new _c(); })();
       // TODO(abap2js): CALL METHOD lo_util->(`CONTEXT_GET_CALLSTACK`) RECEIVING result = result.
     } else {
     }
@@ -463,17 +479,22 @@ class z2ui5_cl_util_api {
 
   static tr_create({ text, target, clike = `T` } = {}) {
     let result = ``;
+    let sy_subrc = 0;
+    let fs_header = null;
+    let _fs$fs_header = null;
+    let fs_trkorr = null;
+    let _fs$fs_trkorr = null;
     try {
       let lr_header = null;
-      // TODO(abap2js): FIELD-SYMBOLS <header> TYPE any.
-      // TODO(abap2js): FIELD-SYMBOLS <trkorr> TYPE any.
       let lv_class = ``;
       // TODO(abap2js): CREATE DATA lr_header TYPE (`TRWBO_REQUEST_HEADER`).
       // TODO(abap2js): ASSIGN lr_header->* TO <header>.
       lv_class = `CL_ADT_CTS_MANAGEMENT`;
       // TODO(abap2js): CALL METHOD (lv_class)=>(`CREATE_EMPTY_REQUEST`) EXPORTING iv_type = type iv_text = text iv_target = target IMPORTING es_request_header = <header>.
-      // TODO(abap2js): ASSIGN COMPONENT `TRKORR` OF STRUCTURE <header> TO <trkorr>.
-      result = trkorr;
+      _fs$fs_trkorr = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_header, `TRKORR`);
+      fs_trkorr = _fs$fs_trkorr ? _fs$fs_trkorr.o[_fs$fs_trkorr.k] : null;
+      sy_subrc = _fs$fs_trkorr ? 0 : 4;
+      result = fs_trkorr;
     } catch (x) {
       throw new z2ui5_cx_util_error({ previous: x });
     }

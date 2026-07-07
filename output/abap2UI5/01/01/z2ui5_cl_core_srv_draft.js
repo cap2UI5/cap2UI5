@@ -19,6 +19,7 @@ class z2ui5_cl_core_srv_draft {
   }
 
   create({ draft, model_xml } = {}) {
+    let sy_subrc = 0;
     if (!(draft.id)) throw new Error(`ASSERT failed`);
     const ls_db = { id: draft.id, id_prev: draft.id_prev, id_prev_app: draft.id_prev_app, id_prev_app_stack: draft.id_prev_app_stack, timestampl: z2ui5_cl_util.time_get_timestampl(), data: model_xml };
     // TODO(abap2js): MODIFY z2ui5_t_01 FROM @ls_db.
@@ -30,6 +31,7 @@ class z2ui5_cl_core_srv_draft {
 
   read({ id, check_load_app = true } = {}) {
     let result = {};
+    let sy_subrc = 0;
     if (check_load_app === true) {
       // TODO(abap2js): SELECT SINGLE * FROM z2ui5_t_01 WHERE id = @id INTO @result .
     } else {
@@ -56,8 +58,9 @@ class z2ui5_cl_core_srv_draft {
 
   check_exists({ id } = {}) {
     let result = false;
+    let sy_subrc = 0;
     // TODO(abap2js): SELECT SINGLE id FROM z2ui5_t_01 WHERE id = @id INTO @DATA(lv_id) .
-    result = /* TODO(abap2js) */ xsdbool(sy_subrc === 0);
+    result = (sy_subrc === 0);
     return result;
   }
 

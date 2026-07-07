@@ -47,6 +47,11 @@ class z2ui5_cl_pop_get_range_m extends z2ui5_if_app {
 
   async main(client) {
     let sy_tabix = 0;
+    let sy_subrc = 0;
+    let fs_tab = null;
+    let _fs$fs_tab = null;
+    let lo_popup;
+    let ls_popup_result;
     this.client = client;
     if (client.check_on_init()) {
       this.init();
@@ -54,20 +59,24 @@ class z2ui5_cl_pop_get_range_m extends z2ui5_if_app {
     }
     const ls_get = client.get();
     if (ls_get.CHECK_ON_NAVIGATED === true) {
-      const lo_popup = (client.get_app_prev());
-      const ls_popup_result = lo_popup.result();
+      lo_popup = (client.get_app_prev());
+      ls_popup_result = lo_popup.result();
       if (ls_popup_result.check_confirmed === true) {
-        // TODO(abap2js): ASSIGN ms_result-t_filter[ name = mv_popup_name ] TO FIELD-SYMBOL(<tab>).
-        tab.t_range = ls_popup_result.t_range;
-        tab.t_token = z2ui5_cl_util.filter_get_token_t_by_range_t(tab.t_range);
+        fs_tab = this.ms_result.t_filter.find((row) => row.name === this.mv_popup_name);
+        _fs$fs_tab = null;
+        sy_subrc = 0;
+        fs_tab.t_range = ls_popup_result.t_range;
+        fs_tab.t_token = z2ui5_cl_util.filter_get_token_t_by_range_t(fs_tab.t_range);
       }
       this.popup_display();
     }
     switch (ls_get.EVENT) {
       case `LIST_DELETE`:
-        // TODO(abap2js): ASSIGN ms_result-t_filter[ name = client->get_event_arg( 1 ) ] TO <tab>.
-        tab.t_token = null;
-        tab.t_range = null;
+        fs_tab = this.ms_result.t_filter.find((row) => row.name === client.get_event_arg(1));
+        _fs$fs_tab = null;
+        sy_subrc = 0;
+        fs_tab.t_token = null;
+        fs_tab.t_range = null;
         client.popup_model_update();
         break;
       case `LIST_OPEN`:

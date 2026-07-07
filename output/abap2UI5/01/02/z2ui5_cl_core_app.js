@@ -49,8 +49,15 @@ class z2ui5_cl_core_app {
 
   static db_load({ id } = {}) {
     let result = null;
+    let sy_subrc = 0;
     const lv_id = (id);
-    // TODO(abap2js): READ TABLE mt_buffer REFERENCE INTO DATA(lr_buf) WITH KEY id = lv_id.
+    let lr_buf = {};
+    {
+      const _t = z2ui5_cl_core_app.mt_buffer;
+      const _i = _t.findIndex((_r) => _r.id === lv_id);
+      sy_subrc = _i >= 0 && _i < _t.length ? 0 : 4;
+      if (sy_subrc === 0) lr_buf = _t[_i];
+    }
     if (sy_subrc === 0) {
       result = lr_buf.app;
       return result;
@@ -78,8 +85,9 @@ class z2ui5_cl_core_app {
   }
 
   db_save() {
+    let li_app;
     if (this.mo_app != null) {
-      const li_app = (this.mo_app);
+      li_app = (this.mo_app);
       li_app.id_draft = this.ms_draft.id;
       li_app.check_initialized = true;
     }

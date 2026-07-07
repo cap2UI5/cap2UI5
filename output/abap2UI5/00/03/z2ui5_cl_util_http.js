@@ -6,12 +6,14 @@ class z2ui5_cl_util_http {
   mo_response_cloud = null;
 
   delete_response_cookie({ val } = {}) {
+    let sy_subrc = 0;
+    let fs_any = null;
+    let _fs$fs_any = null;
     const lv_val = (val);
     if (this.mo_server_onprem != null) {
       let object = null;
-      // TODO(abap2js): FIELD-SYMBOLS <any> TYPE any.
       // TODO(abap2js): ASSIGN mo_server_onprem->(`RESPONSE`) TO <any>.
-      object = any;
+      object = fs_any;
       // TODO(abap2js): CALL METHOD object->(`DELETE_COOKIE`) EXPORTING name = lv_val.
     } else {
     }
@@ -19,12 +21,14 @@ class z2ui5_cl_util_http {
 
   get_response_cookie({ val } = {}) {
     let result = ``;
+    let sy_subrc = 0;
+    let fs_any = null;
+    let _fs$fs_any = null;
     let object = null;
-    // TODO(abap2js): FIELD-SYMBOLS <any> TYPE any.
     const lv_val = (val);
     if (this.mo_server_onprem != null) {
       // TODO(abap2js): ASSIGN mo_server_onprem->(`RESPONSE`) TO <any>.
-      object = any;
+      object = fs_any;
       // TODO(abap2js): CALL METHOD object->(`GET_COOKIE`) EXPORTING name = lv_val IMPORTING value = result.
     } else {
     }
@@ -33,12 +37,14 @@ class z2ui5_cl_util_http {
 
   get_header_field({ val } = {}) {
     let result = ``;
+    let sy_subrc = 0;
+    let fs_any = null;
+    let _fs$fs_any = null;
     let object = null;
-    // TODO(abap2js): FIELD-SYMBOLS <any> TYPE any.
     const lv_val = (val);
     if (this.mo_server_onprem != null) {
       // TODO(abap2js): ASSIGN mo_server_onprem->(`REQUEST`) TO <any>.
-      object = any;
+      object = fs_any;
       // TODO(abap2js): CALL METHOD object->(`GET_HEADER_FIELD`) EXPORTING name = lv_val RECEIVING value = result.
     } else {
       // TODO(abap2js): CALL METHOD mo_request_cloud->(`IF_WEB_HTTP_REQUEST~GET_HEADER_FIELD`) EXPORTING i_name = lv_val RECEIVING r_value = result.
@@ -47,13 +53,15 @@ class z2ui5_cl_util_http {
   }
 
   set_header_field({ n, v } = {}) {
+    let sy_subrc = 0;
+    let fs_any = null;
+    let _fs$fs_any = null;
     let object = null;
-    // TODO(abap2js): FIELD-SYMBOLS <any> TYPE any.
     const lv_n = (n);
     const lv_v = (v);
     if (this.mo_server_onprem != null) {
       // TODO(abap2js): ASSIGN mo_server_onprem->(`RESPONSE`) TO <any>.
-      object = any;
+      object = fs_any;
       // TODO(abap2js): CALL METHOD object->(`SET_HEADER_FIELD`) EXPORTING name = lv_n value = lv_v.
     } else {
       // TODO(abap2js): CALL METHOD mo_response_cloud->(`IF_WEB_HTTP_RESPONSE~SET_HEADER_FIELD`) EXPORTING i_name = lv_n i_value = lv_v.
@@ -77,11 +85,13 @@ class z2ui5_cl_util_http {
 
   get_cdata() {
     let result = ``;
+    let sy_subrc = 0;
+    let fs_any = null;
+    let _fs$fs_any = null;
     let object = null;
-    // TODO(abap2js): FIELD-SYMBOLS <any> TYPE any.
     if (this.mo_server_onprem != null) {
       // TODO(abap2js): ASSIGN mo_server_onprem->(`REQUEST`) TO <any>.
-      object = any;
+      object = fs_any;
       // TODO(abap2js): CALL METHOD object->(`GET_CDATA`) RECEIVING data = result.
     } else {
       // TODO(abap2js): CALL METHOD mo_request_cloud->(`IF_WEB_HTTP_REQUEST~GET_TEXT`) RECEIVING r_value = result.
@@ -91,11 +101,13 @@ class z2ui5_cl_util_http {
 
   get_method() {
     let result = ``;
+    let sy_subrc = 0;
+    let fs_any = null;
+    let _fs$fs_any = null;
     let object = null;
-    // TODO(abap2js): FIELD-SYMBOLS <any> TYPE any.
     if (this.mo_server_onprem != null) {
       // TODO(abap2js): ASSIGN mo_server_onprem->(`REQUEST`) TO <any>.
-      object = any;
+      object = fs_any;
       // TODO(abap2js): CALL METHOD object->(`IF_HTTP_REQUEST~GET_METHOD`) RECEIVING method = result.
     } else {
       // TODO(abap2js): CALL METHOD mo_request_cloud->(`IF_WEB_HTTP_REQUEST~GET_METHOD`) RECEIVING r_value = result.
@@ -104,11 +116,13 @@ class z2ui5_cl_util_http {
   }
 
   set_cdata({ val } = {}) {
+    let sy_subrc = 0;
+    let fs_any = null;
+    let _fs$fs_any = null;
     let object = null;
-    // TODO(abap2js): FIELD-SYMBOLS <any> TYPE any.
     if (this.mo_server_onprem != null) {
       // TODO(abap2js): ASSIGN mo_server_onprem->(`RESPONSE`) TO <any>.
-      object = any;
+      object = fs_any;
       // TODO(abap2js): CALL METHOD object->(`SET_CDATA`) EXPORTING data = val.
     } else {
       // TODO(abap2js): CALL METHOD mo_response_cloud->(`IF_WEB_HTTP_RESPONSE~SET_TEXT`) EXPORTING i_text = val.
@@ -116,12 +130,14 @@ class z2ui5_cl_util_http {
   }
 
   set_status({ code, reason } = {}) {
+    let sy_subrc = 0;
+    let fs_any = null;
+    let _fs$fs_any = null;
     let object = null;
-    // TODO(abap2js): FIELD-SYMBOLS <any> TYPE any.
     const lv_reason = (reason);
     if (this.mo_server_onprem != null) {
       // TODO(abap2js): ASSIGN mo_server_onprem->(`RESPONSE`) TO <any>.
-      object = any;
+      object = fs_any;
       // TODO(abap2js): CALL METHOD object->(`IF_HTTP_RESPONSE~SET_STATUS`) EXPORTING code = code reason = lv_reason.
     } else {
       // TODO(abap2js): CALL METHOD mo_response_cloud->(`IF_WEB_HTTP_RESPONSE~SET_STATUS`) EXPORTING i_code = code i_reason = lv_reason.

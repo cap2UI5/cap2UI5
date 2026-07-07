@@ -25,15 +25,30 @@ class z2ui5_cl_util_msg {
   static msg_get_internal({ val } = {}) {
     let result = [];
     let sy_tabix = 0;
+    let sy_subrc = 0;
+    let fs_tab = null;
+    let _fs$fs_tab = null;
+    let fs_comp = null;
+    let _fs$fs_comp = null;
+    let fs_tab2 = null;
+    let _fs$fs_tab2 = null;
+    let lt_tab;
+    let lt_attri;
+    let ls_result;
+    let lx;
+    let lt_attri_o;
+    let lv_name;
+    let lt_tab2;
     const lv_kind = z2ui5_cl_util.rtti_get_type_kind(val);
     switch (lv_kind) {
       case cl_abap_datadescr.typekind_table:
-        // TODO(abap2js): FIELD-SYMBOLS <tab> TYPE ANY TABLE.
-        // TODO(abap2js): ASSIGN val TO <tab>.
+        fs_tab = val;
+        _fs$fs_tab = null;
+        sy_subrc = 0;
         sy_tabix = 0;
-        for (const SYMBOL of tab) {
+        for (const symbol of fs_tab) {
           sy_tabix++;
-          let lt_tab = z2ui5_cl_util_msg.msg_get_internal({ val: row });
+          lt_tab = z2ui5_cl_util_msg.msg_get_internal({ val: fs_row });
           result.push(...lt_tab);
         }
         break;
@@ -46,18 +61,20 @@ class z2ui5_cl_util_msg {
           result = z2ui5_cl_util_msg.msg_get_rap({ val: val });
           return result;
         }
-        const lt_attri = z2ui5_cl_util.rtti_get_t_attri_by_any(val);
-        let ls_result = {};
+        lt_attri = z2ui5_cl_util.rtti_get_t_attri_by_any(val);
+        ls_result = {};
         sy_tabix = 0;
         for (const ls_attri of lt_attri) {
           sy_tabix++;
-          // TODO(abap2js): ASSIGN COMPONENT ls_attri->name OF STRUCTURE val TO FIELD-SYMBOL(<comp>).
+          _fs$fs_comp = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(val, ls_attri.name);
+          fs_comp = _fs$fs_comp ? _fs$fs_comp.o[_fs$fs_comp.k] : null;
+          sy_subrc = _fs$fs_comp ? 0 : 4;
           if (ls_attri.name === `ITEM`) {
-            lt_tab = z2ui5_cl_util_msg.msg_get_internal({ val: comp });
+            lt_tab = z2ui5_cl_util_msg.msg_get_internal({ val: fs_comp });
             result.push(...lt_tab);
             return result;
           } else {
-            ls_result = z2ui5_cl_util_msg.msg_map({ name: ls_attri.name, val: comp, is_msg: ls_result });
+            ls_result = z2ui5_cl_util_msg.msg_map({ name: ls_attri.name, val: fs_comp, is_msg: ls_result });
           }
         }
         if (!ls_result.text && ls_result.id) {
@@ -68,16 +85,16 @@ class z2ui5_cl_util_msg {
         break;
       case cl_abap_datadescr.typekind_oref:
         try {
-          const lx = (val);
+          lx = (val);
           ls_result = { type: `E`, text: lx.get_text() };
-          let lt_attri_o = z2ui5_cl_util.rtti_get_t_attri_by_oref(val);
+          lt_attri_o = z2ui5_cl_util.rtti_get_t_attri_by_oref(val);
           sy_tabix = 0;
           for (const ls_attri_o of lt_attri_o) {
             sy_tabix++;
             if (!(ls_attri_o.visibility === `U`)) continue;
-            let lv_name = ls_attri_o.name;
+            lv_name = ls_attri_o.name;
             // TODO(abap2js): ASSIGN val->(lv_name) TO <comp>.
-            ls_result = z2ui5_cl_util_msg.msg_map({ name: ls_attri_o.name, val: comp, is_msg: ls_result });
+            ls_result = z2ui5_cl_util_msg.msg_map({ name: ls_attri_o.name, val: fs_comp, is_msg: ls_result });
           }
           result.push(ls_result);
         } catch (error) {
@@ -88,14 +105,14 @@ class z2ui5_cl_util_msg {
             // TODO(abap2js): CREATE DATA lr_tab TYPE (`if_bali_log=>ty_item_table`).
             // TODO(abap2js): ASSIGN lr_tab->* TO FIELD-SYMBOL(<tab2>).
             // TODO(abap2js): CALL METHOD obj->(`IF_BALI_LOG~GET_ALL_ITEMS`) RECEIVING item_table = <tab2>.
-            let lt_tab2 = z2ui5_cl_util_msg.msg_get_internal({ val: tab2 });
+            lt_tab2 = z2ui5_cl_util_msg.msg_get_internal({ val: fs_tab2 });
             result.push(...lt_tab2);
           } catch (error) {
             try {
               // TODO(abap2js): CREATE DATA lr_tab TYPE (`BAPIRETTAB`).
               // TODO(abap2js): ASSIGN lr_tab->* TO <tab2>.
               // TODO(abap2js): CALL METHOD obj->(`ZIF_LOGGER~EXPORT_TO_TABLE`) RECEIVING rt_bapiret = <tab2>.
-              lt_tab2 = z2ui5_cl_util_msg.msg_get_internal({ val: tab2 });
+              lt_tab2 = z2ui5_cl_util_msg.msg_get_internal({ val: fs_tab2 });
               result.push(...lt_tab2);
             } catch (lx2) {
               lt_attri_o = z2ui5_cl_util.rtti_get_t_attri_by_oref(val);
@@ -105,7 +122,7 @@ class z2ui5_cl_util_msg {
                 if (!(ls_attri_o.visibility === `U`)) continue;
                 lv_name = ls_attri_o.name;
                 // TODO(abap2js): ASSIGN obj->(lv_name) TO <comp>.
-                ls_result = z2ui5_cl_util_msg.msg_map({ name: ls_attri_o.name, val: comp, is_msg: ls_result });
+                ls_result = z2ui5_cl_util_msg.msg_map({ name: ls_attri_o.name, val: fs_comp, is_msg: ls_result });
               }
               result.push(ls_result);
             }
@@ -185,6 +202,12 @@ class z2ui5_cl_util_msg {
   static check_is_rap_struct({ val } = {}) {
     let result = false;
     let sy_tabix = 0;
+    let sy_subrc = 0;
+    let fs_tab = null;
+    let _fs$fs_tab = null;
+    let lo_tab;
+    let lo_line;
+    let lt_comps;
     const lt_attri = z2ui5_cl_util.rtti_get_t_attri_by_any(val);
     sy_tabix = 0;
     for (const ls_attri of lt_attri) {
@@ -201,14 +224,16 @@ class z2ui5_cl_util_msg {
     sy_tabix = 0;
     for (const ls_attri of lt_attri) {
       sy_tabix++;
-      // TODO(abap2js): ASSIGN COMPONENT ls_attri->name OF STRUCTURE val TO FIELD-SYMBOL(<tab>).
+      _fs$fs_tab = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(val, ls_attri.name);
+      fs_tab = _fs$fs_tab ? _fs$fs_tab.o[_fs$fs_tab.k] : null;
+      sy_subrc = _fs$fs_tab ? 0 : 4;
       if (!(sy_subrc === 0)) continue;
-      if (!(z2ui5_cl_util.rtti_get_type_kind(tab) === cl_abap_datadescr.typekind_table)) continue;
+      if (!(z2ui5_cl_util.rtti_get_type_kind(fs_tab) === cl_abap_datadescr.typekind_table)) continue;
       try {
-        const lo_tab = (cl_abap_typedescr.describe_by_data(tab));
-        const lo_line = lo_tab.get_table_line_type();
+        lo_tab = (cl_abap_typedescr.describe_by_data(fs_tab));
+        lo_line = lo_tab.get_table_line_type();
         if (!(lo_line.kind === cl_abap_typedescr.kind_struct)) continue;
-        const lt_comps = (lo_line).get_components();
+        lt_comps = (lo_line).get_components();
         const _sy_tabix_1 = sy_tabix;
         sy_tabix = 0;
         for (const ls_comp of lt_comps) {
@@ -228,36 +253,55 @@ class z2ui5_cl_util_msg {
   static msg_get_rap({ val, entity_name } = {}) {
     let result = [];
     let sy_tabix = 0;
+    let sy_subrc = 0;
+    let fs_msg = null;
+    let _fs$fs_msg = null;
+    let fs_fail = null;
+    let _fs$fs_fail = null;
+    let fs_cause = null;
+    let _fs$fs_cause = null;
+    let fs_tab = null;
+    let _fs$fs_tab = null;
+    let fs_ftab = null;
+    let _fs$fs_ftab = null;
+    let lt_one;
+    let lv_text;
     const lv_kind = z2ui5_cl_util.rtti_get_type_kind(val);
     if (lv_kind !== cl_abap_datadescr.typekind_struct1 && lv_kind !== cl_abap_datadescr.typekind_struct2) {
       return result;
     }
     let lv_is_row = false;
     const lt_meta = z2ui5_cl_util_msg.msg_get_rap_meta({ val: val });
-    // TODO(abap2js): ASSIGN COMPONENT `%MSG` OF STRUCTURE val TO FIELD-SYMBOL(<msg>).
+    _fs$fs_msg = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(val, `%MSG`);
+    fs_msg = _fs$fs_msg ? _fs$fs_msg.o[_fs$fs_msg.k] : null;
+    sy_subrc = _fs$fs_msg ? 0 : 4;
     if (sy_subrc === 0) {
       lv_is_row = true;
-      if (msg) {
+      if (fs_msg) {
         try {
-          const lt_one = z2ui5_cl_util_msg.msg_get({ val: msg });
+          lt_one = z2ui5_cl_util_msg.msg_get({ val: fs_msg });
           sy_tabix = 0;
-          for (const SYMBOL of lt_one) {
+          for (const symbol of lt_one) {
             sy_tabix++;
-            m.t_meta = lt_meta;
+            fs_m.t_meta = lt_meta;
           }
           result.push(...lt_one);
         } catch (error) {
         }
       }
     }
-    // TODO(abap2js): ASSIGN COMPONENT `%FAIL` OF STRUCTURE val TO FIELD-SYMBOL(<fail>).
+    _fs$fs_fail = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(val, `%FAIL`);
+    fs_fail = _fs$fs_fail ? _fs$fs_fail.o[_fs$fs_fail.k] : null;
+    sy_subrc = _fs$fs_fail ? 0 : 4;
     if (sy_subrc === 0) {
       lv_is_row = true;
-      // TODO(abap2js): ASSIGN COMPONENT `CAUSE` OF STRUCTURE <fail> TO FIELD-SYMBOL(<cause>).
+      _fs$fs_cause = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_fail, `CAUSE`);
+      fs_cause = _fs$fs_cause ? _fs$fs_cause.o[_fs$fs_cause.k] : null;
+      sy_subrc = _fs$fs_cause ? 0 : 4;
       if (sy_subrc === 0) {
         let lv_cause = 0;
-        lv_cause = cause;
-        let lv_text = z2ui5_cl_util_msg.msg_get_rap_fail_text({ cause: lv_cause });
+        lv_cause = fs_cause;
+        lv_text = z2ui5_cl_util_msg.msg_get_rap_fail_text({ cause: lv_cause });
         if (entity_name) {
           lv_text = `${entity_name}: ${lv_text}`;
         }
@@ -271,24 +315,27 @@ class z2ui5_cl_util_msg {
     sy_tabix = 0;
     for (const ls_attri of lt_attri) {
       sy_tabix++;
-      // TODO(abap2js): ASSIGN COMPONENT ls_attri->name OF STRUCTURE val TO FIELD-SYMBOL(<tab>).
+      _fs$fs_tab = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(val, ls_attri.name);
+      fs_tab = _fs$fs_tab ? _fs$fs_tab.o[_fs$fs_tab.k] : null;
+      sy_subrc = _fs$fs_tab ? 0 : 4;
       if (!(sy_subrc === 0)) continue;
-      if (!(z2ui5_cl_util.rtti_get_type_kind(tab) === cl_abap_datadescr.typekind_table)) continue;
-      // TODO(abap2js): FIELD-SYMBOLS <ftab> TYPE ANY TABLE.
-      // TODO(abap2js): ASSIGN <tab> TO <ftab>.
+      if (!(z2ui5_cl_util.rtti_get_type_kind(fs_tab) === cl_abap_datadescr.typekind_table)) continue;
+      fs_ftab = fs_tab;
+      _fs$fs_ftab = null;
+      sy_subrc = 0;
       const _sy_tabix_1 = sy_tabix;
       sy_tabix = 0;
-      for (const SYMBOL of ftab) {
+      for (const symbol of fs_ftab) {
         sy_tabix++;
-        if (z2ui5_cl_util.rtti_get_type_kind(row) === cl_abap_datadescr.typekind_oref) {
-          if (row) {
+        if (z2ui5_cl_util.rtti_get_type_kind(fs_row) === cl_abap_datadescr.typekind_oref) {
+          if (fs_row) {
             try {
-              result.push(...z2ui5_cl_util_msg.msg_get({ val: row }));
+              result.push(...z2ui5_cl_util_msg.msg_get({ val: fs_row }));
             } catch (error) {
             }
           }
         } else {
-          result.push(...z2ui5_cl_util_msg.msg_get_rap({ val: row, entity_name: ls_attri.name }));
+          result.push(...z2ui5_cl_util_msg.msg_get_rap({ val: fs_row, entity_name: ls_attri.name }));
         }
       }
       sy_tabix = _sy_tabix_1;
@@ -299,15 +346,20 @@ class z2ui5_cl_util_msg {
   static msg_get_rap_element({ val } = {}) {
     let result = ``;
     let sy_tabix = 0;
+    let sy_subrc = 0;
+    let fs_flag = null;
+    let _fs$fs_flag = null;
     const lt_attri = z2ui5_cl_util.rtti_get_t_attri_by_any(val);
     sy_tabix = 0;
     for (const ls_attri of lt_attri) {
       sy_tabix++;
       if (!(ls_attri.name.length > 9)) continue;
       if (!(ls_attri.name(9) === `%ELEMENT-`)) continue;
-      // TODO(abap2js): ASSIGN COMPONENT ls_attri->name OF STRUCTURE val TO FIELD-SYMBOL(<flag>).
+      _fs$fs_flag = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(val, ls_attri.name);
+      fs_flag = _fs$fs_flag ? _fs$fs_flag.o[_fs$fs_flag.k] : null;
+      sy_subrc = _fs$fs_flag ? 0 : 4;
       if (!(sy_subrc === 0)) continue;
-      if (!(flag)) continue;
+      if (!(fs_flag)) continue;
       if (!result) {
         result = ls_attri.name + 9;
       } else {
@@ -319,9 +371,14 @@ class z2ui5_cl_util_msg {
 
   static msg_get_rap_state_area({ val } = {}) {
     let result = ``;
-    // TODO(abap2js): ASSIGN COMPONENT `%STATE_AREA` OF STRUCTURE val TO FIELD-SYMBOL(<sa>).
+    let sy_subrc = 0;
+    let fs_sa = null;
+    let _fs$fs_sa = null;
+    _fs$fs_sa = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(val, `%STATE_AREA`);
+    fs_sa = _fs$fs_sa ? _fs$fs_sa.o[_fs$fs_sa.k] : null;
+    sy_subrc = _fs$fs_sa ? 0 : 4;
     if (sy_subrc === 0) {
-      result = sa;
+      result = fs_sa;
     }
     return result;
   }
@@ -329,15 +386,20 @@ class z2ui5_cl_util_msg {
   static msg_get_rap_action({ val } = {}) {
     let result = ``;
     let sy_tabix = 0;
+    let sy_subrc = 0;
+    let fs_flag = null;
+    let _fs$fs_flag = null;
     const lt_attri = z2ui5_cl_util.rtti_get_t_attri_by_any(val);
     sy_tabix = 0;
     for (const ls_attri of lt_attri) {
       sy_tabix++;
       if (!(ls_attri.name.length > 12)) continue;
       if (!(ls_attri.name(12) === `%OP-%ACTION-`)) continue;
-      // TODO(abap2js): ASSIGN COMPONENT ls_attri->name OF STRUCTURE val TO FIELD-SYMBOL(<flag>).
+      _fs$fs_flag = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(val, ls_attri.name);
+      fs_flag = _fs$fs_flag ? _fs$fs_flag.o[_fs$fs_flag.k] : null;
+      sy_subrc = _fs$fs_flag ? 0 : 4;
       if (!(sy_subrc === 0)) continue;
-      if (!(flag)) continue;
+      if (!(fs_flag)) continue;
       result = ls_attri.name + 12;
       return result;
     }
@@ -346,35 +408,55 @@ class z2ui5_cl_util_msg {
 
   static msg_get_rap_pid({ val } = {}) {
     let result = ``;
-    // TODO(abap2js): ASSIGN COMPONENT `%PID` OF STRUCTURE val TO FIELD-SYMBOL(<pid>).
+    let sy_subrc = 0;
+    let fs_pid = null;
+    let _fs$fs_pid = null;
+    _fs$fs_pid = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(val, `%PID`);
+    fs_pid = _fs$fs_pid ? _fs$fs_pid.o[_fs$fs_pid.k] : null;
+    sy_subrc = _fs$fs_pid ? 0 : 4;
     if (sy_subrc === 0) {
-      result = pid;
+      result = fs_pid;
     }
     return result;
   }
 
   static msg_get_rap_cid({ val } = {}) {
     let result = ``;
-    // TODO(abap2js): ASSIGN COMPONENT `%CID` OF STRUCTURE val TO FIELD-SYMBOL(<cid>).
+    let sy_subrc = 0;
+    let fs_cid = null;
+    let _fs$fs_cid = null;
+    _fs$fs_cid = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(val, `%CID`);
+    fs_cid = _fs$fs_cid ? _fs$fs_cid.o[_fs$fs_cid.k] : null;
+    sy_subrc = _fs$fs_cid ? 0 : 4;
     if (sy_subrc === 0) {
-      result = cid;
+      result = fs_cid;
     }
     return result;
   }
 
   static msg_get_rap_tky({ val } = {}) {
     let result = ``;
-    // TODO(abap2js): ASSIGN COMPONENT `%TKY` OF STRUCTURE val TO FIELD-SYMBOL(<tky>).
-    if (sy_subrc !== 0 || !tky) {
+    let sy_subrc = 0;
+    let fs_tky = null;
+    let _fs$fs_tky = null;
+    _fs$fs_tky = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(val, `%TKY`);
+    fs_tky = _fs$fs_tky ? _fs$fs_tky.o[_fs$fs_tky.k] : null;
+    sy_subrc = _fs$fs_tky ? 0 : 4;
+    if (sy_subrc !== 0 || !fs_tky) {
       return result;
     }
-    result = z2ui5_cl_util_msg.msg_get_rap_flatten({ val: tky });
+    result = z2ui5_cl_util_msg.msg_get_rap_flatten({ val: fs_tky });
     return result;
   }
 
   static msg_get_rap_flatten({ val } = {}) {
     let result = ``;
     let sy_tabix = 0;
+    let sy_subrc = 0;
+    let fs_comp = null;
+    let _fs$fs_comp = null;
+    let lv_sub_kind;
+    let lv_sub;
     const lv_kind = z2ui5_cl_util.rtti_get_type_kind(val);
     if (lv_kind !== cl_abap_datadescr.typekind_struct1 && lv_kind !== cl_abap_datadescr.typekind_struct2) {
       return result;
@@ -383,11 +465,13 @@ class z2ui5_cl_util_msg {
     sy_tabix = 0;
     for (const ls_attri of lt_attri) {
       sy_tabix++;
-      // TODO(abap2js): ASSIGN COMPONENT ls_attri->name OF STRUCTURE val TO FIELD-SYMBOL(<comp>).
+      _fs$fs_comp = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(val, ls_attri.name);
+      fs_comp = _fs$fs_comp ? _fs$fs_comp.o[_fs$fs_comp.k] : null;
+      sy_subrc = _fs$fs_comp ? 0 : 4;
       if (!(sy_subrc === 0)) continue;
-      const lv_sub_kind = z2ui5_cl_util.rtti_get_type_kind(comp);
+      lv_sub_kind = z2ui5_cl_util.rtti_get_type_kind(fs_comp);
       if (lv_sub_kind === cl_abap_datadescr.typekind_struct1 || lv_sub_kind === cl_abap_datadescr.typekind_struct2) {
-        const lv_sub = z2ui5_cl_util_msg.msg_get_rap_flatten({ val: comp });
+        lv_sub = z2ui5_cl_util_msg.msg_get_rap_flatten({ val: fs_comp });
         if (lv_sub) {
           if (result) {
             result = `${result}, `;
@@ -395,10 +479,10 @@ class z2ui5_cl_util_msg {
           result = `${result}${lv_sub}`;
         }
       } else {
-        if (comp) {
+        if (fs_comp) {
           try {
             let lv_str = ``;
-            lv_str = comp;
+            lv_str = fs_comp;
             if (result) {
               result = `${result}, `;
             }

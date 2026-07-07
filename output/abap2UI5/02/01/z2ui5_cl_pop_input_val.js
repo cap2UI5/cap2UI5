@@ -51,7 +51,7 @@ class z2ui5_cl_pop_input_val extends z2ui5_if_app {
     switch (lv_event) {
       case `BUTTON_CONFIRM`:
       case `BUTTON_CANCEL`:
-        this.ms_result.check_confirmed = /* TODO(abap2js) */ xsdbool(lv_event === `BUTTON_CONFIRM`);
+        this.ms_result.check_confirmed = (lv_event === `BUTTON_CONFIRM`);
         client.popup_destroy();
         client.nav_app_leave();
         break;

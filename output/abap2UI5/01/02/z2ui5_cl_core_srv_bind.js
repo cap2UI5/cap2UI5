@@ -13,21 +13,29 @@ class z2ui5_cl_core_srv_bind {
   bind_tab_cell({ iv_name, iv_val } = {}) {
     let result = ``;
     let sy_tabix = 0;
+    let sy_subrc = 0;
+    let fs_tab = null;
+    let _fs$fs_tab = null;
+    let fs_row = null;
+    let _fs$fs_row = null;
+    let fs_ele = null;
+    let _fs$fs_ele = null;
     let lr_ref_in = null;
-    // TODO(abap2js): FIELD-SYMBOLS <tab> TYPE STANDARD TABLE.
-    // TODO(abap2js): FIELD-SYMBOLS <row> TYPE any.
-    // TODO(abap2js): FIELD-SYMBOLS <ele> TYPE any.
     // TODO(abap2js): ASSIGN ms_config-tab->* TO <tab>.
-    // TODO(abap2js): ASSIGN <tab>[ ms_config-tab_index ] TO <row>.
+    fs_row = fs_tab[(this.ms_config.tab_index) - 1];
+    _fs$fs_row = null;
+    sy_subrc = 0;
     const lt_attri = z2ui5_cl_util.rtti_get_t_attri_by_any(this.ms_config.tab);
     sy_tabix = 0;
-    for (const SYMBOL of lt_attri) {
+    for (const symbol of lt_attri) {
       sy_tabix++;
-      // TODO(abap2js): ASSIGN COMPONENT <comp>-name OF STRUCTURE <row> TO <ele>.
+      _fs$fs_ele = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_row, fs_comp.name);
+      fs_ele = _fs$fs_ele ? _fs$fs_ele.o[_fs$fs_ele.k] : null;
+      sy_subrc = _fs$fs_ele ? 0 : 4;
       if (!(sy_subrc === 0)) throw new Error(`ASSERT failed`);
-      lr_ref_in = (ele);
+      lr_ref_in = (fs_ele);
       if (iv_val === lr_ref_in) {
-        result = `${iv_name}/${this.shift_right((this.ms_config.tab_index - 1))}/${comp.name}`;
+        result = `${iv_name}/${this.shift_right((this.ms_config.tab_index - 1))}/${fs_comp.name}`;
         return result;
       }
     }

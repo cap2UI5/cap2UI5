@@ -43,7 +43,7 @@ class z2ui5_cl_core_handler {
     result.o_model = z2ui5_cl_ajson.create_empty();
     const lo_model = lo_ajson.slice(lv_model_edit_name);
     result.o_model.set({ iv_path: lv_model_edit_name, iv_val: lo_model });
-    lo_ajson.delete_(lv_model_edit_name);
+    lo_ajson.delete(lv_model_edit_name);
     lo_ajson = lo_ajson.slice(`/S_FRONT`);
     // TODO(abap2js): lo_ajson->to_abap( EXPORTING iv_corresponding = abap_true IMPORTING ev_container = result-s_front ).
     result.s_front.o_comp_data = lo_ajson.slice(`/CONFIG/ComponentData`);
@@ -63,7 +63,7 @@ class z2ui5_cl_core_handler {
     result.s_front.s_ui5.build_timestamp = lo_ajson.get_string(`/CONFIG/S_UI5/BUILDTIMESTAMP`);
     result.s_front.s_ui5.gav = lo_ajson.get_string(`/CONFIG/S_UI5/GAV`);
     result.s_front.s_ui5.theme = lo_ajson.get_string(`/CONFIG/S_UI5/THEME`);
-    result.s_control.check_launchpad = Boolean(String(result.s_front.search).toLowerCase().includes(String(`scenario=LAUNCHPAD`).toLowerCase()) || String(result.s_front.pathname).toLowerCase().includes(String(`/ui2/flp`).toLowerCase()) || String(result.s_front.pathname).toLowerCase().includes(String(`test/flpSandbox`).toLowerCase()));
+    result.s_control.check_launchpad = (String(result.s_front.search).toLowerCase().includes(String(`scenario=LAUNCHPAD`).toLowerCase()) || String(result.s_front.pathname).toLowerCase().includes(String(`/ui2/flp`).toLowerCase()) || String(result.s_front.pathname).toLowerCase().includes(String(`test/flpSandbox`).toLowerCase()));
     return result;
   }
 
@@ -88,8 +88,9 @@ class z2ui5_cl_core_handler {
 
   request_app_start_draft({ iv_hash } = {}) {
     let result = ``;
+    let lv_hash;
     try {
-      let lv_hash = this.substring_after({ val: iv_hash, sub: `&/` });
+      lv_hash = this.substring_after({ val: iv_hash, sub: `&/` });
       if (!lv_hash) {
         lv_hash = iv_hash + 2;
       }
@@ -101,12 +102,15 @@ class z2ui5_cl_core_handler {
 
   response_abap_to_json({ val } = {}) {
     let result = ``;
+    let ajson_result;
+    let lv_frontend;
+    let lv_model;
     try {
-      let ajson_result = (z2ui5_cl_ajson.create_empty({ ii_custom_mapping: z2ui5_cl_ajson_mapping.create_upper_case() }));
+      ajson_result = (z2ui5_cl_ajson.create_empty({ ii_custom_mapping: z2ui5_cl_ajson_mapping.create_upper_case() }));
       ajson_result.set({ iv_path: `/`, iv_val: val.s_front });
       ajson_result = ajson_result.filter(z2ui5_cl_util_json_fltr.create_no_empty_values());
-      const lv_frontend = ajson_result.stringify();
-      const lv_model = (val.model ? val.model : `{}`);
+      lv_frontend = ajson_result.stringify();
+      lv_model = (val.model ? val.model : `{}`);
       result = `{"S_FRONT":${lv_frontend},"MODEL":${lv_model}}`;
     } catch (x) {
       throw new z2ui5_cx_util_error({ val: x });
@@ -129,7 +133,7 @@ class z2ui5_cl_core_handler {
 
   main_loop() {
     let lv_dispatch_count = 0;
-    while (true) {
+    for (let sy_index = 1; ; sy_index++) {
       if (this.main_process()) {
         return;
       }
@@ -155,17 +159,30 @@ class z2ui5_cl_core_handler {
   check_view_update_needed() {
     let result = false;
     let sy_tabix = 0;
+    let sy_subrc = 0;
+    let fs_slot = null;
+    let _fs$fs_slot = null;
+    let fs_check_update_model = null;
+    let _fs$fs_check_update_model = null;
+    let fs_xml = null;
+    let _fs$fs_xml = null;
     let lt_slot = z2ui5_if_core_types.cs_view_slot_list.split(`,`);
     sy_tabix = 0;
     for (const lv_slot of lt_slot) {
       sy_tabix++;
-      // TODO(abap2js): ASSIGN COMPONENT lv_slot OF STRUCTURE ms_response-s_front-params TO FIELD-SYMBOL(<slot>).
+      _fs$fs_slot = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(this.ms_response.s_front.params, lv_slot);
+      fs_slot = _fs$fs_slot ? _fs$fs_slot.o[_fs$fs_slot.k] : null;
+      sy_subrc = _fs$fs_slot ? 0 : 4;
       if (!(sy_subrc === 0)) throw new Error(`ASSERT failed`);
-      // TODO(abap2js): ASSIGN COMPONENT `CHECK_UPDATE_MODEL` OF STRUCTURE <slot> TO FIELD-SYMBOL(<check_update_model>).
+      _fs$fs_check_update_model = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_slot, `CHECK_UPDATE_MODEL`);
+      fs_check_update_model = _fs$fs_check_update_model ? _fs$fs_check_update_model.o[_fs$fs_check_update_model.k] : null;
+      sy_subrc = _fs$fs_check_update_model ? 0 : 4;
       if (!(sy_subrc === 0)) throw new Error(`ASSERT failed`);
-      // TODO(abap2js): ASSIGN COMPONENT `XML` OF STRUCTURE <slot> TO FIELD-SYMBOL(<xml>).
+      _fs$fs_xml = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_slot, `XML`);
+      fs_xml = _fs$fs_xml ? _fs$fs_xml.o[_fs$fs_xml.k] : null;
+      sy_subrc = _fs$fs_xml ? 0 : 4;
       if (!(sy_subrc === 0)) throw new Error(`ASSERT failed`);
-      if (check_update_model === true || xml) {
+      if (fs_check_update_model === true || fs_xml) {
         result = true;
         return result;
       }
@@ -192,6 +209,7 @@ class z2ui5_cl_core_handler {
 
   main_process() {
     let check_go_client = false;
+    let lx2;
     const li_client = (new z2ui5_cl_core_client(this.mo_action));
     const li_app = (this.mo_action.mo_app.mo_app);
     if (li_app.check_sticky === false) {
@@ -205,7 +223,7 @@ class z2ui5_cl_core_handler {
         li_app.main(li_client);
       }
     } catch (lx) {
-      const lx2 = new z2ui5_cx_util_error({ val: `UNCAUGHT EXCEPTION - Please Restart App:`, previous: lx });
+      lx2 = new z2ui5_cx_util_error({ val: `UNCAUGHT EXCEPTION - Please Restart App:`, previous: lx });
       li_client.nav_app_leave(z2ui5_cl_pop_error.factory(lx2));
     }
     if (li_app.check_sticky === false) {

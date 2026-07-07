@@ -74,7 +74,7 @@ class z2ui5_cl_pop_demo_output extends z2ui5_if_app {
       } else {
         client.popup_destroy();
       }
-      this.as_page = /* TODO(abap2js) */ xsdbool(this.as_page === false);
+      this.as_page = (this.as_page === false);
       this.view_display();
       return;
     }

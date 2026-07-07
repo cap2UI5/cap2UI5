@@ -8,7 +8,7 @@ class z2ui5_cl_ajson_filter_lib {
 
   static create_empty_filter() {
     let ri_filter = null;
-    ri_filter = null; // TODO(abap2js): CREATE OBJECT ri_filter TYPE lcl_empty_filter.
+    ri_filter = new lcl_empty_filter();
     return ri_filter;
   }
 

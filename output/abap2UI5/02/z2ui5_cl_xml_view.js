@@ -2483,6 +2483,7 @@ class z2ui5_cl_xml_view {
 
   xml_get_parts({ ct_parts } = {}) {
     let sy_tabix = 0;
+    let ls_prop;
     if (this.mv_name === `ZZPLAIN`) {
       ct_parts.push(this.mt_prop.find((row) => row.n === `VALUE`).v);
       return;
@@ -2496,7 +2497,7 @@ class z2ui5_cl_xml_view {
         sy_tabix++;
         if (!(lr_ns.table_line && lr_ns.table_line !== `mvc` && lr_ns.table_line !== `core`)) continue;
         try {
-          const ls_prop = z2ui5_cl_xml_view.st_ns_map.find((row) => row.n === lr_ns);
+          ls_prop = z2ui5_cl_xml_view.st_ns_map.find((row) => row.n === lr_ns);
           this.mt_prop.push({ n: `xmlns:${ls_prop.n}`, v: ls_prop.v });
         } catch (error) {
           throw new z2ui5_cx_util_error({ val: `XML_VIEW_ERROR_NO_NAMESPACE_FOUND_FOR: ${lr_ns}` });

@@ -25,11 +25,16 @@ class z2ui5_cl_util_ext {
   static rtti_get_t_attri_on_prem({ tabname } = {}) {
     let result = [];
     let sy_tabix = 0;
+    let sy_subrc = 0;
+    let fs_dfies = null;
+    let _fs$fs_dfies = null;
+    let fs_value = null;
+    let _fs$fs_value = null;
+    let fs_value_dest = null;
+    let _fs$fs_value_dest = null;
     let structdescr = null;
     let dfies = null;
     let s_dfies = {};
-    // TODO(abap2js): FIELD-SYMBOLS <dfies> TYPE STANDARD TABLE.
-    // TODO(abap2js): FIELD-SYMBOLS <line> TYPE any.
     let temp9 = [];
     let comps = null;
     let temp10 = null;
@@ -37,8 +42,6 @@ class z2ui5_cl_util_ext {
     let new_struct_desc = null;
     let new_table_desc = null;
     let comp = null;
-    // TODO(abap2js): FIELD-SYMBOLS <value> TYPE any.
-    // TODO(abap2js): FIELD-SYMBOLS <value_dest> TYPE any.
     comps = temp9;
     temp10 = cl_abap_structdescr.describe_by_name(`DFIES`);
     lo_struct = temp10;
@@ -48,32 +51,40 @@ class z2ui5_cl_util_ext {
       new_table_desc = cl_abap_tabledescr.create({ p_line_type: new_struct_desc, p_table_kind: cl_abap_tabledescr.tablekind_std });
       // TODO(abap2js): CREATE DATA dfies TYPE HANDLE new_table_desc.
       // TODO(abap2js): ASSIGN dfies->* TO <dfies>.
-      if (!(dfies != null)) {
+      if (!(fs_dfies != null)) {
         return result;
       }
       if (!tabname) {
         throw new z2ui5_cx_util_error({ val: `RTTI_BY_NAME_TAB_INITIAL` });
       }
       structdescr = cl_abap_structdescr.describe_by_name(tabname);
-      dfies = structdescr.get_ddic_field_list();
+      fs_dfies = structdescr.get_ddic_field_list();
+      if (_fs$fs_dfies) _fs$fs_dfies.o[_fs$fs_dfies.k] = fs_dfies;
       sy_tabix = 0;
-      for (const line of dfies) {
+      for (const fs_line of fs_dfies) {
         sy_tabix++;
         const _sy_tabix_1 = sy_tabix;
         sy_tabix = 0;
         for (const comp of comps) {
           sy_tabix++;
-          // TODO(abap2js): ASSIGN COMPONENT comp-name OF STRUCTURE <line> TO <value>.
-          if (!(value != null)) {
+          _fs$fs_value = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_line, comp.name);
+          fs_value = _fs$fs_value ? _fs$fs_value.o[_fs$fs_value.k] : null;
+          sy_subrc = _fs$fs_value ? 0 : 4;
+          if (!(fs_value != null)) {
             continue;
           }
-          // TODO(abap2js): ASSIGN COMPONENT comp-name OF STRUCTURE s_dfies TO <value_dest>.
-          if (!(value_dest != null)) {
+          _fs$fs_value_dest = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(s_dfies, comp.name);
+          fs_value_dest = _fs$fs_value_dest ? _fs$fs_value_dest.o[_fs$fs_value_dest.k] : null;
+          sy_subrc = _fs$fs_value_dest ? 0 : 4;
+          if (!(fs_value_dest != null)) {
             continue;
           }
-          value_dest = value;
-          // TODO(abap2js): UNASSIGN <value>.
-          // TODO(abap2js): UNASSIGN <value_dest>.
+          fs_value_dest = fs_value;
+          if (_fs$fs_value_dest) _fs$fs_value_dest.o[_fs$fs_value_dest.k] = fs_value_dest;
+          fs_value = null;
+          _fs$fs_value = null;
+          fs_value_dest = null;
+          _fs$fs_value_dest = null;
         }
         sy_tabix = _sy_tabix_1;
         result.push(s_dfies);
@@ -87,41 +98,53 @@ class z2ui5_cl_util_ext {
   static rtti_get_t_attri_on_cloud({ tabname } = {}) {
     let result = [];
     let sy_tabix = 0;
+    let sy_subrc = 0;
+    let fs_any = null;
+    let _fs$fs_any = null;
+    let fs_ddfields = null;
+    let _fs$fs_ddfields = null;
+    let fs_field = null;
+    let _fs$fs_field = null;
+    let lv_method2;
+    let workaround;
+    let lv_check_key;
     let obj = null;
     let lv_tabname = ``;
     let lr_ddfields = null;
     // TODO(abap2js): TYPES ty_c30 TYPE c LENGTH 30.
     let names = [];
-    // TODO(abap2js): FIELD-SYMBOLS <any> TYPE any.
-    // TODO(abap2js): FIELD-SYMBOLS <field> TYPE simple.
-    // TODO(abap2js): FIELD-SYMBOLS <ddfields> TYPE ANY TABLE.
     lv_tabname = tabname;
     try {
       try {
-        const lv_method2 = `XCO_CP_ABAP_DICTIONARY`;
+        lv_method2 = `XCO_CP_ABAP_DICTIONARY`;
         // TODO(abap2js): CALL METHOD (lv_method2)=>(`DATABASE_TABLE`) EXPORTING iv_name = lv_tabname RECEIVING ro_database_table = obj.
         // TODO(abap2js): ASSIGN obj->(`IF_XCO_DATABASE_TABLE~FIELDS->IF_XCO_DBT_FIELDS_FACTORY~KEY`) TO <any>.
         if (sy_subrc !== 0) {
           throw new cx_sy_dyn_call_illegal_class();
         }
-        obj = any;
+        obj = fs_any;
         // TODO(abap2js): CALL METHOD obj->(`IF_XCO_DBT_FIELDS~GET_NAMES`) RECEIVING rt_names = names.
       } catch (error) {
-        const workaround = `DDFIELDS`;
+        workaround = `DDFIELDS`;
         // TODO(abap2js): CREATE DATA lr_ddfields TYPE (workaround).
         // TODO(abap2js): ASSIGN lr_ddfields->* TO <ddfields>.
         if (!(sy_subrc === 0)) throw new Error(`ASSERT failed`);
-        ddfields = (cl_abap_typedescr.describe_by_name(lv_tabname)).get_ddic_field_list();
+        fs_ddfields = (cl_abap_typedescr.describe_by_name(lv_tabname)).get_ddic_field_list();
+        if (_fs$fs_ddfields) _fs$fs_ddfields.o[_fs$fs_ddfields.k] = fs_ddfields;
         sy_tabix = 0;
-        for (const any of ddfields) {
+        for (const fs_any of fs_ddfields) {
           sy_tabix++;
-          // TODO(abap2js): ASSIGN COMPONENT `KEYFLAG` OF STRUCTURE <any> TO <field>.
-          if (sy_subrc !== 0 || field !== true) {
+          _fs$fs_field = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_any, `KEYFLAG`);
+          fs_field = _fs$fs_field ? _fs$fs_field.o[_fs$fs_field.k] : null;
+          sy_subrc = _fs$fs_field ? 0 : 4;
+          if (sy_subrc !== 0 || fs_field !== true) {
             continue;
           }
-          // TODO(abap2js): ASSIGN COMPONENT `FIELDNAME` OF STRUCTURE <any> TO <field>.
+          _fs$fs_field = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_any, `FIELDNAME`);
+          fs_field = _fs$fs_field ? _fs$fs_field.o[_fs$fs_field.k] : null;
+          sy_subrc = _fs$fs_field ? 0 : 4;
           if (!(sy_subrc === 0)) throw new Error(`ASSERT failed`);
-          names.push(field);
+          names.push(fs_field);
         }
       }
     } catch (error) {
@@ -130,7 +153,7 @@ class z2ui5_cl_util_ext {
     sy_tabix = 0;
     for (const lr_comp of lt_comp) {
       sy_tabix++;
-      let lv_check_key = false;
+      lv_check_key = false;
       if (names.some((row) => row.table_line === lr_comp.name)) {
         lv_check_key = true;
       }
@@ -151,16 +174,18 @@ class z2ui5_cl_util_ext {
 
   static rtti_get_table_desrc({ tabname, langu } = {}) {
     let result = ``;
+    let lan;
+    let lv_tabname;
     let ddtext = ``;
     if (!(langu !== undefined)) {
-      let lan = sy_langu;
+      lan = sy_langu;
     } else {
       lan = langu;
     }
     if (z2ui5_cl_util.context_check_abap_cloud()) {
       ddtext = tabname;
     } else {
-      const lv_tabname = `dd02t`;
+      lv_tabname = `dd02t`;
       // TODO(abap2js): SELECT SINGLE ddtext FROM (lv_tabname) WHERE tabname = @tabname AND ddlanguage = @lan INTO @ddtext.
     }
     if (ddtext) {
@@ -173,6 +198,31 @@ class z2ui5_cl_util_ext {
 
   static bus_search_help_read({ ms_shlp, mv_fname, mv_table, mr_data, mt_result_desc, mv_shlpfield, mt_data, ms_data_row } = {}) {
     let sy_tabix = 0;
+    let sy_subrc = 0;
+    let fs_shlp = null;
+    let _fs$fs_shlp = null;
+    let fs_shlp2 = null;
+    let _fs$fs_shlp2 = null;
+    let fs_row2 = null;
+    let _fs$fs_row2 = null;
+    let fs_any = null;
+    let _fs$fs_any = null;
+    let fs_value = null;
+    let _fs$fs_value = null;
+    let fs_fs_target_tab = null;
+    let _fs$fs_fs_target_tab = null;
+    let fs_fs_line = null;
+    let _fs$fs_fs_line = null;
+    let fs_line_content = null;
+    let _fs$fs_line_content = null;
+    let fs_tab = null;
+    let _fs$fs_tab = null;
+    let fs_row = null;
+    let _fs$fs_row = null;
+    let lv_fm;
+    let lv_type2;
+    let valule;
+    let descption;
     let lt_result_tab = [];
     let ls_comp = null;
     let lt_comps = [];
@@ -181,30 +231,29 @@ class z2ui5_cl_util_ext {
     let lr_shlp = null;
     const lv_type = `SHLP_DESCR`;
     // TODO(abap2js): CREATE DATA lr_shlp TYPE (lv_type).
-    // TODO(abap2js): FIELD-SYMBOLS <shlp> TYPE any.
     // TODO(abap2js): ASSIGN lr_shlp->* TO <shlp>.
     let lv_tabname = ``;
     let lv_fieldname = ``;
     lv_tabname = mv_table;
     lv_fieldname = mv_fname;
     if (!ms_shlp) {
-      let lv_fm = `F4IF_DETERMINE_SEARCHHELP`;
+      lv_fm = `F4IF_DETERMINE_SEARCHHELP`;
       // TODO(abap2js): CALL FUNCTION lv_fm EXPORTING tabname = lv_tabname fieldname = lv_fieldname IMPORTING shlp = <shlp> EXCEPTIONS field_not_found = 1 no_help_for_field = 2 inconsistent_help = 3 OTHERS = 4.
       if (sy_subrc !== 0) {
         throw new z2ui5_cx_util_error({ val: `F4IF_DETERMINE_SEARCHHELP failed for ${lv_tabname}-${lv_fieldname}` });
       }
-      ms_shlp = ({ ...shlp });
+      ms_shlp = ({ ...fs_shlp });
       if (ms_shlp.intdescr.issimple === false) {
         let lr_t_shlp = null;
-        const lv_type2 = `SHLP_DESCT`;
+        lv_type2 = `SHLP_DESCT`;
         // TODO(abap2js): CREATE DATA lr_t_shlp TYPE (lv_type2).
-        // TODO(abap2js): FIELD-SYMBOLS <shlp2> TYPE STANDARD TABLE.
         // TODO(abap2js): ASSIGN lr_t_shlp->* TO <shlp2>.
         lv_fm = `F4IF_EXPAND_SEARCHHELP`;
         // TODO(abap2js): CALL FUNCTION lv_fm EXPORTING shlp_top = ms_shlp IMPORTING shlp_tab = <shlp2>.
-        // TODO(abap2js): FIELD-SYMBOLS <row2> TYPE any.
-        // TODO(abap2js): ASSIGN <shlp2>[ 1 ] TO <row2>.
-        ms_shlp = ({ ...row2 });
+        fs_row2 = fs_shlp2[(1) - 1];
+        _fs$fs_row2 = null;
+        sy_subrc = 0;
+        ms_shlp = ({ ...fs_row2 });
       }
     }
     if (mr_data != null) {
@@ -212,14 +261,14 @@ class z2ui5_cl_util_ext {
       for (const r_interface of ms_shlp.interface) {
         sy_tabix++;
         if (!(!r_interface.value)) continue;
-        // TODO(abap2js): FIELD-SYMBOLS <any> TYPE any.
         // TODO(abap2js): ASSIGN mr_data->* TO <any>.
-        // TODO(abap2js): FIELD-SYMBOLS <value> TYPE any.
-        // TODO(abap2js): ASSIGN COMPONENT r_interface->shlpfield OF STRUCTURE <any> TO <value>.
+        _fs$fs_value = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_any, r_interface.shlpfield);
+        fs_value = _fs$fs_value ? _fs$fs_value.o[_fs$fs_value.k] : null;
+        sy_subrc = _fs$fs_value ? 0 : 4;
         if (sy_subrc !== 0) {
           continue;
         }
-        r_interface.value = value;
+        r_interface.value = fs_value;
       }
     }
     sy_tabix = 0;
@@ -238,13 +287,14 @@ class z2ui5_cl_util_ext {
       if (!fieldrop.defaultval) {
         continue;
       }
-      const valule = fieldrop.defaultval;
+      valule = fieldrop.defaultval;
       // TODO(abap2js): REPLACE ALL OCCURRENCES OF `'` IN valule WITH ``.
       ms_shlp.selopt = [...(ms_shlp.selopt ?? []),{ shlpfield: fieldrop.fieldname, option: ([...String(fieldrop.defaultval)].some(($c) => String(`*`).includes($c)) ? `CP` : `EQ`), sign: `I`, low: valule }];
     }
     // TODO(abap2js): CREATE DATA lr_shlp TYPE (lv_type).
     // TODO(abap2js): ASSIGN lr_shlp->* TO <shlp>.
-    shlp = null;
+    fs_shlp = null;
+    if (_fs$fs_shlp) _fs$fs_shlp.o[_fs$fs_shlp.k] = fs_shlp;
     // TODO(abap2js): MOVE-CORRESPONDING ms_shlp TO <shlp>.
     lv_fm = `F4IF_SELECT_VALUES`;
     // TODO(abap2js): CALL FUNCTION lv_fm EXPORTING shlp = <shlp> sort = space call_shlp_exit = abap_true TABLES record_tab = lt_result_tab recdescr_tab = mt_result_desc.
@@ -253,7 +303,7 @@ class z2ui5_cl_util_ext {
     for (const field_props of ms_shlp.fieldprop) {
       sy_tabix++;
       if (!(field_props.shlplispos)) continue;
-      const descption = (() => { try { return mt_result_desc.find((row) => row.fieldname === field_props.fieldname) ?? null; } catch { return null; } })();
+      descption = (() => { try { return mt_result_desc.find((row) => row.fieldname === field_props.fieldname) ?? null; } catch { return null; } })();
       ls_comp.name = descption.fieldname;
       ls_comp.type = cl_abap_datadescr.describe_by_name(descption.rollname);
       lt_comps.push(ls_comp);
@@ -269,9 +319,9 @@ class z2ui5_cl_util_ext {
     if (mt_data != null) {
       // TODO(abap2js): CREATE DATA mt_data TYPE HANDLE tabdescr.
     }
-    // TODO(abap2js): FIELD-SYMBOLS <fs_target_tab> TYPE STANDARD TABLE.
     // TODO(abap2js): ASSIGN mt_data->* TO <fs_target_tab>.
-    fs_target_tab = null;
+    fs_fs_target_tab = null;
+    if (_fs$fs_fs_target_tab) _fs$fs_fs_target_tab.o[_fs$fs_fs_target_tab.k] = fs_fs_target_tab;
     if (ms_data_row != null) {
       // TODO(abap2js): CREATE DATA ms_data_row TYPE HANDLE strucdescr.
     }
@@ -284,7 +334,9 @@ class z2ui5_cl_util_ext {
       sy_tabix = 0;
       for (const result_desc of mt_result_desc) {
         sy_tabix++;
-        // TODO(abap2js): ASSIGN COMPONENT result_desc-fieldname OF STRUCTURE <fs_line> TO FIELD-SYMBOL(<line_content>).
+        _fs$fs_line_content = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_fs_line, result_desc.fieldname);
+        fs_line_content = _fs$fs_line_content ? _fs$fs_line_content.o[_fs$fs_line_content.k] : null;
+        sy_subrc = _fs$fs_line_content ? 0 : 4;
         if (sy_subrc !== 0) {
           continue;
         }
@@ -292,39 +344,46 @@ class z2ui5_cl_util_ext {
           result_desc.offset = result_desc.offset / 2;
         }
         try {
-          line_content = result_line + result_desc.offset (result_desc.outputlen);
+          fs_line_content = result_line + result_desc.offset (result_desc.outputlen);
+          if (_fs$fs_line_content) _fs$fs_line_content.o[_fs$fs_line_content.k] = fs_line_content;
         } catch (error) {
           try {
-            line_content = result_line + result_desc.offset;
+            fs_line_content = result_line + result_desc.offset;
+            if (_fs$fs_line_content) _fs$fs_line_content.o[_fs$fs_line_content.k] = fs_line_content;
           } catch (error) {
           }
         }
       }
       sy_tabix = _sy_tabix_1;
-      fs_target_tab.push(fs_line);
+      fs_fs_target_tab.push(fs_fs_line);
     }
     sy_tabix = 0;
     for (const interface_ of ms_shlp.interface) {
       sy_tabix++;
       if (interface_.value) {
-        // TODO(abap2js): UNASSIGN <any>.
+        fs_any = null;
+        _fs$fs_any = null;
         // TODO(abap2js): ASSIGN ms_data_row->* TO <any>.
-        // TODO(abap2js): ASSIGN COMPONENT interface-shlpfield OF STRUCTURE <any> TO <value>.
+        _fs$fs_value = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_any, interface_.shlpfield);
+        fs_value = _fs$fs_value ? _fs$fs_value.o[_fs$fs_value.k] : null;
+        sy_subrc = _fs$fs_value ? 0 : 4;
         if (sy_subrc !== 0) {
           continue;
         }
-        value = interface_.value;
+        fs_value = interface_.value;
+        if (_fs$fs_value) _fs$fs_value.o[_fs$fs_value.k] = fs_value;
       }
     }
-    // TODO(abap2js): FIELD-SYMBOLS <tab> TYPE STANDARD TABLE.
-    // TODO(abap2js): FIELD-SYMBOLS <line> TYPE any.
     // TODO(abap2js): ASSIGN mt_data->* TO <tab>.
     sy_tabix = 0;
-    for (const line of tab) {
+    for (const fs_line of fs_tab) {
       sy_tabix++;
-      // TODO(abap2js): ASSIGN COMPONENT 'ROW_ID' OF STRUCTURE <line> TO FIELD-SYMBOL(<row>).
-      if (row != null) {
-        row = sy_tabix;
+      _fs$fs_row = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_line, `ROW_ID`);
+      fs_row = _fs$fs_row ? _fs$fs_row.o[_fs$fs_row.k] : null;
+      sy_subrc = _fs$fs_row ? 0 : 4;
+      if (fs_row != null) {
+        fs_row = sy_tabix;
+        if (_fs$fs_row) _fs$fs_row.o[_fs$fs_row.k] = fs_row;
       }
     }
   }
@@ -332,6 +391,13 @@ class z2ui5_cl_util_ext {
   static tab_get_where_by_dfies({ mv_check_tab_field, ms_data_row, it_dfies } = {}) {
     let result = ``;
     let sy_tabix = 0;
+    let sy_subrc = 0;
+    let fs_row = null;
+    let _fs$fs_row = null;
+    let fs_value = null;
+    let _fs$fs_value = null;
+    let and;
+    let escape;
     let val = ``;
     sy_tabix = 0;
     for (const dfies of it_dfies) {
@@ -340,22 +406,24 @@ class z2ui5_cl_util_ext {
         continue;
       }
       // TODO(abap2js): ASSIGN ms_data_row->* TO FIELD-SYMBOL(<row>).
-      // TODO(abap2js): ASSIGN COMPONENT dfies->fieldname OF STRUCTURE <row> TO FIELD-SYMBOL(<value>).
-      if (!(value != null)) {
+      _fs$fs_value = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_row, dfies.fieldname);
+      fs_value = _fs$fs_value ? _fs$fs_value.o[_fs$fs_value.k] : null;
+      sy_subrc = _fs$fs_value ? 0 : 4;
+      if (!(fs_value != null)) {
         continue;
       }
-      if (!value) {
+      if (!fs_value) {
         continue;
       }
       if (result) {
-        const and = ` AND `;
+        and = ` AND `;
       }
-      if ([...String(value)].some(($c) => String(`_`).includes($c))) {
-        const escape = `ESCAPE '#'`;
+      if ([...String(fs_value)].some(($c) => String(`_`).includes($c))) {
+        escape = `ESCAPE '#'`;
       } else {
         escape = null;
       }
-      val = value;
+      val = fs_value;
       if ([...String(val)].some(($c) => String(`_`).includes($c))) {
         // TODO(abap2js): REPLACE ALL OCCURRENCES OF `_` IN val WITH `#_`.
       }
@@ -367,6 +435,9 @@ class z2ui5_cl_util_ext {
   static _get_e071k_tabkey({ dfies } = {}) {
     let rv_tabkey = null;
     let sy_tabix = 0;
+    let sy_subrc = 0;
+    let fs_value = null;
+    let _fs$fs_value = null;
     let lv_type = ``;
     let lv_tabkey = ``;
     let lv_tabkey_len = 0;
@@ -376,19 +447,21 @@ class z2ui5_cl_util_ext {
     for (const s_dfies of dfies) {
       sy_tabix++;
       if (!(s_dfies.keyflag === true)) continue;
-      // TODO(abap2js): ASSIGN COMPONENT s_dfies-fieldname OF STRUCTURE line TO FIELD-SYMBOL(<value>).
-      if (!(value != null)) {
+      _fs$fs_value = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(line, s_dfies.fieldname);
+      fs_value = _fs$fs_value ? _fs$fs_value.o[_fs$fs_value.k] : null;
+      sy_subrc = _fs$fs_value ? 0 : 4;
+      if (!(fs_value != null)) {
         continue;
       }
-      lv_type = cl_abap_typedescr.describe_by_data(value).type_kind;
+      lv_type = cl_abap_typedescr.describe_by_data(fs_value).type_kind;
       if (![...String(lv_type)].some(($c) => String(`CDNT`).includes($c))) {
         // TODO(abap2js): lv_tabkey+lv_tabkey_len = '*'.
         rv_tabkey = lv_tabkey;
         return rv_tabkey;
       } else {
-        lv_field_len = cl_abap_typedescr.describe_by_data(value).length / cl_abap_char_utilities.charsize;
+        lv_field_len = cl_abap_typedescr.describe_by_data(fs_value).length / cl_abap_char_utilities.charsize;
       }
-      lv_field_len = cl_abap_typedescr.describe_by_data(value).length / cl_abap_char_utilities.charsize;
+      lv_field_len = cl_abap_typedescr.describe_by_data(fs_value).length / cl_abap_char_utilities.charsize;
       // TODO(abap2js): lv_tabkey+lv_tabkey_len(lv_field_len) = <value>.
       lv_tabkey_len = lv_tabkey_len + lv_field_len;
     }
@@ -405,26 +478,34 @@ class z2ui5_cl_util_ext {
   }
 
   static bus_tr_add({ ir_data, iv_tabname, is_transport } = {}) {
+    let sy_subrc = 0;
+    let fs_e071 = null;
+    let _fs$fs_e071 = null;
+    let fs_t_e071k = null;
+    let _fs$fs_t_e071k = null;
+    let fs_t_e071 = null;
+    let _fs$fs_t_e071 = null;
+    let r_e071k;
+    let r_e071;
+    let fb1;
+    let fb2;
     if (z2ui5_cl_util.context_check_abap_cloud()) {
     } else {
-      // TODO(abap2js): FIELD-SYMBOLS <e071> TYPE any.
-      // TODO(abap2js): FIELD-SYMBOLS <t_e071k> TYPE STANDARD TABLE.
-      // TODO(abap2js): FIELD-SYMBOLS <t_e071> TYPE STANDARD TABLE.
       z2ui5_cl_util_ext.set_mandt({ ir_data: ir_data });
-      const r_e071k = z2ui5_cl_util_ext._set_e071k({ ir_data, iv_tabname, is_transport });
+      r_e071k = z2ui5_cl_util_ext._set_e071k({ ir_data, iv_tabname, is_transport });
       // TODO(abap2js): ASSIGN r_e071k->* TO <e071>.
-      if (!e071) {
+      if (!fs_e071) {
         return;
       }
-      const r_e071 = z2ui5_cl_util_ext._set_e071({ iv_tabname, is_transport });
+      r_e071 = z2ui5_cl_util_ext._set_e071({ iv_tabname, is_transport });
       // TODO(abap2js): ASSIGN r_e071k->* TO <t_e071k>.
       // TODO(abap2js): ASSIGN r_e071->* TO <t_e071>.
-      const fb1 = `TR_APPEND_TO_COMM_OBJS_KEYS`;
+      fb1 = `TR_APPEND_TO_COMM_OBJS_KEYS`;
       // TODO(abap2js): CALL FUNCTION fb1 EXPORTING wi_trkorr = is_transport-transport iv_dialog = abap_false TABLES wt_e071 = <t_e071> wt_e071k = <t_e071k> EXCEPTIONS error_message = 1 OTHERS = 2.
       if (sy_subrc !== 0) {
         throw new z2ui5_cx_util_error();
       }
-      const fb2 = `TR_SORT_AND_COMPRESS_COMM`;
+      fb2 = `TR_SORT_AND_COMPRESS_COMM`;
       // TODO(abap2js): CALL FUNCTION fb2 EXPORTING iv_trkorr = is_transport-task EXCEPTIONS error_message = 1 OTHERS = 2.
       if (sy_subrc !== 0) {
         throw new z2ui5_cx_util_error();
@@ -437,17 +518,23 @@ class z2ui5_cl_util_ext {
   static _set_e071k({ ir_data, iv_tabname, is_transport } = {}) {
     let result = null;
     let sy_tabix = 0;
+    let sy_subrc = 0;
+    let fs_t_e071k = null;
+    let _fs$fs_t_e071k = null;
+    let fs_s_e071k = null;
+    let _fs$fs_s_e071k = null;
+    let fs_value = null;
+    let _fs$fs_value = null;
+    let fs_tab = null;
+    let _fs$fs_tab = null;
+    let struct_desc;
+    let table_desc;
     let t_e071k = null;
     let s_e071k = null;
-    // TODO(abap2js): FIELD-SYMBOLS <t_e071k> TYPE STANDARD TABLE.
-    // TODO(abap2js): FIELD-SYMBOLS <s_e071k> TYPE any.
-    // TODO(abap2js): FIELD-SYMBOLS <value> TYPE any.
-    // TODO(abap2js): FIELD-SYMBOLS <tab> TYPE STANDARD TABLE.
-    // TODO(abap2js): FIELD-SYMBOLS <line> TYPE any.
     const t_comp = z2ui5_cl_util.rtti_get_t_attri_by_table_name(`E071K`);
     try {
-      const struct_desc = cl_abap_structdescr.create(t_comp);
-      const table_desc = cl_abap_tabledescr.create({ p_line_type: struct_desc, p_table_kind: cl_abap_tabledescr.tablekind_std });
+      struct_desc = cl_abap_structdescr.create(t_comp);
+      table_desc = cl_abap_tabledescr.create({ p_line_type: struct_desc, p_table_kind: cl_abap_tabledescr.tablekind_std });
       // TODO(abap2js): CREATE DATA t_e071k TYPE HANDLE table_desc.
       // TODO(abap2js): CREATE DATA s_e071k TYPE HANDLE struct_desc.
       // TODO(abap2js): ASSIGN t_e071k->* TO <t_e071k>.
@@ -455,59 +542,86 @@ class z2ui5_cl_util_ext {
     } catch (error) {
     }
     const dfies = z2ui5_cl_util_ext.rtti_get_t_dfies_by_table_name({ table_name: iv_tabname });
-    // TODO(abap2js): ASSIGN COMPONENT 'TRKORR' OF STRUCTURE <s_e071k> TO <value>.
-    if (!(value != null)) {
+    _fs$fs_value = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_s_e071k, `TRKORR`);
+    fs_value = _fs$fs_value ? _fs$fs_value.o[_fs$fs_value.k] : null;
+    sy_subrc = _fs$fs_value ? 0 : 4;
+    if (!(fs_value != null)) {
       return result;
     } else {
-      value = is_transport.task;
+      fs_value = is_transport.task;
+      if (_fs$fs_value) _fs$fs_value.o[_fs$fs_value.k] = fs_value;
     }
-    // TODO(abap2js): UNASSIGN <value>.
-    // TODO(abap2js): ASSIGN COMPONENT 'PGMID' OF STRUCTURE <s_e071k> TO <value>.
-    if (!(value != null)) {
+    fs_value = null;
+    _fs$fs_value = null;
+    _fs$fs_value = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_s_e071k, `PGMID`);
+    fs_value = _fs$fs_value ? _fs$fs_value.o[_fs$fs_value.k] : null;
+    sy_subrc = _fs$fs_value ? 0 : 4;
+    if (!(fs_value != null)) {
       return result;
     } else {
-      value = `R3TR`;
+      fs_value = `R3TR`;
+      if (_fs$fs_value) _fs$fs_value.o[_fs$fs_value.k] = fs_value;
     }
-    // TODO(abap2js): UNASSIGN <value>.
-    // TODO(abap2js): ASSIGN COMPONENT 'MASTERTYPE' OF STRUCTURE <s_e071k> TO <value>.
-    if (!(value != null)) {
+    fs_value = null;
+    _fs$fs_value = null;
+    _fs$fs_value = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_s_e071k, `MASTERTYPE`);
+    fs_value = _fs$fs_value ? _fs$fs_value.o[_fs$fs_value.k] : null;
+    sy_subrc = _fs$fs_value ? 0 : 4;
+    if (!(fs_value != null)) {
       return result;
     } else {
-      value = `TABU`;
+      fs_value = `TABU`;
+      if (_fs$fs_value) _fs$fs_value.o[_fs$fs_value.k] = fs_value;
     }
-    // TODO(abap2js): UNASSIGN <value>.
-    // TODO(abap2js): ASSIGN COMPONENT 'OBJECT' OF STRUCTURE <s_e071k> TO <value>.
-    if (!(value != null)) {
+    fs_value = null;
+    _fs$fs_value = null;
+    _fs$fs_value = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_s_e071k, `OBJECT`);
+    fs_value = _fs$fs_value ? _fs$fs_value.o[_fs$fs_value.k] : null;
+    sy_subrc = _fs$fs_value ? 0 : 4;
+    if (!(fs_value != null)) {
       return result;
     } else {
-      value = `TABU`;
+      fs_value = `TABU`;
+      if (_fs$fs_value) _fs$fs_value.o[_fs$fs_value.k] = fs_value;
     }
-    // TODO(abap2js): UNASSIGN <value>.
-    // TODO(abap2js): ASSIGN COMPONENT 'MASTERNAME' OF STRUCTURE <s_e071k> TO <value>.
-    if (!(value != null)) {
+    fs_value = null;
+    _fs$fs_value = null;
+    _fs$fs_value = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_s_e071k, `MASTERNAME`);
+    fs_value = _fs$fs_value ? _fs$fs_value.o[_fs$fs_value.k] : null;
+    sy_subrc = _fs$fs_value ? 0 : 4;
+    if (!(fs_value != null)) {
       return result;
     } else {
-      value = iv_tabname;
+      fs_value = iv_tabname;
+      if (_fs$fs_value) _fs$fs_value.o[_fs$fs_value.k] = fs_value;
     }
-    // TODO(abap2js): UNASSIGN <value>.
-    // TODO(abap2js): ASSIGN COMPONENT 'OBJNAME' OF STRUCTURE <s_e071k> TO <value>.
-    if (!(value != null)) {
+    fs_value = null;
+    _fs$fs_value = null;
+    _fs$fs_value = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_s_e071k, `OBJNAME`);
+    fs_value = _fs$fs_value ? _fs$fs_value.o[_fs$fs_value.k] : null;
+    sy_subrc = _fs$fs_value ? 0 : 4;
+    if (!(fs_value != null)) {
       return result;
     } else {
-      value = iv_tabname;
+      fs_value = iv_tabname;
+      if (_fs$fs_value) _fs$fs_value.o[_fs$fs_value.k] = fs_value;
     }
-    // TODO(abap2js): UNASSIGN <value>.
+    fs_value = null;
+    _fs$fs_value = null;
     // TODO(abap2js): ASSIGN ir_data->* TO <tab>.
     sy_tabix = 0;
-    for (const line of tab) {
+    for (const fs_line of fs_tab) {
       sy_tabix++;
-      // TODO(abap2js): ASSIGN COMPONENT 'TABKEY' OF STRUCTURE <s_e071k> TO <value>.
-      if (!(value != null)) {
+      _fs$fs_value = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_s_e071k, `TABKEY`);
+      fs_value = _fs$fs_value ? _fs$fs_value.o[_fs$fs_value.k] : null;
+      sy_subrc = _fs$fs_value ? 0 : 4;
+      if (!(fs_value != null)) {
         return result;
       } else {
-        value = z2ui5_cl_util_ext._get_e071k_tabkey({ dfies, line });
+        fs_value = z2ui5_cl_util_ext._get_e071k_tabkey({ dfies, line: fs_line });
+        if (_fs$fs_value) _fs$fs_value.o[_fs$fs_value.k] = fs_value;
       }
-      t_e071k.push(s_e071k);
+      fs_t_e071k.push(fs_s_e071k);
     }
     result = t_e071k;
     return result;
@@ -515,79 +629,113 @@ class z2ui5_cl_util_ext {
 
   static _set_e071({ iv_tabname, is_transport } = {}) {
     let result = null;
+    let sy_subrc = 0;
+    let fs_t_e071 = null;
+    let _fs$fs_t_e071 = null;
+    let fs_s_e071 = null;
+    let _fs$fs_s_e071 = null;
+    let fs_value = null;
+    let _fs$fs_value = null;
+    let struct_desc_new;
+    let table_desc_new;
     let t_e071 = null;
     let s_e071 = null;
-    // TODO(abap2js): FIELD-SYMBOLS <t_e071> TYPE STANDARD TABLE.
-    // TODO(abap2js): FIELD-SYMBOLS <s_e071> TYPE any.
-    // TODO(abap2js): FIELD-SYMBOLS <value> TYPE any.
     const t_comp = z2ui5_cl_util.rtti_get_t_attri_by_table_name(`E071`);
     try {
-      const struct_desc_new = cl_abap_structdescr.create(t_comp);
-      const table_desc_new = cl_abap_tabledescr.create({ p_line_type: struct_desc_new, p_table_kind: cl_abap_tabledescr.tablekind_std });
+      struct_desc_new = cl_abap_structdescr.create(t_comp);
+      table_desc_new = cl_abap_tabledescr.create({ p_line_type: struct_desc_new, p_table_kind: cl_abap_tabledescr.tablekind_std });
       // TODO(abap2js): CREATE DATA t_e071 TYPE HANDLE table_desc_new.
       // TODO(abap2js): CREATE DATA s_e071 TYPE HANDLE struct_desc_new.
       // TODO(abap2js): ASSIGN t_e071->* TO <t_e071>.
       // TODO(abap2js): ASSIGN s_e071->* TO <s_e071>.
     } catch (error) {
     }
-    // TODO(abap2js): ASSIGN COMPONENT 'TRKORR' OF STRUCTURE <s_e071> TO <value>.
-    if (!(value != null)) {
+    _fs$fs_value = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_s_e071, `TRKORR`);
+    fs_value = _fs$fs_value ? _fs$fs_value.o[_fs$fs_value.k] : null;
+    sy_subrc = _fs$fs_value ? 0 : 4;
+    if (!(fs_value != null)) {
       return result;
     } else {
-      value = is_transport.task;
+      fs_value = is_transport.task;
+      if (_fs$fs_value) _fs$fs_value.o[_fs$fs_value.k] = fs_value;
     }
-    // TODO(abap2js): UNASSIGN <value>.
-    // TODO(abap2js): ASSIGN COMPONENT 'PGMID' OF STRUCTURE <s_e071> TO <value>.
-    if (!(value != null)) {
+    fs_value = null;
+    _fs$fs_value = null;
+    _fs$fs_value = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_s_e071, `PGMID`);
+    fs_value = _fs$fs_value ? _fs$fs_value.o[_fs$fs_value.k] : null;
+    sy_subrc = _fs$fs_value ? 0 : 4;
+    if (!(fs_value != null)) {
       return result;
     } else {
-      value = `R3TR`;
+      fs_value = `R3TR`;
+      if (_fs$fs_value) _fs$fs_value.o[_fs$fs_value.k] = fs_value;
     }
-    // TODO(abap2js): UNASSIGN <value>.
-    // TODO(abap2js): ASSIGN COMPONENT 'OBJECT' OF STRUCTURE <s_e071> TO <value>.
-    if (!(value != null)) {
+    fs_value = null;
+    _fs$fs_value = null;
+    _fs$fs_value = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_s_e071, `OBJECT`);
+    fs_value = _fs$fs_value ? _fs$fs_value.o[_fs$fs_value.k] : null;
+    sy_subrc = _fs$fs_value ? 0 : 4;
+    if (!(fs_value != null)) {
       return result;
     } else {
-      value = `TABU`;
+      fs_value = `TABU`;
+      if (_fs$fs_value) _fs$fs_value.o[_fs$fs_value.k] = fs_value;
     }
-    // TODO(abap2js): UNASSIGN <value>.
-    // TODO(abap2js): ASSIGN COMPONENT 'OBJ_NAME' OF STRUCTURE <s_e071> TO <value>.
-    if (!(value != null)) {
+    fs_value = null;
+    _fs$fs_value = null;
+    _fs$fs_value = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_s_e071, `OBJ_NAME`);
+    fs_value = _fs$fs_value ? _fs$fs_value.o[_fs$fs_value.k] : null;
+    sy_subrc = _fs$fs_value ? 0 : 4;
+    if (!(fs_value != null)) {
       return result;
     } else {
-      value = iv_tabname;
+      fs_value = iv_tabname;
+      if (_fs$fs_value) _fs$fs_value.o[_fs$fs_value.k] = fs_value;
     }
-    // TODO(abap2js): UNASSIGN <value>.
-    // TODO(abap2js): ASSIGN COMPONENT 'OBJFUNC' OF STRUCTURE <s_e071> TO <value>.
-    if (!(value != null)) {
+    fs_value = null;
+    _fs$fs_value = null;
+    _fs$fs_value = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_s_e071, `OBJFUNC`);
+    fs_value = _fs$fs_value ? _fs$fs_value.o[_fs$fs_value.k] : null;
+    sy_subrc = _fs$fs_value ? 0 : 4;
+    if (!(fs_value != null)) {
       return result;
     } else {
-      value = `K`;
+      fs_value = `K`;
+      if (_fs$fs_value) _fs$fs_value.o[_fs$fs_value.k] = fs_value;
     }
-    // TODO(abap2js): UNASSIGN <value>.
-    t_e071.push(s_e071);
+    fs_value = null;
+    _fs$fs_value = null;
+    fs_t_e071.push(fs_s_e071);
     result = t_e071;
     return result;
   }
 
   static _read_e070({ mt_data } = {}) {
     let sy_tabix = 0;
+    let sy_subrc = 0;
+    let fs_table = null;
+    let _fs$fs_table = null;
+    let fs_line = null;
+    let _fs$fs_line = null;
+    let fs_value = null;
+    let _fs$fs_value = null;
+    let t_comp;
+    let new_struct_desc;
+    let new_table_desc;
+    let where;
     let lo_tab = null;
     let lo_line = null;
     let ls_data = {};
-    // TODO(abap2js): FIELD-SYMBOLS <table> TYPE STANDARD TABLE.
-    // TODO(abap2js): FIELD-SYMBOLS <line> TYPE any.
-    // TODO(abap2js): FIELD-SYMBOLS <value> TYPE any.
     const table_name = `E070`;
     try {
-      const t_comp = z2ui5_cl_util.rtti_get_t_attri_by_table_name(table_name);
-      const new_struct_desc = cl_abap_structdescr.create(t_comp);
-      const new_table_desc = cl_abap_tabledescr.create({ p_line_type: new_struct_desc, p_table_kind: cl_abap_tabledescr.tablekind_std });
+      t_comp = z2ui5_cl_util.rtti_get_t_attri_by_table_name(table_name);
+      new_struct_desc = cl_abap_structdescr.create(t_comp);
+      new_table_desc = cl_abap_tabledescr.create({ p_line_type: new_struct_desc, p_table_kind: cl_abap_tabledescr.tablekind_std });
       // TODO(abap2js): CREATE DATA lo_tab TYPE HANDLE new_table_desc.
       // TODO(abap2js): CREATE DATA lo_line TYPE HANDLE new_struct_desc.
       // TODO(abap2js): ASSIGN lo_tab->* TO <table>.
       // TODO(abap2js): ASSIGN lo_line->* TO <line>.
-      const where = `( TRFUNCTION EQ 'Q' ) AND ( TRSTATUS EQ 'D' ) AND ( KORRDEV EQ 'CUST' ) AND ( AS4USER EQ '${sy_uname}' )`;
+      where = `( TRFUNCTION EQ 'Q' ) AND ( TRSTATUS EQ 'D' ) AND ( KORRDEV EQ 'CUST' ) AND ( AS4USER EQ '${sy_uname}' )`;
       // TODO(abap2js): SELECT trkorr, trfunction, trstatus, tarsystem, korrdev, as4user, as4date, as4time, strkorr FROM (table_name) WHERE (where) INTO TABLE @<table>.
       if (sy_subrc !== 0) {
         return;
@@ -595,22 +743,28 @@ class z2ui5_cl_util_ext {
     } catch (error) {
     }
     sy_tabix = 0;
-    for (const line of table) {
+    for (const fs_line of fs_table) {
       sy_tabix++;
-      // TODO(abap2js): ASSIGN COMPONENT 'TRKORR' OF STRUCTURE <line> TO <value>.
-      if (!(value != null)) {
+      _fs$fs_value = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_line, `TRKORR`);
+      fs_value = _fs$fs_value ? _fs$fs_value.o[_fs$fs_value.k] : null;
+      sy_subrc = _fs$fs_value ? 0 : 4;
+      if (!(fs_value != null)) {
         continue;
       } else {
-        ls_data.transport = value;
+        ls_data.transport = fs_value;
       }
-      // TODO(abap2js): UNASSIGN <value>.
-      // TODO(abap2js): ASSIGN COMPONENT 'STRKORR' OF STRUCTURE <line> TO <value>.
-      if (!(value != null)) {
+      fs_value = null;
+      _fs$fs_value = null;
+      _fs$fs_value = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_line, `STRKORR`);
+      fs_value = _fs$fs_value ? _fs$fs_value.o[_fs$fs_value.k] : null;
+      sy_subrc = _fs$fs_value ? 0 : 4;
+      if (!(fs_value != null)) {
         continue;
       } else {
-        ls_data.task = value;
+        ls_data.task = fs_value;
       }
-      // TODO(abap2js): UNASSIGN <value>.
+      fs_value = null;
+      _fs$fs_value = null;
       mt_data.push(ls_data);
     }
   }
@@ -618,30 +772,41 @@ class z2ui5_cl_util_ext {
   static bus_tr_read() {
     let mt_data = [];
     let sy_tabix = 0;
+    let sy_subrc = 0;
+    let fs_table = null;
+    let _fs$fs_table = null;
+    let fs_line = null;
+    let _fs$fs_line = null;
+    let fs_value = null;
+    let _fs$fs_value = null;
+    let table_name;
+    let t_comp;
+    let new_struct_desc;
+    let new_table_desc;
+    let index;
+    let where;
+    let data;
     if (z2ui5_cl_util.context_check_abap_cloud()) {
     } else {
       let lo_tab = null;
       let lo_line = null;
-      // TODO(abap2js): FIELD-SYMBOLS <table> TYPE STANDARD TABLE.
-      // TODO(abap2js): FIELD-SYMBOLS <line> TYPE any.
-      // TODO(abap2js): FIELD-SYMBOLS <value> TYPE any.
       z2ui5_cl_util_ext._read_e070({ mt_data: { mt_data } });
-      const table_name = `E07T`;
+      table_name = `E07T`;
       try {
-        const t_comp = z2ui5_cl_util.rtti_get_t_attri_by_table_name(table_name);
-        const new_struct_desc = cl_abap_structdescr.create(t_comp);
-        const new_table_desc = cl_abap_tabledescr.create({ p_line_type: new_struct_desc, p_table_kind: cl_abap_tabledescr.tablekind_std });
+        t_comp = z2ui5_cl_util.rtti_get_t_attri_by_table_name(table_name);
+        new_struct_desc = cl_abap_structdescr.create(t_comp);
+        new_table_desc = cl_abap_tabledescr.create({ p_line_type: new_struct_desc, p_table_kind: cl_abap_tabledescr.tablekind_std });
         // TODO(abap2js): CREATE DATA lo_tab TYPE HANDLE new_table_desc.
         // TODO(abap2js): CREATE DATA lo_line TYPE HANDLE new_struct_desc.
         // TODO(abap2js): ASSIGN lo_tab->* TO <table>.
         // TODO(abap2js): ASSIGN lo_line->* TO <line>.
-        let index = 0;
+        index = 0;
         sy_tabix = 0;
         for (const line of mt_data) {
           sy_tabix++;
           index = index + 1;
           if (index === 1) {
-            let where = `TRKORR EQ '${line.task}'`;
+            where = `TRKORR EQ '${line.task}'`;
           } else {
             where = `${where} OR TRKORR EQ '${line.task}'`;
           }
@@ -654,19 +819,29 @@ class z2ui5_cl_util_ext {
       } catch (error) {
       }
       sy_tabix = 0;
-      for (const line of table) {
+      for (const fs_line of fs_table) {
         sy_tabix++;
-        // TODO(abap2js): ASSIGN COMPONENT 'TRKORR' OF STRUCTURE <line> TO <value>.
-        if (!(value != null)) {
+        _fs$fs_value = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_line, `TRKORR`);
+        fs_value = _fs$fs_value ? _fs$fs_value.o[_fs$fs_value.k] : null;
+        sy_subrc = _fs$fs_value ? 0 : 4;
+        if (!(fs_value != null)) {
           continue;
         } else {
-          // TODO(abap2js): READ TABLE mt_data REFERENCE INTO DATA(data) WITH KEY task = <value>.
+          data = {};
+          {
+            const _t = mt_data;
+            const _i = _t.findIndex((_r) => _r.task === fs_value);
+            sy_subrc = _i >= 0 && _i < _t.length ? 0 : 4;
+            if (sy_subrc === 0) data = _t[_i];
+          }
           if (sy_subrc === 0) {
-            // TODO(abap2js): ASSIGN COMPONENT 'AS4TEXT' OF STRUCTURE <line> TO <value>.
-            if (!(value != null)) {
+            _fs$fs_value = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_line, `AS4TEXT`);
+            fs_value = _fs$fs_value ? _fs$fs_value.o[_fs$fs_value.k] : null;
+            sy_subrc = _fs$fs_value ? 0 : 4;
+            if (!(fs_value != null)) {
               continue;
             } else {
-              data.short_description = value;
+              data.short_description = fs_value;
             }
           }
         }
@@ -677,16 +852,22 @@ class z2ui5_cl_util_ext {
 
   static set_mandt({ ir_data } = {}) {
     let sy_tabix = 0;
-    // TODO(abap2js): FIELD-SYMBOLS <tab> TYPE STANDARD TABLE.
-    // TODO(abap2js): FIELD-SYMBOLS <line> TYPE any.
+    let sy_subrc = 0;
+    let fs_tab = null;
+    let _fs$fs_tab = null;
+    let fs_row = null;
+    let _fs$fs_row = null;
     // TODO(abap2js): ASSIGN ir_data->* TO <tab>.
     sy_tabix = 0;
-    for (const line of tab) {
+    for (const fs_line of fs_tab) {
       sy_tabix++;
-      // TODO(abap2js): ASSIGN COMPONENT `MANDT` OF STRUCTURE <line> TO FIELD-SYMBOL(<row>).
-      if (row != null) {
+      _fs$fs_row = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_line, `MANDT`);
+      fs_row = _fs$fs_row ? _fs$fs_row.o[_fs$fs_row.k] : null;
+      sy_subrc = _fs$fs_row ? 0 : 4;
+      if (fs_row != null) {
         try {
-          row = sy_mandt;
+          fs_row = sy_mandt;
+          if (_fs$fs_row) _fs$fs_row.o[_fs$fs_row.k] = fs_row;
         } catch (error) {
         }
       }
@@ -694,11 +875,14 @@ class z2ui5_cl_util_ext {
   }
 
   static conv_exit({ name, val, result } = {}) {
+    let sy_subrc = 0;
+    let conv;
+    let lv_tab;
     if (z2ui5_cl_util.context_check_abap_cloud()) {
     } else {
-      const conv = `CONVERSION_EXIT_${name.convexit}_INPUT`;
+      conv = `CONVERSION_EXIT_${name.convexit}_INPUT`;
       let conex = ``;
-      const lv_tab = `TFDIR`;
+      lv_tab = `TFDIR`;
       // TODO(abap2js): SELECT SINGLE funcname FROM (lv_tab) WHERE funcname = @conv INTO @conex.
       if (sy_subrc === 0) {
         // TODO(abap2js): CALL FUNCTION conex EXPORTING input = val IMPORTING output = result EXCEPTIONS error_message = 1 OTHERS = 2.

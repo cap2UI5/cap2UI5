@@ -11,16 +11,17 @@ class z2ui5_cl_ajson_utilities {
 
   delete_empty_nodes({ io_json, iv_keep_empty_arrays } = {}) {
     let sy_tabix = 0;
+    let sy_subrc = 0;
     let ls_json_tree = null;
     let lv_done = false;
-    while (true) {
+    for (let sy_index = 1; ; sy_index++) {
       lv_done = true;
       if (iv_keep_empty_arrays === false) {
         sy_tabix = 0;
         for (const ls_json_tree of io_json.mt_json_tree) {
           sy_tabix++;
           if (!(ls_json_tree.type === z2ui5_if_ajson_types.node_type.array && ls_json_tree.children === 0)) continue;
-          io_json.delete_(ls_json_tree.path + ls_json_tree.name);
+          io_json.delete(ls_json_tree.path + ls_json_tree.name);
         }
         if (sy_subrc === 0) {
           lv_done = false;
@@ -30,7 +31,7 @@ class z2ui5_cl_ajson_utilities {
       for (const ls_json_tree of io_json.mt_json_tree) {
         sy_tabix++;
         if (!(ls_json_tree.type === z2ui5_if_ajson_types.node_type.object && ls_json_tree.children === 0)) continue;
-        io_json.delete_(ls_json_tree.path + ls_json_tree.name);
+        io_json.delete(ls_json_tree.path + ls_json_tree.name);
       }
       if (sy_subrc === 0) {
         lv_done = false;
@@ -59,20 +60,27 @@ class z2ui5_cl_ajson_utilities {
 
   diff_a_b({ iv_path } = {}) {
     let sy_tabix = 0;
+    let sy_subrc = 0;
+    let fs_node_b = null;
+    let _fs$fs_node_b = null;
     let lv_path_a = ``;
     let lv_path_b = ``;
-    // TODO(abap2js): FIELD-SYMBOLS <node_a> LIKE LINE OF mo_json_a->mt_json_tree,
-    // TODO(abap2js): FIELD-SYMBOLS <node_b> LIKE LINE OF mo_json_a->mt_json_tree.
     sy_tabix = 0;
-    for (const node_a of this.mo_json_a.mt_json_tree) {
+    for (const fs_node_a of this.mo_json_a.mt_json_tree) {
       sy_tabix++;
-      if (!(node_a.path === iv_path)) continue;
-      lv_path_a = node_a.path + node_a.name + `/`;
-      // TODO(abap2js): READ TABLE mo_json_b->mt_json_tree ASSIGNING <node_b> WITH TABLE KEY path = <node_a>-path name = <node_a>-name.
+      if (!(fs_node_a.path === iv_path)) continue;
+      lv_path_a = fs_node_a.path + fs_node_a.name + `/`;
+      {
+        const _t = this.mo_json_b.mt_json_tree;
+        const _i = _t.findIndex((_r) => _r.path === fs_node_a.path && _r.name === fs_node_a.name);
+        sy_subrc = _i >= 0 && _i < _t.length ? 0 : 4;
+        fs_node_b = sy_subrc === 0 ? _t[_i] : null;
+        _fs$fs_node_b = sy_subrc === 0 ? { o: _t, k: _i } : null;
+      }
       if (sy_subrc === 0) {
-        lv_path_b = node_b.path + node_b.name + `/`;
-        if (node_a.type === node_b.type) {
-          switch (node_a.type) {
+        lv_path_b = fs_node_b.path + fs_node_b.name + `/`;
+        if (fs_node_a.type === fs_node_b.type) {
+          switch (fs_node_a.type) {
             case z2ui5_if_ajson_types.node_type.array:
               this.mo_insert.touch_array(lv_path_a);
               this.mo_change.touch_array(lv_path_a);
@@ -83,13 +91,13 @@ class z2ui5_cl_ajson_utilities {
               this.diff_a_b({ iv_path: lv_path_a });
               break;
             default:
-              if (node_a.value !== node_b.value) {
-                this.mo_change.set({ iv_path: lv_path_b, iv_val: node_b.value, iv_node_type: node_b.type });
+              if (fs_node_a.value !== fs_node_b.value) {
+                this.mo_change.set({ iv_path: lv_path_b, iv_val: fs_node_b.value, iv_node_type: fs_node_b.type });
               }
               break;
           }
         } else {
-          switch (node_a.type) {
+          switch (fs_node_a.type) {
             case z2ui5_if_ajson_types.node_type.array:
               this.mo_delete.touch_array(lv_path_a);
               this.diff_a_b({ iv_path: lv_path_a });
@@ -98,10 +106,10 @@ class z2ui5_cl_ajson_utilities {
               this.diff_a_b({ iv_path: lv_path_a });
               break;
             default:
-              this.mo_delete.set({ iv_path: lv_path_a, iv_val: node_a.value, iv_node_type: node_a.type });
+              this.mo_delete.set({ iv_path: lv_path_a, iv_val: fs_node_a.value, iv_node_type: fs_node_a.type });
               break;
           }
-          switch (node_b.type) {
+          switch (fs_node_b.type) {
             case z2ui5_if_ajson_types.node_type.array:
               this.mo_insert.touch_array(lv_path_b);
               this.diff_b_a({ iv_path: lv_path_b });
@@ -110,12 +118,12 @@ class z2ui5_cl_ajson_utilities {
               this.diff_b_a({ iv_path: lv_path_b });
               break;
             default:
-              this.mo_insert.set({ iv_path: lv_path_b, iv_val: node_b.value, iv_node_type: node_b.type });
+              this.mo_insert.set({ iv_path: lv_path_b, iv_val: fs_node_b.value, iv_node_type: fs_node_b.type });
               break;
           }
         }
       } else {
-        switch (node_a.type) {
+        switch (fs_node_a.type) {
           case z2ui5_if_ajson_types.node_type.array:
             this.mo_delete.touch_array(lv_path_a);
             this.diff_a_b({ iv_path: lv_path_a });
@@ -124,7 +132,7 @@ class z2ui5_cl_ajson_utilities {
             this.diff_a_b({ iv_path: lv_path_a });
             break;
           default:
-            this.mo_delete.set({ iv_path: lv_path_a, iv_val: node_a.value, iv_node_type: node_a.type });
+            this.mo_delete.set({ iv_path: lv_path_a, iv_val: fs_node_a.value, iv_node_type: fs_node_a.type });
             break;
         }
       }
@@ -133,14 +141,14 @@ class z2ui5_cl_ajson_utilities {
 
   diff_b_a({ iv_path, iv_array = false } = {}) {
     let sy_tabix = 0;
+    let sy_subrc = 0;
     let lv_path = ``;
-    // TODO(abap2js): FIELD-SYMBOLS <node_b> LIKE LINE OF mo_json_b->mt_json_tree.
     sy_tabix = 0;
-    for (const node_b of this.mo_json_b.mt_json_tree) {
+    for (const fs_node_b of this.mo_json_b.mt_json_tree) {
       sy_tabix++;
-      if (!(node_b.path === iv_path)) continue;
-      lv_path = node_b.path + node_b.name + `/`;
-      switch (node_b.type) {
+      if (!(fs_node_b.path === iv_path)) continue;
+      lv_path = fs_node_b.path + fs_node_b.name + `/`;
+      switch (fs_node_b.type) {
         case z2ui5_if_ajson_types.node_type.array:
           this.mo_insert.touch_array(lv_path);
           this.diff_b_a({ iv_path: lv_path, iv_array: true });
@@ -150,14 +158,22 @@ class z2ui5_cl_ajson_utilities {
           break;
         default:
           if (iv_array === false) {
-            // TODO(abap2js): READ TABLE mo_json_a->mt_json_tree TRANSPORTING NO FIELDS WITH TABLE KEY path = <node_b>-path name = <node_b>-name.
+            {
+              const _t = this.mo_json_a.mt_json_tree;
+              const _i = _t.findIndex((_r) => _r.path === fs_node_b.path && _r.name === fs_node_b.name);
+              sy_subrc = _i >= 0 && _i < _t.length ? 0 : 4;
+            }
             if (sy_subrc !== 0) {
-              this.mo_insert.set({ iv_path: lv_path, iv_val: node_b.value, iv_node_type: node_b.type });
+              this.mo_insert.set({ iv_path: lv_path, iv_val: fs_node_b.value, iv_node_type: fs_node_b.type });
             }
           } else {
-            // TODO(abap2js): READ TABLE mo_insert->mt_json_tree TRANSPORTING NO FIELDS WITH KEY path = <node_b>-path value = <node_b>-value.
+            {
+              const _t = this.mo_insert.mt_json_tree;
+              const _i = _t.findIndex((_r) => _r.path === fs_node_b.path && _r.value === fs_node_b.value);
+              sy_subrc = _i >= 0 && _i < _t.length ? 0 : 4;
+            }
             if (sy_subrc !== 0) {
-              this.mo_insert.push({ iv_path, iv_val: node_b.value });
+              this.mo_insert.push({ iv_path, iv_val: fs_node_b.value });
             }
           }
           break;
@@ -171,7 +187,7 @@ class z2ui5_cl_ajson_utilities {
     let li_del = null;
     let li_mod = null;
     // TODO(abap2js): diff( EXPORTING iv_json_a = iv_json_a iv_json_b = iv_json_b io_json_a = ii_json_a io_json_b = ii_json_b IMPORTING eo_insert = li_ins eo_delete = li_del eo_change = li_mod ).
-    rv_yes = Boolean(li_ins.is_empty() === true && li_del.is_empty() === true && li_mod.is_empty() === true);
+    rv_yes = (li_ins.is_empty() === true && li_del.is_empty() === true && li_mod.is_empty() === true);
     return rv_yes;
   }
 
@@ -206,7 +222,7 @@ class z2ui5_cl_ajson_utilities {
 
   normalize_input({ iv_json, io_json } = {}) {
     let ro_json = null;
-    if (Boolean(!iv_json) === Boolean(!io_json)) {
+    if ((!iv_json) === (!io_json)) {
       z2ui5_cx_ajson_error.raise(`Either supply JSON string or instance, but not both`);
     }
     if (iv_json) {

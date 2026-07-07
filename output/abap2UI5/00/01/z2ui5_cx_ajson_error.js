@@ -36,18 +36,25 @@ class z2ui5_cx_ajson_error extends cx_static_check {
   }
 
   set_location({ iv_location, is_node } = {}) {
+    let sy_subrc = 0;
+    let fs_path = null;
+    let _fs$fs_path = null;
+    let fs_name = null;
+    let _fs$fs_name = null;
     let ls_msg = null;
     let lv_location = ``;
     let lv_tmp = ``;
-    // TODO(abap2js): field-symbols <path> type string.
-    // TODO(abap2js): field-symbols <name> type string.
     if (iv_location) {
       lv_location = iv_location;
     } else if (is_node) {
-      // TODO(abap2js): assign component 'PATH' of structure is_node to <path>.
-      // TODO(abap2js): assign component 'NAME' of structure is_node to <name>.
-      if (path != null && name != null) {
-        lv_location = path + name;
+      _fs$fs_path = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(is_node, `PATH`);
+      fs_path = _fs$fs_path ? _fs$fs_path.o[_fs$fs_path.k] : null;
+      sy_subrc = _fs$fs_path ? 0 : 4;
+      _fs$fs_name = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(is_node, `NAME`);
+      fs_name = _fs$fs_name ? _fs$fs_name.o[_fs$fs_name.k] : null;
+      sy_subrc = _fs$fs_name ? 0 : 4;
+      if (fs_path != null && fs_name != null) {
+        lv_location = fs_path + fs_name;
       }
     }
     if (lv_location) {

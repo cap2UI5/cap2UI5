@@ -79,48 +79,66 @@ class z2ui5_cl_util_range {
   get_sql() {
     let result = ``;
     let sy_tabix = 0;
-    // TODO(abap2js): FIELD-SYMBOLS <lt_range> TYPE STANDARD TABLE.
+    let sy_subrc = 0;
+    let fs_lt_range = null;
+    let _fs$fs_lt_range = null;
+    let fs_lv_sign = null;
+    let _fs$fs_lv_sign = null;
+    let fs_lv_option = null;
+    let _fs$fs_lv_option = null;
+    let fs_lv_low = null;
+    let _fs$fs_lv_low = null;
+    let fs_lv_high = null;
+    let _fs$fs_lv_high = null;
     // TODO(abap2js): ASSIGN me->mr_range->* TO <lt_range>.
-    if (Boolean(!lt_range) === true) {
+    if ((!fs_lt_range) === true) {
       return result;
     }
     result = `(`;
     sy_tabix = 0;
-    for (const SYMBOL of lt_range) {
+    for (const symbol of fs_lt_range) {
       sy_tabix++;
-      // TODO(abap2js): ASSIGN COMPONENT `SIGN` OF STRUCTURE <ls_range_item> TO FIELD-SYMBOL(<lv_sign>).
-      // TODO(abap2js): ASSIGN COMPONENT `OPTION` OF STRUCTURE <ls_range_item> TO FIELD-SYMBOL(<lv_option>).
-      // TODO(abap2js): ASSIGN COMPONENT `LOW` OF STRUCTURE <ls_range_item> TO FIELD-SYMBOL(<lv_low>).
-      // TODO(abap2js): ASSIGN COMPONENT `HIGH` OF STRUCTURE <ls_range_item> TO FIELD-SYMBOL(<lv_high>).
+      _fs$fs_lv_sign = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_ls_range_item, `SIGN`);
+      fs_lv_sign = _fs$fs_lv_sign ? _fs$fs_lv_sign.o[_fs$fs_lv_sign.k] : null;
+      sy_subrc = _fs$fs_lv_sign ? 0 : 4;
+      _fs$fs_lv_option = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_ls_range_item, `OPTION`);
+      fs_lv_option = _fs$fs_lv_option ? _fs$fs_lv_option.o[_fs$fs_lv_option.k] : null;
+      sy_subrc = _fs$fs_lv_option ? 0 : 4;
+      _fs$fs_lv_low = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_ls_range_item, `LOW`);
+      fs_lv_low = _fs$fs_lv_low ? _fs$fs_lv_low.o[_fs$fs_lv_low.k] : null;
+      sy_subrc = _fs$fs_lv_low ? 0 : 4;
+      _fs$fs_lv_high = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_ls_range_item, `HIGH`);
+      fs_lv_high = _fs$fs_lv_high ? _fs$fs_lv_high.o[_fs$fs_lv_high.k] : null;
+      sy_subrc = _fs$fs_lv_high ? 0 : 4;
       if (sy_tabix !== 1) {
         result = `${result} OR`;
       }
-      if (lv_sign === z2ui5_cl_util_range.signs.excluding) {
+      if (fs_lv_sign === z2ui5_cl_util_range.signs.excluding) {
         result = `${result} NOT`;
       }
       result = `${result} ${this.mv_fieldname}`;
-      switch (lv_option) {
+      switch (fs_lv_option) {
         case z2ui5_cl_util_range.options.equal:
         case z2ui5_cl_util_range.options.not_equal:
         case z2ui5_cl_util_range.options.greater_than:
         case z2ui5_cl_util_range.options.greater_equal:
         case z2ui5_cl_util_range.options.less_equal:
         case z2ui5_cl_util_range.options.less_than:
-          result = `${result} ${lv_option} ${z2ui5_cl_util_range.quote({ val: lv_low })}`;
+          result = `${result} ${fs_lv_option} ${z2ui5_cl_util_range.quote({ val: fs_lv_low })}`;
           break;
         case z2ui5_cl_util_range.options.between:
-          result = `${result} BETWEEN ${z2ui5_cl_util_range.quote({ val: lv_low })} AND ${z2ui5_cl_util_range.quote({ val: lv_high })}`;
+          result = `${result} BETWEEN ${z2ui5_cl_util_range.quote({ val: fs_lv_low })} AND ${z2ui5_cl_util_range.quote({ val: fs_lv_high })}`;
           break;
         case z2ui5_cl_util_range.options.not_between:
-          result = `${result} NOT BETWEEN ${z2ui5_cl_util_range.quote({ val: lv_low })} AND ${z2ui5_cl_util_range.quote({ val: lv_high })}`;
+          result = `${result} NOT BETWEEN ${z2ui5_cl_util_range.quote({ val: fs_lv_low })} AND ${z2ui5_cl_util_range.quote({ val: fs_lv_high })}`;
           break;
         case z2ui5_cl_util_range.options.contains_pattern:
           // TODO(abap2js): TRANSLATE <lv_low> USING `*%`.
-          result = `${result} LIKE ${z2ui5_cl_util_range.quote({ val: lv_low })}`;
+          result = `${result} LIKE ${z2ui5_cl_util_range.quote({ val: fs_lv_low })}`;
           break;
         case z2ui5_cl_util_range.options.not_contains_pattern:
           // TODO(abap2js): TRANSLATE <lv_low> USING `*%`.
-          result = `${result} NOT LIKE ${z2ui5_cl_util_range.quote({ val: lv_low })}`;
+          result = `${result} NOT LIKE ${z2ui5_cl_util_range.quote({ val: fs_lv_low })}`;
           break;
       }
     }

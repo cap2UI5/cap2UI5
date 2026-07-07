@@ -17,15 +17,17 @@ class z2ui5_cx_util_error extends cx_no_check {
   }
 
   get_text() {
+    let error;
+    let lo_x;
     if (this.ms_error.x_root) {
       result = this.ms_error.x_root.get_text();
-      let error = true;
+      error = true;
     } else if (this.ms_error.text) {
       result = this.ms_error.text;
       error = true;
     }
     if (previous != null) {
-      let lo_x = previous;
+      lo_x = previous;
       while (lo_x != null) {
         result = result + cl_abap_char_utilities.newline + lo_x.get_text();
         lo_x = lo_x.previous;

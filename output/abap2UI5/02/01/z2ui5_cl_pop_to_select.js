@@ -42,11 +42,14 @@ class z2ui5_cl_pop_to_select extends z2ui5_if_app {
 
   display() {
     let sy_tabix = 0;
-    // TODO(abap2js): FIELD-SYMBOLS <tab_out> TYPE STANDARD TABLE.
+    let sy_subrc = 0;
+    let fs_tab_out = null;
+    let _fs$fs_tab_out = null;
+    let text;
     // TODO(abap2js): ASSIGN mr_tab_popup->* TO <tab_out>.
     const popup = z2ui5_cl_xml_view.factory_popup();
-    const tab = popup.table_select_dialog({ items: `{path:'` + this.client._bind_edit({ val: tab_out, path: true }) + `', sorter : { path : '${this.sort_field.toUpperCase()}', descending : ` + z2ui5_cl_util.boolean_abap_2_json(this.descending) + ` } }`, cancel: this.client._event(`CANCEL`), search: this.client._event(`SEARCH`, [`\${$parameters>/value}`, `\${$parameters>/clearButtonPressed}`]), confirm: this.client._event(`CONFIRM`, [`\${$parameters>/selectedContexts[0]/sPath}`]), growing: true, contentwidth: this.content_width, contentheight: this.content_height, growingthreshold: this.growing_threshold, title: this.title, multiselect: this.multiselect });
-    const lt_comp = z2ui5_cl_util.rtti_get_t_attri_by_any(tab_out);
+    const tab = popup.table_select_dialog({ items: `{path:'` + this.client._bind_edit({ val: fs_tab_out, path: true }) + `', sorter : { path : '${this.sort_field.toUpperCase()}', descending : ` + z2ui5_cl_util.boolean_abap_2_json(this.descending) + ` } }`, cancel: this.client._event(`CANCEL`), search: this.client._event(`SEARCH`, [`\${$parameters>/value}`, `\${$parameters>/clearButtonPressed}`]), confirm: this.client._event(`CONFIRM`, [`\${$parameters>/selectedContexts[0]/sPath}`]), growing: true, contentwidth: this.content_width, contentheight: this.content_height, growingthreshold: this.growing_threshold, title: this.title, multiselect: this.multiselect });
+    const lt_comp = z2ui5_cl_util.rtti_get_t_attri_by_any(fs_tab_out);
     for (let _i = lt_comp.length - 1; _i >= 0; _i--) { const row = lt_comp[_i]; if (row.name === `ZZSELKZ`) lt_comp.splice(_i, 1); }
     const list = tab.column_list_item({ valign: `Top`, selected: `{ZZSELKZ}` });
     const cells = list.cells();
@@ -59,7 +62,7 @@ class z2ui5_cl_pop_to_select extends z2ui5_if_app {
     sy_tabix = 0;
     for (const ls_comp of lt_comp) {
       sy_tabix++;
-      const text = (medium_label ? medium_label : ls_comp.name);
+      text = (medium_label ? medium_label : ls_comp.name);
       columns.column(`8rem`).header(``).text(text);
     }
     this.client.popup_display(popup.stringify());
@@ -99,25 +102,34 @@ class z2ui5_cl_pop_to_select extends z2ui5_if_app {
 
   set_output_table() {
     let sy_tabix = 0;
+    let sy_subrc = 0;
+    let fs_tab = null;
+    let _fs$fs_tab = null;
+    let fs_tab_out = null;
+    let _fs$fs_tab_out = null;
+    let fs_tab_out2 = null;
+    let _fs$fs_tab_out2 = null;
+    let fs_row2 = null;
+    let _fs$fs_row2 = null;
+    let fs_field = null;
+    let _fs$fs_field = null;
+    let lo_struct;
+    let lt_comp;
+    let lo_elem;
+    let lo_type_bool;
     let lr_row = null;
-    // TODO(abap2js): FIELD-SYMBOLS <tab> TYPE STANDARD TABLE.
-    // TODO(abap2js): FIELD-SYMBOLS <tab_out> TYPE STANDARD TABLE.
-    // TODO(abap2js): FIELD-SYMBOLS <tab_out2> TYPE STANDARD TABLE.
-    // TODO(abap2js): FIELD-SYMBOLS <row> TYPE any.
-    // TODO(abap2js): FIELD-SYMBOLS <row2> TYPE any.
-    // TODO(abap2js): FIELD-SYMBOLS <field> TYPE any.
     // TODO(abap2js): ASSIGN mr_tab->* TO <tab>.
-    const lo_table = (cl_abap_typedescr.describe_by_data(tab));
+    const lo_table = (cl_abap_typedescr.describe_by_data(fs_tab));
     try {
-      const lo_struct = (lo_table.get_table_line_type());
-      const lt_comp = lo_struct.get_components();
+      lo_struct = (lo_table.get_table_line_type());
+      lt_comp = lo_struct.get_components();
     } catch (error) {
       this.check_table_line = true;
-      const lo_elem = (lo_table.get_table_line_type());
+      lo_elem = (lo_table.get_table_line_type());
       lt_comp.push({ name: `TAB_LINE`, type: lo_elem });
     }
     if (!lt_comp.some((row) => row.name === `ZZSELKZ`)) {
-      const lo_type_bool = cl_abap_typedescr.describe_by_name(`ABAP_BOOL`);
+      lo_type_bool = cl_abap_typedescr.describe_by_name(`ABAP_BOOL`);
       lt_comp.push({ name: `ZZSELKZ`, type: (lo_type_bool) });
     }
     const lo_line_type = cl_abap_structdescr.create(lt_comp);
@@ -127,66 +139,84 @@ class z2ui5_cl_pop_to_select extends z2ui5_if_app {
     // TODO(abap2js): ASSIGN mr_tab_popup->* TO <tab_out>.
     // TODO(abap2js): ASSIGN mr_tab_popup_backup->* TO <tab_out2>.
     sy_tabix = 0;
-    for (const row of tab) {
+    for (const fs_row of fs_tab) {
       sy_tabix++;
       // TODO(abap2js): CREATE DATA lr_row LIKE LINE OF <tab_out>.
       // TODO(abap2js): ASSIGN lr_row->* TO <row2>.
       if (this.check_table_line === true) {
         // TODO(abap2js): ASSIGN lr_row->(`TAB_LINE`) TO <field>.
         if (!(sy_subrc === 0)) throw new Error(`ASSERT failed`);
-        field = row;
+        fs_field = fs_row;
+        if (_fs$fs_field) _fs$fs_field.o[_fs$fs_field.k] = fs_field;
       } else {
         // TODO(abap2js): MOVE-CORRESPONDING <row> TO <row2>.
       }
-      tab_out.push(row2);
+      fs_tab_out.push(fs_row2);
     }
-    tab_out2 = tab_out;
+    fs_tab_out2 = fs_tab_out;
+    if (_fs$fs_tab_out2) _fs$fs_tab_out2.o[_fs$fs_tab_out2.k] = fs_tab_out2;
   }
 
   on_event_confirm() {
     let sy_tabix = 0;
-    // TODO(abap2js): FIELD-SYMBOLS <tab> TYPE STANDARD TABLE.
-    // TODO(abap2js): FIELD-SYMBOLS <table_result> TYPE ANY TABLE.
-    // TODO(abap2js): FIELD-SYMBOLS <row_selected> TYPE any.
-    // TODO(abap2js): FIELD-SYMBOLS <selkz> TYPE any.
-    // TODO(abap2js): FIELD-SYMBOLS <row_result> TYPE any.
-    // TODO(abap2js): FIELD-SYMBOLS <table_line_selected> TYPE any.
+    let sy_subrc = 0;
+    let fs_tab = null;
+    let _fs$fs_tab = null;
+    let fs_table_result = null;
+    let _fs$fs_table_result = null;
+    let fs_row_result = null;
+    let _fs$fs_row_result = null;
+    let fs_selkz = null;
+    let _fs$fs_selkz = null;
+    let fs_table_line_selected = null;
+    let _fs$fs_table_line_selected = null;
     // TODO(abap2js): ASSIGN mr_tab_popup->* TO <tab>.
     // TODO(abap2js): ASSIGN ms_result-table->* TO <table_result>.
     // TODO(abap2js): ASSIGN ms_result-row->* TO <row_result>.
-    table_result = null;
+    fs_table_result = null;
+    if (_fs$fs_table_result) _fs$fs_table_result.o[_fs$fs_table_result.k] = fs_table_result;
     sy_tabix = 0;
-    for (const row_selected of tab) {
+    for (const fs_row_selected of fs_tab) {
       sy_tabix++;
-      // TODO(abap2js): ASSIGN COMPONENT `ZZSELKZ` OF STRUCTURE <row_selected> TO <selkz>.
+      _fs$fs_selkz = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_row_selected, `ZZSELKZ`);
+      fs_selkz = _fs$fs_selkz ? _fs$fs_selkz.o[_fs$fs_selkz.k] : null;
+      sy_subrc = _fs$fs_selkz ? 0 : 4;
       if (!(sy_subrc === 0)) throw new Error(`ASSERT failed`);
-      if (selkz === false) {
+      if (fs_selkz === false) {
         continue;
       }
       if (this.check_table_line === true) {
-        // TODO(abap2js): ASSIGN COMPONENT `TAB_LINE` OF STRUCTURE <row_selected> TO <table_line_selected>.
+        _fs$fs_table_line_selected = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_row_selected, `TAB_LINE`);
+        fs_table_line_selected = _fs$fs_table_line_selected ? _fs$fs_table_line_selected.o[_fs$fs_table_line_selected.k] : null;
+        sy_subrc = _fs$fs_table_line_selected ? 0 : 4;
         if (!(sy_subrc === 0)) throw new Error(`ASSERT failed`);
-        row_result = table_line_selected;
+        fs_row_result = fs_table_line_selected;
+        if (_fs$fs_row_result) _fs$fs_row_result.o[_fs$fs_row_result.k] = fs_row_result;
       } else {
-        row_result = null;
+        fs_row_result = null;
+        if (_fs$fs_row_result) _fs$fs_row_result.o[_fs$fs_row_result.k] = fs_row_result;
         // TODO(abap2js): MOVE-CORRESPONDING <row_selected> TO <row_result>.
       }
-      table_result.push(row_result);
+      fs_table_result.push(fs_row_result);
       if (this.multiselect === false) {
         break;
       }
     }
     this.client.popup_destroy();
-    this.client.nav_app_leave({ event: this.event_confirmed, r_data: table_result });
+    this.client.nav_app_leave({ event: this.event_confirmed, r_data: fs_table_result });
   }
 
   on_event_search() {
-    // TODO(abap2js): FIELD-SYMBOLS <tab_out> TYPE STANDARD TABLE.
-    // TODO(abap2js): FIELD-SYMBOLS <tab_out_backup> TYPE STANDARD TABLE.
+    let sy_subrc = 0;
+    let fs_tab_out = null;
+    let _fs$fs_tab_out = null;
+    let fs_tab_out_backup = null;
+    let _fs$fs_tab_out_backup = null;
     // TODO(abap2js): ASSIGN mr_tab_popup->* TO <tab_out>.
     // TODO(abap2js): ASSIGN mr_tab_popup_backup->* TO <tab_out_backup>.
-    tab_out = tab_out_backup;
-    z2ui5_cl_util.itab_filter_by_val({ val: this.client.get_event_arg(1), ignore_case: true, tab: tab_out });
+    fs_tab_out = fs_tab_out_backup;
+    if (_fs$fs_tab_out) _fs$fs_tab_out.o[_fs$fs_tab_out.k] = fs_tab_out;
+    z2ui5_cl_util.itab_filter_by_val({ val: this.client.get_event_arg(1), ignore_case: true, tab: fs_tab_out });
     this.client.popup_model_update();
   }
 }

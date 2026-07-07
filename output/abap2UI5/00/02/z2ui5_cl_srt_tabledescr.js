@@ -25,22 +25,28 @@ class z2ui5_cl_srt_tabledescr extends z2ui5_cl_srt_complexdescr {
   }
 
   get_rtti() {
+    let sy_subrc = 0;
+    let fs_lt_key = null;
+    let _fs$fs_lt_key = null;
     let lt_empty_key = [];
     let lo_data_rtti = null;
     let lo_error = null;
-    // TODO(abap2js): FIELD-SYMBOLS <lt_key> TYPE abap_keydescr_tab.
     lt_empty_key = null;
     switch (this.key_defkind) {
       case cl_abap_tabledescr.keydefkind_user:
-        // TODO(abap2js): ASSIGN key TO <lt_key>.
+        fs_lt_key = this.key;
+        _fs$fs_lt_key = { o: this, k: `key` };
+        sy_subrc = 0;
         break;
       default:
-        // TODO(abap2js): ASSIGN lt_empty_key TO <lt_key>.
+        fs_lt_key = lt_empty_key;
+        _fs$fs_lt_key = null;
+        sy_subrc = 0;
         break;
     }
     try {
       lo_data_rtti = this.line_type.get_rtti();
-      rtti = cl_abap_tabledescr.create({ p_line_type: lo_data_rtti, p_table_kind: this.table_kind, p_unique: this.has_unique_key, p_key: lt_key, p_key_kind: this.key_defkind });
+      rtti = cl_abap_tabledescr.create({ p_line_type: lo_data_rtti, p_table_kind: this.table_kind, p_unique: this.has_unique_key, p_key: fs_lt_key, p_key_kind: this.key_defkind });
     } catch (lo_error) {
       throw new z2ui5_cx_srt({ previous: lo_error });
     }

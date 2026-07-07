@@ -49,10 +49,11 @@ class z2ui5_cl_http_handler {
   static _http_get() {
     let result = null;
     let sy_tabix = 0;
+    let lv_style_css;
     const ls_config = {};
     z2ui5_cl_exit.get_instance().set_config_http_get({ cs_config: ls_config });
     if (!ls_config.styles_css) {
-      let lv_style_css = z2ui5_cl_app_style_css.get();
+      lv_style_css = z2ui5_cl_app_style_css.get();
     } else {
       lv_style_css = ls_config.styles_css;
     }
@@ -104,16 +105,20 @@ class z2ui5_cl_http_handler {
 
   static _http_post({ is_req } = {}) {
     let result = null;
+    let lo_post;
+    let li_app;
+    let lv_error_text;
+    let ls_config;
     try {
       if (z2ui5_cl_http_handler.so_sticky_handler != null) {
-        let lo_post = new z2ui5_cl_core_handler(is_req.body);
+        lo_post = new z2ui5_cl_core_handler(is_req.body);
       } else {
         lo_post = z2ui5_cl_http_handler.so_sticky_handler;
         lo_post.mv_request_json = is_req.body;
       }
       result = lo_post.main();
       try {
-        const li_app = (lo_post.mo_action.mo_app.mo_app);
+        li_app = (lo_post.mo_action.mo_app.mo_app);
         if (li_app.check_sticky === true) {
           z2ui5_cl_http_handler.so_sticky_handler = lo_post;
         } else {
@@ -123,9 +128,9 @@ class z2ui5_cl_http_handler {
         z2ui5_cl_http_handler.so_sticky_handler = null;
       }
     } catch (x) {
-      let lv_error_text = x.get_text();
+      lv_error_text = x.get_text();
       try {
-        const ls_config = {};
+        ls_config = {};
         z2ui5_cl_exit.get_instance().set_config_http_post({ cs_config: ls_config });
         if (ls_config.check_hide_error_details === true) {
           lv_error_text = `An internal error occurred - error details are hidden by configuration (see z2ui5_if_exit->set_config_http_post)`;

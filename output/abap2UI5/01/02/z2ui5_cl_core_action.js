@@ -37,11 +37,12 @@ class z2ui5_cl_core_action {
 
   factory_first_start() {
     let result = null;
+    let lo_app;
     try {
       result = new z2ui5_cl_core_action(this.mo_http_post);
       if (this.mo_http_post.ms_request.s_control.app_start_draft) {
         try {
-          const lo_app = z2ui5_cl_core_app.db_load(this.mo_http_post.ms_request.s_control.app_start_draft);
+          lo_app = z2ui5_cl_core_app.db_load(this.mo_http_post.ms_request.s_control.app_start_draft);
           result.mo_app = lo_app;
           result.ms_actual.check_on_navigated = true;
           result.ms_next.s_set.set_app_state_active = true;
@@ -54,7 +55,7 @@ class z2ui5_cl_core_action {
       }
       result.mo_app.ms_draft.id = z2ui5_cl_util.uuid_get_c32();
       let li_app = null;
-      li_app = null; // TODO(abap2js): CREATE OBJECT li_app TYPE (mo_http_post->ms_request-s_control-app_start).
+      li_app = (() => { const _n = String(this.mo_http_post.ms_request.s_control.app_start); const _c = z2ui5_cl_util.rtti_get_class(_n.toLowerCase()); if (!_c) throw new Error(`CREATE OBJECT: class ${_n} not found`); return new _c(); })();
       result.mo_app.mo_app = li_app;
       li_app.id_draft = result.mo_app.ms_draft.id;
       result.ms_actual.check_on_navigated = true;
@@ -73,6 +74,7 @@ class z2ui5_cl_core_action {
 
   factory_stack_leave() {
     let result = null;
+    let ls_draft;
     result = this.prepare_app_stack({ val: this.ms_next.o_app_leave });
     const lo_draft = new z2ui5_cl_core_srv_draft();
     if (lo_draft.check_exists(this.ms_next.o_app_leave.id_draft) === false) {
@@ -80,7 +82,7 @@ class z2ui5_cl_core_action {
       return result;
     }
     if (this.mo_app.ms_draft.id_prev_app_stack) {
-      const ls_draft = lo_draft.read_info(this.mo_app.ms_draft.id_prev_app_stack);
+      ls_draft = lo_draft.read_info(this.mo_app.ms_draft.id_prev_app_stack);
       result.mo_app.ms_draft.id_prev_app_stack = ls_draft.id_prev_app_stack;
     }
     return result;
@@ -98,20 +100,31 @@ class z2ui5_cl_core_action {
 
   reset_view_update_flags() {
     let sy_tabix = 0;
+    let sy_subrc = 0;
+    let fs_slot = null;
+    let _fs$fs_slot = null;
+    let fs_check_update_model = null;
+    let _fs$fs_check_update_model = null;
     let lt_slot = z2ui5_if_core_types.cs_view_slot_list.split(`,`);
     sy_tabix = 0;
     for (const lv_slot of lt_slot) {
       sy_tabix++;
-      // TODO(abap2js): ASSIGN COMPONENT lv_slot OF STRUCTURE ms_next-s_set TO FIELD-SYMBOL(<slot>).
+      _fs$fs_slot = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(this.ms_next.s_set, lv_slot);
+      fs_slot = _fs$fs_slot ? _fs$fs_slot.o[_fs$fs_slot.k] : null;
+      sy_subrc = _fs$fs_slot ? 0 : 4;
       if (!(sy_subrc === 0)) throw new Error(`ASSERT failed`);
-      // TODO(abap2js): ASSIGN COMPONENT `CHECK_UPDATE_MODEL` OF STRUCTURE <slot> TO FIELD-SYMBOL(<check_update_model>).
+      _fs$fs_check_update_model = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_slot, `CHECK_UPDATE_MODEL`);
+      fs_check_update_model = _fs$fs_check_update_model ? _fs$fs_check_update_model.o[_fs$fs_check_update_model.k] : null;
+      sy_subrc = _fs$fs_check_update_model ? 0 : 4;
       if (!(sy_subrc === 0)) throw new Error(`ASSERT failed`);
-      check_update_model = false;
+      fs_check_update_model = false;
+      if (_fs$fs_check_update_model) _fs$fs_check_update_model.o[_fs$fs_check_update_model.k] = fs_check_update_model;
     }
   }
 
   prepare_app_stack({ val } = {}) {
     let result = null;
+    let lv_action;
     this.mo_app.db_save();
     if (!val.id_draft) {
       val.id_draft = z2ui5_cl_util.uuid_get_c32();
@@ -131,7 +144,7 @@ class z2ui5_cl_core_action {
     if (this.ms_next.next_event) {
       result.ms_actual.event = this.ms_next.next_event;
     } else if (this.ms_next.s_set.s_follow_up_action.custom_js.length > 0) {
-      const lv_action = this.ms_next.s_set.s_follow_up_action.custom_js[(1) - 1];
+      lv_action = this.ms_next.s_set.s_follow_up_action.custom_js[(1) - 1];
       let lv_dummy;
       [lv_dummy, result.ms_actual.event] = lv_action.split(`.eB(['`);
       [result.ms_actual.event, lv_dummy] = result.ms_actual.event.split(`']`);

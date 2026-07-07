@@ -5,8 +5,9 @@ class z2ui5_cl_app_hello_world extends z2ui5_if_app {
   name = ``;
 
   async main(client) {
+    let view;
     if (client.check_on_init()) {
-      const view = z2ui5_cl_xml_view.factory()
+      view = z2ui5_cl_xml_view.factory()
         .shell()
         .page(`abap2UI5 - Hello World`)
         .simple_form({ editable: true })

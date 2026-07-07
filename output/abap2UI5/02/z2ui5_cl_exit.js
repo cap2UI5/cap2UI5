@@ -14,7 +14,7 @@ class z2ui5_cl_exit {
     const lv_class_name = z2ui5_cl_exit.get_user_exit_class();
     if (lv_class_name) {
       try {
-        z2ui5_cl_exit.gi_user_exit = null; // TODO(abap2js): CREATE OBJECT gi_user_exit TYPE (lv_class_name).
+        z2ui5_cl_exit.gi_user_exit = (() => { const _n = String(lv_class_name); const _c = z2ui5_cl_util.rtti_get_class(_n.toLowerCase()); if (!_c) throw new Error(`CREATE OBJECT: class ${_n} not found`); return new _c(); })();
       } catch (error) {
       }
     }
@@ -25,8 +25,9 @@ class z2ui5_cl_exit {
 
   static get_user_exit_class() {
     let r_class_name = ``;
+    let exit_classes;
     try {
-      const exit_classes = z2ui5_cl_util.rtti_get_classes_impl_intf(`Z2UI5_IF_EXIT`);
+      exit_classes = z2ui5_cl_util.rtti_get_classes_impl_intf(`Z2UI5_IF_EXIT`);
       for (let _i = exit_classes.length - 1; _i >= 0; _i--) { const row = exit_classes[_i]; if (row.classname === `Z2UI5_CL_EXIT`) exit_classes.splice(_i, 1); }
       r_class_name = (() => { try { return exit_classes[(1) - 1].classname ?? null; } catch { return null; } })();
     } catch (error) {

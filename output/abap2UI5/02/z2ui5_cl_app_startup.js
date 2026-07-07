@@ -44,7 +44,7 @@ class z2ui5_cl_app_startup extends z2ui5_if_app {
     let li_app_test = null;
     try {
       this.ms_home.classname = z2ui5_cl_util.c_trim_upper(this.ms_home.classname);
-      li_app_test = null; // TODO(abap2js): CREATE OBJECT li_app_test TYPE (ms_home-classname).
+      li_app_test = (() => { const _n = String(this.ms_home.classname); const _c = z2ui5_cl_util.rtti_get_class(_n.toLowerCase()); if (!_c) throw new Error(`CREATE OBJECT: class ${_n} not found`); return new _c(); })();
       this.client.message_toast_display(`App is ready to start!`);
       this.ms_home.btn_text = `Edit`;
       this.ms_home.btn_event_id = z2ui5_cl_app_startup.cs_event.button_change;
@@ -60,6 +60,7 @@ class z2ui5_cl_app_startup extends z2ui5_if_app {
   }
 
   view_display_start() {
+    let lv_url_samples;
     const page = z2ui5_cl_xml_view.factory()
       .shell()
       .page({ title: `abap2UI5 - Building UI5 Apps Purely in ABAP`, shownavbutton: false });
@@ -92,7 +93,7 @@ class z2ui5_cl_app_startup extends z2ui5_if_app {
       .link({ text: `Link to the Application`, target: `_blank`, href: this.client._bind(this.ms_home.url), enabled: `{= $${this.client._bind(this.ms_home.class_editable)} === false }` });
     simple_form.toolbar().title(`What's next?`);
     if (z2ui5_cl_util.rtti_check_class_exists(`z2ui5_cl_demo_app_000`)) {
-      const lv_url_samples = this.get_app_url({ classname: `z2ui5_cl_demo_app_000` });
+      lv_url_samples = this.get_app_url({ classname: `z2ui5_cl_demo_app_000` });
       simple_form.label(`Start Developing`);
       simple_form.button({ text: `Explore Code Samples`, press: this.client._event_client(this.client.cs_event.open_new_tab, [lv_url_samples]), width: `70%` });
     } else {
@@ -111,6 +112,11 @@ class z2ui5_cl_app_startup extends z2ui5_if_app {
   }
 
   async main(client) {
+    let sy_subrc = 0;
+    let fs_class = null;
+    let _fs$fs_class = null;
+    let lo_f4;
+    let ls_result;
     this.client = client;
     if (client.check_on_init()) {
       this.z2ui5_on_init();
@@ -119,11 +125,11 @@ class z2ui5_cl_app_startup extends z2ui5_if_app {
     }
     if (client.get().CHECK_ON_NAVIGATED === true) {
       try {
-        const lo_f4 = (client.get_app_prev());
-        const ls_result = lo_f4.result();
+        lo_f4 = (client.get_app_prev());
+        ls_result = lo_f4.result();
         if (ls_result.check_confirmed === true) {
           // TODO(abap2js): ASSIGN ls_result-row->* TO FIELD-SYMBOL(<class>).
-          this.ms_home = ({ ...this.ms_home, ...class_ });
+          this.ms_home = ({ ...this.ms_home, ...fs_class });
           this.view_display_start();
           return;
         }
@@ -165,7 +171,7 @@ class z2ui5_cl_app_startup extends z2ui5_if_app {
     let li_app = null;
     switch (this.client.get().EVENT) {
       case z2ui5_cl_app_startup.cs_event.set_config:
-        li_app_config = null; // TODO(abap2js): CREATE OBJECT li_app_config TYPE (`Z2UI5_CL_APP_ICF_CONFIG`).
+        li_app_config = (() => { const _n = String(`Z2UI5_CL_APP_ICF_CONFIG`); const _c = z2ui5_cl_util.rtti_get_class(_n.toLowerCase()); if (!_c) throw new Error(`CREATE OBJECT: class ${_n} not found`); return new _c(); })();
         this.client.nav_app_call(li_app_config);
         break;
       case z2ui5_cl_app_startup.cs_event.close:

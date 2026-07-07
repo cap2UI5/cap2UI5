@@ -32,10 +32,10 @@ class z2ui5_cl_ajson {
     } else {
       lo_mutator_queue = null; // TODO(abap2js): CREATE OBJECT lo_mutator_queue.
       if (ii_mapper != null) {
-        lo_mutator_queue.add(lcl_mapper_runner.new_(ii_mapper));
+        lo_mutator_queue.add(lcl_mapper_runner.new(ii_mapper));
       }
       if (ii_filter != null) {
-        lo_mutator_queue.add(lcl_filter_runner.new_(ii_filter));
+        lo_mutator_queue.add(lcl_filter_runner.new(ii_filter));
       }
       // TODO(abap2js): lo_mutator_queue->lif_mutator_runner~run( EXPORTING it_source_tree = ii_source_json->mt_json_tree IMPORTING et_dest_tree = ro_instance->mt_json_tree ).
     }
@@ -44,9 +44,15 @@ class z2ui5_cl_ajson {
 
   delete_subtree({ iv_path, iv_name, ir_parent } = {}) {
     let rs_top_node = null;
+    let sy_subrc = 0;
     let lv_parent_path = ``;
     let lr_parent = null;
-    // TODO(abap2js): READ TABLE mt_json_tree INTO rs_top_node WITH TABLE KEY path = iv_path name = iv_name.
+    {
+      const _t = mt_json_tree;
+      const _i = _t.findIndex((_r) => _r.path === iv_path && _r.name === iv_name);
+      sy_subrc = _i >= 0 && _i < _t.length ? 0 : 4;
+      if (sy_subrc === 0) rs_top_node = _t[_i];
+    }
     if (sy_subrc !== 0) {
       return rs_top_node;
     }
@@ -68,9 +74,15 @@ class z2ui5_cl_ajson {
 
   get_item({ iv_path } = {}) {
     let rv_item = null;
+    let sy_subrc = 0;
     let ls_path_name = null;
     ls_path_name = lcl_utils.split_path(iv_path);
-    // TODO(abap2js): READ TABLE mt_json_tree REFERENCE INTO rv_item WITH KEY path = ls_path_name-path name = ls_path_name-name.
+    {
+      const _t = mt_json_tree;
+      const _i = _t.findIndex((_r) => _r.path === ls_path_name.path && _r.name === ls_path_name.name);
+      sy_subrc = _i >= 0 && _i < _t.length ? 0 : 4;
+      if (sy_subrc === 0) rv_item = _t[_i];
+    }
     return rv_item;
   }
 
@@ -102,6 +114,7 @@ class z2ui5_cl_ajson {
 
   prove_path_exists({ iv_path } = {}) {
     let rr_end_node = null;
+    let sy_subrc = 0;
     let lt_path = [];
     let lr_node_parent = null;
     let lv_cur_path = ``;
@@ -109,9 +122,14 @@ class z2ui5_cl_ajson {
     let ls_new_node = null;
     lt_path = iv_path.split(`/`);
     for (let _i = lt_path.length - 1; _i >= 0; _i--) { const row = lt_path[_i]; if (!row.table_line) lt_path.splice(_i, 1); }
-    while (true) {
+    for (let sy_index = 1; ; sy_index++) {
       lr_node_parent = rr_end_node;
-      // TODO(abap2js): READ TABLE mt_json_tree REFERENCE INTO rr_end_node WITH TABLE KEY path = lv_cur_path name = lv_cur_name.
+      {
+        const _t = mt_json_tree;
+        const _i = _t.findIndex((_r) => _r.path === lv_cur_path && _r.name === lv_cur_name);
+        sy_subrc = _i >= 0 && _i < _t.length ? 0 : 4;
+        if (sy_subrc === 0) rr_end_node = _t[_i];
+      }
       if (sy_subrc !== 0) {
         ls_new_node = null;
         if (lr_node_parent) {
@@ -127,7 +145,12 @@ class z2ui5_cl_ajson {
         mt_json_tree.push(rr_end_node);
       }
       lv_cur_path = lv_cur_path + lv_cur_name + `/`;
-      // TODO(abap2js): READ TABLE lt_path INDEX sy-index INTO lv_cur_name.
+      {
+        const _t = lt_path;
+        const _i = (sy_index) - 1;
+        sy_subrc = _i >= 0 && _i < _t.length ? 0 : 4;
+        if (sy_subrc === 0) lv_cur_name = _t[_i];
+      }
       if (sy_subrc !== 0) {
         break;
       }
@@ -145,7 +168,6 @@ class z2ui5_cl_ajson {
     let sy_tabix = 0;
     let lv_normalized_path = ``;
     let lr_node = null;
-    // TODO(abap2js): FIELD-SYMBOLS <item> LIKE LINE OF mt_json_tree.
     lv_normalized_path = lcl_utils.normalize_path(iv_path);
     lr_node = this.get_item({ iv_path: iv_path });
     if (!lr_node) {
@@ -155,20 +177,20 @@ class z2ui5_cl_ajson {
       z2ui5_cx_ajson_error.raise(`Array expected at: ${iv_path}`);
     }
     sy_tabix = 0;
-    for (const item of mt_json_tree) {
+    for (const fs_item of mt_json_tree) {
       sy_tabix++;
-      if (!(item.path === lv_normalized_path)) continue;
-      switch (item.type) {
+      if (!(fs_item.path === lv_normalized_path)) continue;
+      switch (fs_item.type) {
         case z2ui5_if_ajson_types.node_type.number:
         case z2ui5_if_ajson_types.node_type.string:
-          rt_string_table.push(item.value);
+          rt_string_table.push(fs_item.value);
           break;
         case z2ui5_if_ajson_types.node_type.null:
           rt_string_table.push(``);
           break;
         case z2ui5_if_ajson_types.node_type.boolean:
           let lv_tmp = ``;
-          if (item.value === `true`) {
+          if (fs_item.value === `true`) {
             lv_tmp = true;
           } else {
             lv_tmp = null;
@@ -176,7 +198,7 @@ class z2ui5_cl_ajson {
           rt_string_table.push(lv_tmp);
           break;
         default:
-          z2ui5_cx_ajson_error.raise(`Cannot convert [${item.type}] to string at [${item.path}${item.name}]`);
+          z2ui5_cx_ajson_error.raise(`Cannot convert [${fs_item.type}] to string at [${fs_item.path}${fs_item.name}]`);
           break;
       }
     }
@@ -200,7 +222,7 @@ class z2ui5_cl_ajson {
   }
 
   exists() {
-    rv_exists = Boolean(this.get_item({ iv_path: iv_path }));
+    rv_exists = (this.get_item({ iv_path: iv_path }));
   }
 
   filter() {
@@ -230,7 +252,7 @@ class z2ui5_cl_ajson {
     if (!lr_item || lr_item.type === z2ui5_if_ajson_types.node_type.null) {
       return;
     } else if (lr_item.type === z2ui5_if_ajson_types.node_type.boolean) {
-      rv_value = Boolean(lr_item.value === `true`);
+      rv_value = (lr_item.value === `true`);
     } else if (lr_item.value) {
       rv_value = true;
     }
@@ -311,7 +333,7 @@ class z2ui5_cl_ajson {
   }
 
   is_empty() {
-    rv_yes = Boolean(mt_json_tree.length === 0);
+    rv_yes = (mt_json_tree.length === 0);
   }
 
   keep_item_order() {
@@ -326,13 +348,12 @@ class z2ui5_cl_ajson {
   members() {
     let sy_tabix = 0;
     let lv_normalized_path = ``;
-    // TODO(abap2js): FIELD-SYMBOLS <item> LIKE LINE OF mt_json_tree.
     lv_normalized_path = lcl_utils.normalize_path(iv_path);
     sy_tabix = 0;
-    for (const item of mt_json_tree) {
+    for (const fs_item of mt_json_tree) {
       sy_tabix++;
-      if (!(item.path === lv_normalized_path)) continue;
-      rt_members.push(item.name);
+      if (!(fs_item.path === lv_normalized_path)) continue;
+      rt_members.push(fs_item.name);
     }
   }
 
@@ -341,6 +362,7 @@ class z2ui5_cl_ajson {
   }
 
   push() {
+    let sy_subrc = 0;
     let lr_parent = null;
     let lr_new_node = null;
     this.read_only_watchdog();
@@ -358,7 +380,12 @@ class z2ui5_cl_ajson {
     ls_new_path.path = lcl_utils.normalize_path(iv_path);
     ls_new_path.name = `${lv_new_index}`;
     lt_new_nodes = lcl_abap_to_json.convert({ is_opts: this.ms_opts, iv_data: iv_val, is_prefix: ls_new_path });
-    // TODO(abap2js): READ TABLE lt_new_nodes INDEX 1 REFERENCE INTO lr_new_node.
+    {
+      const _t = lt_new_nodes;
+      const _i = (1) - 1;
+      sy_subrc = _i >= 0 && _i < _t.length ? 0 : 4;
+      if (sy_subrc === 0) lr_new_node = _t[_i];
+    }
     if (!(sy_subrc === 0)) throw new Error(`ASSERT failed`);
     lr_new_node.index = lv_new_index;
     lr_parent.children = lv_new_index;
@@ -457,7 +484,7 @@ class z2ui5_cl_ajson {
   set_boolean() {
     ri_json = this;
     let lv_bool = false;
-    lv_bool = Boolean(iv_val);
+    lv_bool = (iv_val);
     this.set({ iv_ignore_empty: false, iv_path, iv_val: lv_bool });
   }
 
@@ -502,6 +529,7 @@ class z2ui5_cl_ajson {
 
   slice() {
     let sy_tabix = 0;
+    let sy_subrc = 0;
     let lo_section = null;
     let ls_item = null;
     let lv_normalized_path = ``;
@@ -513,7 +541,12 @@ class z2ui5_cl_ajson {
     lv_normalized_path = lcl_utils.normalize_path(iv_path);
     lv_path_len = lv_normalized_path.length;
     ls_path_parts = lcl_utils.split_path(lv_normalized_path);
-    // TODO(abap2js): READ TABLE mt_json_tree INTO ls_item WITH KEY path = ls_path_parts-path name = ls_path_parts-name.
+    {
+      const _t = mt_json_tree;
+      const _i = _t.findIndex((_r) => _r.path === ls_path_parts.path && _r.name === ls_path_parts.name);
+      sy_subrc = _i >= 0 && _i < _t.length ? 0 : 4;
+      if (sy_subrc === 0) ls_item = _t[_i];
+    }
     if (sy_subrc !== 0) {
       return;
     }

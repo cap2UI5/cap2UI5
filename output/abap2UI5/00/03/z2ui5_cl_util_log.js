@@ -48,7 +48,7 @@ class z2ui5_cl_util_log {
 
   has_error() {
     let result = false;
-    result = Boolean(this.mt_log.some((row) => row.type === `E`));
+    result = (this.mt_log.some((row) => row.type === `E`));
     return result;
   }
 
