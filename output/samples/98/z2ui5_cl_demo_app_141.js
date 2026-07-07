@@ -40,14 +40,14 @@ class z2ui5_cl_demo_app_141 extends z2ui5_if_app {
       .toolbar_spacer()
       .button({ text: `Cancel`, press: this.client._event(`BUTTON_TEXTAREA_CANCEL`) })
       .button({ text: `Confirm`, press: this.client._event_client(this.client.cs_event.popup_close), type: `Emphasized` });
-    dialog._generic({ name: `HTML`, ns: `core`, t_prop: [{ n: `content`, v: `<script> sap.z2ui5.setBlackColor(); </script>` }, { n: `preferDOM`, v: `true` }] })
+    dialog._generic({ name: `HTML`, ns: `core`, t_prop: [{ n: `content`, v: `<script> z2ui5.setBlackColor(); </script>` }, { n: `preferDOM`, v: `true` }] })
       .get_parent();
     this.client.popup_display(popup.stringify());
   }
 
   view_display() {
     const css = `` + `.lbl-color { color: red !important; font-size: 30px !important; }`;
-    const script = `` + `sap.z2ui5.setBlackColor = function() {` + `\\n` + ` var lbl = sap.ui.getCore()
+    const script = `` + `z2ui5.setBlackColor = function() {` + `\\n` + ` var lbl = sap.ui.getCore()
       .byId('popupId--lbl1');` + `\\n` + ` lbl.setText('changed from js');` + `\\n` + ` lbl.addStyleClass('lbl-color');` + `\\n` + `};`;
     const view = z2ui5_cl_xml_view.factory();
     view._generic({ name: `style`, ns: `html` })._cc_plain_xml(css).get_parent();

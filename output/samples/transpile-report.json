@@ -67,31 +67,31 @@
   },
   {
     "class": "z2ui5_cl_demo_app_032",
-    "path": "03/z2ui5_cl_demo_app_032.js",
+    "path": "98/z2ui5_cl_demo_app_032.js",
     "todos": 0,
     "todoDetails": []
   },
   {
     "class": "z2ui5_cl_demo_app_036",
-    "path": "03/z2ui5_cl_demo_app_036.js",
+    "path": "98/z2ui5_cl_demo_app_036.js",
     "todos": 0,
     "todoDetails": []
   },
   {
     "class": "z2ui5_cl_demo_app_037",
-    "path": "03/z2ui5_cl_demo_app_037.js",
+    "path": "98/z2ui5_cl_demo_app_037.js",
     "todos": 0,
     "todoDetails": []
   },
   {
     "class": "z2ui5_cl_demo_app_040",
-    "path": "03/z2ui5_cl_demo_app_040.js",
+    "path": "98/z2ui5_cl_demo_app_040.js",
     "todos": 0,
     "todoDetails": []
   },
   {
     "class": "z2ui5_cl_demo_app_060",
-    "path": "03/z2ui5_cl_demo_app_060.js",
+    "path": "98/z2ui5_cl_demo_app_060.js",
     "todos": 7,
     "todoDetails": [
       "unsupported statement: TYPES BEGIN OF ty_s_currency,",
@@ -105,19 +105,25 @@
   },
   {
     "class": "z2ui5_cl_demo_app_084",
-    "path": "03/z2ui5_cl_demo_app_084.js",
+    "path": "98/z2ui5_cl_demo_app_084.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_090",
+    "path": "98/z2ui5_cl_demo_app_090.js",
     "todos": 0,
     "todoDetails": []
   },
   {
     "class": "z2ui5_cl_demo_app_093",
-    "path": "03/z2ui5_cl_demo_app_093.js",
+    "path": "98/z2ui5_cl_demo_app_093.js",
     "todos": 0,
     "todoDetails": []
   },
   {
     "class": "z2ui5_cl_demo_app_111",
-    "path": "03/z2ui5_cl_demo_app_111.js",
+    "path": "98/z2ui5_cl_demo_app_111.js",
     "todos": 1,
     "todoDetails": [
       "unsupported statement: DELETE mt_table."
@@ -125,7 +131,7 @@
   },
   {
     "class": "z2ui5_cl_demo_app_116",
-    "path": "03/z2ui5_cl_demo_app_116.js",
+    "path": "98/z2ui5_cl_demo_app_116.js",
     "todos": 2,
     "todoDetails": [
       "sy-uname used — provide manually",
@@ -134,25 +140,25 @@
   },
   {
     "class": "z2ui5_cl_demo_app_141",
-    "path": "03/z2ui5_cl_demo_app_141.js",
+    "path": "98/z2ui5_cl_demo_app_141.js",
     "todos": 0,
     "todoDetails": []
   },
   {
     "class": "z2ui5_cl_demo_app_172",
-    "path": "03/z2ui5_cl_demo_app_172.js",
+    "path": "98/z2ui5_cl_demo_app_172.js",
     "todos": 0,
     "todoDetails": []
   },
   {
     "class": "z2ui5_cl_demo_app_178",
-    "path": "03/z2ui5_cl_demo_app_178.js",
+    "path": "98/z2ui5_cl_demo_app_178.js",
     "todos": 0,
     "todoDetails": []
   },
   {
     "class": "z2ui5_cl_demo_app_201",
-    "path": "03/z2ui5_cl_demo_app_201.js",
+    "path": "98/z2ui5_cl_demo_app_201.js",
     "todos": 7,
     "todoDetails": [
       "unsupported statement: TYPES BEGIN OF ty_s_currency,",
@@ -165,20 +171,38 @@
     ]
   },
   {
+    "class": "z2ui5_cl_demo_app_202_0",
+    "path": "98/z2ui5_cl_demo_app_202_0.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_309_0",
+    "path": "98/z2ui5_cl_demo_app_309_0.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
     "class": "z2ui5_cl_demo_app_309",
-    "path": "03/z2ui5_cl_demo_app_309.js",
+    "path": "98/z2ui5_cl_demo_app_309.js",
     "todos": 0,
     "todoDetails": []
   },
   {
     "class": "z2ui5_cl_demo_app_317",
-    "path": "03/z2ui5_cl_demo_app_317.js",
+    "path": "98/z2ui5_cl_demo_app_317.js",
     "todos": 0,
     "todoDetails": []
   },
   {
     "class": "z2ui5_cl_demo_app_346",
-    "path": "03/z2ui5_cl_demo_app_346.js",
+    "path": "98/z2ui5_cl_demo_app_346.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_352_0",
+    "path": "98/z2ui5_cl_demo_app_352_0.js",
     "todos": 0,
     "todoDetails": []
   },
@@ -236,24 +260,6 @@
   {
     "class": "z2ui5_cl_demo_app_189_0",
     "path": "99/z2ui5_cl_demo_app_189_0.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_202_0",
-    "path": "99/z2ui5_cl_demo_app_202_0.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_309_0",
-    "path": "99/z2ui5_cl_demo_app_309_0.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_352_0",
-    "path": "99/z2ui5_cl_demo_app_352_0.js",
     "todos": 0,
     "todoDetails": []
   },
@@ -782,12 +788,6 @@
   {
     "class": "z2ui5_cl_demo_app_088",
     "path": "z2ui5_cl_demo_app_088.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_090",
-    "path": "z2ui5_cl_demo_app_090.js",
     "todos": 0,
     "todoDetails": []
   },
