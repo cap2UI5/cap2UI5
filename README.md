@@ -87,3 +87,30 @@ Refresh with:
 ```bash
 npm run mirror_abap2ui5 && npm run prepare_app && npm run copy_into_cap
 ```
+
+## Getting Started
+
+Prerequisites: Node.js ≥ 20 and internet access (the frontend loads SAPUI5
+from the CDN). No database setup is needed — CAP deploys an in-memory
+SQLite automatically on startup.
+
+```bash
+# from the repository root
+cd cap2UI5
+npm install
+
+# start the server (restarts on file changes)
+npx cds watch
+# or: start and open the app in the browser right away
+npm run watch-z2ui5
+```
+
+The server listens on [http://localhost:4004](http://localhost:4004):
+
+| URL | What you get |
+|---|---|
+| `http://localhost:4004/z2ui5/webapp/index.html` | the app — without a parameter the startup app is shown |
+| `http://localhost:4004/z2ui5/webapp/index.html?app_start=z2ui5_cl_app_hello_world` | start a specific app class via the `app_start` parameter (works for every sample, e.g. `z2ui5_cl_demo_app_001`) |
+| `http://localhost:4004/rest/root/z2ui5` | the roundtrip endpoint the frontend talks to |
+
+For a one-off run without file watching use `npm start` (`cds-serve`).
