@@ -53,7 +53,7 @@ class z2ui5_cl_demo_app_182 extends z2ui5_if_app {
   view_display() {
     const view = z2ui5_cl_xml_view.factory();
     const page = view.page({ title: `abap2UI5 - Network Graph - Org Tree`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
-    const graph = page.network_graph({ enablewheelzoom: false, orientation: `TopBottom`, nodes: this.client._bind(this.mt_data.nodes), lines: this.client._bind(this.mt_data.lines), layout: `Layered`, searchsuggest: `suggest`, search: `search`, id: `graph` })
+    const graph = page.network_graph({ enablewheelzoom: false, orientation: `TopBottom`, nodes: this.client._bind(this.mt_data.nodes, { name: `mt_data-nodes` }), lines: this.client._bind(this.mt_data.lines, { name: `mt_data-lines` }), layout: `Layered`, searchsuggest: `suggest`, search: `search`, id: `graph` })
       .get()
       .layout_algorithm()
       .layered_layout({ mergeedges: true, nodeplacement: `Simple`, nodespacing: `40` })

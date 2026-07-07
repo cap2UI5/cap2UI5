@@ -50,19 +50,25 @@ class z2ui5_cl_core_srv_model {
   /**
    * Apply frontend XX changes onto the given app instance.
    *
+   * The wire model uses UPPERCASE names (abap2UI5 wire format); the JS app
+   * properties are usually lowercase — mapping is case-insensitive and the
+   * key case of existing structures/rows is preserved on full replaces.
+   *
    * Wire shapes per property:
-   *   - Full replace:    XX[attr] = newValue        (scalar / array reassignment)
-   *   - Row-field delta: XX[attr] = { __delta: { rowIdx: { field: value } } }
+   *   - Full replace:    XX[ATTR] = newValue        (scalar / array reassignment)
+   *   - Row-field delta: XX[ATTR] = { __delta: { rowIdx: { FIELD: value } } }
    */
   static main_json_to_attri(oApp, xx, requireOwnProp = false) {
     if (!xx) return;
     for (const prop in xx) {
-      if (requireOwnProp && !Object.prototype.hasOwnProperty.call(oApp, prop)) continue;
+      const target = z2ui5_cl_core_srv_model._match_key(oApp, prop);
+      if (requireOwnProp && target === undefined) continue;
+      const key = target !== undefined ? target : prop.toLowerCase();
       const change = xx[prop];
-      if (change && typeof change === `object` && change.__delta && Array.isArray(oApp[prop])) {
-        z2ui5_cl_core_srv_model._apply_table_delta(oApp[prop], change.__delta);
+      if (change && typeof change === `object` && change.__delta && Array.isArray(oApp[key])) {
+        z2ui5_cl_core_srv_model._apply_table_delta(oApp[key], change.__delta);
       } else {
-        oApp[prop] = change;
+        oApp[key] = z2ui5_cl_core_srv_model._restore_case(change, oApp[key]);
       }
     }
   }
@@ -70,26 +76,98 @@ class z2ui5_cl_core_srv_model {
   static _apply_table_delta(tab, delta) {
     for (const rowIdxStr in delta) {
       const rowIdx = +rowIdxStr;
-      if (!tab[rowIdx]) continue;
-      Object.assign(tab[rowIdx], delta[rowIdxStr]);
+      const row = tab[rowIdx];
+      if (!row || typeof row !== `object`) continue;
+      const patch = delta[rowIdxStr] || {};
+      for (const fld of Object.keys(patch)) {
+        const key = z2ui5_cl_core_srv_model._match_key(row, fld);
+        if (key === undefined) continue;
+        row[key] = patch[fld];
+      }
     }
+  }
+
+  /** Find an own key on obj matching `name` case-insensitively. */
+  static _match_key(obj, name) {
+    if (obj === null || typeof obj !== `object`) return undefined;
+    if (Object.prototype.hasOwnProperty.call(obj, name)) return name;
+    const lower = String(name).toLowerCase();
+    return Object.keys(obj).find((k) => k.toLowerCase() === lower);
+  }
+
+  /**
+   * Rebuild an incoming wire value with the key case of the existing target
+   * value (reference), so `XX.MS_HOME = {CLASSNAME: ...}` lands as
+   * `{classname: ...}` on an app whose struct uses lowercase keys. Keys with
+   * no counterpart default to lowercase (the transpiler's convention).
+   */
+  static _restore_case(incoming, reference) {
+    if (Array.isArray(incoming)) {
+      const refArr = Array.isArray(reference) ? reference : [];
+      return incoming.map((row, i) =>
+        z2ui5_cl_core_srv_model._restore_case(row, refArr[i] ?? refArr[0]));
+    }
+    if (incoming !== null && typeof incoming === `object`) {
+      const out = {};
+      for (const k of Object.keys(incoming)) {
+        const refKey = z2ui5_cl_core_srv_model._match_key(reference, k);
+        const key = refKey !== undefined ? refKey : k.toLowerCase();
+        out[key] = z2ui5_cl_core_srv_model._restore_case(
+          incoming[k],
+          reference !== null && typeof reference === `object` ? reference[key] : undefined
+        );
+      }
+      return out;
+    }
+    return incoming;
   }
 
   /**
    * Build the response model from the client's aBind list.
    * One-way bindings sit at the model root; two-way bindings live under XX.
+   * Names and all nested keys are UPPERCASED — the abap2UI5 wire format that
+   * literal view bindings like `{TITLE}` rely on.
+   *
+   * When the app instance is passed, values are read fresh from it (the
+   * binding entry's `val` is a snapshot from bind time — stale after event
+   * handlers mutated the attribute, and rehydrated entries carry none).
    */
-  static main_json_stringify(aBind) {
+  static main_json_stringify(aBind, oApp = null) {
     const xxKey = z2ui5_if_core_types.cs_ui5.two_way_model;
     const oModel = { [xxKey]: {} };
     for (const binding of aBind) {
+      const name = String(binding.name).toUpperCase();
+      const raw = oApp && Object.prototype.hasOwnProperty.call(oApp, binding.name)
+        ? oApp[binding.name]
+        : binding.val;
+      const val = z2ui5_cl_core_srv_model._deep_upper(raw);
       if (binding.type === z2ui5_if_core_types.cs_bind_type.one_way) {
-        oModel[binding.name] = binding.val;
+        oModel[name] = val;
       } else {
-        oModel[xxKey][binding.name] = binding.val;
+        oModel[xxKey][name] = val;
       }
     }
     return oModel;
+  }
+
+  /** Deep-copy a value with all plain-object keys uppercased (cycle-safe). */
+  static _deep_upper(val, seen = new WeakSet()) {
+    if (Array.isArray(val)) {
+      if (seen.has(val)) return undefined;
+      seen.add(val);
+      return val.map((v) => z2ui5_cl_core_srv_model._deep_upper(v, seen));
+    }
+    if (val !== null && typeof val === `object`) {
+      if (val instanceof Date) return val;
+      if (seen.has(val)) return undefined;
+      seen.add(val);
+      const out = {};
+      for (const k of Object.keys(val)) {
+        out[String(k).toUpperCase()] = z2ui5_cl_core_srv_model._deep_upper(val[k], seen);
+      }
+      return out;
+    }
+    return val;
   }
 
   // ============================================================

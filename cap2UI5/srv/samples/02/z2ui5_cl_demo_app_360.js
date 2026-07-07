@@ -26,10 +26,10 @@ class z2ui5_cl_demo_app_360 extends z2ui5_if_app {
   }
 
   view_display() {
-    const float_bind = `{ path: "${this.client._bind({ val: this.big_number, path: true })}", type: "sap.ui.model.type.Float", formatOptions: { decimals: 2, groupingEnabled: true } }`;
-    const int_bind = `{ path: "${this.client._bind({ val: this.integer, path: true })}", type: "sap.ui.model.type.Integer" }`;
-    const curr_bind = `{ parts: [{ path: "${this.client._bind({ val: this.price, path: true })}" },{ path: "${this.client._bind({ val: this.currency, path: true })}" }], type: "sap.ui.model.type.Currency" }`;
-    const date_bind = `{ path: "${this.client._bind({ val: this.date, path: true })}", type: "sap.ui.model.type.Date", formatOptions: { source: { pattern: "yyyy-MM-dd" }, style: "long" } }`;
+    const float_bind = `{ path: "${this.client._bind(this.big_number, { path: true })}", type: "sap.ui.model.type.Float", formatOptions: { decimals: 2, groupingEnabled: true } }`;
+    const int_bind = `{ path: "${this.client._bind(this.integer, { path: true })}", type: "sap.ui.model.type.Integer" }`;
+    const curr_bind = `{ parts: [{ path: "${this.client._bind(this.price, { path: true })}" },{ path: "${this.client._bind(this.currency, { path: true })}" }], type: "sap.ui.model.type.Currency" }`;
+    const date_bind = `{ path: "${this.client._bind(this.date, { path: true })}", type: "sap.ui.model.type.Date", formatOptions: { source: { pattern: "yyyy-MM-dd" }, style: "long" } }`;
     const view = z2ui5_cl_util_xml.factory();
     const root = view.__({ n: `View`, ns: `mvc`, p: [{ n: `displayBlock`, v: true }, { n: `height`, v: `100%` }, { n: `xmlns`, v: `sap.m` }, { n: `xmlns:form`, v: `sap.ui.layout.form` }, { n: `xmlns:mvc`, v: `sap.ui.core.mvc` }] });
     const page = root.__(`Shell`)

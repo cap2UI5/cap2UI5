@@ -49,7 +49,7 @@ class z2ui5_cl_pop_get_range_m extends z2ui5_if_app {
 
     const item = vbox.List({
       noDataText:      `No conditions defined`,
-      items:           c._bind(this.ms_result.t_filter),
+      items:           c._bind(this.ms_result.t_filter, { name: `ms_result-t_filter` }),
       selectionChange: c._event(`SELCHANGE`),
     }).CustomListItem();
 

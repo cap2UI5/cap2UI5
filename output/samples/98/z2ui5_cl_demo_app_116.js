@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -89,7 +90,7 @@ class z2ui5_cl_demo_app_116 extends z2ui5_if_app {
       .object_page_sub_section({ id: `SETS`, title: `Sets` })
       .scroll_container({ vertical: true })
       .vbox()
-      .tree_table({ id: `treeTable`, rows: `{path:'` + this.client._bind({ val: this.prodh_nodes, path: true }) + `', parameters: {arrayNames:['NODES']}}`, toggleopenstate: `saveState()` })
+      .tree_table({ id: `treeTable`, rows: `{path:'` + this.client._bind(this.prodh_nodes, { path: true }) + `', parameters: {arrayNames:['NODES']}}`, toggleopenstate: `saveState()` })
       .tree_columns()
       .tree_column(`Label`)
       .tree_template()
@@ -137,7 +138,7 @@ class z2ui5_cl_demo_app_116 extends z2ui5_if_app {
         .getCurrentTreeState();` + `\\n` + ` };` + `\\n` + `};`;
       client.view_display(z2ui5_cl_xml_view.factory()._z2ui5().timer(client._event(`START`))._generic({ ns: `html`, name: `script` })._cc_plain_xml(lv_save_state_js).get_parent()._generic({ ns: `html`, name: `script` })._cc_plain_xml(lv_reset_state_js).stringify());
     }
-    lt_event_arg = client.get().T_EVENT_ARG;
+    lt_event_arg = z2ui5_cl_util.struct_lower_keys(client.get().T_EVENT_ARG);
     switch (client.get().EVENT) {
       case `START`:
         this.view_display();
@@ -149,7 +150,7 @@ class z2ui5_cl_demo_app_116 extends z2ui5_if_app {
         client.popup_destroy();
         break;
       case `POPOVER`:
-        lt_event_arg = client.get().T_EVENT_ARG;
+        lt_event_arg = z2ui5_cl_util.struct_lower_keys(client.get().T_EVENT_ARG);
         lv_open_by_id = lt_event_arg[(1) - 1];
         this.popover_display({ id: lv_open_by_id });
         break;

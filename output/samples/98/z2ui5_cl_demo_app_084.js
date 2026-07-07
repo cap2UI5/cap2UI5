@@ -69,7 +69,7 @@ class z2ui5_cl_demo_app_084 extends z2ui5_if_app {
     grid.simple_form({ title: `Input`, editable: true })
       .content(`form`)
       .label(`Input with suggestion items`)
-      .input({ id: `suggInput`, value: this.client._bind_edit(this.screen.colour), placeholder: `Fill in your favorite color`, suggestionitems: this.client._bind(this.mt_suggestion), showsuggestion: true })
+      .input({ id: `suggInput`, value: this.client._bind_edit(this.screen.colour, { name: `screen-colour` }), placeholder: `Fill in your favorite color`, suggestionitems: this.client._bind(this.mt_suggestion), showsuggestion: true })
       .get()
       .suggestion_items()
       .get()

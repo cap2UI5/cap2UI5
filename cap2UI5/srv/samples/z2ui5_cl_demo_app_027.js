@@ -28,11 +28,11 @@ class z2ui5_cl_demo_app_027 extends z2ui5_if_app {
     let bind_quantity = ``;
     let bind_input51 = ``;
     let bind_input52 = ``;
-    bind_input31 = this.client._bind({ val: this.input31, path: true });
-    bind_input32 = this.client._bind({ val: this.input32, path: true });
-    bind_quantity = this.client._bind({ val: this.quantity, path: true });
-    bind_input51 = this.client._bind({ val: this.input51, path: true });
-    bind_input52 = this.client._bind({ val: this.input52, path: true });
+    bind_input31 = this.client._bind(this.input31, { path: true });
+    bind_input32 = this.client._bind(this.input32, { path: true });
+    bind_quantity = this.client._bind(this.quantity, { path: true });
+    bind_input51 = this.client._bind(this.input51, { path: true });
+    bind_input52 = this.client._bind(this.input52, { path: true });
     const view = z2ui5_cl_xml_view.factory();
     const form = view.shell()
       .page({ title: `abap2UI5 - Binding Syntax`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() })

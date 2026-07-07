@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -31,7 +32,7 @@ class z2ui5_cl_demo_app_133_0 extends z2ui5_if_app {
       case `BUTTON01`:
       case `BUTTON02`:
         this.update_focus = true;
-        this.focus_id = client.get().EVENT;
+        this.focus_id = z2ui5_cl_util.struct_lower_keys(client.get().EVENT);
         client.view_model_update();
         client.message_toast_display(`focus changed`);
         break;

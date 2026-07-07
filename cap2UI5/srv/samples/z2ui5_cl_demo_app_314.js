@@ -24,8 +24,8 @@ class z2ui5_cl_demo_app_314 extends z2ui5_if_app {
         .page({ title: `abap2UI5 - Device Model, HTTP Model, OData Model`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
       page.input({ description: `device model`, value: `{device>/resize/width}`, enabled: false });
       this.mv_val = `input value with http model`;
-      page.input(client._bind_edit({ val: this.mv_val, switch_default_model: true }));
-      tab = page.table(client._bind_edit({ val: this.t_tab, switch_default_model: true }));
+      page.input(client._bind_edit(this.mv_val, { switch_default_model: true }));
+      tab = page.table(client._bind_edit(this.t_tab, { switch_default_model: true }));
       tab.header_toolbar().toolbar().title(`table with http model (framework default)`);
       tab.columns()
         .column()

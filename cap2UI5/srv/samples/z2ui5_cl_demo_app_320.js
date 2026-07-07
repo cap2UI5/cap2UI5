@@ -43,19 +43,19 @@ class z2ui5_cl_demo_app_320 extends z2ui5_if_app {
       .content(`f`)
       .vertical_layout({ class: `sapUiContentPadding` })
       .hbox({ alignitems: `Center` })
-      .avatar({ src: this.client._bind(this.item.src), initials: this.client._bind(this.item.initials), badgetooltip: this.client._bind(this.item.tooltip), fallbackicon: this.client._bind(this.item.fallbackicon) })
+      .avatar({ src: this.client._bind(this.item.src, { name: `item-src` }), initials: this.client._bind(this.item.initials, { name: `item-initials` }), badgetooltip: this.client._bind(this.item.tooltip, { name: `item-tooltip` }), fallbackicon: this.client._bind(this.item.fallbackicon, { name: `item-fallbackicon` }) })
       .vbox(`sapUiTinyMarginBegin`)
-      .title(this.client._bind(this.item.name))
-      .text(this.client._bind(this.item.jobposition))
+      .title(this.client._bind(this.item.name, { name: `item-name` }))
+      .text(this.client._bind(this.item.jobposition, { name: `item-jobposition` }))
       .get_parent()
       .get_parent()
       .title(`Contact Details`)
       .label(`Mobile`)
-      .text(this.client._bind(this.item.mobile))
+      .text(this.client._bind(this.item.mobile, { name: `item-mobile` }))
       .label(`Phone`)
-      .text(this.client._bind(this.item.phone))
+      .text(this.client._bind(this.item.phone, { name: `item-phone` }))
       .label(`Email`)
-      .text(this.client._bind(this.item.email));
+      .text(this.client._bind(this.item.email, { name: `item-email` }));
     this.client.popover_display(individual_popover.stringify(), id);
   }
 
@@ -78,19 +78,19 @@ class z2ui5_cl_demo_app_320 extends z2ui5_if_app {
       .content(`f`)
       .vertical_layout({ class: `sapUiContentPadding` })
       .hbox({ alignitems: `Center` })
-      .avatar({ src: this.client._bind(this.item.src), initials: this.client._bind(this.item.initials), badgetooltip: this.client._bind(this.item.tooltip), fallbackicon: this.client._bind(this.item.fallbackicon) })
+      .avatar({ src: this.client._bind(this.item.src, { name: `item-src` }), initials: this.client._bind(this.item.initials, { name: `item-initials` }), badgetooltip: this.client._bind(this.item.tooltip, { name: `item-tooltip` }), fallbackicon: this.client._bind(this.item.fallbackicon, { name: `item-fallbackicon` }) })
       .vbox(`sapUiTinyMarginBegin`)
-      .title(this.client._bind(this.item.name))
-      .text(this.client._bind(this.item.jobposition))
+      .title(this.client._bind(this.item.name, { name: `item-name` }))
+      .text(this.client._bind(this.item.jobposition, { name: `item-jobposition` }))
       .get_parent()
       .get_parent()
       .title(`Contact Details`)
       .label(`Mobile`)
-      .text(this.client._bind(this.item.mobile))
+      .text(this.client._bind(this.item.mobile, { name: `item-mobile` }))
       .label(`Phone`)
-      .text(this.client._bind(this.item.phone))
+      .text(this.client._bind(this.item.phone, { name: `item-phone` }))
       .label(`Email`)
-      .text(this.client._bind(this.item.email));
+      .text(this.client._bind(this.item.email, { name: `item-email` }));
     this.client.popover_display(view.stringify(), id);
   }
 

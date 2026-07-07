@@ -77,18 +77,18 @@ class z2ui5_cl_demo_app_009 extends z2ui5_if_app {
       .page({ title: `abap2UI5 - Value Help Examples`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
     const form = page.grid(`L7 M7 S7`).content(`layout`).simple_form(`Input with Value Help`).content(`form`);
     form.label(`Input with suggestion items`)
-      .input({ value: this.client._bind_edit(this.s_screen.color_01), placeholder: `fill in your favorite colour`, suggestionitems: this.client._bind(this.t_suggestion), showsuggestion: true })
+      .input({ value: this.client._bind_edit(this.s_screen.color_01, { name: `s_screen-color_01` }), placeholder: `fill in your favorite colour`, suggestionitems: this.client._bind(this.t_suggestion), showsuggestion: true })
       .get()
       .suggestion_items()
       .get()
       .list_item({ text: `{VALUE}`, additionaltext: `{DESCR}` });
     form.label(`Input only numbers allowed`)
-      .input({ value: this.client._bind_edit(this.s_screen.quantity), type: `Number`, placeholder: `quantity` });
+      .input({ value: this.client._bind_edit(this.s_screen.quantity, { name: `s_screen-quantity` }), type: `Number`, placeholder: `quantity` });
     form.label(`Input with value`)
-      .input({ value: this.client._bind_edit(this.s_screen.color_02), placeholder: `fill in your favorite colour`, showvaluehelp: true, valuehelprequest: this.client._event(`POPUP_TABLE_value`) });
+      .input({ value: this.client._bind_edit(this.s_screen.color_02, { name: `s_screen-color_02` }), placeholder: `fill in your favorite colour`, showvaluehelp: true, valuehelprequest: this.client._event(`POPUP_TABLE_value`) });
     form.label(`Custom value Popup`)
-      .input({ value: this.client._bind_edit(this.s_screen.name), placeholder: `name`, showvaluehelp: true, valuehelprequest: this.client._event(`POPUP_TABLE_value_CUSTOM`) })
-      .input({ value: this.client._bind_edit(this.s_screen.lastname), placeholder: `lastname`, showvaluehelp: true, valuehelprequest: this.client._event(`POPUP_TABLE_value_CUSTOM`) });
+      .input({ value: this.client._bind_edit(this.s_screen.name, { name: `s_screen-name` }), placeholder: `name`, showvaluehelp: true, valuehelprequest: this.client._event(`POPUP_TABLE_value_CUSTOM`) })
+      .input({ value: this.client._bind_edit(this.s_screen.lastname, { name: `s_screen-lastname` }), placeholder: `lastname`, showvaluehelp: true, valuehelprequest: this.client._event(`POPUP_TABLE_value_CUSTOM`) });
     page.footer()
       .overflow_toolbar()
       .toolbar_spacer()
@@ -113,7 +113,7 @@ class z2ui5_cl_demo_app_009 extends z2ui5_if_app {
     const dialog = popup.dialog(`abap2UI5 - Value Help`);
     dialog.simple_form()
       .label(`Location`)
-      .input({ value: this.client._bind_edit(this.s_screen.city), suggestionitems: this.client._bind(this.t_cities), showsuggestion: true })
+      .input({ value: this.client._bind_edit(this.s_screen.city, { name: `s_screen-city` }), suggestionitems: this.client._bind(this.t_cities), showsuggestion: true })
       .get()
       .suggestion_items()
       .get()

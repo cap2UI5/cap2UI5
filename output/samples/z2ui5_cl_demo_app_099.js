@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -61,7 +62,7 @@ class z2ui5_cl_demo_app_099 extends z2ui5_if_app {
         break;
       case `CONFIRM_FILTER`:
         this.mv_filter = {};
-        lt_arg = this.client.get().T_EVENT_ARG;
+        lt_arg = z2ui5_cl_util.struct_lower_keys(this.client.get().T_EVENT_ARG);
         if (lt_arg) {
           filter_string = lt_arg[(1) - 1];
           let lv_dummy;
@@ -85,7 +86,7 @@ class z2ui5_cl_demo_app_099 extends z2ui5_if_app {
         }
         break;
       case `CONFIRM_GROUP`:
-        lt_arg = this.client.get().T_EVENT_ARG;
+        lt_arg = z2ui5_cl_util.struct_lower_keys(this.client.get().T_EVENT_ARG);
         if (lt_arg) {
           group_field = lt_arg[(1) - 1];
           if (group_field) {
@@ -130,7 +131,7 @@ class z2ui5_cl_demo_app_099 extends z2ui5_if_app {
       .header_content()
       .link()
       .get_parent();
-    page.table({ headertext: `Table Output`, items: `{path:'` + this.client._bind_edit({ val: this.t_tab, path: true }) + `',sorter:{path:'` + this.mv_sorter_group + `',group:` + `true` + `}` + `,filters:[` + this.mv_filter + `] }` })
+    page.table({ headertext: `Table Output`, items: `{path:'` + this.client._bind_edit(this.t_tab, { path: true }) + `',sorter:{path:'` + this.mv_sorter_group + `',group:` + `true` + `}` + `,filters:[` + this.mv_filter + `] }` })
       .header_toolbar()
       .overflow_toolbar()
       .title({ text: `Table`, level: `H2` })

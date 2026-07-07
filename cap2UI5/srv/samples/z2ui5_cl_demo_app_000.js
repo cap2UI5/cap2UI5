@@ -25,7 +25,7 @@ class z2ui5_cl_demo_app_000 extends z2ui5_if_app {
           lv_classname = client.get().EVENT.toUpperCase();
           let li_app = null;
           li_app = (() => { const _n = String(lv_classname); const _c = z2ui5_cl_util.rtti_get_class(_n.toLowerCase()); if (!_c) throw new Error(`CREATE OBJECT: class ${_n} not found`); return new _c(); })();
-          this.s_scroll = ({ ...client.get().S_SCROLL.MAIN });
+          this.s_scroll = z2ui5_cl_util.struct_lower_keys(({ ...client.get().S_SCROLL.MAIN }));
           client.nav_app_call(li_app);
           return;
         } catch (error) {
@@ -47,7 +47,7 @@ class z2ui5_cl_demo_app_000 extends z2ui5_if_app {
       .button({ press: client._event(`expand-all`), icon: `sap-icon://expand-all` })
       .button({ press: client._event(`collapse-all`), icon: `sap-icon://collapse-all` });
     const page2 = page;
-    page = page.panel({ expandable: true, expanded: client._bind_edit(this.ms_check_expanded.basics), headertext: `General` });
+    page = page.panel({ expandable: true, expanded: client._bind_edit(this.ms_check_expanded.basics, { name: `ms_check_expanded-basics` }), headertext: `General` });
     let panel = page.panel({ expandable: false, expanded: true, headertext: `Binding` });
     panel.generic_tile({ header: `Binding I`, subheader: `Simple - Send values to the backend`, press: client._event(`Z2UI5_CL_DEMO_APP_001`), mode: `LineMode`, class: `sapUiTinyMarginEnd sapUiTinyMarginBottom` });
     panel.generic_tile({ header: `Binding II`, subheader: `Structure Component Level`, press: client._event(`z2ui5_cl_demo_app_166`), mode: `LineMode`, class: `sapUiTinyMarginEnd sapUiTinyMarginBottom` });
@@ -93,7 +93,7 @@ class z2ui5_cl_demo_app_000 extends z2ui5_if_app {
     panel.generic_tile({ header: `Geolocation`, subheader: ``, press: client._event(`z2ui5_cl_demo_app_120`), mode: `LineMode`, class: `sapUiTinyMarginEnd sapUiTinyMarginBottom` });
     panel.generic_tile({ header: `Frontend Infos`, subheader: ``, press: client._event(`z2ui5_cl_demo_app_122`), mode: `LineMode`, class: `sapUiTinyMarginEnd sapUiTinyMarginBottom` });
     panel.generic_tile({ header: `Camera`, subheader: ``, press: client._event(`z2ui5_cl_demo_app_306`), mode: `LineMode`, class: `sapUiTinyMarginEnd sapUiTinyMarginBottom` });
-    page = page2.panel({ expandable: true, expanded: client._bind_edit(this.ms_check_expanded.input), headertext: `Input & Output` });
+    page = page2.panel({ expandable: true, expanded: client._bind_edit(this.ms_check_expanded.input, { name: `ms_check_expanded-input` }), headertext: `Input & Output` });
     panel = page.panel({ expandable: false, expanded: true, headertext: `Output` });
     panel.generic_tile({ header: `Label`, press: client._event(`Z2UI5_CL_DEMO_APP_051`), mode: `LineMode`, class: `sapUiTinyMarginEnd sapUiTinyMarginBottom` });
     panel.generic_tile({ header: `Progress Indicator`, press: client._event(`Z2UI5_CL_DEMO_APP_022`), mode: `LineMode`, class: `sapUiTinyMarginEnd sapUiTinyMarginBottom` });
@@ -175,7 +175,7 @@ class z2ui5_cl_demo_app_000 extends z2ui5_if_app {
     panel.generic_tile({ header: `Tile`, subheader: `KPI Tile`, press: client._event(`Z2UI5_CL_DEMO_APP_277`), mode: `LineMode`, class: `sapUiTinyMarginEnd sapUiTinyMarginBottom` });
     panel.generic_tile({ header: `Tile`, subheader: `Feed and News Tile`, press: client._event(`Z2UI5_CL_DEMO_APP_278`), mode: `LineMode`, class: `sapUiTinyMarginEnd sapUiTinyMarginBottom` });
     panel.generic_tile({ header: `Tile`, subheader: `Statuses`, press: client._event(`Z2UI5_CL_DEMO_APP_281`), mode: `LineMode`, class: `sapUiTinyMarginEnd sapUiTinyMarginBottom` });
-    page = page2.panel({ expandable: true, expanded: client._bind_edit(this.ms_check_expanded.more), headertext: `Tables & Trees` });
+    page = page2.panel({ expandable: true, expanded: client._bind_edit(this.ms_check_expanded.more, { name: `ms_check_expanded-more` }), headertext: `Tables & Trees` });
     panel = page.panel({ expandable: false, expanded: true, headertext: `Table` });
     panel.generic_tile({ header: `Toolbar`, subheader: `Add a container & toolbar`, press: client._event(`Z2UI5_CL_DEMO_APP_006`), mode: `LineMode`, class: `sapUiTinyMarginEnd sapUiTinyMarginBottom` });
     panel.generic_tile({ header: `Selection Modes`, subheader: `Single Select & Multi Select`, press: client._event(`Z2UI5_CL_DEMO_APP_019`), mode: `LineMode`, class: `sapUiTinyMarginEnd sapUiTinyMarginBottom` });
@@ -197,7 +197,7 @@ class z2ui5_cl_demo_app_000 extends z2ui5_if_app {
     panel = page.panel({ expandable: false, expanded: true, headertext: `Trees` });
     panel.generic_tile({ header: `Tree Table I`, subheader: `Popup Select Entry`, press: client._event(`Z2UI5_CL_DEMO_APP_068`), mode: `LineMode`, class: `sapUiTinyMarginEnd sapUiTinyMarginBottom` });
     panel.generic_tile({ header: `Tree Table II`, subheader: `Checkbox Binding per Node`, press: client._event(`Z2UI5_CL_DEMO_APP_364`), mode: `LineMode`, class: `sapUiTinyMarginEnd sapUiTinyMarginBottom` });
-    page = page2.panel({ expandable: true, expanded: client._bind_edit(this.ms_check_expanded.popups), headertext: `Popups & Popovers` });
+    page = page2.panel({ expandable: true, expanded: client._bind_edit(this.ms_check_expanded.popups, { name: `ms_check_expanded-popups` }), headertext: `Popups & Popovers` });
     panel = page.panel({ expandable: false, expanded: true, headertext: `Popups` });
     panel.generic_tile({ header: `Flow Logic`, subheader: `Different ways of calling Popups`, press: client._event(`Z2UI5_CL_DEMO_APP_012`), mode: `LineMode`, class: `sapUiTinyMarginEnd sapUiTinyMarginBottom` });
     panel.generic_tile({ header: `Call Popup in Popup`, subheader: `Backend Popup Stack Handling`, press: client._event(`z2ui5_cl_demo_app_161`), mode: `LineMode`, class: `sapUiTinyMarginEnd sapUiTinyMarginBottom` });
@@ -223,7 +223,7 @@ class z2ui5_cl_demo_app_000 extends z2ui5_if_app {
     panel.generic_tile({ header: `Popup Display Download`, subheader: ``, press: client._event(`z2ui5_cl_demo_app_168`), mode: `LineMode`, class: `sapUiTinyMarginEnd sapUiTinyMarginBottom` });
     panel.generic_tile({ header: `Popup Display HTML`, subheader: ``, press: client._event(`z2ui5_cl_demo_app_149`), mode: `LineMode`, class: `sapUiTinyMarginEnd sapUiTinyMarginBottom` });
     panel.generic_tile({ header: `Popup Display CL_DEMO_OUTPUT`, subheader: ``, press: client._event(`z2ui5_cl_demo_app_365`), mode: `LineMode`, class: `sapUiTinyMarginEnd sapUiTinyMarginBottom` });
-    page = page2.panel({ expandable: true, expanded: client._bind_edit(this.ms_check_expanded.features), headertext: `More Controls` });
+    page = page2.panel({ expandable: true, expanded: client._bind_edit(this.ms_check_expanded.features, { name: `ms_check_expanded-features` }), headertext: `More Controls` });
     panel = page.panel({ expandable: false, expanded: true, headertext: `Visualization` });
     panel.generic_tile({ header: `Planning Calendar`, press: client._event(`Z2UI5_CL_DEMO_APP_080`), mode: `LineMode`, class: `sapUiTinyMarginEnd sapUiTinyMarginBottom` });
     panel.generic_tile({ header: `Wizard Control I`, press: client._event(`z2ui5_cl_demo_app_175`), mode: `LineMode`, class: `sapUiTinyMarginEnd sapUiTinyMarginBottom` });
@@ -277,7 +277,7 @@ class z2ui5_cl_demo_app_000 extends z2ui5_if_app {
     panel = page.panel({ expandable: false, expanded: true, headertext: `Templating` });
     panel.generic_tile({ header: `Templating I`, subheader: `Basic Example`, press: client._event(`Z2UI5_CL_DEMO_APP_173`), mode: `LineMode`, class: `sapUiTinyMarginEnd sapUiTinyMarginBottom` });
     panel.generic_tile({ header: `Templating II`, subheader: `Nested Views`, press: client._event(`Z2UI5_CL_DEMO_APP_176`), mode: `LineMode`, class: `sapUiTinyMarginEnd sapUiTinyMarginBottom` });
-    page = page2.panel({ expandable: true, expanded: client._bind_edit(this.ms_check_expanded.extensions), headertext: `Custom Extensions` });
+    page = page2.panel({ expandable: true, expanded: client._bind_edit(this.ms_check_expanded.extensions, { name: `ms_check_expanded-extensions` }), headertext: `Custom Extensions` });
     panel = page.panel({ expandable: false, expanded: true, headertext: `CSS` });
     panel.generic_tile({ header: `Messages with Styles I`, press: client._event(`Z2UI5_CL_DEMO_APP_310`), mode: `LineMode`, class: `sapUiTinyMarginEnd sapUiTinyMarginBottom` });
     panel.generic_tile({ header: `Messages with Styles II`, press: client._event(`Z2UI5_CL_DEMO_APP_311`), mode: `LineMode`, class: `sapUiTinyMarginEnd sapUiTinyMarginBottom` });
@@ -285,10 +285,10 @@ class z2ui5_cl_demo_app_000 extends z2ui5_if_app {
     panel.generic_tile({ header: `Import View`, subheader: `Copy & paste views of the UI5 Documentation`, press: client._event(`Z2UI5_CL_DEMO_APP_031`), mode: `LineMode`, class: `sapUiTinyMarginEnd sapUiTinyMarginBottom` });
     panel.generic_tile({ header: `Change CSS`, subheader: `Send your own CSS to the frontend`, press: client._event(`Z2UI5_CL_DEMO_APP_050`), mode: `LineMode`, class: `sapUiTinyMarginEnd sapUiTinyMarginBottom` });
     panel.generic_tile({ header: `Websocket`, subheader: `Consume APC-Messages with Websocket`, press: client._event(`Z2UI5_CL_DEMO_APP_S_05`), mode: `LineMode`, class: `sapUiTinyMarginEnd sapUiTinyMarginBottom` });
-    page = page2.panel({ expandable: true, expanded: client._bind_edit(this.ms_check_expanded.demos), headertext: `Demos` });
+    page = page2.panel({ expandable: true, expanded: client._bind_edit(this.ms_check_expanded.demos, { name: `ms_check_expanded-demos` }), headertext: `Demos` });
     page.generic_tile({ header: `Selection Screen`, subheader: `Explore Input Controls`, press: client._event(`Z2UI5_CL_DEMO_APP_002`), mode: `LineMode`, class: `sapUiTinyMarginEnd sapUiTinyMarginBottom` });
     page.generic_tile({ header: `Sample App`, subheader: `Nested View, Object Page, App Navigation, Tables, Lists, Images, Progress & Rating Indicator`, press: client._event(`Z2UI5_CL_DEMO_APP_085`), mode: `LineMode`, class: `sapUiTinyMarginEnd sapUiTinyMarginBottom` });
-    page = page2.panel({ expandable: true, expanded: client._bind_edit(this.ms_check_expanded.version), headertext: `UI5 Version Specific, Experimental & WIP` });
+    page = page2.panel({ expandable: true, expanded: client._bind_edit(this.ms_check_expanded.version, { name: `ms_check_expanded-version` }), headertext: `UI5 Version Specific, Experimental & WIP` });
     panel = page.panel({ expandable: false, expanded: true, headertext: `UI5-Only` });
     panel.message_strip(`Not working with OpenUI5...`);
     panel.generic_tile({ header: `Table with RadialMicroChart`, press: client._event(`Z2UI5_CL_DEMO_APP_177`), mode: `LineMode`, class: `sapUiTinyMarginEnd sapUiTinyMarginBottom` });

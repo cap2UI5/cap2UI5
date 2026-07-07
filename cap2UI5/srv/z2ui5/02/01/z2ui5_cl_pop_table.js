@@ -53,7 +53,7 @@ class z2ui5_cl_pop_table extends z2ui5_if_app {
     });
     const cells = list.cells();
     for (const col of cols) {
-      cells.Text({ text: `{${col}}` });
+      cells.Text({ text: `{${String(col).toUpperCase()}}` });
     }
 
     const columns = tab.columns();

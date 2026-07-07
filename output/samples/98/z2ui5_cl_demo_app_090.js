@@ -44,9 +44,9 @@ class z2ui5_cl_demo_app_090 extends z2ui5_if_app {
   }
 
   view_display() {
-    this.client._bind_edit({ val: this.mt_columns_p13n, custom_mapper: z2ui5_cl_ajson_mapping.create_lower_case() });
-    this.client._bind_edit({ val: this.mt_sort_p13n, custom_mapper: z2ui5_cl_ajson_mapping.create_lower_case() });
-    this.client._bind_edit({ val: this.mt_groups_p13n, custom_mapper: z2ui5_cl_ajson_mapping.create_lower_case() });
+    this.client._bind_edit(this.mt_columns_p13n, { custom_mapper: z2ui5_cl_ajson_mapping.create_lower_case() });
+    this.client._bind_edit(this.mt_sort_p13n, { custom_mapper: z2ui5_cl_ajson_mapping.create_lower_case() });
+    this.client._bind_edit(this.mt_groups_p13n, { custom_mapper: z2ui5_cl_ajson_mapping.create_lower_case() });
     let page = z2ui5_cl_xml_view.factory();
     page = page.shell()
       .page({ title: `abap2UI5 - P13N Dialog`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack(), class: `sapUiContentPadding` });
@@ -76,7 +76,7 @@ class z2ui5_cl_demo_app_090 extends z2ui5_if_app {
     const p13n_dialog = z2ui5_cl_xml_view.factory_popup();
     const p13n = p13n_dialog._generic({ name: `P13nDialog`, t_prop: [{ n: `ok`, v: this.client._event(`OK`) }, { n: `cancel`, v: this.client._event(`CANCEL`) }, { n: `reset`, v: this.client._event(`RESET`) }, { n: `showReset`, v: `true` }, { n: `initialVisiblePanelType`, v: `sort` }] })
       ._generic(`panels`)
-      ._generic({ name: `P13nColumnsPanel`, t_prop: [{ n: `items`, v: `{path:'${this.client._bind_edit({ val: this.mt_columns, path: true, custom_mapper: z2ui5_cl_ajson_mapping.create_lower_case() })}'}` }, { n: `columnsItems`, v: `{path:'${this.client._bind_edit({ val: this.mt_columns1, path: true, custom_mapper: z2ui5_cl_ajson_mapping.create_lower_case() })}'}` }] })
+      ._generic({ name: `P13nColumnsPanel`, t_prop: [{ n: `items`, v: `{path:'${this.client._bind_edit(this.mt_columns, { path: true, custom_mapper: z2ui5_cl_ajson_mapping.create_lower_case() })}'}` }, { n: `columnsItems`, v: `{path:'${this.client._bind_edit(this.mt_columns1, { path: true, custom_mapper: z2ui5_cl_ajson_mapping.create_lower_case() })}'}` }] })
       .items()
       ._generic({ name: `P13nItem`, t_prop: [{ n: `columnKey`, v: `{columnkey}` }, { n: `text`, v: `{text}` }] })
       .get_parent()
@@ -86,7 +86,7 @@ class z2ui5_cl_demo_app_090 extends z2ui5_if_app {
       .get_parent()
       .get_parent()
       .get_parent()
-      ._generic({ name: `P13nGroupPanel`, t_prop: [{ n: `groupItems`, v: `{path:'${this.client._bind_edit({ val: this.mt_groups, path: true, custom_mapper: z2ui5_cl_ajson_mapping.create_lower_case() })}'}` }] })
+      ._generic({ name: `P13nGroupPanel`, t_prop: [{ n: `groupItems`, v: `{path:'${this.client._bind_edit(this.mt_groups, { path: true, custom_mapper: z2ui5_cl_ajson_mapping.create_lower_case() })}'}` }] })
       .items()
       ._generic({ name: `P13nItem`, t_prop: [{ n: `columnKey`, v: `{columnkey}` }, { n: `text`, v: `{text}` }] })
       .get_parent()

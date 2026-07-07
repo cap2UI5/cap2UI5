@@ -194,7 +194,7 @@ describe("z2ui5_cl_core_client", () => {
 
     test("fallback: creates dynamic binding for unknown value", () => {
       const result = client._bind("unknown_value_xyz");
-      expect(result).toMatch(/^\{\/(__bind_\d+)\}$/);
+      expect(result).toMatch(/^\{\/(__BIND_\d+)\}$/);
       expect(client.aBind).toHaveLength(1);
       expect(client.aBind[0].type).toBe("ONE_WAY");
     });
@@ -215,7 +215,7 @@ describe("z2ui5_cl_core_client", () => {
 
     test("fallback: creates dynamic edit binding for unknown value", () => {
       const result = client._bind_edit("unknown_edit_xyz");
-      expect(result).toMatch(/^\{\/XX\/(__edit_\d+)\}$/);
+      expect(result).toMatch(/^\{\/XX\/(__EDIT_\d+)\}$/);
     });
   });
 

@@ -8,7 +8,7 @@ class z2ui5_cl_demo_app_153 extends z2ui5_if_app {
   client = null;
 
   view_display() {
-    this.client._bind_edit({ val: this.ms_struc, custom_mapper: z2ui5_cl_ajson_mapping.create_camel_case({ iv_first_json_upper: false }), custom_mapper_back: z2ui5_cl_ajson_mapping.create_to_snake_case() });
+    this.client._bind_edit(this.ms_struc, { custom_mapper: z2ui5_cl_ajson_mapping.create_camel_case({ iv_first_json_upper: false }), custom_mapper_back: z2ui5_cl_ajson_mapping.create_to_snake_case() });
     const view = z2ui5_cl_xml_view.factory();
     view.shell()
       .page({ title: `abap2UI5 - Binding`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() })

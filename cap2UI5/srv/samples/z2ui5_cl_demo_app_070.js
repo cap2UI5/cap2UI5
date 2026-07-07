@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -43,7 +44,7 @@ class z2ui5_cl_demo_app_070 extends z2ui5_if_app {
         this.client.message_toast_display(`Event SORT`);
         break;
       case `FILTER`:
-        lt_arg = this.client.get().T_EVENT_ARG;
+        lt_arg = z2ui5_cl_util.struct_lower_keys(this.client.get().T_EVENT_ARG);
         this.client.message_toast_display(`Event FILTER`);
         break;
       case `SELKZ`:
@@ -52,11 +53,11 @@ class z2ui5_cl_demo_app_070 extends z2ui5_if_app {
         this.client.view_model_update();
         break;
       case `CUSTOMFILTER`:
-        lt_arg = this.client.get().T_EVENT_ARG;
+        lt_arg = z2ui5_cl_util.struct_lower_keys(this.client.get().T_EVENT_ARG);
         this.client.message_toast_display(`Event CUSTOMFILTER`);
         break;
       case `ROWEDIT`:
-        lt_arg = this.client.get().T_EVENT_ARG;
+        lt_arg = z2ui5_cl_util.struct_lower_keys(this.client.get().T_EVENT_ARG);
         ls_arg = {};
         {
           const _t = lt_arg;
@@ -69,7 +70,7 @@ class z2ui5_cl_demo_app_070 extends z2ui5_if_app {
         }
         break;
       case `ROW_ACTION_ITEM_NAVIGATION`:
-        lt_arg = this.client.get().T_EVENT_ARG;
+        lt_arg = z2ui5_cl_util.struct_lower_keys(this.client.get().T_EVENT_ARG);
         {
           const _t = lt_arg;
           const _i = (1) - 1;
@@ -81,7 +82,7 @@ class z2ui5_cl_demo_app_070 extends z2ui5_if_app {
         }
         break;
       case `ROW_ACTION_ITEM_EDIT`:
-        lt_arg = this.client.get().T_EVENT_ARG;
+        lt_arg = z2ui5_cl_util.struct_lower_keys(this.client.get().T_EVENT_ARG);
         {
           const _t = lt_arg;
           const _i = (1) - 1;

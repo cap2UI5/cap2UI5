@@ -21,13 +21,13 @@ class z2ui5_cl_demo_app_306 extends z2ui5_if_app {
     const page = cont.page({ title: `abap2UI5 - Device Camera Picture`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
     page.vbox(`sapUiSmallMargin`)
       .label({ text: `facingMode: `, labelfor: `ComboFacingMode` })
-      .combobox({ id: `ComboFacingMode`, selectedkey: this.client._bind_edit(this.facing_mode), items: `{path:'${this.client._bind_edit({ val: this.facing_modes, path: true })}', sorter: { path: 'TEXT' } }` })
+      .combobox({ id: `ComboFacingMode`, selectedkey: this.client._bind_edit(this.facing_mode), items: `{path:'${this.client._bind_edit(this.facing_modes, { path: true })}', sorter: { path: 'TEXT' } }` })
       .get()
       .item({ key: `{KEY}`, text: `{TEXT}` });
     page.vbox(`sapUiSmallMargin`)
       .label({ text: `device: `, labelfor: `ComboDevice` })
       ._z2ui5()
-      .camera_selector({ id: `ComboDevice`, selectedkey: this.client._bind_edit(this.device), items: `{path:'${this.client._bind_edit({ val: this.devices, path: true })}', sorter: { path: 'TEXT' } }` })
+      .camera_selector({ id: `ComboDevice`, selectedkey: this.client._bind_edit(this.device), items: `{path:'${this.client._bind_edit(this.devices, { path: true })}', sorter: { path: 'TEXT' } }` })
       .get()
       .item({ key: `{KEY}`, text: `{TEXT}` });
     page._z2ui5()

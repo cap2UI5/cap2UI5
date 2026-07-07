@@ -77,7 +77,7 @@ class z2ui5_cl_demo_app_339 extends z2ui5_if_app {
     for (const layout of this.mo_layout.ms_data.t_layout) {
       sy_tabix++;
       lv_index = sy_tabix;
-      columns.column({ visible: client._bind({ val: layout.visible, tab: this.mo_layout.ms_data.t_layout, tab_index: lv_index }) })
+      columns.column({ visible: client._bind(layout.visible, { tab: this.mo_layout.ms_data.t_layout, tab_index: lv_index }) })
         .text(layout.name);
     }
     const column_list_item = columns.get_parent()

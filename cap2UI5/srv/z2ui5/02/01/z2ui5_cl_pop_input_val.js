@@ -55,7 +55,7 @@ class z2ui5_cl_pop_input_val extends z2ui5_if_app {
         .VBox({ class: `sapUiMediumMargin` })
           .Label({ text: this.question_text })
           .Input({
-            value:  `{${msResultPath}/value}`,
+            value:  `{${msResultPath}/VALUE}`,
             submit: this.client._event(`BUTTON_CONFIRM`),
           })
         .get_parent()

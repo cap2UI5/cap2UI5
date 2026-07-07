@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -30,7 +31,7 @@ class z2ui5_cl_demo_app_183 extends z2ui5_if_app {
         return;
         break;
       case `ONSORT`:
-        lt_arg = client.get().T_EVENT_ARG;
+        lt_arg = z2ui5_cl_util.struct_lower_keys(client.get().T_EVENT_ARG);
         break;
       case `ONGROUP`:
         break;

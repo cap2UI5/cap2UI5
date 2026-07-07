@@ -217,10 +217,10 @@ class z2ui5_cl_app_startup extends z2ui5_if_app {
     if (this.ms_home.class_editable) {
       content.Input({
         placeholder: "fill in the class name and press 'check'",
-        enabled: c._bind(this.ms_home.class_editable),
-        value: c._bind_edit(this.ms_home.classname),
-        valueState: c._bind(this.ms_home.class_value_state),
-        valueStateText: c._bind(this.ms_home.class_value_state_text),
+        enabled: c._bind(this.ms_home.class_editable, { name: `ms_home-class_editable` }),
+        value: c._bind_edit(this.ms_home.classname, { name: `ms_home-classname` }),
+        valueState: c._bind(this.ms_home.class_value_state, { name: `ms_home-class_value_state` }),
+        valueStateText: c._bind(this.ms_home.class_value_state_text, { name: `ms_home-class_value_state_text` }),
         submit: c._event(this.ms_home.btn_event_id),
         valueHelpRequest: c._event(E.VALUE_HELP),
         showValueHelp: true,
@@ -233,19 +233,19 @@ class z2ui5_cl_app_startup extends z2ui5_if_app {
     content.Label({});
     content.Button({
       press: c._event(this.ms_home.btn_event_id),
-      text: c._bind(this.ms_home.btn_text),
-      icon: c._bind(this.ms_home.btn_icon),
+      text: c._bind(this.ms_home.btn_text, { name: `ms_home-btn_text` }),
+      icon: c._bind(this.ms_home.btn_icon, { name: `ms_home-btn_icon` }),
       width: "70%",
     });
 
     content.Label({ text: "Step 5" });
     // UI5 expression binding requires `${...}` (with $-prefix) to dereference a model path.
     // First `$` is a literal in the template literal, second `${...}` is JS interpolation.
-    const bindEditable = c._bind(this.ms_home.class_editable);
+    const bindEditable = c._bind(this.ms_home.class_editable, { name: `ms_home-class_editable` });
     content.Link({
       text: "Link to the Application",
       target: "_blank",
-      href: c._bind(this.ms_home.url),
+      href: c._bind(this.ms_home.url, { name: `ms_home-url` }),
       enabled: `{= $${bindEditable} === false }`,
     });
 

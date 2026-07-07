@@ -33,7 +33,7 @@ class z2ui5_cl_demo_app_076 extends z2ui5_if_app {
       .get_parent()
       .get_parent()
       .gantt_table()
-      .tree_table({ rows: `{path: '` + this.client._bind({ val: this.mt_table, path: true }) + `', parameters: {arrayNames: ['CHILDREN'],numberOfExpandedLevels: 1}}` })
+      .tree_table({ rows: `{path: '` + this.client._bind(this.mt_table, { path: true }) + `', parameters: {arrayNames: ['CHILDREN'],numberOfExpandedLevels: 1}}` })
       .tree_columns()
       .tree_column(`Col 1`)
       .tree_template()

@@ -11,7 +11,7 @@ class z2ui5_cl_demo_app_lp_04 extends z2ui5_if_app {
   async main(client) {
     const view = z2ui5_cl_xml_view.factory();
     this.product_url = z2ui5_cl_util.url_param_get({ val: `product`, url: client.get().S_CONFIG.SEARCH });
-    this.check_launchpad_active = client.get().CHECK_LAUNCHPAD_ACTIVE;
+    this.check_launchpad_active = z2ui5_cl_util.struct_lower_keys(client.get().CHECK_LAUNCHPAD_ACTIVE);
     const lt_params = client.get().T_COMP_PARAMS;
     try {
       this.product = lt_params.find((row) => row.n === `PRODUCT`).V;

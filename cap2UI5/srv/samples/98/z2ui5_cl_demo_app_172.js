@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -33,7 +34,7 @@ class z2ui5_cl_demo_app_172 extends z2ui5_if_app {
     let lt_event_arguments = [];
     let lv_tab_index = ``;
     let lv_message = ``;
-    lt_event_arguments = this.client.get().T_EVENT_ARG;
+    lt_event_arguments = z2ui5_cl_util.struct_lower_keys(this.client.get().T_EVENT_ARG);
     switch (this.client.get().EVENT) {
       case `LINK_CLICK`:
         lv_tab_index = lt_event_arguments[(1) - 1];

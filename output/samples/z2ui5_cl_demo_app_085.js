@@ -1,4 +1,5 @@
 const z2ui5_cl_demo_app_086 = require("./z2ui5_cl_demo_app_086");
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -31,14 +32,17 @@ class z2ui5_cl_demo_app_085 extends z2ui5_if_app {
     const header_title = page.header_title().object_page_dyn_header_title();
     header_title.expanded_heading()
       .hbox()
-      .info_label({ text: `Product Id ` + this.client._bind(this.ls_detail.productid), colorscheme: `9`, width: `200px`, icon: `sap-icon://home-share` });
+      .info_label({ text: `Product Id ` + this.client._bind(this.ls_detail.productid, { name: `ls_detail-productid` }), colorscheme: `9`, width: `200px`, icon: `sap-icon://home-share` });
     header_title.snapped_heading()
       .flex_box({ alignitems: `Center` })
       .avatar({ src: z2ui5_cl_demo_app_085.c_pic_url + this.ls_detail.pic, class: `sapUiTinyMarginEnd` })
-      .info_label({ text: `Product Id ` + this.client._bind(this.ls_detail.productid), colorscheme: `9`, width: `200px`, icon: `sap-icon://home-share` });
-    header_title.expanded_content(`uxap`).text(this.client._bind(this.ls_detail.productname));
-    header_title.snapped_content(`uxap`).text(this.client._bind(this.ls_detail.productname));
-    header_title.snapped_title_on_mobile().title(this.client._bind(this.ls_detail.productname));
+      .info_label({ text: `Product Id ` + this.client._bind(this.ls_detail.productid, { name: `ls_detail-productid` }), colorscheme: `9`, width: `200px`, icon: `sap-icon://home-share` });
+    header_title.expanded_content(`uxap`)
+      .text(this.client._bind(this.ls_detail.productname, { name: `ls_detail-productname` }));
+    header_title.snapped_content(`uxap`)
+      .text(this.client._bind(this.ls_detail.productname, { name: `ls_detail-productname` }));
+    header_title.snapped_title_on_mobile()
+      .title(this.client._bind(this.ls_detail.productname, { name: `ls_detail-productname` }));
     header_title.actions(`uxap`)
       .overflow_toolbar()
       .overflow_toolbar_button({ icon: `sap-icon://supplier`, text: `Supplier Detail`, type: `Transparent`, enabled: `true`, tooltip: `Goto Supplier`, press: this.client._event(`ONGOTOSUPPLIER`) })
@@ -260,7 +264,7 @@ class z2ui5_cl_demo_app_085 extends z2ui5_if_app {
         this.client.nav_app_call(lo_app_next);
         break;
       case `ONPRESSMASTER`:
-        lt_arg = this.client.get().T_EVENT_ARG;
+        lt_arg = z2ui5_cl_util.struct_lower_keys(this.client.get().T_EVENT_ARG);
         this.client.message_toast_display(`Event Press Master - Product Id ${lt_arg[(1) - 1]} `);
         {
           const _t = this.mt_table;

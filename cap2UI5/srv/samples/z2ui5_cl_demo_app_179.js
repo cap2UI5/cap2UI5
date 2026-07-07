@@ -21,7 +21,7 @@ class z2ui5_cl_demo_app_179 extends z2ui5_if_app {
     const gantt_container = cont.gantt_chart_container();
     const gantt = gantt_container.gantt_chart_with_table({ id: `gantt`, shapeselectionmode: `Single`, isconnectordetailsvisible: true });
     const table = gantt.gantt_table()
-      .tree_table({ rows: `{path: '` + this.client._bind({ val: this.mt_data, path: true }) + `', parameters: {` + `\\r\\n` + ` operationMode: 'Server',` + `\\r\\n` + ` numberOfExpandedLevels: 2,` + `\\r\\n` + ` treeAnnotationProperties: {` + `\\r\\n` + ` hierarchyNodeFor: 'OBJECTID',` + `\\r\\n` + ` hierarchyParentNodeFor: 'PARENTOBJECTID',` + `\\r\\n` + ` hierarchyLevelFor: 'HierarchyNodeLevel',` + `\\r\\n` + ` hierarchyDrillStateFor: 'DrillDownState',` + `\\r\\n` + ` hierarchyNodeDescendantCountFor: 'Magnitude'` + `\\r\\n` + ` },` + `\\r\\n` + ` expand: 'Relationships'` + `\\r\\n` + ` }` + `\\r\\n` + `}` });
+      .tree_table({ rows: `{path: '` + this.client._bind(this.mt_data, { path: true }) + `', parameters: {` + `\\r\\n` + ` operationMode: 'Server',` + `\\r\\n` + ` numberOfExpandedLevels: 2,` + `\\r\\n` + ` treeAnnotationProperties: {` + `\\r\\n` + ` hierarchyNodeFor: 'OBJECTID',` + `\\r\\n` + ` hierarchyParentNodeFor: 'PARENTOBJECTID',` + `\\r\\n` + ` hierarchyLevelFor: 'HierarchyNodeLevel',` + `\\r\\n` + ` hierarchyDrillStateFor: 'DrillDownState',` + `\\r\\n` + ` hierarchyNodeDescendantCountFor: 'Magnitude'` + `\\r\\n` + ` },` + `\\r\\n` + ` expand: 'Relationships'` + `\\r\\n` + ` }` + `\\r\\n` + `}` });
     const row_settings = table.row_settings_template()
       .gantt_row_settings({ rowid: `{OBJECTID}`, relationships: `{path:'Relationships', templateShareable: 'true'}` });
     const shapes = row_settings.shapes1();

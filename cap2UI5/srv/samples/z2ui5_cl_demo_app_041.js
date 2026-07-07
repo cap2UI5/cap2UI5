@@ -10,8 +10,8 @@ class z2ui5_cl_demo_app_041 extends z2ui5_if_app {
       .page({ title: `abap2UI5 - Step Input Example`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
     const layout = page.vertical_layout({ class: `sapUiContentPadding`, width: `100%` });
     layout.label(`StepInput`)
-      .step_input({ value: client._bind_edit(this.screen.step_val_01), step: `2`, min: `0`, max: `20` })
-      .step_input({ value: client._bind_edit(this.screen.step_val_02), step: `10`, min: `0`, max: `100` })
+      .step_input({ value: client._bind_edit(this.screen.step_val_01, { name: `screen-step_val_01` }), step: `2`, min: `0`, max: `20` })
+      .step_input({ value: client._bind_edit(this.screen.step_val_02, { name: `screen-step_val_02` }), step: `10`, min: `0`, max: `100` })
       .button({ text: `OK`, press: client._event(`POST`) });
     client.view_display(page.stringify());
   }
