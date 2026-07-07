@@ -1,12 +1,6 @@
 # cap2UI5 dev
 
-[![sync pipeline](https://github.com/cap2UI5/dev/actions/workflows/sync.yml/badge.svg)](https://github.com/cap2UI5/dev/actions/workflows/sync.yml)
-[![1 mirror abap2UI5](https://github.com/cap2UI5/dev/actions/workflows/1_mirror_abap2ui5.yml/badge.svg)](https://github.com/cap2UI5/dev/actions/workflows/1_mirror_abap2ui5.yml)
-[![2 mirror samples](https://github.com/cap2UI5/dev/actions/workflows/2_mirror_samples.yml/badge.svg)](https://github.com/cap2UI5/dev/actions/workflows/2_mirror_samples.yml)
-[![3 transpile abap2UI5](https://github.com/cap2UI5/dev/actions/workflows/3_transpile_abap2ui5.yml/badge.svg)](https://github.com/cap2UI5/dev/actions/workflows/3_transpile_abap2ui5.yml)
-[![4 transpile samples](https://github.com/cap2UI5/dev/actions/workflows/4_transpile_samples.yml/badge.svg)](https://github.com/cap2UI5/dev/actions/workflows/4_transpile_samples.yml)
-[![5 prepare app](https://github.com/cap2UI5/dev/actions/workflows/5_prepare_app.yml/badge.svg)](https://github.com/cap2UI5/dev/actions/workflows/5_prepare_app.yml)
-[![6 copy into cap](https://github.com/cap2UI5/dev/actions/workflows/6_copy_into_cap.yml/badge.svg)](https://github.com/cap2UI5/dev/actions/workflows/6_copy_into_cap.yml)
+[![sync pipeline](https://github.com/cap2UI5/cap2UI5/actions/workflows/sync.yml/badge.svg?branch=main)](https://github.com/cap2UI5/cap2UI5/actions/workflows/sync.yml)
 
 Development repository for [cap2UI5](cap2UI5/) — bringing the
 [abap2UI5](https://github.com/abap2UI5/abap2UI5) concept to CAP/Node.js.
@@ -40,7 +34,11 @@ dropped silently.
 ## Sync pipeline
 
 GitHub Actions under `.github/workflows/` — each step runs standalone via
-dispatch, `sync.yml` chains 1→6. It runs on every upstream update: the
+dispatch, `sync.yml` chains 1→6. The badge above reflects the chained
+`sync.yml` runs; the step workflows are invoked via `workflow_call`, so
+their runs (and status) appear as jobs **inside** each sync run — they only
+get runs of their own when dispatched standalone, which is why per-step
+badges would stay grey. It runs on every upstream update: the
 `trigger_cap` workflow in [abap2UI5](https://github.com/abap2UI5/abap2UI5)
 (push to `main`) refreshes `input/abap2UI5/` and pushes it here via a
 deploy key registered on this repository with write access (private half:
