@@ -1,7 +1,8 @@
 name: sync pipeline
 
 # Full pipeline: 1 mirror abap2UI5 -> 2 mirror samples -> 3 transpile abap2UI5
-# -> 4 transpile samples -> 5 prepare app -> 6 copy into cap.
+# -> 4 transpile samples -> 5 prepare app -> 6 copy into cap
+# -> 7 trigger web (deploy-key push that starts web-cap2UI5's build).
 # Every step also runs standalone via its own workflow. Manual follow-up work
 # is what the TODO reports in output/*/transpile-report.json point at.
 #
@@ -50,3 +51,7 @@ jobs:
   copy_into_cap:
     needs: prepare_app
     uses: ./.github/workflows/6_copy_into_cap.yml
+  trigger_web:
+    needs: copy_into_cap
+    uses: ./.github/workflows/7_trigger_web.yml
+    secrets: inherit # ACTION_KEY_WEB (deploy key for web-cap2UI5)

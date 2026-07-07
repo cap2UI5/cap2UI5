@@ -63,6 +63,16 @@ secret `ACTION_KEY_CAP` in abap2UI5) — that push starts the pipeline. The
 `ACTION_TOKEN_CAP` in the samples repo). Manual dispatch and a weekly cron
 (safety net) also work. The same steps run locally via the npm scripts.
 
+The pipeline propagates downstream the same way it is triggered from
+upstream: step 7 (`7_trigger_web`) pushes the sha of the last commit
+touching `cap2UI5/` to
+[web-cap2UI5](https://github.com/cap2UI5/web-cap2UI5) (`UPSTREAM_HEAD`)
+via a deploy key registered there with write access (private half: secret
+`ACTION_KEY_WEB` here) — that push starts web-cap2UI5's **build web**
+workflow, which rebuilds and redeploys the browser site. The step also
+runs on direct pushes to `cap2UI5/**` on `main`, so every change to the
+CAP project reaches the site, not just pipeline runs.
+
 | # | Workflow | npm script | What it does |
 |---|---|---|---|
 | 1 | 1 mirror abap2UI5 | `mirror_abap2ui5` | snapshot abap2UI5 (src/ + app/webapp) → `input/abap2UI5/` |
@@ -71,6 +81,7 @@ secret `ACTION_KEY_CAP` in abap2UI5) — that push starts the pipeline. The
 | 4 | 4 transpile samples | `transpile_samples` | all sample classes → `output/samples/` + report |
 | 5 | 5 prepare app | `prepare_app` | `input/abap2UI5/app/webapp` + patches → `output/app/` |
 | 6 | 6 copy into cap | `copy_into_cap` | `output/abap2UI5` → `cap2UI5/srv/z2ui5` (fill-in only), `output/samples` → `cap2UI5/srv/samples` (overwrite), `output/app` → `cap2UI5/app/z2ui5/webapp` (replace) |
+| 7 | 7 trigger web | — | push `UPSTREAM_HEAD` to [web-cap2UI5](https://github.com/cap2UI5/web-cap2UI5) via deploy key → starts its **build web** workflow |
 
 After step 5 the `output/` folder holds the three deployable pieces —
 `abap2UI5/`, `samples/`, `app/`. Step 6 applies them with per-tree policies:
