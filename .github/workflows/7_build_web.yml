@@ -55,5 +55,12 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      # First run on a repo without Pages: create/enable the Pages site
+      # (source "GitHub Actions") so deploy-pages doesn't 404. If this step
+      # fails due to org/token policy, enable Pages once by hand:
+      # Settings → Pages → Source: "GitHub Actions".
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - id: deployment
         uses: actions/deploy-pages@v4
