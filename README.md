@@ -12,6 +12,11 @@ Development repository for [cap2UI5](cap2UI5/) — bringing the
 [abap2UI5](https://github.com/abap2UI5/abap2UI5) concept to CAP/Node.js.
 
 The CAP project lives in [`cap2UI5/`](cap2UI5/), see its README for details.
+The static browser build (whole stack client-side, deployed to GitHub
+Pages) lives in [web-cap2UI5](https://github.com/cap2UI5/web-cap2UI5) —
+it mirrors this repo weekly and only relies on the two framework hooks
+`z2ui5_cl_util.register_app_class()` and
+`z2ui5_cl_core_srv_draft.set_store()`.
 
 ## Dev tooling (repo root)
 

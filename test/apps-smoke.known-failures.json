@@ -60,11 +60,6 @@
     "detail": "page.nav_container(...).pages is not a function"
   },
   {
-    "name": "z2ui5_cl_demo_app_090",
-    "verdict": "not-started",
-    "detail": "handler answered with z2ui5_cl_pop_js_loader"
-  },
-  {
     "name": "z2ui5_cl_demo_app_094",
     "verdict": "error-popup",
     "detail": "Cannot set properties of null (setting 'input')"
@@ -90,19 +85,9 @@
     "detail": "view.shell(...).page(...).simple_form(...).label(...).mask_input(...).get(...).rules is not a function"
   },
   {
-    "name": "z2ui5_cl_demo_app_111",
-    "verdict": "not-started",
-    "detail": "handler answered with z2ui5_cl_pop_js_loader"
-  },
-  {
     "name": "z2ui5_cl_demo_app_112",
     "verdict": "error-popup",
     "detail": "Cannot read properties of null (reading 'input')"
-  },
-  {
-    "name": "z2ui5_cl_demo_app_116",
-    "verdict": "error-popup",
-    "detail": "sy_uname is not defined"
   },
   {
     "name": "z2ui5_cl_demo_app_118",
@@ -133,11 +118,6 @@
     "name": "z2ui5_cl_demo_app_171",
     "verdict": "no-view",
     "detail": "started but no main view XML"
-  },
-  {
-    "name": "z2ui5_cl_demo_app_172",
-    "verdict": "error-popup",
-    "detail": "this.output.push is not a function"
   },
   {
     "name": "z2ui5_cl_demo_app_192",
@@ -198,11 +178,6 @@
     "name": "z2ui5_cl_demo_app_294",
     "verdict": "error-popup",
     "detail": "this.lt_a_data.push is not a function"
-  },
-  {
-    "name": "z2ui5_cl_demo_app_317",
-    "verdict": "error-popup",
-    "detail": "this.mt_tree.push is not a function"
   },
   {
     "name": "z2ui5_cl_demo_app_319",
@@ -298,10 +273,5 @@
     "name": "z2ui5_cl_demo_app_354",
     "verdict": "error-popup",
     "detail": "page._z2ui5(...).uploadset_ext is not a function"
-  },
-  {
-    "name": "z2ui5_cl_demo_app_s_03_0",
-    "verdict": "not-started",
-    "detail": "handler answered with z2ui5_cl_app_startup"
   }
 ]
