@@ -2,6 +2,15 @@
 
 [![sync pipeline](https://github.com/cap2UI5/cap2UI5/actions/workflows/sync.yml/badge.svg?branch=main)](https://github.com/cap2UI5/cap2UI5/actions/workflows/sync.yml)
 
+> [!IMPORTANT]
+> **Everything in this project is generated automatically.** The entire
+> codebase, all documentation, and the
+> [web version](https://github.com/cap2UI5/web-cap2UI5) were created by AI
+> (Claude) and by the automated [sync pipeline](#sync-pipeline) that mirrors
+> and transpiles the upstream
+> [abap2UI5](https://github.com/abap2UI5/abap2UI5) sources — nothing here is
+> hand-written. Review and test before relying on it.
+
 Development repository for [cap2UI5](cap2UI5/) — bringing the
 [abap2UI5](https://github.com/abap2UI5/abap2UI5) concept to CAP/Node.js.
 

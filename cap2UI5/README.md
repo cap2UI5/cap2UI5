@@ -4,6 +4,15 @@
 
 Bringing the [abap2UI5](https://github.com/abap2UI5/abap2UI5) concept to CAP/Node.js.
 
+> [!IMPORTANT]
+> **Everything in this project is generated automatically.** The entire
+> codebase, all documentation, and the
+> [web version](https://github.com/cap2UI5/web-cap2UI5) were created by AI
+> (Claude) and by an automated sync pipeline that mirrors and transpiles the
+> upstream [abap2UI5](https://github.com/abap2UI5/abap2UI5) sources — nothing
+> here is hand-written. See the [root README](../README.md) for how the
+> pipeline works. Review and test before relying on it.
+
 #### Features
 * XML View Generation - Create UI5 views programmatically in your backend
 * Data Binding & Exchange - Seamless two-way data binding between frontend and backend

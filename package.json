@@ -2,7 +2,7 @@
   "name": "cap2ui5-dev",
   "version": "1.0.0",
   "private": true,
-  "description": "Development tooling for cap2UI5 — the deployable CAP project lives in cap2UI5/",
+  "description": "Development tooling for cap2UI5 — a fully auto-generated project (AI + sync pipeline, nothing hand-written); the deployable CAP project lives in cap2UI5/",
   "license": "MIT",
   "scripts": {
     "test": "jest --verbose",
