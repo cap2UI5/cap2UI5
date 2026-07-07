@@ -1,0 +1,16 @@
+{
+  "name": "cap2ui5-web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Browser build of cap2UI5 — bundles the CAP-free core, the samples and an in-memory draft store so the whole roundtrip runs client-side on a static host",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "registry": "node gen-registry.mjs",
+    "build": "node build.mjs",
+    "serve": "node dev-server.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  }
+}
