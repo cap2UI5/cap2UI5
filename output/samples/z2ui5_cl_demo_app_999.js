@@ -5,7 +5,7 @@ class z2ui5_cl_demo_app_999 extends z2ui5_if_app {
   ms_check_expanded = { getting_started: false, binding: false, events: false, input: false, display: false, layouts: false, popups: false, files: false, advanced: false, experimental: false };
 
   async main(client) {
-    // TODO(abap2js): CONSTANTS c_title TYPE string VALUE `abap2UI5 - Samples (new structure)`.
+    const c_title = `abap2UI5 - Samples (new structure)`;
     switch (client.get().EVENT) {
       case `expand-all`:
         this.expand_all();

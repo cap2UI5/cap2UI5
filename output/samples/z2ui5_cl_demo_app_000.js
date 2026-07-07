@@ -7,7 +7,7 @@ class z2ui5_cl_demo_app_000 extends z2ui5_if_app {
   s_scroll = { id: ``, x: 0, y: 0 };
 
   async main(client) {
-    // TODO(abap2js): CONSTANTS c_title TYPE string VALUE ` abap2UI5 - Samples`.
+    const c_title = ` abap2UI5 - Samples`;
     if (client.get().CHECK_ON_NAVIGATED === true && this.s_scroll.id) {
       client.action.gen({ val: z2ui5_if_client.cs_event.scroll_to, t_arg: [this.s_scroll.id, `${this.s_scroll.y}`, `${this.s_scroll.x}`] });
     }

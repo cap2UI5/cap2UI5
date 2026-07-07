@@ -1469,6 +1469,15 @@ function emitStatement(s, ctx, st, push, assignedTwice, methodDef) {
       push(`let ${name} = ${typeDefault(typeTokens)};`);
       break;
     }
+    case "Constant": {
+      // method-local CONSTANTS c_x TYPE t VALUE lit.
+      const name = safeIdent(toks[1].str.toLowerCase());
+      ctx.locals.add(name);
+      const { typeTokens, value } = parseTypeAfter(toks.slice(2), 0);
+      const rendered = value ? renderLiteralToken(value) : null;
+      push(`const ${name} = ${rendered ?? typeDefault(typeTokens)};`);
+      break;
+    }
     case "Move": {
       // possibly DATA(x) = ... / FINAL(x) = ...
       let i = 0;
