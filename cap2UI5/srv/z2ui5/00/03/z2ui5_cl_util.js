@@ -553,9 +553,9 @@ class z2ui5_cl_util {
   //    3. Anything registered at runtime via register_app_dir()
   //    4. Anything in the Z2UI5_APP_DIRS env var (colon-separated paths)
   //
-  //  Each directory is searched recursively (the transpiled samples tree
-  //  mirrors the upstream src/ subfolders); within one directory a file at
-  //  the top level wins over one in a subdirectory.
+  //  Each directory is searched recursively (external sample repos may keep
+  //  their classes in subfolders); within one directory a file at the top
+  //  level wins over one in a subdirectory.
   //
   //  External samples-repo lifecycle:
   //    require("abap2UI5/register-apps")(__dirname + "/samples");
@@ -596,9 +596,8 @@ class z2ui5_cl_util {
 
   /**
    * Recursively collects all .js files under dir — files at the top level
-   * first, then subdirectories. The transpiled samples tree mirrors the
-   * upstream src/ layout (01/, 02/, 03/, 99/, ...), so app classes may sit
-   * at any depth.
+   * first, then subdirectories. External sample repos may keep their app
+   * classes in subfolders, so lookup covers any depth.
    */
   static _walkClassFiles(dir, out = []) {
     const subdirs = [];
