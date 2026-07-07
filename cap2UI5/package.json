@@ -1,7 +1,7 @@
 {
   "name": "abap2UI5",
   "version": "1.0.0",
-  "description": "A simple CAP project.",
+  "description": "cap2UI5 — the abap2UI5 concept on CAP/Node.js. Fully auto-generated project (AI + sync pipeline, nothing hand-written).",
   "repository": "<Add your repository here>",
   "license": "UNLICENSED",
   "private": true,

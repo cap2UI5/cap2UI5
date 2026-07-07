@@ -2,6 +2,11 @@
 
 Demo apps mirroring the [abap2UI5-samples](https://github.com/abap2UI5/abap2UI5-samples) repository, ported to JavaScript.
 
+> [!IMPORTANT]
+> Like everything in this project, this folder is generated automatically —
+> the samples are transpiled from the upstream ABAP sources or created by AI
+> (Claude), and this documentation is auto-generated too.
+
 ## Status
 
 - **345 sample classes** total — all named `z2ui5_cl_demo_app_*.js`
