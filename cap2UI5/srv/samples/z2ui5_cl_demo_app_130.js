@@ -99,7 +99,14 @@ class z2ui5_cl_demo_app_130 extends z2ui5_if_app {
   }
 
   popup_filter_ok() {
-    // TODO(abap2js): READ TABLE mt_fields REFERENCE INTO DATA(lr_field) WITH KEY field = mv_activ_elemnt.
+    let sy_subrc = 0;
+    let lr_field = {};
+    {
+      const _t = this.mt_fields;
+      const _i = _t.findIndex((_r) => _r.field === this.mv_activ_elemnt);
+      sy_subrc = _i >= 0 && _i < _t.length ? 0 : 4;
+      if (sy_subrc === 0) lr_field = _t[_i];
+    }
     if (sy_subrc === 0) {
       for (let _i = this.mt_filter.length - 1; _i >= 0; _i--) { const row = this.mt_filter[_i]; if (!row.option) this.mt_filter.splice(_i, 1); }
       lr_field.t_filter = this.mt_filter;
@@ -242,6 +249,7 @@ class z2ui5_cl_demo_app_130 extends z2ui5_if_app {
 
   varaint_page() {
     let sy_tabix = 0;
+    let sy_subrc = 0;
     switch (this.client.get().EVENT) {
       case `INPUT_SCREEN_CHANGE`:
         this.mv_screen_descr = (() => { try { return this.mt_screens.find((row) => row.screen_name === this.mv_screen).descr ?? null; } catch { return null; } })();
@@ -274,7 +282,13 @@ class z2ui5_cl_demo_app_130 extends z2ui5_if_app {
       case `CALL_POPUP_FILTER`:
         const arg = this.client.get().T_EVENT_ARG;
         this.mv_activ_elemnt = (() => { try { return arg[(1) - 1] ?? null; } catch { return null; } })();
-        // TODO(abap2js): READ TABLE mt_fields REFERENCE INTO DATA(lr_field) WITH KEY field = mv_activ_elemnt.
+        let lr_field = {};
+        {
+          const _t = this.mt_fields;
+          const _i = _t.findIndex((_r) => _r.field === this.mv_activ_elemnt);
+          sy_subrc = _i >= 0 && _i < _t.length ? 0 : 4;
+          if (sy_subrc === 0) lr_field = _t[_i];
+        }
         this.mt_filter = lr_field.t_filter;
         this.render_popup_filter();
         break;

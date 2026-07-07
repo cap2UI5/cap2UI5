@@ -25,6 +25,7 @@ class z2ui5_cl_demo_app_099 extends z2ui5_if_app {
 
   on_event() {
     let sy_tabix = 0;
+    let sy_subrc = 0;
     switch (this.client.get().EVENT) {
       case `ALL`:
         this.view_display_settings_popup();

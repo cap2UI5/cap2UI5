@@ -84,6 +84,18 @@ CLASS zcl_feature DEFINITION PUBLIC.
     METHODS title
       RETURNING
         VALUE(result) TYPE string.
+    DATA:
+      BEGIN OF ms_flags,
+        one TYPE abap_bool,
+        two TYPE abap_bool,
+      END OF ms_flags.
+    METHODS expand_all.
+    METHODS collapse_all.
+    METHODS read_second
+      IMPORTING
+        i_key         TYPE string
+      RETURNING
+        VALUE(result) TYPE string.
   PROTECTED SECTION.
   PRIVATE SECTION.
 ENDCLASS.
@@ -116,6 +128,34 @@ CLASS zcl_feature IMPLEMENTATION.
   METHOD title.
     CONSTANTS c_title TYPE string VALUE \` abap2UI5 - Samples\`.
     result = c_title.
+  ENDMETHOD.
+
+  METHOD expand_all.
+    DO.
+      ASSIGN COMPONENT sy-index OF STRUCTURE ms_flags TO FIELD-SYMBOL(<flag>).
+      IF sy-subrc <> 0.
+        EXIT.
+      ENDIF.
+      <flag> = abap_true.
+    ENDDO.
+  ENDMETHOD.
+
+  METHOD collapse_all.
+    ms_flags = VALUE #( ).
+  ENDMETHOD.
+
+  METHOD read_second.
+    DATA lt_rows TYPE string_table.
+    APPEND \`alpha\` TO lt_rows.
+    APPEND \`beta\` TO lt_rows.
+    READ TABLE lt_rows INTO DATA(lv_row) INDEX 2.
+    IF sy-subrc = 0.
+      result = lv_row.
+    ENDIF.
+    READ TABLE lt_rows TRANSPORTING NO FIELDS WITH KEY table_line = i_key.
+    IF sy-subrc <> 0.
+      result = |{ result }-missing|.
+    ENDIF.
   ENDMETHOD.
 
   METHOD z2ui5_if_app~main.
@@ -152,6 +192,27 @@ ENDCLASS.
     test("method-local CONSTANTS becomes a const declaration", () => {
       const f = Feature.factory();
       expect(f.title()).toBe(" abap2UI5 - Samples");
+    });
+
+    test("DO + ASSIGN COMPONENT sy-index writes through the field symbol", () => {
+      const f = Feature.factory();
+      f.expand_all();
+      expect(f.ms_flags).toEqual({ one: true, two: true });
+    });
+
+    test("VALUE #( ) reset keeps the structure's component keys", () => {
+      const f = Feature.factory();
+      f.expand_all();
+      f.collapse_all();
+      expect(f.ms_flags).toEqual({ one: false, two: false });
+      f.expand_all();
+      expect(f.ms_flags).toEqual({ one: true, two: true });
+    });
+
+    test("READ TABLE INDEX / WITH KEY sets sy-subrc", () => {
+      const f = Feature.factory();
+      expect(f.read_second({ i_key: "alpha" })).toBe("beta");
+      expect(f.read_second({ i_key: "nope" })).toBe("beta-missing");
     });
 
     test("CASE with multi-WHEN, string template escapes, COND, builtins", () => {

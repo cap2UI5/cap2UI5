@@ -17,17 +17,23 @@ class z2ui5_cl_demo_app_194 extends z2ui5_if_app {
 
   on_event() {
     let sy_tabix = 0;
-    // TODO(abap2js): FIELD-SYMBOLS <row> TYPE any.
+    let sy_subrc = 0;
+    let fs_row = null;
+    let _fs$fs_row = null;
+    let fs_val = null;
+    let _fs$fs_val = null;
     if (this.client.check_on_event(`BUTTON`)) {
       sy_tabix = 0;
       for (const comp of this.mt_comp) {
         sy_tabix++;
         // TODO(abap2js): ASSIGN ms_table_row->* TO <row>.
-        // TODO(abap2js): ASSIGN COMPONENT comp->name OF STRUCTURE <row> TO FIELD-SYMBOL(<val>).
+        _fs$fs_val = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_row, comp.name);
+        fs_val = _fs$fs_val ? _fs$fs_val.o[_fs$fs_val.k] : null;
+        sy_subrc = _fs$fs_val ? 0 : 4;
         if (sy_subrc !== 0) {
           continue;
         } else {
-          this.client._bind(val);
+          this.client._bind(fs_val);
         }
       }
     }
@@ -40,14 +46,16 @@ class z2ui5_cl_demo_app_194 extends z2ui5_if_app {
 
   view_display() {
     let sy_tabix = 0;
-    // TODO(abap2js): FIELD-SYMBOLS <tab> TYPE data.
+    let sy_subrc = 0;
+    let fs_tab = null;
+    let _fs$fs_tab = null;
     if (!this.mo_parent_view) {
       let page = z2ui5_cl_xml_view.factory();
     } else {
       page = this.mo_parent_view.get(`Page`);
     }
     // TODO(abap2js): ASSIGN mt_table->* TO <tab>.
-    const table = page.table({ growing: `true`, width: `auto`, items: this.client._bind(tab) });
+    const table = page.table({ growing: `true`, width: `auto`, items: this.client._bind(fs_tab) });
     const columns = table.columns();
     sy_tabix = 0;
     for (const comp of this.mt_comp) {
@@ -84,8 +92,11 @@ class z2ui5_cl_demo_app_194 extends z2ui5_if_app {
   }
 
   get_data() {
-    // TODO(abap2js): FIELD-SYMBOLS <table> TYPE STANDARD TABLE.
-    // TODO(abap2js): FIELD-SYMBOLS <table_tmp> TYPE STANDARD TABLE.
+    let sy_subrc = 0;
+    let fs_table = null;
+    let _fs$fs_table = null;
+    let fs_table_tmp = null;
+    let _fs$fs_table_tmp = null;
     this.mt_comp = this.get_comp();
     try {
       const new_struct_desc = cl_abap_structdescr.create(this.mt_comp);
@@ -98,7 +109,8 @@ class z2ui5_cl_demo_app_194 extends z2ui5_if_app {
     } catch (error) {
     }
     // TODO(abap2js): ASSIGN mt_table_tmp->* TO <table_tmp>.
-    table_tmp = table;
+    fs_table_tmp = fs_table;
+    if (_fs$fs_table_tmp) _fs$fs_table_tmp.o[_fs$fs_table_tmp.k] = fs_table_tmp;
     this.get_fixval();
   }
 

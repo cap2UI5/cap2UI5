@@ -7,6 +7,7 @@ class z2ui5_cl_demo_app_350 extends z2ui5_if_app {
   varkey = ``;
 
   async main(client) {
+    let sy_subrc = 0;
     if (!this.view_id || this.view_id === 1) {
       this.view_id = 1;
       try {

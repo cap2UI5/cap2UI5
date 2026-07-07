@@ -56,6 +56,9 @@ class z2ui5_cl_demo_app_339 extends z2ui5_if_app {
 
   view_display({ client } = {}) {
     let sy_tabix = 0;
+    let sy_subrc = 0;
+    let fs_table = null;
+    let _fs$fs_table = null;
     if (!this.mo_parent_view) {
       let page = z2ui5_cl_xml_view.factory();
     } else {
@@ -63,7 +66,7 @@ class z2ui5_cl_demo_app_339 extends z2ui5_if_app {
     }
     this.mo_layout = z2ui5_cl_demo_app_333.factory({ i_data: this.mt_table, vis_cols: 5 });
     // TODO(abap2js): ASSIGN mt_table->* TO FIELD-SYMBOL(<table>).
-    const table = page.table({ width: `auto`, mode: `SingleSelectLeft`, selectionchange: client._event(`SELECTION_CHANGE`), items: client._bind_edit(table) });
+    const table = page.table({ width: `auto`, mode: `SingleSelectLeft`, selectionchange: client._event(`SELECTION_CHANGE`), items: client._bind_edit(fs_table) });
     const columns = table.columns();
     sy_tabix = 0;
     for (const layout of this.mo_layout.ms_data.t_layout) {
@@ -94,6 +97,11 @@ class z2ui5_cl_demo_app_339 extends z2ui5_if_app {
   }
 
   async main(client) {
+    let sy_subrc = 0;
+    let fs_data = null;
+    let _fs$fs_data = null;
+    let fs_table = null;
+    let _fs$fs_table = null;
     if (this.mv_init === false) {
       this.mv_init = true;
       this.get_data();
@@ -104,14 +112,16 @@ class z2ui5_cl_demo_app_339 extends z2ui5_if_app {
     }
     // TODO(abap2js): ASSIGN mo_layout->mr_data->* TO FIELD-SYMBOL(<data>).
     // TODO(abap2js): ASSIGN mt_table->* TO FIELD-SYMBOL(<table>).
-    if (data !== table) {
+    if (fs_data !== fs_table) {
       client.message_toast_display(`ERROR - mo_layout->mr_data->* ne mt_table->*`);
     }
     this.on_event({ client: client });
   }
 
   get_data() {
-    // TODO(abap2js): FIELD-SYMBOLS <table> TYPE STANDARD TABLE.
+    let sy_subrc = 0;
+    let fs_table = null;
+    let _fs$fs_table = null;
     const t_comp = this.get_comp();
     try {
       const new_struct_desc = cl_abap_structdescr.create(t_comp);
@@ -120,7 +130,7 @@ class z2ui5_cl_demo_app_339 extends z2ui5_if_app {
       // TODO(abap2js): CREATE DATA mt_table_tmp TYPE HANDLE new_table_desc.
       // TODO(abap2js): ASSIGN mt_table->* TO <table>.
       // TODO(abap2js): SELECT * FROM (mv_table) INTO CORRESPONDING FIELDS OF TABLE @<table> UP TO 3 ROWS.
-      table.sort();
+      fs_table.sort();
     } catch (error) {
     }
     this.mt_table_tmp = this.mt_table;

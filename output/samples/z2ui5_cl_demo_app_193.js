@@ -19,14 +19,19 @@ class z2ui5_cl_demo_app_193 {
   }
 
   xml_stringify() {
+    let sy_subrc = 0;
+    let fs_head = null;
+    let _fs$fs_head = null;
+    let fs_pos = null;
+    let _fs$fs_pos = null;
     // TODO(abap2js): ASSIGN mt_kopf->* TO FIELD-SYMBOL(<head>).
     if (sy_subrc === 0) {
-      this.mt_kopf_xml = z2ui5_cl_util.xml_srtti_stringify(head);
+      this.mt_kopf_xml = z2ui5_cl_util.xml_srtti_stringify(fs_head);
       this.mt_kopf = {};
     }
     // TODO(abap2js): ASSIGN mt_pos->* TO FIELD-SYMBOL(<pos>).
     if (sy_subrc === 0) {
-      this.mt_pos_xml = z2ui5_cl_util.xml_srtti_stringify(pos);
+      this.mt_pos_xml = z2ui5_cl_util.xml_srtti_stringify(fs_pos);
       this.mt_pos = {};
     }
   }

@@ -16,7 +16,7 @@ class z2ui5_cl_demo_app_000 extends z2ui5_if_app {
         this.expand_all();
         break;
       case `collapse-all`:
-        this.ms_check_expanded = {};
+        this.ms_check_expanded = { basics: false, input: false, more: false, popups: false, features: false, extensions: false, demos: false, version: false };
         break;
       default:
         try {
@@ -386,12 +386,18 @@ class z2ui5_cl_demo_app_000 extends z2ui5_if_app {
   }
 
   expand_all() {
-    while (true) {
-      // TODO(abap2js): ASSIGN COMPONENT sy-index OF STRUCTURE ms_check_expanded TO FIELD-SYMBOL(<check>).
+    let sy_subrc = 0;
+    let fs_check = null;
+    let _fs$fs_check = null;
+    for (let sy_index = 1; ; sy_index++) {
+      _fs$fs_check = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(this.ms_check_expanded, sy_index);
+      fs_check = _fs$fs_check ? _fs$fs_check.o[_fs$fs_check.k] : null;
+      sy_subrc = _fs$fs_check ? 0 : 4;
       if (sy_subrc !== 0) {
         break;
       }
-      check = true;
+      fs_check = true;
+      if (_fs$fs_check) _fs$fs_check.o[_fs$fs_check.k] = fs_check;
     }
   }
 }

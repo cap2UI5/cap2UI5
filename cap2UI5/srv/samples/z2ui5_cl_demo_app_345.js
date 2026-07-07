@@ -32,7 +32,9 @@ class z2ui5_cl_demo_app_345 extends z2ui5_if_app {
   }
 
   get_data() {
-    // TODO(abap2js): FIELD-SYMBOLS <table1> TYPE STANDARD TABLE.
+    let sy_subrc = 0;
+    let fs_table1 = null;
+    let _fs$fs_table1 = null;
     const t_comp = this.get_comp();
     try {
       const new_struct_desc = cl_abap_structdescr.create(t_comp);
@@ -56,8 +58,11 @@ class z2ui5_cl_demo_app_345 extends z2ui5_if_app {
 
   xml_table({ i_page, i_client, i_data, i_layout } = {}) {
     let sy_tabix = 0;
+    let sy_subrc = 0;
+    let fs_data = null;
+    let _fs$fs_data = null;
     // TODO(abap2js): ASSIGN i_data->* TO FIELD-SYMBOL(<data>).
-    const table = i_page.table({ width: `auto`, items: i_client._bind(data) });
+    const table = i_page.table({ width: `auto`, items: i_client._bind(fs_data) });
     const columns = table.columns();
     sy_tabix = 0;
     for (const layout of i_layout.ms_data.t_layout) {
@@ -77,6 +82,11 @@ class z2ui5_cl_demo_app_345 extends z2ui5_if_app {
   }
 
   async main(client) {
+    let sy_subrc = 0;
+    let fs_table = null;
+    let _fs$fs_table = null;
+    let fs_val = null;
+    let _fs$fs_val = null;
     if (client.check_on_init()) {
       this.get_data();
       this.view_display({ client: client });
@@ -95,7 +105,7 @@ class z2ui5_cl_demo_app_345 extends z2ui5_if_app {
     }
     // TODO(abap2js): ASSIGN mt_data1->* TO FIELD-SYMBOL(<table>).
     // TODO(abap2js): ASSIGN mo_layout_obj1->mr_data->* TO FIELD-SYMBOL(<val>).
-    if (val !== table) {
+    if (fs_val !== fs_table) {
       client.message_toast_display(`ERROR - mo_layout_obj_2->mr_data <> mt_data!`);
     }
   }

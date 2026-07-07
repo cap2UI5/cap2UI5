@@ -37,16 +37,15 @@ class z2ui5_cl_demo_app_264 extends z2ui5_if_app {
 
   async main(client) {
     let sy_tabix = 0;
-    // TODO(abap2js): FIELD-SYMBOLS <fs_a_data> TYPE ty_s_a_data.
     this.client = client;
     if (client.check_on_init()) {
       this.view_display({ client: client });
       this.s_text = `StepInput with valueState `;
       this.lt_a_data = [{ value_state: `None` }, { value_state: `Information` }, { value_state: `Success` }, { value_state: `Warning` }, { value_state: `Error` }];
       sy_tabix = 0;
-      for (const fs_a_data of this.lt_a_data) {
+      for (const fs_fs_a_data of this.lt_a_data) {
         sy_tabix++;
-        fs_a_data.label = this.s_text + ` ` + fs_a_data.value_state;
+        fs_fs_a_data.label = this.s_text + ` ` + fs_fs_a_data.value_state;
       }
     }
     this.on_event({ client: client });

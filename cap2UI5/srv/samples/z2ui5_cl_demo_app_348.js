@@ -8,7 +8,9 @@ class z2ui5_cl_demo_app_348 extends z2ui5_if_app {
   mo_layout_obj = null;
 
   async main(client) {
-    // TODO(abap2js): FIELD-SYMBOLS <row> TYPE z2ui5_t_01.
+    let sy_subrc = 0;
+    let fs_row = null;
+    let _fs$fs_row = null;
     if (client.check_on_init()) {
       this.get_data();
       this.mo_layout_obj = z2ui5_cl_demo_app_333.factory({ i_data: (this.ms_struc), vis_cols: 5 });
@@ -33,7 +35,7 @@ class z2ui5_cl_demo_app_348 extends z2ui5_if_app {
       client.message_toast_display(`ERROR - ms_struc is initial!`);
     }
     // TODO(abap2js): ASSIGN mo_layout_obj->mr_data->* TO <row>.
-    if (row !== this.ms_struc) {
+    if (fs_row !== this.ms_struc) {
       client.message_toast_display(`ERROR - mo_layout_obj->mr_data->* <> ms_struc!`);
     }
     client.view_model_update();
@@ -60,23 +62,27 @@ class z2ui5_cl_demo_app_348 extends z2ui5_if_app {
 
   xml_form({ i_data, i_page, i_client } = {}) {
     let sy_tabix = 0;
-    // TODO(abap2js): FIELD-SYMBOLS <layout> TYPE z2ui5_cl_demo_app_333=>ty_s_layout.
-    // TODO(abap2js): FIELD-SYMBOLS <data> TYPE any.
-    // TODO(abap2js): FIELD-SYMBOLS <value> TYPE any.
+    let sy_subrc = 0;
+    let fs_data = null;
+    let _fs$fs_data = null;
+    let fs_value = null;
+    let _fs$fs_value = null;
     const form = i_page.simple_form({ editable: true, layout: `ResponsiveGridLayout`, adjustlabelspan: true })
       .content(`form`);
     let index = 0;
     sy_tabix = 0;
-    for (const layout of this.mo_layout_obj.ms_data.t_layout) {
+    for (const fs_layout of this.mo_layout_obj.ms_data.t_layout) {
       sy_tabix++;
       index = index + 1;
       // TODO(abap2js): ASSIGN i_data->* TO <data>.
-      // TODO(abap2js): ASSIGN COMPONENT <layout>-name OF STRUCTURE <data> TO <value>.
+      _fs$fs_value = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_data, fs_layout.name);
+      fs_value = _fs$fs_value ? _fs$fs_value.o[_fs$fs_value.k] : null;
+      sy_subrc = _fs$fs_value ? 0 : 4;
       if (sy_subrc !== 0) {
         return;
       }
-      const line = form.label({ wrapping: false, text: layout.name });
-      line.input({ value: i_client._bind(value), visible: i_client._bind({ val: layout.visible, tab: this.mo_layout_obj.ms_data.t_layout, tab_index: index }), enabled: false });
+      const line = form.label({ wrapping: false, text: fs_layout.name });
+      line.input({ value: i_client._bind(fs_value), visible: i_client._bind({ val: fs_layout.visible, tab: this.mo_layout_obj.ms_data.t_layout, tab_index: index }), enabled: false });
     }
   }
 }

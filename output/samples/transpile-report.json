@@ -124,10 +124,8 @@
   {
     "class": "z2ui5_cl_demo_app_111",
     "path": "03/z2ui5_cl_demo_app_111.js",
-    "todos": 3,
+    "todos": 1,
     "todoDetails": [
-      "unsupported statement: ASSIGN COMPONENT lv_index OF STRUCTURE lr_row->* TO FIELD-SYMBOL(<field>).",
-      "sy-subrc used — provide manually",
       "unsupported statement: DELETE mt_table."
     ]
   },
@@ -149,14 +147,8 @@
   {
     "class": "z2ui5_cl_demo_app_172",
     "path": "03/z2ui5_cl_demo_app_172.js",
-    "todos": 5,
-    "todoDetails": [
-      "unsupported statement: FIELD-SYMBOLS <f_output> LIKE LINE OF output,",
-      "unsupported statement: FIELD-SYMBOLS <f_input> TYPE any.",
-      "unsupported statement: ASSIGN COMPONENT i_column OF STRUCTURE <f_output> TO <f_input>.",
-      "unsupported statement: READ TABLE output INDEX 1 ASSIGNING <f_output>.",
-      "unsupported statement: ASSIGN COMPONENT i_column OF STRUCTURE <f_output> TO <f_input>."
-    ]
+    "todos": 0,
+    "todoDetails": []
   },
   {
     "class": "z2ui5_cl_demo_app_178",
@@ -292,11 +284,9 @@
   {
     "class": "z2ui5_cl_demo_app_000",
     "path": "z2ui5_cl_demo_app_000.js",
-    "todos": 3,
+    "todos": 1,
     "todoDetails": [
-      "CREATE OBJECT: CREATE OBJECT li_app TYPE (lv_classname).",
-      "unsupported statement: ASSIGN COMPONENT sy-index OF STRUCTURE ms_check_expanded TO FIELD-SYMBOL(<check>).",
-      "sy-subrc used — provide manually"
+      "CREATE OBJECT: CREATE OBJECT li_app TYPE (lv_classname)."
     ]
   },
   {
@@ -642,11 +632,9 @@
   {
     "class": "z2ui5_cl_demo_app_061",
     "path": "z2ui5_cl_demo_app_061.js",
-    "todos": 5,
+    "todos": 3,
     "todoDetails": [
-      "unsupported statement: FIELD-SYMBOLS <tab> TYPE table.",
       "unsupported statement: ASSIGN t_tab->* TO <tab>.",
-      "unsupported statement: FIELD-SYMBOLS <tab> TYPE table.",
       "unsupported statement: CREATE DATA t_tab TYPE STANDARD TABLE OF (`Z2UI5_T_01`).",
       "unsupported statement: ASSIGN t_tab->* TO <tab>."
     ]
@@ -666,9 +654,8 @@
   {
     "class": "z2ui5_cl_demo_app_064",
     "path": "z2ui5_cl_demo_app_064.js",
-    "todos": 2,
+    "todos": 1,
     "todoDetails": [
-      "unsupported statement: FIELD-SYMBOLS <ls_table> TYPE ty_s_tab.",
       "unsupported statement: WAIT UP TO 2 SECONDS."
     ]
   },
@@ -702,17 +689,8 @@
   {
     "class": "z2ui5_cl_demo_app_070",
     "path": "z2ui5_cl_demo_app_070.js",
-    "todos": 10,
+    "todos": 1,
     "todoDetails": [
-      "unsupported statement: FIELD-SYMBOLS <ls_table> TYPE ty_s_tab.",
-      "unsupported statement: READ TABLE lt_arg INTO DATA(ls_arg) INDEX 1.",
-      "sy-subrc used — provide manually",
-      "unsupported statement: READ TABLE lt_arg INTO ls_arg INDEX 1.",
-      "sy-subrc used — provide manually",
-      "unsupported statement: READ TABLE lt_arg INTO ls_arg INDEX 1.",
-      "sy-subrc used — provide manually",
-      "unsupported statement: ASSIGN COMPONENT lv_index OF STRUCTURE lr_row->* TO FIELD-SYMBOL(<field>).",
-      "sy-subrc used — provide manually",
       "unsupported statement: DELETE mt_table."
     ]
   },
@@ -742,9 +720,8 @@
   {
     "class": "z2ui5_cl_demo_app_074",
     "path": "z2ui5_cl_demo_app_074.js",
-    "todos": 2,
+    "todos": 1,
     "todoDetails": [
-      "unsupported statement: FIELD-SYMBOLS <tab> TYPE table.",
       "unsupported statement: ASSIGN mr_table->* TO <tab>."
     ]
   },
@@ -802,14 +779,8 @@
   {
     "class": "z2ui5_cl_demo_app_085",
     "path": "z2ui5_cl_demo_app_085.js",
-    "todos": 7,
+    "todos": 1,
     "todoDetails": [
-      "unsupported statement: READ TABLE mt_table_supplier WITH KEY suppliername = lt_arg[ 1 ] INTO ls_detail_supplier.",
-      "unsupported statement: READ TABLE mt_table WITH KEY key = lt_arg[ 1 ] INTO ls_detail.",
-      "unsupported statement: READ TABLE mt_table_supplier WITH KEY suppliername = ls_detail-suppliername INTO ls_detail_supplier.",
-      "unsupported statement: READ TABLE mt_table INDEX 1 INTO ls_detail.",
-      "unsupported statement: ASSIGN COMPONENT lv_index OF STRUCTURE lr_row->* TO FIELD-SYMBOL(<field>).",
-      "sy-subrc used — provide manually",
       "unsupported statement: DELETE mt_table."
     ]
   },
@@ -846,17 +817,13 @@
   {
     "class": "z2ui5_cl_demo_app_094",
     "path": "z2ui5_cl_demo_app_094.js",
-    "todos": 11,
+    "todos": 7,
     "todoDetails": [
-      "unsupported statement: FIELD-SYMBOLS <input> TYPE any.",
-      "unsupported statement: FIELD-SYMBOLS <screen> TYPE ty_s_01.",
       "unsupported statement: CREATE DATA mr_input TYPE string.",
       "unsupported statement: ASSIGN mr_input->* TO <input>.",
       "unsupported statement: CREATE DATA mr_screen TYPE ty_s_01.",
       "unsupported statement: ASSIGN mr_screen->* TO <screen>.",
       "NEW #( ) — target type unknown, resolve manually",
-      "unsupported statement: FIELD-SYMBOLS <input> TYPE any.",
-      "unsupported statement: FIELD-SYMBOLS <screen> TYPE ty_s_01.",
       "unsupported statement: ASSIGN mr_input->* TO <input>.",
       "unsupported statement: ASSIGN mr_screen->* TO <screen>."
     ]
@@ -878,29 +845,24 @@
   {
     "class": "z2ui5_cl_demo_app_097",
     "path": "z2ui5_cl_demo_app_097.js",
-    "todos": 2,
-    "todoDetails": [
-      "unsupported statement: READ TABLE lt_arg INTO DATA(ls_arg) INDEX 1.",
-      "unsupported statement: READ TABLE lt_sel INTO DATA(ls_sel) INDEX 1."
-    ]
+    "todos": 0,
+    "todoDetails": []
   },
   {
     "class": "z2ui5_cl_demo_app_098",
     "path": "z2ui5_cl_demo_app_098.js",
-    "todos": 2,
+    "todos": 1,
     "todoDetails": [
-      "builtin xsdbool( ) not mapped",
-      "unsupported statement: READ TABLE lt_sel INTO DATA(ls_sel) INDEX 1."
+      "builtin xsdbool( ) not mapped"
     ]
   },
   {
     "class": "z2ui5_cl_demo_app_099",
     "path": "z2ui5_cl_demo_app_099.js",
-    "todos": 4,
+    "todos": 3,
     "todoDetails": [
       "unsupported statement: CONDENSE filter_string NO-GAPS.",
       "unsupported statement: TRANSLATE lv_field TO UPPER CASE.",
-      "sy-subrc used — provide manually",
       "unsupported statement: TRANSLATE mv_sorter_group TO UPPER CASE."
     ]
   },
@@ -927,14 +889,13 @@
   {
     "class": "z2ui5_cl_demo_app_104",
     "path": "z2ui5_cl_demo_app_104.js",
-    "todos": 6,
+    "todos": 5,
     "todoDetails": [
       "unsupported statement: ASSIGN mo_app_sub->(`MO_VIEW_PARENT`) TO FIELD-SYMBOL(<fs>).",
       "unsupported statement: CALL METHOD mo_app_sub->(`Z2UI5_IF_APP~MAIN`) EXPORTING client = client.",
       "CREATE OBJECT: CREATE OBJECT mo_app_sub TYPE (classname).",
       "unsupported statement: ASSIGN mo_app_sub->(`MO_VIEW_PARENT`) TO FIELD-SYMBOL(<fs>).",
-      "unsupported statement: CALL METHOD mo_app_sub->(`Z2UI5_IF_APP~MAIN`) EXPORTING client = client.",
-      "unsupported statement: READ TABLE lt_sel INTO DATA(ls_sel) INDEX 1."
+      "unsupported statement: CALL METHOD mo_app_sub->(`Z2UI5_IF_APP~MAIN`) EXPORTING client = client."
     ]
   },
   {
@@ -990,11 +951,8 @@
   {
     "class": "z2ui5_cl_demo_app_117",
     "path": "z2ui5_cl_demo_app_117.js",
-    "todos": 8,
+    "todos": 5,
     "todoDetails": [
-      "unsupported statement: FIELD-SYMBOLS <view_display> TYPE any.",
-      "unsupported statement: READ TABLE mt_t002 REFERENCE INTO DATA(t002) WITH KEY id = mv_selectedkey.",
-      "sy-subrc used — provide manually",
       "CREATE OBJECT: CREATE OBJECT mo_app TYPE (t002->class).",
       "unsupported statement: CALL METHOD mo_app->(`SET_APP_DATA`) EXPORTING data = t002->count.",
       "unsupported statement: ASSIGN mo_app->(`MO_PARENT_VIEW`) TO FIELD-SYMBOL(<view>).",
@@ -1063,11 +1021,9 @@
   {
     "class": "z2ui5_cl_demo_app_126",
     "path": "z2ui5_cl_demo_app_126.js",
-    "todos": 13,
+    "todos": 11,
     "todoDetails": [
       "unsupported statement: cl_abap_typedescr=>describe_by_name( EXPORTING p_name = `Z2UI5_T_UTIL_01` RECEIVING p_descr_ref = DATA(typedesc) EXCEPTI",
-      "unsupported statement: FIELD-SYMBOLS <table> TYPE STANDARD TABLE.",
-      "unsupported statement: FIELD-SYMBOLS <table_tmp> TYPE STANDARD TABLE.",
       "unsupported statement: CREATE DATA mt_table TYPE HANDLE new_table_desc.",
       "unsupported statement: CREATE DATA mt_table_del TYPE HANDLE new_table_desc.",
       "unsupported statement: CREATE DATA mt_table_tmp TYPE HANDLE new_table_desc.",
@@ -1089,23 +1045,17 @@
   {
     "class": "z2ui5_cl_demo_app_130",
     "path": "z2ui5_cl_demo_app_130.js",
-    "todos": 5,
+    "todos": 2,
     "todoDetails": [
-      "unsupported statement: READ TABLE mt_fields REFERENCE INTO DATA(lr_field) WITH KEY field = mv_activ_elemnt.",
-      "sy-subrc used — provide manually",
       "unsupported statement: REPLACE `{LOW}` IN lv_value WITH lr_filter->low.",
-      "unsupported statement: REPLACE `{HIGH}` IN lv_value WITH lr_filter->high.",
-      "unsupported statement: READ TABLE mt_fields REFERENCE INTO DATA(lr_field) WITH KEY field = mv_activ_elemnt."
+      "unsupported statement: REPLACE `{HIGH}` IN lv_value WITH lr_filter->high."
     ]
   },
   {
     "class": "z2ui5_cl_demo_app_131",
     "path": "z2ui5_cl_demo_app_131.js",
-    "todos": 8,
+    "todos": 5,
     "todoDetails": [
-      "unsupported statement: FIELD-SYMBOLS <view_display> TYPE any.",
-      "unsupported statement: READ TABLE mt_t002 REFERENCE INTO DATA(t002) WITH KEY id = mv_selectedkey.",
-      "sy-subrc used — provide manually",
       "CREATE OBJECT: CREATE OBJECT mo_app TYPE (t002->class).",
       "unsupported statement: CALL METHOD mo_app->(`SET_APP_DATA`) EXPORTING count = t002->count table = t002->table.",
       "unsupported statement: ASSIGN mo_app->(`MO_PARENT_VIEW`) TO FIELD-SYMBOL(<view>).",
@@ -1131,9 +1081,8 @@
   {
     "class": "z2ui5_cl_demo_app_136",
     "path": "z2ui5_cl_demo_app_136.js",
-    "todos": 2,
+    "todos": 1,
     "todoDetails": [
-      "unsupported statement: FIELD-SYMBOLS <tab> TYPE table.",
       "unsupported statement: ASSIGN mr_table->* TO <tab>."
     ]
   },
@@ -1188,9 +1137,8 @@
   {
     "class": "z2ui5_cl_demo_app_152",
     "path": "z2ui5_cl_demo_app_152.js",
-    "todos": 3,
+    "todos": 2,
     "todoDetails": [
-      "unsupported statement: FIELD-SYMBOLS <row> TYPE ty_s_row.",
       "unsupported statement: ASSIGN ls_result-row->* TO <row>.",
       "unsupported statement: ASSIGN ls_result-table->* TO FIELD-SYMBOL(<table>)."
     ]
@@ -1367,10 +1315,8 @@
   {
     "class": "z2ui5_cl_demo_app_182",
     "path": "z2ui5_cl_demo_app_182.js",
-    "todos": 1,
-    "todoDetails": [
-      "unsupported statement: READ TABLE mt_data-nodes INTO DATA(ls_node) WITH KEY id = lt_arg[ 2 ]."
-    ]
+    "todos": 0,
+    "todoDetails": []
   },
   {
     "class": "z2ui5_cl_demo_app_183",
@@ -1381,12 +1327,9 @@
   {
     "class": "z2ui5_cl_demo_app_184",
     "path": "z2ui5_cl_demo_app_184.js",
-    "todos": 13,
+    "todos": 10,
     "todoDetails": [
-      "unsupported statement: FIELD-SYMBOLS <tab> TYPE data.",
       "unsupported statement: ASSIGN mt_table->* TO <tab>.",
-      "unsupported statement: FIELD-SYMBOLS <table> TYPE STANDARD TABLE.",
-      "unsupported statement: FIELD-SYMBOLS <table_tmp> TYPE STANDARD TABLE.",
       "unsupported statement: CREATE DATA mt_table TYPE HANDLE new_table_desc.",
       "unsupported statement: CREATE DATA mt_table_tmp TYPE HANDLE new_table_desc.",
       "unsupported statement: ASSIGN mt_table->* TO <table>.",
@@ -1401,11 +1344,8 @@
   {
     "class": "z2ui5_cl_demo_app_185",
     "path": "z2ui5_cl_demo_app_185.js",
-    "todos": 8,
+    "todos": 5,
     "todoDetails": [
-      "unsupported statement: FIELD-SYMBOLS <view_display> TYPE any.",
-      "unsupported statement: READ TABLE mt_t002 REFERENCE INTO DATA(t002) WITH KEY id = mv_selectedkey.",
-      "sy-subrc used — provide manually",
       "CREATE OBJECT: CREATE OBJECT mo_app TYPE (t002->class).",
       "unsupported statement: CALL METHOD mo_app->(`SET_APP_DATA`) EXPORTING count = t002->count table = t002->table.",
       "unsupported statement: ASSIGN mo_app->(`MO_PARENT_VIEW`) TO FIELD-SYMBOL(<view>).",
@@ -1436,13 +1376,9 @@
   {
     "class": "z2ui5_cl_demo_app_190",
     "path": "z2ui5_cl_demo_app_190.js",
-    "todos": 12,
+    "todos": 8,
     "todoDetails": [
-      "unsupported statement: FIELD-SYMBOLS <row> TYPE any.",
-      "unsupported statement: FIELD-SYMBOLS <tab> TYPE data.",
       "unsupported statement: ASSIGN mt_table->* TO <tab>.",
-      "unsupported statement: FIELD-SYMBOLS <table> TYPE STANDARD TABLE.",
-      "unsupported statement: FIELD-SYMBOLS <table_tmp> TYPE STANDARD TABLE.",
       "unsupported statement: CREATE DATA mt_table TYPE HANDLE new_table_desc.",
       "unsupported statement: ASSIGN mt_table->* TO <table>.",
       "unsupported statement: SELECT * FROM (mv_table) INTO CORRESPONDING FIELDS OF TABLE @<table> UP TO 100 ROWS.",
@@ -1455,11 +1391,8 @@
   {
     "class": "z2ui5_cl_demo_app_191",
     "path": "z2ui5_cl_demo_app_191.js",
-    "todos": 8,
+    "todos": 5,
     "todoDetails": [
-      "unsupported statement: FIELD-SYMBOLS <view_display> TYPE any.",
-      "unsupported statement: READ TABLE mt_t002 REFERENCE INTO DATA(t002) WITH KEY id = mv_selectedkey.",
-      "sy-subrc used — provide manually",
       "CREATE OBJECT: CREATE OBJECT mo_app TYPE (t002->class).",
       "unsupported statement: CALL METHOD mo_app->(`SET_APP_DATA`) EXPORTING count = t002->count table = t002->table.",
       "unsupported statement: ASSIGN mo_app->(`MO_PARENT_VIEW`) TO FIELD-SYMBOL(<view>).",
@@ -1470,11 +1403,8 @@
   {
     "class": "z2ui5_cl_demo_app_192",
     "path": "z2ui5_cl_demo_app_192.js",
-    "todos": 7,
+    "todos": 4,
     "todoDetails": [
-      "unsupported statement: FIELD-SYMBOLS <fs_s_head> TYPE any.",
-      "unsupported statement: FIELD-SYMBOLS <fs_t_head_new> TYPE STANDARD TABLE.",
-      "unsupported statement: FIELD-SYMBOLS <fs_s_head_new> TYPE any.",
       "unsupported statement: CREATE DATA lo_new_data->mt_kopf TYPE HANDLE lr_tabdescr.",
       "unsupported statement: ASSIGN lo_new_data->mt_kopf->* TO <fs_t_head_new>.",
       "unresolved class reference: cl_abap_structdescr",
@@ -1484,27 +1414,19 @@
   {
     "class": "z2ui5_cl_demo_app_193",
     "path": "z2ui5_cl_demo_app_193.js",
-    "todos": 4,
+    "todos": 2,
     "todoDetails": [
       "unsupported statement: ASSIGN mt_kopf->* TO FIELD-SYMBOL(<head>).",
-      "sy-subrc used — provide manually",
-      "unsupported statement: ASSIGN mt_pos->* TO FIELD-SYMBOL(<pos>).",
-      "sy-subrc used — provide manually"
+      "unsupported statement: ASSIGN mt_pos->* TO FIELD-SYMBOL(<pos>)."
     ]
   },
   {
     "class": "z2ui5_cl_demo_app_194",
     "path": "z2ui5_cl_demo_app_194.js",
-    "todos": 27,
+    "todos": 21,
     "todoDetails": [
-      "unsupported statement: FIELD-SYMBOLS <row> TYPE any.",
       "unsupported statement: ASSIGN ms_table_row->* TO <row>.",
-      "unsupported statement: ASSIGN COMPONENT comp->name OF STRUCTURE <row> TO FIELD-SYMBOL(<val>).",
-      "sy-subrc used — provide manually",
-      "unsupported statement: FIELD-SYMBOLS <tab> TYPE data.",
       "unsupported statement: ASSIGN mt_table->* TO <tab>.",
-      "unsupported statement: FIELD-SYMBOLS <table> TYPE STANDARD TABLE.",
-      "unsupported statement: FIELD-SYMBOLS <table_tmp> TYPE STANDARD TABLE.",
       "unsupported statement: CREATE DATA mt_table TYPE HANDLE new_table_desc.",
       "unsupported statement: CREATE DATA mt_table_tmp TYPE HANDLE new_table_desc.",
       "unsupported statement: CREATE DATA ms_table_row TYPE HANDLE new_struct_desc.",
@@ -1529,11 +1451,8 @@
   {
     "class": "z2ui5_cl_demo_app_195",
     "path": "z2ui5_cl_demo_app_195.js",
-    "todos": 8,
+    "todos": 5,
     "todoDetails": [
-      "unsupported statement: FIELD-SYMBOLS <view_display> TYPE any.",
-      "unsupported statement: READ TABLE mt_t002 REFERENCE INTO DATA(t002) WITH KEY id = mv_selectedkey.",
-      "sy-subrc used — provide manually",
       "CREATE OBJECT: CREATE OBJECT mo_app TYPE (t002->class).",
       "unsupported statement: CALL METHOD mo_app->(`SET_APP_DATA`) EXPORTING table = t002->table.",
       "unsupported statement: ASSIGN mo_app->(`MO_PARENT_VIEW`) TO FIELD-SYMBOL(<view>).",
@@ -1562,17 +1481,13 @@
   {
     "class": "z2ui5_cl_demo_app_199",
     "path": "z2ui5_cl_demo_app_199.js",
-    "todos": 10,
+    "todos": 6,
     "todoDetails": [
-      "unsupported statement: FIELD-SYMBOLS <tab> TYPE data.",
       "unsupported statement: ASSIGN mt_table->* TO <tab>.",
-      "unsupported statement: FIELD-SYMBOLS <tab> TYPE STANDARD TABLE.",
       "unsupported statement: ASSIGN mt_table->* TO <tab>.",
-      "unsupported statement: FIELD-SYMBOLS <table> TYPE STANDARD TABLE.",
       "unsupported statement: CREATE DATA mt_table TYPE STANDARD TABLE OF z2ui5_t_01.",
       "unsupported statement: ASSIGN mt_table->* TO <table>.",
       "unsupported statement: SELECT id, id_prev FROM z2ui5_t_01 INTO CORRESPONDING FIELDS OF TABLE @<table> UP TO 2 ROWS.",
-      "unsupported statement: FIELD-SYMBOLS <tab> TYPE STANDARD TABLE.",
       "unsupported statement: ASSIGN mt_table->* TO <tab>."
     ]
   },
@@ -1621,10 +1536,8 @@
   {
     "class": "z2ui5_cl_demo_app_211",
     "path": "z2ui5_cl_demo_app_211.js",
-    "todos": 8,
+    "todos": 6,
     "todoDetails": [
-      "unsupported statement: READ TABLE mt_t002 REFERENCE INTO DATA(t002) WITH KEY id = mv_selectedkey.",
-      "sy-subrc used — provide manually",
       "CREATE OBJECT: CREATE OBJECT mo_app TYPE (t002->class).",
       "unsupported statement: CALL METHOD mo_app->(`SET_APP_DATA`) EXPORTING table = t002->table.",
       "unsupported statement: ASSIGN mo_app->(`MO_PARENT_VIEW`) TO FIELD-SYMBOL(<view>).",
@@ -1636,28 +1549,12 @@
   {
     "class": "z2ui5_cl_demo_app_212",
     "path": "z2ui5_cl_demo_app_212.js",
-    "todos": 30,
+    "todos": 14,
     "todoDetails": [
-      "unsupported statement: READ TABLE lt_arg INTO DATA(ls_arg) INDEX 1.",
-      "sy-subrc used — provide manually",
-      "unsupported statement: FIELD-SYMBOLS <tab> TYPE STANDARD TABLE.",
-      "unsupported statement: FIELD-SYMBOLS <table_row> TYPE any.",
       "unsupported statement: ASSIGN mt_table->* TO <tab>.",
-      "unsupported statement: ASSIGN <tab>[ index ] TO FIELD-SYMBOL(<row>).",
-      "sy-subrc used — provide manually",
-      "unsupported statement: ASSIGN COMPONENT dfies-fieldname OF STRUCTURE <row> TO FIELD-SYMBOL(<value_tab>).",
-      "sy-subrc used — provide manually",
       "unsupported statement: ASSIGN ms_table_row->* TO <table_row>.",
-      "unsupported statement: ASSIGN COMPONENT dfies-fieldname OF STRUCTURE <table_row> TO FIELD-SYMBOL(<value_struc>).",
-      "sy-subrc used — provide manually",
-      "unsupported statement: FIELD-SYMBOLS <row> TYPE any.",
       "unsupported statement: ASSIGN ms_table_row->* TO <row>.",
-      "unsupported statement: ASSIGN COMPONENT dfies->fieldname OF STRUCTURE <row> TO FIELD-SYMBOL(<val>).",
-      "sy-subrc used — provide manually",
-      "unsupported statement: FIELD-SYMBOLS <tab> TYPE data.",
       "unsupported statement: ASSIGN mt_table->* TO <tab>.",
-      "unsupported statement: FIELD-SYMBOLS <table> TYPE STANDARD TABLE.",
-      "unsupported statement: FIELD-SYMBOLS <table_tmp> TYPE STANDARD TABLE.",
       "unsupported statement: CREATE DATA mt_table TYPE HANDLE new_table_desc.",
       "unsupported statement: CREATE DATA mt_table_tmp TYPE HANDLE new_table_desc.",
       "unsupported statement: CREATE DATA ms_table_row TYPE HANDLE new_struct_desc.",
@@ -1981,10 +1878,8 @@
   {
     "class": "z2ui5_cl_demo_app_264",
     "path": "z2ui5_cl_demo_app_264.js",
-    "todos": 1,
-    "todoDetails": [
-      "unsupported statement: FIELD-SYMBOLS <fs_a_data> TYPE ty_s_a_data."
-    ]
+    "todos": 0,
+    "todoDetails": []
   },
   {
     "class": "z2ui5_cl_demo_app_265",
@@ -2229,11 +2124,9 @@
   {
     "class": "z2ui5_cl_demo_app_306",
     "path": "z2ui5_cl_demo_app_306.js",
-    "todos": 3,
+    "todos": 1,
     "todoDetails": [
-      "sy-uzeit used — provide manually",
-      "unsupported statement: ASSIGN mt_picture[ selected_picture-id ] TO FIELD-SYMBOL(<picture>).",
-      "sy-subrc used — provide manually"
+      "sy-uzeit used — provide manually"
     ]
   },
   {
@@ -2358,17 +2251,12 @@
   {
     "class": "z2ui5_cl_demo_app_328",
     "path": "z2ui5_cl_demo_app_328.js",
-    "todos": 15,
+    "todos": 10,
     "todoDetails": [
-      "unsupported statement: FIELD-SYMBOLS <line> TYPE any.",
-      "unsupported statement: FIELD-SYMBOLS <tab> TYPE ANY TABLE.",
       "unsupported statement: ASSIGN mt_table->* TO <tab>.",
-      "unsupported statement: ASSIGN COMPONENT `SELKZ` OF STRUCTURE <line> TO FIELD-SYMBOL(<selkz>).",
-      "sy-subrc used — provide manually",
       "unsupported statement: ASSIGN mt_table->* TO FIELD-SYMBOL(<table>).",
       "unsupported statement: ASSIGN mo_table_obj->mr_data->* TO FIELD-SYMBOL(<val>).",
       "unsupported statement: ASSIGN mt_table->* TO FIELD-SYMBOL(<table>).",
-      "unsupported statement: FIELD-SYMBOLS <table> TYPE STANDARD TABLE.",
       "unsupported statement: CREATE DATA mt_table TYPE HANDLE new_table_desc.",
       "unsupported statement: ASSIGN mt_table->* TO <table>.",
       "unsupported statement: SELECT id FROM z2ui5_t_01 INTO CORRESPONDING FIELDS OF TABLE @<table> UP TO 4 ROWS.",
@@ -2392,21 +2280,18 @@
   {
     "class": "z2ui5_cl_demo_app_331",
     "path": "z2ui5_cl_demo_app_331.js",
-    "todos": 3,
+    "todos": 2,
     "todoDetails": [
       "unsupported statement: ASSIGN mo_table_obj->mr_data->* TO FIELD-SYMBOL(<val>).",
-      "unsupported statement: ASSIGN COMPONENT `ID` OF STRUCTURE <val> TO FIELD-SYMBOL(<value>).",
       "unsupported statement: SELECT SINGLE * FROM z2ui5_t_01 INTO CORRESPONDING FIELDS OF @ms_struc."
     ]
   },
   {
     "class": "z2ui5_cl_demo_app_332",
     "path": "z2ui5_cl_demo_app_332.js",
-    "todos": 4,
+    "todos": 2,
     "todoDetails": [
       "unsupported statement: ASSIGN mo_table_obj->mr_data->* TO FIELD-SYMBOL(<val>).",
-      "unsupported statement: ASSIGN COMPONENT layout->name OF STRUCTURE <val> TO FIELD-SYMBOL(<value>).",
-      "sy-subrc used — provide manually",
       "unsupported statement: SELECT SINGLE * FROM z2ui5_t_01 INTO CORRESPONDING FIELDS OF @ms_struc."
     ]
   },
@@ -2419,25 +2304,20 @@
   {
     "class": "z2ui5_cl_demo_app_334",
     "path": "z2ui5_cl_demo_app_334.js",
-    "todos": 4,
+    "todos": 2,
     "todoDetails": [
       "unsupported statement: ASSIGN mo_layout_obj->mr_data->* TO FIELD-SYMBOL(<val>).",
-      "unsupported statement: ASSIGN COMPONENT layout->name OF STRUCTURE <val> TO FIELD-SYMBOL(<value>).",
-      "sy-subrc used — provide manually",
       "unsupported statement: SELECT SINGLE * FROM z2ui5_t_01 INTO CORRESPONDING FIELDS OF @ms_struc."
     ]
   },
   {
     "class": "z2ui5_cl_demo_app_335",
     "path": "z2ui5_cl_demo_app_335.js",
-    "todos": 8,
+    "todos": 5,
     "todoDetails": [
-      "unsupported statement: FIELD-SYMBOLS <row> TYPE z2ui5_t_01.",
       "unsupported statement: ASSIGN mo_layout_obj_2->mr_data->* TO <row>.",
       "unsupported statement: ASSIGN mo_layout_obj->mr_data->* TO <row>.",
       "unsupported statement: ASSIGN mo_layout_obj->mr_data->* TO FIELD-SYMBOL(<val>).",
-      "unsupported statement: ASSIGN COMPONENT layout->name OF STRUCTURE <val> TO FIELD-SYMBOL(<value>).",
-      "sy-subrc used — provide manually",
       "unsupported statement: SELECT SINGLE * FROM z2ui5_t_01 INTO CORRESPONDING FIELDS OF @ms_struc.",
       "unsupported statement: SELECT SINGLE * FROM z2ui5_t_01 WHERE id <> @ms_struc-id INTO CORRESPONDING FIELDS OF @ms_struc."
     ]
@@ -2451,23 +2331,18 @@
   {
     "class": "z2ui5_cl_demo_app_337",
     "path": "z2ui5_cl_demo_app_337.js",
-    "todos": 5,
+    "todos": 3,
     "todoDetails": [
       "unsupported statement: ASSIGN mo_layout_obj->mr_data->* TO FIELD-SYMBOL(<val>).",
       "unsupported statement: ASSIGN mo_layout_obj_2->mr_data->* TO FIELD-SYMBOL(<val2>).",
-      "unsupported statement: SELECT id, id_prev, id_prev_app, id_prev_app_stack, timestampl FROM z2ui5_t_01 INTO CORRESPONDING FIELDS OF TABLE @mt_da",
-      "unsupported statement: ASSIGN COMPONENT layout->name OF STRUCTURE ms_data TO FIELD-SYMBOL(<value>).",
-      "sy-subrc used — provide manually"
+      "unsupported statement: SELECT id, id_prev, id_prev_app, id_prev_app_stack, timestampl FROM z2ui5_t_01 INTO CORRESPONDING FIELDS OF TABLE @mt_da"
     ]
   },
   {
     "class": "z2ui5_cl_demo_app_338",
     "path": "z2ui5_cl_demo_app_338.js",
-    "todos": 8,
+    "todos": 5,
     "todoDetails": [
-      "unsupported statement: FIELD-SYMBOLS <view_display> TYPE any.",
-      "unsupported statement: READ TABLE mt_t002 REFERENCE INTO DATA(t002) WITH KEY id = mv_selectedkey.",
-      "sy-subrc used — provide manually",
       "CREATE OBJECT: CREATE OBJECT mo_app TYPE (t002->class).",
       "unsupported statement: CALL METHOD mo_app->(`SET_APP_DATA`) EXPORTING table = t002->table.",
       "unsupported statement: ASSIGN mo_app->(`MO_PARENT_VIEW`) TO FIELD-SYMBOL(<view>).",
@@ -2478,13 +2353,12 @@
   {
     "class": "z2ui5_cl_demo_app_339",
     "path": "z2ui5_cl_demo_app_339.js",
-    "todos": 12,
+    "todos": 11,
     "todoDetails": [
       "unsupported statement: cl_abap_typedescr=>describe_by_name( EXPORTING p_name = mv_table RECEIVING p_descr_ref = DATA(typedesc) EXCEPTIONS type_",
       "unsupported statement: ASSIGN mt_table->* TO FIELD-SYMBOL(<table>).",
       "unsupported statement: ASSIGN mo_layout->mr_data->* TO FIELD-SYMBOL(<data>).",
       "unsupported statement: ASSIGN mt_table->* TO FIELD-SYMBOL(<table>).",
-      "unsupported statement: FIELD-SYMBOLS <table> TYPE STANDARD TABLE.",
       "unsupported statement: CREATE DATA mt_table TYPE HANDLE new_table_desc.",
       "unsupported statement: CREATE DATA mt_table_tmp TYPE HANDLE new_table_desc.",
       "unsupported statement: ASSIGN mt_table->* TO <table>.",
@@ -2520,13 +2394,12 @@
   {
     "class": "z2ui5_cl_demo_app_342",
     "path": "z2ui5_cl_demo_app_342.js",
-    "todos": 12,
+    "todos": 11,
     "todoDetails": [
       "unsupported statement: cl_abap_typedescr=>describe_by_name( EXPORTING p_name = mv_table RECEIVING p_descr_ref = DATA(typedesc) EXCEPTIONS type_",
       "unsupported statement: ASSIGN mt_data->* TO FIELD-SYMBOL(<table>).",
       "unsupported statement: ASSIGN mo_lay->mr_data->* TO FIELD-SYMBOL(<data>).",
       "unsupported statement: ASSIGN mt_data->* TO FIELD-SYMBOL(<table>).",
-      "unsupported statement: FIELD-SYMBOLS <table> TYPE STANDARD TABLE.",
       "unsupported statement: CREATE DATA mt_data TYPE HANDLE new_table_desc.",
       "unsupported statement: CREATE DATA mt_data_tmp TYPE HANDLE new_table_desc.",
       "unsupported statement: ASSIGN mt_data->* TO <table>.",
@@ -2539,10 +2412,9 @@
   {
     "class": "z2ui5_cl_demo_app_343",
     "path": "z2ui5_cl_demo_app_343.js",
-    "todos": 7,
+    "todos": 6,
     "todoDetails": [
       "unsupported statement: cl_abap_typedescr=>describe_by_name( EXPORTING p_name = `Z2UI5_T_01` RECEIVING p_descr_ref = DATA(typedesc) EXCEPTIONS t",
-      "unsupported statement: FIELD-SYMBOLS <table1> TYPE STANDARD TABLE.",
       "unsupported statement: CREATE DATA mt_data1 TYPE HANDLE new_table_desc.",
       "unsupported statement: ASSIGN mt_data1->* TO <table1>.",
       "unsupported statement: SELECT * FROM z2ui5_t_01 INTO TABLE @<table1> UP TO 5 ROWS.",
@@ -2553,18 +2425,16 @@
   {
     "class": "z2ui5_cl_demo_app_344",
     "path": "z2ui5_cl_demo_app_344.js",
-    "todos": 17,
+    "todos": 15,
     "todoDetails": [
       "unsupported statement: ASSIGN mt_data->* TO FIELD-SYMBOL(<table>).",
       "unsupported statement: ASSIGN mo_layout_obj->mr_data->* TO FIELD-SYMBOL(<val>).",
       "unsupported statement: ASSIGN mt_data2->* TO FIELD-SYMBOL(<table2>).",
       "unsupported statement: ASSIGN mo_layout_obj2->mr_data->* TO FIELD-SYMBOL(<val2>).",
       "unsupported statement: ASSIGN i_data->* TO FIELD-SYMBOL(<table>).",
-      "unsupported statement: FIELD-SYMBOLS <table> TYPE STANDARD TABLE.",
       "unsupported statement: CREATE DATA mt_data TYPE HANDLE new_table_desc.",
       "unsupported statement: ASSIGN mt_data->* TO <table>.",
       "unsupported statement: SELECT * FROM (iv_tabname) INTO CORRESPONDING FIELDS OF TABLE @<table> UP TO 3 ROWS.",
-      "unsupported statement: FIELD-SYMBOLS <table> TYPE STANDARD TABLE.",
       "unsupported statement: CREATE DATA mt_data2 TYPE HANDLE new_table_desc.",
       "unsupported statement: ASSIGN mt_data2->* TO <table>.",
       "unsupported statement: SELECT * FROM (iv_tabname) INTO CORRESPONDING FIELDS OF TABLE @<table> UP TO 4 ROWS.",
@@ -2577,10 +2447,9 @@
   {
     "class": "z2ui5_cl_demo_app_345",
     "path": "z2ui5_cl_demo_app_345.js",
-    "todos": 10,
+    "todos": 9,
     "todoDetails": [
       "unsupported statement: cl_abap_typedescr=>describe_by_name( EXPORTING p_name = `Z2UI5_T_01` RECEIVING p_descr_ref = DATA(typedesc) EXCEPTIONS t",
-      "unsupported statement: FIELD-SYMBOLS <table1> TYPE STANDARD TABLE.",
       "unsupported statement: CREATE DATA mt_data1 TYPE HANDLE new_table_desc.",
       "unsupported statement: ASSIGN mt_data1->* TO <table1>.",
       "unsupported statement: SELECT * FROM z2ui5_t_01 INTO TABLE @<table1> UP TO 5 ROWS.",
@@ -2603,39 +2472,30 @@
   {
     "class": "z2ui5_cl_demo_app_348",
     "path": "z2ui5_cl_demo_app_348.js",
-    "todos": 10,
+    "todos": 4,
     "todoDetails": [
-      "unsupported statement: FIELD-SYMBOLS <row> TYPE z2ui5_t_01.",
       "unsupported statement: ASSIGN mo_layout_obj->mr_data->* TO <row>.",
       "unsupported statement: SELECT SINGLE id, id_prev, id_prev_app, id_prev_app_stack, timestampl FROM z2ui5_t_01 INTO CORRESPONDING FIELDS OF @ms_s",
       "unsupported statement: SELECT SINGLE id, id_prev, id_prev_app, id_prev_app_stack, timestampl FROM z2ui5_t_01 WHERE id <> @ms_struc-id INTO CORR",
-      "unsupported statement: FIELD-SYMBOLS <layout> TYPE z2ui5_cl_demo_app_333=>ty_s_layout.",
-      "unsupported statement: FIELD-SYMBOLS <data> TYPE any.",
-      "unsupported statement: FIELD-SYMBOLS <value> TYPE any.",
-      "unsupported statement: ASSIGN i_data->* TO <data>.",
-      "unsupported statement: ASSIGN COMPONENT <layout>-name OF STRUCTURE <data> TO <value>.",
-      "sy-subrc used — provide manually"
+      "unsupported statement: ASSIGN i_data->* TO <data>."
     ]
   },
   {
     "class": "z2ui5_cl_demo_app_349",
     "path": "z2ui5_cl_demo_app_349.js",
-    "todos": 5,
+    "todos": 3,
     "todoDetails": [
       "unsupported statement: ASSIGN mo_layout_obj->mr_data->* TO FIELD-SYMBOL(<val>).",
       "unsupported statement: ASSIGN mo_layout_obj_2->mr_data->* TO FIELD-SYMBOL(<val2>).",
-      "unsupported statement: SELECT id, id_prev, id_prev_app, id_prev_app_stack, timestampl FROM z2ui5_t_01 INTO CORRESPONDING FIELDS OF TABLE @mt_da",
-      "unsupported statement: ASSIGN COMPONENT layout->name OF STRUCTURE ms_data TO FIELD-SYMBOL(<value>).",
-      "sy-subrc used — provide manually"
+      "unsupported statement: SELECT id, id_prev, id_prev_app, id_prev_app_stack, timestampl FROM z2ui5_t_01 INTO CORRESPONDING FIELDS OF TABLE @mt_da"
     ]
   },
   {
     "class": "z2ui5_cl_demo_app_350",
     "path": "z2ui5_cl_demo_app_350.js",
-    "todos": 2,
+    "todos": 1,
     "todoDetails": [
-      "unsupported statement: CALL FUNCTION lv_fm EXPORTING tabname = `ZTEST` varkey = varkey EXCEPTIONS foreign_lock = 1 system_failure = 2 OTHERS = ",
-      "sy-subrc used — provide manually"
+      "unsupported statement: CALL FUNCTION lv_fm EXPORTING tabname = `ZTEST` varkey = varkey EXCEPTIONS foreign_lock = 1 system_failure = 2 OTHERS = "
     ]
   },
   {

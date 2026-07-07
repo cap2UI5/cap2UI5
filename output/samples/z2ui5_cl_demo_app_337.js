@@ -10,6 +10,11 @@ class z2ui5_cl_demo_app_337 extends z2ui5_if_app {
   mo_layout_obj_2 = null;
 
   async main(client) {
+    let sy_subrc = 0;
+    let fs_val = null;
+    let _fs$fs_val = null;
+    let fs_val2 = null;
+    let _fs$fs_val2 = null;
     if (client.check_on_init()) {
       this.get_data();
       this.mo_layout_obj = z2ui5_cl_demo_app_333.factory({ i_data: (this.mt_data), vis_cols: 5 });
@@ -32,11 +37,11 @@ class z2ui5_cl_demo_app_337 extends z2ui5_if_app {
       client.message_toast_display(`ERROR - mo_layout_obj_2->mr_data is not bound!`);
     }
     // TODO(abap2js): ASSIGN mo_layout_obj->mr_data->* TO FIELD-SYMBOL(<val>).
-    if (val !== this.mt_data) {
+    if (fs_val !== this.mt_data) {
       client.message_toast_display(`ERROR - mo_layout_obj_2->mr_data <> mt_data!`);
     }
     // TODO(abap2js): ASSIGN mo_layout_obj_2->mr_data->* TO FIELD-SYMBOL(<val2>).
-    if (val2 !== this.ms_data) {
+    if (fs_val2 !== this.ms_data) {
       client.message_toast_display(`ERROR - mo_layout_obj_2->mr_data <> ms_data!`);
     }
     client.view_model_update();
@@ -80,6 +85,9 @@ class z2ui5_cl_demo_app_337 extends z2ui5_if_app {
 
   xml_form({ i_page, i_client } = {}) {
     let sy_tabix = 0;
+    let sy_subrc = 0;
+    let fs_value = null;
+    let _fs$fs_value = null;
     const form = i_page.simple_form({ editable: true, layout: `ResponsiveGridLayout`, adjustlabelspan: true })
       .content(`form`);
     let index = 0;
@@ -87,12 +95,14 @@ class z2ui5_cl_demo_app_337 extends z2ui5_if_app {
     for (const layout of this.mo_layout_obj.ms_data.t_layout) {
       sy_tabix++;
       index = index + 1;
-      // TODO(abap2js): ASSIGN COMPONENT layout->name OF STRUCTURE ms_data TO FIELD-SYMBOL(<value>).
+      _fs$fs_value = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(this.ms_data, layout.name);
+      fs_value = _fs$fs_value ? _fs$fs_value.o[_fs$fs_value.k] : null;
+      sy_subrc = _fs$fs_value ? 0 : 4;
       if (sy_subrc !== 0) {
         return;
       }
       const line = form.label({ wrapping: false, text: layout.name });
-      line.input({ value: i_client._bind(value), visible: i_client._bind({ val: layout.visible, tab: this.mo_layout_obj.ms_data.t_layout, tab_index: index }), enabled: false });
+      line.input({ value: i_client._bind(fs_value), visible: i_client._bind({ val: layout.visible, tab: this.mo_layout_obj.ms_data.t_layout, tab_index: index }), enabled: false });
     }
   }
 }

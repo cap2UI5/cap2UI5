@@ -91,15 +91,20 @@ class z2ui5_cl_demo_app_306 extends z2ui5_if_app {
   }
 
   on_navigation() {
+    let sy_subrc = 0;
+    let fs_picture = null;
+    let _fs$fs_picture = null;
     try {
       const lo_prev = this.client.get_app(this.client.get().S_DRAFT.ID_PREV_APP);
       const result = (lo_prev).result();
       if (result.check_confirmed === true) {
         this.mv_pic_display = result.image;
-        // TODO(abap2js): ASSIGN mt_picture[ selected_picture-id ] TO FIELD-SYMBOL(<picture>).
+        fs_picture = this.mt_picture[(this.selected_picture.id) - 1];
+        _fs$fs_picture = null;
+        sy_subrc = 0;
         if (sy_subrc === 0) {
-          picture.data = this.mv_pic_display;
-          picture.thumbnail = this.mv_pic_display;
+          fs_picture.data = this.mv_pic_display;
+          fs_picture.thumbnail = this.mv_pic_display;
         }
       }
     } catch (error) {

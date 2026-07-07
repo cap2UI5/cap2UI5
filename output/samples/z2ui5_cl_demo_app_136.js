@@ -36,20 +36,22 @@ class z2ui5_cl_demo_app_136 extends z2ui5_if_app {
 
   view_display() {
     let sy_tabix = 0;
+    let sy_subrc = 0;
+    let fs_tab = null;
+    let _fs$fs_tab = null;
     const view = z2ui5_cl_xml_view.factory();
     const page = view.shell()
       .page({ title: `abap2UI5 - CSV to ABAP internal Table`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
-    // TODO(abap2js): FIELD-SYMBOLS <tab> TYPE table.
     if (this.mr_table) {
       // TODO(abap2js): ASSIGN mr_table->* TO <tab>.
-      const tab = page.table((this.mv_check_edit === true ? this.client._bind_edit(tab) : this.client._bind_edit(tab)))
+      const tab = page.table((this.mv_check_edit === true ? this.client._bind_edit(fs_tab) : this.client._bind_edit(fs_tab)))
         .header_toolbar()
         .overflow_toolbar()
         .title(`CSV Content`)
         .toolbar_spacer()
         .get_parent()
         .get_parent();
-      const lr_fields = z2ui5_cl_util.rtti_get_t_attri_by_any(tab);
+      const lr_fields = z2ui5_cl_util.rtti_get_t_attri_by_any(fs_tab);
       const lo_cols = tab.columns();
       sy_tabix = 0;
       for (const lr_col of lr_fields) {

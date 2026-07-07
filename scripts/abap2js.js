@@ -127,6 +127,17 @@ function safeIdent(name) {
   return JS_RESERVED.has(name) ? `${name}_` : name;
 }
 
+/** JS name for an ABAP field symbol — `<x>` → `fs_x`. ABAP `<x>` and `x` are
+ *  distinct names, so stripping only the brackets can collide. */
+function fsIdent(raw) {
+  return safeIdent(`fs_${raw.replace(/[<>]/g, "").toLowerCase()}`);
+}
+
+/** identifier that may be a plain var or a field symbol */
+function varOrFsIdent(raw) {
+  return /^<\w+>$/.test(raw) ? fsIdent(raw) : safeIdent(raw.toLowerCase());
+}
+
 /** ABAP '...' literal → JS `...` literal */
 function singleQuotedToBacktick(raw) {
   const inner = raw.slice(1, -1).replace(/''/g, "'");
@@ -408,6 +419,7 @@ class Ctx {
     this.todos = null; // shared array
     this.rowVar = null; // WHERE context: bare names resolve to <rowVar>.<name>
     this.loopDepth = 0;
+    this.fsBacked = new Map(); // field symbol name -> shadow var holding { o, k } write-back target
   }
   isLocal(name) {
     return this.locals.has(name.toLowerCase());
@@ -634,7 +646,7 @@ function renderBuiltinNamed(name, named, ctx) {
 function parseIdentChain(toks, i, ctx) {
   const first = toks[i];
   // field symbols <fs> keep their name without the brackets
-  const name = /^<\w+>$/.test(first.str) ? first.str.slice(1, -1) : first.str;
+  const name = /^<\w+>$/.test(first.str) ? `fs_${first.str.slice(1, -1)}` : first.str;
   const lower = safeIdent(name.toLowerCase());
   const up = KW(name);
   let str;
@@ -678,7 +690,7 @@ function parseIdentChain(toks, i, ctx) {
   } else if (up === "SY" && isDash(toks[j] ?? { type: "" })) {
     const field = toks[j + 1].str.toLowerCase();
     str = field === "index" ? "sy_index" : field === "tabix" ? "sy_tabix" : `sy_${field}`;
-    if (!["index", "tabix"].includes(field)) ctx.todos?.push(`sy-${field} used — provide manually`);
+    if (!["index", "tabix", "subrc"].includes(field)) ctx.todos?.push(`sy-${field} used — provide manually`);
     j += 2;
   } else if (callFollows && lower in BUILTIN_FN) {
     // builtin function call
@@ -1444,12 +1456,59 @@ function emitMethod(model, body, lines, requires, todos) {
     push(`let sy_tabix = 0;`);
   }
 
+  // sy-subrc — declared once per method when read anywhere or set by a
+  // supported statement (ASSIGN / READ TABLE)
+  if (body.statements.some((x) => x.type === "Assign" || x.type === "ReadTable" || /\bsy-subrc\b/i.test(x.src))) {
+    ctx.locals.add("sy_subrc");
+    push(`let sy_subrc = 0;`);
+  }
+
+  // field symbols are method-scoped in ABAP while the ASSIGN sites may sit in
+  // nested blocks — hoist every target to the method top. Each gets a shadow
+  // var holding its { o, k } write-back target so plain `<fs> = val` writes
+  // propagate into the assigned structure component / table line.
+  for (const name of collectFsTargets(body.statements)) {
+    if (ctx.locals.has(name)) continue;
+    ctx.locals.add(name);
+    ctx.fsBacked.set(name, `_fs$${name}`);
+    push(`let ${name} = null;`);
+    push(`let _fs$${name} = null;`);
+  }
+
   for (const s of body.statements) {
     emitStatement(s, ctx, st, push, assignedTwice, def);
   }
 
   if (def.returning) push(`return ${def.returning.name};`);
   lines.push(`  }`);
+}
+
+/** field-symbol names a method body declares or assigns to (FIELD-SYMBOLS,
+ *  ASSIGN ... TO, READ TABLE ... ASSIGNING, UNASSIGN) */
+function collectFsTargets(statements) {
+  const names = new Set();
+  const grab = (tok) => {
+    if (tok && /^<\w+>$/.test(tok.str)) names.add(fsIdent(tok.str));
+  };
+  for (const s of statements) {
+    if (s.type === "FieldSymbol" || s.type === "Unassign") {
+      grab(s.toks[1]);
+    } else if (s.type === "Assign" || s.type === "ReadTable") {
+      for (let i = 0; i < s.toks.length; i++) {
+        const up = KW(s.toks[i].str);
+        if (up === "TO" || up === "ASSIGNING") {
+          // TO <x> | TO FIELD-SYMBOL( <x> ) — FIELD-SYMBOL lexes as 3 tokens
+          for (let j = i + 1; j < Math.min(i + 7, s.toks.length); j++) {
+            if (/^<\w+>$/.test(s.toks[j].str)) {
+              grab(s.toks[j]);
+              break;
+            }
+          }
+        }
+      }
+    }
+  }
+  return names;
 }
 
 function emitStatement(s, ctx, st, push, assignedTwice, methodDef) {
@@ -1476,6 +1535,141 @@ function emitStatement(s, ctx, st, push, assignedTwice, methodDef) {
       const { typeTokens, value } = parseTypeAfter(toks.slice(2), 0);
       const rendered = value ? renderLiteralToken(value) : null;
       push(`const ${name} = ${rendered ?? typeDefault(typeTokens)};`);
+      break;
+    }
+    case "FieldSymbol":
+      // FIELD-SYMBOLS <x> TYPE t. — already hoisted to the method top
+      break;
+    case "Unassign": {
+      const name = fsIdent(toks[1].str);
+      push(`${name} = null;`);
+      const shadow = ctx.fsBacked.get(name);
+      if (shadow) push(`${shadow} = null;`);
+      break;
+    }
+    case "Assign": {
+      // ASSIGN COMPONENT c OF STRUCTURE s TO <x>. | ASSIGN src TO <x>.
+      const toIdx = findTopWord(toks, "TO");
+      if (toIdx < 0) return todo();
+      // TO <x> | TO FIELD-SYMBOL( <x> ) — FIELD-SYMBOL lexes as FIELD - SYMBOL
+      let fsAt = toIdx + 1;
+      if (KW(toks[fsAt]?.str ?? "") === "FIELD" && isDash(toks[fsAt + 1] ?? { type: "" })) fsAt = toIdx + 5;
+      const fsTok = toks[fsAt];
+      if (!fsTok || !/^<\w+>$/.test(fsTok.str)) return todo();
+      // trailing options: ELSE UNASSIGN matches our null handling, the rest
+      // (CASTING, dynamic pieces) has no JS mapping
+      const trailing = toks.slice(fsAt + (fsAt === toIdx + 5 ? 2 : 1));
+      if (trailing.length && !(KW(trailing[0].str) === "ELSE" && KW(trailing[1]?.str ?? "") === "UNASSIGN")) return todo();
+      const name = fsIdent(fsTok.str);
+      const shadow = ctx.fsBacked.get(name);
+      if (KW(toks[1].str) === "COMPONENT") {
+        // component by name (ABAP-uppercase -> JS-lowercase keys) or by index
+        const ofIdx = findTopWord(toks, "OF");
+        if (ofIdx < 0 || KW(toks[ofIdx + 1].str) !== "STRUCTURE") return todo();
+        const comp = txExpr(toks.slice(2, ofIdx), ctx);
+        const struct = txExpr(toks.slice(ofIdx + 2, toIdx), ctx);
+        push(`${shadow} = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(${struct}, ${comp});`);
+        push(`${name} = ${shadow} ? ${shadow}.o[${shadow}.k] : null;`);
+        push(`sy_subrc = ${shadow} ? 0 : 4;`);
+      } else {
+        // dynamic access (ref->*, obj->('NAME'), (name)) has no JS mapping
+        const srcToks = toks.slice(1, toIdx);
+        if (isParenL(srcToks[0])) return todo();
+        for (let k = 0; k < srcToks.length; k++) {
+          if (srcToks[k].str === "->*" || (srcToks[k].str === "->" && (srcToks[k + 1]?.str === "*" || isParenL(srcToks[k + 1] ?? { type: "" })))) return todo();
+        }
+        const src = txExpr(srcToks, ctx);
+        const m = src.match(/^(.+)\.([A-Za-z_$][\w$]*)$/);
+        push(`${name} = ${src};`);
+        push(`${shadow} = ${m ? `{ o: ${m[1]}, k: \`${m[2]}\` }` : "null"};`);
+        push(`sy_subrc = 0;`);
+      }
+      break;
+    }
+    case "ReadTable": {
+      // READ TABLE tab [WITH [TABLE] KEY c = v ...] [INDEX n]
+      //   [INTO [DATA(]x[)] | REFERENCE INTO [DATA(]x[)]
+      //    | ASSIGNING [FIELD-SYMBOL(]<x>[)] | TRANSPORTING NO FIELDS].
+      const intoIdx = findTopWord(toks, "INTO");
+      const asgIdx = findTopWord(toks, "ASSIGNING");
+      const withIdx = findTopWord(toks, "WITH");
+      const idxIdx = findTopWord(toks, "INDEX");
+      const transIdx = findTopWord(toks, "TRANSPORTING");
+      const refIdx = findTopWord(toks, "REFERENCE");
+      const stops = [intoIdx, asgIdx, withIdx, idxIdx, transIdx, refIdx].filter((x) => x > 0);
+      const tab = txExpr(toks.slice(2, stops.length ? Math.min(...stops) : toks.length), ctx);
+      // locator — INDEX n or WITH [TABLE] KEY c1 = v1 c2 = v2 (BINARY SEARCH is a no-op)
+      let locator = null;
+      if (idxIdx > 0) {
+        const end = stops.filter((x) => x > idxIdx).sort((a, b) => a - b)[0] ?? toks.length;
+        locator = `(${txExpr(toks.slice(idxIdx + 1, end), ctx)}) - 1`;
+      } else if (withIdx > 0) {
+        let k = withIdx + 1;
+        if (KW(toks[k].str) === "TABLE") k++;
+        if (KW(toks[k].str) !== "KEY") return todo();
+        k++;
+        const conds = [];
+        while (k < toks.length) {
+          if (!isId(toks[k]) || toks[k + 1]?.str !== "=") break;
+          const comp = toks[k].str.toLowerCase();
+          // value expr runs until the next `comp =` pair or section keyword
+          let end = toks.length;
+          let depth = 0;
+          for (let j = k + 2; j < toks.length; j++) {
+            depth += depthDelta(toks[j]);
+            if (depth !== 0) continue;
+            const u = KW(toks[j].str);
+            if (["INTO", "ASSIGNING", "REFERENCE", "TRANSPORTING", "BINARY", "INDEX"].includes(u) || (isId(toks[j]) && toks[j + 1]?.str === "=")) {
+              end = j;
+              break;
+            }
+          }
+          const val = txExpr(toks.slice(k + 2, end), ctx);
+          conds.push(comp === "table_line" ? `_r === ${val}` : `_r.${safeIdent(comp)} === ${val}`);
+          k = end;
+        }
+        if (!conds.length) return todo();
+        locator = `_t.findIndex((_r) => ${conds.join(" && ")})`;
+      } else {
+        return todo();
+      }
+      // target
+      let target = null; // { name, isFs }
+      if (asgIdx > 0) {
+        let fsAt = asgIdx + 1;
+        if (KW(toks[fsAt]?.str ?? "") === "FIELD" && isDash(toks[fsAt + 1] ?? { type: "" })) fsAt = asgIdx + 5;
+        if (!toks[fsAt] || !/^<\w+>$/.test(toks[fsAt].str)) return todo();
+        target = { name: fsIdent(toks[fsAt].str), isFs: true };
+      } else if (intoIdx > 0) {
+        let tAt = intoIdx + 1;
+        if (["DATA", "FINAL"].includes(KW(toks[tAt]?.str ?? "")) && isParenL(toks[tAt + 1] ?? { type: "" })) {
+          const name = safeIdent(toks[tAt + 2].str.toLowerCase());
+          ctx.locals.add(name);
+          push(`let ${name} = {};`);
+          target = { name, isFs: false };
+        } else {
+          const end = stops.filter((x) => x > tAt).sort((a, b) => a - b)[0] ?? toks.length;
+          target = { name: txExpr(toks.slice(tAt, end), ctx), isFs: false };
+        }
+      } else if (transIdx < 0) {
+        return todo();
+      }
+      push(`{`);
+      st.indent++;
+      push(`const _t = ${tab};`);
+      push(`const _i = ${locator};`);
+      push(`sy_subrc = _i >= 0 && _i < _t.length ? 0 : 4;`);
+      if (target) {
+        if (target.isFs) {
+          push(`${target.name} = sy_subrc === 0 ? _t[_i] : null;`);
+          const shadow = ctx.fsBacked.get(target.name);
+          if (shadow) push(`${shadow} = sy_subrc === 0 ? { o: _t, k: _i } : null;`);
+        } else {
+          push(`if (sy_subrc === 0) ${target.name} = _t[_i];`);
+        }
+      }
+      st.indent--;
+      push(`}`);
       break;
     }
     case "Move": {
@@ -1507,7 +1701,17 @@ function emitStatement(s, ctx, st, push, assignedTwice, methodDef) {
         // offset/length writes (lv_x+off(len) = ...) have no JS counterpart
         if (toks.slice(i, eq).some((t) => t.str === "+")) return todo();
         const lhs = txExpr(toks.slice(i, eq), ctx);
-        push(`${lhs} = ${rhs};`);
+        // x = VALUE #( ). resets to the type's INITIAL value — restore the
+        // declared component defaults instead of dropping the keys
+        let rhs2 = rhs;
+        if (rhs === "{}") {
+          const f = ctx.model.fields.get(lhs.replace(/^this\./, ""));
+          if (f && f.default.startsWith("{")) rhs2 = f.default;
+        }
+        push(`${lhs} = ${rhs2};`);
+        // writes through a backed field symbol propagate into the structure
+        const shadow = ctx.fsBacked.get(lhs);
+        if (shadow) push(`if (${shadow}) ${shadow}.o[${shadow}.k] = ${lhs};`);
       }
       break;
     }
@@ -1584,12 +1788,12 @@ function emitStatement(s, ctx, st, push, assignedTwice, methodDef) {
       const tabToks = toks.slice(atIdx + 1, tabEnd.length ? Math.min(...tabEnd) : toks.length);
       const tab = txExpr(tabToks, ctx);
       let rowVar = "row";
-      if (intoIdx > 0 && toks[intoIdx + 2] && isParenL(toks[intoIdx + 2])) rowVar = safeIdent(toks[intoIdx + 3].str.replace(/[<>]/g, "").toLowerCase());
-      else if (intoIdx > 0) rowVar = safeIdent(toks[intoIdx + 1].str.replace(/[<>]/g, "").toLowerCase());
+      if (intoIdx > 0 && toks[intoIdx + 2] && isParenL(toks[intoIdx + 2])) rowVar = varOrFsIdent(toks[intoIdx + 3].str);
+      else if (intoIdx > 0) rowVar = varOrFsIdent(toks[intoIdx + 1].str);
       else if (assignIdx > 0) {
         // ASSIGNING <fs> (pre-declared) or ASSIGNING FIELD-SYMBOL(<fs>)
         const fs = /^<\w+>$/.test(toks[assignIdx + 1]?.str ?? "") ? toks[assignIdx + 1].str : (toks[assignIdx + 1 + 2]?.str ?? "fs");
-        rowVar = safeIdent(fs.replace(/[<>]/g, ""));
+        rowVar = varOrFsIdent(fs);
       }
       ctx.locals.add(rowVar);
       const loopDepth = st.loopStack.filter((l) => l && l.restoreTabix !== undefined).length;
@@ -1621,7 +1825,9 @@ function emitStatement(s, ctx, st, push, assignedTwice, methodDef) {
         ctx.locals.add("sy_index");
         push(`for (let sy_index = 1; sy_index <= ${txExpr(toks.slice(1, -1), ctx)}; sy_index++) {`);
       } else {
-        push(`while (true) {`);
+        // bare DO. — sy-index still counts the passes
+        ctx.locals.add("sy_index");
+        push(`for (let sy_index = 1; ; sy_index++) {`);
       }
       st.indent++;
       st.loopStack.push("do");
@@ -1663,6 +1869,8 @@ function emitStatement(s, ctx, st, push, assignedTwice, methodDef) {
       const f = ctx.model.fields.get(name);
       const dflt = f ? f.default : ctx.isLocal(name) ? "null" : "null";
       push(`${target} = ${dflt === "null" && /\.length/.test(target) ? "[]" : dflt};`);
+      const shadow = ctx.fsBacked.get(target);
+      if (shadow) push(`if (${shadow}) ${shadow}.o[${shadow}.k] = ${target};`);
       break;
     }
     case "Append": {
@@ -1676,7 +1884,7 @@ function emitStatement(s, ctx, st, push, assignedTwice, methodDef) {
         // the target name sits inside the DATA( x ) / FIELD-SYMBOL( <x> ) group
         for (let k = end; k < toks.length; k++) {
           if (isParenL(toks[k])) {
-            refVar = safeIdent(toks[k + 1].str.replace(/[<>]/g, "").toLowerCase());
+            refVar = varOrFsIdent(toks[k + 1].str);
             break;
           }
         }
@@ -1731,7 +1939,7 @@ function emitStatement(s, ctx, st, push, assignedTwice, methodDef) {
         const parenAt = target.findIndex(isParenL);
         if (parenAt >= 0) {
           // DATA(x) / FINAL(x) / FIELD-SYMBOL(<x>) inline declaration
-          const name = safeIdent(target[parenAt + 1].str.replace(/[<>]/g, "").toLowerCase());
+          const name = varOrFsIdent(target[parenAt + 1].str);
           ctx.locals.add(name);
           push(`const ${name} = ${val};`);
           val = name;
@@ -1966,6 +2174,7 @@ function txWhere(toks, rowVar, ctx) {
   sub.todos = ctx.todos;
   sub.locals = ctx.locals;
   sub.upperLocals = ctx.upperLocals;
+  sub.fsBacked = ctx.fsBacked;
   sub.rowVar = rowVar; // unresolved bare identifiers become row components
   return txCond(toks, sub);
 }

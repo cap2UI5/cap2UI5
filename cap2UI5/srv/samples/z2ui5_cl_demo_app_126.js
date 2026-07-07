@@ -40,8 +40,11 @@ class z2ui5_cl_demo_app_126 extends z2ui5_if_app {
   }
 
   get_data() {
-    // TODO(abap2js): FIELD-SYMBOLS <table> TYPE STANDARD TABLE.
-    // TODO(abap2js): FIELD-SYMBOLS <table_tmp> TYPE STANDARD TABLE.
+    let sy_subrc = 0;
+    let fs_table = null;
+    let _fs$fs_table = null;
+    let fs_table_tmp = null;
+    let _fs$fs_table_tmp = null;
     const t_comp = this.get_comp();
     try {
       const new_struct_desc = cl_abap_structdescr.create(t_comp);
@@ -55,7 +58,8 @@ class z2ui5_cl_demo_app_126 extends z2ui5_if_app {
     } catch (error) {
     }
     // TODO(abap2js): ASSIGN mt_table_tmp->* TO <table_tmp>.
-    table_tmp = table;
+    fs_table_tmp = fs_table;
+    if (_fs$fs_table_tmp) _fs$fs_table_tmp.o[_fs$fs_table_tmp.k] = fs_table_tmp;
   }
 
   on_init() {

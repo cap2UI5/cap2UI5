@@ -55,7 +55,20 @@ class z2ui5_cl_demo_app_211 extends z2ui5_if_app {
   }
 
   render_sub_app() {
-    // TODO(abap2js): READ TABLE mt_t002 REFERENCE INTO DATA(t002) WITH KEY id = mv_selectedkey.
+    let sy_subrc = 0;
+    let fs_view = null;
+    let _fs$fs_view = null;
+    let fs_view_display = null;
+    let _fs$fs_view_display = null;
+    let fs_view_update = null;
+    let _fs$fs_view_update = null;
+    let t002 = {};
+    {
+      const _t = this.mt_t002;
+      const _i = _t.findIndex((_r) => _r.id === this.mv_selectedkey);
+      sy_subrc = _i >= 0 && _i < _t.length ? 0 : 4;
+      if (sy_subrc === 0) t002 = _t[_i];
+    }
     if (sy_subrc !== 0) {
       return;
     }
@@ -68,8 +81,9 @@ class z2ui5_cl_demo_app_211 extends z2ui5_if_app {
           // TODO(abap2js): CALL METHOD mo_app->(`SET_APP_DATA`) EXPORTING table = t002->table.
           this.view_display();
           // TODO(abap2js): ASSIGN mo_app->(`MO_PARENT_VIEW`) TO FIELD-SYMBOL(<view>).
-          if (view != null) {
-            view = this.mo_main_page;
+          if (fs_view != null) {
+            fs_view = this.mo_main_page;
+            if (_fs$fs_view) _fs$fs_view.o[_fs$fs_view.k] = fs_view;
           }
           // TODO(abap2js): CALL METHOD mo_app->(`Z2UI5_IF_APP~MAIN`) EXPORTING client = client.
         } catch (error) {
@@ -78,13 +92,15 @@ class z2ui5_cl_demo_app_211 extends z2ui5_if_app {
         break;
     }
     // TODO(abap2js): ASSIGN mo_app->(`MV_VIEW_DISPLAY`) TO FIELD-SYMBOL(<view_display>).
-    if (view_display === true) {
-      view_display = false;
+    if (fs_view_display === true) {
+      fs_view_display = false;
+      if (_fs$fs_view_display) _fs$fs_view_display.o[_fs$fs_view_display.k] = fs_view_display;
       this.client.view_display(this.mo_main_page.stringify());
     }
     // TODO(abap2js): ASSIGN mo_app->(`MV_VIEW_MODEL_UPDATE`) TO FIELD-SYMBOL(<view_update>).
-    if (view_update === true) {
-      view_update = false;
+    if (fs_view_update === true) {
+      fs_view_update = false;
+      if (_fs$fs_view_update) _fs$fs_view_update.o[_fs$fs_view_update.k] = fs_view_update;
       this.client.view_model_update();
     }
     if (this.mv_selectedkey !== this.mv_selectedkey_tmp) {

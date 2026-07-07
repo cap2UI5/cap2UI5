@@ -6,12 +6,14 @@ class z2ui5_cl_demo_app_061 extends z2ui5_if_app {
   client = null;
 
   set_view() {
+    let sy_subrc = 0;
+    let fs_tab = null;
+    let _fs$fs_tab = null;
     const view = z2ui5_cl_xml_view.factory();
     const page = view.shell()
       .page({ title: `abap2UI5 - RTTI created Table`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
-    // TODO(abap2js): FIELD-SYMBOLS <tab> TYPE table.
     // TODO(abap2js): ASSIGN t_tab->* TO <tab>.
-    const tab = page.table({ items: this.client._bind_edit(tab), mode: `MultiSelect` })
+    const tab = page.table({ items: this.client._bind_edit(fs_tab), mode: `MultiSelect` })
       .header_toolbar()
       .overflow_toolbar()
       .title(`Dynamic typed table`)
@@ -39,14 +41,16 @@ class z2ui5_cl_demo_app_061 extends z2ui5_if_app {
   }
 
   async main(client) {
-    // TODO(abap2js): FIELD-SYMBOLS <tab> TYPE table.
+    let sy_subrc = 0;
+    let fs_tab = null;
+    let _fs$fs_tab = null;
     this.client = client;
     if (client.check_on_init()) {
       // TODO(abap2js): CREATE DATA t_tab TYPE STANDARD TABLE OF (`Z2UI5_T_01`).
       // TODO(abap2js): ASSIGN t_tab->* TO <tab>.
-      tab.push({ id: `this is an uuid`, timestampl: `2023234243`, id_prev: `previous` });
-      tab.push({ id: `this is an uuid`, timestampl: `2023234243`, id_prev: `previous` });
-      tab.push({ id: `this is an uuid`, timestampl: `2023234243`, id_prev: `previous` });
+      fs_tab.push({ id: `this is an uuid`, timestampl: `2023234243`, id_prev: `previous` });
+      fs_tab.push({ id: `this is an uuid`, timestampl: `2023234243`, id_prev: `previous` });
+      fs_tab.push({ id: `this is an uuid`, timestampl: `2023234243`, id_prev: `previous` });
     }
     this.set_view();
   }

@@ -12,8 +12,15 @@ class z2ui5_cl_demo_app_328 extends z2ui5_if_app {
 
   async main(client) {
     let sy_tabix = 0;
-    // TODO(abap2js): FIELD-SYMBOLS <line> TYPE any.
-    // TODO(abap2js): FIELD-SYMBOLS <tab> TYPE ANY TABLE.
+    let sy_subrc = 0;
+    let fs_tab = null;
+    let _fs$fs_tab = null;
+    let fs_selkz = null;
+    let _fs$fs_selkz = null;
+    let fs_table = null;
+    let _fs$fs_table = null;
+    let fs_val = null;
+    let _fs$fs_val = null;
     if (client.check_on_init()) {
       this.get_data();
       this.mo_table_obj = z2ui5_cl_demo_app_329.factory(this.mt_table);
@@ -26,13 +33,15 @@ class z2ui5_cl_demo_app_328 extends z2ui5_if_app {
       case `GO`:
         // TODO(abap2js): ASSIGN mt_table->* TO <tab>.
         sy_tabix = 0;
-        for (const line of tab) {
+        for (const fs_line of fs_tab) {
           sy_tabix++;
-          // TODO(abap2js): ASSIGN COMPONENT `SELKZ` OF STRUCTURE <line> TO FIELD-SYMBOL(<selkz>).
+          _fs$fs_selkz = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_line, `SELKZ`);
+          fs_selkz = _fs$fs_selkz ? _fs$fs_selkz.o[_fs$fs_selkz.k] : null;
+          sy_subrc = _fs$fs_selkz ? 0 : 4;
           if (sy_subrc !== 0) {
             continue;
           }
-          if (selkz === true) {
+          if (fs_selkz === true) {
             const okay = true;
             break;
           }
@@ -43,7 +52,7 @@ class z2ui5_cl_demo_app_328 extends z2ui5_if_app {
           this.view_display({ client: client });
           // TODO(abap2js): ASSIGN mt_table->* TO FIELD-SYMBOL(<table>).
           // TODO(abap2js): ASSIGN mo_table_obj->mr_data->* TO FIELD-SYMBOL(<val>).
-          if (table !== val) {
+          if (fs_table !== fs_val) {
             client.message_toast_display(`Error - MT_TABLE <> MO_TABLE_OBJ->MR_TABLE_DATA`);
           } else {
             client.message_toast_display(`Success - MT_TABLE = MO_TABLE_OBJ->MR_TABLE_DATA`);
@@ -56,12 +65,15 @@ class z2ui5_cl_demo_app_328 extends z2ui5_if_app {
   }
 
   view_display({ client } = {}) {
+    let sy_subrc = 0;
+    let fs_table = null;
+    let _fs$fs_table = null;
     const page = z2ui5_cl_xml_view.factory()
       .shell()
       .page({ title: `RTTI IV`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
     page.button({ text: `GO`, press: client._event(`GO`), type: `Success` });
     // TODO(abap2js): ASSIGN mt_table->* TO FIELD-SYMBOL(<table>).
-    page.table({ headertext: `Table`, mode: `MultiSelect`, items: client._bind_edit(table), selectionchange: client._event(`SELECTION_CHANGE`) })
+    page.table({ headertext: `Table`, mode: `MultiSelect`, items: client._bind_edit(fs_table), selectionchange: client._event(`SELECTION_CHANGE`) })
       .columns()
       .column()
       .text(`id `)
@@ -75,8 +87,10 @@ class z2ui5_cl_demo_app_328 extends z2ui5_if_app {
   }
 
   get_data() {
+    let sy_subrc = 0;
+    let fs_table = null;
+    let _fs$fs_table = null;
     let selkz = false;
-    // TODO(abap2js): FIELD-SYMBOLS <table> TYPE STANDARD TABLE.
     const t_comp = z2ui5_cl_util.rtti_get_t_attri_by_table_name(`Z2UI5_T_01`);
     t_comp.push(...[{ name: `SELKZ`, type: (cl_abap_datadescr.describe_by_data(selkz)) }]);
     try {

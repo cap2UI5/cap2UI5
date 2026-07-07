@@ -8,6 +8,9 @@ class z2ui5_cl_demo_app_347 extends z2ui5_if_app {
   mo_layout_obj = null;
 
   async main(client) {
+    let sy_subrc = 0;
+    let fs_val = null;
+    let _fs$fs_val = null;
     if (client.check_on_init()) {
       this.get_data();
       this.mo_layout_obj = z2ui5_cl_demo_app_333.factory({ i_data: (this.mt_data), vis_cols: 5 });
@@ -29,7 +32,7 @@ class z2ui5_cl_demo_app_347 extends z2ui5_if_app {
       client.message_toast_display(`ERROR - mt_data is initial!`);
     }
     // TODO(abap2js): ASSIGN mo_layout_obj->mr_data->* TO FIELD-SYMBOL(<val>).
-    if (val !== this.mt_data) {
+    if (fs_val !== this.mt_data) {
       client.message_toast_display(`ERROR - mo_layout_obj_2->mr_data <> mt_data!`);
     }
     client.view_model_update();

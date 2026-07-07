@@ -15,18 +15,26 @@ class z2ui5_cl_demo_app_104 extends z2ui5_if_app {
   client = null;
 
   on_event_sub() {
+    let sy_subrc = 0;
+    let fs_fs = null;
+    let _fs$fs_fs = null;
     if (this.mo_app_sub != null) {
       // TODO(abap2js): ASSIGN mo_app_sub->(`MO_VIEW_PARENT`) TO FIELD-SYMBOL(<fs>).
-      fs = this.mo_grid_sub;
+      fs_fs = this.mo_grid_sub;
+      if (_fs$fs_fs) _fs$fs_fs.o[_fs$fs_fs.k] = fs_fs;
       // TODO(abap2js): CALL METHOD mo_app_sub->(`Z2UI5_IF_APP~MAIN`) EXPORTING client = client.
     }
   }
 
   on_init_sub() {
+    let sy_subrc = 0;
+    let fs_fs = null;
+    let _fs$fs_fs = null;
     this.classname = this.classname.toUpperCase();
     this.mo_app_sub = null; // TODO(abap2js): CREATE OBJECT mo_app_sub TYPE (classname).
     // TODO(abap2js): ASSIGN mo_app_sub->(`MO_VIEW_PARENT`) TO FIELD-SYMBOL(<fs>).
-    fs = this.mo_grid_sub;
+    fs_fs = this.mo_grid_sub;
+    if (_fs$fs_fs) _fs$fs_fs.o[_fs$fs_fs.k] = fs_fs;
     // TODO(abap2js): CALL METHOD mo_app_sub->(`Z2UI5_IF_APP~MAIN`) EXPORTING client = client.
   }
 
@@ -47,6 +55,7 @@ class z2ui5_cl_demo_app_104 extends z2ui5_if_app {
   }
 
   async main(client) {
+    let sy_subrc = 0;
     this.client = client;
     if (client.check_on_init()) {
       this.t_tab = [{ title: `Class 1`, info: `z2ui5_cl_demo_app_105`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `Class 2`, info: `z2ui5_cl_demo_app_112`, descr: `this is a description`, icon: `sap-icon://account` }];
@@ -58,7 +67,13 @@ class z2ui5_cl_demo_app_104 extends z2ui5_if_app {
       case `SELCHANGE`:
         const lt_sel = this.t_tab;
         for (let _i = lt_sel.length - 1; _i >= 0; _i--) { const row = lt_sel[_i]; if (row.selected === false) lt_sel.splice(_i, 1); }
-        // TODO(abap2js): READ TABLE lt_sel INTO DATA(ls_sel) INDEX 1.
+        let ls_sel = {};
+        {
+          const _t = lt_sel;
+          const _i = (1) - 1;
+          sy_subrc = _i >= 0 && _i < _t.length ? 0 : 4;
+          if (sy_subrc === 0) ls_sel = _t[_i];
+        }
         this.t_tab2.push(ls_sel);
         if (this.classname) {
           this.view_display_master();

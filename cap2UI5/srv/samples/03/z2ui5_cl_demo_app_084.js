@@ -47,7 +47,7 @@ class z2ui5_cl_demo_app_084 extends z2ui5_if_app {
         this.client.message_box_display(`success - values sent to the server`);
         break;
       case `BUTTON_CLEAR`:
-        this.screen = {};
+        this.screen = { check_is_active: false, colour: ``, combo_key: ``, combo_key2: ``, segment_key: ``, date: ``, date_time: ``, time_start: ``, time_end: ``, check_switch_01: false, check_switch_02: false };
         this.client.message_toast_display(`View initialized`);
         break;
     }

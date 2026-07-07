@@ -51,6 +51,7 @@ class z2ui5_cl_demo_app_098 extends z2ui5_if_app {
   }
 
   async main(client) {
+    let sy_subrc = 0;
     this.client = client;
     if (client.check_on_init()) {
       this.t_tab = [{ title: `row_01`, info: `completed`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `row_02`, info: `incompleted`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `row_03`, info: `working`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `row_04`, info: `working`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `row_05`, info: `completed`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `row_06`, info: `completed`, descr: `this is a description`, icon: `sap-icon://account` }];
@@ -71,7 +72,13 @@ class z2ui5_cl_demo_app_098 extends z2ui5_if_app {
       case `SELCHANGE`:
         const lt_sel = this.t_tab;
         for (let _i = lt_sel.length - 1; _i >= 0; _i--) { const row = lt_sel[_i]; if (row.selected === false) lt_sel.splice(_i, 1); }
-        // TODO(abap2js): READ TABLE lt_sel INTO DATA(ls_sel) INDEX 1.
+        let ls_sel = {};
+        {
+          const _t = lt_sel;
+          const _i = (1) - 1;
+          sy_subrc = _i >= 0 && _i < _t.length ? 0 : 4;
+          if (sy_subrc === 0) ls_sel = _t[_i];
+        }
         this.t_tab2.push(ls_sel);
         this.mv_layout = `TwoColumnsMidExpanded`;
         client.nest_view_model_update();

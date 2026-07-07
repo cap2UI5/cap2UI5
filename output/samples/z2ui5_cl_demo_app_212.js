@@ -24,8 +24,15 @@ class z2ui5_cl_demo_app_212 extends z2ui5_if_app {
   }
 
   row_select() {
+    let sy_subrc = 0;
     const lt_arg = this.client.get().T_EVENT_ARG;
-    // TODO(abap2js): READ TABLE lt_arg INTO DATA(ls_arg) INDEX 1.
+    let ls_arg = {};
+    {
+      const _t = lt_arg;
+      const _i = (1) - 1;
+      sy_subrc = _i >= 0 && _i < _t.length ? 0 : 4;
+      if (sy_subrc === 0) ls_arg = _t[_i];
+    }
     if (sy_subrc !== 0) {
       return;
     }
@@ -35,26 +42,42 @@ class z2ui5_cl_demo_app_212 extends z2ui5_if_app {
 
   prefill_popup_values({ index } = {}) {
     let sy_tabix = 0;
-    // TODO(abap2js): FIELD-SYMBOLS <tab> TYPE STANDARD TABLE.
-    // TODO(abap2js): FIELD-SYMBOLS <table_row> TYPE any.
+    let sy_subrc = 0;
+    let fs_tab = null;
+    let _fs$fs_tab = null;
+    let fs_row = null;
+    let _fs$fs_row = null;
+    let fs_value_tab = null;
+    let _fs$fs_value_tab = null;
+    let fs_table_row = null;
+    let _fs$fs_table_row = null;
+    let fs_value_struc = null;
+    let _fs$fs_value_struc = null;
     // TODO(abap2js): ASSIGN mt_table->* TO <tab>.
-    // TODO(abap2js): ASSIGN <tab>[ index ] TO FIELD-SYMBOL(<row>).
+    fs_row = fs_tab[(index) - 1];
+    _fs$fs_row = null;
+    sy_subrc = 0;
     if (sy_subrc !== 0) {
       return;
     }
     sy_tabix = 0;
     for (const dfies of this.mt_dfies) {
       sy_tabix++;
-      // TODO(abap2js): ASSIGN COMPONENT dfies-fieldname OF STRUCTURE <row> TO FIELD-SYMBOL(<value_tab>).
+      _fs$fs_value_tab = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_row, dfies.fieldname);
+      fs_value_tab = _fs$fs_value_tab ? _fs$fs_value_tab.o[_fs$fs_value_tab.k] : null;
+      sy_subrc = _fs$fs_value_tab ? 0 : 4;
       if (sy_subrc !== 0) {
         continue;
       }
       // TODO(abap2js): ASSIGN ms_table_row->* TO <table_row>.
-      // TODO(abap2js): ASSIGN COMPONENT dfies-fieldname OF STRUCTURE <table_row> TO FIELD-SYMBOL(<value_struc>).
+      _fs$fs_value_struc = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_table_row, dfies.fieldname);
+      fs_value_struc = _fs$fs_value_struc ? _fs$fs_value_struc.o[_fs$fs_value_struc.k] : null;
+      sy_subrc = _fs$fs_value_struc ? 0 : 4;
       if (sy_subrc !== 0) {
         continue;
       }
-      value_struc = value_tab;
+      fs_value_struc = fs_value_tab;
+      if (_fs$fs_value_struc) _fs$fs_value_struc.o[_fs$fs_value_struc.k] = fs_value_struc;
     }
   }
 
@@ -64,7 +87,11 @@ class z2ui5_cl_demo_app_212 extends z2ui5_if_app {
 
   render_popup() {
     let sy_tabix = 0;
-    // TODO(abap2js): FIELD-SYMBOLS <row> TYPE any.
+    let sy_subrc = 0;
+    let fs_row = null;
+    let _fs$fs_row = null;
+    let fs_val = null;
+    let _fs$fs_val = null;
     const popup = z2ui5_cl_xml_view.factory_popup();
     const content = popup.dialog({ contentwidth: `60%` })
       .simple_form({ layout: `ResponsiveGridLayout`, editable: true })
@@ -73,12 +100,14 @@ class z2ui5_cl_demo_app_212 extends z2ui5_if_app {
     for (const dfies of this.mt_dfies) {
       sy_tabix++;
       // TODO(abap2js): ASSIGN ms_table_row->* TO <row>.
-      // TODO(abap2js): ASSIGN COMPONENT dfies->fieldname OF STRUCTURE <row> TO FIELD-SYMBOL(<val>).
+      _fs$fs_val = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_row, dfies.fieldname);
+      fs_val = _fs$fs_val ? _fs$fs_val.o[_fs$fs_val.k] : null;
+      sy_subrc = _fs$fs_val ? 0 : 4;
       if (sy_subrc !== 0) {
         continue;
       }
       content.label(`text`);
-      content.input({ value: this.client._bind_edit(val), enabled: false, showvaluehelp: false });
+      content.input({ value: this.client._bind_edit(fs_val), enabled: false, showvaluehelp: false });
     }
     this.client.popup_display(popup.stringify());
   }
@@ -90,14 +119,16 @@ class z2ui5_cl_demo_app_212 extends z2ui5_if_app {
   }
 
   view_display() {
-    // TODO(abap2js): FIELD-SYMBOLS <tab> TYPE data.
+    let sy_subrc = 0;
+    let fs_tab = null;
+    let _fs$fs_tab = null;
     if (!this.mo_parent_view) {
       let page = z2ui5_cl_xml_view.factory();
     } else {
       page = this.mo_parent_view.get(`Page`);
     }
     // TODO(abap2js): ASSIGN mt_table->* TO <tab>.
-    const table = page.table({ growing: `true`, width: `auto`, items: this.client._bind_edit(tab) });
+    const table = page.table({ growing: `true`, width: `auto`, items: this.client._bind_edit(fs_tab) });
     const headder = table.header_toolbar().overflow_toolbar().toolbar_spacer();
     if (!this.mo_parent_view) {
       this.client.view_display(page.stringify());
@@ -119,8 +150,11 @@ class z2ui5_cl_demo_app_212 extends z2ui5_if_app {
   }
 
   get_data() {
-    // TODO(abap2js): FIELD-SYMBOLS <table> TYPE STANDARD TABLE.
-    // TODO(abap2js): FIELD-SYMBOLS <table_tmp> TYPE STANDARD TABLE.
+    let sy_subrc = 0;
+    let fs_table = null;
+    let _fs$fs_table = null;
+    let fs_table_tmp = null;
+    let _fs$fs_table_tmp = null;
     this.mt_comp = this.get_comp();
     try {
       const new_struct_desc = cl_abap_structdescr.create(this.mt_comp);
@@ -133,7 +167,8 @@ class z2ui5_cl_demo_app_212 extends z2ui5_if_app {
     } catch (error) {
     }
     // TODO(abap2js): ASSIGN mt_table_tmp->* TO <table_tmp>.
-    table_tmp = table;
+    fs_table_tmp = fs_table;
+    if (_fs$fs_table_tmp) _fs$fs_table_tmp.o[_fs$fs_table_tmp.k] = fs_table_tmp;
   }
 
   get_comp() {

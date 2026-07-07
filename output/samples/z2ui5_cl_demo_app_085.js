@@ -215,6 +215,7 @@ class z2ui5_cl_demo_app_085 extends z2ui5_if_app {
   }
 
   on_event() {
+    let sy_subrc = 0;
     switch (this.client.get().EVENT) {
       case `ONGOTOSUPPLIER`:
         let lo_app_next = new z2ui5_cl_demo_app_086();
@@ -245,7 +246,12 @@ class z2ui5_cl_demo_app_085 extends z2ui5_if_app {
         break;
       case `ONPRESSSUPPLIER`:
         let lt_arg = this.client.get().T_EVENT_ARG;
-        // TODO(abap2js): READ TABLE mt_table_supplier WITH KEY suppliername = lt_arg[ 1 ] INTO ls_detail_supplier.
+        {
+          const _t = this.mt_table_supplier;
+          const _i = _t.findIndex((_r) => _r.suppliername === lt_arg[(1) - 1]);
+          sy_subrc = _i >= 0 && _i < _t.length ? 0 : 4;
+          if (sy_subrc === 0) this.ls_detail_supplier = _t[_i];
+        }
         this.client.message_toast_display(`Event Press Supplier List Name: ${lt_arg[(1) - 1]} `);
         lo_app_next = new z2ui5_cl_demo_app_086();
         lo_app_next.ls_detail_supplier = this.ls_detail_supplier;
@@ -254,8 +260,18 @@ class z2ui5_cl_demo_app_085 extends z2ui5_if_app {
       case `ONPRESSMASTER`:
         lt_arg = this.client.get().T_EVENT_ARG;
         this.client.message_toast_display(`Event Press Master - Product Id ${lt_arg[(1) - 1]} `);
-        // TODO(abap2js): READ TABLE mt_table WITH KEY key = lt_arg[ 1 ] INTO ls_detail.
-        // TODO(abap2js): READ TABLE mt_table_supplier WITH KEY suppliername = ls_detail-suppliername INTO ls_detail_supplier.
+        {
+          const _t = this.mt_table;
+          const _i = _t.findIndex((_r) => _r.key === lt_arg[(1) - 1]);
+          sy_subrc = _i >= 0 && _i < _t.length ? 0 : 4;
+          if (sy_subrc === 0) this.ls_detail = _t[_i];
+        }
+        {
+          const _t = this.mt_table_supplier;
+          const _i = _t.findIndex((_r) => _r.suppliername === this.ls_detail.suppliername);
+          sy_subrc = _i >= 0 && _i < _t.length ? 0 : 4;
+          if (sy_subrc === 0) this.ls_detail_supplier = _t[_i];
+        }
         this.lv_layout = `TwoColumnsMidExpanded`;
         if (this.check_detail_active === false) {
           this.view_display_master();
@@ -270,7 +286,12 @@ class z2ui5_cl_demo_app_085 extends z2ui5_if_app {
       case `ONSORT`:
         this.client.message_toast_display(`Sort Entries`);
         this.sort();
-        // TODO(abap2js): READ TABLE mt_table INDEX 1 INTO ls_detail.
+        {
+          const _t = this.mt_table;
+          const _i = (1) - 1;
+          sy_subrc = _i >= 0 && _i < _t.length ? 0 : 4;
+          if (sy_subrc === 0) this.ls_detail = _t[_i];
+        }
         this.view_display_master();
         this.view_display_detail();
         this.client.view_model_update();
@@ -294,18 +315,23 @@ class z2ui5_cl_demo_app_085 extends z2ui5_if_app {
 
   set_search() {
     let sy_tabix = 0;
+    let sy_subrc = 0;
+    let fs_field = null;
+    let _fs$fs_field = null;
     if (this.mv_search_value) {
       sy_tabix = 0;
       for (const lr_row of this.mt_table) {
         sy_tabix++;
         let lv_row = ``;
         let lv_index = 1;
-        while (true) {
-          // TODO(abap2js): ASSIGN COMPONENT lv_index OF STRUCTURE lr_row->* TO FIELD-SYMBOL(<field>).
+        for (let sy_index = 1; ; sy_index++) {
+          _fs$fs_field = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(lr_row, lv_index);
+          fs_field = _fs$fs_field ? _fs$fs_field.o[_fs$fs_field.k] : null;
+          sy_subrc = _fs$fs_field ? 0 : 4;
           if (sy_subrc !== 0) {
             break;
           }
-          lv_row = lv_row + field;
+          lv_row = lv_row + fs_field;
           lv_index = lv_index + 1;
         }
         if (!String(lv_row).toLowerCase().includes(String(this.mv_search_value).toLowerCase())) {

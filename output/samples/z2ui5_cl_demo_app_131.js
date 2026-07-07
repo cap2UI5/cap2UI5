@@ -53,8 +53,18 @@ class z2ui5_cl_demo_app_131 extends z2ui5_if_app {
   }
 
   render_sub_app() {
-    // TODO(abap2js): FIELD-SYMBOLS <view_display> TYPE any.
-    // TODO(abap2js): READ TABLE mt_t002 REFERENCE INTO DATA(t002) WITH KEY id = mv_selectedkey.
+    let sy_subrc = 0;
+    let fs_view = null;
+    let _fs$fs_view = null;
+    let fs_view_display = null;
+    let _fs$fs_view_display = null;
+    let t002 = {};
+    {
+      const _t = this.mt_t002;
+      const _i = _t.findIndex((_r) => _r.id === this.mv_selectedkey);
+      sy_subrc = _i >= 0 && _i < _t.length ? 0 : 4;
+      if (sy_subrc === 0) t002 = _t[_i];
+    }
     if (sy_subrc !== 0) {
       return;
     }
@@ -67,8 +77,9 @@ class z2ui5_cl_demo_app_131 extends z2ui5_if_app {
           // TODO(abap2js): CALL METHOD mo_app->(`SET_APP_DATA`) EXPORTING count = t002->count table = t002->table.
           this.view_display();
           // TODO(abap2js): ASSIGN mo_app->(`MO_PARENT_VIEW`) TO FIELD-SYMBOL(<view>).
-          if (view != null) {
-            view = this.mo_main_page;
+          if (fs_view != null) {
+            fs_view = this.mo_main_page;
+            if (_fs$fs_view) _fs$fs_view.o[_fs$fs_view.k] = fs_view;
           }
           // TODO(abap2js): CALL METHOD mo_app->(`Z2UI5_IF_APP~MAIN`) EXPORTING client = client.
         } catch (error) {
@@ -78,8 +89,9 @@ class z2ui5_cl_demo_app_131 extends z2ui5_if_app {
     }
     this.client.view_model_update();
     // TODO(abap2js): ASSIGN mo_app->(`MV_VIEW_DISPLAY`) TO <view_display>.
-    if (view_display === true) {
-      view_display = false;
+    if (fs_view_display === true) {
+      fs_view_display = false;
+      if (_fs$fs_view_display) _fs$fs_view_display.o[_fs$fs_view_display.k] = fs_view_display;
       this.client.view_display(this.mo_main_page.stringify());
     }
     if (this.mv_selectedkey !== this.mv_selectedkey_tmp) {
