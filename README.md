@@ -53,12 +53,13 @@ view with the fluent view API, bind data with `client._bind_edit(...)`,
 react to events with `client._event(...)` — the framework handles the
 roundtrip.
 
-Create the file in **`cap2UI5/srv/z2ui5/02/`** — one of the folders the
-framework scans when resolving `?app_start=<class>`. The file's basename
-must match the class name, and the class must export itself:
+Create the file in **`cap2UI5/srv/app/`** — the folder that collects this
+project's custom apps, scanned by the framework when resolving
+`?app_start=<class>`. The file's basename must match the class name, and the
+class must export itself:
 
 ```js
-// cap2UI5/srv/z2ui5/02/z2ui5_cl_app_my_first_app.js
+// cap2UI5/srv/app/z2ui5_cl_app_my_first_app.js
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -91,10 +92,13 @@ module.exports = z2ui5_cl_app_my_first_app;
 http://localhost:4004/z2ui5/webapp/index.html?app_start=z2ui5_cl_app_my_first_app
 ```
 
-Don't put your own apps into `cap2UI5/srv/samples/` — that folder is owned
-by the sync pipeline and gets overwritten on every sync. To keep your apps
-outside the framework tree entirely, put them in any folder and register it
-via the `Z2UI5_APP_DIRS` environment variable (`PATH`-style list) or
+`cap2UI5/srv/app/` is the place for your own apps — it sits outside the
+transpiled framework tree and is never touched by the sync pipeline (see the
+[custom apps README](cap2UI5/srv/app/README.md)). Don't put your own apps into
+`cap2UI5/srv/samples/` or `cap2UI5/srv/z2ui5/` — both are owned by the sync
+pipeline and get overwritten on every sync. To keep your apps in a separate
+repo entirely, put them in any folder and register it via the
+`Z2UI5_APP_DIRS` environment variable (`PATH`-style list) or
 `require("abap2UI5/register-apps")(dir)` — see the
 [discovery API](cap2UI5/srv/samples/README.md#discovery-api).
 
@@ -120,7 +124,7 @@ model uppercases all property names, so the table cells bind
 `{COMPANYNAME}` — not `{CompanyName}`:
 
 ```js
-// cap2UI5/srv/z2ui5/02/z2ui5_cl_app_read_odata.js — ships with the project
+// cap2UI5/srv/app/z2ui5_cl_app_read_odata.js — ships with the project
 const cds = require("@sap/cds");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
