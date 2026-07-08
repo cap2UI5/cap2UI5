@@ -36,7 +36,8 @@
   },
   "dependencies": {
     "@sap/cds": "^9",
-    "express": "^5"
+    "express": "^5",
+    "openui5-dist": "1.113.0"
   },
   "devDependencies": {
     "@cap-js/cds-types": "^0.16",

@@ -395,7 +395,8 @@ describe("z2ui5_cl_exit", () => {
     const cfg = z2ui5_cl_exit.get_instance().set_config_http_get(undefined, {});
     expect(cfg.title).toBe("abap2UI5");
     expect(cfg.theme).toBe("sap_horizon");
-    expect(cfg.src).toContain("sdk.openui5.org");
+    // UI5 is served locally by the CAP server (see srv/server.js), not a CDN.
+    expect(cfg.src).toBe("/resources/sap-ui-core.js");
     expect(cfg.content_security_policy).toContain("Content-Security-Policy");
     expect(cfg.t_security_header.length).toBeGreaterThan(3);
   });
