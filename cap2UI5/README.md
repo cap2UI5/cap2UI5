@@ -60,29 +60,42 @@ folder, see
 ## Samples
 All samples demonstrate complete view definition and data exchange handled entirely by the CAP server, using the same and static frontend from abap2UI5.
 
+Each app is a single `.js` file whose basename matches the class name it
+exports (`module.exports`). Put your own apps into `srv/z2ui5/02/` (scanned
+automatically when resolving `?app_start=<class>`) or into any folder
+registered via `Z2UI5_APP_DIRS` / `require("abap2UI5/register-apps")(dir)` —
+see the [discovery API](srv/samples/README.md#discovery-api). Don't use
+`srv/samples/`, it is overwritten by the sync pipeline.
+
 #### 1. Hello World
 ###### App
 ```js
-class z2ui5_cl_app_hello_world {
+// srv/z2ui5/02/z2ui5_cl_app_hello_world.js — ships with the project
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
+
+class z2ui5_cl_app_hello_world extends z2ui5_if_app {
+  name = ``;
+
   async main(client) {
-
-    this.NAME ??= 'test';
-
-    client.oView
-      .Page({ title: "abap2UI5 - Hello World" })
-      .Title({ text: "Make an input here and send it to the server..." })
-      .Input({ 
-        value: client._bind_edit(this.NAME), 
-        enabled: true 
-      })
-      .Button({ 
-        press: client._event('BUTTON_POST'), 
-        text: "Post" 
-      });
-    client.display_view(client.oView.stringify());
-
+    if (client.check_on_init()) {
+      const view = z2ui5_cl_xml_view.factory()
+        .shell()
+        .page(`abap2UI5 - Hello World`)
+        .simple_form({ editable: true })
+        .content(`form`)
+        .title({ ns: `core`, text: `Enter a value and send it to the server...` })
+        .label(`Name`)
+        .input(client._bind_edit(this.name))
+        .button({ text: `Send`, press: client._event(`BUTTON_POST`) });
+      client.view_display(view.stringify());
+    } else if (client.check_on_event(`BUTTON_POST`)) {
+      client.message_box_display(`Your name is ${this.name}`);
+    }
   }
 }
+
+module.exports = z2ui5_cl_app_hello_world;
 ```
 ###### Demo
 <img width="500" height="393" alt="image" src="https://github.com/user-attachments/assets/3acd8c43-3733-40b0-a6f9-27ae6beba6e7" />
@@ -101,34 +114,43 @@ class z2ui5_cl_app_hello_world {
 ```
 ###### App
 ```js
-class z2ui5_cl_app_read_odata {
+// srv/z2ui5/02/z2ui5_cl_app_read_odata.js — ships with the project
+const cds = require("@sap/cds");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
+
+class z2ui5_cl_app_read_odata extends z2ui5_if_app {
+  customers = [];
+
   async main(client) {
+    if (client.check_on_init()) {
+      const northwind = await cds.connect.to(`northwind`);
+      this.customers = await northwind.run(
+        SELECT.from(`Customers`).columns(`CompanyName`, `ContactName`).limit(20)
+      );
 
-    const northwindAPI = await cds.connect.to("northwind");
-    this.aCustomers = await northwindAPI.run(SELECT.from("Customers"));
-
-
-    const Z2UI5_CL_XML_VIEW = require("../abap2ui5/02/z2ui5_cl_xml_view");
-    var oView = new Z2UI5_CL_XML_VIEW();
-    var oPage = oView.Page({ title: "abap2UI5 - Table with Data Fetched via remote OData" });
-
-    var oTab = oPage.Table({ items: client._bind_edit(this.aCustomers) });
-    var oColumns = oTab.columns();
-    oColumns.Column().Text({ text: `CompanyName` });
-    oColumns.Column().Text({ text: `ContactName` });
-
-    oTab
-      .items()
-      .ColumnListItem()
-      .cells()
-      .Input({ value: `{CompanyName}`, enabled: true })
-      .Input({ value: `{ContactName}`, enabled: true });
-
-    client.display_view(oView.stringify());
-
+      const view = z2ui5_cl_xml_view.factory();
+      const tab = view.shell()
+        .page(`abap2UI5 - Table with Data Fetched via Remote OData`)
+        .table({ items: client._bind_edit(this.customers) });
+      tab.columns()
+        .column().text(`CompanyName`).get_parent()
+        .column().text(`ContactName`);
+      tab.items()
+        .column_list_item()
+        .cells()
+        .input({ value: `{COMPANYNAME}`, enabled: true })
+        .input({ value: `{CONTACTNAME}`, enabled: true });
+      client.view_display(view.stringify());
+    }
   }
 }
+
+module.exports = z2ui5_cl_app_read_odata;
 ```
+
+Note: the client model uppercases all property names — the cells bind
+`{COMPANYNAME}`, not `{CompanyName}`.
 ##### Demo
 ![alt text](_media/image.png)
 
@@ -177,19 +199,20 @@ class z2ui5_cl_app_read_odata {
 ```
 ###### z2ui5_cl_app_read_view
 ```js
-class z2ui5_cl_app_read_view {
-  async main(client) {
+// srv/z2ui5/02/z2ui5_cl_app_read_view.js
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
-    this.client = client;
+class z2ui5_cl_app_read_view extends z2ui5_if_app {
+  async main(client) {
     const fs = require("fs");
     const path = require("path");
     const viewPath = path.join(__dirname, "View1.view.xml");
     const viewContent = fs.readFileSync(viewPath, "utf8");
-    client.display_view(viewContent);
-
+    client.view_display(viewContent);
   }
 }
 
+module.exports = z2ui5_cl_app_read_view;
 ```
 ###### Demo
 ![alt text](_media/image-1.png)

@@ -49,36 +49,120 @@ For a one-off run without file watching use `npm start` (`cds-serve`).
 ## Writing your first app
 
 An app is a single JavaScript class with a `main(client)` method: build the
-view with the fluent `oView` API, bind data with `client._bind_edit(...)`,
+view with the fluent view API, bind data with `client._bind_edit(...)`,
 react to events with `client._event(...)` — the framework handles the
 roundtrip.
 
+Create the file in **`cap2UI5/srv/z2ui5/02/`** — one of the folders the
+framework scans when resolving `?app_start=<class>`. The file's basename
+must match the class name, and the class must export itself:
+
 ```js
-class z2ui5_cl_app_hello_world {
+// cap2UI5/srv/z2ui5/02/z2ui5_cl_app_my_first_app.js
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
+
+class z2ui5_cl_app_my_first_app extends z2ui5_if_app {
+  name = ``;
+
   async main(client) {
+    if (client.check_on_init()) {
+      const view = z2ui5_cl_xml_view.factory()
+        .shell()
+        .page(`abap2UI5 - Hello World`)
+        .simple_form({ editable: true })
+        .content(`form`)
+        .label(`Name`)
+        .input(client._bind_edit(this.name))
+        .button({ text: `Send`, press: client._event(`BUTTON_POST`) });
+      client.view_display(view.stringify());
+    } else if (client.check_on_event(`BUTTON_POST`)) {
+      client.message_box_display(`Your name is ${this.name}`);
+    }
+  }
+}
 
-    this.NAME ??= 'test';
+module.exports = z2ui5_cl_app_my_first_app;
+```
 
-    client.oView
-      .Page({ title: "abap2UI5 - Hello World" })
-      .Title({ text: "Make an input here and send it to the server..." })
-      .Input({
-        value: client._bind_edit(this.NAME),
-        enabled: true
-      })
-      .Button({
-        press: client._event('BUTTON_POST'),
-        text: "Post"
-      });
-    client.display_view(client.oView.stringify());
+`cds watch` picks the new file up automatically — open
 
+```
+http://localhost:4004/z2ui5/webapp/index.html?app_start=z2ui5_cl_app_my_first_app
+```
+
+Don't put your own apps into `cap2UI5/srv/samples/` — that folder is owned
+by the sync pipeline and gets overwritten on every sync. To keep your apps
+outside the framework tree entirely, put them in any folder and register it
+via the `Z2UI5_APP_DIRS` environment variable (`PATH`-style list) or
+`require("abap2UI5/register-apps")(dir)` — see the
+[discovery API](cap2UI5/srv/samples/README.md#discovery-api).
+
+### Calling a remote OData service
+
+A remote service is already preconfigured in
+[`cap2UI5/package.json`](cap2UI5/package.json) — the public Northwind demo
+service:
+
+```json
+"northwind": {
+  "kind": "odata-v2",
+  "model": "srv/external/northwind",
+  "credentials": {
+    "url": "https://services.odata.org/V2/Northwind/Northwind.svc/"
   }
 }
 ```
 
-Open it with `?app_start=<class name>` as shown above. The full
-app-developer guide — more worked examples (remote OData, server-side XML
-views), project layout, deployment — lives in the CAP project:
+Consume it inside an app with the standard CAP APIs (`cds.connect.to`,
+`SELECT`) and show the result in a table. One thing to know: the client
+model uppercases all property names, so the table cells bind
+`{COMPANYNAME}` — not `{CompanyName}`:
+
+```js
+// cap2UI5/srv/z2ui5/02/z2ui5_cl_app_read_odata.js — ships with the project
+const cds = require("@sap/cds");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
+
+class z2ui5_cl_app_read_odata extends z2ui5_if_app {
+  customers = [];
+
+  async main(client) {
+    if (client.check_on_init()) {
+      const northwind = await cds.connect.to(`northwind`);
+      this.customers = await northwind.run(
+        SELECT.from(`Customers`).columns(`CompanyName`, `ContactName`).limit(20)
+      );
+
+      const view = z2ui5_cl_xml_view.factory();
+      const tab = view.shell()
+        .page(`abap2UI5 - Table with Data Fetched via Remote OData`)
+        .table({ items: client._bind_edit(this.customers) });
+      tab.columns()
+        .column().text(`CompanyName`).get_parent()
+        .column().text(`ContactName`);
+      tab.items()
+        .column_list_item()
+        .cells()
+        .input({ value: `{COMPANYNAME}`, enabled: true })
+        .input({ value: `{CONTACTNAME}`, enabled: true });
+      client.view_display(view.stringify());
+    }
+  }
+}
+
+module.exports = z2ui5_cl_app_read_odata;
+```
+
+This app ships with the project, so you can try it right away:
+
+```
+http://localhost:4004/z2ui5/webapp/index.html?app_start=z2ui5_cl_app_read_odata
+```
+
+The full app-developer guide — more worked examples, project layout,
+deployment — lives in the CAP project:
 **[cap2UI5/README.md](cap2UI5/README.md)**.
 
 ## Samples
