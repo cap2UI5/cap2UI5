@@ -25,6 +25,14 @@ Prerequisites: Node.js ≥ 20 and internet access (the frontend loads SAPUI5
 from the CDN). No database setup is needed — CAP deploys an in-memory
 SQLite automatically on startup.
 
+> [!NOTE]
+> GitHub Codespaces and VS Code Dev Containers pick up the Node 20 image
+> from [`.devcontainer/devcontainer.json`](.devcontainer/devcontainer.json)
+> automatically. If you are on an older container (e.g. Node 16, where
+> `cds watch` aborts with *"Node.js version 20 or higher is required"*),
+> switch with `nvm install 20 && nvm use 20` — the pinned version lives in
+> [`.nvmrc`](.nvmrc).
+
 ```bash
 # from the repository root
 cd cap2UI5
