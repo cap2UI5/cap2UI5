@@ -83,7 +83,10 @@ class z2ui5_cl_pop_get_range_m extends z2ui5_if_app {
       press: c._event(`LIST_DELETE`, [`{NAME}`]),
     });
 
-    popup.get_parent()
+    // popup is the Dialog itself — attach `buttons` directly to it, not to
+    // its parent (the FragmentDefinition root, where UI5 would load the
+    // aggregation name as a control sap.m.buttons and fail).
+    popup
       .buttons()
         .Button({
           text:  `Clear All`,

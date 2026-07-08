@@ -50,14 +50,17 @@ class z2ui5_cl_pop_pdf extends z2ui5_if_app {
     popup._generic({
       ns:   `html`,
       name: `iframe`,
-      p: [
+      t_prop: [
         { n: `src`,    v: this.mv_pdf },
         { n: `height`, v: `800px` },
         { n: `width`,  v: `99%` },
       ],
     });
 
-    popup.get_parent().get_parent().get_parent()
+    // popup is the VBox (the Label leaf returned it); climb VBox → content →
+    // Dialog so `buttons` is the Dialog's aggregation and not a sibling of it
+    // under the FragmentDefinition root (which UI5 loads as sap.m.buttons).
+    popup.get_parent().get_parent()
       .buttons()
         .Button({ text: this.button_text_cancel,  press: c._event(`BUTTON_CANCEL`) })
         .Button({

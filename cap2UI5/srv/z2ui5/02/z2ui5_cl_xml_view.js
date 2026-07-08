@@ -2072,6 +2072,7 @@ class z2ui5_cl_xml_view {
   analytical_table({ ns, selectionmode, rowmode, toolbar, columns } = {}) {
     return this._container({
       name: "AnalyticalTable",
+      ns: ns || "",
       aProp: this._filterProps([
       { n: "selectionMode", v: selectionmode },
       { n: "rowMode", v: rowmode },
@@ -2124,6 +2125,7 @@ class z2ui5_cl_xml_view {
   auto({ ns, rowcontentheight } = {}) {
     return this._container({
       name: "Auto",
+      ns: ns || "",
       aProp: this._filterProps([
       { n: "rowContentHeight", v: rowcontentheight },
       ]),
@@ -3450,7 +3452,12 @@ class z2ui5_cl_xml_view {
    * Generic element — mirrors abap _generic( name, ns, t_prop ). Returns the
    * newly created child element.
    */
-  _generic({ name, ns, t_prop } = {}) {
+  _generic(args = {}) {
+    // abap `_generic` takes `name` as its first (mandatory) parameter, so
+    // transpiled call sites pass it positionally as a string, e.g.
+    // `_generic(`menu`)` / `_generic(`Menu`)`. Without this a string arg made
+    // `name` undefined and emitted an `<undefined>` tag (→ sap/m/undefined.js).
+    const { name, ns, t_prop } = typeof args === "string" ? { name: args } : (args || {});
     return this._container({
       name: name,
       ns: ns || "",
@@ -5795,6 +5802,7 @@ class z2ui5_cl_xml_view {
   invisible_text({ ns, id, text } = {}) {
     return this._container({
       name: "InvisibleText",
+      ns: ns || "",
       aProp: this._filterProps([
       { n: "id", v: id },
       { n: "text", v: text },
@@ -5805,6 +5813,7 @@ class z2ui5_cl_xml_view {
   fix_flex({ ns, class: cssClass, fixcontentsize } = {}) {
     return this._container({
       name: "FixFlex",
+      ns: ns || "",
       aProp: this._filterProps([
       { n: "class", v: cssClass },
       { n: "fixContentSize", v: fixcontentsize },
