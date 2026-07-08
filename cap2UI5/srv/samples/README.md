@@ -107,9 +107,10 @@ The framework's class registry is exposed via `abap2UI5/z2ui5_cl_util`:
 Resolution order (first hit wins):
 
 1. Framework built-ins (`srv/z2ui5/02/`, `srv/z2ui5/02/01/`)
-2. Bundled samples (`srv/samples/` — present today; gone after extraction)
-3. Runtime-registered dirs (`register_app_dir(...)`)
-4. `Z2UI5_APP_DIRS` env var (`PATH`-style colon-separated list)
+2. Custom apps (`srv/app/`)
+3. Bundled samples (`srv/samples/` — present today; gone after extraction)
+4. Runtime-registered dirs (`register_app_dir(...)`)
+5. `Z2UI5_APP_DIRS` env var (`PATH`-style colon-separated list)
 
 ## Naming convention
 

@@ -61,11 +61,12 @@ folder, see
 All samples demonstrate complete view definition and data exchange handled entirely by the CAP server, using the same and static frontend from abap2UI5.
 
 Each app is a single `.js` file whose basename matches the class name it
-exports (`module.exports`). Put your own apps into `srv/z2ui5/02/` (scanned
-automatically when resolving `?app_start=<class>`) or into any folder
-registered via `Z2UI5_APP_DIRS` / `require("abap2UI5/register-apps")(dir)` —
-see the [discovery API](srv/samples/README.md#discovery-api). Don't use
-`srv/samples/`, it is overwritten by the sync pipeline.
+exports (`module.exports`). Put your own apps into `srv/app/` (scanned
+automatically when resolving `?app_start=<class>`, see the
+[custom apps README](srv/app/README.md)) or into any folder registered via
+`Z2UI5_APP_DIRS` / `require("abap2UI5/register-apps")(dir)` — see the
+[discovery API](srv/samples/README.md#discovery-api). Don't use
+`srv/samples/` or `srv/z2ui5/`, both are owned by the sync pipeline.
 
 #### 1. Hello World
 ###### App
@@ -114,7 +115,7 @@ module.exports = z2ui5_cl_app_hello_world;
 ```
 ###### App
 ```js
-// srv/z2ui5/02/z2ui5_cl_app_read_odata.js — ships with the project
+// srv/app/z2ui5_cl_app_read_odata.js — ships with the project
 const cds = require("@sap/cds");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");

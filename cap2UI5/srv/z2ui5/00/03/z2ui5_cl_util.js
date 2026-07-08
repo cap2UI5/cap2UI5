@@ -621,10 +621,12 @@ class z2ui5_cl_util {
   //
   //  Resolution order (first hit wins for rtti_get_class):
   //    1. Built-ins shipped with the framework (02/, 02/01/)
-  //    2. Bundled samples folder (srv/samples/) — present iff this repo
+  //    2. Custom apps folder (srv/app/) — hand-written apps for this
+  //       project live here, outside the transpiled srv/z2ui5 tree.
+  //    3. Bundled samples folder (srv/samples/) — present iff this repo
   //       carries them in-tree; gone after extraction to a separate repo.
-  //    3. Anything registered at runtime via register_app_dir()
-  //    4. Anything in the Z2UI5_APP_DIRS env var (colon-separated paths)
+  //    4. Anything registered at runtime via register_app_dir()
+  //    5. Anything in the Z2UI5_APP_DIRS env var (colon-separated paths)
   //
   //  Each directory is searched recursively (external sample repos may keep
   //  their classes in subfolders); within one directory a file at the top
@@ -666,12 +668,14 @@ class z2ui5_cl_util {
       // 1. Framework built-ins
       path.join(__dirname, "../../02"),
       path.join(__dirname, "../../02/01"),
-      // 2. Bundled samples (still in-tree); harmless if absent
+      // 2. Custom apps (srv/app/)
+      path.join(__dirname, "../../../app"),
+      // 3. Bundled samples (still in-tree); harmless if absent
       path.join(__dirname, "../../../samples"),
-      // 3. Runtime-registered
+      // 4. Runtime-registered
       ...z2ui5_cl_util._registered_dirs,
     ];
-    // 4. Env var
+    // 5. Env var
     const env = process.env.Z2UI5_APP_DIRS;
     if (env) {
       for (const p of env.split(path.delimiter)) {
