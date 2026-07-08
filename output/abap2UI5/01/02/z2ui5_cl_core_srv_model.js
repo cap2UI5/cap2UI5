@@ -32,7 +32,7 @@ class z2ui5_cl_core_srv_model {
         if (lo_val_front != null) {
           continue;
         }
-        if (lo_val_front.exists(`/__delta`) === true) {
+        if ((lo_val_front.exists(`/__delta`) === true || lo_val_front.exists(`/__delta`) === `X`)) {
           this.delta_apply_to_table({ io_val_front: lo_val_front, iv_name: lr_attri.name });
           continue;
         }
@@ -87,13 +87,13 @@ class z2ui5_cl_core_srv_model {
             if (sy_subrc === 0) lr_mapper_cache = _t[_i];
           }
           if (sy_subrc === 0) {
-            ajson = lr_mapper_cache.ajson;
+            ajson = z2ui5_cl_util.abap_copy(lr_mapper_cache.ajson);
           } else {
             ajson = (z2ui5_cl_ajson.create_empty({ ii_custom_mapping: lr_attri.custom_mapper }));
             lt_mapper_cache.push({ mapper: lr_attri.custom_mapper, ajson: ajson });
           }
         } else {
-          ajson = ajson_default;
+          ajson = z2ui5_cl_util.abap_copy(ajson_default);
         }
         try {
           lr_ref = this.attri_get_val_ref({ iv_path: lr_attri.name });
@@ -369,8 +369,8 @@ class z2ui5_cl_core_srv_model {
   }
 
   constructor({ attri, app } = {}) {
-    this.mt_attri = attri;
-    this.mo_app = app;
+    this.mt_attri = z2ui5_cl_util.abap_copy(attri);
+    this.mo_app = z2ui5_cl_util.abap_copy(app);
   }
 
   attri_search({ val } = {}) {
@@ -387,8 +387,8 @@ class z2ui5_cl_core_srv_model {
     for (const lr_attri of this.mt_attri) {
       sy_tabix++;
       if (!(!lr_attri.name_ref && lr_attri.type_kind === lo_datadescr.type_kind && lr_attri.kind === lo_datadescr.kind)) continue;
-      lv_name_attri = lr_attri.o_typedescr.absolute_name;
-      lv_name_val = lo_datadescr.absolute_name;
+      lv_name_attri = z2ui5_cl_util.abap_copy(lr_attri.o_typedescr.absolute_name);
+      lv_name_val = z2ui5_cl_util.abap_copy(lo_datadescr.absolute_name);
       if (lv_name_attri !== lv_name_val && !String(lv_name_attri).toLowerCase().includes(String(`%`).toLowerCase()) && !String(lv_name_val).toLowerCase().includes(String(`%`).toLowerCase())) {
         continue;
       }
@@ -398,7 +398,7 @@ class z2ui5_cl_core_srv_model {
         continue;
       }
       if (lr_ref === val) {
-        result = lr_attri;
+        result = z2ui5_cl_util.abap_copy(lr_attri);
         return result;
       }
     }
@@ -432,9 +432,9 @@ class z2ui5_cl_core_srv_model {
         break;
       default:
         ls_attri2.name = `${ir_attri.name}->*`;
-        ls_attri2.name_parent = ir_attri.name;
-        ls_attri2.type_kind = ls_attri2.o_typedescr.type_kind;
-        ls_attri2.kind = ls_attri2.o_typedescr.kind;
+        ls_attri2.name_parent = z2ui5_cl_util.abap_copy(ir_attri.name);
+        ls_attri2.type_kind = z2ui5_cl_util.abap_copy(ls_attri2.o_typedescr.type_kind);
+        ls_attri2.kind = z2ui5_cl_util.abap_copy(ls_attri2.o_typedescr.kind);
         result.push(ls_attri2);
         break;
     }
@@ -455,10 +455,10 @@ class z2ui5_cl_core_srv_model {
     sy_tabix = 0;
     for (const lr_attri of lt_attri) {
       sy_tabix++;
-      if (!(lr_attri.visibility === cl_abap_objectdescr.public && lr_attri.is_interface === false && lr_attri.is_class === false && lr_attri.is_constant === false)) continue;
+      if (!(lr_attri.visibility === cl_abap_objectdescr.public && !(lr_attri.is_interface === true || lr_attri.is_interface === `X`) && !(lr_attri.is_class === true || lr_attri.is_class === `X`) && !(lr_attri.is_constant === true || lr_attri.is_constant === `X`))) continue;
       try {
         ls_new = this.attri_create_new({ name: lv_prefix + lr_attri.name });
-        ls_new.name_parent = ir_attri.name;
+        ls_new.name_parent = z2ui5_cl_util.abap_copy(ir_attri.name);
         result.push(ls_new);
       } catch (error) {
       }
@@ -479,7 +479,7 @@ class z2ui5_cl_core_srv_model {
       lr_ref = z2ui5_cl_util.unassign_data(lr_val);
     } else {
       lv_name = `${ir_attri.name}-`;
-      lr_ref = lr_val;
+      lr_ref = z2ui5_cl_util.abap_copy(lr_val);
     }
     if (lr_ref != null) {
       lt_attri = z2ui5_cl_util.rtti_get_t_attri_by_any(lr_ref);
@@ -487,7 +487,7 @@ class z2ui5_cl_core_srv_model {
       for (const ls_attri of lt_attri) {
         sy_tabix++;
         ls_new = this.attri_create_new({ name: lv_name + ls_attri.name });
-        ls_new.name_parent = ir_attri.name;
+        ls_new.name_parent = z2ui5_cl_util.abap_copy(ir_attri.name);
         result.push(ls_new);
       }
     }
@@ -520,7 +520,7 @@ class z2ui5_cl_core_srv_model {
     sy_tabix = 0;
     for (const lr_attri of this.mt_attri) {
       sy_tabix++;
-      if (!(lr_attri.check_dissolved === true && !lr_attri.name_ref)) continue;
+      if (!((lr_attri.check_dissolved === true || lr_attri.check_dissolved === `X`) && !lr_attri.name_ref)) continue;
       try {
         lr_ref = this.attri_get_val_ref({ iv_path: lr_attri.name });
       } catch (error) {
@@ -532,7 +532,7 @@ class z2ui5_cl_core_srv_model {
           sy_tabix = 0;
           for (const lr_attri_ref of this.mt_attri) {
             sy_tabix++;
-            if (!(lr_attri_ref.check_dissolved === true && lr_attri_ref.name !== lr_attri.name && !lr_attri_ref.name_ref && lr_attri_ref.type_kind === cl_abap_typedescr.typekind_table)) continue;
+            if (!((lr_attri_ref.check_dissolved === true || lr_attri_ref.check_dissolved === `X`) && lr_attri_ref.name !== lr_attri.name && !lr_attri_ref.name_ref && lr_attri_ref.type_kind === cl_abap_typedescr.typekind_table)) continue;
             try {
               lr_attri_ref_ref = this.attri_get_val_ref({ iv_path: lr_attri_ref.name });
             } catch (error) {
@@ -541,7 +541,7 @@ class z2ui5_cl_core_srv_model {
             if (lr_ref !== lr_attri_ref_ref) {
               continue;
             }
-            lr_attri.name_ref = lr_attri_ref.name;
+            lr_attri.name_ref = z2ui5_cl_util.abap_copy(lr_attri_ref.name);
           }
           sy_tabix = _sy_tabix_1;
           break;
@@ -551,7 +551,7 @@ class z2ui5_cl_core_srv_model {
           sy_tabix = 0;
           for (const lr_attri_ref of this.mt_attri) {
             sy_tabix++;
-            if (!(lr_attri_ref.check_dissolved === true && lr_attri_ref.name !== lr_attri.name && !lr_attri_ref.name_ref && (lr_attri_ref.type_kind === cl_abap_typedescr.typekind_struct1 || lr_attri_ref.type_kind === cl_abap_typedescr.typekind_struct2))) continue;
+            if (!((lr_attri_ref.check_dissolved === true || lr_attri_ref.check_dissolved === `X`) && lr_attri_ref.name !== lr_attri.name && !lr_attri_ref.name_ref && (lr_attri_ref.type_kind === cl_abap_typedescr.typekind_struct1 || lr_attri_ref.type_kind === cl_abap_typedescr.typekind_struct2))) continue;
             try {
               lr_attri_ref_ref = this.attri_get_val_ref({ iv_path: lr_attri_ref.name });
             } catch (error) {
@@ -563,7 +563,7 @@ class z2ui5_cl_core_srv_model {
             if (lr_attri.name_ref && lr_attri.name_ref.length <= lr_attri_ref.name.length) {
               continue;
             }
-            lr_attri.name_ref = lr_attri_ref.name;
+            lr_attri.name_ref = z2ui5_cl_util.abap_copy(lr_attri_ref.name);
             this.attri_update_refs_children({ ir_attri: lr_attri });
           }
           sy_tabix = _sy_tabix_2;
@@ -601,11 +601,11 @@ class z2ui5_cl_core_srv_model {
     sy_tabix = 0;
     for (const lr_attri of this.mt_attri) {
       sy_tabix++;
-      if (!(lr_attri.check_dissolved === false)) continue;
+      if (!(!(lr_attri.check_dissolved === true || lr_attri.check_dissolved === `X`))) continue;
       lr_attri.check_dissolved = true;
       if (lr_attri.o_typedescr != null) {
         ls_entry = this.attri_create_new({ name: lr_attri.name });
-        lr_attri.o_typedescr = ls_entry.o_typedescr;
+        lr_attri.o_typedescr = z2ui5_cl_util.abap_copy(ls_entry.o_typedescr);
       }
       switch (lr_attri.o_typedescr.kind) {
         case cl_abap_typedescr.kind_struct:
@@ -638,7 +638,7 @@ class z2ui5_cl_core_srv_model {
     let sy_tabix = 0;
     let sy_subrc = 0;
     let lr_old;
-    const lt_attri = this.mt_attri;
+    const lt_attri = z2ui5_cl_util.abap_copy(this.mt_attri);
     for (let _i = lt_attri.length - 1; _i >= 0; _i--) { const row = lt_attri[_i]; if (!row.bind_type) lt_attri.splice(_i, 1); }
     this.mt_attri = null;
     this.dissolve();
@@ -653,9 +653,9 @@ class z2ui5_cl_core_srv_model {
         if (sy_subrc === 0) lr_old = _t[_i];
       }
       if (sy_subrc === 0) {
-        lr_attri.bind_type = lr_old.bind_type;
-        lr_attri.name_client = lr_old.name_client;
-        lr_attri.view = lr_old.view;
+        lr_attri.bind_type = z2ui5_cl_util.abap_copy(lr_old.bind_type);
+        lr_attri.name_client = z2ui5_cl_util.abap_copy(lr_old.name_client);
+        lr_attri.view = z2ui5_cl_util.abap_copy(lr_old.view);
       }
     }
   }

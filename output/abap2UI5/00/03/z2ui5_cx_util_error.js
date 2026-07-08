@@ -9,9 +9,9 @@ class z2ui5_cx_util_error extends cx_no_check {
     super.constructor({ previous });
     textid = null;
     try {
-      this.ms_error.x_root = val;
+      this.ms_error.x_root = z2ui5_cl_util.abap_copy(val);
     } catch (error) {
-      this.ms_error.text = val;
+      this.ms_error.text = z2ui5_cl_util.abap_copy(val);
     }
     this.ms_error.uuid = z2ui5_cl_util.uuid_get_c32();
   }
@@ -23,17 +23,17 @@ class z2ui5_cx_util_error extends cx_no_check {
       result = this.ms_error.x_root.get_text();
       error = true;
     } else if (this.ms_error.text) {
-      result = this.ms_error.text;
+      result = z2ui5_cl_util.abap_copy(this.ms_error.text);
       error = true;
     }
     if (previous != null) {
-      lo_x = previous;
+      lo_x = z2ui5_cl_util.abap_copy(previous);
       while (lo_x != null) {
         result = result + cl_abap_char_utilities.newline + lo_x.get_text();
-        lo_x = lo_x.previous;
+        lo_x = z2ui5_cl_util.abap_copy(lo_x.previous);
       }
     }
-    result = (error === true && !result ? `UNKNOWN_ERROR` : result);
+    result = ((error === true || error === `X`) && !result ? `UNKNOWN_ERROR` : result);
   }
 }
 

@@ -1,6 +1,7 @@
 // TODO(abap2js): unresolved reference cl_abap_typedescr — add require manually
 // TODO(abap2js): unresolved reference cl_abap_unit_assert — add require manually
 const z2ui5_cl_srt_typedescr = require("abap2UI5/z2ui5_cl_srt_typedescr");
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 
 class z2ui5_cl_srt_aunit {
   static serialize_deserialize({ variable } = {}) {
@@ -24,7 +25,7 @@ class z2ui5_cl_srt_aunit {
     // TODO(abap2js): CALL TRANSFORMATION id SOURCE srtti = srtti1 dobj = <variable1> RESULT XML xstring OPTIONS data_refs = 'heap-or-create'.
     // TODO(abap2js): CALL TRANSFORMATION id SOURCE XML xstring RESULT srtti = srtti2.
     temp1 = srtti2.get_rtti();
-    rtti2 = temp1;
+    rtti2 = z2ui5_cl_util.abap_copy(temp1);
     // TODO(abap2js): CREATE DATA ref_variable2 TYPE HANDLE rtti2.
     // TODO(abap2js): ASSIGN ref_variable2->* TO <variable2>.
     // TODO(abap2js): CALL TRANSFORMATION id SOURCE XML xstring RESULT dobj = <variable2>.

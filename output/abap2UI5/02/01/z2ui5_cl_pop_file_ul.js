@@ -16,17 +16,17 @@ class z2ui5_cl_pop_file_ul extends z2ui5_if_app {
   static factory({ i_text = `Choose the file to upload:`, i_title = `File Upload`, i_button_text_confirm = `OK`, i_button_text_cancel = `Cancel`, i_path } = {}) {
     let r_result = null;
     r_result = new z2ui5_cl_pop_file_ul();
-    r_result.title = i_title;
-    r_result.question_text = i_text;
-    r_result.button_text_confirm = i_button_text_confirm;
-    r_result.button_text_cancel = i_button_text_cancel;
-    r_result.mv_path = i_path;
+    r_result.title = z2ui5_cl_util.abap_copy(i_title);
+    r_result.question_text = z2ui5_cl_util.abap_copy(i_text);
+    r_result.button_text_confirm = z2ui5_cl_util.abap_copy(i_button_text_confirm);
+    r_result.button_text_cancel = z2ui5_cl_util.abap_copy(i_button_text_cancel);
+    r_result.mv_path = z2ui5_cl_util.abap_copy(i_path);
     return r_result;
   }
 
   result() {
     let result = {};
-    result = this.ms_result;
+    result = z2ui5_cl_util.abap_copy(this.ms_result);
     return result;
   }
 
@@ -48,7 +48,7 @@ class z2ui5_cl_pop_file_ul extends z2ui5_if_app {
 
   async main(client) {
     let lv_data;
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.view_display();
       return;

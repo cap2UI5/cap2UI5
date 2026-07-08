@@ -35,7 +35,7 @@ class z2ui5_cl_app_startup extends z2ui5_if_app {
 
   reset_button_state() {
     this.ms_home.btn_text = `Check`;
-    this.ms_home.btn_event_id = z2ui5_cl_app_startup.cs_event.button_check;
+    this.ms_home.btn_event_id = z2ui5_cl_util.abap_copy(z2ui5_cl_app_startup.cs_event.button_check);
     this.ms_home.btn_icon = `sap-icon://validate`;
     this.ms_home.class_editable = true;
   }
@@ -47,7 +47,7 @@ class z2ui5_cl_app_startup extends z2ui5_if_app {
       li_app_test = (() => { const _n = String(this.ms_home.classname); const _c = z2ui5_cl_util.rtti_get_class(_n.toLowerCase()); if (!_c) throw new Error(`CREATE OBJECT: class ${_n} not found`); return new _c(); })();
       this.client.message_toast_display(`App is ready to start!`);
       this.ms_home.btn_text = `Edit`;
-      this.ms_home.btn_event_id = z2ui5_cl_app_startup.cs_event.button_change;
+      this.ms_home.btn_event_id = z2ui5_cl_util.abap_copy(z2ui5_cl_app_startup.cs_event.button_change);
       this.ms_home.btn_icon = `sap-icon://edit`;
       this.ms_home.class_value_state = `Success`;
       this.ms_home.class_editable = false;
@@ -82,7 +82,7 @@ class z2ui5_cl_app_startup extends z2ui5_if_app {
       .label()
       .link({ text: `(Example)`, target: `_blank`, href: `https://github.com/abap2UI5/abap2UI5/blob/main/src/02/z2ui5_cl_app_hello_world.clas.abap` })
       .label(`Step 4`);
-    if (this.ms_home.class_editable === true) {
+    if ((this.ms_home.class_editable === true || this.ms_home.class_editable === `X`)) {
       simple_form.input({ placeholder: `fill in the class name and press 'check'`, enabled: this.client._bind(this.ms_home.class_editable, { name: `ms_home-class_editable` }), value: this.client._bind_edit(this.ms_home.classname, { name: `ms_home-classname` }), submit: this.client._event(this.ms_home.btn_event_id), valuehelprequest: this.client._event(z2ui5_cl_app_startup.cs_event.value_help), showvaluehelp: true, width: `70%` });
     } else {
       simple_form.text(this.ms_home.classname);
@@ -117,17 +117,17 @@ class z2ui5_cl_app_startup extends z2ui5_if_app {
     let _fs$fs_class = null;
     let lo_f4;
     let ls_result;
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.z2ui5_on_init();
       this.view_display_start();
       return;
     }
-    if (client.get().CHECK_ON_NAVIGATED === true) {
+    if (((client.get().CHECK_ON_NAVIGATED) === true || (client.get().CHECK_ON_NAVIGATED) === `X`)) {
       try {
         lo_f4 = (client.get_app_prev());
         ls_result = lo_f4.result();
-        if (ls_result.check_confirmed === true) {
+        if ((ls_result.check_confirmed === true || ls_result.check_confirmed === `X`)) {
           // TODO(abap2js): ASSIGN ls_result-row->* TO FIELD-SYMBOL(<class>).
           this.ms_home = ({ ...this.ms_home, ...fs_class });
           this.view_display_start();

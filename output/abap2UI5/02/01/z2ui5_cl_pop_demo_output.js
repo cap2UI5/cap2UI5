@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -13,11 +14,11 @@ class z2ui5_cl_pop_demo_output extends z2ui5_if_app {
   static factory({ i_output, i_title = `Output`, i_icon = `sap-icon://textFormatting`, i_button_text = `OK`, i_stretch = false, i_as_page = false } = {}) {
     let r_result = null;
     r_result = new z2ui5_cl_pop_demo_output();
-    r_result.title = i_title;
-    r_result.icon = i_icon;
-    r_result.button_text_confirm = i_button_text;
-    r_result.stretch = i_stretch;
-    r_result.as_page = i_as_page;
+    r_result.title = z2ui5_cl_util.abap_copy(i_title);
+    r_result.icon = z2ui5_cl_util.abap_copy(i_icon);
+    r_result.button_text_confirm = z2ui5_cl_util.abap_copy(i_button_text);
+    r_result.stretch = z2ui5_cl_util.abap_copy(i_stretch);
+    r_result.as_page = z2ui5_cl_util.abap_copy(i_as_page);
     try {
       // TODO(abap2js): CALL METHOD i_output->('GET') RECEIVING output = r_result->html.
     } catch (error) {
@@ -28,7 +29,7 @@ class z2ui5_cl_pop_demo_output extends z2ui5_if_app {
   }
 
   view_display() {
-    if (this.as_page === true) {
+    if ((this.as_page === true || this.as_page === `X`)) {
       this.render_page();
     } else {
       this.render_popup();
@@ -63,18 +64,18 @@ class z2ui5_cl_pop_demo_output extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.view_display();
       return;
     }
     if (client.check_on_event(`TOGGLE_FULLSCREEN`)) {
-      if (this.as_page === true) {
+      if ((this.as_page === true || this.as_page === `X`)) {
         client.view_destroy();
       } else {
         client.popup_destroy();
       }
-      this.as_page = (this.as_page === false);
+      this.as_page = (!(this.as_page === true || this.as_page === `X`));
       this.view_display();
       return;
     }
@@ -86,7 +87,7 @@ class z2ui5_cl_pop_demo_output extends z2ui5_if_app {
 
   get_style() {
     let result = ``;
-    result = `<html:style type="text/css">` + `\\n` + ` body {` + `\\n` + ` font-family: Arial;` + `\\n` + ` font-size: 90%;` + `\\n` + ` }` + `\\n` + ` table {` + `\\n` + ` font-family: Arial;` + `\\n` + ` font-size: 90%;` + `\\n` + ` }` + `\\n` + ` caption {` + `\\n` + ` font-family: Arial;` + `\\n` + ` font-size: 90%;` + `\\n` + ` font-weight: bold;` + `\\n` + ` text-align: left;` + `\\n` + ` }` + `\\n` + ` span.heading1 {` + `\\n` + ` font-size: 150%;` + `\\n` + ` color: #000080;` + `\\n` + ` font-weight: bold;` + `\\n` + ` }` + `\\n` + ` span.heading2 {` + `\\n` + ` font-size: 135%;` + `\\n` + ` color: #000080;` + `\\n` + ` font-weight: bold;` + `\\n` + ` }` + `\\n` + ` span.heading3 {` + `\\n` + ` font-size: 120%;` + `\\n` + ` color: #000080;` + `\\n` + ` font-weight: bold;` + `\\n` + ` }` + `\\n` + ` span.heading4 {` + `\\n` + ` font-size: 105%;` + `\\n` + ` color: #000080;` + `\\n` + ` font-weight: bold;` + `\\n` + ` }` + `\\n` + ` span.normal {` + `\\n` + ` font-family: Arial;` + `\\n` + ` font-size: 100%;` + `\\n` + ` color: #000000;` + `\\n` + ` font-weight: normal;` + `\\n` + ` white-space: pre;` + `\\n` + ` }` + `\\n` + ` span.nonprop {` + `\\n` + ` font-family: Courier New;` + `\\n` + ` font-size: 100%;` + `\\n` + ` color: #000000;` + `\\n` + ` font-weight: 400;` + `\\n` + ` white-space: pre;` + `\\n` + ` }` + `\\n` + ` span.nowrap {` + `\\n` + ` white-space: nowrap;` + `\\n` + ` }` + `\\n` + ` span.nprpnwrp {` + `\\n` + ` font-family: Courier New;` + `\\n` + ` font-size: 100%;` + `\\n` + ` color: #000000;` + `\\n` + ` font-weight: 400;` + `\\n` + ` white-space: nowrap;` + `\\n` + ` }` + `\\n` + ` tr.header {` + `\\n` + ` background-color: #D1D1D1;` + `\\n` + ` }` + `\\n` + ` tr.body {` + `\\n` + ` background-color: #F4F4F4;` + `\\n` + ` }` + `\\n` + ` th {` + `\\n` + ` text-align: left;` + `\\n` + ` }` + `\\n` + ` table.nested_table {` + `\\n` + ` border: 1px solid #D1D1D1;` + `\\n` + ` border-collapse: collapse;` + `\\n` + ` padding: 4px;` + `\\n` + ` text-align: center;` + `\\n` + ` }` + `\\n` + ` .nested_table td {` + `\\n` + ` border: 1px solid #D1D1D1;` + `\\n` + ` border-collapse: collapse;` + `\\n` + ` padding: 4px;` + `\\n` + ` text-align: left;` + `\\n` + ` }` + `\\n` + ` .nested_table th {` + `\\n` + ` border: 1px solid #D1D1D1;` + `\\n` + ` border-collapse: collapse;` + `\\n` + ` background-color: #D1D1D1;` + `\\n` + ` padding: 4px;` + `\\n` + ` }` + `\\n` + `</html:style>`;
+    result = `<html:style type="text/css">` + ` ` + ` body {` + ` ` + ` font-family: Arial;` + ` ` + ` font-size: 90%;` + ` ` + ` }` + ` ` + ` table {` + ` ` + ` font-family: Arial;` + ` ` + ` font-size: 90%;` + ` ` + ` }` + ` ` + ` caption {` + ` ` + ` font-family: Arial;` + ` ` + ` font-size: 90%;` + ` ` + ` font-weight: bold;` + ` ` + ` text-align: left;` + ` ` + ` }` + ` ` + ` span.heading1 {` + ` ` + ` font-size: 150%;` + ` ` + ` color: #000080;` + ` ` + ` font-weight: bold;` + ` ` + ` }` + ` ` + ` span.heading2 {` + ` ` + ` font-size: 135%;` + ` ` + ` color: #000080;` + ` ` + ` font-weight: bold;` + ` ` + ` }` + ` ` + ` span.heading3 {` + ` ` + ` font-size: 120%;` + ` ` + ` color: #000080;` + ` ` + ` font-weight: bold;` + ` ` + ` }` + ` ` + ` span.heading4 {` + ` ` + ` font-size: 105%;` + ` ` + ` color: #000080;` + ` ` + ` font-weight: bold;` + ` ` + ` }` + ` ` + ` span.normal {` + ` ` + ` font-family: Arial;` + ` ` + ` font-size: 100%;` + ` ` + ` color: #000000;` + ` ` + ` font-weight: normal;` + ` ` + ` white-space: pre;` + ` ` + ` }` + ` ` + ` span.nonprop {` + ` ` + ` font-family: Courier New;` + ` ` + ` font-size: 100%;` + ` ` + ` color: #000000;` + ` ` + ` font-weight: 400;` + ` ` + ` white-space: pre;` + ` ` + ` }` + ` ` + ` span.nowrap {` + ` ` + ` white-space: nowrap;` + ` ` + ` }` + ` ` + ` span.nprpnwrp {` + ` ` + ` font-family: Courier New;` + ` ` + ` font-size: 100%;` + ` ` + ` color: #000000;` + ` ` + ` font-weight: 400;` + ` ` + ` white-space: nowrap;` + ` ` + ` }` + ` ` + ` tr.header {` + ` ` + ` background-color: #D1D1D1;` + ` ` + ` }` + ` ` + ` tr.body {` + ` ` + ` background-color: #F4F4F4;` + ` ` + ` }` + ` ` + ` th {` + ` ` + ` text-align: left;` + ` ` + ` }` + ` ` + ` table.nested_table {` + ` ` + ` border: 1px solid #D1D1D1;` + ` ` + ` border-collapse: collapse;` + ` ` + ` padding: 4px;` + ` ` + ` text-align: center;` + ` ` + ` }` + ` ` + ` .nested_table td {` + ` ` + ` border: 1px solid #D1D1D1;` + ` ` + ` border-collapse: collapse;` + ` ` + ` padding: 4px;` + ` ` + ` text-align: left;` + ` ` + ` }` + ` ` + ` .nested_table th {` + ` ` + ` border: 1px solid #D1D1D1;` + ` ` + ` border-collapse: collapse;` + ` ` + ` background-color: #D1D1D1;` + ` ` + ` padding: 4px;` + ` ` + ` }` + ` ` + `</html:style>`;
     return result;
   }
 }

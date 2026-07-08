@@ -16,7 +16,7 @@ class z2ui5_cl_pop_messages extends z2ui5_if_app {
       sy_tabix++;
       r_result.mt_msg.push({ type: z2ui5_cl_util.ui5_get_msg_type(lr_row.type), title: lr_row.text, subtitle: `${lr_row.id} ${lr_row.no}` });
     }
-    r_result.title = i_title;
+    r_result.title = z2ui5_cl_util.abap_copy(i_title);
     return r_result;
   }
 
@@ -30,7 +30,7 @@ class z2ui5_cl_pop_messages extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.view_display();
       return;

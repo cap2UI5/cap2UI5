@@ -12,7 +12,7 @@ class z2ui5_cl_core_action {
   ms_next = null;
 
   constructor({ val } = {}) {
-    this.mo_http_post = val;
+    this.mo_http_post = z2ui5_cl_util.abap_copy(val);
     this.mo_app = /* TODO(abap2js): NEW #( ) */ null;
   }
 
@@ -20,18 +20,18 @@ class z2ui5_cl_core_action {
     let result = null;
     result = new z2ui5_cl_core_action(this.mo_http_post);
     if (this.mo_http_post.mo_action.mo_app.mo_app != null) {
-      result.mo_app = this.mo_http_post.mo_action.mo_app;
+      result.mo_app = z2ui5_cl_util.abap_copy(this.mo_http_post.mo_action.mo_app);
     } else {
       result.mo_app = z2ui5_cl_core_app.db_load(this.mo_http_post.ms_request.s_front.id);
     }
     result.mo_app.ms_draft.id = z2ui5_cl_util.uuid_get_c32();
-    result.mo_app.ms_draft.id_prev = this.mo_http_post.ms_request.s_front.id;
-    result.ms_actual.view = this.mo_http_post.ms_request.s_front.view;
-    if (this.mo_http_post.ms_request.o_model.is_empty() === false) {
+    result.mo_app.ms_draft.id_prev = z2ui5_cl_util.abap_copy(this.mo_http_post.ms_request.s_front.id);
+    result.ms_actual.view = z2ui5_cl_util.abap_copy(this.mo_http_post.ms_request.s_front.view);
+    if (!(this.mo_http_post.ms_request.o_model.is_empty() === true || this.mo_http_post.ms_request.o_model.is_empty() === `X`)) {
       result.mo_app.model_json_parse({ iv_view: this.mo_http_post.ms_request.s_front.view, io_model: this.mo_http_post.ms_request.o_model });
     }
-    result.ms_actual.event = this.mo_http_post.ms_request.s_front.event;
-    result.ms_actual.t_event_arg = this.mo_http_post.ms_request.s_front.t_event_arg;
+    result.ms_actual.event = z2ui5_cl_util.abap_copy(this.mo_http_post.ms_request.s_front.event);
+    result.ms_actual.t_event_arg = z2ui5_cl_util.abap_copy(this.mo_http_post.ms_request.s_front.t_event_arg);
     return result;
   }
 
@@ -43,7 +43,7 @@ class z2ui5_cl_core_action {
       if (this.mo_http_post.ms_request.s_control.app_start_draft) {
         try {
           lo_app = z2ui5_cl_core_app.db_load(this.mo_http_post.ms_request.s_control.app_start_draft);
-          result.mo_app = lo_app;
+          result.mo_app = z2ui5_cl_util.abap_copy(lo_app);
           result.ms_actual.check_on_navigated = true;
           result.ms_next.s_set.set_app_state_active = true;
           result.mo_app.ms_draft.id_prev_app_stack = ``;
@@ -56,8 +56,8 @@ class z2ui5_cl_core_action {
       result.mo_app.ms_draft.id = z2ui5_cl_util.uuid_get_c32();
       let li_app = null;
       li_app = (() => { const _n = String(this.mo_http_post.ms_request.s_control.app_start); const _c = z2ui5_cl_util.rtti_get_class(_n.toLowerCase()); if (!_c) throw new Error(`CREATE OBJECT: class ${_n} not found`); return new _c(); })();
-      result.mo_app.mo_app = li_app;
-      li_app.id_draft = result.mo_app.ms_draft.id;
+      result.mo_app.mo_app = z2ui5_cl_util.abap_copy(li_app);
+      li_app.id_draft = z2ui5_cl_util.abap_copy(result.mo_app.ms_draft.id);
       result.ms_actual.check_on_navigated = true;
     } catch (x) {
       throw new z2ui5_cx_util_error({ val: `App with name ${this.mo_http_post.ms_request.s_control.app_start} not found...`, previous: x });
@@ -68,7 +68,7 @@ class z2ui5_cl_core_action {
   factory_stack_call() {
     let result = null;
     result = this.prepare_app_stack({ val: this.ms_next.o_app_call });
-    result.mo_app.ms_draft.id_prev_app_stack = this.mo_app.ms_draft.id;
+    result.mo_app.ms_draft.id_prev_app_stack = z2ui5_cl_util.abap_copy(this.mo_app.ms_draft.id);
     return result;
   }
 
@@ -77,13 +77,13 @@ class z2ui5_cl_core_action {
     let ls_draft;
     result = this.prepare_app_stack({ val: this.ms_next.o_app_leave });
     const lo_draft = new z2ui5_cl_core_srv_draft();
-    if (lo_draft.check_exists(this.ms_next.o_app_leave.id_draft) === false) {
-      result.mo_app.ms_draft.id_prev_app_stack = this.mo_app.ms_draft.id_prev_app_stack;
+    if (!(lo_draft.check_exists(this.ms_next.o_app_leave.id_draft) === true || lo_draft.check_exists(this.ms_next.o_app_leave.id_draft) === `X`)) {
+      result.mo_app.ms_draft.id_prev_app_stack = z2ui5_cl_util.abap_copy(this.mo_app.ms_draft.id_prev_app_stack);
       return result;
     }
     if (this.mo_app.ms_draft.id_prev_app_stack) {
       ls_draft = lo_draft.read_info(this.mo_app.ms_draft.id_prev_app_stack);
-      result.mo_app.ms_draft.id_prev_app_stack = ls_draft.id_prev_app_stack;
+      result.mo_app.ms_draft.id_prev_app_stack = z2ui5_cl_util.abap_copy(ls_draft.id_prev_app_stack);
     }
     return result;
   }
@@ -94,7 +94,7 @@ class z2ui5_cl_core_action {
     result.mo_app.ms_draft.id = z2ui5_cl_util.uuid_get_c32();
     result.ms_actual.check_on_navigated = true;
     result.mo_app.mo_app = z2ui5_cl_app_startup.factory();
-    (result.mo_app.mo_app).id_draft = result.mo_app.ms_draft.id;
+    (result.mo_app.mo_app).id_draft = z2ui5_cl_util.abap_copy(result.mo_app.ms_draft.id);
     return result;
   }
 
@@ -133,23 +133,23 @@ class z2ui5_cl_core_action {
     try {
       result.mo_app = z2ui5_cl_core_app.db_load_by_app(val);
     } catch (error) {
-      result.mo_app.mo_app = val;
+      result.mo_app.mo_app = z2ui5_cl_util.abap_copy(val);
     }
-    result.mo_app.ms_draft.id = val.id_draft;
-    result.mo_app.ms_draft.id_prev = this.mo_app.ms_draft.id;
-    result.mo_app.ms_draft.id_prev_app = this.mo_app.ms_draft.id;
+    result.mo_app.ms_draft.id = z2ui5_cl_util.abap_copy(val.id_draft);
+    result.mo_app.ms_draft.id_prev = z2ui5_cl_util.abap_copy(this.mo_app.ms_draft.id);
+    result.mo_app.ms_draft.id_prev_app = z2ui5_cl_util.abap_copy(this.mo_app.ms_draft.id);
     result.ms_actual.check_on_navigated = true;
-    result.ms_next.s_set = this.ms_next.s_set;
+    result.ms_next.s_set = z2ui5_cl_util.abap_copy(this.ms_next.s_set);
     result.reset_view_update_flags();
     if (this.ms_next.next_event) {
-      result.ms_actual.event = this.ms_next.next_event;
+      result.ms_actual.event = z2ui5_cl_util.abap_copy(this.ms_next.next_event);
     } else if (this.ms_next.s_set.s_follow_up_action.custom_js.length > 0) {
-      lv_action = this.ms_next.s_set.s_follow_up_action.custom_js[(1) - 1];
+      lv_action = z2ui5_cl_util.abap_copy(this.ms_next.s_set.s_follow_up_action.custom_js[(1) - 1]);
       let lv_dummy;
       [lv_dummy, result.ms_actual.event] = lv_action.split(`.eB(['`);
       [result.ms_actual.event, lv_dummy] = result.ms_actual.event.split(`']`);
     }
-    result.ms_actual.r_data = this.ms_next.r_data;
+    result.ms_actual.r_data = z2ui5_cl_util.abap_copy(this.ms_next.r_data);
     result.ms_next.s_set.s_msg_box = null;
     result.ms_next.s_set.s_msg_toast = null;
     return result;

@@ -33,17 +33,17 @@ class z2ui5_cl_pop_data extends z2ui5_if_app {
     let _fs$fs_data = null;
     r_result = new z2ui5_cl_pop_data();
     if (title) {
-      r_result.title = title;
+      r_result.title = z2ui5_cl_util.abap_copy(title);
     }
     // TODO(abap2js): CREATE DATA r_result->mr_data LIKE val.
     // TODO(abap2js): ASSIGN r_result->mr_data->* TO <data>.
-    fs_data = val;
+    fs_data = z2ui5_cl_util.abap_copy(val);
     if (_fs$fs_data) _fs$fs_data.o[_fs$fs_data.k] = fs_data;
     return r_result;
   }
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.display();
       return;

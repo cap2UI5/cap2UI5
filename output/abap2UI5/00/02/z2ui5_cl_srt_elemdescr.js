@@ -2,6 +2,7 @@
 // TODO(abap2js): unresolved reference cl_abap_elemdescr — add require manually
 // TODO(abap2js): unresolved reference cl_abap_typedescr — add require manually
 const z2ui5_cl_srt_datadescr = require("abap2UI5/z2ui5_cl_srt_datadescr");
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cx_srt = require("abap2UI5/z2ui5_cx_srt");
 
 class z2ui5_cl_srt_elemdescr extends z2ui5_cl_srt_datadescr {
@@ -11,9 +12,9 @@ class z2ui5_cl_srt_elemdescr extends z2ui5_cl_srt_datadescr {
 
   constructor({ rtti } = {}) {
     super.constructor(rtti);
-    this.edit_mask = rtti.edit_mask;
-    this.help_id = rtti.help_id;
-    this.output_length = rtti.output_length;
+    this.edit_mask = z2ui5_cl_util.abap_copy(rtti.edit_mask);
+    this.help_id = z2ui5_cl_util.abap_copy(rtti.help_id);
+    this.output_length = z2ui5_cl_util.abap_copy(rtti.output_length);
   }
 
   get_rtti() {
@@ -21,7 +22,7 @@ class z2ui5_cl_srt_elemdescr extends z2ui5_cl_srt_datadescr {
     if (rtti != null) {
       return;
     }
-    if (is_ddic_type === true && technical_type === false) {
+    if ((is_ddic_type === true || is_ddic_type === `X`) && !(technical_type === true || technical_type === `X`)) {
       rtti = cl_abap_typedescr.describe_by_name(absolute_name);
     } else {
       rtti = this.get_rtti_by_type_kind({ i_type_kind: type_kind });
@@ -33,11 +34,11 @@ class z2ui5_cl_srt_elemdescr extends z2ui5_cl_srt_datadescr {
     let l_length = 0;
     switch (i_type_kind) {
       case cl_abap_typedescr.typekind_num:
-        l_length = length / cl_abap_char_utilities.charsize;
+        l_length = z2ui5_cl_util.abap_div(length, cl_abap_char_utilities.charsize);
         rtti = cl_abap_elemdescr.get_n(l_length);
         break;
       case cl_abap_typedescr.typekind_char:
-        l_length = length / cl_abap_char_utilities.charsize;
+        l_length = z2ui5_cl_util.abap_div(length, cl_abap_char_utilities.charsize);
         rtti = cl_abap_elemdescr.get_c(l_length);
         break;
       case cl_abap_typedescr.typekind_string:

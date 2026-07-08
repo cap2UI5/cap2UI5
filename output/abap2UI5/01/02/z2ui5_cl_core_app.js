@@ -59,7 +59,7 @@ class z2ui5_cl_core_app {
       if (sy_subrc === 0) lr_buf = _t[_i];
     }
     if (sy_subrc === 0) {
-      result = lr_buf.app;
+      result = z2ui5_cl_util.abap_copy(lr_buf.app);
       return result;
     }
     const lo_db = new z2ui5_cl_core_srv_draft();
@@ -79,7 +79,7 @@ class z2ui5_cl_core_app {
     const lo_db = new z2ui5_cl_core_srv_draft();
     const ls_db = lo_db.read_draft(app.id_draft);
     result = z2ui5_cl_core_app.all_xml_parse({ xml: ls_db.data });
-    result.mo_app = app;
+    result.mo_app = z2ui5_cl_util.abap_copy(app);
     result.create_model().main_attri_db_load();
     return result;
   }
@@ -88,7 +88,7 @@ class z2ui5_cl_core_app {
     let li_app;
     if (this.mo_app != null) {
       li_app = (this.mo_app);
-      li_app.id_draft = this.ms_draft.id;
+      li_app.id_draft = z2ui5_cl_util.abap_copy(this.ms_draft.id);
       li_app.check_initialized = true;
     }
     const lo_db = new z2ui5_cl_core_srv_draft();

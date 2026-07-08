@@ -32,7 +32,7 @@ class z2ui5_cl_pop_table extends z2ui5_if_app {
     sy_tabix = 0;
     for (const ls_comp of lt_comp) {
       sy_tabix++;
-      if (ls_comp.type != null && ls_comp.type.is_ddic_type() === true) {
+      if (ls_comp.type != null && (ls_comp.type.is_ddic_type() === true || ls_comp.type.is_ddic_type() === `X`)) {
         lv_name = this.substring_after({ val: (ls_comp.type).absolute_name, sub: `\\TYPE=` });
         lv_ddic_field_label = z2ui5_cl_util.rtti_get_data_element_text_l(lv_name);
         if (lv_ddic_field_label) {
@@ -52,7 +52,7 @@ class z2ui5_cl_pop_table extends z2ui5_if_app {
     let r_result = null;
     r_result = new z2ui5_cl_pop_table();
     if (i_title) {
-      r_result.title = i_title;
+      r_result.title = z2ui5_cl_util.abap_copy(i_title);
     }
     r_result.mr_tab = z2ui5_cl_util.conv_copy_ref_data(i_tab);
     // TODO(abap2js): CREATE DATA r_result->ms_result-row LIKE LINE OF i_tab.
@@ -79,12 +79,12 @@ class z2ui5_cl_pop_table extends z2ui5_if_app {
 
   result() {
     let result = {};
-    result = this.ms_result;
+    result = z2ui5_cl_util.abap_copy(this.ms_result);
     return result;
   }
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.display();
       return;

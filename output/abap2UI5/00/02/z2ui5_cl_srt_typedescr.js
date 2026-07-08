@@ -1,4 +1,5 @@
 // TODO(abap2js): unresolved reference cl_abap_typedescr — add require manually
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cx_srt = require("abap2UI5/z2ui5_cx_srt");
 
 class z2ui5_cl_srt_typedescr {
@@ -12,11 +13,11 @@ class z2ui5_cl_srt_typedescr {
   technical_type = false;
 
   constructor({ rtti } = {}) {
-    this.absolute_name = rtti.absolute_name;
-    this.type_kind = rtti.type_kind;
-    this.length = rtti.length;
-    this.decimals = rtti.decimals;
-    this.kind = rtti.kind;
+    this.absolute_name = z2ui5_cl_util.abap_copy(rtti.absolute_name);
+    this.type_kind = z2ui5_cl_util.abap_copy(rtti.type_kind);
+    this.length = z2ui5_cl_util.abap_copy(rtti.length);
+    this.decimals = z2ui5_cl_util.abap_copy(rtti.decimals);
+    this.kind = z2ui5_cl_util.abap_copy(rtti.kind);
     this.is_ddic_type = rtti.is_ddic_type();
     if (String(rtti.absolute_name).includes(String(`\\TYPE=%_T*`).replace(/\*/g, ""))) {
       this.technical_type = true;
@@ -39,27 +40,27 @@ class z2ui5_cl_srt_typedescr {
     let intf_rtti = null;
     switch (rtti.kind) {
       case cl_abap_typedescr.kind_elem:
-        elem_rtti = rtti;
+        elem_rtti = z2ui5_cl_util.abap_copy(rtti);
         srtti = null; // TODO(abap2js): CREATE OBJECT srtti TYPE z2ui5_cl_srt_elemdescr EXPORTING rtti = elem_rtti.
         break;
       case cl_abap_typedescr.kind_struct:
-        struct_rtti = rtti;
+        struct_rtti = z2ui5_cl_util.abap_copy(rtti);
         srtti = null; // TODO(abap2js): CREATE OBJECT srtti TYPE z2ui5_cl_srt_structdescr EXPORTING rtti = struct_rtti.
         break;
       case cl_abap_typedescr.kind_table:
-        table_rtti = rtti;
+        table_rtti = z2ui5_cl_util.abap_copy(rtti);
         srtti = null; // TODO(abap2js): CREATE OBJECT srtti TYPE z2ui5_cl_srt_tabledescr EXPORTING rtti = table_rtti.
         break;
       case cl_abap_typedescr.kind_ref:
-        ref_rtti = rtti;
+        ref_rtti = z2ui5_cl_util.abap_copy(rtti);
         srtti = null; // TODO(abap2js): CREATE OBJECT srtti TYPE z2ui5_cl_srt_refdescr EXPORTING rtti = ref_rtti.
         break;
       case cl_abap_typedescr.kind_class:
-        class_rtti = rtti;
+        class_rtti = z2ui5_cl_util.abap_copy(rtti);
         srtti = null; // TODO(abap2js): CREATE OBJECT srtti TYPE z2ui5_cl_srt_classdescr EXPORTING rtti = class_rtti.
         break;
       case cl_abap_typedescr.kind_intf:
-        intf_rtti = rtti;
+        intf_rtti = z2ui5_cl_util.abap_copy(rtti);
         srtti = null; // TODO(abap2js): CREATE OBJECT srtti TYPE z2ui5_cl_srt_intfdescr EXPORTING rtti = intf_rtti.
         break;
       default:
@@ -71,7 +72,7 @@ class z2ui5_cl_srt_typedescr {
 
   get_rtti() {
     let rtti = null;
-    if (this.technical_type === false) {
+    if (!(this.technical_type === true || this.technical_type === `X`)) {
       rtti = cl_abap_typedescr.describe_by_name(this.absolute_name);
     }
     return rtti;

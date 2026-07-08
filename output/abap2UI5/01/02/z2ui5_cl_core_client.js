@@ -9,10 +9,10 @@ class z2ui5_cl_core_client {
   mo_srv_event = null;
 
   constructor({ action } = {}) {
-    this.mo_action = action;
+    this.mo_action = z2ui5_cl_util.abap_copy(action);
     this.mo_srv_bind = /* TODO(abap2js): NEW #( ) */ null;
     this.mo_srv_event = /* TODO(abap2js): NEW #( ) */ null;
-    this.action = this;
+    this.action = z2ui5_cl_util.abap_copy(this);
   }
 
   follow_up_action() {
@@ -21,7 +21,7 @@ class z2ui5_cl_core_client {
 
   gen() {
     let lv_val = ``;
-    lv_val = val;
+    lv_val = z2ui5_cl_util.abap_copy(val);
     if (!lv_val || ![...String(lv_val)].every(($c) => String(`ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_`).includes($c))) {
       throw new z2ui5_cx_util_error({ val: `action: invalid event name '${val}' - only A-Z, a-z, 0-9 and _ allowed` });
     }
@@ -42,7 +42,7 @@ class z2ui5_cl_core_client {
     let lo_params;
     result = { event: this.mo_action.ms_actual.event, check_launchpad_active: this.mo_action.mo_http_post.ms_request.s_control.check_launchpad, t_event_arg: this.mo_action.ms_actual.t_event_arg, s_draft: ({ ...this.mo_action.mo_app.ms_draft }), check_on_navigated: this.mo_action.ms_actual.check_on_navigated, s_config: ({ ...this.mo_action.mo_http_post.ms_request.s_front }), s_device: this.mo_action.mo_http_post.ms_request.s_front.s_device, s_focus: this.mo_action.mo_http_post.ms_request.s_front.s_focus, s_scroll: this.mo_action.mo_http_post.ms_request.s_front.s_scroll, s_ui5: this.mo_action.mo_http_post.ms_request.s_front.s_ui5, r_event_data: this.mo_action.ms_actual.r_data, _s_nav: { check_call: (this.mo_action.ms_next.o_app_call), check_leave: (this.mo_action.ms_next.o_app_leave) } };
     try {
-      lo_comp = this.mo_action.mo_http_post.ms_request.s_front.o_comp_data;
+      lo_comp = z2ui5_cl_util.abap_copy(this.mo_action.mo_http_post.ms_request.s_front.o_comp_data);
       if (lo_comp != null) {
         return;
       }
@@ -62,7 +62,7 @@ class z2ui5_cl_core_client {
 
   get_event_arg() {
     try {
-      result = this.mo_action.ms_actual.t_event_arg[(v) - 1];
+      result = z2ui5_cl_util.abap_copy(this.mo_action.ms_actual.t_event_arg[(v) - 1]);
     } catch (error) {
     }
   }
@@ -83,20 +83,20 @@ class z2ui5_cl_core_client {
     let lv_type = ``;
     let lv_title = ``;
     let lv_details = ``;
-    if (z2ui5_cl_util.rtti_check_clike(text) === false) {
+    if (!(z2ui5_cl_util.rtti_check_clike(text) === true || z2ui5_cl_util.rtti_check_clike(text) === `X`)) {
       ls_msg_box = z2ui5_cl_util.ui5_msg_box_format(text);
-      if (ls_msg_box.skip === true) {
+      if ((ls_msg_box.skip === true || ls_msg_box.skip === `X`)) {
         return;
       }
-      lv_text = ls_msg_box.text;
-      lv_type = ls_msg_box.type;
+      lv_text = z2ui5_cl_util.abap_copy(ls_msg_box.text);
+      lv_type = z2ui5_cl_util.abap_copy(ls_msg_box.type);
       lv_title = (title ? title : ls_msg_box.title);
-      lv_details = ls_msg_box.details;
+      lv_details = z2ui5_cl_util.abap_copy(ls_msg_box.details);
     } else {
-      lv_text = text;
-      lv_type = type;
-      lv_title = title;
-      lv_details = details;
+      lv_text = z2ui5_cl_util.abap_copy(text);
+      lv_type = z2ui5_cl_util.abap_copy(type);
+      lv_title = z2ui5_cl_util.abap_copy(title);
+      lv_details = z2ui5_cl_util.abap_copy(details);
       if (lv_type === `information`) {
         lv_type = `show`;
         if (!lv_title) {
@@ -122,12 +122,12 @@ class z2ui5_cl_core_client {
     if (!app.id_app) {
       app.id_app = z2ui5_cl_util.uuid_get_c32();
     }
-    result = app.id_app;
+    result = z2ui5_cl_util.abap_copy(app.id_app);
     return result;
   }
 
   nav_app_call() {
-    this.mo_action.ms_next.o_app_call = app;
+    this.mo_action.ms_next.o_app_call = z2ui5_cl_util.abap_copy(app);
     result = this.nav_app_set_id({ app: app });
   }
 
@@ -135,8 +135,8 @@ class z2ui5_cl_core_client {
     if (!(app !== undefined)) {
       app = this.get_app(this.mo_action.mo_app.ms_draft.id_prev_app_stack);
     }
-    this.mo_action.ms_next.o_app_leave = app;
-    this.mo_action.ms_next.next_event = event;
+    this.mo_action.ms_next.o_app_leave = z2ui5_cl_util.abap_copy(app);
+    this.mo_action.ms_next.next_event = z2ui5_cl_util.abap_copy(event);
     if (r_data) {
       this.mo_action.ms_next.r_data = z2ui5_cl_util.conv_copy_ref_data(r_data);
     }
@@ -148,10 +148,10 @@ class z2ui5_cl_core_client {
   }
 
   nest2_view_display() {
-    this.mo_action.ms_next.s_set.s_view_nest2.xml = val;
-    this.mo_action.ms_next.s_set.s_view_nest2.id = id;
-    this.mo_action.ms_next.s_set.s_view_nest2.method_destroy = method_destroy;
-    this.mo_action.ms_next.s_set.s_view_nest2.method_insert = method_insert;
+    this.mo_action.ms_next.s_set.s_view_nest2.xml = z2ui5_cl_util.abap_copy(val);
+    this.mo_action.ms_next.s_set.s_view_nest2.id = z2ui5_cl_util.abap_copy(id);
+    this.mo_action.ms_next.s_set.s_view_nest2.method_destroy = z2ui5_cl_util.abap_copy(method_destroy);
+    this.mo_action.ms_next.s_set.s_view_nest2.method_insert = z2ui5_cl_util.abap_copy(method_insert);
   }
 
   nest2_view_model_update() {
@@ -163,10 +163,10 @@ class z2ui5_cl_core_client {
   }
 
   nest_view_display() {
-    this.mo_action.ms_next.s_set.s_view_nest.xml = val;
-    this.mo_action.ms_next.s_set.s_view_nest.id = id;
-    this.mo_action.ms_next.s_set.s_view_nest.method_destroy = method_destroy;
-    this.mo_action.ms_next.s_set.s_view_nest.method_insert = method_insert;
+    this.mo_action.ms_next.s_set.s_view_nest.xml = z2ui5_cl_util.abap_copy(val);
+    this.mo_action.ms_next.s_set.s_view_nest.id = z2ui5_cl_util.abap_copy(id);
+    this.mo_action.ms_next.s_set.s_view_nest.method_destroy = z2ui5_cl_util.abap_copy(method_destroy);
+    this.mo_action.ms_next.s_set.s_view_nest.method_insert = z2ui5_cl_util.abap_copy(method_insert);
   }
 
   nest_view_model_update() {
@@ -179,8 +179,8 @@ class z2ui5_cl_core_client {
 
   popover_display() {
     this.mo_action.ms_next.s_set.s_popover.check_destroy = false;
-    this.mo_action.ms_next.s_set.s_popover.xml = xml;
-    this.mo_action.ms_next.s_set.s_popover.open_by_id = by_id;
+    this.mo_action.ms_next.s_set.s_popover.xml = z2ui5_cl_util.abap_copy(xml);
+    this.mo_action.ms_next.s_set.s_popover.open_by_id = z2ui5_cl_util.abap_copy(by_id);
   }
 
   popover_model_update() {
@@ -193,7 +193,7 @@ class z2ui5_cl_core_client {
 
   popup_display() {
     this.mo_action.ms_next.s_set.s_popup.check_destroy = false;
-    this.mo_action.ms_next.s_set.s_popup.xml = val;
+    this.mo_action.ms_next.s_set.s_popup.xml = z2ui5_cl_util.abap_copy(val);
   }
 
   popup_model_update() {
@@ -205,9 +205,9 @@ class z2ui5_cl_core_client {
   }
 
   view_display() {
-    this.mo_action.ms_next.s_set.s_view.xml = val;
-    this.mo_action.ms_next.s_set.s_view.switchdefaultmodelannouri = switch_default_model_anno_uri;
-    this.mo_action.ms_next.s_set.s_view.switch_default_model_path = switch_default_model_path;
+    this.mo_action.ms_next.s_set.s_view.xml = z2ui5_cl_util.abap_copy(val);
+    this.mo_action.ms_next.s_set.s_view.switchdefaultmodelannouri = z2ui5_cl_util.abap_copy(switch_default_model_anno_uri);
+    this.mo_action.ms_next.s_set.s_view.switch_default_model_path = z2ui5_cl_util.abap_copy(switch_default_model_path);
   }
 
   view_model_update() {
@@ -234,15 +234,15 @@ class z2ui5_cl_core_client {
   }
 
   set_nav_back() {
-    this.mo_action.ms_next.s_set.set_nav_back = val;
+    this.mo_action.ms_next.s_set.set_nav_back = z2ui5_cl_util.abap_copy(val);
   }
 
   set_push_state() {
-    this.mo_action.ms_next.s_set.set_push_state = val;
+    this.mo_action.ms_next.s_set.set_push_state = z2ui5_cl_util.abap_copy(val);
   }
 
   set_app_state_active() {
-    this.mo_action.ms_next.s_set.set_app_state_active = val;
+    this.mo_action.ms_next.s_set.set_app_state_active = z2ui5_cl_util.abap_copy(val);
   }
 
   set_session_stateful() {
@@ -250,9 +250,9 @@ class z2ui5_cl_core_client {
     if (li_app.check_sticky === val) {
       return;
     }
-    this.mo_action.ms_next.s_set.s_stateful.active = (val === true ? 1 : 0);
-    li_app.check_sticky = val;
-    this.mo_action.ms_next.s_set.s_stateful.switched = (this.mo_action.ms_next.s_set.s_stateful.switched === false);
+    this.mo_action.ms_next.s_set.s_stateful.active = ((val === true || val === `X`) ? 1 : 0);
+    li_app.check_sticky = z2ui5_cl_util.abap_copy(val);
+    this.mo_action.ms_next.s_set.s_stateful.switched = (!(this.mo_action.ms_next.s_set.s_stateful.switched === true || this.mo_action.ms_next.s_set.s_stateful.switched === `X`));
   }
 
   check_app_prev_stack() {
@@ -261,11 +261,11 @@ class z2ui5_cl_core_client {
 
   check_on_init() {
     const li_app = this.get_if_app();
-    result = (li_app.check_initialized === false);
+    result = (!(li_app.check_initialized === true || li_app.check_initialized === `X`));
   }
 
   check_on_navigated() {
-    result = this.mo_action.ms_actual.check_on_navigated;
+    result = z2ui5_cl_util.abap_copy(this.mo_action.ms_actual.check_on_navigated);
   }
 
   get_app_prev() {

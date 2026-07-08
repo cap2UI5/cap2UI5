@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -16,20 +17,20 @@ class z2ui5_cl_pop_to_confirm extends z2ui5_if_app {
 
   result() {
     let result = false;
-    result = this.check_result_confirmed;
+    result = z2ui5_cl_util.abap_copy(this.check_result_confirmed);
     return result;
   }
 
   static factory({ i_question_text, i_title = `Popup To Confirm`, i_icon = `sap-icon://question-mark`, i_button_text_confirm = `OK`, i_button_text_cancel = `Cancel`, i_event_confirm = z2ui5_cl_pop_to_confirm.cs_event.confirmed, i_event_cancel = z2ui5_cl_pop_to_confirm.cs_event.canceled } = {}) {
     let r_result = null;
     r_result = new z2ui5_cl_pop_to_confirm();
-    r_result.title = i_title;
-    r_result.icon = i_icon;
-    r_result.question_text = i_question_text;
-    r_result.button_text_confirm = i_button_text_confirm;
-    r_result.button_text_cancel = i_button_text_cancel;
-    r_result.event_confirm = i_event_confirm;
-    r_result.event_canceled = i_event_cancel;
+    r_result.title = z2ui5_cl_util.abap_copy(i_title);
+    r_result.icon = z2ui5_cl_util.abap_copy(i_icon);
+    r_result.question_text = z2ui5_cl_util.abap_copy(i_question_text);
+    r_result.button_text_confirm = z2ui5_cl_util.abap_copy(i_button_text_confirm);
+    r_result.button_text_cancel = z2ui5_cl_util.abap_copy(i_button_text_cancel);
+    r_result.event_confirm = z2ui5_cl_util.abap_copy(i_event_confirm);
+    r_result.event_canceled = z2ui5_cl_util.abap_copy(i_event_cancel);
     return r_result;
   }
 
@@ -48,7 +49,7 @@ class z2ui5_cl_pop_to_confirm extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.view_display();
       return;

@@ -7,42 +7,42 @@ class z2ui5_cl_util_log {
     let result = null;
     const lt_msg = z2ui5_cl_util.msg_get_t(val);
     this.mt_log.push(...lt_msg);
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     return result;
   }
 
   info({ val } = {}) {
     let result = null;
     this.mt_log.push({ type: `I`, text: val });
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     return result;
   }
 
   error({ val } = {}) {
     let result = null;
     this.mt_log.push({ type: `E`, text: val });
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     return result;
   }
 
   warning({ val } = {}) {
     let result = null;
     this.mt_log.push({ type: `W`, text: val });
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     return result;
   }
 
   success({ val } = {}) {
     let result = null;
     this.mt_log.push({ type: `S`, text: val });
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     return result;
   }
 
   clear() {
     let result = null;
     this.mt_log = [];
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     return result;
   }
 
@@ -54,7 +54,7 @@ class z2ui5_cl_util_log {
 
   count() {
     let result = 0;
-    result = this.mt_log.length;
+    result = z2ui5_cl_util.abap_copy(this.mt_log.length);
     return result;
   }
 
@@ -81,7 +81,7 @@ class z2ui5_cl_util_log {
 
   to_msg() {
     let result = [];
-    result = this.mt_log;
+    result = z2ui5_cl_util.abap_copy(this.mt_log);
     return result;
   }
 
@@ -92,7 +92,7 @@ class z2ui5_cl_util_log {
     for (const ls_msg of this.mt_log) {
       sy_tabix++;
       if (result) {
-        result = `${result}\\n`;
+        result = `${result} `;
       }
       result = `${result}[${ls_msg.type}] ${ls_msg.text}`;
     }

@@ -8,7 +8,7 @@ class z2ui5_cl_exit {
   static get_instance() {
     let ri_exit = null;
     if (z2ui5_cl_exit.gi_me != null) {
-      ri_exit = z2ui5_cl_exit.gi_me;
+      ri_exit = z2ui5_cl_util.abap_copy(z2ui5_cl_exit.gi_me);
       return ri_exit;
     }
     const lv_class_name = z2ui5_cl_exit.get_user_exit_class();
@@ -19,7 +19,7 @@ class z2ui5_cl_exit {
       }
     }
     z2ui5_cl_exit.gi_me = new z2ui5_cl_exit();
-    ri_exit = z2ui5_cl_exit.gi_me;
+    ri_exit = z2ui5_cl_util.abap_copy(z2ui5_cl_exit.gi_me);
     return ri_exit;
   }
 

@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -12,17 +13,17 @@ class z2ui5_cl_pop_input_val extends z2ui5_if_app {
   static factory({ text = `Enter New Value`, val, title = `Popup Input Value`, button_text_confirm = `OK`, button_text_cancel = `Cancel` } = {}) {
     let r_result = null;
     r_result = new z2ui5_cl_pop_input_val();
-    r_result.title = title;
-    r_result.question_text = text;
-    r_result.button_text_confirm = button_text_confirm;
-    r_result.button_text_cancel = button_text_cancel;
-    r_result.ms_result.value = val;
+    r_result.title = z2ui5_cl_util.abap_copy(title);
+    r_result.question_text = z2ui5_cl_util.abap_copy(text);
+    r_result.button_text_confirm = z2ui5_cl_util.abap_copy(button_text_confirm);
+    r_result.button_text_cancel = z2ui5_cl_util.abap_copy(button_text_cancel);
+    r_result.ms_result.value = z2ui5_cl_util.abap_copy(val);
     return r_result;
   }
 
   result() {
     let result = {};
-    result = this.ms_result;
+    result = z2ui5_cl_util.abap_copy(this.ms_result);
     return result;
   }
 
@@ -42,7 +43,7 @@ class z2ui5_cl_pop_input_val extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.view_display();
       return;

@@ -25,15 +25,15 @@ class z2ui5_cl_pop_to_select extends z2ui5_if_app {
   static factory({ i_tab, i_title, i_sort_field, i_descending, i_contentwidth, i_contentheight, i_growingthreshold, i_multiselect, i_event_canceled, i_event_confirmed } = {}) {
     let r_result = null;
     r_result = new z2ui5_cl_pop_to_select();
-    r_result.title = (i_title ? i_title : i_multiselect === true ? `Multi Select` : `Single Select`);
-    r_result.sort_field = i_sort_field;
-    r_result.descending = i_descending;
-    r_result.content_height = i_contentheight;
-    r_result.content_width = i_contentwidth;
-    r_result.growing_threshold = i_growingthreshold;
-    r_result.multiselect = i_multiselect;
-    r_result.event_confirmed = i_event_confirmed;
-    r_result.event_canceled = i_event_canceled;
+    r_result.title = (i_title ? i_title : (i_multiselect === true || i_multiselect === `X`) ? `Multi Select` : `Single Select`);
+    r_result.sort_field = z2ui5_cl_util.abap_copy(i_sort_field);
+    r_result.descending = z2ui5_cl_util.abap_copy(i_descending);
+    r_result.content_height = z2ui5_cl_util.abap_copy(i_contentheight);
+    r_result.content_width = z2ui5_cl_util.abap_copy(i_contentwidth);
+    r_result.growing_threshold = z2ui5_cl_util.abap_copy(i_growingthreshold);
+    r_result.multiselect = z2ui5_cl_util.abap_copy(i_multiselect);
+    r_result.event_confirmed = z2ui5_cl_util.abap_copy(i_event_confirmed);
+    r_result.event_canceled = z2ui5_cl_util.abap_copy(i_event_canceled);
     r_result.mr_tab = z2ui5_cl_util.conv_copy_ref_data(i_tab);
     // TODO(abap2js): CREATE DATA r_result->ms_result-row LIKE LINE OF i_tab.
     // TODO(abap2js): CREATE DATA r_result->ms_result-table LIKE i_tab.
@@ -69,7 +69,7 @@ class z2ui5_cl_pop_to_select extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.set_output_table();
       this.display();
@@ -96,7 +96,7 @@ class z2ui5_cl_pop_to_select extends z2ui5_if_app {
 
   result() {
     let result = {};
-    result = this.ms_result;
+    result = z2ui5_cl_util.abap_copy(this.ms_result);
     return result;
   }
 
@@ -143,17 +143,17 @@ class z2ui5_cl_pop_to_select extends z2ui5_if_app {
       sy_tabix++;
       // TODO(abap2js): CREATE DATA lr_row LIKE LINE OF <tab_out>.
       // TODO(abap2js): ASSIGN lr_row->* TO <row2>.
-      if (this.check_table_line === true) {
+      if ((this.check_table_line === true || this.check_table_line === `X`)) {
         // TODO(abap2js): ASSIGN lr_row->(`TAB_LINE`) TO <field>.
         if (!(sy_subrc === 0)) throw new Error(`ASSERT failed`);
-        fs_field = fs_row;
+        fs_field = z2ui5_cl_util.abap_copy(fs_row);
         if (_fs$fs_field) _fs$fs_field.o[_fs$fs_field.k] = fs_field;
       } else {
         // TODO(abap2js): MOVE-CORRESPONDING <row> TO <row2>.
       }
       fs_tab_out.push(fs_row2);
     }
-    fs_tab_out2 = fs_tab_out;
+    fs_tab_out2 = z2ui5_cl_util.abap_copy(fs_tab_out);
     if (_fs$fs_tab_out2) _fs$fs_tab_out2.o[_fs$fs_tab_out2.k] = fs_tab_out2;
   }
 
@@ -182,15 +182,15 @@ class z2ui5_cl_pop_to_select extends z2ui5_if_app {
       fs_selkz = _fs$fs_selkz ? _fs$fs_selkz.o[_fs$fs_selkz.k] : null;
       sy_subrc = _fs$fs_selkz ? 0 : 4;
       if (!(sy_subrc === 0)) throw new Error(`ASSERT failed`);
-      if (fs_selkz === false) {
+      if (!(fs_selkz === true || fs_selkz === `X`)) {
         continue;
       }
-      if (this.check_table_line === true) {
+      if ((this.check_table_line === true || this.check_table_line === `X`)) {
         _fs$fs_table_line_selected = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_row_selected, `TAB_LINE`);
         fs_table_line_selected = _fs$fs_table_line_selected ? _fs$fs_table_line_selected.o[_fs$fs_table_line_selected.k] : null;
         sy_subrc = _fs$fs_table_line_selected ? 0 : 4;
         if (!(sy_subrc === 0)) throw new Error(`ASSERT failed`);
-        fs_row_result = fs_table_line_selected;
+        fs_row_result = z2ui5_cl_util.abap_copy(fs_table_line_selected);
         if (_fs$fs_row_result) _fs$fs_row_result.o[_fs$fs_row_result.k] = fs_row_result;
       } else {
         fs_row_result = null;
@@ -198,7 +198,7 @@ class z2ui5_cl_pop_to_select extends z2ui5_if_app {
         // TODO(abap2js): MOVE-CORRESPONDING <row_selected> TO <row_result>.
       }
       fs_table_result.push(fs_row_result);
-      if (this.multiselect === false) {
+      if (!(this.multiselect === true || this.multiselect === `X`)) {
         break;
       }
     }
@@ -214,7 +214,7 @@ class z2ui5_cl_pop_to_select extends z2ui5_if_app {
     let _fs$fs_tab_out_backup = null;
     // TODO(abap2js): ASSIGN mr_tab_popup->* TO <tab_out>.
     // TODO(abap2js): ASSIGN mr_tab_popup_backup->* TO <tab_out_backup>.
-    fs_tab_out = fs_tab_out_backup;
+    fs_tab_out = z2ui5_cl_util.abap_copy(fs_tab_out_backup);
     if (_fs$fs_tab_out) _fs$fs_tab_out.o[_fs$fs_tab_out.k] = fs_tab_out;
     z2ui5_cl_util.itab_filter_by_val({ val: this.client.get_event_arg(1), ignore_case: true, tab: fs_tab_out });
     this.client.popup_model_update();

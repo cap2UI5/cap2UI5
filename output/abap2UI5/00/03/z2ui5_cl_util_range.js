@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 
 class z2ui5_cl_util_range {
   static signs = { including: `I`, excluding: `E` };
@@ -72,7 +73,7 @@ class z2ui5_cl_util_range {
   }
 
   constructor({ iv_fieldname, ir_range } = {}) {
-    this.mr_range = ir_range;
+    this.mr_range = z2ui5_cl_util.abap_copy(ir_range);
     this.mv_fieldname = `${iv_fieldname.toUpperCase()}`;
   }
 
@@ -91,7 +92,7 @@ class z2ui5_cl_util_range {
     let fs_lv_high = null;
     let _fs$fs_lv_high = null;
     // TODO(abap2js): ASSIGN me->mr_range->* TO <lt_range>.
-    if ((!fs_lt_range) === true) {
+    if ((((!fs_lt_range)) === true || ((!fs_lt_range)) === `X`)) {
       return result;
     }
     result = `(`;

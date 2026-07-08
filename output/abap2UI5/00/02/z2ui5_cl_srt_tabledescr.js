@@ -1,6 +1,7 @@
 // TODO(abap2js): unresolved reference cl_abap_tabledescr — add require manually
 const z2ui5_cl_srt_complexdescr = require("abap2UI5/z2ui5_cl_srt_complexdescr");
 const z2ui5_cl_srt_typedescr = require("abap2UI5/z2ui5_cl_srt_typedescr");
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cx_srt = require("abap2UI5/z2ui5_cx_srt");
 
 class z2ui5_cl_srt_tabledescr extends z2ui5_cl_srt_complexdescr {
@@ -13,13 +14,13 @@ class z2ui5_cl_srt_tabledescr extends z2ui5_cl_srt_complexdescr {
 
   constructor({ rtti } = {}) {
     super.constructor(rtti);
-    this.key = rtti.key;
-    this.initial_size = rtti.initial_size;
-    this.key_defkind = rtti.key_defkind;
-    this.has_unique_key = rtti.has_unique_key;
-    this.table_kind = rtti.table_kind;
+    this.key = z2ui5_cl_util.abap_copy(rtti.key);
+    this.initial_size = z2ui5_cl_util.abap_copy(rtti.initial_size);
+    this.key_defkind = z2ui5_cl_util.abap_copy(rtti.key_defkind);
+    this.has_unique_key = z2ui5_cl_util.abap_copy(rtti.has_unique_key);
+    this.table_kind = z2ui5_cl_util.abap_copy(rtti.table_kind);
     this.line_type = z2ui5_cl_srt_typedescr.create_by_rtti(rtti.get_table_line_type());
-    if (this.line_type.not_serializable === true) {
+    if ((this.line_type.not_serializable === true || this.line_type.not_serializable === `X`)) {
       not_serializable = true;
     }
   }

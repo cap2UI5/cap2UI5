@@ -11,7 +11,7 @@ class z2ui5_cl_pop_get_range_m extends z2ui5_if_app {
   static factory({ val } = {}) {
     let r_result = null;
     r_result = new z2ui5_cl_pop_get_range_m();
-    r_result.ms_result.t_filter = val;
+    r_result.ms_result.t_filter = z2ui5_cl_util.abap_copy(val);
     return r_result;
   }
 
@@ -41,7 +41,7 @@ class z2ui5_cl_pop_get_range_m extends z2ui5_if_app {
 
   result() {
     let result = {};
-    result = this.ms_result;
+    result = z2ui5_cl_util.abap_copy(this.ms_result);
     return result;
   }
 
@@ -52,20 +52,20 @@ class z2ui5_cl_pop_get_range_m extends z2ui5_if_app {
     let _fs$fs_tab = null;
     let lo_popup;
     let ls_popup_result;
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.init();
       return;
     }
     const ls_get = client.get();
-    if (ls_get.CHECK_ON_NAVIGATED === true) {
+    if ((ls_get.CHECK_ON_NAVIGATED === true || ls_get.CHECK_ON_NAVIGATED === `X`)) {
       lo_popup = (client.get_app_prev());
       ls_popup_result = lo_popup.result();
-      if (ls_popup_result.check_confirmed === true) {
+      if ((ls_popup_result.check_confirmed === true || ls_popup_result.check_confirmed === `X`)) {
         fs_tab = this.ms_result.t_filter.find((row) => row.name === this.mv_popup_name);
         _fs$fs_tab = null;
         sy_subrc = 0;
-        fs_tab.t_range = ls_popup_result.t_range;
+        fs_tab.t_range = z2ui5_cl_util.abap_copy(ls_popup_result.t_range);
         fs_tab.t_token = z2ui5_cl_util.filter_get_token_t_by_range_t(fs_tab.t_range);
       }
       this.popup_display();

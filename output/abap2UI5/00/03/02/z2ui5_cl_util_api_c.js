@@ -1,6 +1,7 @@
 // TODO(abap2js): unresolved reference cl_abap_structdescr — add require manually
 // TODO(abap2js): unresolved reference cl_abap_typedescr — add require manually
 // TODO(abap2js): unresolved reference cx_sy_dyn_call_illegal_class — add require manually
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cx_util_error = require("abap2UI5/z2ui5_cx_util_error");
 
 class z2ui5_cl_util_api_c {
@@ -15,7 +16,7 @@ class z2ui5_cl_util_api_c {
       lv_result = {};
       lv_class = `CL_ABAP_CONTEXT_INFO`;
       // TODO(abap2js): CALL METHOD (lv_class)=>(`GET_USER_TECHNICAL_NAME`) RECEIVING rv_technical_name = lv_result.
-      result = lv_result;
+      result = z2ui5_cl_util.abap_copy(lv_result);
     } catch (x) {
       throw new z2ui5_cx_util_error({ previous: x });
     }
@@ -24,8 +25,8 @@ class z2ui5_cl_util_api_c {
 
   static context_check_abap_cloud() {
     let result = false;
-    if (z2ui5_cl_util_api_c.gv_check_cloud_cached === true) {
-      result = z2ui5_cl_util_api_c.gv_check_cloud;
+    if ((z2ui5_cl_util_api_c.gv_check_cloud_cached === true || z2ui5_cl_util_api_c.gv_check_cloud_cached === `X`)) {
+      result = z2ui5_cl_util.abap_copy(z2ui5_cl_util_api_c.gv_check_cloud);
       return result;
     }
     try {
@@ -35,7 +36,7 @@ class z2ui5_cl_util_api_c {
       z2ui5_cl_util_api_c.gv_check_cloud = true;
     }
     z2ui5_cl_util_api_c.gv_check_cloud_cached = true;
-    result = z2ui5_cl_util_api_c.gv_check_cloud;
+    result = z2ui5_cl_util.abap_copy(z2ui5_cl_util_api_c.gv_check_cloud);
     return result;
   }
 
@@ -56,15 +57,15 @@ class z2ui5_cl_util_api_c {
     let lr_fix = null;
     let temp2 = null;
     lv_langu = ` `;
-    lv_langu = langu;
+    lv_langu = z2ui5_cl_util.abap_copy(langu);
     // TODO(abap2js): CALL METHOD elemdescr->(`GET_DDIC_FIXED_VALUES`) EXPORTING p_langu = lv_langu RECEIVING p_fixed_values = lt_values EXCEPTIONS not_found = 1 no_ddic_type = 2 OTHERS = 3.
     sy_tabix = 0;
     for (const lr_fix of lt_values) {
       sy_tabix++;
       temp2 = null;
-      temp2.low = lr_fix.low;
-      temp2.high = lr_fix.high;
-      temp2.descr = lr_fix.ddtext;
+      temp2.low = z2ui5_cl_util.abap_copy(lr_fix.low);
+      temp2.high = z2ui5_cl_util.abap_copy(lr_fix.high);
+      temp2.descr = z2ui5_cl_util.abap_copy(lr_fix.ddtext);
       result.push(temp2);
     }
     return result;
@@ -155,7 +156,7 @@ class z2ui5_cl_util_api_c {
       // TODO(abap2js): CALL METHOD (xco_cp_abap)=>(`CLASS`) EXPORTING iv_name = lv_class RECEIVING ro_class = object.
       // TODO(abap2js): ASSIGN object->(`IF_XCO_AO_CLASS~IMPLEMENTATION`) TO <any>.
       if (!(sy_subrc === 0)) throw new Error(`ASSERT failed`);
-      object = fs_any;
+      object = z2ui5_cl_util.abap_copy(fs_any);
       // TODO(abap2js): CALL METHOD object->(`IF_XCO_CLAS_IMPLEMENTATION~METHOD`) EXPORTING iv_name = lv_method RECEIVING ro_method = object.
       // TODO(abap2js): CALL METHOD object->(`IF_XCO_CLAS_I_METHOD~CONTENT`) RECEIVING ro_content = object.
       // TODO(abap2js): CALL METHOD object->(`IF_XCO_CLAS_I_METHOD_CONTENT~GET_SOURCE`) RECEIVING rt_source = result.
@@ -176,12 +177,12 @@ class z2ui5_cl_util_api_c {
           lv_check_method = true;
           continue;
         }
-        if (lv_check_method === true) {
+        if ((lv_check_method === true || lv_check_method === `X`)) {
           lt_string.push(lv_source);
         }
       }
     }
-    result = lt_string;
+    result = z2ui5_cl_util.abap_copy(lt_string);
     return result;
   }
 
@@ -217,29 +218,29 @@ class z2ui5_cl_util_api_c {
     let lr_impl = null;
     let temp6 = null;
     try {
-      ls_clskey.clsname = val;
+      ls_clskey.clsname = z2ui5_cl_util.abap_copy(val);
       xco_cp_abap = `XCO_CP_ABAP`;
       // TODO(abap2js): CALL METHOD (xco_cp_abap)=>interface EXPORTING iv_name = ls_clskey-clsname RECEIVING ro_interface = obj.
       // TODO(abap2js): ASSIGN obj->(`IF_XCO_AO_INTERFACE~IMPLEMENTATIONS`) TO <any>.
       if (sy_subrc !== 0) {
         throw new cx_sy_dyn_call_illegal_class();
       }
-      obj = fs_any;
+      obj = z2ui5_cl_util.abap_copy(fs_any);
       // TODO(abap2js): ASSIGN obj->(`IF_XCO_INTF_IMPLEMENTATIONS_FC~ALL`) TO <any>.
       if (sy_subrc !== 0) {
         throw new cx_sy_dyn_call_illegal_class();
       }
-      obj = fs_any;
+      obj = z2ui5_cl_util.abap_copy(fs_any);
       // TODO(abap2js): CALL METHOD obj->(`IF_XCO_INTF_IMPLEMENTATIONS~GET_NAMES`) RECEIVING rt_names = lt_implementation_names.
       temp3 = null;
       sy_tabix = 0;
       for (const implementation_name of lt_implementation_names) {
         sy_tabix++;
-        temp4.classname = implementation_name;
+        temp4.classname = z2ui5_cl_util.abap_copy(implementation_name);
         temp4.description = z2ui5_cl_util_api_c.rtti_get_class_descr_on_cloud({ i_classname: implementation_name });
         temp3.push(temp4);
       }
-      result = temp3;
+      result = z2ui5_cl_util.abap_copy(temp3);
     } catch (x) {
       lv_dummy = x.get_text();
     }
@@ -268,11 +269,11 @@ class z2ui5_cl_util_api_c {
     let lo_typedescr = null;
     let temp8 = null;
     let data_descr = null;
-    data_element_name = val;
+    data_element_name = z2ui5_cl_util.abap_copy(val);
     try {
       cl_abap_typedescr.describe_by_name(`T100`);
       temp7 = cl_abap_structdescr.describe_by_name(`DFIES`);
-      struct_desrc = temp7;
+      struct_desrc = z2ui5_cl_util.abap_copy(temp7);
       // TODO(abap2js): CREATE DATA ddic_ref TYPE HANDLE struct_desrc.
       // TODO(abap2js): ASSIGN ddic_ref->* TO <ddic>.
       if (!(sy_subrc === 0)) throw new Error(`ASSERT failed`);
@@ -280,24 +281,24 @@ class z2ui5_cl_util_api_c {
       if (sy_subrc !== 0) {
         return result;
       }
-      temp8 = lo_typedescr;
-      data_descr = temp8;
+      temp8 = z2ui5_cl_util.abap_copy(lo_typedescr);
+      data_descr = z2ui5_cl_util.abap_copy(temp8);
       // TODO(abap2js): CALL METHOD data_descr->(`GET_DDIC_FIELD`) RECEIVING p_flddescr = <ddic> EXCEPTIONS not_found = 1 no_ddic_type = 2 OTHERS = 3.
       if (sy_subrc !== 0) {
         return result;
       }
       // TODO(abap2js): MOVE-CORRESPONDING <ddic> TO ddic.
-      result.header = ddic.reptext;
-      result.short = ddic.scrtext_s;
-      result.medium = ddic.scrtext_m;
-      result.long = ddic.scrtext_l;
+      result.header = z2ui5_cl_util.abap_copy(ddic.reptext);
+      result.short = z2ui5_cl_util.abap_copy(ddic.scrtext_s);
+      result.medium = z2ui5_cl_util.abap_copy(ddic.scrtext_m);
+      result.long = z2ui5_cl_util.abap_copy(ddic.scrtext_l);
     } catch (error) {
       try {
         let lv_xco_cp_abap_dictionary = ``;
         lv_xco_cp_abap_dictionary = `XCO_CP_ABAP_DICTIONARY`;
         // TODO(abap2js): CALL METHOD (lv_xco_cp_abap_dictionary)=>(`DATA_ELEMENT`) EXPORTING iv_name = data_element_name RECEIVING ro_data_element = data_element.
         // TODO(abap2js): CALL METHOD data_element->(`IF_XCO_AD_DATA_ELEMENT~EXISTS`) RECEIVING rv_exists = exists.
-        if (exists === false) {
+        if (!(exists === true || exists === `X`)) {
           return result;
         }
         // TODO(abap2js): CALL METHOD data_element->(`IF_XCO_AD_DATA_ELEMENT~CONTENT`) RECEIVING ro_content = content.
@@ -310,10 +311,10 @@ class z2ui5_cl_util_api_c {
       }
     }
     if (!result) {
-      result.header = val;
-      result.long = val;
-      result.medium = val;
-      result.short = val;
+      result.header = z2ui5_cl_util.abap_copy(val);
+      result.long = z2ui5_cl_util.abap_copy(val);
+      result.medium = z2ui5_cl_util.abap_copy(val);
+      result.short = z2ui5_cl_util.abap_copy(val);
     }
     return result;
   }
@@ -331,7 +332,7 @@ class z2ui5_cl_util_api_c {
         lv_fm = `GUID_CREATE`;
         // TODO(abap2js): CALL FUNCTION lv_fm IMPORTING ev_guid_22 = lv_uuid.
       }
-      result = lv_uuid;
+      result = z2ui5_cl_util.abap_copy(lv_uuid);
     } catch (error) {
       if (!(1 === 0)) throw new Error(`ASSERT failed`);
     }
@@ -355,7 +356,7 @@ class z2ui5_cl_util_api_c {
         lv_fm = `GUID_CREATE`;
         // TODO(abap2js): CALL FUNCTION lv_fm IMPORTING ev_guid_32 = lv_uuid.
       }
-      result = lv_uuid;
+      result = z2ui5_cl_util.abap_copy(lv_uuid);
     } catch (error) {
       if (!(1 === 0)) throw new Error(`ASSERT failed`);
     }
@@ -370,7 +371,7 @@ class z2ui5_cl_util_api_c {
       let content = null;
       let lv_classname = ``;
       let xco_cp_abap = ``;
-      lv_classname = i_classname;
+      lv_classname = z2ui5_cl_util.abap_copy(i_classname);
       xco_cp_abap = `XCO_CP_ABAP`;
       // TODO(abap2js): CALL METHOD (xco_cp_abap)=>(`CLASS`) EXPORTING iv_name = lv_classname RECEIVING ro_class = obj.
       // TODO(abap2js): CALL METHOD obj->(`IF_XCO_AO_CLASS~CONTENT`) RECEIVING ro_content = content.
@@ -387,20 +388,20 @@ class z2ui5_cl_util_api_c {
     let lv_tabname;
     let ddtext = ``;
     if (!(langu !== undefined)) {
-      lan = sy_langu;
+      lan = z2ui5_cl_util.abap_copy(sy_langu);
     } else {
-      lan = langu;
+      lan = z2ui5_cl_util.abap_copy(langu);
     }
     if (z2ui5_cl_util_api_c.context_check_abap_cloud()) {
-      ddtext = tabname;
+      ddtext = z2ui5_cl_util.abap_copy(tabname);
     } else {
       lv_tabname = `dd02t`;
       // TODO(abap2js): SELECT SINGLE ddtext FROM (lv_tabname) WHERE tabname = @tabname AND ddlanguage = @lan INTO @ddtext.
     }
     if (ddtext) {
-      result = ddtext;
+      result = z2ui5_cl_util.abap_copy(ddtext);
     } else {
-      result = tabname;
+      result = z2ui5_cl_util.abap_copy(tabname);
     }
     return result;
   }
@@ -442,19 +443,19 @@ class z2ui5_cl_util_api_c {
       // TODO(abap2js): ASSIGN (lv_assign) TO <format>.
       lv_assign = `XCO_CP_CALL_STACK=>FORMAT`;
       // TODO(abap2js): ASSIGN (lv_assign) TO <format2>.
-      format_obj2 = fs_format2;
+      format_obj2 = z2ui5_cl_util.abap_copy(fs_format2);
       // TODO(abap2js): CALL METHOD format_obj2->(`IF_XCO_CP_CS_FORMAT_FACTORY~ADT`) RECEIVING ro_adt = format_obj3.
       // TODO(abap2js): CALL METHOD format_obj3->(`WITH_LINE_NUMBER_FLAVOR`) EXPORTING io_line_number_flavor = <format> RECEIVING ro_me = format_source.
       lv_xco_cp = `XCO_CP`;
       // TODO(abap2js): ASSIGN (lv_xco_cp)=>(`CURRENT`) TO <current>.
-      current_obj = fs_current;
+      current_obj = z2ui5_cl_util.abap_copy(fs_current);
       // TODO(abap2js): ASSIGN current_obj->(`IF_XCO_CP_STD_CURRENT~CALL_STACK`) TO <call_stack>.
-      stack = fs_call_stack;
+      stack = z2ui5_cl_util.abap_copy(fs_call_stack);
       // TODO(abap2js): CALL METHOD stack->(`IF_XCO_CP_STD_CUR_API_CLL_STCK~FULL`) RECEIVING ro_full = full_stack.
       let r = null;
       // TODO(abap2js): CREATE DATA r TYPE REF TO (`IF_XCO_CS_FORMAT`).
       // TODO(abap2js): ASSIGN r->* TO <any>.
-      fs_any = format_source;
+      fs_any = z2ui5_cl_util.abap_copy(format_source);
       if (_fs$fs_any) _fs$fs_any.o[_fs$fs_any.k] = fs_any;
       // TODO(abap2js): CALL METHOD full_stack->(`IF_XCO_CP_CALL_STACK~AS_TEXT`) EXPORTING io_format = <any> RECEIVING ro_text = text_obj.
       // TODO(abap2js): CALL METHOD text_obj->(`IF_XCO_TEXT~GET_LINES`) RECEIVING ro_lines = ro_lines.
@@ -542,31 +543,31 @@ class z2ui5_cl_util_api_c {
           ls_msg = {};
           lv_text = ``;
           // TODO(abap2js): CALL METHOD ls_item-item->(`GET_MESSAGE_TEXT`) RECEIVING message_text = lv_text.
-          ls_msg.text = lv_text;
+          ls_msg.text = z2ui5_cl_util.abap_copy(lv_text);
           try {
             // TODO(abap2js): CALL METHOD ls_item-item->(`GET_SEVERITY`) RECEIVING severity = lv_severity.
-            ls_msg.type = lv_severity;
+            ls_msg.type = z2ui5_cl_util.abap_copy(lv_severity);
           } catch (error) {
           }
           try {
             // TODO(abap2js): CALL METHOD ls_item-item->(`GET_MESSAGE_ID`) RECEIVING id = lv_msgid.
-            ls_msg.id = lv_msgid;
+            ls_msg.id = z2ui5_cl_util.abap_copy(lv_msgid);
           } catch (error) {
           }
           try {
             // TODO(abap2js): CALL METHOD ls_item-item->(`GET_MESSAGE_NUMBER`) RECEIVING number = lv_msgno.
-            ls_msg.no = lv_msgno;
+            ls_msg.no = z2ui5_cl_util.abap_copy(lv_msgno);
           } catch (error) {
           }
           try {
             // TODO(abap2js): CALL METHOD ls_item-item->(`GET_MESSAGE_VARIABLE_1`) RECEIVING variable_1 = lv_msgv1.
-            ls_msg.v1 = lv_msgv1;
+            ls_msg.v1 = z2ui5_cl_util.abap_copy(lv_msgv1);
             // TODO(abap2js): CALL METHOD ls_item-item->(`GET_MESSAGE_VARIABLE_2`) RECEIVING variable_2 = lv_msgv2.
-            ls_msg.v2 = lv_msgv2;
+            ls_msg.v2 = z2ui5_cl_util.abap_copy(lv_msgv2);
             // TODO(abap2js): CALL METHOD ls_item-item->(`GET_MESSAGE_VARIABLE_3`) RECEIVING variable_3 = lv_msgv3.
-            ls_msg.v3 = lv_msgv3;
+            ls_msg.v3 = z2ui5_cl_util.abap_copy(lv_msgv3);
             // TODO(abap2js): CALL METHOD ls_item-item->(`GET_MESSAGE_VARIABLE_4`) RECEIVING variable_4 = lv_msgv4.
-            ls_msg.v4 = lv_msgv4;
+            ls_msg.v4 = z2ui5_cl_util.abap_copy(lv_msgv4);
           } catch (error) {
           }
           result.push(ls_msg);
@@ -594,7 +595,7 @@ class z2ui5_cl_util_api_c {
         z2ui5_cl_util_api_c.bal_create({ object, subobject, id, t_log });
         return;
       }
-      lo_log = lt_logs[(1) - 1];
+      lo_log = z2ui5_cl_util.abap_copy(lt_logs[(1) - 1]);
       z2ui5_cl_util_api_c.bal_add_items({ log: lo_log, t_log });
       // TODO(abap2js): CALL METHOD lo_db->(`SAVE_LOG`) EXPORTING log = lo_log.
       // TODO(abap2js): COMMIT WORK AND WAIT.
@@ -633,7 +634,7 @@ class z2ui5_cl_util_api_c {
     sy_tabix = 0;
     for (const ls_log of t_log) {
       sy_tabix++;
-      lv_msgty = ls_log.type;
+      lv_msgty = z2ui5_cl_util.abap_copy(ls_log.type);
       if (ls_log.id && ls_log.no) {
         lv_class = `CL_BALI_MESSAGE_SETTER`;
         // TODO(abap2js): CALL METHOD (lv_class)=>(`CREATE`) EXPORTING severity = lv_msgty id = ls_log-id number = ls_log-no variable_1 = ls_log-v1 variable_2 = ls_log-v2 variable_3 = ls_log-v3 variable_4 = ls_log-v4 RECEIVING message = lo_item.
@@ -652,7 +653,7 @@ class z2ui5_cl_util_api_c {
     lv_class = `CL_BALI_LOG_FILTER`;
     // TODO(abap2js): CALL METHOD (lv_class)=>(`CREATE`) RECEIVING filter = lo_filter.
     // TODO(abap2js): CALL METHOD lo_filter->(`SET_DESCRIPTOR`) EXPORTING object = object subobject = subobject external_id = id.
-    result = lo_filter;
+    result = z2ui5_cl_util.abap_copy(lo_filter);
     return result;
   }
 

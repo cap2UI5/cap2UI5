@@ -1,4 +1,5 @@
 const z2ui5_cl_ajson = require("abap2UI5/z2ui5_cl_ajson");
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cx_ajson_error = require("abap2UI5/z2ui5_cx_ajson_error");
 const z2ui5_if_ajson_types = require("abap2UI5/z2ui5_if_ajson_types");
 
@@ -16,7 +17,7 @@ class z2ui5_cl_ajson_utilities {
     let lv_done = false;
     for (let sy_index = 1; ; sy_index++) {
       lv_done = true;
-      if (iv_keep_empty_arrays === false) {
+      if (!(iv_keep_empty_arrays === true || iv_keep_empty_arrays === `X`)) {
         sy_tabix = 0;
         for (const ls_json_tree of io_json.mt_json_tree) {
           sy_tabix++;
@@ -36,7 +37,7 @@ class z2ui5_cl_ajson_utilities {
       if (sy_subrc === 0) {
         lv_done = false;
       }
-      if (lv_done === true) {
+      if ((lv_done === true || lv_done === `X`)) {
         break;
       }
     }
@@ -50,9 +51,9 @@ class z2ui5_cl_ajson_utilities {
     this.mo_change = z2ui5_cl_ajson.create_empty();
     this.diff_a_b({ iv_path: `/` });
     this.diff_b_a({ iv_path: `/` });
-    eo_insert = this.mo_insert;
-    eo_delete = this.mo_delete;
-    eo_change = this.mo_change;
+    eo_insert = z2ui5_cl_util.abap_copy(this.mo_insert);
+    eo_delete = z2ui5_cl_util.abap_copy(this.mo_delete);
+    eo_change = z2ui5_cl_util.abap_copy(this.mo_change);
     this.delete_empty_nodes({ io_json: eo_insert, iv_keep_empty_arrays });
     this.delete_empty_nodes({ io_json: eo_delete, iv_keep_empty_arrays });
     this.delete_empty_nodes({ io_json: eo_change, iv_keep_empty_arrays });
@@ -157,7 +158,7 @@ class z2ui5_cl_ajson_utilities {
           this.diff_b_a({ iv_path: lv_path });
           break;
         default:
-          if (iv_array === false) {
+          if (!(iv_array === true || iv_array === `X`)) {
             {
               const _t = this.mo_json_a.mt_json_tree;
               const _i = _t.findIndex((_r) => _r.path === fs_node_b.path && _r.name === fs_node_b.name);
@@ -187,7 +188,7 @@ class z2ui5_cl_ajson_utilities {
     let li_del = null;
     let li_mod = null;
     // TODO(abap2js): diff( EXPORTING iv_json_a = iv_json_a iv_json_b = iv_json_b io_json_a = ii_json_a io_json_b = ii_json_b IMPORTING eo_insert = li_ins eo_delete = li_del eo_change = li_mod ).
-    rv_yes = (li_ins.is_empty() === true && li_del.is_empty() === true && li_mod.is_empty() === true);
+    rv_yes = ((li_ins.is_empty() === true || li_ins.is_empty() === `X`) && (li_del.is_empty() === true || li_del.is_empty() === `X`) && (li_mod.is_empty() === true || li_mod.is_empty() === `X`));
     return rv_yes;
   }
 
@@ -207,9 +208,9 @@ class z2ui5_cl_ajson_utilities {
     let ro_json = null;
     this.mo_json_a = this.normalize_input({ iv_json: iv_json_a, io_json: io_json_a });
     this.mo_json_b = this.normalize_input({ iv_json: iv_json_b, io_json: io_json_b });
-    this.mo_insert = this.mo_json_a;
+    this.mo_insert = z2ui5_cl_util.abap_copy(this.mo_json_a);
     this.diff_b_a({ iv_path: `/` });
-    ro_json = this.mo_insert;
+    ro_json = z2ui5_cl_util.abap_copy(this.mo_insert);
     this.delete_empty_nodes({ io_json: ro_json, iv_keep_empty_arrays });
     return ro_json;
   }
@@ -228,7 +229,7 @@ class z2ui5_cl_ajson_utilities {
     if (iv_json) {
       ro_json = z2ui5_cl_ajson.parse(iv_json);
     } else if (io_json) {
-      ro_json = io_json;
+      ro_json = z2ui5_cl_util.abap_copy(io_json);
     } else {
       z2ui5_cx_ajson_error.raise(`Supply either JSON string or instance`);
     }

@@ -1,10 +1,11 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_if_core_types = require("abap2UI5/z2ui5_if_core_types");
 
 class z2ui5_cl_core_srv_event {
   get_event({ val, t_arg, s_cnt } = {}) {
     let result = ``;
     result = `${z2ui5_if_core_types.cs_ui5.event_backend_function}(['${val}'`;
-    if (s_cnt.check_allow_multi_req === true) {
+    if ((s_cnt.check_allow_multi_req === true || s_cnt.check_allow_multi_req === `X`)) {
       result = `${result},false,true`;
     }
     result = `${result}]${this.get_t_arg({ val: t_arg })}`;
@@ -24,7 +25,7 @@ class z2ui5_cl_core_srv_event {
     sy_tabix = 0;
     for (const lr_arg of val) {
       sy_tabix++;
-      lv_new = lr_arg;
+      lv_new = z2ui5_cl_util.abap_copy(lr_arg);
       if (!lv_new) {
         continue;
       }

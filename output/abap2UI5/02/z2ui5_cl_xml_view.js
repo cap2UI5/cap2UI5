@@ -70,7 +70,7 @@ class z2ui5_cl_xml_view {
 
   area_micro_chart({ colorpalette, press, size, height, maxxvalue, maxyvalue, minxvalue, minyvalue, view, aligncontent, hideonnodata, showlabel, width } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `AreaMicroChart`, ns: `mchart`, t_prop: [{ n: `colorPalette`, v: colorpalette }, { n: `press`, v: press }, { n: `size`, v: size }, { n: `height`, v: height }, { n: `maxXValue`, v: maxxvalue }, { n: `maxYValue`, v: maxyvalue }, { n: `minXValue`, v: minxvalue }, { n: `minYValue`, v: minyvalue }, { n: `view`, v: view }, { n: `alignContent`, v: aligncontent }, { n: `hideOnNoData`, v: z2ui5_cl_util.boolean_abap_2_json(hideonnodata) }, { n: `showLabel`, v: z2ui5_cl_util.boolean_abap_2_json(showlabel) }, { n: `width`, v: width }] });
     return result;
   }
@@ -83,7 +83,7 @@ class z2ui5_cl_xml_view {
 
   avatar({ ns, id, src, class: class_, displaysize, ariahaspopup, backgroundcolor, badgeicon, badgetooltip, badgevaluestate, customdisplaysize, customfontsize, displayshape, fallbackicon, imagefittype, initials, showborder, decorative, enabled, press } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `Avatar`, ns: false /* TODO(abap2js): NS */, t_prop: [{ n: `id`, v: id }, { n: `src`, v: src }, { n: `class`, v: class_ }, { n: `ariaHasPopup`, v: ariahaspopup }, { n: `backgroundColor`, v: backgroundcolor }, { n: `badgeIcon`, v: badgeicon }, { n: `badgeTooltip`, v: badgetooltip }, { n: `badgeValueState`, v: badgevaluestate }, { n: `customDisplaySize`, v: customdisplaysize }, { n: `customFontSize`, v: customfontsize }, { n: `displayShape`, v: displayshape }, { n: `fallbackIcon`, v: fallbackicon }, { n: `imageFitType`, v: imagefittype }, { n: `initials`, v: initials }, { n: `showBorder`, v: z2ui5_cl_util.boolean_abap_2_json(showborder) }, { n: `decorative`, v: z2ui5_cl_util.boolean_abap_2_json(decorative) }, { n: `enabled`, v: z2ui5_cl_util.boolean_abap_2_json(enabled) }, { n: `displaySize`, v: displaysize }, { n: `press`, v: press }] });
     return result;
   }
@@ -96,7 +96,7 @@ class z2ui5_cl_xml_view {
 
   avatar_group_item({ id, busy = `false`, busyindicatordelay, busyindicatorsize, fallbackicon, fieldgroupids, initials, src, visible = `true`, tooltip } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `AvatarGroupItem`, ns: `f`, t_prop: [{ n: `id`, v: id }, { n: `busy`, v: busy }, { n: `busyIndicatorDelay`, v: busyindicatordelay }, { n: `busyIndicatorSize`, v: busyindicatorsize }, { n: `fallbackIcon`, v: fallbackicon }, { n: `fieldGroupIds`, v: fieldgroupids }, { n: `initials`, v: initials }, { n: `src`, v: src }, { n: `visible`, v: visible }, { n: `tooltip`, v: tooltip }] });
     return result;
   }
@@ -115,7 +115,7 @@ class z2ui5_cl_xml_view {
 
   badge_custom_data({ value, visible } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `BadgeCustomData`, t_prop: [{ n: `key`, v: key }, { n: `value`, v: value }, { n: `visible`, v: z2ui5_cl_util.boolean_abap_2_json(visible) }] });
     return result;
   }
@@ -188,7 +188,7 @@ class z2ui5_cl_xml_view {
 
   bullet_micro_chart({ actualvaluelabel, press, size, height, width, deltavaluelabel, maxvalue, minvalue, mode, scale, targetvalue, targetvaluelabel, scalecolor, hideonnodata, showactualvalue, showdeltavalue, showtargetvalue, showthresholds, showvaluemarker, smallrangeallowed, forecastvalue, savidm } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `BulletMicroChart`, ns: `mchart`, t_prop: [{ n: `actualValueLabel`, v: actualvaluelabel }, { n: `press`, v: press }, { n: `size`, v: size }, { n: `height`, v: height }, { n: `width`, v: width }, { n: `deltaValueLabel`, v: deltavaluelabel }, { n: `maxValue`, v: maxvalue }, { n: `minValue`, v: minvalue }, { n: `mode`, v: mode }, { n: `scale`, v: scale }, { n: `targetValue`, v: targetvalue }, { n: `targetValueLabel`, v: targetvaluelabel }, { n: `scaleColor`, v: scalecolor }, { n: `hideOnNoData`, v: z2ui5_cl_util.boolean_abap_2_json(hideonnodata) }, { n: `showActualValue`, v: z2ui5_cl_util.boolean_abap_2_json(showactualvalue) }, { n: `showActualValueInDeltaMode`, v: z2ui5_cl_util.boolean_abap_2_json(savidm) }, { n: `showDeltaValue`, v: z2ui5_cl_util.boolean_abap_2_json(showdeltavalue) }, { n: `showTargetValue`, v: z2ui5_cl_util.boolean_abap_2_json(showtargetvalue) }, { n: `showThresholds`, v: z2ui5_cl_util.boolean_abap_2_json(showthresholds) }, { n: `showValueMarker`, v: z2ui5_cl_util.boolean_abap_2_json(showvaluemarker) }, { n: `smallRangeAllowed`, v: z2ui5_cl_util.boolean_abap_2_json(smallrangeallowed) }, { n: `forecastValue`, v: forecastvalue }] });
     return result;
   }
@@ -201,7 +201,7 @@ class z2ui5_cl_xml_view {
 
   button({ text, icon, enabled, visible, press, class: class_, id, ns, tooltip, width, iconfirst, icondensityaware, ariahaspopup, activeicon, accessiblerole, textdirection, arialabelledby, ariadescribedby } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `Button`, ns: false /* TODO(abap2js): NS */, t_prop: [{ n: `press`, v: press }, { n: `text`, v: text }, { n: `enabled`, v: z2ui5_cl_util.boolean_abap_2_json(enabled) }, { n: `visible`, v: z2ui5_cl_util.boolean_abap_2_json(visible) }, { n: `iconDensityAware`, v: z2ui5_cl_util.boolean_abap_2_json(icondensityaware) }, { n: `iconFirst`, v: z2ui5_cl_util.boolean_abap_2_json(iconfirst) }, { n: `icon`, v: icon }, { n: `type`, v: type }, { n: `id`, v: id }, { n: `width`, v: width }, { n: `tooltip`, v: tooltip }, { n: `textDirection`, v: textdirection }, { n: `accessibleRole`, v: accessiblerole }, { n: `activeIcon`, v: activeicon }, { n: `ariaHasPopup`, v: ariahaspopup }, { n: `class`, v: class_ }, { n: `ariaLabelledBy`, v: arialabelledby }, { n: `ariaDescribedBy`, v: ariadescribedby }] });
     return result;
   }
@@ -256,14 +256,14 @@ class z2ui5_cl_xml_view {
 
   checkbox({ text, selected, enabled, select, id, class: class_, textalign, textdirection, width, activehandling, visible, displayonly, editable, partiallyselected, useentirewidth, wrapping, name, valuestate, required } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `CheckBox`, t_prop: [{ n: `text`, v: text }, { n: `id`, v: id }, { n: `class`, v: class_ }, { n: `name`, v: name }, { n: `selected`, v: selected }, { n: `textAlign`, v: textalign }, { n: `textDirection`, v: textdirection }, { n: `valueState`, v: valuestate }, { n: `width`, v: width }, { n: `activeHandling`, v: z2ui5_cl_util.boolean_abap_2_json(activehandling) }, { n: `enabled`, v: z2ui5_cl_util.boolean_abap_2_json(enabled) }, { n: `visible`, v: z2ui5_cl_util.boolean_abap_2_json(visible) }, { n: `displayOnly`, v: z2ui5_cl_util.boolean_abap_2_json(displayonly) }, { n: `editable`, v: z2ui5_cl_util.boolean_abap_2_json(editable) }, { n: `partiallySelected`, v: z2ui5_cl_util.boolean_abap_2_json(partiallyselected) }, { n: `useEntireWidth`, v: z2ui5_cl_util.boolean_abap_2_json(useentirewidth) }, { n: `wrapping`, v: z2ui5_cl_util.boolean_abap_2_json(wrapping) }, { n: `select`, v: select }, { n: `required`, v: z2ui5_cl_util.boolean_abap_2_json(required) }] });
     return result;
   }
 
   code_editor({ value, height, width, editable } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `CodeEditor`, ns: `editor`, t_prop: [{ n: `value`, v: value }, { n: `type`, v: type }, { n: `editable`, v: z2ui5_cl_util.boolean_abap_2_json(editable) }, { n: `height`, v: height }, { n: `width`, v: width }] });
     return result;
   }
@@ -366,14 +366,14 @@ class z2ui5_cl_xml_view {
 
   column_micro_chart({ width, press, size, aligncontent, hideonnodata, allowcolumnlabels, showbottomlabels, showtoplabels, height } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `ColumnMicroChart`, ns: `mchart`, t_prop: [{ n: `width`, v: width }, { n: `press`, v: press }, { n: `size`, v: size }, { n: `alignContent`, v: aligncontent }, { n: `hideOnNoData`, v: z2ui5_cl_util.boolean_abap_2_json(hideonnodata) }, { n: `allowColumnLabels`, v: z2ui5_cl_util.boolean_abap_2_json(allowcolumnlabels) }, { n: `showBottomLabels`, v: z2ui5_cl_util.boolean_abap_2_json(showbottomlabels) }, { n: `showTopLabels`, v: z2ui5_cl_util.boolean_abap_2_json(showtoplabels) }, { n: `height`, v: height }] });
     return result;
   }
 
   column_micro_chart_data({ value, label, displayvalue, color, press } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `ColumnMicroChartData`, ns: `mchart`, t_prop: [{ n: `color`, v: color }, { n: `displayValue`, v: displayvalue }, { n: `label`, v: label }, { n: `value`, v: value }, { n: `press`, v: press }] });
     return result;
   }
@@ -437,7 +437,7 @@ class z2ui5_cl_xml_view {
 
   core_custom_data({ value, writetodom } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `CustomData`, ns: `core`, t_prop: [{ n: `value`, v: value }, { n: `key`, v: key }, { n: `writeToDom`, v: z2ui5_cl_util.boolean_abap_2_json(writetodom) }] });
     return result;
   }
@@ -486,21 +486,21 @@ class z2ui5_cl_xml_view {
 
   date_picker({ value, placeholder, displayformat, valueformat, required, valuestate, valuestatetext, enabled, showcurrentdatebutton, change, hideinput, showfooter, visible, showvaluestatemessage, mindate, maxdate, editable, width, id, calendarweeknumbering, displayformattype, class: class_, textdirection, textalign, name, datevalue, initialfocuseddatevalue } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `DatePicker`, t_prop: [{ n: `value`, v: value }, { n: `displayFormat`, v: displayformat }, { n: `displayFormatType`, v: displayformattype }, { n: `valueFormat`, v: valueformat }, { n: `required`, v: z2ui5_cl_util.boolean_abap_2_json(required) }, { n: `valueState`, v: valuestate }, { n: `valueStateText`, v: valuestatetext }, { n: `placeholder`, v: placeholder }, { n: `textAlign`, v: textalign }, { n: `textDirection`, v: textdirection }, { n: `change`, v: change }, { n: `maxDate`, v: maxdate }, { n: `minDate`, v: mindate }, { n: `width`, v: width }, { n: `id`, v: id }, { n: `dateValue`, v: datevalue }, { n: `name`, v: name }, { n: `class`, v: class_ }, { n: `calendarWeekNumbering`, v: calendarweeknumbering }, { n: `initialFocusedDateValue`, v: initialfocuseddatevalue }, { n: `enabled`, v: z2ui5_cl_util.boolean_abap_2_json(enabled) }, { n: `visible`, v: z2ui5_cl_util.boolean_abap_2_json(visible) }, { n: `editable`, v: z2ui5_cl_util.boolean_abap_2_json(editable) }, { n: `hideInput`, v: z2ui5_cl_util.boolean_abap_2_json(hideinput) }, { n: `showFooter`, v: z2ui5_cl_util.boolean_abap_2_json(showfooter) }, { n: `showValueStateMessage`, v: z2ui5_cl_util.boolean_abap_2_json(showvaluestatemessage) }, { n: `showCurrentDateButton`, v: z2ui5_cl_util.boolean_abap_2_json(showcurrentdatebutton) }] });
     return result;
   }
 
   date_time_picker({ value, placeholder, enabled, valuestate } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `DateTimePicker`, t_prop: [{ n: `value`, v: value }, { n: `placeholder`, v: placeholder }, { n: `enabled`, v: z2ui5_cl_util.boolean_abap_2_json(enabled) }, { n: `valueState`, v: valuestate }] });
     return result;
   }
 
   delta_micro_chart({ color, press, size, height, width, deltadisplayvalue, displayvalue1, displayvalue2, title2, value1, value2, view, hideonnodata, title1 } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `DeltaMicroChart`, ns: `mchart`, t_prop: [{ n: `color`, v: color }, { n: `press`, v: press }, { n: `size`, v: size }, { n: `height`, v: height }, { n: `width`, v: width }, { n: `deltaDisplayValue`, v: deltadisplayvalue }, { n: `displayValue1`, v: displayvalue1 }, { n: `displayValue2`, v: displayvalue2 }, { n: `title2`, v: title2 }, { n: `value1`, v: value1 }, { n: `value2`, v: value2 }, { n: `view`, v: view }, { n: `hideOnNoData`, v: z2ui5_cl_util.boolean_abap_2_json(hideonnodata) }, { n: `title1`, v: title1 }] });
     return result;
   }
@@ -537,14 +537,14 @@ class z2ui5_cl_xml_view {
 
   drag_drop_info({ sourceaggregation, targetaggregation, dragstart, drop } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `DragDropInfo`, ns: `dnd`, t_prop: [{ n: `sourceAggregation`, v: sourceaggregation }, { n: `targetAggregation`, v: targetaggregation }, { n: `dragStart`, v: dragstart }, { n: `drop`, v: drop }] });
     return result;
   }
 
   drag_info({ sourceaggregation } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `DragInfo`, ns: `dnd`, t_prop: [{ n: `sourceAggregation`, v: sourceaggregation }] });
     return result;
   }
@@ -599,7 +599,7 @@ class z2ui5_cl_xml_view {
 
   end_column_pages() {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     return result;
   }
 
@@ -642,12 +642,12 @@ class z2ui5_cl_xml_view {
   static factory({ t_ns } = {}) {
     let result = null;
     result = new z2ui5_cl_xml_view();
-    result.mt_prop = t_ns;
+    result.mt_prop = z2ui5_cl_util.abap_copy(t_ns);
     result.mt_prop = [...(result.mt_prop ?? []),{ n: `displayBlock`, v: `true` }, { n: `height`, v: `100%` }];
     result.mv_name = `View`;
     result.mv_ns = `mvc`;
-    result.mo_root = result;
-    result.mo_parent = result;
+    result.mo_root = z2ui5_cl_util.abap_copy(result);
+    result.mo_parent = z2ui5_cl_util.abap_copy(result);
     result.mt_prop.push({ n: `xmlns`, v: `sap.m` });
     result.mt_prop.push({ n: `xmlns:mvc`, v: `sap.ui.core.mvc` });
     result.mt_prop.push({ n: `xmlns:core`, v: `sap.ui.core` });
@@ -657,19 +657,19 @@ class z2ui5_cl_xml_view {
   static factory_plain() {
     let result = null;
     result = new z2ui5_cl_xml_view();
-    result.mo_root = result;
-    result.mo_parent = result;
+    result.mo_root = z2ui5_cl_util.abap_copy(result);
+    result.mo_parent = z2ui5_cl_util.abap_copy(result);
     return result;
   }
 
   static factory_popup({ t_ns } = {}) {
     let result = null;
     result = new z2ui5_cl_xml_view();
-    result.mt_prop = t_ns;
+    result.mt_prop = z2ui5_cl_util.abap_copy(t_ns);
     result.mv_name = `FragmentDefinition`;
     result.mv_ns = `core`;
-    result.mo_root = result;
-    result.mo_parent = result;
+    result.mo_root = z2ui5_cl_util.abap_copy(result);
+    result.mo_parent = z2ui5_cl_util.abap_copy(result);
     result.mt_prop.push({ n: `xmlns`, v: `sap.m` });
     result.mt_prop.push({ n: `xmlns:core`, v: `sap.ui.core` });
     return result;
@@ -749,7 +749,7 @@ class z2ui5_cl_xml_view {
 
   flex_item_data({ growfactor, basesize, backgrounddesign, styleclass, order, shrinkfactor } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `FlexItemData`, t_prop: [{ n: `growFactor`, v: growfactor }, { n: `baseSize`, v: basesize }, { n: `backgroundDesign`, v: backgrounddesign }, { n: `styleClass`, v: styleclass }, { n: `order`, v: order }, { n: `shrinkFactor`, v: shrinkfactor }] });
     return result;
   }
@@ -774,7 +774,7 @@ class z2ui5_cl_xml_view {
 
   formatted_text({ htmltext, convertedlinksdefaulttarget, convertlinkstoanchortags, height, textalign, textdirection, visible, width, id, class: class_, controls } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `FormattedText`, t_prop: [{ n: `htmlText`, v: htmltext }, { n: `convertedLinksDefaultTarget`, v: convertedlinksdefaulttarget }, { n: `convertLinksToAnchorTags`, v: convertlinkstoanchortags }, { n: `height`, v: height }, { n: `textAlign`, v: textalign }, { n: `textDirection`, v: textdirection }, { n: `visible`, v: z2ui5_cl_util.boolean_abap_2_json(visible) }, { n: `width`, v: width }, { n: `class`, v: class_ }, { n: `id`, v: id }, { n: `controls`, v: controls }] });
     return result;
   }
@@ -830,11 +830,11 @@ class z2ui5_cl_xml_view {
   get({ name } = {}) {
     let result = null;
     if (!name) {
-      result = this.mo_root.mo_previous;
+      result = z2ui5_cl_util.abap_copy(this.mo_root.mo_previous);
       return result;
     }
     if (this.mo_parent.mv_name === name) {
-      result = this.mo_parent;
+      result = z2ui5_cl_util.abap_copy(this.mo_parent);
     } else {
       result = this.mo_parent.get(name);
     }
@@ -843,19 +843,19 @@ class z2ui5_cl_xml_view {
 
   get_child({ index = 1 } = {}) {
     let result = null;
-    result = this.mt_child[(index) - 1];
+    result = z2ui5_cl_util.abap_copy(this.mt_child[(index) - 1]);
     return result;
   }
 
   get_parent() {
     let result = null;
-    result = this.mo_parent;
+    result = z2ui5_cl_util.abap_copy(this.mo_parent);
     return result;
   }
 
   get_root() {
     let result = null;
-    result = this.mo_root;
+    result = z2ui5_cl_util.abap_copy(this.mo_root);
     return result;
   }
 
@@ -867,21 +867,21 @@ class z2ui5_cl_xml_view {
 
   grid_box_layout({ boxesperrowconfig, boxminwidth, boxwidth } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `GridBoxLayout`, ns: `grid`, t_prop: [{ n: `boxesPerRowConfig`, v: boxesperrowconfig }, { n: `boxMinWidth`, v: boxminwidth }, { n: `boxWidth`, v: boxwidth }] });
     return result;
   }
 
   grid_data({ span, linebreak, indentl, indentm } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `GridData`, ns: `layout`, t_prop: [{ n: `span`, v: span }, { n: `linebreak`, v: z2ui5_cl_util.boolean_abap_2_json(linebreak) }, { n: `indentL`, v: indentl }, { n: `indentM`, v: indentm }] });
     return result;
   }
 
   grid_drop_info({ targetaggregation, dropposition, droplayout, drop, dragenter, dragover } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `GridDropInfo`, ns: `dnd-grid`, t_prop: [{ n: `targetAggregation`, v: targetaggregation }, { n: `dropPosition`, v: dropposition }, { n: `dropLayout`, v: droplayout }, { n: `drop`, v: drop }, { n: `dragEnter`, v: dragenter }, { n: `dragOver`, v: dragover }] });
     return result;
   }
@@ -1002,7 +1002,7 @@ class z2ui5_cl_xml_view {
 
   icon({ src, press, size, color, class: class_, id, width, useicontooltip, notabstop, hovercolor, hoverbackgroundcolor, height, decorative, backgroundcolor, alt, activecolor, activebackgroundcolor, visible } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `Icon`, ns: `core`, t_prop: [{ n: `size`, v: size }, { n: `color`, v: color }, { n: `class`, v: class_ }, { n: `src`, v: src }, { n: `activeColor`, v: activecolor }, { n: `activeBackgroundColor`, v: activebackgroundcolor }, { n: `alt`, v: alt }, { n: `backgroundColor`, v: backgroundcolor }, { n: `height`, v: height }, { n: `width`, v: width }, { n: `id`, v: id }, { n: `press`, v: press }, { n: `hoverBackgroundColor`, v: hoverbackgroundcolor }, { n: `hoverColor`, v: hovercolor }, { n: `visible`, v: z2ui5_cl_util.boolean_abap_2_json(visible) }, { n: `decorative`, v: z2ui5_cl_util.boolean_abap_2_json(decorative) }, { n: `noTabStop`, v: z2ui5_cl_util.boolean_abap_2_json(notabstop) }, { n: `useIconTooltip`, v: z2ui5_cl_util.boolean_abap_2_json(useicontooltip) }] });
     return result;
   }
@@ -1039,7 +1039,7 @@ class z2ui5_cl_xml_view {
 
   image({ src, class: class_, height, width, usemap, mode, lazyloading, densityaware, decorative, backgroundsize, backgroundrepeat, backgroundposition, ariahaspopup, alt, activesrc, press, load, error, id } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `Image`, t_prop: [{ n: `id`, v: id }, { n: `src`, v: src }, { n: `class`, v: class_ }, { n: `height`, v: height }, { n: `alt`, v: alt }, { n: `activeSrc`, v: activesrc }, { n: `ariaHasPopup`, v: ariahaspopup }, { n: `backgroundPosition`, v: backgroundposition }, { n: `backgroundRepeat`, v: backgroundrepeat }, { n: `backgroundSize`, v: backgroundsize }, { n: `mode`, v: mode }, { n: `useMap`, v: usemap }, { n: `width`, v: width }, { n: `error`, v: error }, { n: `press`, v: press }, { n: `load`, v: load }, { n: `decorative`, v: z2ui5_cl_util.boolean_abap_2_json(decorative) }, { n: `densityAware`, v: z2ui5_cl_util.boolean_abap_2_json(densityaware) }, { n: `lazyLoading`, v: z2ui5_cl_util.boolean_abap_2_json(lazyloading) }] });
     return result;
   }
@@ -1058,7 +1058,7 @@ class z2ui5_cl_xml_view {
 
   input({ id, value, placeholder, showclearicon, valuestate, valuestatetext, showtablesuggestionvaluehelp, description, editable, enabled, suggestionitems, suggestionrows, showsuggestion, showvaluehelp, valuehelprequest, required, suggest, class: class_, visible, submit, valueliveupdate, autocomplete, maxsuggestionwidth, fieldwidth, valuehelponly, width, change, valuehelpiconsrc, textformatter, textformatmode, maxlength, startsuggestion, enablesuggestionshighlighting, enabletableautopopinmode, arialabelledby, ariadescribedby, name, textalign, textdirection, showvaluestatemessage } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `Input`, t_prop: [{ n: `id`, v: id }, { n: `placeholder`, v: placeholder }, { n: `type`, v: type }, { n: `maxLength`, v: maxlength }, { n: `showClearIcon`, v: z2ui5_cl_util.boolean_abap_2_json(showclearicon) }, { n: `description`, v: description }, { n: `editable`, v: z2ui5_cl_util.boolean_abap_2_json(editable) }, { n: `enabled`, v: z2ui5_cl_util.boolean_abap_2_json(enabled) }, { n: `visible`, v: z2ui5_cl_util.boolean_abap_2_json(visible) }, { n: `enableTableAutoPopinMode`, v: z2ui5_cl_util.boolean_abap_2_json(enabletableautopopinmode) }, { n: `enableSuggestionsHighlighting`, v: z2ui5_cl_util.boolean_abap_2_json(enablesuggestionshighlighting) }, { n: `showTableSuggestionValueHelp`, v: z2ui5_cl_util.boolean_abap_2_json(showtablesuggestionvaluehelp) }, { n: `valueState`, v: valuestate }, { n: `valueStateText`, v: valuestatetext }, { n: `value`, v: value }, { n: `required`, v: z2ui5_cl_util.boolean_abap_2_json(required) }, { n: `suggest`, v: suggest }, { n: `suggestionItems`, v: suggestionitems }, { n: `suggestionRows`, v: suggestionrows }, { n: `showSuggestion`, v: z2ui5_cl_util.boolean_abap_2_json(showsuggestion) }, { n: `valueHelpRequest`, v: valuehelprequest }, { n: `autocomplete`, v: z2ui5_cl_util.boolean_abap_2_json(autocomplete) }, { n: `valueLiveUpdate`, v: z2ui5_cl_util.boolean_abap_2_json(valueliveupdate) }, { n: `submit`, v: z2ui5_cl_util.boolean_abap_2_json(submit) }, { n: `showValueHelp`, v: z2ui5_cl_util.boolean_abap_2_json(showvaluehelp) }, { n: `valueHelpOnly`, v: z2ui5_cl_util.boolean_abap_2_json(valuehelponly) }, { n: `class`, v: class_ }, { n: `change`, v: change }, { n: `maxSuggestionWidth`, v: maxsuggestionwidth }, { n: `width`, v: width }, { n: `textFormatter`, v: textformatter }, { n: `startSuggestion`, v: startsuggestion }, { n: `valueHelpIconSrc`, v: valuehelpiconsrc }, { n: `textFormatMode`, v: textformatmode }, { n: `fieldWidth`, v: fieldwidth }, { n: `ariaLabelledBy`, v: arialabelledby }, { n: `ariaDescribedBy`, v: ariadescribedby }, { n: `name`, v: name }, { n: `textAlign`, v: textalign }, { n: `textDirection`, v: textdirection }, { n: `showValueStateMessage`, v: z2ui5_cl_util.boolean_abap_2_json(showvaluestatemessage) }] });
     return result;
   }
@@ -1119,7 +1119,7 @@ class z2ui5_cl_xml_view {
 
   item({ text } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `Item`, ns: `core`, t_prop: [{ n: `key`, v: key }, { n: `text`, v: text }] });
     return result;
   }
@@ -1132,7 +1132,7 @@ class z2ui5_cl_xml_view {
 
   label({ text, labelfor, design, displayonly, required, showcolon, textalign, textdirection, valign, width, wrapping, wrappingtype, id, class: class_, visible } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `Label`, t_prop: [{ n: `text`, v: text }, { n: `displayOnly`, v: z2ui5_cl_util.boolean_abap_2_json(displayonly) }, { n: `required`, v: z2ui5_cl_util.boolean_abap_2_json(required) }, { n: `showColon`, v: z2ui5_cl_util.boolean_abap_2_json(showcolon) }, { n: `textAlign`, v: textalign }, { n: `textDirection`, v: textdirection }, { n: `vAlign`, v: valign }, { n: `width`, v: width }, { n: `wrapping`, v: z2ui5_cl_util.boolean_abap_2_json(wrapping) }, { n: `wrappingType`, v: wrappingtype }, { n: `design`, v: design }, { n: `id`, v: id }, { n: `class`, v: class_ }, { n: `labelFor`, v: labelfor }, { n: `visible`, v: z2ui5_cl_util.boolean_abap_2_json(visible) }] });
     return result;
   }
@@ -1211,7 +1211,7 @@ class z2ui5_cl_xml_view {
 
   line_micro_chart({ color, height, leftbottomlabel, lefttoplabel, maxxvalue, minxvalue, minyvalue, rightbottomlabel, righttoplabel, size, threshold, thresholddisplayvalue, width, press, hideonnodata, showbottomlabels, showpoints, showthresholdline, showthresholdvalue, showtoplabels, maxyvalue } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `LineMicroChart`, ns: `mchart`, t_prop: [{ n: `color`, v: color }, { n: `height`, v: height }, { n: `leftBottomLabel`, v: leftbottomlabel }, { n: `leftTopLabel`, v: lefttoplabel }, { n: `maxXValue`, v: maxxvalue }, { n: `minXValue`, v: minxvalue }, { n: `minYValue`, v: minyvalue }, { n: `rightBottomLabel`, v: rightbottomlabel }, { n: `rightTopLabel`, v: righttoplabel }, { n: `size`, v: size }, { n: `threshold`, v: threshold }, { n: `thresholdDisplayValue`, v: thresholddisplayvalue }, { n: `width`, v: width }, { n: `press`, v: press }, { n: `hideOnNoData`, v: z2ui5_cl_util.boolean_abap_2_json(hideonnodata) }, { n: `showBottomLabels`, v: z2ui5_cl_util.boolean_abap_2_json(showbottomlabels) }, { n: `showPoints`, v: z2ui5_cl_util.boolean_abap_2_json(showpoints) }, { n: `showThresholdLine`, v: z2ui5_cl_util.boolean_abap_2_json(showthresholdline) }, { n: `showThresholdValue`, v: z2ui5_cl_util.boolean_abap_2_json(showthresholdvalue) }, { n: `showTopLabels`, v: z2ui5_cl_util.boolean_abap_2_json(showtoplabels) }, { n: `maxYValue`, v: maxyvalue }] });
     return result;
   }
@@ -1236,7 +1236,7 @@ class z2ui5_cl_xml_view {
 
   link({ text, href, target, enabled, press, id, ns, wrapping, width, validateurl, textdirection, textalign, subtle, rel, emptyindicatormode, emphasized, ariahaspopup, accessiblerole, class: class_, endicon, icon } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `Link`, ns: false /* TODO(abap2js): NS */, t_prop: [{ n: `text`, v: text }, { n: `target`, v: target }, { n: `href`, v: href }, { n: `press`, v: press }, { n: `id`, v: id }, { n: `class`, v: class_ }, { n: `accessibleRole`, v: accessiblerole }, { n: `ariaHasPopup`, v: ariahaspopup }, { n: `emptyIndicatorMode`, v: emptyindicatormode }, { n: `rel`, v: rel }, { n: `subtle`, v: z2ui5_cl_util.boolean_abap_2_json(subtle) }, { n: `textAlign`, v: textalign }, { n: `textDirection`, v: textdirection }, { n: `validateUrl`, v: z2ui5_cl_util.boolean_abap_2_json(validateurl) }, { n: `width`, v: width }, { n: `wrapping`, v: z2ui5_cl_util.boolean_abap_2_json(wrapping) }, { n: `emphasized`, v: z2ui5_cl_util.boolean_abap_2_json(emphasized) }, { n: `enabled`, v: z2ui5_cl_util.boolean_abap_2_json(enabled) }, { n: `endIcon`, v: endicon }, { n: `icon`, v: icon }] });
     return result;
   }
@@ -1255,7 +1255,7 @@ class z2ui5_cl_xml_view {
 
   list_item({ text, additionaltext, icon, enabled, textdirection } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `ListItem`, ns: `core`, t_prop: [{ n: `text`, v: text }, { n: `icon`, v: icon }, { n: `key`, v: key }, { n: `textDirection`, v: textdirection }, { n: `enabled`, v: z2ui5_cl_util.boolean_abap_2_json(enabled) }, { n: `additionalText`, v: additionaltext }] });
     return result;
   }
@@ -1292,7 +1292,7 @@ class z2ui5_cl_xml_view {
 
   mask_input({ placeholder, mask, name, textalign, textdirection, value, width, valuestate, valuestatetext, placeholdersymbol, required, showclearicon, showvaluestatemessage, visible, fieldwidth, livechange, change } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `MaskInput`, t_prop: [{ n: `placeholder`, v: placeholder }, { n: `mask`, v: mask }, { n: `name`, v: name }, { n: `textAlign`, v: textalign }, { n: `textDirection`, v: textdirection }, { n: `value`, v: value }, { n: `width`, v: width }, { n: `liveChange`, v: livechange }, { n: `change`, v: change }, { n: `valueState`, v: valuestate }, { n: `valueStateText`, v: valuestatetext }, { n: `placeholderSymbol`, v: placeholdersymbol }, { n: `required`, v: z2ui5_cl_util.boolean_abap_2_json(required) }, { n: `showClearIcon`, v: z2ui5_cl_util.boolean_abap_2_json(showclearicon) }, { n: `showValueStateMessage`, v: z2ui5_cl_util.boolean_abap_2_json(showvaluestatemessage) }, { n: `visible`, v: z2ui5_cl_util.boolean_abap_2_json(visible) }, { n: `fieldWidth`, v: fieldwidth }] });
     return result;
   }
@@ -1317,7 +1317,7 @@ class z2ui5_cl_xml_view {
 
   menu_item({ press, text, icon } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `MenuItem`, t_prop: [{ n: `press`, v: press }, { n: `text`, v: text }, { n: `icon`, v: icon }] });
     return result;
   }
@@ -1342,7 +1342,7 @@ class z2ui5_cl_xml_view {
 
   message_strip({ text, showicon, customicon, class: class_, visible, showclosebutton, enableformattedtext } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `MessageStrip`, t_prop: [{ n: `text`, v: text }, { n: `type`, v: type }, { n: `showIcon`, v: z2ui5_cl_util.boolean_abap_2_json(showicon) }, { n: `customIcon`, v: customicon }, { n: `visible`, v: z2ui5_cl_util.boolean_abap_2_json(visible) }, { n: `showCloseButton`, v: z2ui5_cl_util.boolean_abap_2_json(showclosebutton) }, { n: `class`, v: class_ }, { n: `enableFormattedText`, v: z2ui5_cl_util.boolean_abap_2_json(enableformattedtext) }] });
     return result;
   }
@@ -1469,7 +1469,7 @@ class z2ui5_cl_xml_view {
 
   object_attribute({ title, text, active, ariahaspopup, textdirection, visible, press } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `ObjectAttribute`, t_prop: [{ n: `title`, v: title }, { n: `textDirection`, v: textdirection }, { n: `ariaHasPopup`, v: ariahaspopup }, { n: `press`, v: press }, { n: `active`, v: z2ui5_cl_util.boolean_abap_2_json(active) }, { n: `visible`, v: z2ui5_cl_util.boolean_abap_2_json(visible) }, { n: `text`, v: text }] });
     return result;
   }
@@ -1500,7 +1500,7 @@ class z2ui5_cl_xml_view {
 
   object_number({ state, emphasized, number, textdirection, textalign, numberunit, inverted, emptyindicatormode, active, unit, visible, class: class_, id } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `ObjectNumber`, t_prop: [{ n: `emphasized`, v: z2ui5_cl_util.boolean_abap_2_json(emphasized) }, { n: `number`, v: number }, { n: `state`, v: state }, { n: `id`, v: id }, { n: `class`, v: class_ }, { n: `textAlign`, v: textalign }, { n: `textDirection`, v: textdirection }, { n: `emptyIndicatorMode`, v: emptyindicatormode }, { n: `numberUnit`, v: numberunit }, { n: `active`, v: z2ui5_cl_util.boolean_abap_2_json(active) }, { n: `inverted`, v: z2ui5_cl_util.boolean_abap_2_json(inverted) }, { n: `visible`, v: z2ui5_cl_util.boolean_abap_2_json(visible) }, { n: `unit`, v: unit }] });
     return result;
   }
@@ -1513,14 +1513,14 @@ class z2ui5_cl_xml_view {
 
   object_page_header({ isactionareaalwaysvisible, isobjecticonalwaysvisible, isobjectsubtitlealwaysvisible, isobjecttitlealwaysvisible, markchanges, markfavorite, markflagged, marklocked, objectimagealt, objectimagebackgroundcolor, objectimagedensityaware, objectimageshape, objectimageuri, objectsubtitle, objecttitle, showmarkers, showplaceholder, showtitleselector, visible, markchangespress, marklockedpress, titleselectorpress } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `ObjectPageHeader`, ns: `uxap`, t_prop: [{ n: `isActionAreaAlwaysVisible`, v: z2ui5_cl_util.boolean_abap_2_json(isactionareaalwaysvisible) }, { n: `isObjectIconAlwaysVisible`, v: z2ui5_cl_util.boolean_abap_2_json(isobjecticonalwaysvisible) }, { n: `isObjectSubtitleAlwaysVisible`, v: z2ui5_cl_util.boolean_abap_2_json(isobjectsubtitlealwaysvisible) }, { n: `isObjectTitleAlwaysVisible`, v: z2ui5_cl_util.boolean_abap_2_json(isobjecttitlealwaysvisible) }, { n: `markChanges`, v: z2ui5_cl_util.boolean_abap_2_json(markchanges) }, { n: `markFavorite`, v: z2ui5_cl_util.boolean_abap_2_json(markfavorite) }, { n: `markFlagged`, v: z2ui5_cl_util.boolean_abap_2_json(markflagged) }, { n: `markLocked`, v: z2ui5_cl_util.boolean_abap_2_json(marklocked) }, { n: `objectImageDensityAware`, v: z2ui5_cl_util.boolean_abap_2_json(objectimagedensityaware) }, { n: `showMarkers`, v: z2ui5_cl_util.boolean_abap_2_json(showmarkers) }, { n: `showPlaceholder`, v: z2ui5_cl_util.boolean_abap_2_json(showplaceholder) }, { n: `showTitleSelector`, v: z2ui5_cl_util.boolean_abap_2_json(showtitleselector) }, { n: `visible`, v: z2ui5_cl_util.boolean_abap_2_json(visible) }, { n: `objectImageAlt`, v: objectimagealt }, { n: `objectImageBackgroundColor`, v: objectimagebackgroundcolor }, { n: `objectImageURI`, v: objectimageuri }, { n: `objectSubtitle`, v: objectsubtitle }, { n: `objectTitle`, v: objecttitle }, { n: `markChangesPress`, v: markchangespress }, { n: `markLockedPress`, v: marklockedpress }, { n: `titleSelectorPress`, v: titleselectorpress }, { n: `objectImageShape`, v: objectimageshape }] });
     return result;
   }
 
   object_page_header_action_btn({ activeicon, ariahaspopup, enabled, hideicon, hidetext, icon, icondensityaware, iconfirst, importance, text, textdirection, visible, width, press } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `ObjectPageHeaderActionButton`, ns: `uxap`, t_prop: [{ n: `activeIcon`, v: activeicon }, { n: `ariaHasPopup`, v: ariahaspopup }, { n: `icon`, v: icon }, { n: `importance`, v: importance }, { n: `text`, v: text }, { n: `textDirection`, v: textdirection }, { n: `type`, v: type }, { n: `width`, v: width }, { n: `enabled`, v: z2ui5_cl_util.boolean_abap_2_json(enabled) }, { n: `hideIcon`, v: z2ui5_cl_util.boolean_abap_2_json(hideicon) }, { n: `hideText`, v: z2ui5_cl_util.boolean_abap_2_json(hidetext) }, { n: `iconDensityAware`, v: z2ui5_cl_util.boolean_abap_2_json(icondensityaware) }, { n: `iconFirst`, v: z2ui5_cl_util.boolean_abap_2_json(iconfirst) }, { n: `visible`, v: z2ui5_cl_util.boolean_abap_2_json(visible) }, { n: `press`, v: press }] });
     return result;
   }
@@ -1557,7 +1557,7 @@ class z2ui5_cl_xml_view {
 
   overflow_toolbar_button({ id, text, icon, enabled, press, tooltip } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `OverflowToolbarButton`, t_prop: [{ n: `id`, v: id }, { n: `press`, v: press }, { n: `text`, v: text }, { n: `enabled`, v: z2ui5_cl_util.boolean_abap_2_json(enabled) }, { n: `icon`, v: icon }, { n: `type`, v: type }, { n: `tooltip`, v: tooltip }] });
     return result;
   }
@@ -1570,7 +1570,7 @@ class z2ui5_cl_xml_view {
 
   overflow_toolbar_toggle_button({ text, icon, enabled, press, tooltip } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `OverflowToolbarToggleButton`, t_prop: [{ n: `press`, v: press }, { n: `text`, v: text }, { n: `enabled`, v: z2ui5_cl_util.boolean_abap_2_json(enabled) }, { n: `icon`, v: icon }, { n: `type`, v: type }, { n: `tooltip`, v: tooltip }] });
     return result;
   }
@@ -1589,7 +1589,7 @@ class z2ui5_cl_xml_view {
 
   paging_button({ count, nextbuttontooltip, previousbuttontooltip, position } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `PagingButton`, t_prop: [{ n: `count`, v: count }, { n: `nextButtonTooltip`, v: nextbuttontooltip }, { n: `position`, v: position }, { n: `previousButtonTooltip`, v: previousbuttontooltip }] });
     return result;
   }
@@ -1662,7 +1662,7 @@ class z2ui5_cl_xml_view {
 
   progress_indicator({ class: class_, percentvalue, displayvalue, showvalue, state, visible, width, height, enabled, displayonly, displayanimation } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `ProgressIndicator`, t_prop: [{ n: `class`, v: class_ }, { n: `percentValue`, v: percentvalue }, { n: `displayValue`, v: displayvalue }, { n: `showValue`, v: z2ui5_cl_util.boolean_abap_2_json(showvalue) }, { n: `visible`, v: z2ui5_cl_util.boolean_abap_2_json(visible) }, { n: `state`, v: state }, { n: `width`, v: width }, { n: `height`, v: height }, { n: `enabled`, v: z2ui5_cl_util.boolean_abap_2_json(enabled) }, { n: `displayOnly`, v: z2ui5_cl_util.boolean_abap_2_json(displayonly) }, { n: `displayAnimation`, v: z2ui5_cl_util.boolean_abap_2_json(displayanimation) }] });
     return result;
   }
@@ -1717,7 +1717,7 @@ class z2ui5_cl_xml_view {
 
   radial_micro_chart({ size, percentage, press, valuecolor, height, aligncontent, hideonnodata } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `RadialMicroChart`, ns: `mchart`, t_prop: [{ n: `percentage`, v: percentage }, { n: `press`, v: press }, { n: `size`, v: size }, { n: `height`, v: height }, { n: `alignContent`, v: aligncontent }, { n: `hideOnNoData`, v: z2ui5_cl_util.boolean_abap_2_json(hideonnodata) }, { n: `valueColor`, v: valuecolor }] });
     return result;
   }
@@ -1736,7 +1736,7 @@ class z2ui5_cl_xml_view {
 
   range_slider({ max, min, step, startvalue, endvalue, showtickmarks, labelinterval, width, class: class_, id, value, value2, change } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `RangeSlider`, t_prop: [{ n: `class`, v: class_ }, { n: `id`, v: id }, { n: `labelInterval`, v: labelinterval }, { n: `max`, v: max }, { n: `min`, v: min }, { n: `enableTickmarks`, v: z2ui5_cl_util.boolean_abap_2_json(showtickmarks) }, { n: `step`, v: step }, { n: `width`, v: width }, { n: `value`, v: (value ? value : startvalue) }, { n: `value2`, v: (value2 ? value2 : endvalue) }, { n: `change`, v: change }] });
     return result;
   }
@@ -1779,7 +1779,7 @@ class z2ui5_cl_xml_view {
 
   route({ id, position, routetype, linedash, color, colorborder, linewidth } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `Route`, ns: `vbm`, t_prop: [{ n: `id`, v: id }, { n: `position`, v: position }, { n: `routetype`, v: routetype }, { n: `lineDash`, v: linedash }, { n: `linewidth`, v: linewidth }, { n: `color`, v: color }, { n: `colorBorder`, v: colorborder }] });
     return result;
   }
@@ -1816,7 +1816,7 @@ class z2ui5_cl_xml_view {
 
   search_field({ search, width, value, id, class: class_, change, livechange, suggest, enabled, enablesuggestions, maxlength, placeholder, showrefreshbutton, showsearchbutton, visible } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `SearchField`, t_prop: [{ n: `width`, v: width }, { n: `search`, v: search }, { n: `value`, v: value }, { n: `id`, v: id }, { n: `class`, v: class_ }, { n: `change`, v: change }, { n: `maxLength`, v: maxlength }, { n: `placeholder`, v: placeholder }, { n: `suggest`, v: suggest }, { n: `enableSuggestions`, v: z2ui5_cl_util.boolean_abap_2_json(enablesuggestions) }, { n: `showRefreshButton`, v: z2ui5_cl_util.boolean_abap_2_json(showrefreshbutton) }, { n: `showSearchButton`, v: z2ui5_cl_util.boolean_abap_2_json(showsearchbutton) }, { n: `visible`, v: z2ui5_cl_util.boolean_abap_2_json(visible) }, { n: `enabled`, v: z2ui5_cl_util.boolean_abap_2_json(enabled) }, { n: `liveChange`, v: livechange }] });
     return result;
   }
@@ -1841,7 +1841,7 @@ class z2ui5_cl_xml_view {
 
   segmented_button_item({ icon, text, width, visible, textdirection, enabled, press } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `SegmentedButtonItem`, t_prop: [{ n: `icon`, v: icon }, { n: `press`, v: press }, { n: `width`, v: width }, { n: `key`, v: key }, { n: `textDirection`, v: textdirection }, { n: `enabled`, v: z2ui5_cl_util.boolean_abap_2_json(enabled) }, { n: `visible`, v: z2ui5_cl_util.boolean_abap_2_json(visible) }, { n: `text`, v: text }] });
     return result;
   }
@@ -1914,7 +1914,7 @@ class z2ui5_cl_xml_view {
 
   slider({ max, min, step, value, enabletickmarks, width, class: class_, id, enabled, change, inputsastooltips, showadvancedtooltip, showhandletooltip, livechange } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `Slider`, t_prop: [{ n: `class`, v: class_ }, { n: `id`, v: id }, { n: `max`, v: max }, { n: `min`, v: min }, { n: `enableTickmarks`, v: z2ui5_cl_util.boolean_abap_2_json(enabletickmarks) }, { n: `enabled`, v: z2ui5_cl_util.boolean_abap_2_json(enabled) }, { n: `value`, v: value }, { n: `step`, v: step }, { n: `change`, v: change }, { n: `width`, v: width }, { n: `inputsAsTooltips`, v: inputsastooltips }, { n: `showAdvancedTooltip`, v: showadvancedtooltip }, { n: `showHandleTooltip`, v: showhandletooltip }, { n: `liveChange`, v: livechange }] });
     return result;
   }
@@ -1927,7 +1927,7 @@ class z2ui5_cl_xml_view {
 
   smart_variant_management({ id, showexecuteonselection, persistencykey } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `SmartVariantManagement`, ns: `smartVariantManagement`, t_prop: [{ n: `id`, v: id }, { n: `showExecuteOnSelection`, v: z2ui5_cl_util.boolean_abap_2_json(showexecuteonselection) }, { n: `persistencyKey`, v: persistencykey }] });
     return result;
   }
@@ -1964,7 +1964,7 @@ class z2ui5_cl_xml_view {
 
   split_container({ id, initialdetail, initialmaster, backgroundcolor, backgroundimage, backgroundopacity, backgroundrepeat, defaulttransitionnamedetail, defaulttransitionnamemaster, masterbuttontext, masterbuttontooltip, mode, afterdetailnavigate, aftermasterclose, aftermasternavigate, aftermasteropen, beforemasterclose, beforemasteropen, detailnavigate, masterbutton, masternavigate } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `SplitContainer`, t_prop: [{ n: `id`, v: id }, { n: `initialDetail`, v: initialdetail }, { n: `initialMaster`, v: initialmaster }, { n: `backgroundColor`, v: backgroundcolor }, { n: `backgroundImage`, v: backgroundimage }, { n: `backgroundOpacity`, v: backgroundopacity }, { n: `backgroundRepeat`, v: backgroundrepeat }, { n: `defaultTransitionNameDetail`, v: defaulttransitionnamedetail }, { n: `defaultTransitionNameMaster`, v: defaulttransitionnamemaster }, { n: `masterButtonText`, v: masterbuttontext }, { n: `masterButtonTooltip`, v: masterbuttontooltip }, { n: `afterDetailNavigate`, v: afterdetailnavigate }, { n: `afterMasterClose`, v: aftermasterclose }, { n: `afterMasterNavigate`, v: aftermasternavigate }, { n: `afterMasterOpen`, v: aftermasteropen }, { n: `beforeMasterClose`, v: beforemasterclose }, { n: `beforeMasterOpen`, v: beforemasteropen }, { n: `detailNavigate`, v: detailnavigate }, { n: `masterButton`, v: masterbutton }, { n: `masterNavigate`, v: masternavigate }, { n: `mode`, v: mode }] });
     return result;
   }
@@ -1977,7 +1977,7 @@ class z2ui5_cl_xml_view {
 
   spot({ id, position, contentoffset, scale, tooltip, image, icon, click, text } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `Spot`, ns: `vbm`, t_prop: [{ n: `id`, v: id }, { n: `position`, v: position }, { n: `contentOffset`, v: contentoffset }, { n: `type`, v: type }, { n: `scale`, v: scale }, { n: `tooltip`, v: tooltip }, { n: `image`, v: image }, { n: `icon`, v: icon }, { n: `text`, v: text }, { n: `click`, v: click }] });
     return result;
   }
@@ -1990,21 +1990,21 @@ class z2ui5_cl_xml_view {
 
   stacked_bar_micro_chart({ height, press, maxvalue, precision, size, hideonnodata, displayzerovalue, showlabels, width } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `StackedBarMicroChart`, ns: `mchart`, t_prop: [{ n: `height`, v: height }, { n: `press`, v: press }, { n: `maxValue`, v: maxvalue }, { n: `precision`, v: precision }, { n: `size`, v: size }, { n: `hideOnNoData`, v: z2ui5_cl_util.boolean_abap_2_json(hideonnodata) }, { n: `displayZeroValue`, v: z2ui5_cl_util.boolean_abap_2_json(displayzerovalue) }, { n: `showLabels`, v: z2ui5_cl_util.boolean_abap_2_json(showlabels) }, { n: `width`, v: width }] });
     return result;
   }
 
   standard_list_item({ title, description, icon, info, press, selected, counter, wrapping, wrapcharlimit, infostateinverted, infostate, iconinset, adapttitlesize, activeicon, unread, highlight } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `StandardListItem`, t_prop: [{ n: `title`, v: title }, { n: `description`, v: description }, { n: `icon`, v: icon }, { n: `info`, v: info }, { n: `press`, v: press }, { n: `type`, v: type }, { n: `counter`, v: counter }, { n: `activeIcon`, v: activeicon }, { n: `adaptTitleSize`, v: z2ui5_cl_util.boolean_abap_2_json(adapttitlesize) }, { n: `unread`, v: z2ui5_cl_util.boolean_abap_2_json(unread) }, { n: `iconInset`, v: z2ui5_cl_util.boolean_abap_2_json(iconinset) }, { n: `infoStateInverted`, v: z2ui5_cl_util.boolean_abap_2_json(infostateinverted) }, { n: `wrapping`, v: z2ui5_cl_util.boolean_abap_2_json(wrapping) }, { n: `infoState`, v: infostate }, { n: `highlight`, v: highlight }, { n: `wrapCharLimit`, v: wrapcharlimit }, { n: `selected`, v: selected }] });
     return result;
   }
 
   standard_tree_item({ title, icon, press, detailpress, selected, counter, tooltip } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `StandardTreeItem`, t_prop: [{ n: `title`, v: title }, { n: `icon`, v: icon }, { n: `press`, v: press }, { n: `detailPress`, v: detailpress }, { n: `type`, v: type }, { n: `counter`, v: counter }, { n: `selected`, v: selected }, { n: `tooltip`, v: tooltip }] });
     return result;
   }
@@ -2029,7 +2029,7 @@ class z2ui5_cl_xml_view {
 
   step_input({ id, value, min, max, step, width, valuestate, enabled, description, displayvalueprecision, largerstep, stepmode, editable, fieldwidth, textalign, validationmode, change } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `StepInput`, t_prop: [{ n: `id`, v: id }, { n: `max`, v: max }, { n: `min`, v: min }, { n: `step`, v: step }, { n: `width`, v: width }, { n: `value`, v: value }, { n: `valueState`, v: valuestate }, { n: `enabled`, v: z2ui5_cl_util.boolean_abap_2_json(enabled) }, { n: `description`, v: description }, { n: `displayValuePrecision`, v: displayvalueprecision }, { n: `largerStep`, v: largerstep }, { n: `stepMode`, v: stepmode }, { n: `editable`, v: z2ui5_cl_util.boolean_abap_2_json(editable) }, { n: `fieldWidth`, v: fieldwidth }, { n: `textAlign`, v: textalign }, { n: `validationMode`, v: validationmode }, { n: `change`, v: change }] });
     return result;
   }
@@ -2062,7 +2062,7 @@ class z2ui5_cl_xml_view {
 
   suggestion_item({ description, icon, text, textdirection } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `SuggestionItem`, t_prop: [{ n: `description`, v: description }, { n: `icon`, v: icon }, { n: `key`, v: key }, { n: `text`, v: text }, { n: `textDirection`, v: textdirection }] });
     return result;
   }
@@ -2087,7 +2087,7 @@ class z2ui5_cl_xml_view {
 
   switch({ state, customtexton, customtextoff, enabled, change, name } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `Switch`, t_prop: [{ n: `type`, v: type }, { n: `enabled`, v: z2ui5_cl_util.boolean_abap_2_json(enabled) }, { n: `state`, v: state }, { n: `change`, v: change }, { n: `customTextOff`, v: customtextoff }, { n: `customTextOn`, v: customtexton }, { n: `name`, v: name }] });
     return result;
   }
@@ -2160,14 +2160,14 @@ class z2ui5_cl_xml_view {
 
   text({ text, class: class_, ns, emptyindicatormode, maxlines, renderwhitespace, textalign, textdirection, width, wrapping, wrappingtype, id, visible } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `Text`, ns: false /* TODO(abap2js): NS */, t_prop: [{ n: `text`, v: text }, { n: `emptyIndicatorMode`, v: emptyindicatormode }, { n: `maxLines`, v: maxlines }, { n: `renderWhitespace`, v: renderwhitespace }, { n: `textAlign`, v: textalign }, { n: `visible`, v: z2ui5_cl_util.boolean_abap_2_json(visible) }, { n: `textDirection`, v: textdirection }, { n: `width`, v: width }, { n: `id`, v: id }, { n: `wrapping`, v: z2ui5_cl_util.boolean_abap_2_json(wrapping) }, { n: `wrappingType`, v: wrappingtype }, { n: `class`, v: class_ }] });
     return result;
   }
 
   text_area({ value, rows, cols, height, class: class_, width, valueliveupdate, editable, enabled, growing, growingmaxlines, id, required, placeholder, valuestate, valuestatetext, wrapping, maxlength, textalign, textdirection, showvaluestatemessage, showexceededtext } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `TextArea`, t_prop: [{ n: `value`, v: value }, { n: `rows`, v: rows }, { n: `cols`, v: cols }, { n: `height`, v: height }, { n: `width`, v: width }, { n: `wrapping`, v: wrapping }, { n: `maxLength`, v: maxlength }, { n: `textAlign`, v: textalign }, { n: `textDirection`, v: textdirection }, { n: `showValueStateMessage`, v: z2ui5_cl_util.boolean_abap_2_json(showvaluestatemessage) }, { n: `showExceededText`, v: z2ui5_cl_util.boolean_abap_2_json(showexceededtext) }, { n: `valueLiveUpdate`, v: z2ui5_cl_util.boolean_abap_2_json(valueliveupdate) }, { n: `editable`, v: z2ui5_cl_util.boolean_abap_2_json(editable) }, { n: `class`, v: class_ }, { n: `enabled`, v: z2ui5_cl_util.boolean_abap_2_json(enabled) }, { n: `id`, v: id }, { n: `growing`, v: z2ui5_cl_util.boolean_abap_2_json(growing) }, { n: `growingMaxLines`, v: growingmaxlines }, { n: `required`, v: required }, { n: `valueState`, v: valuestate }, { n: `placeholder`, v: placeholder }, { n: `valueStateText`, v: valuestatetext }] });
     return result;
   }
@@ -2204,7 +2204,7 @@ class z2ui5_cl_xml_view {
 
   time_picker({ value, placeholder, enabled, valuestate, displayformat, valueformat, required, width, datevalue, localeid, mask, maskmode, minutesstep, name, placeholdersymbol, secondsstep, textalign, textdirection, title, showcurrenttimebutton, showvaluestatemessage, support2400, initialfocuseddatevalue, hideinput, editable, visible, valuestatetext, livechange, change, aftervaluehelpopen, aftervaluehelpclose } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `TimePicker`, t_prop: [{ n: `value`, v: value }, { n: `dateValue`, v: datevalue }, { n: `localeId`, v: localeid }, { n: `placeholder`, v: placeholder }, { n: `mask`, v: mask }, { n: `maskMode`, v: maskmode }, { n: `minutesStep`, v: minutesstep }, { n: `name`, v: name }, { n: `placeholderSymbol`, v: placeholdersymbol }, { n: `secondsStep`, v: secondsstep }, { n: `textAlign`, v: textalign }, { n: `textDirection`, v: textdirection }, { n: `title`, v: title }, { n: `showCurrentTimeButton`, v: z2ui5_cl_util.boolean_abap_2_json(showcurrenttimebutton) }, { n: `showValueStateMessage`, v: z2ui5_cl_util.boolean_abap_2_json(showvaluestatemessage) }, { n: `support2400`, v: z2ui5_cl_util.boolean_abap_2_json(support2400) }, { n: `initialFocusedDateValue`, v: z2ui5_cl_util.boolean_abap_2_json(initialfocuseddatevalue) }, { n: `hideInput`, v: z2ui5_cl_util.boolean_abap_2_json(hideinput) }, { n: `editable`, v: z2ui5_cl_util.boolean_abap_2_json(editable) }, { n: `enabled`, v: z2ui5_cl_util.boolean_abap_2_json(enabled) }, { n: `required`, v: z2ui5_cl_util.boolean_abap_2_json(required) }, { n: `visible`, v: z2ui5_cl_util.boolean_abap_2_json(visible) }, { n: `width`, v: width }, { n: `valueState`, v: valuestate }, { n: `valueStateText`, v: valuestatetext }, { n: `displayFormat`, v: displayformat }, { n: `afterValueHelpClose`, v: aftervaluehelpclose }, { n: `afterValueHelpOpen`, v: aftervaluehelpopen }, { n: `change`, v: change }, { n: `liveChange`, v: livechange }, { n: `valueFormat`, v: valueformat }] });
     return result;
   }
@@ -2212,21 +2212,21 @@ class z2ui5_cl_xml_view {
   title({ ns, text, wrapping, level, class: class_, id, textalign, textdirection, titlestyle, width, wrappingtype, visible } = {}) {
     let result = null;
     const lv_name = (false /* TODO(abap2js): NS */ === `f` ? `title` : `Title`);
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ ns: false /* TODO(abap2js): NS */, name: lv_name, t_prop: [{ n: `text`, v: text }, { n: `class`, v: class_ }, { n: `id`, v: id }, { n: `wrappingType`, v: wrappingtype }, { n: `textAlign`, v: textalign }, { n: `textDirection`, v: textdirection }, { n: `titleStyle`, v: titlestyle }, { n: `width`, v: width }, { n: `wrapping`, v: z2ui5_cl_util.boolean_abap_2_json(wrapping) }, { n: `visible`, v: z2ui5_cl_util.boolean_abap_2_json(visible) }, { n: `level`, v: level }] });
     return result;
   }
 
   toggle_button({ text, icon, enabled, press, class: class_, pressed } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `ToggleButton`, t_prop: [{ n: `press`, v: press }, { n: `text`, v: text }, { n: `enabled`, v: z2ui5_cl_util.boolean_abap_2_json(enabled) }, { n: `icon`, v: icon }, { n: `type`, v: type }, { n: `class`, v: class_ }, { n: `pressed`, v: z2ui5_cl_util.boolean_abap_2_json(pressed) }] });
     return result;
   }
 
   token({ text, selected, visible, editable } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `Token`, t_prop: [{ n: `key`, v: key }, { n: `text`, v: text }, { n: `selected`, v: selected }, { n: `visible`, v: visible }, { n: `editable`, v: editable }] });
     return result;
   }
@@ -2246,7 +2246,7 @@ class z2ui5_cl_xml_view {
 
   toolbar_spacer({ ns, width } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `ToolbarSpacer`, ns: false /* TODO(abap2js): NS */, t_prop: [{ n: `width`, v: width }] });
     return result;
   }
@@ -2521,7 +2521,7 @@ class z2ui5_cl_xml_view {
 
   _cc_plain_xml({ val } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `ZZPLAIN`, ns: `html`, t_prop: [{ n: `VALUE`, v: val }] });
     return result;
   }
@@ -2533,21 +2533,21 @@ class z2ui5_cl_xml_view {
     } catch (error) {
     }
     const result2 = new z2ui5_cl_xml_view();
-    result2.mv_name = name;
+    result2.mv_name = z2ui5_cl_util.abap_copy(name);
     result2.mv_ns = false /* TODO(abap2js): NS */;
-    result2.mt_prop = t_prop;
-    result2.mo_parent = this;
-    result2.mo_root = this.mo_root;
+    result2.mt_prop = z2ui5_cl_util.abap_copy(t_prop);
+    result2.mo_parent = z2ui5_cl_util.abap_copy(this);
+    result2.mo_root = z2ui5_cl_util.abap_copy(this.mo_root);
     this.mt_child.push(result2);
-    this.mo_root.mo_previous = result2;
-    result = result2;
+    this.mo_root.mo_previous = z2ui5_cl_util.abap_copy(result2);
+    result = z2ui5_cl_util.abap_copy(result2);
     return result;
   }
 
   _generic_property({ val } = {}) {
     let result = null;
     this.mt_prop.push(val);
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     return result;
   }
 
@@ -2559,21 +2559,21 @@ class z2ui5_cl_xml_view {
 
   p_cell_selector({ id } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `CellSelector`, ns: `plugins`, t_prop: [{ n: `id`, v: id }] });
     return result;
   }
 
   p_copy_provider({ id, extract_data, copy } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `CopyProvider`, ns: `plugins`, t_prop: [{ n: `id`, v: id }, { n: `copy`, v: copy }, { n: `extractData`, v: extract_data }] });
     return result;
   }
 
   date_range_selection({ value, placeholder, displayformat, valueformat, required, valuestate, valuestatetext, enabled, showcurrentdatebutton, change, hideinput, showfooter, visible, showvaluestatemessage, mindate, maxdate, editable, width, id, calendarweeknumbering, displayformattype, class: class_, textdirection, textalign, name, datevalue, seconddatevalue, initialfocuseddatevalue, delimiter } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `DateRangeSelection`, t_prop: [{ n: `value`, v: value }, { n: `displayFormat`, v: displayformat }, { n: `displayFormatType`, v: displayformattype }, { n: `valueFormat`, v: valueformat }, { n: `required`, v: z2ui5_cl_util.boolean_abap_2_json(required) }, { n: `valueState`, v: valuestate }, { n: `valueStateText`, v: valuestatetext }, { n: `placeholder`, v: placeholder }, { n: `textAlign`, v: textalign }, { n: `textDirection`, v: textdirection }, { n: `change`, v: change }, { n: `maxDate`, v: maxdate }, { n: `minDate`, v: mindate }, { n: `width`, v: width }, { n: `id`, v: id }, { n: `dateValue`, v: datevalue }, { n: `secondDateValue`, v: seconddatevalue }, { n: `name`, v: name }, { n: `class`, v: class_ }, { n: `calendarWeekNumbering`, v: calendarweeknumbering }, { n: `initialFocusedDateValue`, v: initialfocuseddatevalue }, { n: `enabled`, v: z2ui5_cl_util.boolean_abap_2_json(enabled) }, { n: `visible`, v: z2ui5_cl_util.boolean_abap_2_json(visible) }, { n: `editable`, v: z2ui5_cl_util.boolean_abap_2_json(editable) }, { n: `hideInput`, v: z2ui5_cl_util.boolean_abap_2_json(hideinput) }, { n: `showFooter`, v: z2ui5_cl_util.boolean_abap_2_json(showfooter) }, { n: `showValueStateMessage`, v: z2ui5_cl_util.boolean_abap_2_json(showvaluestatemessage) }, { n: `showCurrentDateButton`, v: z2ui5_cl_util.boolean_abap_2_json(showcurrentdatebutton) }, { n: `delimiter`, v: delimiter }] });
     return result;
   }
@@ -2640,7 +2640,7 @@ class z2ui5_cl_xml_view {
 
   navigation_list_item({ text, icon, select, href } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `NavigationListItem`, ns: `tnt`, t_prop: [{ n: `text`, v: text }, { n: `icon`, v: icon }, { n: `href`, v: href }, { n: `key`, v: key }, { n: `select`, v: select }] });
     return result;
   }
@@ -2665,7 +2665,7 @@ class z2ui5_cl_xml_view {
 
   color_picker({ colorstring, displaymode, change, livechange } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ ns: `u`, name: `ColorPicker`, t_prop: [{ n: `colorString`, v: colorstring }, { n: `displayMode`, v: displaymode }, { n: `change`, v: change }, { n: `liveChange`, v: livechange }] });
     return result;
   }
@@ -2732,7 +2732,7 @@ class z2ui5_cl_xml_view {
 
   control_configuration({ id, previnitdatafetchinvalhelpdia, visibleinadvancedarea } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this._generic({ name: `ControlConfiguration`, ns: `smartFilterBar`, t_prop: [{ n: `id`, v: id }, { n: `key`, v: key }, { n: `visibleInAdvancedArea`, v: z2ui5_cl_util.boolean_abap_2_json(visibleinadvancedarea) }, { n: `preventInitialDataFetchInValueHelpDialog`, v: z2ui5_cl_util.boolean_abap_2_json(previnitdatafetchinvalhelpdia) }] });
     return result;
   }
@@ -2789,9 +2789,9 @@ class z2ui5_cl_xml_view {
     let result = null;
     let lv_vizproperties = ``;
     if (!vizproperties) {
-      lv_vizproperties = `{` + `\\n` + `"plotArea": {` + `\\n` + `"dataLabel": {` + `\\n` + `"formatString": "",` + `\\n` + `"visible": false` + `\\n` + `}` + `\\n` + `},` + `\\n` + `"valueAxis": {` + `\\n` + `"label": {` + `\\n` + `"formatString": ""` + `\\n` + `},` + `\\n` + `"title": {` + `\\n` + `"visible": false` + `\\n` + `}` + `\\n` + `},` + `\\n` + `"categoryAxis": {` + `\\n` + `"title": {` + `\\n` + `"visible": false` + `\\n` + `}` + `\\n` + `},` + `\\n` + `"title": {` + `\\n` + `"visible": false,` + `\\n` + `"text": ""` + `\\n` + `}` + `\\n` + `}`;
+      lv_vizproperties = `{` + ` ` + `"plotArea": {` + ` ` + `"dataLabel": {` + ` ` + `"formatString": "",` + ` ` + `"visible": false` + ` ` + `}` + ` ` + `},` + ` ` + `"valueAxis": {` + ` ` + `"label": {` + ` ` + `"formatString": ""` + ` ` + `},` + ` ` + `"title": {` + ` ` + `"visible": false` + ` ` + `}` + ` ` + `},` + ` ` + `"categoryAxis": {` + ` ` + `"title": {` + ` ` + `"visible": false` + ` ` + `}` + ` ` + `},` + ` ` + `"title": {` + ` ` + `"visible": false,` + ` ` + `"text": ""` + ` ` + `}` + ` ` + `}`;
     } else {
-      lv_vizproperties = vizproperties;
+      lv_vizproperties = z2ui5_cl_util.abap_copy(vizproperties);
     }
     result = this._generic({ name: `VizFrame`, ns: `viz`, t_prop: [{ n: `id`, v: id }, { n: `legendVisible`, v: legendvisible }, { n: `vizCustomizations`, v: vizcustomizations }, { n: `vizProperties`, v: lv_vizproperties }, { n: `vizScales`, v: vizscales }, { n: `vizType`, v: viztype }, { n: `height`, v: height }, { n: `width`, v: width }, { n: `uiConfig`, v: uiconfig }, { n: `visible`, v: z2ui5_cl_util.boolean_abap_2_json(visible) }, { n: `selectData`, v: selectdata }] });
     return result;

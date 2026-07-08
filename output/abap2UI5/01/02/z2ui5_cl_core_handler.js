@@ -37,7 +37,7 @@ class z2ui5_cl_core_handler {
     let lo_ajson = (z2ui5_cl_ajson.parse(val));
     const lo_ajson2 = lo_ajson.slice(`value`);
     if (lo_ajson2 != null) {
-      lo_ajson = lo_ajson2;
+      lo_ajson = z2ui5_cl_util.abap_copy(lo_ajson2);
     }
     const lv_model_edit_name = `/${z2ui5_if_core_types.cs_ui5.two_way_model}`;
     result.o_model = z2ui5_cl_ajson.create_empty();
@@ -119,7 +119,7 @@ class z2ui5_cl_core_handler {
   }
 
   constructor({ val } = {}) {
-    this.mv_request_json = val;
+    this.mv_request_json = z2ui5_cl_util.abap_copy(val);
     this.mo_action = new z2ui5_cl_core_action(this);
   }
 
@@ -182,7 +182,7 @@ class z2ui5_cl_core_handler {
       fs_xml = _fs$fs_xml ? _fs$fs_xml.o[_fs$fs_xml.k] : null;
       sy_subrc = _fs$fs_xml ? 0 : 4;
       if (!(sy_subrc === 0)) throw new Error(`ASSERT failed`);
-      if (fs_check_update_model === true || fs_xml) {
+      if ((fs_check_update_model === true || fs_check_update_model === `X`) || fs_xml) {
         result = true;
         return result;
       }
@@ -202,7 +202,7 @@ class z2ui5_cl_core_handler {
     }
     this.mv_response = this.response_abap_to_json({ val: this.ms_response });
     this.mo_action.ms_next = null;
-    if ((this.mo_action.mo_app.mo_app).check_sticky === false) {
+    if (!(((this.mo_action.mo_app.mo_app).check_sticky) === true || ((this.mo_action.mo_app.mo_app).check_sticky) === `X`)) {
       this.mo_action.mo_app.db_save();
     }
   }
@@ -212,7 +212,7 @@ class z2ui5_cl_core_handler {
     let lx2;
     const li_client = (new z2ui5_cl_core_client(this.mo_action));
     const li_app = (this.mo_action.mo_app.mo_app);
-    if (li_app.check_sticky === false) {
+    if (!(li_app.check_sticky === true || li_app.check_sticky === `X`)) {
       // TODO(abap2js): ROLLBACK WORK.
     }
     try {
@@ -226,7 +226,7 @@ class z2ui5_cl_core_handler {
       lx2 = new z2ui5_cx_util_error({ val: `UNCAUGHT EXCEPTION - Please Restart App:`, previous: lx });
       li_client.nav_app_leave(z2ui5_cl_pop_error.factory(lx2));
     }
-    if (li_app.check_sticky === false) {
+    if (!(li_app.check_sticky === true || li_app.check_sticky === `X`)) {
       // TODO(abap2js): ROLLBACK WORK.
     }
     if (this.mo_action.ms_next.o_app_leave) {

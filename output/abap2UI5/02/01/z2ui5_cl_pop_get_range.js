@@ -18,7 +18,7 @@ class z2ui5_cl_pop_get_range extends z2ui5_if_app {
 
   result() {
     let result = {};
-    result = this.ms_result;
+    result = z2ui5_cl_util.abap_copy(this.ms_result);
     return result;
   }
 
@@ -45,7 +45,7 @@ class z2ui5_cl_pop_get_range extends z2ui5_if_app {
 
   async main(client) {
     let sy_tabix = 0;
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.mt_mapping = z2ui5_cl_util.filter_get_token_range_mapping();
       this.mt_filter = [];

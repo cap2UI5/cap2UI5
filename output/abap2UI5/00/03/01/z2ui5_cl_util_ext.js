@@ -14,7 +14,7 @@ class z2ui5_cl_util_ext {
     let content = null;
     let lv_classname = ``;
     let xco_cp_abap = ``;
-    lv_classname = i_classname;
+    lv_classname = z2ui5_cl_util.abap_copy(i_classname);
     xco_cp_abap = `XCO_CP_ABAP`;
     // TODO(abap2js): CALL METHOD (xco_cp_abap)=>(`CLASS`) EXPORTING iv_name = lv_classname RECEIVING ro_class = obj.
     // TODO(abap2js): CALL METHOD obj->(`IF_XCO_AO_CLASS~CONTENT`) RECEIVING ro_content = content.
@@ -42,9 +42,9 @@ class z2ui5_cl_util_ext {
     let new_struct_desc = null;
     let new_table_desc = null;
     let comp = null;
-    comps = temp9;
+    comps = z2ui5_cl_util.abap_copy(temp9);
     temp10 = cl_abap_structdescr.describe_by_name(`DFIES`);
-    lo_struct = temp10;
+    lo_struct = z2ui5_cl_util.abap_copy(temp10);
     comps = lo_struct.get_components();
     try {
       new_struct_desc = cl_abap_structdescr.create(comps);
@@ -79,7 +79,7 @@ class z2ui5_cl_util_ext {
           if (!(fs_value_dest != null)) {
             continue;
           }
-          fs_value_dest = fs_value;
+          fs_value_dest = z2ui5_cl_util.abap_copy(fs_value);
           if (_fs$fs_value_dest) _fs$fs_value_dest.o[_fs$fs_value_dest.k] = fs_value_dest;
           fs_value = null;
           _fs$fs_value = null;
@@ -113,7 +113,7 @@ class z2ui5_cl_util_ext {
     let lr_ddfields = null;
     // TODO(abap2js): TYPES ty_c30 TYPE c LENGTH 30.
     let names = [];
-    lv_tabname = tabname;
+    lv_tabname = z2ui5_cl_util.abap_copy(tabname);
     try {
       try {
         lv_method2 = `XCO_CP_ABAP_DICTIONARY`;
@@ -122,7 +122,7 @@ class z2ui5_cl_util_ext {
         if (sy_subrc !== 0) {
           throw new cx_sy_dyn_call_illegal_class();
         }
-        obj = fs_any;
+        obj = z2ui5_cl_util.abap_copy(fs_any);
         // TODO(abap2js): CALL METHOD obj->(`IF_XCO_DBT_FIELDS~GET_NAMES`) RECEIVING rt_names = names.
       } catch (error) {
         workaround = `DDFIELDS`;
@@ -137,7 +137,7 @@ class z2ui5_cl_util_ext {
           _fs$fs_field = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_any, `KEYFLAG`);
           fs_field = _fs$fs_field ? _fs$fs_field.o[_fs$fs_field.k] : null;
           sy_subrc = _fs$fs_field ? 0 : 4;
-          if (sy_subrc !== 0 || fs_field !== true) {
+          if (sy_subrc !== 0 || !(fs_field === true || fs_field === `X`)) {
             continue;
           }
           _fs$fs_field = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_any, `FIELDNAME`);
@@ -178,20 +178,20 @@ class z2ui5_cl_util_ext {
     let lv_tabname;
     let ddtext = ``;
     if (!(langu !== undefined)) {
-      lan = sy_langu;
+      lan = z2ui5_cl_util.abap_copy(sy_langu);
     } else {
-      lan = langu;
+      lan = z2ui5_cl_util.abap_copy(langu);
     }
     if (z2ui5_cl_util.context_check_abap_cloud()) {
-      ddtext = tabname;
+      ddtext = z2ui5_cl_util.abap_copy(tabname);
     } else {
       lv_tabname = `dd02t`;
       // TODO(abap2js): SELECT SINGLE ddtext FROM (lv_tabname) WHERE tabname = @tabname AND ddlanguage = @lan INTO @ddtext.
     }
     if (ddtext) {
-      result = ddtext;
+      result = z2ui5_cl_util.abap_copy(ddtext);
     } else {
-      result = tabname;
+      result = z2ui5_cl_util.abap_copy(tabname);
     }
     return result;
   }
@@ -234,8 +234,8 @@ class z2ui5_cl_util_ext {
     // TODO(abap2js): ASSIGN lr_shlp->* TO <shlp>.
     let lv_tabname = ``;
     let lv_fieldname = ``;
-    lv_tabname = mv_table;
-    lv_fieldname = mv_fname;
+    lv_tabname = z2ui5_cl_util.abap_copy(mv_table);
+    lv_fieldname = z2ui5_cl_util.abap_copy(mv_fname);
     if (!ms_shlp) {
       lv_fm = `F4IF_DETERMINE_SEARCHHELP`;
       // TODO(abap2js): CALL FUNCTION lv_fm EXPORTING tabname = lv_tabname fieldname = lv_fieldname IMPORTING shlp = <shlp> EXCEPTIONS field_not_found = 1 no_help_for_field = 2 inconsistent_help = 3 OTHERS = 4.
@@ -243,7 +243,7 @@ class z2ui5_cl_util_ext {
         throw new z2ui5_cx_util_error({ val: `F4IF_DETERMINE_SEARCHHELP failed for ${lv_tabname}-${lv_fieldname}` });
       }
       ms_shlp = ({ ...fs_shlp });
-      if (ms_shlp.intdescr.issimple === false) {
+      if (!(ms_shlp.intdescr.issimple === true || ms_shlp.intdescr.issimple === `X`)) {
         let lr_t_shlp = null;
         lv_type2 = `SHLP_DESCT`;
         // TODO(abap2js): CREATE DATA lr_t_shlp TYPE (lv_type2).
@@ -268,14 +268,14 @@ class z2ui5_cl_util_ext {
         if (sy_subrc !== 0) {
           continue;
         }
-        r_interface.value = fs_value;
+        r_interface.value = z2ui5_cl_util.abap_copy(fs_value);
       }
     }
     sy_tabix = 0;
     for (const interface_ of ms_shlp.interface) {
       sy_tabix++;
       if (interface_.valfield === mv_fname) {
-        mv_shlpfield = interface_.shlpfield;
+        mv_shlpfield = z2ui5_cl_util.abap_copy(interface_.shlpfield);
       }
       if (interface_.value) {
         ms_shlp.selopt = [...(ms_shlp.selopt ?? []),{ shlpfield: interface_.shlpfield, shlpname: interface_.valtabname, option: ([...String(interface_.value)].some(($c) => String(`*`).includes($c)) ? `CP` : `EQ`), sign: `I`, low: interface_.value }];
@@ -287,7 +287,7 @@ class z2ui5_cl_util_ext {
       if (!fieldrop.defaultval) {
         continue;
       }
-      valule = fieldrop.defaultval;
+      valule = z2ui5_cl_util.abap_copy(fieldrop.defaultval);
       // TODO(abap2js): REPLACE ALL OCCURRENCES OF `'` IN valule WITH ``.
       ms_shlp.selopt = [...(ms_shlp.selopt ?? []),{ shlpfield: fieldrop.fieldname, option: ([...String(fieldrop.defaultval)].some(($c) => String(`*`).includes($c)) ? `CP` : `EQ`), sign: `I`, low: valule }];
     }
@@ -304,14 +304,14 @@ class z2ui5_cl_util_ext {
       sy_tabix++;
       if (!(field_props.shlplispos)) continue;
       descption = (() => { try { return mt_result_desc.find((row) => row.fieldname === field_props.fieldname) ?? null; } catch { return null; } })();
-      ls_comp.name = descption.fieldname;
+      ls_comp.name = z2ui5_cl_util.abap_copy(descption.fieldname);
       ls_comp.type = cl_abap_datadescr.describe_by_name(descption.rollname);
       lt_comps.push(ls_comp);
     }
     if (!lt_comps.some((row) => row.name === `ROW_ID`)) {
       lo_datadescr = cl_abap_datadescr.describe_by_name(`INT4`);
       ls_comp.name = `ROW_ID`;
-      ls_comp.type = lo_datadescr;
+      ls_comp.type = z2ui5_cl_util.abap_copy(lo_datadescr);
       lt_comps.push(ls_comp);
     }
     const strucdescr = cl_abap_structdescr.create({ p_components: lt_comps });
@@ -341,7 +341,7 @@ class z2ui5_cl_util_ext {
           continue;
         }
         if (result_desc.leng < result_desc.intlen) {
-          result_desc.offset = result_desc.offset / 2;
+          result_desc.offset = z2ui5_cl_util.abap_div(result_desc.offset, 2);
         }
         try {
           fs_line_content = result_line + result_desc.offset (result_desc.outputlen);
@@ -370,7 +370,7 @@ class z2ui5_cl_util_ext {
         if (sy_subrc !== 0) {
           continue;
         }
-        fs_value = interface_.value;
+        fs_value = z2ui5_cl_util.abap_copy(interface_.value);
         if (_fs$fs_value) _fs$fs_value.o[_fs$fs_value.k] = fs_value;
       }
     }
@@ -382,7 +382,7 @@ class z2ui5_cl_util_ext {
       fs_row = _fs$fs_row ? _fs$fs_row.o[_fs$fs_row.k] : null;
       sy_subrc = _fs$fs_row ? 0 : 4;
       if (fs_row != null) {
-        fs_row = sy_tabix;
+        fs_row = z2ui5_cl_util.abap_copy(sy_tabix);
         if (_fs$fs_row) _fs$fs_row.o[_fs$fs_row.k] = fs_row;
       }
     }
@@ -402,7 +402,7 @@ class z2ui5_cl_util_ext {
     sy_tabix = 0;
     for (const dfies of it_dfies) {
       sy_tabix++;
-      if (!((dfies.keyflag === true || dfies.fieldname === mv_check_tab_field))) {
+      if (!(((dfies.keyflag === true || dfies.keyflag === `X`) || dfies.fieldname === mv_check_tab_field))) {
         continue;
       }
       // TODO(abap2js): ASSIGN ms_data_row->* TO FIELD-SYMBOL(<row>).
@@ -423,7 +423,7 @@ class z2ui5_cl_util_ext {
       } else {
         escape = null;
       }
-      val = fs_value;
+      val = z2ui5_cl_util.abap_copy(fs_value);
       if ([...String(val)].some(($c) => String(`_`).includes($c))) {
         // TODO(abap2js): REPLACE ALL OCCURRENCES OF `_` IN val WITH `#_`.
       }
@@ -446,7 +446,7 @@ class z2ui5_cl_util_ext {
     sy_tabix = 0;
     for (const s_dfies of dfies) {
       sy_tabix++;
-      if (!(s_dfies.keyflag === true)) continue;
+      if (!((s_dfies.keyflag === true || s_dfies.keyflag === `X`))) continue;
       _fs$fs_value = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(line, s_dfies.fieldname);
       fs_value = _fs$fs_value ? _fs$fs_value.o[_fs$fs_value.k] : null;
       sy_subrc = _fs$fs_value ? 0 : 4;
@@ -456,24 +456,24 @@ class z2ui5_cl_util_ext {
       lv_type = cl_abap_typedescr.describe_by_data(fs_value).type_kind;
       if (![...String(lv_type)].some(($c) => String(`CDNT`).includes($c))) {
         // TODO(abap2js): lv_tabkey+lv_tabkey_len = '*'.
-        rv_tabkey = lv_tabkey;
+        rv_tabkey = z2ui5_cl_util.abap_copy(lv_tabkey);
         return rv_tabkey;
       } else {
-        lv_field_len = cl_abap_typedescr.describe_by_data(fs_value).length / cl_abap_char_utilities.charsize;
+        lv_field_len = z2ui5_cl_util.abap_div((cl_abap_typedescr.describe_by_data(fs_value).length), cl_abap_char_utilities.charsize);
       }
-      lv_field_len = cl_abap_typedescr.describe_by_data(fs_value).length / cl_abap_char_utilities.charsize;
+      lv_field_len = z2ui5_cl_util.abap_div((cl_abap_typedescr.describe_by_data(fs_value).length), cl_abap_char_utilities.charsize);
       // TODO(abap2js): lv_tabkey+lv_tabkey_len(lv_field_len) = <value>.
       lv_tabkey_len = lv_tabkey_len + lv_field_len;
     }
     if (lv_tabkey_len > 119) {
       if (String(lv_tabkey).toLowerCase().includes(String(`_`).toLowerCase())) {
-        lv_offset = sy_fdpos;
+        lv_offset = z2ui5_cl_util.abap_copy(sy_fdpos);
         // TODO(abap2js): lv_tabkey+lv_offset = '*'.
       } else {
         // TODO(abap2js): lv_tabkey+119 = '*'.
       }
     }
-    rv_tabkey = lv_tabkey;
+    rv_tabkey = z2ui5_cl_util.abap_copy(lv_tabkey);
     return rv_tabkey;
   }
 
@@ -548,7 +548,7 @@ class z2ui5_cl_util_ext {
     if (!(fs_value != null)) {
       return result;
     } else {
-      fs_value = is_transport.task;
+      fs_value = z2ui5_cl_util.abap_copy(is_transport.task);
       if (_fs$fs_value) _fs$fs_value.o[_fs$fs_value.k] = fs_value;
     }
     fs_value = null;
@@ -592,7 +592,7 @@ class z2ui5_cl_util_ext {
     if (!(fs_value != null)) {
       return result;
     } else {
-      fs_value = iv_tabname;
+      fs_value = z2ui5_cl_util.abap_copy(iv_tabname);
       if (_fs$fs_value) _fs$fs_value.o[_fs$fs_value.k] = fs_value;
     }
     fs_value = null;
@@ -603,7 +603,7 @@ class z2ui5_cl_util_ext {
     if (!(fs_value != null)) {
       return result;
     } else {
-      fs_value = iv_tabname;
+      fs_value = z2ui5_cl_util.abap_copy(iv_tabname);
       if (_fs$fs_value) _fs$fs_value.o[_fs$fs_value.k] = fs_value;
     }
     fs_value = null;
@@ -623,7 +623,7 @@ class z2ui5_cl_util_ext {
       }
       fs_t_e071k.push(fs_s_e071k);
     }
-    result = t_e071k;
+    result = z2ui5_cl_util.abap_copy(t_e071k);
     return result;
   }
 
@@ -656,7 +656,7 @@ class z2ui5_cl_util_ext {
     if (!(fs_value != null)) {
       return result;
     } else {
-      fs_value = is_transport.task;
+      fs_value = z2ui5_cl_util.abap_copy(is_transport.task);
       if (_fs$fs_value) _fs$fs_value.o[_fs$fs_value.k] = fs_value;
     }
     fs_value = null;
@@ -689,7 +689,7 @@ class z2ui5_cl_util_ext {
     if (!(fs_value != null)) {
       return result;
     } else {
-      fs_value = iv_tabname;
+      fs_value = z2ui5_cl_util.abap_copy(iv_tabname);
       if (_fs$fs_value) _fs$fs_value.o[_fs$fs_value.k] = fs_value;
     }
     fs_value = null;
@@ -706,7 +706,7 @@ class z2ui5_cl_util_ext {
     fs_value = null;
     _fs$fs_value = null;
     fs_t_e071.push(fs_s_e071);
-    result = t_e071;
+    result = z2ui5_cl_util.abap_copy(t_e071);
     return result;
   }
 
@@ -751,7 +751,7 @@ class z2ui5_cl_util_ext {
       if (!(fs_value != null)) {
         continue;
       } else {
-        ls_data.transport = fs_value;
+        ls_data.transport = z2ui5_cl_util.abap_copy(fs_value);
       }
       fs_value = null;
       _fs$fs_value = null;
@@ -761,7 +761,7 @@ class z2ui5_cl_util_ext {
       if (!(fs_value != null)) {
         continue;
       } else {
-        ls_data.task = fs_value;
+        ls_data.task = z2ui5_cl_util.abap_copy(fs_value);
       }
       fs_value = null;
       _fs$fs_value = null;
@@ -841,7 +841,7 @@ class z2ui5_cl_util_ext {
             if (!(fs_value != null)) {
               continue;
             } else {
-              data.short_description = fs_value;
+              data.short_description = z2ui5_cl_util.abap_copy(fs_value);
             }
           }
         }
@@ -866,7 +866,7 @@ class z2ui5_cl_util_ext {
       sy_subrc = _fs$fs_row ? 0 : 4;
       if (fs_row != null) {
         try {
-          fs_row = sy_mandt;
+          fs_row = z2ui5_cl_util.abap_copy(sy_mandt);
           if (_fs$fs_row) _fs$fs_row.o[_fs$fs_row.k] = fs_row;
         } catch (error) {
         }

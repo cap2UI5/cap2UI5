@@ -1,3 +1,4 @@
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 
 class z2ui5_cl_util_xml {
   mv_name = ``;
@@ -14,50 +15,50 @@ class z2ui5_cl_util_xml {
   static factory() {
     let result = null;
     result = new z2ui5_cl_util_xml();
-    result.mo_root = result;
-    result.mo_parent = result;
+    result.mo_root = z2ui5_cl_util.abap_copy(result);
+    result.mo_parent = z2ui5_cl_util.abap_copy(result);
     return result;
   }
 
   __({ n, ns, a, v, p } = {}) {
     let result = null;
     const lo_child = new z2ui5_cl_util_xml();
-    lo_child.mv_name = n;
+    lo_child.mv_name = z2ui5_cl_util.abap_copy(n);
     lo_child.mv_ns = false /* TODO(abap2js): NS */;
-    lo_child.mt_prop = p;
+    lo_child.mt_prop = z2ui5_cl_util.abap_copy(p);
     if (a) {
       lo_child.mt_prop.push({ n: a, v: v });
     }
-    lo_child.mo_parent = this;
-    lo_child.mo_root = this.mo_root;
+    lo_child.mo_parent = z2ui5_cl_util.abap_copy(this);
+    lo_child.mo_root = z2ui5_cl_util.abap_copy(this.mo_root);
     this.mt_child.push(lo_child);
-    this.mo_root.mo_previous = lo_child;
-    result = lo_child;
+    this.mo_root.mo_previous = z2ui5_cl_util.abap_copy(lo_child);
+    result = z2ui5_cl_util.abap_copy(lo_child);
     return result;
   }
 
   _({ n, ns, a, v, p } = {}) {
     let result = null;
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     this.__({ n, ns: false /* TODO(abap2js): NS */, a, v, p });
     return result;
   }
 
   _if({ when, n, ns, a, v, p } = {}) {
     let result = null;
-    if (when === true) {
+    if ((when === true || when === `X`)) {
       this.__({ n, ns: false /* TODO(abap2js): NS */, a, v, p });
     }
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     return result;
   }
 
   __if({ when, n, ns, a, v, p } = {}) {
     let result = null;
-    if (when === true) {
+    if ((when === true || when === `X`)) {
       result = this.__({ n, ns: false /* TODO(abap2js): NS */, a, v, p });
     } else {
-      result = this;
+      result = z2ui5_cl_util.abap_copy(this);
     }
     return result;
   }
@@ -65,20 +66,20 @@ class z2ui5_cl_util_xml {
   p({ n, v } = {}) {
     let result = null;
     this.mt_prop.push({ n: n, v: v });
-    result = this;
+    result = z2ui5_cl_util.abap_copy(this);
     return result;
   }
 
   n({ name } = {}) {
     let result = null;
     if (!name) {
-      result = this.mo_parent;
+      result = z2ui5_cl_util.abap_copy(this.mo_parent);
       return result;
     }
     if (this.mo_parent.mv_name === name) {
-      result = this.mo_parent;
+      result = z2ui5_cl_util.abap_copy(this.mo_parent);
     } else if (this === this.mo_root) {
-      result = this;
+      result = z2ui5_cl_util.abap_copy(this);
     } else {
       result = this.mo_parent.n(name);
     }
@@ -87,28 +88,28 @@ class z2ui5_cl_util_xml {
 
   n_prev() {
     let result = null;
-    result = this.mo_root.mo_previous;
+    result = z2ui5_cl_util.abap_copy(this.mo_root.mo_previous);
     return result;
   }
 
   n_root() {
     let result = null;
-    result = this.mo_root;
+    result = z2ui5_cl_util.abap_copy(this.mo_root);
     return result;
   }
 
   stringify({ from_root = true, indent = false } = {}) {
     let result = ``;
     let lt_parts = [];
-    if (indent === true) {
-      if (from_root === true) {
+    if ((indent === true || indent === `X`)) {
+      if ((from_root === true || from_root === `X`)) {
         this.mo_root.xml_get_parts_indent({ ct_parts: lt_parts });
       } else {
         this.xml_get_parts_indent({ iv_depth: { ct_parts: lt_parts } });
       }
-      result = lt_parts.join(`\\n`);
+      result = lt_parts.join(` `);
     } else {
-      if (from_root === true) {
+      if ((from_root === true || from_root === `X`)) {
         this.mo_root.xml_get_parts({ ct_parts: lt_parts });
       } else {
         this.xml_get_parts({ ct_parts: { ct_parts: lt_parts } });

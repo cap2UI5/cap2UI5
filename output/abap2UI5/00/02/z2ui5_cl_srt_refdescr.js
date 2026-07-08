@@ -8,7 +8,7 @@ class z2ui5_cl_srt_refdescr extends z2ui5_cl_srt_datadescr {
   constructor({ rtti } = {}) {
     super.constructor(rtti);
     this.referenced_type = null; // TODO(abap2js): CREATE OBJECT referenced_type TYPE z2ui5_cl_srt_typedescr EXPORTING rtti = rtti->get_referenced_type( ).
-    if (this.referenced_type.not_serializable === true) {
+    if ((this.referenced_type.not_serializable === true || this.referenced_type.not_serializable === `X`)) {
       not_serializable = true;
     }
   }

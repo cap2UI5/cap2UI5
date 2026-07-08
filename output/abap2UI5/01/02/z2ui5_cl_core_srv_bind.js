@@ -59,16 +59,16 @@ class z2ui5_cl_core_srv_bind {
   }
 
   check_raise_new() {
-    if (z2ui5_cl_util.rtti_check_serializable(this.mr_attri.custom_filter_back) === false) {
+    if (!(z2ui5_cl_util.rtti_check_serializable(this.mr_attri.custom_filter_back) === true || z2ui5_cl_util.rtti_check_serializable(this.mr_attri.custom_filter_back) === `X`)) {
       throw new z2ui5_cx_util_error({ val: `<p>custom_filter_back used but it is not serializable - please use if_serializable_object` });
     }
-    if (z2ui5_cl_util.rtti_check_serializable(this.mr_attri.custom_mapper_back) === false) {
+    if (!(z2ui5_cl_util.rtti_check_serializable(this.mr_attri.custom_mapper_back) === true || z2ui5_cl_util.rtti_check_serializable(this.mr_attri.custom_mapper_back) === `X`)) {
       throw new z2ui5_cx_util_error({ val: `<p>custom_mapper_back used but it is not serializable - please use if_serializable_object` });
     }
   }
 
   constructor({ app } = {}) {
-    this.mo_app = app;
+    this.mo_app = z2ui5_cl_util.abap_copy(app);
   }
 
   get_client_name() {
@@ -84,8 +84,8 @@ class z2ui5_cl_core_srv_bind {
       result = this.main_cell({ val, type, config });
       return result;
     }
-    this.ms_config = config;
-    this.mv_type = type;
+    this.ms_config = z2ui5_cl_util.abap_copy(config);
+    this.mv_type = z2ui5_cl_util.abap_copy(type);
     const lo_model = new z2ui5_cl_core_srv_model({ attri: this.mo_app.mt_attri, app: this.mo_app.mo_app });
     this.mr_attri = lo_model.main_attri_search(val);
     if (this.mr_attri.name_ref) {
@@ -97,14 +97,14 @@ class z2ui5_cl_core_srv_bind {
       this.check_raise_new();
       this.update_model_attri();
     }
-    result = this.mr_attri.name_client;
+    result = z2ui5_cl_util.abap_copy(this.mr_attri.name_client);
     if (result === `/${z2ui5_if_core_types.cs_ui5.two_way_model}`) {
       throw new z2ui5_cx_util_error({ val: `<p>Name of variable not allowed - XX is a reserved word - use another name for your attribute` });
     }
-    if (this.ms_config.switch_default_model === true) {
+    if ((this.ms_config.switch_default_model === true || this.ms_config.switch_default_model === `X`)) {
       result = `http>${result}`;
     }
-    if (this.ms_config.path_only === false) {
+    if (!(this.ms_config.path_only === true || this.ms_config.path_only === `X`)) {
       result = `{${result}}`;
     }
     return result;
@@ -112,22 +112,22 @@ class z2ui5_cl_core_srv_bind {
 
   main_cell({ val, data, config } = {}) {
     let result = ``;
-    this.ms_config = config;
+    this.ms_config = z2ui5_cl_util.abap_copy(config);
     const lo_bind = new z2ui5_cl_core_srv_bind(this.mo_app);
     result = lo_bind.main({ val: config.tab, type, config: { path_only: true } });
     result = this.bind_tab_cell({ iv_name: result, iv_val: val });
-    if (this.ms_config.path_only === false) {
+    if (!(this.ms_config.path_only === true || this.ms_config.path_only === `X`)) {
       result = `{${result}}`;
     }
     return result;
   }
 
   update_model_attri() {
-    this.mr_attri.bind_type = this.mv_type;
-    this.mr_attri.custom_filter = this.ms_config.custom_filter;
-    this.mr_attri.custom_filter_back = this.ms_config.custom_filter_back;
-    this.mr_attri.custom_mapper = this.ms_config.custom_mapper;
-    this.mr_attri.custom_mapper_back = this.ms_config.custom_mapper_back;
+    this.mr_attri.bind_type = z2ui5_cl_util.abap_copy(this.mv_type);
+    this.mr_attri.custom_filter = z2ui5_cl_util.abap_copy(this.ms_config.custom_filter);
+    this.mr_attri.custom_filter_back = z2ui5_cl_util.abap_copy(this.ms_config.custom_filter_back);
+    this.mr_attri.custom_mapper = z2ui5_cl_util.abap_copy(this.ms_config.custom_mapper);
+    this.mr_attri.custom_mapper_back = z2ui5_cl_util.abap_copy(this.ms_config.custom_mapper_back);
     this.mr_attri.view = (!this.ms_config.view ? z2ui5_if_client.cs_view.main : this.ms_config.view);
     this.mr_attri.name_client = this.get_client_name();
   }
