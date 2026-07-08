@@ -12,7 +12,7 @@ class z2ui5_cl_demo_app_318 extends z2ui5_if_app {
   client = null;
 
   view_display() {
-    this.mv_editor = `<html> ` + `\\n` + ` <body> ` + `\\n` + ` <h1> Hi there 👋</h1>` + `\\n` + ` <p>This example was rendered by providing HTML code to the API. You can also tell the API to convert from a URL. Just remove the html parameter and add the url parameter.</p>` + `\\n` + ` </body> ` + `\\n` + `</html>`;
+    this.mv_editor = `<html> ` + ` ` + ` <body> ` + ` ` + ` <h1> Hi there 👋</h1>` + ` ` + ` <p>This example was rendered by providing HTML code to the API. You can also tell the API to convert from a URL. Just remove the html parameter and add the url parameter.</p>` + ` ` + ` </body> ` + ` ` + `</html>`;
     const view = z2ui5_cl_xml_view.factory();
     const page = view.shell()
       .page({ title: `abap2UI5 - File Editor`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });

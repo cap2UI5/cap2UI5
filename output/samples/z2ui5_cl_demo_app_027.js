@@ -47,7 +47,7 @@ class z2ui5_cl_demo_app_027 extends z2ui5_if_app {
       .input({ value: `{= $${this.client._bind(this.input2)}.toUpperCase() }`, enabled: false })
       .label(`max value of the first two inputs`)
       .input(`{ type : "sap.ui.model.type.Integer",` + ` path:"` + bind_input31 + `" }`)
-      .input(`{ type : "sap.ui.model.type.Integer",` + `\\n` + ` path:"` + bind_input32 + `" }`)
+      .input(`{ type : "sap.ui.model.type.Integer",` + ` ` + ` path:"` + bind_input32 + `" }`)
       .input({ value: `{= Math.max($${this.client._bind(this.input31)}, $${this.client._bind(this.input32)}) }`, enabled: false })
       .label(`only enabled when the quantity equals 500`)
       .input(`{ type : "sap.ui.model.type.Integer",` + ` path:"` + bind_quantity + `" }`)
@@ -58,7 +58,7 @@ class z2ui5_cl_demo_app_027 extends z2ui5_if_app {
       .label(`concatenate both inputs`)
       .input(this.client._bind(this.input51))
       .input(this.client._bind(this.input52))
-      .input({ value: `{ parts: [` + `\\n` + ` "` + bind_input51 + `",` + `\\n` + ` "` + bind_input52 + `"` + `\\n` + ` ] }`, enabled: false });
+      .input({ value: `{ parts: [` + ` ` + ` "` + bind_input51 + `",` + ` ` + ` "` + bind_input52 + `"` + ` ` + ` ] }`, enabled: false });
     this.client.view_display(view.stringify());
   }
 }

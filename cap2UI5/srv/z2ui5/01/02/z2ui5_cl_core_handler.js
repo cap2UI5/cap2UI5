@@ -123,6 +123,9 @@ class z2ui5_cl_core_handler {
       oClient.oReq = baseReq;
     }
     oClient.oApp  = li_app;
+    // Surface the action's draft ids so client.get().S_DRAFT carries
+    // ID_PREV_APP / ID_PREV_APP_STACK like the abap ms_draft does.
+    oClient._draft = this.mo_action.mo_app.ms_draft;
 
     // Rehydrate the binding list persisted with the draft — an event
     // roundtrip that only calls view_model_update() (no re-render, so no

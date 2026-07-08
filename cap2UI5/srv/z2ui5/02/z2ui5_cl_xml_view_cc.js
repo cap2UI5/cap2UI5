@@ -249,4 +249,38 @@ class z2ui5_cl_xml_view_cc {
   }
 }
 
+// ---------------------------------------------------------------------------
+// abap PREFERRED PARAMETER semantics for the cc builder — `history(bind)` ≡
+// `history({ search: bind })`. Same shim as on z2ui5_cl_xml_view: abap callers
+// (and code transpiled 1:1 from abap) pass the preferred/single parameter
+// positionally, the JS methods destructure an options object. Without this,
+// destructuring a primitive picks up String.prototype members (e.g.
+// `{ search } = "..."` yields the native String.prototype.search function).
+// Explicit PREFERRED PARAMETER entries plus every single-IMPORTING-parameter
+// method from z2ui5_cl_xml_view_cc.clas.abap (those are implicitly positional).
+// ---------------------------------------------------------------------------
+z2ui5_cl_xml_view_cc.PREFERRED_PARAM = {
+  binding_update: `changed`,
+  dirty: `isdirty`,
+  favicon: `favicon`,
+  focus: `focusid`,
+  history: `search`,
+  info_frontend: `finished`,
+  message_manager: `items`,
+  messaging: `items`,
+  timer: `finished`,
+  tree: `tree_id`,
+  uitableext: `tableid`,
+  websocket: `received`,
+};
+
+for (const [meth, param] of Object.entries(z2ui5_cl_xml_view_cc.PREFERRED_PARAM)) {
+  const orig = z2ui5_cl_xml_view_cc.prototype[meth];
+  if (typeof orig !== "function") continue;
+  z2ui5_cl_xml_view_cc.prototype[meth] = function (args, ...rest) {
+    if (args != null && typeof args !== "object") args = { [param]: args };
+    return orig.call(this, args, ...rest);
+  };
+}
+
 module.exports = z2ui5_cl_xml_view_cc;

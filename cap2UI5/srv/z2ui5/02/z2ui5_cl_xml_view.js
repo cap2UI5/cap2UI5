@@ -43,7 +43,7 @@ class z2ui5_cl_xml_view {
     l: `sap.ui.layout`,
     u: `sap.ui.unified`,
     unified: `sap.ui.unified`,
-    z2ui5: `z2ui5`,
+    z2ui5: `z2ui5.cc`,
     layout: `sap.ui.layout`,
     networkgraph: `sap.suite.ui.commons.networkgraph`,
     nglayout: `sap.suite.ui.commons.networkgraph.layout`,
@@ -117,9 +117,9 @@ class z2ui5_cl_xml_view {
     // un-prefixed tag resolves to sap.m instead of the null namespace (which
     // UI5 would try to load as a module, e.g. `null/content.js`).
     if (this._isPopup) {
-      return `<core:FragmentDefinition xmlns="sap.m" xmlns:m="sap.m" xmlns:core="sap.ui.core" xmlns:f="sap.f" xmlns:form="sap.ui.layout.form" xmlns:l="sap.ui.layout" xmlns:mvc="sap.ui.core.mvc" xmlns:table="sap.ui.table" xmlns:unified="sap.ui.unified" xmlns:upload="sap.m.upload" xmlns:uxap="sap.uxap" xmlns:z2ui5="z2ui5"${this._renderExtraNs()}`;
+      return `<core:FragmentDefinition xmlns="sap.m" xmlns:m="sap.m" xmlns:core="sap.ui.core" xmlns:f="sap.f" xmlns:form="sap.ui.layout.form" xmlns:l="sap.ui.layout" xmlns:mvc="sap.ui.core.mvc" xmlns:table="sap.ui.table" xmlns:unified="sap.ui.unified" xmlns:upload="sap.m.upload" xmlns:uxap="sap.uxap" xmlns:z2ui5="z2ui5.cc"${this._renderExtraNs()}`;
     }
-    return `<mvc:View xmlns="sap.m" xmlns:m="sap.m" xmlns:core="sap.ui.core" xmlns:f="sap.f" xmlns:form="sap.ui.layout.form" xmlns:l="sap.ui.layout" xmlns:mvc="sap.ui.core.mvc" xmlns:table="sap.ui.table" xmlns:unified="sap.ui.unified" xmlns:upload="sap.m.upload" xmlns:uxap="sap.uxap" xmlns:z2ui5="z2ui5"${this._renderExtraNs()} displayBlock="true" height="100%"`;
+    return `<mvc:View xmlns="sap.m" xmlns:m="sap.m" xmlns:core="sap.ui.core" xmlns:f="sap.f" xmlns:form="sap.ui.layout.form" xmlns:l="sap.ui.layout" xmlns:mvc="sap.ui.core.mvc" xmlns:table="sap.ui.table" xmlns:unified="sap.ui.unified" xmlns:upload="sap.m.upload" xmlns:uxap="sap.uxap" xmlns:z2ui5="z2ui5.cc"${this._renderExtraNs()} displayBlock="true" height="100%"`;
   }
 
   _renderRootClose() {
@@ -2072,6 +2072,7 @@ class z2ui5_cl_xml_view {
   analytical_table({ ns, selectionmode, rowmode, toolbar, columns } = {}) {
     return this._container({
       name: "AnalyticalTable",
+      ns: ns || "",
       aProp: this._filterProps([
       { n: "selectionMode", v: selectionmode },
       { n: "rowMode", v: rowmode },
@@ -2124,6 +2125,7 @@ class z2ui5_cl_xml_view {
   auto({ ns, rowcontentheight } = {}) {
     return this._container({
       name: "Auto",
+      ns: ns || "",
       aProp: this._filterProps([
       { n: "rowContentHeight", v: rowcontentheight },
       ]),
@@ -2391,7 +2393,10 @@ class z2ui5_cl_xml_view {
   }
 
   snapped_heading() {
-    return this._leaf({
+    // Aggregation accessor (abap _generic → returns the child), NOT a leaf:
+    // callers chain content into it, e.g.
+    // `header_title.snapped_heading().flex_box(...).title(...)`.
+    return this._container({
       name: "snappedHeading",
       ns: "uxap",
       aProp: this._filterProps([
@@ -3447,7 +3452,12 @@ class z2ui5_cl_xml_view {
    * Generic element — mirrors abap _generic( name, ns, t_prop ). Returns the
    * newly created child element.
    */
-  _generic({ name, ns, t_prop } = {}) {
+  _generic(args = {}) {
+    // abap `_generic` takes `name` as its first (mandatory) parameter, so
+    // transpiled call sites pass it positionally as a string, e.g.
+    // `_generic(`menu`)` / `_generic(`Menu`)`. Without this a string arg made
+    // `name` undefined and emitted an `<undefined>` tag (→ sap/m/undefined.js).
+    const { name, ns, t_prop } = typeof args === "string" ? { name: args } : (args || {});
     return this._container({
       name: name,
       ns: ns || "",
@@ -5792,6 +5802,7 @@ class z2ui5_cl_xml_view {
   invisible_text({ ns, id, text } = {}) {
     return this._container({
       name: "InvisibleText",
+      ns: ns || "",
       aProp: this._filterProps([
       { n: "id", v: id },
       { n: "text", v: text },
@@ -5802,6 +5813,7 @@ class z2ui5_cl_xml_view {
   fix_flex({ ns, class: cssClass, fixcontentsize } = {}) {
     return this._container({
       name: "FixFlex",
+      ns: ns || "",
       aProp: this._filterProps([
       { n: "class", v: cssClass },
       { n: "fixContentSize", v: fixcontentsize },

@@ -40,4 +40,9 @@ class z2ui5_cl_pop_error extends z2ui5_if_app {
   }
 }
 
+// abap PREFERRED PARAMETER call style — see z2ui5_pop_preferred_param.js
+require("./z2ui5_pop_preferred_param")(z2ui5_cl_pop_error, {
+  factory: { preferred: `x_root`, params: [`x_root`, `i_title`] },
+});
+
 module.exports = z2ui5_cl_pop_error;
