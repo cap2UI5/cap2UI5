@@ -1,0 +1,20 @@
+{
+  "name": "cap2UI5",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "postCreateCommand": "cd cap2UI5 && npm install",
+  "forwardPorts": [4004],
+  "portsAttributes": {
+    "4004": {
+      "label": "cds server",
+      "onAutoForward": "notify"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": ["SAPSE.vscode-cds"]
+    }
+  }
+}

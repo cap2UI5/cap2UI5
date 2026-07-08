@@ -4,6 +4,9 @@
   "private": true,
   "description": "Development tooling for cap2UI5 — a fully auto-generated project (AI + sync pipeline, nothing hand-written); the deployable CAP project lives in cap2UI5/",
   "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "test": "jest --config tools/jest.config.js --verbose",
     "test:watch": "jest --config tools/jest.config.js --watch",
