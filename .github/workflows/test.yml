@@ -1,0 +1,30 @@
+name: test
+
+# Runs the Jest test suite on every pull request (and on pushes to main).
+# Make this check "Required" in the branch protection rules of `main` so a PR
+# can only be merged once the tests pass — see README / repo Settings > Branches.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      # dev tooling (jest) lives at the repo root; the runtime deps the tests
+      # import (@sap/cds, @cap-js/sqlite, …) live in the CAP project cap2UI5/.
+      - run: npm ci
+      - run: npm ci
+        working-directory: cap2UI5
+      - run: npm test
