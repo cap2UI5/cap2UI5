@@ -41,4 +41,9 @@ class z2ui5_cl_pop_messages extends z2ui5_if_app {
   }
 }
 
+// abap PREFERRED PARAMETER call style — see z2ui5_pop_preferred_param.js
+require("./z2ui5_pop_preferred_param")(z2ui5_cl_pop_messages, {
+  factory: { preferred: `i_messages`, params: [`i_messages`, `i_title`] },
+});
+
 module.exports = z2ui5_cl_pop_messages;

@@ -115,9 +115,15 @@ function escTemplateText(s) {
   return s.replace(/\\/g, "\\\\").replace(/`/g, "\\`").replace(/\$\{/g, "\\${");
 }
 
-/** ABAP string-template escapes: \| \{ \} \\ */
+/** ABAP string-template escapes: structural \| \{ \} \\ plus the control
+ *  characters \n (newline), \t (tab), \r (CR). Resolve them to the actual
+ *  characters — escTemplateText() re-escapes backslashes/backticks for JS
+ *  afterwards, and a literal newline is valid inside a JS template literal.
+ *  Without \n/\t/\r a template like |...\n...| leaked the two-character
+ *  sequence "\n" into the output (e.g. broken inline XML views). */
 function unescAbapTemplate(s) {
-  return s.replace(/\\([|{}\\])/g, "$1");
+  return s.replace(/\\(.)/g, (_m, c) =>
+    c === "n" ? "\n" : c === "t" ? "\t" : c === "r" ? "\r" : c);
 }
 
 const JS_RESERVED = new Set(["class", "new", "delete", "function", "var", "let", "const", "switch", "case", "return", "this", "typeof", "in", "of", "do", "if", "else", "for", "while", "void", "with", "yield", "await", "static", "import", "export", "extends", "super", "catch", "try", "finally", "throw", "default", "break", "continue", "instanceof", "null", "true", "false", "enum", "arguments", "interface", "implements", "package", "private", "protected", "public"]);
