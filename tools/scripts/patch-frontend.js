@@ -17,7 +17,7 @@
  *
  * Idempotent — running it on an already patched webapp changes nothing.
  *
- * Usage: node scripts/patch-frontend.js <path/to/webapp>
+ * Usage: node tools/scripts/patch-frontend.js <path/to/webapp>
  */
 "use strict";
 
@@ -29,7 +29,7 @@ const DATA_SOURCE_URI = "/rest/root/z2ui5";
 
 const webapp = process.argv[2];
 if (!webapp || !fs.existsSync(path.join(webapp, "index.html"))) {
-  console.error("usage: node scripts/patch-frontend.js <path/to/webapp>");
+  console.error("usage: node tools/scripts/patch-frontend.js <path/to/webapp>");
   process.exit(1);
 }
 

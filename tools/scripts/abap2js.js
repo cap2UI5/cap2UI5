@@ -15,8 +15,8 @@
  * `// TODO(abap2js): <original>` so nothing is silently dropped.
  *
  * Usage:
- *   node scripts/abap2js.js <file.clas.abap|dir> [more inputs...] -o <outdir>
- *   node scripts/abap2js.js <file.clas.abap> --stdout
+ *   node tools/scripts/abap2js.js <file.clas.abap|dir> [more inputs...] -o <outdir>
+ *   node tools/scripts/abap2js.js <file.clas.abap> --stdout
  */
 "use strict";
 
@@ -367,7 +367,7 @@ let _clientSig;
 function clientSignature() {
   if (_clientSig !== undefined) return _clientSig;
   _clientSig = null;
-  const p = path.join(__dirname, "..", "cap2UI5", "srv", "z2ui5", "01", "02", "z2ui5_cl_core_client.js");
+  const p = path.join(__dirname, "..", "..", "cap2UI5", "srv", "z2ui5", "01", "02", "z2ui5_cl_core_client.js");
   if (!fs.existsSync(p)) return _clientSig;
   _clientSig = new Map();
   const src = fs.readFileSync(p, "utf8");
@@ -2572,7 +2572,7 @@ function main(argv) {
     else inputs.push(args[i]);
   }
   if (!inputs.length) {
-    console.error("usage: node scripts/abap2js.js <file.clas.abap|dir>... [-o outdir | --stdout]");
+    console.error("usage: node tools/scripts/abap2js.js <file.clas.abap|dir>... [-o outdir | --stdout]");
     process.exit(1);
   }
   // collect inputs; directories are walked recursively and their internal

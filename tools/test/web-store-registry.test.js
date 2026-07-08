@@ -9,11 +9,11 @@
 // Together they mean a full roundtrip works with no @sap/cds runtime and no
 // app-class files on disk — exactly the browser situation.
 
-const z2ui5_cl_util = require("../cap2UI5/srv/z2ui5/00/03/z2ui5_cl_util");
-const DB = require("../cap2UI5/srv/z2ui5/01/01/z2ui5_cl_core_srv_draft");
-const Handler = require("../cap2UI5/srv/z2ui5/01/02/z2ui5_cl_core_handler");
-const z2ui5_if_app = require("../cap2UI5/srv/z2ui5/02/z2ui5_if_app");
-const z2ui5_cl_xml_view = require("../cap2UI5/srv/z2ui5/02/z2ui5_cl_xml_view");
+const z2ui5_cl_util = require("../../cap2UI5/srv/z2ui5/00/03/z2ui5_cl_util");
+const DB = require("../../cap2UI5/srv/z2ui5/01/01/z2ui5_cl_core_srv_draft");
+const Handler = require("../../cap2UI5/srv/z2ui5/01/02/z2ui5_cl_core_handler");
+const z2ui5_if_app = require("../../cap2UI5/srv/z2ui5/02/z2ui5_if_app");
+const z2ui5_cl_xml_view = require("../../cap2UI5/srv/z2ui5/02/z2ui5_cl_xml_view");
 
 // Registered at runtime only — this class has no file on disk, so every
 // lookup that succeeds must have gone through the registry.

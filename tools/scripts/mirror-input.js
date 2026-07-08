@@ -3,8 +3,8 @@
  * mirror-input — snapshots an upstream repository into input/<name>/ so the
  * transpile/copy steps work on a versioned, reviewable copy.
  *
- *   node scripts/mirror-input.js abap2UI5   → input/abap2UI5/ (src + app/webapp)
- *   node scripts/mirror-input.js samples    → input/samples/  (src, cloud branch)
+ *   node tools/scripts/mirror-input.js abap2UI5   → input/abap2UI5/ (src + app/webapp)
+ *   node tools/scripts/mirror-input.js samples    → input/samples/  (src, cloud branch)
  *
  * samples is taken from the cloud branch (rebuilt by its auto_cloud workflow
  * on every push to standard) — it already excludes the on-premise-only apps
@@ -31,11 +31,11 @@ const SOURCES = {
 const name = process.argv[2];
 const cfg = SOURCES[name];
 if (!cfg) {
-  console.error(`usage: node scripts/mirror-input.js <${Object.keys(SOURCES).join("|")}>`);
+  console.error(`usage: node tools/scripts/mirror-input.js <${Object.keys(SOURCES).join("|")}>`);
   process.exit(1);
 }
 
-const root = path.join(__dirname, "..");
+const root = path.join(__dirname, "..", "..");
 const dest = path.join(root, "input", name);
 const tmp = path.join(root, ".mirror_tmp");
 
