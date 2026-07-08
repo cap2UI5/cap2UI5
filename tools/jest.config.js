@@ -4,6 +4,10 @@
  * tests can load modules exactly like the samples do.
  */
 module.exports = {
+  // config lives in tools/ — anchor <rootDir> at the repository root so the
+  // mappings below and test discovery (tools/test/ and cap2UI5/test/) keep
+  // working unchanged
+  rootDir: "..",
   moduleNameMapper: {
     "^abap2UI5/z2ui5_if_(.*)$": "<rootDir>/cap2UI5/srv/z2ui5/02/z2ui5_if_$1.js",
     "^abap2UI5/z2ui5_cl_xml_view$": "<rootDir>/cap2UI5/srv/z2ui5/02/z2ui5_cl_xml_view.js",

@@ -13,7 +13,7 @@ const fs = require("fs");
 const path = require("path");
 const { execSync } = require("child_process");
 
-const root = path.join(__dirname, "..");
+const root = path.join(__dirname, "..", "..");
 const src = path.join(root, "input", "abap2UI5", "app", "webapp");
 const dest = path.join(root, "output", "app");
 

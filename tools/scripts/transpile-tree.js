@@ -5,8 +5,8 @@
  * transpile-report.json with the TODO count per class. The copy step
  * (copy-into-cap.js) uses that report as its safety gate.
  *
- *   node scripts/transpile-tree.js abap2UI5   → every class under src/
- *   node scripts/transpile-tree.js samples    → every class under src/
+ *   node tools/scripts/transpile-tree.js abap2UI5   → every class under src/
+ *   node tools/scripts/transpile-tree.js samples    → every class under src/
  */
 "use strict";
 
@@ -23,11 +23,11 @@ const TARGETS = {
 const name = process.argv[2];
 const cfg = TARGETS[name];
 if (!cfg) {
-  console.error(`usage: node scripts/transpile-tree.js <${Object.keys(TARGETS).join("|")}>`);
+  console.error(`usage: node tools/scripts/transpile-tree.js <${Object.keys(TARGETS).join("|")}>`);
   process.exit(1);
 }
 
-const root = path.join(__dirname, "..");
+const root = path.join(__dirname, "..", "..");
 const srcBase = path.join(root, "input", name, ...cfg.base);
 const outBase = path.join(root, "output", name);
 

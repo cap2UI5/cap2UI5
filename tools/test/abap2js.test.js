@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const { transpileClass } = require("../scripts/abap2js");
-const Client = require("../cap2UI5/srv/z2ui5/01/02/z2ui5_cl_core_client");
+const Client = require("../../cap2UI5/srv/z2ui5/01/02/z2ui5_cl_core_client");
 
 /**
  * Execute generated code with this test's require — the "abap2UI5/..."

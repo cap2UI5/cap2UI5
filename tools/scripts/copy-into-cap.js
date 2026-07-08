@@ -29,7 +29,7 @@ const path = require("path");
 const vm = require("vm");
 const { execFileSync } = require("child_process");
 
-const root = path.join(__dirname, "..");
+const root = path.join(__dirname, "..", "..");
 
 const COPIES = [
   { name: "abap2UI5", from: path.join(root, "output", "abap2UI5"), to: path.join(root, "cap2UI5", "srv", "z2ui5"), replace: false, clobber: false, parseCheck: true },
@@ -146,5 +146,5 @@ console.log(`\n${total} files copied into cap2UI5`);
 if (broken) {
   // not fatal: the previous version stays in place and jest gates the sync —
   // the transpile-report.json parseError entries track the follow-up work
-  console.error(`WARNING: ${broken} file(s) skipped because they do not parse or load — fix scripts/abap2js.js`);
+  console.error(`WARNING: ${broken} file(s) skipped because they do not parse or load — fix tools/scripts/abap2js.js`);
 }

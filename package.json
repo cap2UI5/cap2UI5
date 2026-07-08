@@ -5,15 +5,15 @@
   "description": "Development tooling for cap2UI5 — a fully auto-generated project (AI + sync pipeline, nothing hand-written); the deployable CAP project lives in cap2UI5/",
   "license": "MIT",
   "scripts": {
-    "test": "jest --verbose",
-    "test:watch": "jest --watch",
-    "transpile": "node scripts/abap2js.js",
-    "mirror_abap2ui5": "node scripts/mirror-input.js abap2UI5",
-    "mirror_samples": "node scripts/mirror-input.js samples",
-    "transpile_abap2ui5": "node scripts/transpile-tree.js abap2UI5",
-    "transpile_samples": "node scripts/transpile-tree.js samples",
-    "prepare_app": "node scripts/prepare-app.js",
-    "copy_into_cap": "node scripts/copy-into-cap.js"
+    "test": "jest --config tools/jest.config.js --verbose",
+    "test:watch": "jest --config tools/jest.config.js --watch",
+    "transpile": "node tools/scripts/abap2js.js",
+    "mirror_abap2ui5": "node tools/scripts/mirror-input.js abap2UI5",
+    "mirror_samples": "node tools/scripts/mirror-input.js samples",
+    "transpile_abap2ui5": "node tools/scripts/transpile-tree.js abap2UI5",
+    "transpile_samples": "node tools/scripts/transpile-tree.js samples",
+    "prepare_app": "node tools/scripts/prepare-app.js",
+    "copy_into_cap": "node tools/scripts/copy-into-cap.js"
   },
   "devDependencies": {
     "@abaplint/core": "^2.119.56",

@@ -1,19 +1,19 @@
 // Tests for the abap2UI5-mirrored util modules added in the CAP port.
 // Each block exercises the same surface the abap test classes hit.
 
-const z2ui5_cl_util       = require("../cap2UI5/srv/z2ui5/00/03/z2ui5_cl_util");
-const z2ui5_cl_util_log   = require("../cap2UI5/srv/z2ui5/00/03/z2ui5_cl_util_log");
-const z2ui5_cl_util_msg   = require("../cap2UI5/srv/z2ui5/00/03/z2ui5_cl_util_msg");
-const z2ui5_cl_util_range = require("../cap2UI5/srv/z2ui5/00/03/z2ui5_cl_util_range");
-const z2ui5_cl_util_xml   = require("../cap2UI5/srv/z2ui5/00/03/z2ui5_cl_util_xml");
-const z2ui5_cl_util_http  = require("../cap2UI5/srv/z2ui5/00/03/z2ui5_cl_util_http");
-const z2ui5_cx_util_error = require("../cap2UI5/srv/z2ui5/00/03/z2ui5_cx_util_error");
-const z2ui5_cl_util_db    = require("../cap2UI5/srv/z2ui5/00/03/01/z2ui5_cl_util_db");
-const z2ui5_cl_util_api   = require("../cap2UI5/srv/z2ui5/00/03/02/z2ui5_cl_util_api");
+const z2ui5_cl_util       = require("../../cap2UI5/srv/z2ui5/00/03/z2ui5_cl_util");
+const z2ui5_cl_util_log   = require("../../cap2UI5/srv/z2ui5/00/03/z2ui5_cl_util_log");
+const z2ui5_cl_util_msg   = require("../../cap2UI5/srv/z2ui5/00/03/z2ui5_cl_util_msg");
+const z2ui5_cl_util_range = require("../../cap2UI5/srv/z2ui5/00/03/z2ui5_cl_util_range");
+const z2ui5_cl_util_xml   = require("../../cap2UI5/srv/z2ui5/00/03/z2ui5_cl_util_xml");
+const z2ui5_cl_util_http  = require("../../cap2UI5/srv/z2ui5/00/03/z2ui5_cl_util_http");
+const z2ui5_cx_util_error = require("../../cap2UI5/srv/z2ui5/00/03/z2ui5_cx_util_error");
+const z2ui5_cl_util_db    = require("../../cap2UI5/srv/z2ui5/00/03/01/z2ui5_cl_util_db");
+const z2ui5_cl_util_api   = require("../../cap2UI5/srv/z2ui5/00/03/02/z2ui5_cl_util_api");
 
-const z2ui5_if_client     = require("../cap2UI5/srv/z2ui5/02/z2ui5_if_client");
-const z2ui5_if_exit       = require("../cap2UI5/srv/z2ui5/02/z2ui5_if_exit");
-const z2ui5_cl_exit       = require("../cap2UI5/srv/z2ui5/02/z2ui5_cl_exit");
+const z2ui5_if_client     = require("../../cap2UI5/srv/z2ui5/02/z2ui5_if_client");
+const z2ui5_if_exit       = require("../../cap2UI5/srv/z2ui5/02/z2ui5_if_exit");
+const z2ui5_cl_exit       = require("../../cap2UI5/srv/z2ui5/02/z2ui5_cl_exit");
 
 // =============================================================
 //  z2ui5_cl_util — string / url / boolean / itab / range / time
@@ -47,7 +47,7 @@ describe("z2ui5_cl_util", () => {
   });
 
   test("rtti_get_classes_impl_intf sees bundled sample classes", () => {
-    const z2ui5_if_app = require("../cap2UI5/srv/z2ui5/02/z2ui5_if_app");
+    const z2ui5_if_app = require("../../cap2UI5/srv/z2ui5/02/z2ui5_if_app");
     const names = z2ui5_cl_util.rtti_get_classes_impl_intf(z2ui5_if_app).map((r) => r.classname);
     expect(names).toContain("z2ui5_cl_demo_app_000");
   });
@@ -338,8 +338,8 @@ describe("z2ui5_cl_util_api", () => {
   });
 
   test("api_c and api_s re-export the same module", () => {
-    const c = require("../cap2UI5/srv/z2ui5/00/03/02/z2ui5_cl_util_api_c");
-    const s = require("../cap2UI5/srv/z2ui5/00/03/02/z2ui5_cl_util_api_s");
+    const c = require("../../cap2UI5/srv/z2ui5/00/03/02/z2ui5_cl_util_api_c");
+    const s = require("../../cap2UI5/srv/z2ui5/00/03/02/z2ui5_cl_util_api_s");
     expect(c).toBe(z2ui5_cl_util_api);
     expect(s).toBe(z2ui5_cl_util_api);
   });
@@ -367,7 +367,7 @@ describe("z2ui5_if_client", () => {
   });
 
   test("check_implements passes on a real client", () => {
-    const Client = require("../cap2UI5/srv/z2ui5/01/02/z2ui5_cl_core_client");
+    const Client = require("../../cap2UI5/srv/z2ui5/01/02/z2ui5_cl_core_client");
     expect(() => z2ui5_if_client.check_implements(new Client())).not.toThrow();
   });
 });

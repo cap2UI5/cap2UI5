@@ -5,13 +5,13 @@ const path = require("path");
  * Smoke gate over all bundled sample apps — every class in
  * cap2UI5/srv/samples is started through the real core handler
  * (`?app_start=<class>`, same code path the browser hits) by
- * scripts/smoke-apps.js in a child process.
+ * tools/scripts/smoke-apps.js in a child process.
  *
- * The result is diffed against test/apps-smoke.known-failures.json:
+ * The result is diffed against tools/test/apps-smoke.known-failures.json:
  *   - an app that fails but is not on the list is a REGRESSION → test fails
  *   - an app on the list that now starts is an IMPROVEMENT → test fails too,
  *     so the list stays honest: remove the entry (regenerate via
- *     `node scripts/smoke-apps.js --json`)
+ *     `node tools/scripts/smoke-apps.js --json`)
  */
 describe("sample apps smoke", () => {
   jest.setTimeout(300000);
