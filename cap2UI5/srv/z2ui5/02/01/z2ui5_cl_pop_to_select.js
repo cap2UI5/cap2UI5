@@ -212,4 +212,9 @@ class z2ui5_cl_pop_to_select extends z2ui5_if_app {
   }
 }
 
+// abap PREFERRED PARAMETER call style — see z2ui5_pop_preferred_param.js
+require("./z2ui5_pop_preferred_param")(z2ui5_cl_pop_to_select, {
+  factory: { preferred: `i_tab`, params: [`i_tab`, `i_title`, `i_sort_field`, `i_descending`, `i_contentwidth`, `i_contentheight`, `i_growingthreshold`, `i_multiselect`, `i_event_canceled`, `i_event_confirmed`] },
+});
+
 module.exports = z2ui5_cl_pop_to_select;

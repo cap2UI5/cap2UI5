@@ -163,4 +163,9 @@ class z2ui5_cl_pop_get_range_m extends z2ui5_if_app {
   }
 }
 
+// abap PREFERRED PARAMETER call style — see z2ui5_pop_preferred_param.js
+require("./z2ui5_pop_preferred_param")(z2ui5_cl_pop_get_range_m, {
+  factory: { preferred: `val`, params: [`val`] },
+});
+
 module.exports = z2ui5_cl_pop_get_range_m;

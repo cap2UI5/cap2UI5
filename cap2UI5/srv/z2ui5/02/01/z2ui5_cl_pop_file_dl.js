@@ -86,4 +86,9 @@ class z2ui5_cl_pop_file_dl extends z2ui5_if_app {
   }
 }
 
+// abap PREFERRED PARAMETER call style — see z2ui5_pop_preferred_param.js
+require("./z2ui5_pop_preferred_param")(z2ui5_cl_pop_file_dl, {
+  factory: { preferred: `i_file`, params: [`i_text`, `i_title`, `i_button_text_confirm`, `i_button_text_cancel`, `i_file`, `i_type`, `i_name`] },
+});
+
 module.exports = z2ui5_cl_pop_file_dl;

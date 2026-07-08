@@ -519,7 +519,12 @@ class z2ui5_cl_core_client {
         return args[index] || "";
       },
       S_CONFIG: config,
-      S_DRAFT: { ID: sFront.ID || null },
+      S_DRAFT: {
+        ID:                sFront.ID || null,
+        ID_PREV:           this._draft?.id_prev || ``,
+        ID_PREV_APP:       this._draft?.id_prev_app || ``,
+        ID_PREV_APP_STACK: this._draft?.id_prev_app_stack || ``,
+      },
       S_SCROLL: {
         MAIN:    { ...scrollDefault(), ...(sScroll.MAIN || {}) },
         NEST:    { ...scrollDefault(), ...(sScroll.NEST || {}) },
@@ -669,6 +674,15 @@ class z2ui5_cl_core_client {
    */
   get_app(id) {
     if (!id) return this.oApp;
+    // Synchronous paths first — transpiled abap uses the return value
+    // directly (`client.get_app( id )->result( )`), so the common lookups
+    // must not go through a Promise. The just-left app (ID_PREV_APP) and
+    // stacked apps are all in memory on this roundtrip.
+    if (this._navPrev && (this._navPrev.id_draft === id || this._draft?.id_prev_app === id)) {
+      return this._navPrev;
+    }
+    const stacked = this._navStack.find((app) => app?.id_draft === id);
+    if (stacked) return stacked;
     return (async () => {
       try {
         const z2ui5_cl_core_app = require("./z2ui5_cl_core_app");

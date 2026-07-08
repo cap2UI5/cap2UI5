@@ -92,4 +92,9 @@ class z2ui5_cl_pop_pdf extends z2ui5_if_app {
   }
 }
 
+// abap PREFERRED PARAMETER call style — see z2ui5_pop_preferred_param.js
+require("./z2ui5_pop_preferred_param")(z2ui5_cl_pop_pdf, {
+  factory: { preferred: `i_pdf`, params: [`i_title`, `i_button_text_confirm`, `i_button_text_cancel`, `i_pdf`, `i_label`] },
+});
+
 module.exports = z2ui5_cl_pop_pdf;

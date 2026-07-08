@@ -113,4 +113,10 @@ class z2ui5_cl_pop_bal extends z2ui5_if_app {
   }
 }
 
+// abap PREFERRED PARAMETER call style — see z2ui5_pop_preferred_param.js
+require("./z2ui5_pop_preferred_param")(z2ui5_cl_pop_bal, {
+  factory: { preferred: `i_messages`, params: [`i_messages`, `i_title`, `i_object`, `i_subobject`, `i_extnumber`, `i_check_save`] },
+  factory_by_db: { preferred: `i_object`, params: [`i_object`, `i_subobject`, `i_extnumber`, `i_title`, `i_check_save`] },
+});
+
 module.exports = z2ui5_cl_pop_bal;
