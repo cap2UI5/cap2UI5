@@ -24,7 +24,7 @@ class z2ui5_cl_demo_app_312 extends z2ui5_if_app {
 
   on_init() {
     this.mt_data_chart = [{ week: `Week 1 - 4`, revenue: `431000.22`, cost: `230000.00` }, { week: `Week 5 - 8`, revenue: `494000.30`, cost: `238000.00` }, { week: `Week 9 - 12`, revenue: `491000.17`, cost: `221000.00` }, { week: `Week 13 - 16`, revenue: `536000.34`, cost: `280000.00` }];
-    this.mv_prop = `{` + `\\n` + `"plotArea": {` + `\\n` + `"dataLabel": {` + `\\n` + `"formatString": "",` + `\\n` + `"visible": true` + `\\n` + `}` + `\\n` + `},` + `\\n` + `"valueAxis": {` + `\\n` + `"label": {` + `\\n` + `"formatString": ""` + `\\n` + `},` + `\\n` + `"title": {` + `\\n` + `"visible": true` + `\\n` + `}` + `\\n` + `},` + `\\n` + `"categoryAxis": {` + `\\n` + `"title": {` + `\\n` + `"visible": true` + `\\n` + `}` + `\\n` + `},` + `\\n` + `"title": {` + `\\n` + `"visible": true,` + `\\n` + `"text": "Vizframe Charts for 2UI5"` + `\\n` + `}` + `\\n` + `}`;
+    this.mv_prop = `{` + ` ` + `"plotArea": {` + ` ` + `"dataLabel": {` + ` ` + `"formatString": "",` + ` ` + `"visible": true` + ` ` + `}` + ` ` + `},` + ` ` + `"valueAxis": {` + ` ` + `"label": {` + ` ` + `"formatString": ""` + ` ` + `},` + ` ` + `"title": {` + ` ` + `"visible": true` + ` ` + `}` + ` ` + `},` + ` ` + `"categoryAxis": {` + ` ` + `"title": {` + ` ` + `"visible": true` + ` ` + `}` + ` ` + `},` + ` ` + `"title": {` + ` ` + `"visible": true,` + ` ` + `"text": "Vizframe Charts for 2UI5"` + ` ` + `}` + ` ` + `}`;
     this.mt_feed_values = [`Revenue`, `Cost`];
     this.ms_screen.viztype = `column`;
     this.ms_screen.viztypesel = `column`;
