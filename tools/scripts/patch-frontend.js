@@ -4,8 +4,9 @@
  * mirrored abap2UI5 frontend, so no stored copies ("backup" files) are
  * needed and everything else keeps flowing 1:1 from upstream:
  *
- *   index.html    bootstrap src:  resources/sap-ui-core.js  →  UI5 CDN
- *                 (the CAP server does not ship UI5 itself)
+ *   index.html    bootstrap src:  resources/sap-ui-core.js  →  /resources/…
+ *                 (the CAP server ships a local UI5 runtime at /resources,
+ *                 served from the openui5-dist dependency — see srv/server.js)
  *   manifest.json dataSources.http.uri:  /sap/bc/z2ui5  →  /rest/root/z2ui5
  *                 (the CDS REST action instead of the abap ICF path)
  *   core/DebugTool.js
@@ -24,7 +25,10 @@
 const fs = require("fs");
 const path = require("path");
 
-const UI5_CDN = "https://sapui5.hana.ondemand.com/1.147.1/resources/sap-ui-core.js";
+// The CAP server ships its own local UI5 runtime at /resources (see
+// srv/server.js — served from the openui5-dist dependency), so bootstrap from
+// there instead of a public CDN. This keeps the whole stack offline-capable.
+const UI5_SRC = "/resources/sap-ui-core.js";
 const DATA_SOURCE_URI = "/rest/root/z2ui5";
 
 const webapp = process.argv[2];
@@ -33,24 +37,23 @@ if (!webapp || !fs.existsSync(path.join(webapp, "index.html"))) {
   process.exit(1);
 }
 
-// index.html — point the bootstrap at the CDN
+// index.html — point the bootstrap at the local /resources runtime.
+// The pattern matches the upstream relative src, a previously-patched CDN URL,
+// and an already-local absolute path, so the patch stays idempotent.
 const indexPath = path.join(webapp, "index.html");
 const index = fs.readFileSync(indexPath, "utf8");
-let patchedIndex = index.replace(/src="(?:https:\/\/[^"]*\/)?resources\/sap-ui-core\.js"/, `src="${UI5_CDN}"`);
+let patchedIndex = index.replace(/src="[^"]*resources\/sap-ui-core\.js"/, `src="${UI5_SRC}"`);
 
-// index.html — hyphenate the bootstrap config attributes. The camelCase /
-// lowercase aliases still work but are deprecated since UI5 1.12x and log a
-// "Deprecated configuration option ..." console warning on every app start.
-const ATTR_RENAMES = [
-  [/data-sap-ui-resourceroots(?==)/gi, "data-sap-ui-resource-roots"],
-  [/data-sap-ui-oninit(?==)/gi, "data-sap-ui-on-init"],
-  [/data-sap-ui-compatversion(?==)/gi, "data-sap-ui-compat-version"],
-  [/data-sap-ui-frameoptions(?==)/gi, "data-sap-ui-frame-options"],
-];
-for (const [from, to] of ATTR_RENAMES) patchedIndex = patchedIndex.replace(from, to);
+// NOTE: the bootstrap config attributes are deliberately left in the upstream
+// lowercase form (data-sap-ui-oninit / -resourceroots / -compatversion /
+// -frameoptions). The hyphenated form (data-sap-ui-on-init, …) was only
+// introduced around UI5 1.120, and the local runtime we ship (openui5-dist,
+// currently 1.113) does not recognise it — hyphenating here made
+// ComponentSupport's on-init never fire, so the app booted a blank shell.
+// The lowercase form works on every version.
 
 if (patchedIndex !== index) fs.writeFileSync(indexPath, patchedIndex);
-console.log(`index.html:    bootstrap src ${patchedIndex !== index ? "patched" : "already patched"} -> ${UI5_CDN} (+ hyphenated config attributes)`);
+console.log(`index.html:    bootstrap src ${patchedIndex !== index ? "patched" : "already patched"} -> ${UI5_SRC}`);
 
 // view/App.view.xml — give the empty shell App an initial placeholder page.
 // The root App control renders before the first backend roundtrip returns a

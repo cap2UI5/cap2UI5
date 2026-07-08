@@ -44,20 +44,17 @@ ${csp}
 \t<meta name="viewport" content="width=device-width, initial-scale=1.0">
 \t<title>${title}</title>
 
-\t<link rel="preconnect" href="https://sdk.openui5.org" crossorigin>
-\t<link rel="dns-prefetch" href="https://sdk.openui5.org">
-
 \t<script
 \t\tid="sap-ui-bootstrap"
 \t\tsrc="${src}"
 \t\tdata-sap-ui-theme="${theme}"
 \t\tdata-sap-ui-async="true"
-\t\tdata-sap-ui-compat-version="edge"
+\t\tdata-sap-ui-compatversion="edge"
 \t\tdata-sap-ui-libs="sap.m"
-\t\tdata-sap-ui-resource-roots='{"z2ui5": "/z2ui5/webapp/"}'
+\t\tdata-sap-ui-resourceroots='{"z2ui5": "/z2ui5/webapp/"}'
 \t\tdata-sap-ui-xx-component-preload="off"
-\t\tdata-sap-ui-frame-options="trusted"
-\t\tdata-sap-ui-on-init="module:sap/ui/core/ComponentSupport"${addAttrs}
+\t\tdata-sap-ui-frameoptions="trusted"
+\t\tdata-sap-ui-oninit="module:sap/ui/core/ComponentSupport"${addAttrs}
 \t></script>
 </head>
 <body class="sapUiBody sapUiSizeCompact" id="content">

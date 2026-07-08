@@ -77,7 +77,9 @@ class z2ui5_cl_exit {
   set_config_http_get(is_context, cs_config = {}) {
     cs_config.title = `abap2UI5`;
     cs_config.theme = `sap_horizon`;
-    cs_config.src   = `https://sdk.openui5.org/resources/sap-ui-cachebuster/sap-ui-core.js`;
+    // Local UI5 runtime served by the CAP server at /resources (openui5-dist
+    // dependency, see srv/server.js) — keeps the stack offline-capable.
+    cs_config.src   = `/resources/sap-ui-core.js`;
 
     cs_config.content_security_policy =
       `<meta http-equiv="Content-Security-Policy" ` +
