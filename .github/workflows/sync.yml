@@ -11,7 +11,8 @@ name: sync pipeline
 # (that push triggers this pipeline — the pipeline's own sync commits use
 # GITHUB_TOKEN and therefore never retrigger it); samples (cloud branch
 # rebuilt) sends a repository_dispatch via its trigger_cap workflow. The
-# weekly cron remains as a safety net.
+# daily cron remains as a safety net — one full rebuild per day even if no
+# upstream event fires.
 
 on:
   workflow_dispatch:
@@ -22,7 +23,7 @@ on:
   repository_dispatch:
     types: [upstream-update]
   schedule:
-    - cron: "0 4 * * 1" # monday 04:00 UTC
+    - cron: "17 4 * * *" # daily 04:17 UTC
 
 permissions:
   contents: write
