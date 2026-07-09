@@ -1315,6 +1315,12 @@ class z2ui5_cl_xml_view {
     return result;
   }
 
+  menu({ id, title, itemselected, closed } = {}) {
+    let result = null;
+    result = this._generic({ name: `Menu`, t_prop: [{ n: `id`, v: id }, { n: `title`, v: title }, { n: `itemSelected`, v: itemselected }, { n: `closed`, v: closed }] });
+    return result;
+  }
+
   menu_item({ press, text, icon } = {}) {
     let result = null;
     result = z2ui5_cl_util.abap_copy(this);
@@ -1486,9 +1492,9 @@ class z2ui5_cl_xml_view {
     return result;
   }
 
-  object_list_item({ activeicon, icon, icondensityaware, intro, introtextdirection, number, numberstate, numbertextdirection, numberunit, title, titletextdirection, press, selected } = {}) {
+  object_list_item({ activeicon, icon, icondensityaware, intro, introtextdirection, number, numberstate, numbertextdirection, numberunit, unit, title, titletextdirection, press, selected } = {}) {
     let result = null;
-    result = this._generic({ name: `ObjectListItem`, t_prop: [{ n: `activeIcon`, v: activeicon }, { n: `icon`, v: icon }, { n: `intro`, v: intro }, { n: `introTextDirection`, v: introtextdirection }, { n: `number`, v: number }, { n: `numberState`, v: numberstate }, { n: `numberTextDirection`, v: numbertextdirection }, { n: `numberUnit`, v: numberunit }, { n: `title`, v: title }, { n: `titleTextDirection`, v: titletextdirection }, { n: `iconDensityAware`, v: z2ui5_cl_util.boolean_abap_2_json(icondensityaware) }, { n: `press`, v: press }, { n: `selected`, v: z2ui5_cl_util.boolean_abap_2_json(selected) }, { n: `type`, v: type }] });
+    result = this._generic({ name: `ObjectListItem`, t_prop: [{ n: `activeIcon`, v: activeicon }, { n: `icon`, v: icon }, { n: `intro`, v: intro }, { n: `introTextDirection`, v: introtextdirection }, { n: `number`, v: number }, { n: `numberState`, v: numberstate }, { n: `numberTextDirection`, v: numbertextdirection }, { n: `numberUnit`, v: numberunit }, { n: `unit`, v: unit }, { n: `title`, v: title }, { n: `titleTextDirection`, v: titletextdirection }, { n: `iconDensityAware`, v: z2ui5_cl_util.boolean_abap_2_json(icondensityaware) }, { n: `press`, v: press }, { n: `selected`, v: z2ui5_cl_util.boolean_abap_2_json(selected) }, { n: `type`, v: type }] });
     return result;
   }
 
@@ -2688,9 +2694,57 @@ class z2ui5_cl_xml_view {
     return result;
   }
 
-  auto({ ns, rowcontentheight } = {}) {
+  auto({ ns, rowcontentheight, minrowcount, maxrowcount, fixedtoprowcount, fixedbottomrowcount } = {}) {
     let result = null;
-    result = this._generic({ ns: false /* TODO(abap2js): NS */, name: `Auto`, t_prop: [{ n: `rowContentHeight`, v: rowcontentheight }] });
+    result = this._generic({ ns: false /* TODO(abap2js): NS */, name: `Auto`, t_prop: [{ n: `rowContentHeight`, v: rowcontentheight }, { n: `minRowCount`, v: minrowcount }, { n: `maxRowCount`, v: maxrowcount }, { n: `fixedTopRowCount`, v: fixedtoprowcount }, { n: `fixedBottomRowCount`, v: fixedbottomrowcount }] });
+    return result;
+  }
+
+  fixed({ ns, rowcount, rowcontentheight, fixedtoprowcount, fixedbottomrowcount } = {}) {
+    let result = null;
+    result = this._generic({ ns: false /* TODO(abap2js): NS */, name: `Fixed`, t_prop: [{ n: `rowCount`, v: rowcount }, { n: `rowContentHeight`, v: rowcontentheight }, { n: `fixedTopRowCount`, v: fixedtoprowcount }, { n: `fixedBottomRowCount`, v: fixedbottomrowcount }] });
+    return result;
+  }
+
+  interactive({ ns, rowcount, minrowcount, maxrowcount, rowcontentheight, fixedtoprowcount, fixedbottomrowcount } = {}) {
+    let result = null;
+    result = this._generic({ ns: false /* TODO(abap2js): NS */, name: `Interactive`, t_prop: [{ n: `rowCount`, v: rowcount }, { n: `minRowCount`, v: minrowcount }, { n: `maxRowCount`, v: maxrowcount }, { n: `rowContentHeight`, v: rowcontentheight }, { n: `fixedTopRowCount`, v: fixedtoprowcount }, { n: `fixedBottomRowCount`, v: fixedbottomrowcount }] });
+    return result;
+  }
+
+  product_switch({ id, change } = {}) {
+    let result = null;
+    result = this._generic({ ns: `f`, name: `ProductSwitch`, t_prop: [{ n: `id`, v: id }, { n: `change`, v: change }] });
+    return result;
+  }
+
+  product_switch_item({ id, src, imagesrc, title, subtitle, target, targetsrc } = {}) {
+    let result = null;
+    result = this._generic({ ns: `f`, name: `ProductSwitchItem`, t_prop: [{ n: `id`, v: id }, { n: `src`, v: src }, { n: `imageSrc`, v: imagesrc }, { n: `title`, v: title }, { n: `subTitle`, v: subtitle }, { n: `target`, v: target }, { n: `targetSrc`, v: targetsrc }] });
+    return result;
+  }
+
+  grid_container({ id, width, minheight, containerquery, snaptorow, allowdensefill, inlineblocklayout, layoutchange, columnschange, borderreached } = {}) {
+    let result = null;
+    result = this._generic({ ns: `f`, name: `GridContainer`, t_prop: [{ n: `id`, v: id }, { n: `width`, v: width }, { n: `minHeight`, v: minheight }, { n: `containerQuery`, v: z2ui5_cl_util.boolean_abap_2_json(containerquery) }, { n: `snapToRow`, v: z2ui5_cl_util.boolean_abap_2_json(snaptorow) }, { n: `allowDenseFill`, v: z2ui5_cl_util.boolean_abap_2_json(allowdensefill) }, { n: `inlineBlockLayout`, v: z2ui5_cl_util.boolean_abap_2_json(inlineblocklayout) }, { n: `layoutChange`, v: layoutchange }, { n: `columnsChange`, v: columnschange }, { n: `borderReached`, v: borderreached }] });
+    return result;
+  }
+
+  grid_container_settings({ columns, columnsize, mincolumnsize, maxcolumnsize, rowsize, gap } = {}) {
+    let result = null;
+    result = this._generic({ ns: `f`, name: `GridContainerSettings`, t_prop: [{ n: `columns`, v: columns }, { n: `columnSize`, v: columnsize }, { n: `minColumnSize`, v: mincolumnsize }, { n: `maxColumnSize`, v: maxcolumnsize }, { n: `rowSize`, v: rowsize }, { n: `gap`, v: gap }] });
+    return result;
+  }
+
+  layout({ ns } = {}) {
+    let result = null;
+    result = this._generic({ name: `layout`, ns: false /* TODO(abap2js): NS */ });
+    return result;
+  }
+
+  dynamic_date_range({ id, value, width, enabled, editable, required, name, placeholder, valuestate, valuestatetext, enablegroupheaders, hideinput, showclearicon, change } = {}) {
+    let result = null;
+    result = this._generic({ name: `DynamicDateRange`, t_prop: [{ n: `id`, v: id }, { n: `value`, v: value }, { n: `width`, v: width }, { n: `enabled`, v: z2ui5_cl_util.boolean_abap_2_json(enabled) }, { n: `editable`, v: z2ui5_cl_util.boolean_abap_2_json(editable) }, { n: `required`, v: z2ui5_cl_util.boolean_abap_2_json(required) }, { n: `name`, v: name }, { n: `placeholder`, v: placeholder }, { n: `valueState`, v: valuestate }, { n: `valueStateText`, v: valuestatetext }, { n: `enableGroupHeaders`, v: z2ui5_cl_util.boolean_abap_2_json(enablegroupheaders) }, { n: `hideInput`, v: z2ui5_cl_util.boolean_abap_2_json(hideinput) }, { n: `showClearIcon`, v: z2ui5_cl_util.boolean_abap_2_json(showclearicon) }, { n: `change`, v: change }] });
     return result;
   }
 

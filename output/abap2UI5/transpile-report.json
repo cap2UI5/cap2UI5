@@ -1538,7 +1538,7 @@
   {
     "class": "z2ui5_cl_xml_view",
     "path": "02/z2ui5_cl_xml_view.js",
-    "todos": 118,
+    "todos": 124,
     "todoDetails": [
       "NS comparison without operand — rewrite manually",
       "NS comparison without operand — rewrite manually",
@@ -1630,6 +1630,12 @@
       "VALUE #( FOR/BASE/LINES OF ... ) not supported — rewrite manually",
       "builtin concat_lines_of( ) not mapped",
       "REDUCE #( ) not supported",
+      "NS comparison without operand — rewrite manually",
+      "NS comparison without operand — rewrite manually",
+      "NS comparison without operand — rewrite manually",
+      "NS comparison without operand — rewrite manually",
+      "NS comparison without operand — rewrite manually",
+      "NS comparison without operand — rewrite manually",
       "NS comparison without operand — rewrite manually",
       "NS comparison without operand — rewrite manually",
       "NS comparison without operand — rewrite manually",

@@ -152,6 +152,8 @@ class z2ui5_cl_core_action {
     result.ms_actual.r_data = z2ui5_cl_util.abap_copy(this.ms_next.r_data);
     result.ms_next.s_set.s_msg_box = null;
     result.ms_next.s_set.s_msg_toast = null;
+    result.ms_next.s_set.s_follow_up_action = null;
+    result.ms_next.s_set.s_popup = { check_destroy: true };
     return result;
   }
 }
