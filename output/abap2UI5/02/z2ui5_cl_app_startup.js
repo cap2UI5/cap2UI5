@@ -92,8 +92,9 @@ class z2ui5_cl_app_startup extends z2ui5_if_app {
     simple_form.label(`Step 5`)
       .link({ text: `Link to the Application`, target: `_blank`, href: this.client._bind(this.ms_home.url, { name: `ms_home-url` }), enabled: `{= $${this.client._bind(this.ms_home.class_editable, { name: `ms_home-class_editable` })} === false }` });
     simple_form.toolbar().title(`What's next?`);
-    if (z2ui5_cl_util.rtti_check_class_exists(`z2ui5_cl_demo_app_000`)) {
-      lv_url_samples = this.get_app_url({ classname: `z2ui5_cl_demo_app_000` });
+    const lv_class_samples = (z2ui5_cl_util.rtti_check_class_exists(`z2ui5_cl_sample_000`) ? `z2ui5_cl_sample_000` : z2ui5_cl_util.rtti_check_class_exists(`z2ui5_cl_demo_app_000`) ? `z2ui5_cl_demo_app_000` : null);
+    if (lv_class_samples) {
+      lv_url_samples = this.get_app_url({ classname: lv_class_samples });
       simple_form.label(`Start Developing`);
       simple_form.button({ text: `Explore Code Samples`, press: this.client._event_client(this.client.cs_event.open_new_tab, [lv_url_samples]), width: `70%` });
     } else {
