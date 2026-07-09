@@ -178,12 +178,23 @@ describe("z2ui5_cl_core_handler", () => {
   // ===== Messages =====
 
   describe("messages in response", () => {
-    test("toast message appears in response", async () => {
-      const Messages = require("../../cap2UI5/srv/samples/z2ui5_cl_demo_app_008");
-      const app = new Messages();
-      DB.loadApp.mockResolvedValueOnce(app);
+    // A minimal in-test app that exercises the client message API directly,
+    // so the plumbing check does not depend on a specific mirrored sample.
+    const z2ui5_if_app = require("../../cap2UI5/srv/z2ui5/02/z2ui5_if_app");
+    class MsgApp extends z2ui5_if_app {
+      async main(client) {
+        if (client.check_on_event("TOAST")) {
+          client.message_toast_display("this is a message toast");
+        } else if (client.check_on_event("BOX")) {
+          client.message_box_display("Your booking will be reserved for 24 hours.");
+        }
+      }
+    }
 
-      const req = makeRequest({ id: "msg-id", event: "BUTTON_MESSAGE_TOAST" });
+    test("toast message appears in response", async () => {
+      DB.loadApp.mockResolvedValueOnce(new MsgApp());
+
+      const req = makeRequest({ id: "msg-id", event: "TOAST" });
       const result = JSON.parse(await handler.main(req));
 
       expect(result.S_FRONT.PARAMS.S_MSG_TOAST).not.toBeNull();
@@ -191,11 +202,9 @@ describe("z2ui5_cl_core_handler", () => {
     });
 
     test("message box appears in response", async () => {
-      const Messages = require("../../cap2UI5/srv/samples/z2ui5_cl_demo_app_008");
-      const app = new Messages();
-      DB.loadApp.mockResolvedValueOnce(app);
+      DB.loadApp.mockResolvedValueOnce(new MsgApp());
 
-      const req = makeRequest({ id: "msg-id", event: "BUTTON_MESSAGE_BOX_INFO" });
+      const req = makeRequest({ id: "msg-id", event: "BOX" });
       const result = JSON.parse(await handler.main(req));
 
       expect(result.S_FRONT.PARAMS.S_MSG_BOX).not.toBeNull();

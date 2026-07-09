@@ -15,6 +15,12 @@ const z2ui5_if_client     = require("../../cap2UI5/srv/z2ui5/02/z2ui5_if_client"
 const z2ui5_if_exit       = require("../../cap2UI5/srv/z2ui5/02/z2ui5_if_exit");
 const z2ui5_cl_exit       = require("../../cap2UI5/srv/z2ui5/02/z2ui5_cl_exit");
 
+const { firstSampleName } = require("./helpers/samples");
+
+// A representative sample app, picked dynamically so the rtti checks track
+// the mirrored samples set instead of a hardcoded class name.
+const SAMPLE = firstSampleName();
+
 // =============================================================
 //  z2ui5_cl_util — string / url / boolean / itab / range / time
 // =============================================================
@@ -40,16 +46,16 @@ describe("z2ui5_cl_util", () => {
   test("rtti_get_class finds classes in the bundled samples folder", () => {
     // only the top-level samples of the upstream src/ are mirrored, so the
     // bundled tree under srv/samples is flat.
-    const Cls = z2ui5_cl_util.rtti_get_class("z2ui5_cl_demo_app_000");
+    const Cls = z2ui5_cl_util.rtti_get_class(SAMPLE);
     expect(typeof Cls).toBe("function");
-    expect(z2ui5_cl_util.rtti_check_class_exists("z2ui5_cl_demo_app_000")).toBe(true);
+    expect(z2ui5_cl_util.rtti_check_class_exists(SAMPLE)).toBe(true);
     expect(z2ui5_cl_util.rtti_get_class("z2ui5_cl_does_not_exist")).toBeNull();
   });
 
   test("rtti_get_classes_impl_intf sees bundled sample classes", () => {
     const z2ui5_if_app = require("../../cap2UI5/srv/z2ui5/02/z2ui5_if_app");
     const names = z2ui5_cl_util.rtti_get_classes_impl_intf(z2ui5_if_app).map((r) => r.classname);
-    expect(names).toContain("z2ui5_cl_demo_app_000");
+    expect(names).toContain(SAMPLE);
   });
 
   test("rtti_get_type_kind classification", () => {
