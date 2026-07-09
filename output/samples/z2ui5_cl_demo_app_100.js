@@ -27,7 +27,7 @@ class z2ui5_cl_demo_app_100 extends z2ui5_if_app {
       .header_content()
       .link()
       .get_parent();
-    const tab = page.ui_table({ rows: this.client._bind(this.mt_table), id: `persoTable`, editable: false, alternaterowcolors: true, rowactioncount: `2`, enablegrouping: false, fixedcolumncount: `1`, selectionmode: `None`, sort: this.client._event(`SORT`), filter: this.client._event(`FILTER`), customfilter: this.client._event(`CUSTOMFILTER`) });
+    const tab = page.ui_table({ rows: this.client._bind(this.mt_table), id: `persoTable`, editable: false, alternaterowcolors: true, rowactioncount: `2`, fixedcolumncount: `1`, selectionmode: `None`, sort: this.client._event(`SORT`), filter: this.client._event(`FILTER`), customfilter: this.client._event(`CUSTOMFILTER`) });
     tab.ui_extension()
       .overflow_toolbar()
       .title(`Products`)

@@ -116,7 +116,7 @@ class z2ui5_cl_demo_app_070 extends z2ui5_if_app {
       .hbox({ justifycontent: `End` })
       .button({ text: `Go`, press: this.client._event(`BUTTON_START`), type: `Emphasized` });
     const cont = page.content(`f`);
-    const tab = cont.ui_table({ rows: this.client._bind(this.mt_table), editable: false, alternaterowcolors: true, rowactioncount: `2`, enablegrouping: false, fixedcolumncount: `1`, selectionmode: `None`, sort: this.client._event(`SORT`), filter: this.client._event(`FILTER`), customfilter: this.client._event(`CUSTOMFILTER`) });
+    const tab = cont.ui_table({ rows: this.client._bind(this.mt_table), editable: false, alternaterowcolors: true, rowactioncount: `2`, fixedcolumncount: `1`, selectionmode: `None`, sort: this.client._event(`SORT`), filter: this.client._event(`FILTER`), customfilter: this.client._event(`CUSTOMFILTER`) });
     tab.ui_extension().overflow_toolbar().title(`Products`);
     const lo_columns = tab.ui_columns();
     lo_columns.ui_column(`4rem`)
