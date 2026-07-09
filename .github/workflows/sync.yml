@@ -10,9 +10,7 @@ name: sync pipeline
 # workflow refreshes input/abap2UI5/ and pushes it to main via deploy key
 # (that push triggers this pipeline — the pipeline's own sync commits use
 # GITHUB_TOKEN and therefore never retrigger it); samples (cloud branch
-# rebuilt) sends a repository_dispatch via its trigger_cap workflow. The
-# daily cron remains as a safety net — one full rebuild per day even if no
-# upstream event fires.
+# rebuilt) sends a repository_dispatch via its trigger_cap workflow.
 
 on:
   workflow_dispatch:
@@ -22,8 +20,6 @@ on:
       - "input/abap2UI5/**"
   repository_dispatch:
     types: [upstream-update]
-  schedule:
-    - cron: "17 4 * * *" # daily 04:17 UTC
 
 permissions:
   contents: write
