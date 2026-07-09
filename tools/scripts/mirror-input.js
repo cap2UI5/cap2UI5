@@ -22,10 +22,12 @@ const { execSync } = require("child_process");
 
 const SOURCES = {
   abap2UI5: { url: "https://github.com/abap2UI5/abap2UI5", paths: ["src", "app/webapp"] },
-  // topLevelOnly: the numbered subfolders (01/, 02/, ...) hold layout/addon
-  // samples that are not part of the CAP demo set — only the samples directly
-  // under src/ are mirrored.
-  samples: { url: "https://github.com/abap2UI5/samples", branch: "cloud", paths: ["src"], topLevelOnly: true },
+  // The whole src/ root folder is mirrored from the cloud branch, including
+  // the numbered subpackages (01/, 02/, ...). The cloud branch is rebuilt from
+  // standard by the auto_cloud workflow without the on-premise-only 00/ apps
+  // (they cannot run in the CAP/Node environment) — so mirroring it yields the
+  // src/ root folder without subpackage 00/.
+  samples: { url: "https://github.com/abap2UI5/samples", branch: "cloud", paths: ["src"] },
 };
 
 const name = process.argv[2];
@@ -56,12 +58,7 @@ for (const p of cfg.paths) {
     console.error(`upstream path not found: ${p} — repository structure changed?`);
     process.exit(1);
   }
-  fs.cpSync(from, path.join(dest, p), {
-    recursive: true,
-    filter: cfg.topLevelOnly
-      ? (src) => src === from || (path.dirname(src) === from && fs.statSync(src).isFile())
-      : undefined,
-  });
+  fs.cpSync(from, path.join(dest, p), { recursive: true });
 }
 fs.writeFileSync(path.join(dest, "UPSTREAM_COMMIT"), commit + "\n");
 
