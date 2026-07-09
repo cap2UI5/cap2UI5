@@ -13,7 +13,7 @@ class z2ui5_cl_demo_app_097 extends z2ui5_if_app {
   view_display_detail() {
     const lo_view_nested = z2ui5_cl_xml_view.factory();
     const page = lo_view_nested.page(`Nested View`);
-    const tab = page.ui_table({ rows: this.client._bind_edit(this.t_tab2, { view: this.client.cs_view.nested }), editable: false, alternaterowcolors: true, rowactioncount: `1`, enablegrouping: false, fixedcolumncount: `1`, selectionmode: `None`, sort: this.client._event(`SORT`), filter: this.client._event(`FILTER`), customfilter: this.client._event(`CUSTOMFILTER`) });
+    const tab = page.ui_table({ rows: this.client._bind_edit(this.t_tab2, { view: this.client.cs_view.nested }), editable: false, alternaterowcolors: true, rowactioncount: `1`, fixedcolumncount: `1`, selectionmode: `None`, sort: this.client._event(`SORT`), filter: this.client._event(`FILTER`), customfilter: this.client._event(`CUSTOMFILTER`) });
     tab.ui_extension().overflow_toolbar().title(`Products`);
     const lo_columns = tab.ui_columns();
     lo_columns.ui_column({ sortproperty: `TITLE`, filterproperty: `TITLE` })

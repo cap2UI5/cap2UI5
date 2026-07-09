@@ -45,7 +45,7 @@ class z2ui5_cl_demo_app_160 extends z2ui5_if_app {
       .link()
       .get_parent();
     const table = page.flex_box({ height: `85vh` })
-      .ui_table({ alternaterowcolors: `true`, visiblerowcountmode: `Auto`, fixedrowcount: `1`, selectionmode: `None`, rows: this.client._bind_edit(this.mt_output) });
+      .ui_table({ alternaterowcolors: `true`, selectionmode: `None`, visiblerowcountmode: `Auto`, fixedrowcount: `1`, rows: this.client._bind_edit(this.mt_output) });
     const columns = table.ui_columns();
     columns.ui_column({ width: `5.2rem`, sortproperty: `SET_SK`, filterproperty: `SET_SK` })
       .text(`Column 1`)

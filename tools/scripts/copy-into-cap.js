@@ -4,7 +4,7 @@
  * positions in the CAP project:
  *
  *   output/abap2UI5/**  → cap2UI5/srv/z2ui5/**        (fill-in: new files only)
- *   output/samples/**   → cap2UI5/srv/samples/**      (overwrite)
+ *   output/samples/**   → cap2UI5/srv/samples/*.js    (flattened, overwrite)
  *   output/app/**       → cap2UI5/app/z2ui5/webapp/** (replaced 1:1)
  *
  * Policies:
@@ -17,6 +17,12 @@
  *   overwritten and files that no longer exist in output/samples are
  *   removed (upstream deletions must propagate). Files whose transpiled
  *   source does not parse keep their previous version in place.
+ *   The samples tree is FLATTENED: the mirror keeps the upstream ABAP
+ *   package folders (output/samples/01/03/<class>.js), but the transpiled
+ *   sample classes require each other as siblings (require("./z2ui5_cl_…"))
+ *   and the runtime keys apps by bare class name, so every sample lands
+ *   directly under srv/samples/. Class names are globally unique, so the
+ *   flatten can never collide.
  * - Every transpiled .js file must parse; files that don't are skipped and
  *   reported (the jest run afterwards is the behavioral gate).
  *
@@ -33,7 +39,7 @@ const root = path.join(__dirname, "..", "..");
 
 const COPIES = [
   { name: "abap2UI5", from: path.join(root, "output", "abap2UI5"), to: path.join(root, "cap2UI5", "srv", "z2ui5"), replace: false, clobber: false, parseCheck: true },
-  { name: "samples", from: path.join(root, "output", "samples"), to: path.join(root, "cap2UI5", "srv", "samples"), replace: false, clobber: true, prune: true, parseCheck: true },
+  { name: "samples", from: path.join(root, "output", "samples"), to: path.join(root, "cap2UI5", "srv", "samples"), replace: false, clobber: true, prune: true, parseCheck: true, flatten: true },
   { name: "app", from: path.join(root, "output", "app"), to: path.join(root, "cap2UI5", "app", "z2ui5", "webapp"), replace: true, clobber: true, parseCheck: false },
 ];
 
@@ -48,12 +54,15 @@ function parses(file) {
   }
 }
 
+// When opts.flatten is set the source folder structure is discarded and every
+// file lands directly under the top-level `to` — used for srv/samples, whose
+// classes reference each other as siblings and are keyed by bare class name.
 function copyTree(from, to, opts, stats) {
   for (const entry of fs.readdirSync(from, { withFileTypes: true })) {
     const src = path.join(from, entry.name);
     const dest = path.join(to, entry.name);
     if (entry.isDirectory()) {
-      copyTree(src, dest, opts, stats);
+      copyTree(src, opts.flatten ? to : dest, opts, stats);
     } else if (!skip(src)) {
       const isNew = !fs.existsSync(dest);
       if (!opts.clobber && !isNew) {
@@ -91,6 +100,30 @@ function pruneTree(from, to, stats) {
   }
 }
 
+// Flatten variant: `to` holds every class as a flat `<name>.js`, so a file is
+// pruned when its basename is absent anywhere in the (nested) `from` tree.
+// Stray subdirectories left over from an earlier non-flat copy are removed.
+function pruneFlat(from, to, stats) {
+  if (!fs.existsSync(to)) return;
+  const keep = new Set();
+  (function collect(dir) {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const p = path.join(dir, entry.name);
+      if (entry.isDirectory()) collect(p);
+      else if (entry.name.endsWith(".js") && !skip(p)) keep.add(entry.name);
+    }
+  })(from);
+  for (const entry of fs.readdirSync(to, { withFileTypes: true })) {
+    const dest = path.join(to, entry.name);
+    if (entry.isDirectory()) {
+      fs.rmSync(dest, { recursive: true, force: true });
+    } else if (entry.name.endsWith(".js") && !keep.has(entry.name)) {
+      fs.rmSync(dest);
+      stats.pruned++;
+    }
+  }
+}
+
 /**
  * Backend fill-ins must not just parse but also load (unresolved requires,
  * stubbed superclasses of missing classes, ...). Files are checked in a
@@ -121,15 +154,15 @@ function loadGate(files, stats) {
 
 let total = 0;
 let broken = 0;
-for (const { name, from, to, replace, clobber, prune, parseCheck } of COPIES) {
+for (const { name, from, to, replace, clobber, prune, parseCheck, flatten } of COPIES) {
   if (!fs.existsSync(from)) {
     console.log(`output/${name}: not found — skipped (run the transpile/prepare steps first)`);
     continue;
   }
   if (replace) fs.rmSync(to, { recursive: true, force: true });
   const stats = { copied: 0, kept: 0, pruned: 0, invalid: [], added: [], unloadable: [] };
-  copyTree(from, to, { clobber, parseCheck }, stats);
-  if (prune) pruneTree(from, to, stats);
+  copyTree(from, to, { clobber, parseCheck, flatten }, stats);
+  if (prune) (flatten ? pruneFlat : pruneTree)(from, to, stats);
   if (name === "abap2UI5" && stats.added.length) loadGate(stats.added, stats);
   total += stats.copied;
   broken += stats.invalid.length + stats.unloadable.length;

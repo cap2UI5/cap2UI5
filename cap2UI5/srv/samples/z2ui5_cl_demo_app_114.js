@@ -41,7 +41,7 @@ class z2ui5_cl_demo_app_114 extends z2ui5_if_app {
     const page = lo_view.shell()
       .page({ title: `Feed Input`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
     page.flex_box({ justifycontent: `Start`, class: `sapUiSmallMarginEnd`, alignitems: `Center` })
-      .avatar({ class: `sapUiSmallMarginEnd` })
+      .icon({ src: `sap-icon://person-placeholder`, class: `sapUiSmallMarginEnd` })
       .text_area({ value: this.client._bind_edit(this.mv_value), rows: `4`, cols: `120`, class: `sapUiSmallMarginEnd`, placeholder: `Post something here...`, editable: true, enabled: true })
       .button({ icon: `sap-icon://paper-plane`, press: this.client._event(`POST`), iconfirst: true });
     page.list({ items: this.client._bind_edit(this.mt_feed), showseparators: `Inner` })

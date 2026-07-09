@@ -88,7 +88,7 @@ class z2ui5_cl_demo_app_083 extends z2ui5_if_app {
     let sy_tabix = 0;
     let view = z2ui5_cl_xml_view.factory();
     view = view.page({ id: `page_main`, title: `abap2UI5 - Select-Options`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
-    const page = view.dynamic_page({ headerexpanded: true, headerpinned: true });
+    const page = view.dynamic_page({ headerexpanded: true });
     const header_title = page.title({ ns: `f` }).get().dynamic_page_title();
     header_title.heading(`f`).hbox().title(`Select-Option`);
     header_title.expanded_content(`f`);
@@ -115,7 +115,7 @@ class z2ui5_cl_demo_app_083 extends z2ui5_if_app {
         .custom_list_item()
         .hbox()
         .text(`{NAME}`)
-        .multi_input({ tokens: this.client._bind(this.mt_token), showclearicon: true, value: `{VALUE}`, tokenupdate: this.client._event(`FILTER_UPDATE1`), submit: this.client._event(`FILTER_UPDATE`), id: `FILTER`, valuehelprequest: this.client._event(`FILTER_VALUE_HELP`) })
+        .multi_input({ tokens: this.client._bind(this.mt_token), value: `{VALUE}`, tokenupdate: this.client._event(`FILTER_UPDATE1`), submit: this.client._event(`FILTER_UPDATE`), id: `FILTER`, valuehelprequest: this.client._event(`FILTER_VALUE_HELP`) })
         .item({ key: `{KEY}`, text: `{TEXT}` })
         .tokens()
         .token({ key: `{KEY}`, text: `{TEXT}`, visible: `{VISIBLE}`, selected: `{SELKZ}`, editable: `{EDITABLE}` });

@@ -8,6 +8,12 @@
  * (names, numbering, additions/removals) drifts over time. Tests must not
  * pin to a hardcoded snapshot of that set — they read what is actually on
  * disk here instead.
+ *
+ * The mirror mirrors the upstream `cloud` branch `src/` 1:1, which keeps the
+ * ABAP package folders (e.g. srv/samples/01/03/<class>.js). Discovery must
+ * therefore recurse — the same way the runtime's register_app_dir walk
+ * (z2ui5_cl_util._walkClassFiles) and tools/scripts/smoke-apps.js already do.
+ * A flat samples folder is just the depth-0 case of the same walk.
  */
 
 const fs = require("fs");
@@ -15,19 +21,35 @@ const path = require("path");
 
 const samplesDir = path.join(__dirname, "..", "..", "..", "cap2UI5", "srv", "samples");
 
+// Walk the samples tree and return a { className -> absolute file path } map
+// for every sample class on disk, regardless of how deep the mirror nests it.
+function sampleFileMap() {
+  const map = new Map();
+  const walk = (dir) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        walk(full);
+      } else if (entry.name.endsWith(".js")) {
+        const name = path.basename(entry.name, ".js");
+        if (/^z2ui5_cl_/.test(name)) map.set(name, full);
+      }
+    }
+  };
+  walk(samplesDir);
+  return map;
+}
+
 // All sample app class names present on disk, sorted, matching the framework
 // naming convention.
 function sampleClassNames() {
-  return fs
-    .readdirSync(samplesDir)
-    .filter((f) => f.endsWith(".js"))
-    .map((f) => path.basename(f, ".js"))
-    .filter((n) => /^z2ui5_cl_/.test(n))
-    .sort();
+  return [...sampleFileMap().keys()].sort();
 }
 
 function requireSample(name) {
-  return require(path.join(samplesDir, `${name}.js`));
+  const file = sampleFileMap().get(name);
+  if (!file) throw new Error(`sample ${name} not found under ${samplesDir}`);
+  return require(file);
 }
 
 // A stable, representative sample app used to exercise generic behavior
