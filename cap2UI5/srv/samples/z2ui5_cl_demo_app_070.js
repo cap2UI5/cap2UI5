@@ -100,7 +100,7 @@ class z2ui5_cl_demo_app_070 extends z2ui5_if_app {
     this.mt_mapping = [{ n: `EQ`, v: `={LOW}` }, { n: `LT`, v: `<{LOW}` }, { n: `LE`, v: `<={LOW}` }, { n: `GT`, v: `>{LOW}` }, { n: `GE`, v: `>={LOW}` }, { n: `CP`, v: `*{LOW}*` }, { n: `BT`, v: `{LOW}...{HIGH}` }, { n: `NE`, v: `!(={LOW})` }, { n: `NE`, v: `!(<leer>)` }, { n: `<leer>`, v: `<leer>` }];
     const view = z2ui5_cl_xml_view.factory();
     const page1 = view.page({ id: `page_main`, title: `abap2UI5 - sap.ui.table.Table Features`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack(), class: `sapUiContentPadding` });
-    const page = page1.dynamic_page({ headerexpanded: true, headerpinned: true });
+    const page = page1.dynamic_page({ headerexpanded: true });
     const header_title = page.title({ ns: `f` }).get().dynamic_page_title();
     header_title.heading(`f`).hbox().title(`Search Field`);
     header_title.expanded_content(`f`);
@@ -116,7 +116,7 @@ class z2ui5_cl_demo_app_070 extends z2ui5_if_app {
       .hbox({ justifycontent: `End` })
       .button({ text: `Go`, press: this.client._event(`BUTTON_START`), type: `Emphasized` });
     const cont = page.content(`f`);
-    const tab = cont.ui_table({ rows: this.client._bind(this.mt_table), editable: false, alternaterowcolors: true, rowactioncount: `2`, enablegrouping: false, fixedcolumncount: `1`, selectionmode: `None`, sort: this.client._event(`SORT`), filter: this.client._event(`FILTER`), customfilter: this.client._event(`CUSTOMFILTER`) });
+    const tab = cont.ui_table({ rows: this.client._bind(this.mt_table), editable: false, alternaterowcolors: true, rowactioncount: `2`, fixedcolumncount: `1`, selectionmode: `None`, sort: this.client._event(`SORT`), filter: this.client._event(`FILTER`), customfilter: this.client._event(`CUSTOMFILTER`) });
     tab.ui_extension().overflow_toolbar().title(`Products`);
     const lo_columns = tab.ui_columns();
     lo_columns.ui_column(`4rem`)

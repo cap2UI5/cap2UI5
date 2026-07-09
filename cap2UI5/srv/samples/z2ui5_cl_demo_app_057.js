@@ -57,7 +57,7 @@ class z2ui5_cl_demo_app_057 extends z2ui5_if_app {
       lv_base64 = z2ui5_cl_util.conv_encode_x_base64(lv_csv_x);
       view._generic({ ns: `html`, name: `iframe`, t_prop: [{ n: `src`, v: `data:text/csv;base64,` + lv_base64 }, { n: `hidden`, v: `hidden` }] });
     }
-    const page = view.dynamic_page({ headerexpanded: true, headerpinned: true });
+    const page = view.dynamic_page({ headerexpanded: true });
     const header_title = page.title({ ns: `f` }).get().dynamic_page_title();
     header_title.heading(`f`).hbox().title(`Download CSV`);
     header_title.expanded_content(`f`);

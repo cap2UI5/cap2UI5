@@ -162,7 +162,7 @@ class z2ui5_cl_demo_app_099 extends z2ui5_if_app {
       .text(`{TITLE}`)
       .text(`{INFO}`)
       .text(`{DESCR}`)
-      .avatar({ src: `{ICON}` });
+      .icon({ src: `{ICON}` });
     this.client.view_display(view.stringify());
   }
 

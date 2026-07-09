@@ -12,7 +12,7 @@ class z2ui5_cl_demo_app_017 extends z2ui5_if_app {
     header_title.expanded_heading().hbox().title({ text: `Oblomov Dev`, wrapping: true });
     header_title.snapped_heading()
       .flex_box({ alignitems: `Center` })
-      .avatar({ src: lcl_help.get_avatar(), class: `sapUiTinyMarginEnd` })
+      .icon({ src: `sap-icon://person-placeholder`, size: `2rem`, class: `sapUiTinyMarginEnd` })
       .title({ text: `Oblomov Dev`, wrapping: true });
     header_title.expanded_content(`uxap`).text(`abap2UI5 Developer`);
     header_title.snapped_content(`uxap`).text(`abap2UI5 Developer`);
@@ -25,7 +25,7 @@ class z2ui5_cl_demo_app_017 extends z2ui5_if_app {
       .button({ text: `Go Back`, press: this.client._event_nav_app_leave() });
     const header_content = page.header_content(`uxap`);
     header_content.flex_box({ wrap: `Wrap` })
-      .avatar({ src: lcl_help.get_avatar(), class: `sapUiSmallMarginEnd`, displaysize: `layout` })
+      .icon({ src: `sap-icon://person-placeholder`, size: `5rem`, class: `sapUiSmallMarginEnd` })
       .vertical_layout({ class: `sapUiSmallMarginBeginEnd` })
       .link({ text: `+33 6 4512 5158` })
       .link({ text: `email@email.com` })

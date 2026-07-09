@@ -1,28 +1,8 @@
 [
   {
-    "name": "z2ui5_cl_demo_app_017",
-    "verdict": "error-popup",
-    "detail": "lcl_help is not defined"
-  },
-  {
     "name": "z2ui5_cl_demo_app_020",
     "verdict": "not-started",
     "detail": "handler answered with z2ui5_cl_app_startup"
-  },
-  {
-    "name": "z2ui5_cl_demo_app_033",
-    "verdict": "error-popup",
-    "detail": "page.illustrated_message(...).additional_content is not a function"
-  },
-  {
-    "name": "z2ui5_cl_demo_app_042",
-    "verdict": "error-popup",
-    "detail": "lcl_help is not defined"
-  },
-  {
-    "name": "z2ui5_cl_demo_app_043",
-    "verdict": "no-view",
-    "detail": "started but no main view XML"
   },
   {
     "name": "z2ui5_cl_demo_app_047",
@@ -90,19 +70,9 @@
     "detail": "Cannot read properties of null (reading 'input')"
   },
   {
-    "name": "z2ui5_cl_demo_app_118",
-    "verdict": "error-popup",
-    "detail": "sy_datum is not defined"
-  },
-  {
     "name": "z2ui5_cl_demo_app_122",
     "verdict": "error-popup",
     "detail": "Cannot read properties of undefined (reading 'system')"
-  },
-  {
-    "name": "z2ui5_cl_demo_app_138",
-    "verdict": "error-popup",
-    "detail": "ms_data is not defined"
   },
   {
     "name": "z2ui5_cl_demo_app_153",
@@ -133,11 +103,6 @@
     "name": "z2ui5_cl_demo_app_194",
     "verdict": "error-popup",
     "detail": "cl_abap_structdescr is not defined"
-  },
-  {
-    "name": "z2ui5_cl_demo_app_199",
-    "verdict": "error-popup",
-    "detail": "Cannot read properties of null (reading 'length')"
   },
   {
     "name": "z2ui5_cl_demo_app_212",
@@ -180,49 +145,14 @@
     "detail": "this.lt_a_data.push is not a function"
   },
   {
-    "name": "z2ui5_cl_demo_app_319",
-    "verdict": "error-popup",
-    "detail": "m_selection is not defined"
-  },
-  {
-    "name": "z2ui5_cl_demo_app_328",
-    "verdict": "error-popup",
-    "detail": "cl_abap_datadescr is not defined"
-  },
-  {
     "name": "z2ui5_cl_demo_app_329",
     "verdict": "error-popup",
     "detail": "li_app.main is not a function"
   },
   {
-    "name": "z2ui5_cl_demo_app_331",
-    "verdict": "no-view",
-    "detail": "started but no main view XML"
-  },
-  {
-    "name": "z2ui5_cl_demo_app_332",
-    "verdict": "error-popup",
-    "detail": "this.mo_table_obj.ms_data.t_layout is not iterable"
-  },
-  {
     "name": "z2ui5_cl_demo_app_333",
     "verdict": "error-popup",
     "detail": "li_app.main is not a function"
-  },
-  {
-    "name": "z2ui5_cl_demo_app_334",
-    "verdict": "error-popup",
-    "detail": "this.mo_layout_obj.ms_data.t_layout is not iterable"
-  },
-  {
-    "name": "z2ui5_cl_demo_app_335",
-    "verdict": "error-popup",
-    "detail": "this.mo_layout_obj.ms_data.t_layout is not iterable"
-  },
-  {
-    "name": "z2ui5_cl_demo_app_337",
-    "verdict": "error-popup",
-    "detail": "this.mo_layout_obj.ms_data.t_layout is not iterable"
   },
   {
     "name": "z2ui5_cl_demo_app_339",
@@ -238,36 +168,6 @@
     "name": "z2ui5_cl_demo_app_342",
     "verdict": "error-popup",
     "detail": "this.mo_lay.ms_data.t_layout is not iterable"
-  },
-  {
-    "name": "z2ui5_cl_demo_app_344",
-    "verdict": "error-popup",
-    "detail": "i_layout.ms_data.t_layout is not iterable"
-  },
-  {
-    "name": "z2ui5_cl_demo_app_345",
-    "verdict": "error-popup",
-    "detail": "i_layout.ms_data.t_layout is not iterable"
-  },
-  {
-    "name": "z2ui5_cl_demo_app_347",
-    "verdict": "error-popup",
-    "detail": "this.mo_layout_obj.ms_data.t_layout is not iterable"
-  },
-  {
-    "name": "z2ui5_cl_demo_app_348",
-    "verdict": "error-popup",
-    "detail": "this.mo_layout_obj.ms_data.t_layout is not iterable"
-  },
-  {
-    "name": "z2ui5_cl_demo_app_349",
-    "verdict": "error-popup",
-    "detail": "this.mo_layout_obj.ms_data.t_layout is not iterable"
-  },
-  {
-    "name": "z2ui5_cl_demo_app_353",
-    "verdict": "error-popup",
-    "detail": "Cannot read properties of undefined (reading 'VERSION')"
   },
   {
     "name": "z2ui5_cl_demo_app_354",

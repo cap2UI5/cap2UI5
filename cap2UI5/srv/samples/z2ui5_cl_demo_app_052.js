@@ -32,7 +32,7 @@ class z2ui5_cl_demo_app_052 extends z2ui5_if_app {
   view_display() {
     const view = z2ui5_cl_xml_view.factory();
     let page = view.page({ id: `page_main`, title: `abap2UI5 - List Report Features`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
-    page = page.dynamic_page({ headerexpanded: true, headerpinned: true });
+    page = page.dynamic_page({ headerexpanded: true });
     const cont = page.content(`f`);
     const tab = cont.table({ id: `tab`, items: this.client._bind_edit(this.mt_table) });
     const lo_columns = tab.columns();

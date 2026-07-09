@@ -25,7 +25,7 @@ class z2ui5_cl_demo_app_352 extends z2ui5_if_app {
       .content(`form`)
       .title(`Keyboard on/off`)
       .label(`Input (numeric keyboard)`)
-      .input({ id: `ZINPUT`, value: this.client._bind_edit(this.input), showvaluehelp: true, valuehelprequest: this.client._event(`CALL_KEYBOARD`), valuehelpiconsrc: `sap-icon://keyboard-and-mouse` });
+      .input({ id: `ZINPUT`, value: this.client._bind_edit(this.input), showvaluehelp: true, valuehelprequest: this.client._event(`CALL_KEYBOARD`) });
     this.client.view_display(page.stringify());
   }
 

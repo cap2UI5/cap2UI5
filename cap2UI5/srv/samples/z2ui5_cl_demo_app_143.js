@@ -31,9 +31,9 @@ class z2ui5_cl_demo_app_143 extends z2ui5_if_app {
     header_title.expanded_content(`f`);
     header_title.snapped_content(`f`);
     const cont = page.content(`f`);
-    const tab = cont.vbox()
-      .ui_table({ rows: this.client._bind(this.gt_data), id: `Table1`, editable: false, alternaterowcolors: true, enablecellfilter: true, rowactioncount: `1`, visiblerowcount: `7`, enablegrouping: false, fixedcolumncount: `1`, selectionmode: `None` })
-      .ui_columns()
+    const table = cont.vbox()
+      .ui_table({ rows: this.client._bind(this.gt_data), id: `Table1`, editable: false, alternaterowcolors: true, enablecellfilter: true, rowactioncount: `1`, fixedcolumncount: `1`, visiblerowcount: `7`, selectionmode: `None` });
+    table.ui_columns()
       .ui_column({ sortproperty: `FIELD1`, filterproperty: `FIELD1`, autoresizable: `true` })
       .text(`Field1`)
       .ui_template()

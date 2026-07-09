@@ -16,7 +16,7 @@ class z2ui5_cl_demo_app_251 extends z2ui5_if_app {
     const layout = page.vertical_layout({ class: `sapUiContentPadding`, width: `100%` });
     layout.input({ value: `10`, description: `PC`, width: `100px`, fieldwidth: `60%`, class: `sapUiSmallMarginBottom` });
     layout.input({ value: `220`, description: `EUR / 5 pieces`, width: `200px`, fieldwidth: `60px`, class: `sapUiSmallMarginBottom` });
-    layout.input({ value: `220.00`, description: `EUR`, width: `250px`, fieldwidth: `80%`, showclearicon: true, class: `sapUiSmallMarginBottom` });
+    layout.input({ value: `220.00`, description: `EUR`, width: `250px`, fieldwidth: `80%`, class: `sapUiSmallMarginBottom` });
     layout.input({ value: `007`, description: `Bastian Schweinsteiger`, width: `300px`, fieldwidth: `50px`, class: `sapUiSmallMarginBottom` });
     layout.input({ value: `EDP_LAPTOP`, ariadescribedby: `descriptionNodeId`, description: `IT Laptops`, width: `400px`, fieldwidth: `75%`, class: `sapUiSmallMarginBottom` });
     layout.invisible_text({ ns: `core`, id: `descriptionNodeId`, text: `Additional input description refferenced by aria-describedby.` });
