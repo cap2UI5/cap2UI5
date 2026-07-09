@@ -22,11 +22,7 @@ const { execSync } = require("child_process");
 
 const SOURCES = {
   abap2UI5: { url: "https://github.com/abap2UI5/abap2UI5", paths: ["src", "app/webapp"] },
-  // The whole src/ root folder is mirrored from the cloud branch, including
-  // the numbered subpackages (01/, 02/, ...). The cloud branch is rebuilt from
-  // standard by the auto_cloud workflow without the on-premise-only 00/ apps
-  // (they cannot run in the CAP/Node environment) — so mirroring it yields the
-  // src/ root folder without subpackage 00/.
+  // src/ is mirrored 1:1 from the cloud branch, as it is.
   samples: { url: "https://github.com/abap2UI5/samples", branch: "cloud", paths: ["src"] },
 };
 
