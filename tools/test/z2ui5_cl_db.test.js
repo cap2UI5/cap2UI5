@@ -1,4 +1,9 @@
 const DB = require("../../cap2UI5/srv/z2ui5/01/01/z2ui5_cl_core_srv_draft");
+const { firstSampleName, requireSample } = require("./helpers/samples");
+
+// A representative sample app, picked dynamically so the suite tracks the
+// mirrored samples set instead of a hardcoded class name.
+const SAMPLE = firstSampleName();
 
 describe("z2ui5_cl_db", () => {
   // ===== serialize / deserialize =====
@@ -64,19 +69,19 @@ describe("z2ui5_cl_db", () => {
   // ===== serialize apps from /samples/ folder =====
 
   describe("serialize demo apps from /samples/ folder", () => {
-    test("round-trip for z2ui5_cl_demo_app_001", () => {
-      const AppClass = require("../../cap2UI5/srv/samples/z2ui5_cl_demo_app_001");
+    test(`round-trip for a samples/ app (${SAMPLE})`, () => {
+      const AppClass = requireSample(SAMPLE);
       const app = new AppClass();
 
       const json = DB.serialize(app);
       const restored = DB.deserialize(json);
 
-      expect(restored.constructor.name).toBe("z2ui5_cl_demo_app_001");
+      expect(restored.constructor.name).toBe(SAMPLE);
       expect(typeof restored.main).toBe("function");
     });
 
-    test("round-trip for z2ui5_cl_demo_app_011 preserves table data", () => {
-      const AppClass = require("../../cap2UI5/srv/samples/z2ui5_cl_demo_app_011");
+    test("round-trip preserves table data on a samples/ app", () => {
+      const AppClass = requireSample(SAMPLE);
       const app = new AppClass();
       app.t_tab = [
         { selkz: false, title: "Item A", value: "1" },
@@ -101,8 +106,8 @@ describe("z2ui5_cl_db", () => {
     });
 
     test("finds demo app in samples/ folder", () => {
-      const filePath = DB._findAppFile("z2ui5_cl_demo_app_001");
-      expect(filePath).toContain("z2ui5_cl_demo_app_001.js");
+      const filePath = DB._findAppFile(SAMPLE);
+      expect(filePath).toContain(`${SAMPLE}.js`);
     });
 
     test("returns default path for unknown class", () => {
@@ -122,7 +127,7 @@ describe("z2ui5_cl_db", () => {
     });
 
     test("returns class for known demo app in samples/", () => {
-      const AppClass = DB.findAppClass("z2ui5_cl_demo_app_001");
+      const AppClass = DB.findAppClass(SAMPLE);
       expect(AppClass).not.toBeNull();
     });
 
