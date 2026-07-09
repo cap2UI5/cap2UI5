@@ -61,7 +61,11 @@ class z2ui5_cl_sample_000 extends z2ui5_if_app {
     }
     let prev_group = ``;
     sy_tabix = 0;
-    for (const tile of this.get_catalog()) {
+    // Only render catalog entries whose class is actually available in this
+    // deployment. The catalog is a hardcoded list; a build that ships a
+    // subset of the samples (e.g. the in-browser web bundle) would otherwise
+    // render dead "not found" links for the missing ones.
+    for (const tile of this.get_catalog().filter((t) => this.class_exists({ name: t.app }))) {
       sy_tabix++;
       if (tile.group !== prev_group) {
         page.title({ text: tile.group, level: `H3`, class: `sapUiSmallMarginTop sapUiTinyMarginBottom` });
