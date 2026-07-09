@@ -100,7 +100,7 @@ class z2ui5_cl_demo_app_070 extends z2ui5_if_app {
     this.mt_mapping = [{ n: `EQ`, v: `={LOW}` }, { n: `LT`, v: `<{LOW}` }, { n: `LE`, v: `<={LOW}` }, { n: `GT`, v: `>{LOW}` }, { n: `GE`, v: `>={LOW}` }, { n: `CP`, v: `*{LOW}*` }, { n: `BT`, v: `{LOW}...{HIGH}` }, { n: `NE`, v: `!(={LOW})` }, { n: `NE`, v: `!(<leer>)` }, { n: `<leer>`, v: `<leer>` }];
     const view = z2ui5_cl_xml_view.factory();
     const page1 = view.page({ id: `page_main`, title: `abap2UI5 - sap.ui.table.Table Features`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack(), class: `sapUiContentPadding` });
-    const page = page1.dynamic_page({ headerexpanded: true, headerpinned: true });
+    const page = page1.dynamic_page({ headerexpanded: true });
     const header_title = page.title({ ns: `f` }).get().dynamic_page_title();
     header_title.heading(`f`).hbox().title(`Search Field`);
     header_title.expanded_content(`f`);

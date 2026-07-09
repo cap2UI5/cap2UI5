@@ -1,13 +1,21 @@
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
-class z2ui5_cl_demo_app_017 extends z2ui5_if_app {
-  client = null;
-
-  view_display() {
+class z2ui5_cl_demo_app_042 extends z2ui5_if_app {
+  async main(client) {
+    let lv_dummy;
+    if (client.check_on_init()) {
+    }
+    switch (client.get().EVENT) {
+      case `BUTTON_ROUNDTRIP`:
+        lv_dummy = `user pressed a button, your custom implementation can be called here`;
+        break;
+      case `BUTTON_MSG_BOX`:
+        client.message_box_display(`this is a message box with a custom text`, `success`);
+        break;
+    }
     const view = z2ui5_cl_xml_view.factory();
-    const page = view.object_page_layout({ showtitleinheadercontent: true, showeditheaderbutton: true, editheaderbuttonpress: this.client._event(`EDIT_HEADER_PRESS`), uppercaseanchorbar: false });
+    const page = view.object_page_layout({ showtitleinheadercontent: true, showeditheaderbutton: true, editheaderbuttonpress: client._event(`EDIT_HEADER_PRESS`), uppercaseanchorbar: false });
     const header_title = page.header_title().object_page_dyn_header_title();
     header_title.expanded_heading().hbox().title({ text: `Oblomov Dev`, wrapping: true });
     header_title.snapped_heading()
@@ -22,7 +30,7 @@ class z2ui5_cl_demo_app_017 extends z2ui5_if_app {
       .overflow_toolbar_button({ icon: `sap-icon://edit`, text: `edit header`, type: `Emphasized`, tooltip: `edit` })
       .overflow_toolbar_button({ icon: `sap-icon://pull-down`, text: `show section`, type: `Emphasized`, tooltip: `pull-down` })
       .overflow_toolbar_button({ icon: `sap-icon://show`, text: `show state`, tooltip: `show` })
-      .button({ text: `Go Back`, press: this.client._event_nav_app_leave() });
+      .button({ text: `Go Back`, press: client._event_nav_app_leave() });
     const header_content = page.header_content(`uxap`);
     header_content.flex_box({ wrap: `Wrap` })
       .icon({ src: `sap-icon://person-placeholder`, size: `5rem`, class: `sapUiSmallMarginEnd` })
@@ -115,16 +123,8 @@ class z2ui5_cl_demo_app_017 extends z2ui5_if_app {
       .label(`details`)
       .label(`details`)
       .label(`details`);
-    this.client.view_display(view.stringify());
-  }
-
-  async main(client) {
-    this.client = z2ui5_cl_util.abap_copy(client);
-    if (client.check_on_event(`BUTTON_MSG_BOX`)) {
-      client.message_box_display(`this is a message box with a custom text`, `success`);
-    }
-    this.view_display();
+    client.view_display(page.stringify());
   }
 }
 
-module.exports = z2ui5_cl_demo_app_017;
+module.exports = z2ui5_cl_demo_app_042;

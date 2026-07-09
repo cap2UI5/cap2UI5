@@ -29,7 +29,7 @@ class z2ui5_cl_demo_app_110 extends z2ui5_if_app {
       .get_parent()
       .get_parent()
       .label(`Phone number`)
-      .mask_input({ mask: `(999) 999 999999`, placeholdersymbol: `_`, placeholder: `Enter twelve-digit number`, showclearicon: true })
+      .mask_input({ mask: `(999) 999 999999`, placeholdersymbol: `_`, placeholder: `Enter twelve-digit number` })
       .get()
       .rules()
       .mask_input_rule()
@@ -39,7 +39,7 @@ class z2ui5_cl_demo_app_110 extends z2ui5_if_app {
       .get_parent()
       .simple_form({ title: `Possible usages (may require additional coding)`, layout: `ColumnLayout`, editable: true })
       .label(`Serial number`)
-      .mask_input({ mask: `CCCC-CCCC-CCCC-CCCC-CCCC`, placeholdersymbol: `_`, placeholder: `Enter digits and capital letters`, showclearicon: true })
+      .mask_input({ mask: `CCCC-CCCC-CCCC-CCCC-CCCC`, placeholdersymbol: `_`, placeholder: `Enter digits and capital letters` })
       .get()
       .rules()
       .mask_input_rule({ maskformatsymbol: `C`, regex: `[A-Z0-9]` })
@@ -47,7 +47,7 @@ class z2ui5_cl_demo_app_110 extends z2ui5_if_app {
       .get_parent()
       .get_parent()
       .label(`Product activation key`)
-      .mask_input({ mask: `SAP-CCCCC-CCCCC`, placeholdersymbol: `_`, placeholder: `Starts with 'SAP' followed by digits and capital letters`, showclearicon: true })
+      .mask_input({ mask: `SAP-CCCCC-CCCCC`, placeholdersymbol: `_`, placeholder: `Starts with 'SAP' followed by digits and capital letters` })
       .get()
       .rules()
       .mask_input_rule({ maskformatsymbol: `C`, regex: `[A-Z0-9]` })
@@ -55,7 +55,7 @@ class z2ui5_cl_demo_app_110 extends z2ui5_if_app {
       .get_parent()
       .get_parent()
       .label(`ISBN`)
-      .mask_input({ mask: `999-99-999-9999-9`, placeholdersymbol: `_`, placeholder: `Enter thirteen-digit number`, showclearicon: true })
+      .mask_input({ mask: `999-99-999-9999-9`, placeholdersymbol: `_`, placeholder: `Enter thirteen-digit number` })
       .get();
     this.client.view_display(view.stringify());
   }
