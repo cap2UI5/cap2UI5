@@ -14,18 +14,19 @@ class z2ui5_cl_pop_bal extends z2ui5_if_app {
 
   static factory({ i_messages, i_title = `abap2UI5 - Business Application Log`, i_object, i_subobject, i_extnumber, i_check_save = false } = {}) {
     let r_result = null;
+    let sy_tabix = 0;
     r_result = new z2ui5_cl_pop_bal();
     r_result.mt_msg_bal = z2ui5_cl_util.msg_get_t(i_messages);
-    let sy_tabix = 0;
+    sy_tabix = 0;
     for (const lr_row of r_result.mt_msg_bal) {
       sy_tabix++;
       r_result.mt_msg.push({ type: z2ui5_cl_util.ui5_get_msg_type(lr_row.type), title: lr_row.text, id: lr_row.id, number: lr_row.no, message_v1: lr_row.v1, message_v2: lr_row.v2, message_v3: lr_row.v3, message_v4: lr_row.v4, message: lr_row.text, subtitle: `${lr_row.id} ${lr_row.no}`, date: z2ui5_cl_util.time_get_date_by_stampl(lr_row.timestampl), time: z2ui5_cl_util.time_get_time_by_stampl(lr_row.timestampl) });
     }
-    r_result.title = i_title;
-    r_result.mv_object = i_object;
-    r_result.mv_subobject = i_subobject;
-    r_result.mv_extnumber = i_extnumber;
-    r_result.mv_check_save = i_check_save;
+    r_result.title = z2ui5_cl_util.abap_copy(i_title);
+    r_result.mv_object = z2ui5_cl_util.abap_copy(i_object);
+    r_result.mv_subobject = z2ui5_cl_util.abap_copy(i_subobject);
+    r_result.mv_extnumber = z2ui5_cl_util.abap_copy(i_extnumber);
+    r_result.mv_check_save = z2ui5_cl_util.abap_copy(i_check_save);
     return r_result;
   }
 
@@ -38,7 +39,7 @@ class z2ui5_cl_pop_bal extends z2ui5_if_app {
   view_display() {
     let popup = z2ui5_cl_xml_view.factory_popup();
     popup = popup.dialog({ title: this.title, contentheight: `50%`, contentwidth: `50%`, verticalscrolling: false, afterclose: this.client._event(`BUTTON_CONTINUE`) });
-    if (this.mv_check_save === true) {
+    if ((this.mv_check_save === true || this.mv_check_save === `X`)) {
       popup.overflow_toolbar()
         .label(`Object`)
         .input({ value: this.client._bind_edit(this.mv_object), width: `10rem` })
@@ -76,7 +77,7 @@ class z2ui5_cl_pop_bal extends z2ui5_if_app {
       .text(`{NUMBER}`)
       .text(`{MESSAGE}`);
     const buttons = popup.buttons();
-    if (this.mv_check_save === true) {
+    if ((this.mv_check_save === true || this.mv_check_save === `X`)) {
       buttons.button({ text: `Save`, press: this.client._event(`BUTTON_SAVE`) });
     }
     buttons.button({ text: `Continue`, press: this.client._event(`BUTTON_CONTINUE`), type: `Emphasized` });
@@ -97,7 +98,7 @@ class z2ui5_cl_pop_bal extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = client;
+    this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.view_display();
       return;

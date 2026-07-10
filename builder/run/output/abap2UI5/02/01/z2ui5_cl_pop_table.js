@@ -93,4 +93,9 @@ class z2ui5_cl_pop_table extends z2ui5_if_app {
   }
 }
 
+// abap PREFERRED PARAMETER call style — see z2ui5_pop_preferred_param.js
+require("./z2ui5_pop_preferred_param")(z2ui5_cl_pop_table, {
+  factory: { preferred: `i_tab`, params: [`i_tab`, `i_title`] },
+});
+
 module.exports = z2ui5_cl_pop_table;

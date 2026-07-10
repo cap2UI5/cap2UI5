@@ -1526,6 +1526,54 @@ function wrap(s) {
 // statement transpiler
 // ---------------------------------------------------------------------------
 
+/**
+ * Derive the popup PREFERRED PARAMETER map from the class definition: per public
+ * factory-style method, the preferred parameter is the explicit
+ * `PREFERRED PARAMETER x`, else the first IMPORTING parameter that is neither
+ * DEFAULTed nor OPTIONAL (abap's single-mandatory positional call). Methods
+ * without such a parameter are omitted. Matches the hand-authored maps 1:1.
+ */
+function derivePreferredMap(file) {
+  const out = {};
+  for (const s of file.getStatements()) {
+    const T = s.get().constructor.name;
+    if (T === "ClassImplementation") break;
+    if (T !== "MethodDef") continue;
+    const toks = s.getTokens().map((t) => t.getStr());
+    const up = toks.map((t) => t.toUpperCase());
+    const isStatic = up[0] === "CLASS";
+    const name = toks[isStatic ? 3 : 1];
+    if (!name) continue;
+    let preferred = null;
+    const params = [];
+    const pp = up.indexOf("PREFERRED");
+    if (pp >= 0 && up[pp + 1] === "PARAMETER") preferred = paramName(toks[pp + 2]);
+    const impIdx = up.indexOf("IMPORTING");
+    if (impIdx >= 0) {
+      const end = [up.indexOf("EXPORTING"), up.indexOf("RETURNING"), up.indexOf("CHANGING"), up.indexOf("RAISING"), up.indexOf("PREFERRED"), toks.length].filter((x) => x > impIdx).sort((a, b) => a - b)[0];
+      let i = impIdx + 1;
+      while (i < end) {
+        if ((up[i + 1] === "TYPE" || up[i + 1] === "LIKE") && /^!?[a-z]/i.test(toks[i])) {
+          const pn = paramName(toks[i]);
+          let j = i + 2;
+          let mandatory = true;
+          while (j < end && !((up[j + 1] === "TYPE" || up[j + 1] === "LIKE") && /^!?[a-z]/i.test(toks[j]))) {
+            if (up[j] === "DEFAULT" || up[j] === "OPTIONAL") mandatory = false;
+            j++;
+          }
+          params.push(pn);
+          if (!preferred && mandatory) preferred = pn;
+          i = j;
+          continue;
+        }
+        i++;
+      }
+    }
+    if (preferred) out[name.toLowerCase()] = { preferred, params };
+  }
+  return out;
+}
+
 function transpileClass(source, filename) {
   const reg = new Registry().addFile(new MemoryFile(filename, source));
   reg.parse();
@@ -1564,6 +1612,26 @@ function transpileClass(source, filename) {
   while (lines[lines.length - 1] === "") lines.pop();
   lines.push(`}`);
   lines.push("");
+
+  // abap PREFERRED PARAMETER call style for popup factories — abap (and code
+  // transpiled 1:1 from it) passes the preferred/single-mandatory parameter
+  // positionally, while the JS factory destructures an options object. Wire the
+  // z2ui5_pop_preferred_param shim so both call styles work, matching the
+  // hand-ported popups. Only z2ui5_cl_pop_* classes carry this convention.
+  if (/^z2ui5_cl_pop_/.test(model.name)) {
+    const pmap = derivePreferredMap(file);
+    const entries = Object.entries(pmap);
+    if (entries.length) {
+      lines.push(`// abap PREFERRED PARAMETER call style — see z2ui5_pop_preferred_param.js`);
+      lines.push(`require("./z2ui5_pop_preferred_param")(${model.name}, {`);
+      for (const [meth, { preferred, params }] of entries) {
+        lines.push(`  ${meth}: { preferred: \`${preferred}\`, params: [${params.map((p) => `\`${p}\``).join(", ")}] },`);
+      }
+      lines.push(`});`);
+      lines.push("");
+    }
+  }
+
   lines.push(`module.exports = ${model.name};`);
 
   // requires header
