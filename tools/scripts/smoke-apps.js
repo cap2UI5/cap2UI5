@@ -28,7 +28,7 @@ const fs = require("fs");
 const path = require("path");
 
 const root = path.join(__dirname, "..", "..");
-const samplesDir = path.join(root, "cap2UI5", "srv", "samples");
+const samplesDir = path.join(root, "cap2UI5", "srv", "app", "samples");
 
 // stub the async DB layer before anything pulls in the handler
 const DB = require(path.join(root, "cap2UI5", "srv", "z2ui5", "01", "01", "z2ui5_cl_core_srv_draft"));

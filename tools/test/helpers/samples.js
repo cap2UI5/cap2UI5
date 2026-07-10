@@ -1,7 +1,7 @@
 "use strict";
 
 /**
- * Dynamic discovery of the bundled sample apps under cap2UI5/srv/samples.
+ * Dynamic discovery of the bundled sample apps under cap2UI5/srv/app/samples.
  *
  * The samples folder is mirrored + transpiled from the upstream
  * abap2UI5/samples repo on every sync run, so its exact set of classes
@@ -10,7 +10,7 @@
  * disk here instead.
  *
  * The mirror mirrors the upstream `cloud` branch `src/` 1:1, which keeps the
- * ABAP package folders (e.g. srv/samples/01/03/<class>.js). Discovery must
+ * ABAP package folders (e.g. srv/app/samples/01/03/<class>.js). Discovery must
  * therefore recurse — the same way the runtime's register_app_dir walk
  * (z2ui5_cl_util._walkClassFiles) and tools/scripts/smoke-apps.js already do.
  * A flat samples folder is just the depth-0 case of the same walk.
@@ -19,7 +19,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const samplesDir = path.join(__dirname, "..", "..", "..", "cap2UI5", "srv", "samples");
+const samplesDir = path.join(__dirname, "..", "..", "..", "cap2UI5", "srv", "app", "samples");
 
 // Walk the samples tree and return a { className -> absolute file path } map
 // for every sample class on disk, regardless of how deep the mirror nests it.

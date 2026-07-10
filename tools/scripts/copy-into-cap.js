@@ -3,9 +3,9 @@
  * copy-into-cap — step 6: copy the prepared output/ folders into their
  * positions in the CAP project:
  *
- *   output/abap2UI5/**  → cap2UI5/srv/z2ui5/**        (fill-in: new files only)
- *   output/samples/**   → cap2UI5/srv/samples/*.js    (flattened, overwrite)
- *   output/app/**       → cap2UI5/app/z2ui5/webapp/** (replaced 1:1)
+ *   output/abap2UI5/**  → cap2UI5/srv/z2ui5/**          (fill-in: new files only)
+ *   output/samples/**   → cap2UI5/srv/app/samples/*.js  (flattened, overwrite)
+ *   output/app/**       → cap2UI5/app/z2ui5/webapp/**   (replaced 1:1)
  *
  * Policies:
  * - The backend tree under srv/z2ui5 contains the hand-maintained CAP
@@ -13,7 +13,7 @@
  *   classes are only ADDED for files that do not exist yet, never copied
  *   over an existing file. Promoting a transpiled class over a hand-written
  *   one is a deliberate manual step.
- * - srv/samples is fully owned by the transpiler: existing files are
+ * - srv/app/samples is fully owned by the transpiler: existing files are
  *   overwritten and files that no longer exist in output/samples are
  *   removed (upstream deletions must propagate). Files whose transpiled
  *   source does not parse keep their previous version in place.
@@ -21,8 +21,9 @@
  *   package folders (output/samples/01/03/<class>.js), but the transpiled
  *   sample classes require each other as siblings (require("./z2ui5_cl_…"))
  *   and the runtime keys apps by bare class name, so every sample lands
- *   directly under srv/samples/. Class names are globally unique, so the
- *   flatten can never collide.
+ *   directly under srv/app/samples/. Class names are globally unique, so the
+ *   flatten can never collide. The sibling srv/app/ custom apps are untouched
+ *   because this tree only owns the samples/ subfolder.
  * - Every transpiled .js file must parse; files that don't are skipped and
  *   reported (the jest run afterwards is the behavioral gate).
  *
@@ -39,9 +40,18 @@ const root = path.join(__dirname, "..", "..");
 
 const COPIES = [
   { name: "abap2UI5", from: path.join(root, "output", "abap2UI5"), to: path.join(root, "cap2UI5", "srv", "z2ui5"), replace: false, clobber: false, parseCheck: true },
-  { name: "samples", from: path.join(root, "output", "samples"), to: path.join(root, "cap2UI5", "srv", "samples"), replace: false, clobber: true, prune: true, parseCheck: true, flatten: true },
+  { name: "samples", from: path.join(root, "output", "samples"), to: path.join(root, "cap2UI5", "srv", "app", "samples"), replace: false, clobber: true, prune: true, parseCheck: true, flatten: true },
   { name: "app", from: path.join(root, "output", "app"), to: path.join(root, "cap2UI5", "app", "z2ui5", "webapp"), replace: true, clobber: true, parseCheck: false },
 ];
+
+// Optional stream filter: `copy-into-cap.js <samples|abap2UI5|app>` copies only
+// that one tree; no argument copies all three (the full-sync behaviour).
+const only = process.argv[2];
+const names = COPIES.map((c) => c.name);
+if (only && !names.includes(only)) {
+  console.error(`usage: node tools/scripts/copy-into-cap.js [${names.join("|")}]`);
+  process.exit(1);
+}
 
 const skip = (p) => path.basename(p) === "transpile-report.json";
 
@@ -55,8 +65,8 @@ function parses(file) {
 }
 
 // When opts.flatten is set the source folder structure is discarded and every
-// file lands directly under the top-level `to` — used for srv/samples, whose
-// classes reference each other as siblings and are keyed by bare class name.
+// file lands directly under the top-level `to` — used for srv/app/samples,
+// whose classes reference each other as siblings and are keyed by bare class name.
 function copyTree(from, to, opts, stats) {
   for (const entry of fs.readdirSync(from, { withFileTypes: true })) {
     const src = path.join(from, entry.name);
@@ -155,6 +165,7 @@ function loadGate(files, stats) {
 let total = 0;
 let broken = 0;
 for (const { name, from, to, replace, clobber, prune, parseCheck, flatten } of COPIES) {
+  if (only && name !== only) continue;
   if (!fs.existsSync(from)) {
     console.log(`output/${name}: not found — skipped (run the transpile/prepare steps first)`);
     continue;

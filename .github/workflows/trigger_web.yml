@@ -1,23 +1,17 @@
-name: 7 trigger web
+name: trigger web
 
-# Step 7: kick the browser build in web-cap2UI5. Writes the sha of the
+# Kick the browser build in web-cap2UI5. Writes the sha of the
 # last commit touching cap2UI5/ into web-cap2UI5:UPSTREAM_HEAD and pushes
 # it via a deploy key registered on web-cap2UI5 with write access (private
 # half: secret ACTION_KEY_WEB here) — that push starts web-cap2UI5's
 # "build web" workflow, which mirrors this repo and redeploys the site.
-# Same pattern as abap2UI5's trigger_cap. Chained after step 6 in sync.yml
-# (the pipeline's sync commits use GITHUB_TOKEN and never fire push
-# events); the push trigger below covers hand-made changes to cap2UI5/ on
-# main. If cap2UI5/ is unchanged since the last trigger, nothing is pushed
-# and web-cap2UI5 does not rebuild.
+# Same pattern as abap2UI5's trigger_cap. Manual only (workflow_dispatch):
+# run it whenever a rebuild of the browser site should be kicked off — e.g.
+# after a nightly sync updated cap2UI5/. If cap2UI5/ is unchanged since the
+# last trigger, nothing is pushed and web-cap2UI5 does not rebuild.
 
 on:
   workflow_dispatch:
-  workflow_call:
-  push:
-    branches: [main]
-    paths:
-      - "cap2UI5/**"
 
 permissions:
   contents: read

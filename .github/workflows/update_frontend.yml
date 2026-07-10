@@ -1,0 +1,26 @@
+name: update_frontend
+
+# Nightly, independent frontend pipeline:
+#   app mirror -> app to CAP
+# Refreshes cap2UI5/app/z2ui5/webapp from the abap2UI5 static UI5 webapp.
+# Runs on its own schedule, independent of update_samples / update_backend.
+
+on:
+  schedule:
+    - cron: "0 5 * * *" # 05:00 UTC nightly
+  workflow_dispatch:
+  workflow_call: # chained by trigger_update
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update_frontend
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    uses: ./.github/workflows/app_mirror.yml
+  to_cap:
+    needs: mirror
+    uses: ./.github/workflows/app_to_cap.yml

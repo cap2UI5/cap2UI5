@@ -12,10 +12,14 @@
     "test:watch": "jest --config tools/jest.config.js --watch",
     "transpile": "node tools/scripts/abap2js.js",
     "mirror_abap2ui5": "node tools/scripts/mirror-input.js abap2UI5",
+    "mirror_app": "node tools/scripts/mirror-input.js app",
     "mirror_samples": "node tools/scripts/mirror-input.js samples",
     "transpile_abap2ui5": "node tools/scripts/transpile-tree.js abap2UI5",
     "transpile_samples": "node tools/scripts/transpile-tree.js samples",
     "prepare_app": "node tools/scripts/prepare-app.js",
+    "copy_abap2ui5": "node tools/scripts/copy-into-cap.js abap2UI5",
+    "copy_app": "node tools/scripts/copy-into-cap.js app",
+    "copy_samples": "node tools/scripts/copy-into-cap.js samples",
     "copy_into_cap": "node tools/scripts/copy-into-cap.js"
   },
   "devDependencies": {

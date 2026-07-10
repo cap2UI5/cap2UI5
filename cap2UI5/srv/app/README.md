@@ -1,14 +1,19 @@
 # cap2UI5 — Custom Apps
 
 Hand-written z2ui5 apps for this project live here. Unlike `srv/z2ui5/`
-(transpiled framework core, synced from upstream abap2UI5) and `srv/samples/`
-(fully owned by the transpiler pipeline), this folder is **not touched by the
-sync workflows** — it is the place to collect your own apps.
+(transpiled framework core, synced from upstream abap2UI5) and the
+`samples/` subfolder below it (fully owned by the transpiler pipeline), the
+files directly in this folder are **not touched by the sync workflows** — it
+is the place to collect your own apps.
 
 Currently included:
 
 - `z2ui5_cl_app_read_odata.js` — table over remote Northwind OData data,
   fetched via CAP's `cds.connect.to` (see the walkthrough in the project README)
+- `samples/` — the bundled abap2UI5 sample apps, mirrored and transpiled from
+  [abap2UI5/samples](https://github.com/abap2UI5/samples) on every sync run.
+  Fully owned by the pipeline (do not hand-edit); reached by the recursive
+  app-search walk of this folder.
 
 ## Adding a custom app
 
@@ -47,7 +52,7 @@ and via `client.nav_app_call()` from other apps.
 Resolution order (first hit wins):
 
 1. Framework built-ins (`srv/z2ui5/02/`, `srv/z2ui5/02/01/`)
-2. Custom apps (`srv/app/` — this folder)
-3. Bundled samples (`srv/samples/`)
-4. Runtime-registered dirs (`register_app_dir(...)`)
-5. `Z2UI5_APP_DIRS` env var (`PATH`-style colon-separated list)
+2. Custom apps (`srv/app/` — this folder), including the bundled samples in
+   its `samples/` subfolder (both covered by the recursive walk)
+3. Runtime-registered dirs (`register_app_dir(...)`)
+4. `Z2UI5_APP_DIRS` env var (`PATH`-style colon-separated list)

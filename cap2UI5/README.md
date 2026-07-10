@@ -1,4 +1,6 @@
-[![sync pipeline](https://github.com/cap2UI5/cap2UI5/actions/workflows/sync.yml/badge.svg?branch=main)](https://github.com/cap2UI5/cap2UI5/actions/workflows/sync.yml)
+[![update_samples](https://github.com/cap2UI5/cap2UI5/actions/workflows/update_samples.yml/badge.svg?branch=main)](https://github.com/cap2UI5/cap2UI5/actions/workflows/update_samples.yml)
+[![update_backend](https://github.com/cap2UI5/cap2UI5/actions/workflows/update_backend.yml/badge.svg?branch=main)](https://github.com/cap2UI5/cap2UI5/actions/workflows/update_backend.yml)
+[![update_frontend](https://github.com/cap2UI5/cap2UI5/actions/workflows/update_frontend.yml/badge.svg?branch=main)](https://github.com/cap2UI5/cap2UI5/actions/workflows/update_frontend.yml)
 
 # 🚀 cap2UI5
 
@@ -65,8 +67,8 @@ exports (`module.exports`). Put your own apps into `srv/app/` (scanned
 automatically when resolving `?app_start=<class>`, see the
 [custom apps README](srv/app/README.md)) or into any folder registered via
 `Z2UI5_APP_DIRS` / `require("abap2UI5/register-apps")(dir)` — see the
-[discovery API](srv/samples/README.md#discovery-api). Don't use
-`srv/samples/` or `srv/z2ui5/`, both are owned by the sync pipeline.
+[discovery API](srv/app/samples/README.md#discovery-api). Don't use
+`srv/app/samples/` or `srv/z2ui5/`, both are owned by the sync pipeline.
 
 #### 1. Hello World
 ###### App

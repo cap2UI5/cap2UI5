@@ -1,0 +1,29 @@
+name: update_backend
+
+# Nightly, independent backend pipeline:
+#   abap2UI5 mirror -> abap2UI5 transpile -> abap2UI5 to CAP
+# Refreshes cap2UI5/srv/z2ui5 from the abap2UI5 framework sources.
+# Runs on its own schedule, independent of update_samples / update_frontend.
+
+on:
+  schedule:
+    - cron: "0 4 * * *" # 04:00 UTC nightly
+  workflow_dispatch:
+  workflow_call: # chained by trigger_update
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update_backend
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    uses: ./.github/workflows/abap2ui5_mirror.yml
+  transpile:
+    needs: mirror
+    uses: ./.github/workflows/abap2ui5_transpile.yml
+  to_cap:
+    needs: transpile
+    uses: ./.github/workflows/abap2ui5_to_cap.yml

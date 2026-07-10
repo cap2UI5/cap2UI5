@@ -2,7 +2,7 @@
 /**
  * abap2js — transpiles abap2UI5 app classes (z2ui5_if_app implementations,
  * popup classes, demo apps) from ABAP to the idiomatic JavaScript style used
- * in srv/z2ui5 and srv/samples.
+ * in srv/z2ui5 and srv/app/samples.
  *
  * Parsing is done by @abaplint/core (larshp's ABAP parser): it provides exact
  * statement boundaries, statement classification and the token stream. This
