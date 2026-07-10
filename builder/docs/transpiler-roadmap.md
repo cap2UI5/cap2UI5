@@ -71,20 +71,37 @@ table `z2ui5_t_91`, ~8 operations across ~8 classes.
 
 Step-1 (mechanical, shrink TODO noise + enable base pruning), safest first:
 
-- [x] Drop method-local `TYPES` (−54 TODOs). *(commit: abap2js: drop TYPES)*
-- [ ] `ns`/`co`/… as identifiers mis-read as string-comparison operators
-      (119× in `xml_view`, 7× in `util_xml`) — disambiguate operator vs name.
+- [x] Drop method-local `TYPES` (−54 TODOs).
+- [x] Word operators (`eq/lt/cs/ns/…`) used as identifiers — read as operators
+      only in operator position (−126 TODOs, fixes the `lt → <` / `ns` breakage).
 - [ ] `CALL METHOD super->constructor` → `super(...)` (exception classes).
 - [ ] More `sy-<field>` mappings where a JS equivalent exists.
 - [ ] Statement forms `CONDENSE` / `TRANSLATE` / `REPLACE` / `MOVE-CORRESPONDING`.
 
 Step-2 (porter):
 
-- [ ] Marker format + `scripts/port-cap.js` skeleton (runs after transpile,
-      before assemble).
-- [ ] DB schema → CDS `z2ui5_t_91` store shim (pilot: `z2ui5_cl_util_db`).
+- [x] Neutral IR + swappable backend (chosen over a text-rewrite script):
+      abap2js emits `z2ui5_port.db({…})`, `z2ui5_port` is the backend.
+- [x] DB pilot: SELECT/MODIFY/DELETE/COMMIT → `z2ui5_port.db()` +
+      synchronous in-memory `z2ui5_port` store (−~24 TODOs, end-to-end tested).
+- [ ] CDS-backed `z2ui5_port` store (async — see ripple note) via `set_store`.
 - [ ] RTTI schema → `z2ui5_cl_srt_*`.
 - [ ] sxml schema → XML shim.
+
+TODO count across the tree: **973 → 769** so far.
+
+## Finding: "clean transpile" ≠ "safe to prune"
+
+Removing all 64 base classes that now transpile with **zero TODOs** and letting
+the transpile fill in produced **17 load-gate failures** (transpiled popups
+`extends` an unresolved superclass) and **29 test failures** even among the
+loadable ones — foundational glue classes (`z2ui5_if_app`, `z2ui5_if_client`,
+`z2ui5_cl_srt_*`, `util_log`, …) hand-ported behaviour the transpiler does not
+yet reproduce. So base pruning is **not** gated on TODO count; it is gated on
+per-class behavioural equivalence, proven by the jest + smoke suite. Prune a
+class only after its transpiled form load-gates AND keeps the suite green;
+expect most to need a targeted transpiler fix first (superclass/interface glue,
+RTTI, asset-string fidelity).
 
 ## Verification discipline (every change)
 
