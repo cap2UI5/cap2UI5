@@ -1,7 +1,7 @@
 name: app mirror
 
 # Mirror the abap2UI5 static UI5 webapp (app/webapp) into
-# input/abap2UI5/app/webapp. Step 1 of the update_frontend pipeline;
+# tools/run/input/app/webapp. Step 1 of the update_frontend pipeline;
 # also runnable standalone.
 
 on:
@@ -26,11 +26,11 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add input/abap2UI5/app/webapp input/abap2UI5/UPSTREAM_COMMIT
+          git add tools/run/input/app/webapp tools/run/input/app/UPSTREAM_COMMIT
           if git diff --cached --quiet; then
             echo "nothing to commit"
           else
-            git commit -m "mirror: update input/abap2UI5/app/webapp ($(cut -c1-12 input/abap2UI5/UPSTREAM_COMMIT))"
+            git commit -m "mirror: update tools/run/input/app/webapp ($(cut -c1-12 tools/run/input/app/UPSTREAM_COMMIT))"
             git pull --rebase origin "${{ github.ref_name }}"
             git push origin "HEAD:${{ github.ref_name }}"
           fi
