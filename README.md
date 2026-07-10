@@ -14,7 +14,7 @@ frontend project needed.
 > Everything in this project is generated automatically — by AI (Claude)
 > and by a sync pipeline that mirrors and transpiles the upstream
 > [abap2UI5](https://github.com/abap2UI5/abap2UI5) sources. Review and test
-> before relying on it. Details: [docs/development.md](docs/development.md).
+> before relying on it. Details: [tools/development.md](tools/development.md).
 
 ## Features
 
@@ -205,7 +205,7 @@ The codebase is not written by hand: an automated pipeline mirrors the
 upstream [abap2UI5](https://github.com/abap2UI5/abap2UI5) ABAP sources,
 transpiles them to JavaScript and copies the result into the CAP project,
 gated by the jest suite. How the pipeline, the transpiler and the dev
-tooling work is documented in [docs/development.md](docs/development.md).
+tooling work is documented in [tools/development.md](tools/development.md).
 
 ## Workflows
 
@@ -214,7 +214,7 @@ tooling work is documented in [docs/development.md](docs/development.md).
 [![test](https://github.com/cap2UI5/cap2UI5/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/cap2UI5/cap2UI5/actions/workflows/test.yml)
 
 **Nightly sync pipelines** — each runs on its own schedule (see
-[Sync pipelines](docs/development.md#sync-pipelines)):
+[Sync pipelines](tools/development.md#sync-pipelines)):
 
 [![update_samples](https://github.com/cap2UI5/cap2UI5/actions/workflows/update_samples.yml/badge.svg?branch=main)](https://github.com/cap2UI5/cap2UI5/actions/workflows/update_samples.yml)
 [![update_backend](https://github.com/cap2UI5/cap2UI5/actions/workflows/update_backend.yml/badge.svg?branch=main)](https://github.com/cap2UI5/cap2UI5/actions/workflows/update_backend.yml)
