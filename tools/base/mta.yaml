@@ -1,0 +1,125 @@
+_schema-version: 3.3.0
+ID: abap2UI5
+description: A simple CAP project.
+version: 1.0.0
+modules:
+- name: abap2UI5-srv
+  type: nodejs
+  path: gen/srv
+  requires:
+  - name: abap2UI5-destination
+  - name: abap2UI5-auth
+  provides:
+  - name: srv-api
+    properties:
+      srv-url: ${default-url}
+  parameters:
+    buildpack: nodejs_buildpack
+    readiness-health-check-http-endpoint: /health
+    readiness-health-check-type: http
+  build-parameters:
+    builder: npm
+- name: abap2UI5-app-deployer
+  type: com.sap.application.content
+  path: .
+  requires:
+  - name: abap2UI5-html5-repo-host
+    parameters:
+      content-target: true
+  build-parameters:
+    build-result: resources
+    requires:
+    - artifacts:
+      - abap2UI5.zip
+      name: abap2UI5
+      target-path: resources/
+- name: abap2UI5
+  type: html5
+  path: app/z2ui5
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+- name: abap2UI5-destinations
+  type: com.sap.application.content
+  requires:
+  - name: abap2UI5-auth
+    parameters:
+      service-key:
+        name: abap2UI5-auth-key
+  - name: abap2UI5-html5-repo-host
+    parameters:
+      service-key:
+        name: abap2UI5-html5-repo-host-key
+  - name: abap2UI5-destination
+    parameters:
+      content-target: true
+  parameters:
+    content:
+      instance:
+        destinations:
+        - HTML5.DynamicDestination: true
+          Name: abap2UI5-html5-repository
+          ServiceInstanceName: abap2UI5-html5-repo-host
+          ServiceKeyName: abap2UI5-html5-repo-host-key
+          sap.cloud.service: abap2UI5.service
+        - Authentication: OAuth2UserTokenExchange
+          Name: abap2UI5-auth
+          ServiceInstanceName: abap2UI5-auth
+          ServiceKeyName: abap2UI5-auth-key
+          sap.cloud.service: abap2UI5.service
+        existing_destinations_policy: update
+  build-parameters:
+    no-source: true
+resources:
+- name: abap2UI5-destination
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      HTML5Runtime_enabled: true
+      init_data:
+        instance:
+          destinations:
+          - Authentication: NoAuthentication
+            HTML5.DynamicDestination: true
+            HTML5.ForwardAuthToken: true
+            Name: abap2UI5-srv
+            ProxyType: Internet
+            Type: HTTP
+            URL: ~{srv-api/srv-url}
+          - Authentication: NoAuthentication
+            Name: ui5
+            ProxyType: Internet
+            Type: HTTP
+            URL: https://ui5.sap.com
+          existing_destinations_policy: update
+    service: destination
+    service-plan: lite
+  requires:
+  - name: srv-api
+- name: abap2UI5-html5-repo-host
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-plan: app-host
+- name: abap2UI5-auth
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      tenant-mode: dedicated
+      xsappname: abap2UI5-${org}-${space}
+    path: ./xs-security.json
+    service: xsuaa
+    service-plan: application
+parameters:
+  deploy_mode: html5-repo
+  enable-parallel-deployments: true
+build-parameters:
+  before-all:
+  - builder: custom
+    commands:
+    - npm ci
+    - npx cds build --production

@@ -20,7 +20,8 @@
     "copy_abap2ui5": "node tools/scripts/copy-into-cap.js abap2UI5",
     "copy_app": "node tools/scripts/copy-into-cap.js app",
     "copy_samples": "node tools/scripts/copy-into-cap.js samples",
-    "copy_into_cap": "node tools/scripts/copy-into-cap.js"
+    "copy_into_cap": "node tools/scripts/copy-into-cap.js",
+    "snapshot_base": "node tools/scripts/snapshot-base.js"
   },
   "devDependencies": {
     "@abaplint/core": "^2.119.56",

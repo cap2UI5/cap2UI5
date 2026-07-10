@@ -46,7 +46,24 @@ Everything that is not deployed with the CAP project lives under
 | `npm run transpile_abap2ui5` / `transpile_samples` | transpile `tools/run/input/*/src` → `tools/run/output/` |
 | `npm run prepare_app` | `tools/run/input/app/webapp` → `tools/run/output/app` (+ patches) |
 | `npm run copy_abap2ui5` / `copy_samples` / `copy_app` | copy one `tools/run/output/` tree → cap2UI5 project (fill-in / overwrite / replace); `copy_into_cap` (no arg) does all three |
+| `npm run snapshot_base` | refresh [`tools/base/`](../tools/base/) — a copy of the hand-maintained cap2UI5 base project with the generated content stripped |
 | `tools/scripts/`, `tools/test/`, `tools/jest.config.js` | sources of the above |
+
+### Base project snapshot
+
+[`tools/base/`](../tools/base/) is a copy of the cap2UI5 **base project** — the
+hand-maintained skeleton the sync pipeline fills the generated files into. It
+makes the foundation everything builds on visible in one place. It is a
+snapshot for reference only (nothing reads from it); refresh it with
+`npm run snapshot_base` whenever the base changes.
+
+`snapshot-base.js` takes `git ls-files cap2UI5` (so build artifacts and
+`node_modules` are excluded) and leaves out the generated content:
+`app/z2ui5/webapp/` and `srv/app/samples/` (fully generated) plus the
+`srv/z2ui5/` files that are byte-identical to the freshly transpiled
+`tools/run/output/abap2UI5/` (the pure transpiled fill-ins). The hand-maintained
+CAP adaptations under `srv/z2ui5/` — which differ from the fresh transpile — are
+kept, so `npm run transpile_abap2ui5` must have run first.
 
 ```
 npm run transpile -- path/to/z2ui5_cl_my_app.clas.abap --stdout
