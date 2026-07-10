@@ -83,7 +83,7 @@ nightly schedule.
 |---|---|---|
 | **update_samples** (03:00) | samples mirror → samples transpile → samples to CAP<br>(`mirror_samples`, `transpile_samples`, `copy_samples`) | `cap2UI5/srv/app/samples` from the abap2UI5/samples **whole cloud branch** |
 | **update_backend** (04:00) | abap2UI5 mirror → abap2UI5 transpile → abap2UI5 to CAP<br>(`mirror_abap2ui5`, `transpile_abap2ui5`, `copy_abap2ui5`) | `cap2UI5/srv/z2ui5` from the abap2UI5 framework `src/` |
-| **update_frontend** (05:00) | app mirror → app to CAP<br>(`mirror_app`, `prepare_app` + `copy_app`) | `cap2UI5/app/z2ui5/webapp` from the abap2UI5 `app/webapp` |
+| **update_frontend** (05:00) | app mirror → app prepare → app to CAP<br>(`mirror_app`, `prepare_app`, `copy_app`) | `cap2UI5/app/z2ui5/webapp` from the abap2UI5 `app/webapp` |
 
 Per-tree copy policies (`copy-into-cap.js <stream>`): the backend tree
 `srv/z2ui5` is the hand-maintained CAP architecture adaptation, so transpiled
