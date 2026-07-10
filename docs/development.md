@@ -73,6 +73,11 @@ own nightly `schedule` and carries its own `concurrency` group, so the three
 never block one another. Every step commits with `GITHUB_TOKEN` and does
 `git pull --rebase` before pushing, so concurrent commits to `main` are safe.
 
+`trigger_update` (manual, `workflow_dispatch`) runs all three pipelines
+back-to-back in order — update_samples → update_backend → update_frontend —
+for a one-click full refresh; each pipeline also stays available on its own
+nightly schedule.
+
 | Pipeline (nightly) | Steps → npm scripts | What it refreshes |
 |---|---|---|
 | **update_samples** (03:00) | samples mirror → samples transpile → samples to CAP<br>(`mirror_samples`, `transpile_samples`, `copy_samples`) | `cap2UI5/srv/app/samples` from the abap2UI5/samples **whole cloud branch** |
@@ -97,12 +102,11 @@ touching `cap2UI5/` to
 [web-cap2UI5](https://github.com/cap2UI5/web-cap2UI5) (`UPSTREAM_HEAD`) via a
 deploy key registered there with write access (private half: secret
 `ACTION_KEY_WEB` here) — that push starts web-cap2UI5's **build web**
-workflow, which rebuilds and redeploys the browser site. It runs on direct
-pushes to `cap2UI5/**` on `main` and via `workflow_dispatch`. Note that the
-`update_*` pipelines commit with `GITHUB_TOKEN`, which does **not** fire
-`push` events, so a nightly sync does not auto-trigger the web rebuild — run
-`trigger_web` manually, or wire it into the `update_*` orchestrators, when a
-bot-driven sync should redeploy the site.
+workflow, which rebuilds and redeploys the browser site. It is **manual only**
+(`workflow_dispatch`): run it whenever a rebuild should be kicked off — e.g.
+after a nightly sync (or a `trigger_update` run) updated `cap2UI5/`. If
+`cap2UI5/` is unchanged since the last trigger, nothing is pushed and
+web-cap2UI5 does not rebuild.
 
 ## Frontend
 
