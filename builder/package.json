@@ -17,11 +17,9 @@
     "transpile_abap2ui5": "node scripts/transpile-tree.js abap2UI5",
     "transpile_samples": "node scripts/transpile-tree.js samples",
     "prepare_app": "node scripts/prepare-app.js",
-    "copy_abap2ui5": "node scripts/copy-into-cap.js abap2UI5",
-    "copy_app": "node scripts/copy-into-cap.js app",
-    "copy_samples": "node scripts/copy-into-cap.js samples",
-    "copy_into_cap": "node scripts/copy-into-cap.js",
-    "snapshot_base": "node scripts/snapshot-base.js"
+    "assemble": "node scripts/assemble-cap.js",
+    "publish": "node scripts/publish-cap.js",
+    "build_cap": "node scripts/assemble-cap.js && node scripts/publish-cap.js"
   },
   "devDependencies": {
     "@abaplint/core": "^2.119.56",

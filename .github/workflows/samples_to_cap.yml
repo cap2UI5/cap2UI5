@@ -1,7 +1,8 @@
 name: samples to CAP
 
-# Copy builder/run/output/samples into cap2UI5/srv/app/samples (flattened, overwrite,
-# upstream deletions pruned). Jest gates the commit. Step 3 of update_samples.
+# Rebuild the CAP project from builder/base + the generated trees
+# (assemble → publish) after the samples transpile refreshed run/output/samples.
+# Jest gates the commit. Step 3 of update_samples.
 
 on:
   workflow_dispatch:
@@ -28,7 +29,7 @@ jobs:
         working-directory: builder
       - run: npm ci
         working-directory: cap2UI5
-      - run: npm run copy_samples
+      - run: npm run build_cap
         working-directory: builder
       - run: npm test
         working-directory: builder
@@ -36,11 +37,11 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add cap2UI5/srv/app/samples
+          git add cap2UI5
           if git diff --cached --quiet; then
             echo "nothing to commit"
           else
-            git commit -m "sync: copy samples into cap2UI5/srv/app/samples"
+            git commit -m "build: regenerate cap2UI5 (samples sync)"
             git pull --rebase origin "${{ github.ref_name }}"
             git push origin "HEAD:${{ github.ref_name }}"
           fi

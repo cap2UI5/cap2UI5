@@ -2,8 +2,8 @@
 /**
  * transpile-tree — transpiles ABAP classes from builder/run/input/<name>/src into
  * builder/run/output/<name>/ (folder structure mirrored 1:1) and writes a
- * transpile-report.json with the TODO count per class. The copy step
- * (copy-into-cap.js) uses that report as its safety gate.
+ * transpile-report.json with the TODO count per class. The assemble step
+ * (assemble-cap.js) uses that report as its safety gate.
  *
  *   node builder/scripts/transpile-tree.js abap2UI5   → every class under src/
  *   node builder/scripts/transpile-tree.js samples    → every class under src/

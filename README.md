@@ -24,7 +24,15 @@ matches what you want to do:
 | Project | What it is | Start here |
 |---|---|---|
 | [**`cap2UI5/`**](cap2UI5/) | The finished, deployable CAP app — install it, run `cds watch`, and write your own UI5 apps as JavaScript classes. **This is what you want if you just want to use cap2UI5.** | [cap2UI5/README.md](cap2UI5/README.md) |
-| [**`builder/`**](builder/) | The build machinery that generates `cap2UI5/`: the ABAP→JS transpiler, the sync scripts that mirror upstream abap2UI5, and the jest suite. **This is what you want to understand how the code is produced.** | [builder/README.md](builder/README.md) |
+| [**`builder/`**](builder/) | The build machinery **and hand-written source** that generates `cap2UI5/`: the ABAP→JS transpiler, the sync scripts that mirror upstream abap2UI5, the hand-maintained source in `builder/base/`, and the jest suite. **This is what you want to change how the code is produced.** | [builder/README.md](builder/README.md) |
+
+> [!NOTE]
+> **`cap2UI5/` is a generated build artifact in this repository** — every build
+> wipes and rewrites it from `builder/base/` + the transpiled sources. If you
+> are contributing here, edit the source in `builder/base/`, not `cap2UI5/`, and
+> re-run `npm run build_cap` in `builder/`. (Consumers who copy `cap2UI5/` out
+> and use it standalone can of course edit it freely — see
+> [builder/README.md](builder/README.md).)
 
 ### Use it
 
@@ -41,10 +49,11 @@ the samples without installing anything in the
 
 ### How it's built
 
-The codebase is not written by hand: the [builder](builder/) mirrors the
-upstream abap2UI5 ABAP sources, transpiles them to JavaScript and copies the
-result into the CAP project, gated by the jest suite. The full pipeline —
-transpiler, sync scripts and GitHub Actions — is documented in
+The [builder](builder/) mirrors the upstream abap2UI5 ABAP sources, transpiles
+them to JavaScript, **assembles** the complete app by overlaying the generated
+trees on the hand-written source in `builder/base/`, and **publishes** it 1:1
+into `cap2UI5/` — gated by the jest suite. The full pipeline — transpiler, sync
+scripts and GitHub Actions — is documented in
 [builder/README.md](builder/README.md).
 
 ## License

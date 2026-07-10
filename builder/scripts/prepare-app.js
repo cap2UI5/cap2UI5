@@ -2,8 +2,8 @@
 /**
  * prepare-app — step 5: builds the ready-to-serve frontend into builder/run/output/app.
  * Takes builder/run/input/app/webapp 1:1 and applies the two cap2UI5-specific
- * patches (see patch-frontend.js). The copy step (copy-into-cap.js) then
- * just copies builder/run/output/app into the CAP project like the other output folders.
+ * patches (see patch-frontend.js). The assemble step (assemble-cap.js) then
+ * overlays builder/run/output/app onto the base skeleton like the other output folders.
  *
  * Run `npm run mirror_app` first.
  */

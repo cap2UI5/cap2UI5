@@ -1,8 +1,8 @@
 name: abap2UI5 to CAP
 
-# Copy builder/run/output/abap2UI5 into cap2UI5/srv/z2ui5 (fill-in only: hand-maintained
-# CAP-adapted files are never overwritten). Jest gates the commit. Step 3 of
-# the update_backend pipeline.
+# Rebuild the CAP project from builder/base + the generated trees
+# (assemble → publish) after the backend transpile refreshed run/output/abap2UI5.
+# Jest gates the commit. Step 3 of the update_backend pipeline.
 
 on:
   workflow_dispatch:
@@ -29,7 +29,7 @@ jobs:
         working-directory: builder
       - run: npm ci
         working-directory: cap2UI5
-      - run: npm run copy_abap2ui5
+      - run: npm run build_cap
         working-directory: builder
       - run: npm test
         working-directory: builder
@@ -37,11 +37,11 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add cap2UI5/srv/z2ui5
+          git add cap2UI5
           if git diff --cached --quiet; then
             echo "nothing to commit"
           else
-            git commit -m "sync: copy abap2UI5 into cap2UI5/srv/z2ui5"
+            git commit -m "build: regenerate cap2UI5 (backend sync)"
             git pull --rebase origin "${{ github.ref_name }}"
             git push origin "HEAD:${{ github.ref_name }}"
           fi

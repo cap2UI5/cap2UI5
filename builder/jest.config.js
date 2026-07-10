@@ -22,9 +22,10 @@ module.exports = {
     "^abap2UI5/register-apps$": "<rootDir>/cap2UI5/srv/z2ui5/register-apps.js",
     "^abap2UI5$": "<rootDir>/cap2UI5/srv/z2ui5/00/03/z2ui5_cl_util.js",
   },
-  testPathIgnorePatterns: ["/node_modules/", "/cap2UI5/app/", "/builder/base/"],
-  // builder/base/ is a read-only snapshot of the cap2UI5 base project (see
-  // snapshot-base.js). Keep it out of module resolution so its copied
-  // package.json / sources never shadow the real cap2UI5 ones.
-  modulePathIgnorePatterns: ["/builder/base/"],
+  testPathIgnorePatterns: ["/node_modules/", "/cap2UI5/app/", "/builder/base/", "/builder/run/output/"],
+  // builder/base/ is the hand-maintained SOURCE of the CAP project and
+  // builder/run/output/cap2UI5 is the assembled copy of it — keep both out of
+  // module resolution so their package.json / sources never shadow the real
+  // cap2UI5 ones the tests load.
+  modulePathIgnorePatterns: ["/builder/base/", "/builder/run/output/cap2UI5/"],
 };
