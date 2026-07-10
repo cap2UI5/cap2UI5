@@ -127,11 +127,21 @@ was therefore reverted, not committed.
 - **Interfaces / glue** (`if_*`): keep — needs a class-from-interface strategy.
 - **Frontend assets** (`01/03/*_css/_js/…`): keep — disk-backed CAP adaptation,
   not derivable from the ABAP inline string. Different problem than transpiling.
-- **Popups** (`z2ui5_cl_pop_*`): teach the emitter to emit the
-  `PREFERRED PARAMETER` wiring, and audit `abap_copy` on live objects; then they
-  become faithful and prunable.
+- **Popups** (`z2ui5_cl_pop_*`): ✅ done — the emitter now derives and emits the
+  `PREFERRED PARAMETER` wiring (matches the hand-authored maps 18/19), and
+  `abap_copy` was shown safe on live objects. **14 popups pruned, base 107 → 93**
+  (`get_range` map-mismatch + the TODO-carrying popups stay hand-ported).
 - **RTTI** (`srt_*`) / **util_log / util_json_fltr**: keep until behavioural
   equivalence is shown per class.
+
+### Method: safe pruning, proven per class
+
+The popup prune is the template for the rest: (1) find the adaptation the
+hand-port carries that the transpile drops; (2) teach the emitter to reproduce
+it; (3) prove the derived form matches the hand-authored one (here: the
+preferred-map equality check, 18/19); (4) prune only the proven-faithful
+classes; (5) gate on the full jest + smoke suite AND a byte-diff review showing
+the only residual differences are known-safe (here: `abap_copy` wrapping).
 
 ## Verification discipline (every change)
 
