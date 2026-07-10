@@ -1,11 +1,7 @@
-name: 6 copy into cap
+name: samples transpile
 
-# Step 6: copy the output/ folders into the CAP project —
-# output/abap2UI5 -> cap2UI5/srv/z2ui5 (fill-in only: hand-maintained files
-# win), output/samples -> cap2UI5/srv/app/samples (overwrite),
-# output/app -> cap2UI5/app/z2ui5/webapp (replace). Files that do not parse
-# are skipped and reported. Jest gates the commit: only a green suite is
-# pushed.
+# Transpile all sample classes from input/samples/src into output/samples
+# (+ transpile report). Step 2 of the update_samples pipeline.
 
 on:
   workflow_dispatch:
@@ -27,17 +23,16 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm ci --prefix cap2UI5
-      - run: npm run copy_into_cap
-      - run: npm test
+      - run: npm run transpile_samples
       - name: commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add cap2UI5/srv cap2UI5/app
+          git add output/samples
           if git diff --cached --quiet; then
             echo "nothing to commit"
           else
-            git commit -m "sync: copy output/ into cap2UI5"
+            git commit -m "transpile: update output/samples ($(cut -c1-12 input/samples/UPSTREAM_COMMIT))"
             git pull --rebase origin "${{ github.ref_name }}"
             git push origin "HEAD:${{ github.ref_name }}"
           fi

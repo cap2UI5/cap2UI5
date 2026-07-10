@@ -44,6 +44,15 @@ const COPIES = [
   { name: "app", from: path.join(root, "output", "app"), to: path.join(root, "cap2UI5", "app", "z2ui5", "webapp"), replace: true, clobber: true, parseCheck: false },
 ];
 
+// Optional stream filter: `copy-into-cap.js <samples|abap2UI5|app>` copies only
+// that one tree; no argument copies all three (the full-sync behaviour).
+const only = process.argv[2];
+const names = COPIES.map((c) => c.name);
+if (only && !names.includes(only)) {
+  console.error(`usage: node tools/scripts/copy-into-cap.js [${names.join("|")}]`);
+  process.exit(1);
+}
+
 const skip = (p) => path.basename(p) === "transpile-report.json";
 
 function parses(file) {
@@ -156,6 +165,7 @@ function loadGate(files, stats) {
 let total = 0;
 let broken = 0;
 for (const { name, from, to, replace, clobber, prune, parseCheck, flatten } of COPIES) {
+  if (only && name !== only) continue;
   if (!fs.existsSync(from)) {
     console.log(`output/${name}: not found — skipped (run the transpile/prepare steps first)`);
     continue;

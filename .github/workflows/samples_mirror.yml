@@ -1,7 +1,7 @@
-name: 3 transpile abap2UI5
+name: samples mirror
 
-# Step 3: transpile every abap2UI5 class (whole src/ tree) from
-# input/abap2UI5 into output/abap2UI5 + transpile report.
+# Mirror the abap2UI5/samples cloud branch (whole branch, 1:1) into input/samples/.
+# Step 1 of the update_samples pipeline; also runnable standalone.
 
 on:
   workflow_dispatch:
@@ -20,19 +20,16 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
-          cache: npm
-      - run: npm ci
-      - run: npm ci --prefix cap2UI5
-      - run: npm run transpile_abap2ui5
+      - run: npm run mirror_samples
       - name: commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add output/abap2UI5
+          git add input/samples
           if git diff --cached --quiet; then
             echo "nothing to commit"
           else
-            git commit -m "transpile: update output/abap2UI5 ($(cut -c1-12 input/abap2UI5/UPSTREAM_COMMIT))"
+            git commit -m "mirror: update input/samples ($(cut -c1-12 input/samples/UPSTREAM_COMMIT))"
             git pull --rebase origin "${{ github.ref_name }}"
             git push origin "HEAD:${{ github.ref_name }}"
           fi

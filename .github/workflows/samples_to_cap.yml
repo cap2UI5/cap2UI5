@@ -1,7 +1,7 @@
-name: 5 prepare app
+name: samples to CAP
 
-# Step 5: build the ready-to-serve frontend into output/app —
-# input/abap2UI5/app/webapp 1:1 plus the two cap2UI5 patches.
+# Copy output/samples into cap2UI5/srv/app/samples (flattened, overwrite,
+# upstream deletions pruned). Jest gates the commit. Step 3 of update_samples.
 
 on:
   workflow_dispatch:
@@ -20,16 +20,20 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
-      - run: npm run prepare_app
+          cache: npm
+      - run: npm ci
+      - run: npm ci --prefix cap2UI5
+      - run: npm run copy_samples
+      - run: npm test
       - name: commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add output/app
+          git add cap2UI5/srv/app/samples
           if git diff --cached --quiet; then
             echo "nothing to commit"
           else
-            git commit -m "prepare: update output/app ($(cut -c1-12 input/abap2UI5/UPSTREAM_COMMIT))"
+            git commit -m "sync: copy samples into cap2UI5/srv/app/samples"
             git pull --rebase origin "${{ github.ref_name }}"
             git push origin "HEAD:${{ github.ref_name }}"
           fi
