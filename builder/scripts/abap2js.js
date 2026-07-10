@@ -1461,7 +1461,44 @@ function joinAtoms(atoms, ctx) {
         out.push(a.str);
     }
   }
-  return out.join(" ").replace(/\s+/g, " ").trim();
+  return collapseOutsideLiterals(out.join(" ")).trim();
+}
+
+/**
+ * Collapse runs of whitespace to a single space — but ONLY in code position,
+ * never inside string/template literals. A blind `replace(/\s+/g, " ")` would
+ * turn a newline (`|\n|`) or run of spaces embedded in an asset string into a
+ * single space, corrupting multi-line content (e.g. inline JS/CSS whose `//`
+ * comments would then swallow the rest of the file).
+ */
+function collapseOutsideLiterals(s) {
+  let out = "";
+  const stack = [{ t: "code" }];
+  let i = 0;
+  while (i < s.length) {
+    const c = s[i];
+    const top = stack[stack.length - 1];
+    if (top.t === "tmpl") {
+      if (c === "\\") { out += c + (s[i + 1] ?? ""); i += 2; continue; }
+      if (c === "`") { stack.pop(); out += c; i++; continue; }
+      if (c === "$" && s[i + 1] === "{") { stack.push({ t: "subst" }); out += "${"; i += 2; continue; }
+      out += c; i++; continue; // literal char (incl. newlines/spaces) kept verbatim
+    }
+    // code / subst position
+    if (c === "`") { stack.push({ t: "tmpl" }); out += c; i++; continue; }
+    if (c === "'" || c === '"') {
+      const q = c; out += c; i++;
+      while (i < s.length && s[i] !== q) {
+        if (s[i] === "\\") { out += s[i] + (s[i + 1] ?? ""); i += 2; } else { out += s[i]; i++; }
+      }
+      if (i < s.length) { out += s[i]; i++; }
+      continue;
+    }
+    if (top.t === "subst" && c === "}") { stack.pop(); out += c; i++; continue; }
+    if (/\s/.test(c)) { let j = i; while (j < s.length && /\s/.test(s[j])) j++; out += " "; i = j; continue; }
+    out += c; i++;
+  }
+  return out;
 }
 
 const COMPARE_WORDS = new Set(["CS", "CP", "NS", "NP", "CO", "CN", "CA", "NA", "IN", "BETWEEN"]);

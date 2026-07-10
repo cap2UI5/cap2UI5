@@ -58,13 +58,38 @@ class z2ui5_cl_http_handler {
     } else {
       lv_style_css = z2ui5_cl_util.abap_copy(ls_config.styles_css);
     }
-    result.body = `<!DOCTYPE html>` + ` ` + `<html lang="en">` + ` ` + `<head>` + ` ` + `${ls_config.content_security_policy} ` + ` <meta charset="UTF-8">` + ` ` + ` <meta name="viewport" content="width=device-width, initial-scale=1.0">` + ` ` + ` <meta http-equiv="X-UA-Compatible" content="IE=edge">` + ` ` + `<title>${ls_config.title}</title> ` + ` <style> html, body, body > div, #container, #container-uiarea { ` + ` height: 100%; ` + ` }</style> ` + `<script>` + ` ` + ` function onInitComponent(){` + ` ` + ` sap.ui.require.preload({` + ` ` + z2ui5_cl_app_preload.get({ styles_css: lv_style_css, custom_js: ls_config.custom_js }) + ` });` + ` ` + ` sap.ui.require(["sap/ui/core/ComponentSupport"], function(ComponentSupport){` + ` ` + ` window.z2ui5 = { checkLocal : true }; ComponentSupport.run();` + ` ` + ` });` + ` ` + ` }` + ` ` + `</script>` + ` ` + `<script id="sap-ui-bootstrap" data-sap-ui-resourceroots='{ "z2ui5": "./" }' data-sap-ui-oninit="onInitComponent" ` + ` ` + `data-sap-ui-compatVersion="edge" data-sap-ui-async="true" data-sap-ui-frameOptions="trusted" data-sap-ui-bindingSyntax="complex"` + ` ` + `data-sap-ui-theme="${ls_config.theme}" src="${ls_config.src}"`;
+    result.body = `<!DOCTYPE html>` + `
+` + `<html lang="en">` + `
+` + `<head>` + `
+` + `${ls_config.content_security_policy}
+` + `    <meta charset="UTF-8">` + `
+` + `    <meta name="viewport" content="width=device-width, initial-scale=1.0">` + `
+` + `    <meta http-equiv="X-UA-Compatible" content="IE=edge">` + `
+` + `<title>${ls_config.title}</title>
+` + ` <style>        html, body, body > div, #container, #container-uiarea {
+` + `            height: 100%;
+` + `        }</style> 
+` + `<script>` + `
+` + `  function onInitComponent(){` + `
+` + `    sap.ui.require.preload({` + `
+` + z2ui5_cl_app_preload.get({ styles_css: lv_style_css, custom_js: ls_config.custom_js }) + `    });` + `
+` + `    sap.ui.require(["sap/ui/core/ComponentSupport"], function(ComponentSupport){` + `
+` + `     window.z2ui5 = { checkLocal : true }; ComponentSupport.run();` + `
+` + `    });` + `
+` + `  }` + `
+` + `</script>` + `
+` + `<script id="sap-ui-bootstrap" data-sap-ui-resourceroots='{ "z2ui5": "./" }' data-sap-ui-oninit="onInitComponent" ` + `
+` + `data-sap-ui-compatVersion="edge" data-sap-ui-async="true" data-sap-ui-frameOptions="trusted" data-sap-ui-bindingSyntax="complex"` + `
+` + `data-sap-ui-theme="${ls_config.theme}" src="${ls_config.src}"`;
     sy_tabix = 0;
     for (const lr_config of ls_config.t_add_config) {
       sy_tabix++;
       result.body = `${result.body} ${lr_config.n}='${lr_config.v}'`;
     }
-    result.body = result.body + ` ></script></head>` + ` ` + `<body class="sapUiBody sapUiSizeCompact" id="content">` + ` ` + ` <div data-sap-ui-component data-name="z2ui5" data-id="container" data-settings='{"id" : "z2ui5"}' data-handle-validation="true"></div>` + ` ` + ` </body></html>`;
+    result.body = result.body + ` ></script></head>` + `
+` + `<body class="sapUiBody sapUiSizeCompact" id="content">` + `
+` + `    <div data-sap-ui-component data-name="z2ui5" data-id="container" data-settings='{"id" : "z2ui5"}' data-handle-validation="true"></div>` + `
+` + ` </body></html>`;
     result.status_code = 200;
     result.status_reason = `success`;
     return result;

@@ -2506,7 +2506,7 @@ class z2ui5_cl_xml_view {
           ls_prop = z2ui5_cl_xml_view.st_ns_map.find((row) => row.n === lr_ns);
           this.mt_prop.push({ n: `xmlns:${ls_prop.n}`, v: ls_prop.v });
         } catch (error) {
-          throw new z2ui5_cx_util_error({ val: `XML_VIEW_ERROR_NO_NAMESPACE_FOUND_FOR: ${lr_ns}` });
+          throw new z2ui5_cx_util_error({ val: `XML_VIEW_ERROR_NO_NAMESPACE_FOUND_FOR:  ${lr_ns}` });
         }
       }
     }
@@ -2843,7 +2843,31 @@ class z2ui5_cl_xml_view {
     let result = null;
     let lv_vizproperties = ``;
     if (!vizproperties) {
-      lv_vizproperties = `{` + ` ` + `"plotArea": {` + ` ` + `"dataLabel": {` + ` ` + `"formatString": "",` + ` ` + `"visible": false` + ` ` + `}` + ` ` + `},` + ` ` + `"valueAxis": {` + ` ` + `"label": {` + ` ` + `"formatString": ""` + ` ` + `},` + ` ` + `"title": {` + ` ` + `"visible": false` + ` ` + `}` + ` ` + `},` + ` ` + `"categoryAxis": {` + ` ` + `"title": {` + ` ` + `"visible": false` + ` ` + `}` + ` ` + `},` + ` ` + `"title": {` + ` ` + `"visible": false,` + ` ` + `"text": ""` + ` ` + `}` + ` ` + `}`;
+      lv_vizproperties = `{` + `
+` + `"plotArea": {` + `
+` + `"dataLabel": {` + `
+` + `"formatString": "",` + `
+` + `"visible": false` + `
+` + `}` + `
+` + `},` + `
+` + `"valueAxis": {` + `
+` + `"label": {` + `
+` + `"formatString": ""` + `
+` + `},` + `
+` + `"title": {` + `
+` + `"visible": false` + `
+` + `}` + `
+` + `},` + `
+` + `"categoryAxis": {` + `
+` + `"title": {` + `
+` + `"visible": false` + `
+` + `}` + `
+` + `},` + `
+` + `"title": {` + `
+` + `"visible": false,` + `
+` + `"text": ""` + `
+` + `}` + `
+` + `}`;
     } else {
       lv_vizproperties = z2ui5_cl_util.abap_copy(vizproperties);
     }

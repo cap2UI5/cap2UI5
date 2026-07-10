@@ -107,7 +107,8 @@ class z2ui5_cl_util_xml {
       } else {
         this.xml_get_parts_indent({ iv_depth: { ct_parts: lt_parts } });
       }
-      result = lt_parts.join(` `);
+      result = lt_parts.join(`
+`);
     } else {
       if ((from_root === true || from_root === `X`)) {
         this.mo_root.xml_get_parts({ ct_parts: lt_parts });
