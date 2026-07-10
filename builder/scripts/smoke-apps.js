@@ -4,9 +4,9 @@
  * (the same code path a browser hits via `?app_start=<class>`) and report
  * whether it starts.
  *
- *   node tools/scripts/smoke-apps.js             human-readable progress + summary
- *   node tools/scripts/smoke-apps.js --json      machine-readable report on stdout
- *   node tools/scripts/smoke-apps.js <class>...  only the given classes
+ *   node builder/scripts/smoke-apps.js             human-readable progress + summary
+ *   node builder/scripts/smoke-apps.js --json      machine-readable report on stdout
+ *   node builder/scripts/smoke-apps.js <class>...  only the given classes
  *
  * Verdicts per app:
  *   ok             app started and rendered a view
@@ -19,8 +19,8 @@
  *   timeout        roundtrip did not finish within TIMEOUT_MS
  *
  * The draft DB is stubbed (no CDS runtime here) — exactly like the jest
- * handler tests. tools/test/apps-smoke.test.js runs this script and diffs the
- * result against tools/test/apps-smoke.known-failures.json.
+ * handler tests. builder/test/apps-smoke.test.js runs this script and diffs the
+ * result against builder/test/apps-smoke.known-failures.json.
  */
 "use strict";
 
@@ -123,6 +123,6 @@ async function smokeOne(name) {
       console.log(`  ${v.padEnd(12)} ${names.length}`);
     }
   }
-  // reporting tool — CI pass/fail is decided by tools/test/apps-smoke.test.js
+  // reporting tool — CI pass/fail is decided by builder/test/apps-smoke.test.js
   process.exit(0);
 })();

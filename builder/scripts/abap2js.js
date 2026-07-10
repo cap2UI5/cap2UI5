@@ -15,8 +15,8 @@
  * `// TODO(abap2js): <original>` so nothing is silently dropped.
  *
  * Usage:
- *   node tools/scripts/abap2js.js <file.clas.abap|dir> [more inputs...] -o <outdir>
- *   node tools/scripts/abap2js.js <file.clas.abap> --stdout
+ *   node builder/scripts/abap2js.js <file.clas.abap|dir> [more inputs...] -o <outdir>
+ *   node builder/scripts/abap2js.js <file.clas.abap> --stdout
  */
 "use strict";
 
@@ -2578,7 +2578,7 @@ function main(argv) {
     else inputs.push(args[i]);
   }
   if (!inputs.length) {
-    console.error("usage: node tools/scripts/abap2js.js <file.clas.abap|dir>... [-o outdir | --stdout]");
+    console.error("usage: node builder/scripts/abap2js.js <file.clas.abap|dir>... [-o outdir | --stdout]");
     process.exit(1);
   }
   // collect inputs; directories are walked recursively and their internal

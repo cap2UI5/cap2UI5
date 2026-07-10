@@ -12,7 +12,7 @@
  * The mirror mirrors the upstream `cloud` branch `src/` 1:1, which keeps the
  * ABAP package folders (e.g. srv/app/samples/01/03/<class>.js). Discovery must
  * therefore recurse — the same way the runtime's register_app_dir walk
- * (z2ui5_cl_util._walkClassFiles) and tools/scripts/smoke-apps.js already do.
+ * (z2ui5_cl_util._walkClassFiles) and builder/scripts/smoke-apps.js already do.
  * A flat samples folder is just the depth-0 case of the same walk.
  */
 
