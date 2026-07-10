@@ -134,6 +134,40 @@ was therefore reverted, not committed.
 - **RTTI** (`srt_*`) / **util_log / util_json_fltr**: keep until behavioural
   equivalence is shown per class.
 
+### Frontend assets — not prunable (finding)
+
+The `src/01/03/*_js/_css/_html/_xml/_json` classes look prunable (clean
+transpile) but are not:
+- 9 are **disk-backed** — the hand-port serves the real file via
+  `fs.readFileSync(app/z2ui5/webapp/…)`; the transpile returns the ABAP inline
+  string. Different behaviour by design.
+- The rest **deliberately differ at runtime**: the hand-port emits the escape
+  `\n` (a literal backslash-n) while the ABAP `|\n|` / the transpile emit a real
+  newline. The two are not byte- or runtime-equal, and which is correct depends
+  on how the asset is consumed (raw vs JSON-embedded). So they stay hand-ported.
+
+The whitespace-in-literals fix (`collapseOutsideLiterals`) is still a correct
+general improvement — it makes multi-line strings transpile faithfully for every
+*other* class — it simply does not make these hand-deviating assets prunable.
+
+### Architectural floor (what stays hand-ported, and why)
+
+After the popup prune, the remaining base classes are the intended
+hand-maintained floor:
+- **Interfaces** (`if_*`) — an ABAP interface transpiles to a plain object, not
+  a class; the hand-ports are the base classes everything `extends`.
+- **Frontend assets** (`01/03/*`) — disk-backed / hand-deviating (above).
+- **Engine + RTTI + serialization** (`core_*`, `srt_*`, `ajson*`, `util_xml`,
+  `util_db`) — their remaining TODOs are `CALL TRANSFORMATION`, dynamic
+  `CALL METHOD cl_abap_*=>(…)`, `ASSIGN ref->*`, `CREATE DATA … TYPE HANDLE`:
+  RTTI / dynamic / OpenSQL that is a platform *adaptation*, not a translation.
+- **Exception classes** (`cx_*`) — extend SAP standard exceptions
+  (`cx_static_check`, `cx_no_check`) that don't exist in the target.
+
+Reducing this floor further is the **Step-2 porter** work (RTTI/sxml shims
+informed by open-abap; the CDS-backed async `z2ui5_port` DB store), i.e. an
+architectural initiative — not incremental transpiler cleanup.
+
 ### Method: safe pruning, proven per class
 
 The popup prune is the template for the rest: (1) find the adaptation the
