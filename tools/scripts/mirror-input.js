@@ -4,11 +4,16 @@
  * transpile/copy steps work on a versioned, reviewable copy.
  *
  *   node tools/scripts/mirror-input.js abap2UI5   → input/abap2UI5/ (src + app/webapp)
- *   node tools/scripts/mirror-input.js samples    → input/samples/  (src, cloud branch)
+ *   node tools/scripts/mirror-input.js samples    → input/samples/  (whole cloud branch)
  *
  * samples is taken from the cloud branch (rebuilt by its auto_cloud workflow
  * on every push to standard) — it already excludes the on-premise-only apps
- * under src/00, which cannot run in the CAP/Node environment anyway.
+ * under src/00, which cannot run in the CAP/Node environment anyway. The whole
+ * branch is mirrored 1:1 (everything except .git) so nothing upstream is ever
+ * silently dropped; the transpile step still reads only its src/ subtree.
+ *
+ * A source with no `paths` restriction mirrors its entire checkout (minus
+ * .git); one with `paths` mirrors just those subtrees.
  *
  * The upstream commit is recorded in input/<name>/UPSTREAM_COMMIT.
  * Set MIRROR_SOURCE=/path/to/checkout to use a local copy instead of cloning
@@ -22,8 +27,8 @@ const { execSync } = require("child_process");
 
 const SOURCES = {
   abap2UI5: { url: "https://github.com/abap2UI5/abap2UI5", paths: ["src", "app/webapp"] },
-  // src/ is mirrored 1:1 from the cloud branch, as it is.
-  samples: { url: "https://github.com/abap2UI5/samples", branch: "cloud", paths: ["src"] },
+  // No `paths`: the entire cloud branch is mirrored 1:1 (everything except .git).
+  samples: { url: "https://github.com/abap2UI5/samples", branch: "cloud" },
 };
 
 const name = process.argv[2];
@@ -48,7 +53,9 @@ if (!source) {
 const commit = execSync("git rev-parse HEAD", { cwd: source }).toString().trim();
 
 fs.rmSync(dest, { recursive: true, force: true });
-for (const p of cfg.paths) {
+// No `paths` → mirror the whole checkout (everything except .git).
+const paths = cfg.paths || fs.readdirSync(source).filter((e) => e !== ".git");
+for (const p of paths) {
   const from = path.join(source, p);
   if (!fs.existsSync(from)) {
     console.error(`upstream path not found: ${p} — repository structure changed?`);
