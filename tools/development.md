@@ -59,11 +59,10 @@ snapshot for reference only (nothing reads from it); refresh it with
 
 `snapshot-base.js` takes `git ls-files cap2UI5` (so build artifacts and
 `node_modules` are excluded) and leaves out the generated content:
-`app/z2ui5/webapp/` and `srv/app/samples/` (fully generated) plus the
-`srv/z2ui5/` files that are byte-identical to the freshly transpiled
-`tools/run/output/abap2UI5/` (the pure transpiled fill-ins). The hand-maintained
-CAP adaptations under `srv/z2ui5/` — which differ from the fresh transpile — are
-kept, so `npm run transpile_abap2ui5` must have run first.
+`app/z2ui5/webapp/` and `srv/app/samples/` (fully generated) plus the whole
+`srv/z2ui5/` tree (the framework classes transpiled from ABAP by the backend
+stream). `srv/z2ui5/` is emptied down to a placeholder README, so the resulting
+skeleton is reference-only and not runnable on its own.
 
 ```
 npm run transpile -- path/to/z2ui5_cl_my_app.clas.abap --stdout
