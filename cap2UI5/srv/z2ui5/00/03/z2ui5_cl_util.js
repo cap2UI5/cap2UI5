@@ -622,11 +622,12 @@ class z2ui5_cl_util {
   //  Resolution order (first hit wins for rtti_get_class):
   //    1. Built-ins shipped with the framework (02/, 02/01/)
   //    2. Custom apps folder (srv/app/) — hand-written apps for this
-  //       project live here, outside the transpiled srv/z2ui5 tree.
-  //    3. Bundled samples folder (srv/samples/) — present iff this repo
-  //       carries them in-tree; gone after extraction to a separate repo.
-  //    4. Anything registered at runtime via register_app_dir()
-  //    5. Anything in the Z2UI5_APP_DIRS env var (colon-separated paths)
+  //       project live here, outside the transpiled srv/z2ui5 tree. The
+  //       bundled samples live in-tree under srv/app/samples/ and are
+  //       reached by the recursive walk of this same folder (present iff
+  //       this repo carries them; gone after extraction to a separate repo).
+  //    3. Anything registered at runtime via register_app_dir()
+  //    4. Anything in the Z2UI5_APP_DIRS env var (colon-separated paths)
   //
   //  Each directory is searched recursively (external sample repos may keep
   //  their classes in subfolders); within one directory a file at the top
@@ -668,14 +669,13 @@ class z2ui5_cl_util {
       // 1. Framework built-ins
       path.join(__dirname, "../../02"),
       path.join(__dirname, "../../02/01"),
-      // 2. Custom apps (srv/app/)
+      // 2. Custom apps (srv/app/); bundled samples under srv/app/samples/
+      //    are covered by the recursive walk of this same folder.
       path.join(__dirname, "../../../app"),
-      // 3. Bundled samples (still in-tree); harmless if absent
-      path.join(__dirname, "../../../samples"),
-      // 4. Runtime-registered
+      // 3. Runtime-registered
       ...z2ui5_cl_util._registered_dirs,
     ];
-    // 5. Env var
+    // 4. Env var
     const env = process.env.Z2UI5_APP_DIRS;
     if (env) {
       for (const p of env.split(path.delimiter)) {

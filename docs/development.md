@@ -94,7 +94,7 @@ CAP project reaches the site, not just pipeline runs.
 | 3 | 3 transpile abap2UI5 | `transpile_abap2ui5` | all abap2UI5 classes (whole `src/` tree) → `output/abap2UI5/` + report |
 | 4 | 4 transpile samples | `transpile_samples` | all sample classes → `output/samples/` + report |
 | 5 | 5 prepare app | `prepare_app` | `input/abap2UI5/app/webapp` + patches → `output/app/` |
-| 6 | 6 copy into cap | `copy_into_cap` | `output/abap2UI5` → `cap2UI5/srv/z2ui5` (fill-in only), `output/samples` → `cap2UI5/srv/samples` (overwrite), `output/app` → `cap2UI5/app/z2ui5/webapp` (replace) |
+| 6 | 6 copy into cap | `copy_into_cap` | `output/abap2UI5` → `cap2UI5/srv/z2ui5` (fill-in only), `output/samples` → `cap2UI5/srv/app/samples` (overwrite), `output/app` → `cap2UI5/app/z2ui5/webapp` (replace) |
 | 7 | 7 trigger web | — | push `UPSTREAM_HEAD` to [web-cap2UI5](https://github.com/cap2UI5/web-cap2UI5) via deploy key → starts its **build web** workflow |
 
 After step 5 the `output/` folder holds the three deployable pieces —
@@ -102,8 +102,9 @@ After step 5 the `output/` folder holds the three deployable pieces —
 the backend tree `srv/z2ui5` is the hand-maintained CAP architecture
 adaptation, so transpiled classes are only **added** there and never copied
 over an existing file (promoting one is a deliberate manual step);
-`srv/samples` is fully owned by the transpiler — existing files are
-overwritten and files gone upstream are removed; the webapp is replaced
+`srv/app/samples` is fully owned by the transpiler — existing files are
+overwritten and files gone upstream are removed (the sibling `srv/app`
+custom apps are untouched); the webapp is replaced
 1:1. Transpiled files that do not parse are skipped and
 reported. Classes with `TODO(abap2js)` markers or `parseError` entries are
 listed in `output/*/transpile-report.json` and need manual follow-up. Jest

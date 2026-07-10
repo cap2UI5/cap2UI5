@@ -103,12 +103,12 @@ http://localhost:4004/z2ui5/webapp/index.html?app_start=z2ui5_cl_app_my_first_ap
 `cap2UI5/srv/app/` is the place for your own apps — it sits outside the
 transpiled framework tree and is never touched by the sync pipeline (see the
 [custom apps README](cap2UI5/srv/app/README.md)). Don't put your own apps into
-`cap2UI5/srv/samples/` or `cap2UI5/srv/z2ui5/` — both are owned by the sync
+`cap2UI5/srv/app/samples/` or `cap2UI5/srv/z2ui5/` — both are owned by the sync
 pipeline and get overwritten on every sync. To keep your apps in a separate
 repo entirely, put them in any folder and register it via the
 `Z2UI5_APP_DIRS` environment variable (`PATH`-style list) or
 `require("abap2UI5/register-apps")(dir)` — see the
-[discovery API](cap2UI5/srv/samples/README.md#discovery-api).
+[discovery API](cap2UI5/srv/app/samples/README.md#discovery-api).
 
 ### Calling a remote OData service
 
@@ -182,8 +182,8 @@ deployment — lives in the CAP project:
 Around 345 demo apps transpiled from
 [abap2UI5/samples](https://github.com/abap2UI5/samples) ship with the
 project — tables, popups, layouts, drafts and more. Browse them under
-[`cap2UI5/srv/samples/`](cap2UI5/srv/samples/) (details in the
-[samples README](cap2UI5/srv/samples/README.md)), start any of them via
+[`cap2UI5/srv/app/samples/`](cap2UI5/srv/app/samples/) (details in the
+[samples README](cap2UI5/srv/app/samples/README.md)), start any of them via
 `?app_start=<class>`, or try them without installing anything in the
 [browser version](https://github.com/cap2UI5/web-cap2UI5).
 

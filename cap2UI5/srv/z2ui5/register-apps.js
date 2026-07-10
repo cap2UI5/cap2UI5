@@ -11,7 +11,7 @@
  *
  * The directory passed should contain `*.js` files where each file's basename
  * matches the class name it exports — same convention the bundled
- * `srv/samples/` folder uses.
+ * `srv/app/samples/` folder uses.
  */
 const z2ui5_cl_util = require("./00/03/z2ui5_cl_util");
 

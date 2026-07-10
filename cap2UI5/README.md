@@ -65,8 +65,8 @@ exports (`module.exports`). Put your own apps into `srv/app/` (scanned
 automatically when resolving `?app_start=<class>`, see the
 [custom apps README](srv/app/README.md)) or into any folder registered via
 `Z2UI5_APP_DIRS` / `require("abap2UI5/register-apps")(dir)` — see the
-[discovery API](srv/samples/README.md#discovery-api). Don't use
-`srv/samples/` or `srv/z2ui5/`, both are owned by the sync pipeline.
+[discovery API](srv/app/samples/README.md#discovery-api). Don't use
+`srv/app/samples/` or `srv/z2ui5/`, both are owned by the sync pipeline.
 
 #### 1. Hello World
 ###### App

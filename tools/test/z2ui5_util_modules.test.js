@@ -45,7 +45,7 @@ describe("z2ui5_cl_util", () => {
 
   test("rtti_get_class finds classes in the bundled samples folder", () => {
     // only the top-level samples of the upstream src/ are mirrored, so the
-    // bundled tree under srv/samples is flat.
+    // bundled tree under srv/app/samples is flat.
     const Cls = z2ui5_cl_util.rtti_get_class(SAMPLE);
     expect(typeof Cls).toBe("function");
     expect(z2ui5_cl_util.rtti_check_class_exists(SAMPLE)).toBe(true);
