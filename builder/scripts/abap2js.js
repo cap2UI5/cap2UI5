@@ -528,8 +528,15 @@ function toAtoms(toks, ctx) {
     }
 
     // primaries — note: comparison operators (=, <>, >, ...) lex as
-    // Identifier tokens too, so require a word/number/field-symbol shape here
-    if (isStr(t) || isTmplBegin(t) || isTmpl(t) || (isId(t) && !isOperatorWord(up) && (/^[a-z0-9_]/i.test(t.str) || /^<\w+>$/.test(t.str))) || isParenL(t)) {
+    // Identifier tokens too, so require a word/number/field-symbol shape here.
+    // The 2-letter word operators (eq/lt/cs/ns/…) are also legal identifiers:
+    // treat them as identifiers when NOT in operator position (i.e. an operand
+    // is expected — at the start, or right after another operator), so a
+    // variable/param named `lt` or `ns` is not mistaken for a comparison.
+    const wordShaped = isId(t) && (/^[a-z0-9_]/i.test(t.str) || /^<\w+>$/.test(t.str));
+    const operandExpected = atoms.length === 0 || atoms[atoms.length - 1].kind === "op";
+    const asIdent = wordShaped && (!isOperatorWord(up) || (AMBIGUOUS_OP_IDENTS.has(up) && operandExpected));
+    if (isStr(t) || isTmplBegin(t) || isTmpl(t) || asIdent || isParenL(t)) {
       const { str, next } = parsePrimary(toks, i, ctx);
       atoms.push({ kind: "expr", str });
       i = next;
@@ -556,6 +563,11 @@ function toAtoms(toks, ctx) {
 }
 
 const OPERATOR_WORDS = new Set(["AND", "OR", "NOT", "IS", "IN", "EQ", "NE", "GT", "LT", "GE", "LE", "CS", "CP", "CO", "CN", "CA", "NA", "NS", "NP", "INITIAL", "BOUND", "SUPPLIED", "ASSIGNED", "INSTANCE", "OF", "BETWEEN", "XSDBOOL", "MOD", "DIV"]);
+// Binary infix operators that are ALSO common identifier names (a namespace
+// `ns`, a local table `lt`, …). They only act as operators in operator
+// position; elsewhere they are plain identifiers. (AND/OR/NOT/IN/IS/BETWEEN are
+// excluded — unlikely identifiers, and some are unary/keyword-shaped.)
+const AMBIGUOUS_OP_IDENTS = new Set(["EQ", "NE", "GT", "LT", "GE", "LE", "CS", "CP", "CO", "CN", "CA", "NA", "NS", "NP", "MOD", "DIV"]);
 function isOperatorWord(up) {
   return OPERATOR_WORDS.has(up) && up !== "XSDBOOL";
 }
