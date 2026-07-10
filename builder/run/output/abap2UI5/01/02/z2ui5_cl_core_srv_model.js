@@ -69,10 +69,6 @@ class z2ui5_cl_core_srv_model {
     try {
       ajson_result = (z2ui5_cl_ajson.create_empty());
       ajson_default = (z2ui5_cl_ajson.create_empty({ ii_custom_mapping: z2ui5_cl_ajson_mapping.create_upper_case() }));
-      // TODO(abap2js): TYPES BEGIN OF ty_s_mapper_cache,
-      // TODO(abap2js): TYPES mapper TYPE REF TO z2ui5_if_ajson_mapping,
-      // TODO(abap2js): TYPES ajson TYPE REF TO z2ui5_if_ajson,
-      // TODO(abap2js): TYPES END OF ty_s_mapper_cache.
       let lt_mapper_cache = [];
       sy_tabix = 0;
       for (const lr_attri of this.mt_attri) {

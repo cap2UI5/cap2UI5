@@ -111,7 +111,6 @@ class z2ui5_cl_util_ext {
     let obj = null;
     let lv_tabname = ``;
     let lr_ddfields = null;
-    // TODO(abap2js): TYPES ty_c30 TYPE c LENGTH 30.
     let names = [];
     lv_tabname = z2ui5_cl_util.abap_copy(tabname);
     try {

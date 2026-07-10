@@ -1762,6 +1762,13 @@ function emitStatement(s, ctx, st, push, assignedTwice, methodDef) {
     case "FieldSymbol":
       // FIELD-SYMBOLS <x> TYPE t. — already hoisted to the method top
       break;
+    case "Type":
+    case "TypeBegin":
+    case "TypeEnd":
+      // method-local TYPES (incl. BEGIN OF ... END OF): pure type declarations
+      // carry no runtime meaning in JS — references resolve structurally, so
+      // the declaration is simply dropped.
+      break;
     case "Unassign": {
       const name = fsIdent(toks[1].str);
       push(`${name} = null;`);
