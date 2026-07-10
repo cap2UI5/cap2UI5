@@ -22,10 +22,17 @@ jobs:
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: |
+            tools/package-lock.json
+            cap2UI5/package-lock.json
       - run: npm ci
-      - run: npm ci --prefix cap2UI5
+        working-directory: tools
+      - run: npm ci
+        working-directory: cap2UI5
       - run: npm run copy_app
+        working-directory: tools
       - run: npm test
+        working-directory: tools
       - name: commit
         run: |
           git config user.name "github-actions[bot]"

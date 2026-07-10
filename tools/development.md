@@ -19,8 +19,11 @@ with upstream. If you just want to **use** cap2UI5, start with the
 
 ## Repository roles
 
-The repo root is the development harness; the deployable CAP project lives
-in [`cap2UI5/`](../cap2UI5/). The static browser build (whole stack
+The repository holds two separate npm projects, each installed and run on its
+own: [`tools/`](../tools/) is the **builder project** (the transpiler, sync
+scripts and jest suite — its own `package.json`), and [`cap2UI5/`](../cap2UI5/)
+is the **deployable CAP project**. The repo root itself is no longer a project,
+just the container for the two. The static browser build (whole stack
 client-side, deployed to GitHub Pages) lives in
 [web-cap2UI5](https://github.com/cap2UI5/web-cap2UI5) — it mirrors this
 repo weekly and only relies on the two framework hooks
@@ -36,11 +39,12 @@ deploy keys and pipelines that target them must be updated to match.
 ## Dev tooling
 
 Everything that is not deployed with the CAP project lives under
-[`tools/`](../tools/):
+[`tools/`](../tools/) — the builder project. Install and run these commands
+from **inside** `tools/` (`cd tools && npm install` first):
 
 | | |
 |---|---|
-| `npm test` | jest suite (backend units, sample apps, transpiler) |
+| `npm test` | jest suite (backend units, sample apps, transpiler) — also needs `cap2UI5/` deps installed |
 | `npm run transpile` | abap2js — transpile ABAP classes to JS (parser: [@abaplint/core](https://github.com/abaplint/abaplint)) |
 | `npm run mirror_abap2ui5` / `mirror_app` / `mirror_samples` | snapshot upstream into one folder each under `tools/run/input/` — `abap2UI5/` (backend `src/`), `app/` (frontend `webapp`), `samples/` (whole cloud branch); each folder is rewritten fresh on every run |
 | `npm run transpile_abap2ui5` / `transpile_samples` | transpile `tools/run/input/*/src` → `tools/run/output/` |

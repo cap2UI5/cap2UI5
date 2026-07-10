@@ -22,6 +22,7 @@ jobs:
         with:
           node-version: 22
       - run: npm run mirror_app
+        working-directory: tools
       - name: commit
         run: |
           git config user.name "github-actions[bot]"

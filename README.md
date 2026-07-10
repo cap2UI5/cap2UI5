@@ -192,11 +192,14 @@ project — tables, popups, layouts, drafts and more. Browse them under
 
 ## Repository layout
 
+The repository holds **two separate npm projects**, each installed and run on
+its own:
+
 | Path | What it is |
 |---|---|
-| [`cap2UI5/`](cap2UI5/) | **the CAP project** — install, run and develop your apps here |
+| [`cap2UI5/`](cap2UI5/) | **the CAP project** — the finished, deployable app; install, run and develop your apps here (`cd cap2UI5 && npm install && npx cds watch`) |
+| [`tools/`](tools/) | **the builder project** — ABAP→JS transpiler, sync scripts, jest suite; its own `package.json` (`cd tools && npm install && npm test`) |
 | [`docs/`](docs/) | internals documentation |
-| [`tools/`](tools/) | dev tooling: ABAP→JS transpiler, sync scripts, jest suite |
 | `tools/run/input/`, `tools/run/output/` | artifacts of the sync pipeline (mirrored upstream sources and transpiled output) |
 
 ## How this repository is built

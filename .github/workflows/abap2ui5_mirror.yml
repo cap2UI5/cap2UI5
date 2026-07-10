@@ -21,6 +21,7 @@ jobs:
         with:
           node-version: 22
       - run: npm run mirror_abap2ui5
+        working-directory: tools
       - name: commit
         run: |
           git config user.name "github-actions[bot]"

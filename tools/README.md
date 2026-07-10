@@ -1,9 +1,19 @@
-# tools/
+# tools/ — the cap2UI5 builder project
 
-The development harness for cap2UI5 — everything that is **not** deployed with
-the [CAP project](../cap2UI5/). It mirrors the upstream
+This is the **builder project** — a self-contained npm project (its own
+[`package.json`](package.json) / `package-lock.json`) that is **not** deployed
+with the app. It mirrors the upstream
 [abap2UI5](https://github.com/abap2UI5/abap2UI5) sources, transpiles the ABAP
-classes to JavaScript, and copies the result into the `cap2UI5/` project.
+classes to JavaScript, and copies the result into the deployable
+[CAP project](../cap2UI5/).
+
+The repository holds **two separate projects**, each installed and run on its
+own:
+
+| Project | What it is | Run it |
+|---|---|---|
+| [`cap2UI5/`](../cap2UI5/) | the finished, deployable CAP app | `cd cap2UI5 && npm install && npx cds watch` |
+| [`tools/`](.) (here) | the builder (transpiler + sync + tests) | `cd tools && npm install && npm test` |
 
 For the full pipeline, npm scripts and GitHub Actions, see
 [development.md](development.md). This file is just a map of the folders.
@@ -12,11 +22,33 @@ For the full pipeline, npm scripts and GitHub Actions, see
 
 | Path | What it is |
 |---|---|
+| `package.json` / `package-lock.json` | the builder project manifest — dev deps (`@abaplint/core`, `jest`) and the `npm run …` sync/transpile scripts. |
 | [`run/`](run/) | **Working area — transient generated files.** Scratch space for the sync pipeline. Everything here is mirrored from upstream or produced by the transpiler and **rewritten fresh on every run** — treat it as build output, not as sources you edit by hand. |
 | [`base/`](base/) | **The base skeleton.** A snapshot of the hand-maintained `cap2UI5/` project **with the generated content stripped out**, so the foundation everything is built on is visible in one place. Reference only — nothing reads from it. |
 | [`scripts/`](scripts/) | The Node scripts behind the npm commands (mirror, transpile, copy, snapshot, …). |
 | [`test/`](test/) | jest suite (backend units, sample apps, transpiler) + fixtures/helpers. |
 | `jest.config.js` | jest configuration for the suite above. |
+
+## Install & run
+
+The builder is a normal npm project — install and run it from **inside**
+`tools/`:
+
+```bash
+cd tools
+npm install        # dev deps: @abaplint/core, jest
+npm test           # run the jest suite
+
+# sync pipeline steps (see development.md for all of them)
+npm run mirror_abap2ui5
+npm run transpile_abap2ui5
+npm run copy_into_cap
+```
+
+> [!NOTE]
+> The jest suite also loads runtime modules from the `cap2UI5/` project
+> (`@sap/cds`, `@cap-js/sqlite`, …), so that project must have its deps
+> installed too (`cd cap2UI5 && npm install`) before `npm test` passes.
 
 ### `run/` — temporary files
 

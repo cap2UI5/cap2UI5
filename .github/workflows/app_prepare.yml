@@ -23,8 +23,11 @@ jobs:
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: tools/package-lock.json
       - run: npm ci
+        working-directory: tools
       - run: npm run prepare_app
+        working-directory: tools
       - name: commit
         run: |
           git config user.name "github-actions[bot]"
