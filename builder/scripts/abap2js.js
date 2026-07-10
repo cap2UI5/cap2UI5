@@ -39,7 +39,8 @@ function requirePathFor(className) {
     /^z2ui5_cl_app_/.test(className) ||
     className === "z2ui5_cl_xml_view" ||
     className === "z2ui5_cl_xml_view_cc" ||
-    className === "z2ui5_cx_util_error"
+    className === "z2ui5_cx_util_error" ||
+    className === "z2ui5_port"
   ) {
     return `abap2UI5/${className}`;
   }
@@ -2413,11 +2414,131 @@ function emitStatement(s, ctx, st, push, assignedTwice, methodDef) {
     case "Assert":
       push(`if (!(${txCond(toks.slice(1), ctx)})) throw new Error(\`ASSERT failed\`);`);
       break;
+    case "DeleteDatabase": {
+      // DELETE FROM <t> WHERE <conds>. → neutral DB IR marker.
+      // Only the plain `DELETE FROM <t>` form is lowered; bulk/other forms TODO.
+      if (KW(toks[1].str) !== "FROM") return todo();
+      const whereIdx = findTopWord(toks, "WHERE");
+      const table = toks[2].str.toLowerCase();
+      if (!isTableName(table)) return todo();
+      const where = whereIdx > 0 ? sqlWhere(toks.slice(whereIdx + 1), ctx) : "[]";
+      if (where === null) return todo();
+      ctx.requires?.add("z2ui5_port");
+      push(`z2ui5_port.db({ op: \`delete\`, table: \`${table}\`, where: ${where} });`);
+      push(`sy_subrc = z2ui5_port.sy_subrc;`);
+      break;
+    }
+    case "ModifyDatabase": {
+      // MODIFY <t> FROM @<row>. → neutral DB IR marker (upsert by table key).
+      // FROM TABLE @<itab> (bulk) is not lowered.
+      const fromIdx = findTopWord(toks, "FROM");
+      const table = toks[1].str.toLowerCase();
+      if (fromIdx < 0 || !isTableName(table)) return todo();
+      let rowToks = toks.slice(fromIdx + 1);
+      if (KW(rowToks[0]?.str ?? "") === "TABLE") return todo();
+      if (rowToks[0]?.type === "WAt") rowToks = rowToks.slice(1);
+      ctx.requires?.add("z2ui5_port");
+      push(`z2ui5_port.db({ op: \`modify\`, table: \`${table}\`, row: ${txExpr(rowToks, ctx)} });`);
+      push(`sy_subrc = z2ui5_port.sy_subrc;`);
+      break;
+    }
+    case "Commit":
+      ctx.requires?.add("z2ui5_port");
+      push(`z2ui5_port.db({ op: \`commit\` });`);
+      break;
+    case "Select": {
+      // SELECT [SINGLE] <fields|FIELDS *|*> FROM <t> [WHERE <conds>]
+      //   INTO ( [TABLE] @DATA(x) | @x | CORRESPONDING FIELDS OF [TABLE] @x )
+      // Anything outside this subset (joins, aggregates, ORDER/GROUP, UP TO,
+      // non eq/in WHERE ops) falls back to a clean TODO — never broken JS.
+      const single = KW(toks[1].str) === "SINGLE";
+      const fromIdx = findTopWord(toks, "FROM");
+      const whereIdx = findTopWord(toks, "WHERE");
+      const intoIdx = findTopWord(toks, "INTO");
+      const fieldsIdx = findTopWord(toks, "FIELDS");
+      if (fromIdx < 0 || intoIdx < 0) return todo();
+      for (const w of ["JOIN", "GROUP", "ORDER", "HAVING", "UNION", "UP"]) {
+        if (findTopWord(toks.slice(0, intoIdx), w) > 0) return todo();
+      }
+      const table = toks[fromIdx + 1].str.toLowerCase();
+      if (!isTableName(table)) return todo();
+      const fieldToks = fieldsIdx >= 0 ? toks.slice(fieldsIdx + 1, whereIdx > 0 ? whereIdx : intoIdx) : toks.slice(single ? 2 : 1, fromIdx);
+      if (fieldToks.some((t) => isParenL(t))) return todo(); // aggregates COUNT( )/SUM( )
+      const isStar = fieldToks.length === 1 && fieldToks[0].str === "*";
+      const fieldList = isStar ? [] : fieldToks.filter((t) => t.str !== ",").map((t) => `\`${t.str.toLowerCase()}\``);
+      const where = whereIdx > 0 ? sqlWhere(toks.slice(whereIdx + 1, intoIdx), ctx) : "[]";
+      if (where === null) return todo();
+
+      let intoToks = toks.slice(intoIdx + 1);
+      let op, target, dataDecl = false, singleField = false;
+      if (KW(intoToks[0].str) === "CORRESPONDING") {
+        const ofIdx = intoToks.findIndex((t) => KW(t.str) === "OF");
+        if (ofIdx < 0) return todo();
+        let rest = intoToks.slice(ofIdx + 1);
+        const isTable = KW(rest[0]?.str ?? "") === "TABLE";
+        if (isTable) rest = rest.slice(1);
+        if (rest[0]?.type === "WAt") rest = rest.slice(1);
+        if (!rest.length) return todo();
+        op = isTable ? "select_table" : "select_single";
+        dataDecl = KW(rest[0].str) === "DATA" && isParenL(rest[1] ?? { type: "" });
+        target = dataDecl ? safeIdent(rest[2].str.toLowerCase()) : txExpr(rest, ctx);
+      } else {
+        let t0 = intoToks;
+        let forceTable = false;
+        if (KW(t0[0].str) === "TABLE") { t0 = t0.slice(1); forceTable = true; }
+        if (t0[0]?.type === "WAt") t0 = t0.slice(1);
+        if (!t0.length) return todo();
+        op = forceTable ? "select_table" : single ? "select_single" : "select_table";
+        dataDecl = KW(t0[0].str) === "DATA" && isParenL(t0[1] ?? { type: "" });
+        target = dataDecl ? safeIdent(t0[2].str.toLowerCase()) : txExpr(t0, ctx);
+        singleField = op === "select_single" && fieldList.length === 1;
+      }
+      if (!/^[A-Za-z_$][\w$.]*$/.test(target)) return todo(); // guard against garbage lvalue
+      if (dataDecl) ctx.locals.add(target);
+      ctx.requires?.add("z2ui5_port");
+      const extra = op === "select_single" ? `, single_field: ${singleField}` : "";
+      push(`${dataDecl ? "let " : ""}${target} = z2ui5_port.db({ op: \`${op}\`, table: \`${table}\`, fields: [${fieldList.join(", ")}], where: ${where}${extra} });`);
+      push(`sy_subrc = z2ui5_port.sy_subrc;`);
+      break;
+    }
     case "Comment":
       break;
     default:
       todo();
   }
+}
+
+const isTableName = (s) => /^[a-z_]\w*$/i.test(s);
+
+/**
+ * OpenSQL WHERE (`a = @v AND b IN @r ...`) → neutral condition-array literal.
+ * Only equality (`=`) and range membership (`IN`) map cleanly; any other
+ * comparison (<, >, <>, LIKE, …) or a malformed condition returns null so the
+ * caller falls back to a TODO instead of emitting wrong semantics.
+ */
+function sqlWhere(condToks, ctx) {
+  const parts = [];
+  let cur = [];
+  let depth = 0;
+  for (const t of condToks) {
+    depth += depthDelta(t);
+    if (depth === 0 && isId(t) && KW(t.str) === "AND") { parts.push(cur); cur = []; }
+    else cur.push(t);
+  }
+  if (cur.length) parts.push(cur);
+  const conds = [];
+  for (const p of parts) {
+    if (p.length < 3 || !isId(p[0])) return null;
+    const opTok = KW(p[1].str);
+    const op = opTok === "IN" ? "in" : opTok === "=" ? "eq" : null;
+    if (!op) return null; // unsupported comparison operator
+    const field = p[0].str.toLowerCase();
+    let valToks = p.slice(2);
+    if (valToks[0]?.type === "WAt") valToks = valToks.slice(1);
+    if (!valToks.length) return null;
+    conds.push(`{ field: \`${field}\`, op: \`${op}\`, value: ${txExpr(valToks, ctx)} }`);
+  }
+  return `[${conds.join(", ")}]`;
 }
 
 function findTopWord(toks, word) {

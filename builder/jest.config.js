@@ -20,6 +20,7 @@ module.exports = {
     "^abap2UI5/z2ui5_cl_util_(.*)$": "<rootDir>/cap2UI5/srv/z2ui5/00/03/z2ui5_cl_util_$1.js",
     "^abap2UI5/z2ui5_cx_util_error$": "<rootDir>/cap2UI5/srv/z2ui5/00/03/z2ui5_cx_util_error.js",
     "^abap2UI5/register-apps$": "<rootDir>/cap2UI5/srv/z2ui5/register-apps.js",
+    "^abap2UI5/z2ui5_port$": "<rootDir>/cap2UI5/srv/z2ui5/z2ui5_port.js",
     "^abap2UI5$": "<rootDir>/cap2UI5/srv/z2ui5/00/03/z2ui5_cl_util.js",
   },
   testPathIgnorePatterns: ["/node_modules/", "/cap2UI5/app/", "/builder/base/", "/builder/run/output/"],

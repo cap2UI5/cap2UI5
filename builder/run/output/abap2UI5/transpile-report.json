@@ -220,24 +220,16 @@
   {
     "class": "z2ui5_cl_util_db",
     "path": "00/03/01/z2ui5_cl_util_db.js",
-    "todos": 10,
+    "todos": 2,
     "todoDetails": [
-      "unsupported statement: DELETE FROM z2ui5_t_91 WHERE uname = @uname AND handle = @handle AND handle2 = @handle2 AND handle3 = @handle3.",
-      "unsupported statement: COMMIT WORK AND WAIT.",
-      "unsupported statement: SELECT SINGLE data FROM z2ui5_t_91 WHERE uname = @uname AND handle = @handle AND handle2 = @handle2 AND handle3 = @handl",
       "unsupported statement: z2ui5_cl_util=>xml_parse( EXPORTING xml = lv_data IMPORTING any = result ).",
-      "unsupported statement: SELECT FROM z2ui5_t_91 FIELDS * WHERE uname IN @lr_uname AND handle IN @lr_handle AND handle2 IN @lr_handle2 AND handle3",
-      "unsupported statement: SELECT SINGLE data FROM z2ui5_t_91 WHERE id = @id INTO @DATA(lv_data).",
-      "unsupported statement: z2ui5_cl_util=>xml_parse( EXPORTING xml = lv_data IMPORTING any = result ).",
-      "unsupported statement: SELECT SINGLE id FROM z2ui5_t_91 WHERE uname = @uname AND handle = @handle AND handle2 = @handle2 AND handle3 = @handle3",
-      "unsupported statement: MODIFY z2ui5_t_91 FROM @ls_db.",
-      "unsupported statement: COMMIT WORK AND WAIT."
+      "unsupported statement: z2ui5_cl_util=>xml_parse( EXPORTING xml = lv_data IMPORTING any = result )."
     ]
   },
   {
     "class": "z2ui5_cl_util_ext",
     "path": "00/03/01/z2ui5_cl_util_ext.js",
-    "todos": 74,
+    "todos": 73,
     "todoDetails": [
       "unsupported statement: CALL METHOD (xco_cp_abap)=>(`CLASS`) EXPORTING iv_name = lv_classname RECEIVING ro_class = obj.",
       "unsupported statement: CALL METHOD obj->(`IF_XCO_AO_CLASS~CONTENT`) RECEIVING ro_content = content.",
@@ -282,7 +274,6 @@
       "unsupported statement: ASSIGN r_e071->* TO <t_e071>.",
       "unsupported statement: CALL FUNCTION fb1 EXPORTING wi_trkorr = is_transport-transport iv_dialog = abap_false TABLES wt_e071 = <t_e071> wt_e071k",
       "unsupported statement: CALL FUNCTION fb2 EXPORTING iv_trkorr = is_transport-task EXCEPTIONS error_message = 1 OTHERS = 2.",
-      "unsupported statement: COMMIT WORK AND WAIT.",
       "unsupported statement: CREATE DATA t_e071k TYPE HANDLE table_desc.",
       "unsupported statement: CREATE DATA s_e071k TYPE HANDLE struct_desc.",
       "unsupported statement: ASSIGN t_e071k->* TO <t_e071k>.",
@@ -318,7 +309,7 @@
   {
     "class": "z2ui5_cl_util_api_c",
     "path": "00/03/02/z2ui5_cl_util_api_c.js",
-    "todos": 97,
+    "todos": 94,
     "todoDetails": [
       "unsupported statement: CALL METHOD (lv_class)=>(`GET_USER_TECHNICAL_NAME`) RECEIVING rv_technical_name = lv_result.",
       "unsupported statement: CALL METHOD elemdescr->(`GET_DDIC_FIXED_VALUES`) EXPORTING p_langu = lv_langu RECEIVING p_fixed_values = lt_values EXCEP",
@@ -389,7 +380,6 @@
       "unsupported statement: CALL METHOD lo_log->(`SET_HEADER`) EXPORTING header = lo_header.",
       "unsupported statement: CALL METHOD (lv_class)=>(`GET_INSTANCE`) RECEIVING db_handler = lo_db.",
       "unsupported statement: CALL METHOD lo_db->(`SAVE_LOG`) EXPORTING log = lo_log.",
-      "unsupported statement: COMMIT WORK AND WAIT.",
       "unsupported statement: CALL METHOD (lv_class)=>(`GET_INSTANCE`) RECEIVING db_handler = lo_db.",
       "unsupported statement: CALL METHOD lo_db->(`LOAD_LOGS_VIA_FILTER`) EXPORTING filter = lo_filter RECEIVING log_table = lt_logs.",
       "unsupported statement: CALL METHOD lo_log->(`GET_ALL_ITEMS`) RECEIVING item_table = lt_items.",
@@ -404,11 +394,9 @@
       "unsupported statement: CALL METHOD (lv_class)=>(`GET_INSTANCE`) RECEIVING db_handler = lo_db.",
       "unsupported statement: CALL METHOD lo_db->(`LOAD_LOGS_VIA_FILTER`) EXPORTING filter = lo_filter RECEIVING log_table = lt_logs.",
       "unsupported statement: CALL METHOD lo_db->(`SAVE_LOG`) EXPORTING log = lo_log.",
-      "unsupported statement: COMMIT WORK AND WAIT.",
       "unsupported statement: CALL METHOD (lv_class)=>(`GET_INSTANCE`) RECEIVING db_handler = lo_db.",
       "unsupported statement: CALL METHOD lo_db->(`LOAD_LOGS_VIA_FILTER`) EXPORTING filter = lo_filter RECEIVING log_table = lt_logs.",
       "unsupported statement: CALL METHOD lo_db->(`DELETE_LOG`) EXPORTING log = lo_log.",
-      "unsupported statement: COMMIT WORK AND WAIT.",
       "unsupported statement: CALL METHOD (lv_class)=>(`CREATE`) EXPORTING severity = lv_msgty id = ls_log-id number = ls_log-no variable_1 = ls_log-v",
       "unsupported statement: CALL METHOD (lv_class)=>(`CREATE`) EXPORTING severity = lv_msgty text = ls_log-text RECEIVING free_text = lo_item.",
       "unsupported statement: CALL METHOD log->(`ADD_ITEM`) EXPORTING item = lo_item.",
@@ -422,7 +410,7 @@
   {
     "class": "z2ui5_cl_util_api_s",
     "path": "00/03/02/z2ui5_cl_util_api_s.js",
-    "todos": 110,
+    "todos": 107,
     "todoDetails": [
       "unsupported statement: CALL METHOD (lv_class)=>(`GET_USER_BUSINESS_PARTNER_ID`) RECEIVING rv_business_partner_id = lv_result.",
       "unsupported statement: CALL METHOD elemdescr->(`GET_DDIC_FIXED_VALUES`) EXPORTING p_langu = lv_langu RECEIVING p_fixed_values = lt_values EXCEP",
@@ -483,7 +471,6 @@
       "unsupported statement: CREATE DATA lr_handles TYPE ('BAL_T_LOGH').",
       "unsupported statement: ASSIGN lr_handles->* TO <handles>.",
       "unsupported statement: CALL FUNCTION lv_fm EXPORTING i_t_log_handle = <handles> EXCEPTIONS OTHERS = 1.",
-      "unsupported statement: COMMIT WORK AND WAIT.",
       "unsupported statement: ASSIGN lr_handles->* TO <handles>.",
       "unsupported statement: CREATE DATA lr_single TYPE ('BAL_T_LOGH').",
       "unsupported statement: ASSIGN lr_single->* TO <single>.",
@@ -495,10 +482,8 @@
       "unsupported statement: CALL FUNCTION lv_fm EXPORTING i_s_msg_handle = <mh> IMPORTING e_s_msg = <msg> EXCEPTIONS OTHERS = 1.",
       "unsupported statement: ASSIGN lr_handles->* TO <handles>.",
       "unsupported statement: CALL FUNCTION lv_fm EXPORTING i_t_log_handle = <handles> EXCEPTIONS OTHERS = 1.",
-      "unsupported statement: COMMIT WORK AND WAIT.",
       "unsupported statement: ASSIGN lr_filter->* TO <filter>.",
       "unsupported statement: CALL FUNCTION lv_fm EXPORTING i_s_log_filter = <filter> EXCEPTIONS OTHERS = 1.",
-      "unsupported statement: COMMIT WORK AND WAIT.",
       "unsupported statement: CREATE DATA lr_msg TYPE ('BAL_S_MSG').",
       "unsupported statement: ASSIGN lr_msg->* TO <msg>.",
       "unsupported statement: CALL FUNCTION lv_fm EXPORTING i_log_handle = handle i_s_msg = <msg> EXCEPTIONS OTHERS = 1.",
@@ -710,7 +695,7 @@
   {
     "class": "z2ui5_cl_util",
     "path": "00/03/z2ui5_cl_util.js",
-    "todos": 228,
+    "todos": 225,
     "todoDetails": [
       "unsupported statement: ASSIGN val->* TO <any>.",
       "unsupported statement: ASSIGN from->* TO <from>.",
@@ -846,7 +831,6 @@
       "unsupported statement: CALL METHOD (lv_cls)=>(`GET_INSTANCE`) RECEIVING db_handler = lo_db_c.",
       "unsupported statement: CALL METHOD lo_db_c->(`LOAD_LOGS_VIA_FILTER`) EXPORTING filter = lo_filter_c RECEIVING log_table = lt_logs_c.",
       "unsupported statement: CALL METHOD lo_db_c->(`DELETE_LOG`) EXPORTING log = lo_log_c.",
-      "unsupported statement: COMMIT WORK AND WAIT.",
       "unsupported statement: CREATE DATA lr_filter TYPE ('BAL_S_LFIL').",
       "unsupported statement: ASSIGN lr_filter->* TO <filter>.",
       "unsupported statement: CREATE DATA lr_rline LIKE LINE OF <range>.",
@@ -856,7 +840,6 @@
       "unsupported statement: CREATE DATA lr_rline LIKE LINE OF <range>.",
       "unsupported statement: ASSIGN lr_rline->* TO <rline>.",
       "unsupported statement: CALL FUNCTION lv_fm EXPORTING i_s_log_filter = <filter> EXCEPTIONS OTHERS = 1.",
-      "unsupported statement: COMMIT WORK AND WAIT.",
       "unsupported statement: CALL METHOD (lv_xco)=>(`TRANSPORT`) EXPORTING iv_transport = lv_trkorr_c RECEIVING ro_transport = lo_transport.",
       "unsupported statement: CALL METHOD lo_transport->(`OBJECTS`) RECEIVING ro_objects = lo_objects_api.",
       "unsupported statement: CALL METHOD lo_objects_api->(`ALL`) RECEIVING ro_all = lo_all.",
@@ -930,7 +913,6 @@
       "unsupported statement: CALL METHOD lo_mail->(`SET_DOCUMENT`) EXPORTING i_document = lo_doc.",
       "unsupported statement: CALL METHOD lo_mail->(`SET_SEND_IMMEDIATELY`) EXPORTING i_send_immediately = abap_true.",
       "unsupported statement: CALL METHOD lo_mail->(`SEND`) RECEIVING result = result.",
-      "unsupported statement: COMMIT WORK AND WAIT.",
       "unresolved class reference: cl_abap_char_utilities",
       "unresolved class reference: cl_abap_classdescr",
       "unresolved class reference: cl_abap_datadescr",
@@ -954,15 +936,9 @@
   {
     "class": "z2ui5_cl_core_srv_draft",
     "path": "01/01/z2ui5_cl_core_srv_draft.js",
-    "todos": 9,
+    "todos": 3,
     "todoDetails": [
       "unsupported statement: DELETE FROM z2ui5_t_01 WHERE timestampl < @lv_n_hours_ago .",
-      "unsupported statement: COMMIT WORK.",
-      "unsupported statement: MODIFY z2ui5_t_01 FROM @ls_db.",
-      "unsupported statement: COMMIT WORK AND WAIT.",
-      "unsupported statement: SELECT SINGLE * FROM z2ui5_t_01 WHERE id = @id INTO @result .",
-      "unsupported statement: SELECT SINGLE id, id_prev, id_prev_app, id_prev_app_stack FROM z2ui5_t_01 WHERE id = @id INTO CORRESPONDING FIELDS OF @r",
-      "unsupported statement: SELECT SINGLE id FROM z2ui5_t_01 WHERE id = @id INTO @DATA(lv_id) .",
       "unsupported statement: SELECT COUNT( * ) FROM z2ui5_t_01 INTO @result.",
       "unresolved class reference: z2ui5_cl_exit"
     ]

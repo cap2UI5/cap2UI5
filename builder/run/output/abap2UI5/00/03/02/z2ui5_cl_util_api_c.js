@@ -3,6 +3,7 @@
 // TODO(abap2js): unresolved reference cx_sy_dyn_call_illegal_class — add require manually
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cx_util_error = require("abap2UI5/z2ui5_cx_util_error");
+const z2ui5_port = require("abap2UI5/z2ui5_port");
 
 class z2ui5_cl_util_api_c {
   static gv_check_cloud = false;
@@ -481,7 +482,7 @@ class z2ui5_cl_util_api_c {
       lv_class = `CL_BALI_LOG_DB`;
       // TODO(abap2js): CALL METHOD (lv_class)=>(`GET_INSTANCE`) RECEIVING db_handler = lo_db.
       // TODO(abap2js): CALL METHOD lo_db->(`SAVE_LOG`) EXPORTING log = lo_log.
-      // TODO(abap2js): COMMIT WORK AND WAIT.
+      z2ui5_port.db({ op: `commit` });
     } catch (error) {
       return;
     }
@@ -579,7 +580,7 @@ class z2ui5_cl_util_api_c {
       lo_log = z2ui5_cl_util.abap_copy(lt_logs[(1) - 1]);
       z2ui5_cl_util_api_c.bal_add_items({ log: lo_log, t_log });
       // TODO(abap2js): CALL METHOD lo_db->(`SAVE_LOG`) EXPORTING log = lo_log.
-      // TODO(abap2js): COMMIT WORK AND WAIT.
+      z2ui5_port.db({ op: `commit` });
     } catch (error) {
       z2ui5_cl_util_api_c.bal_create({ object, subobject, id, t_log });
     }
@@ -601,7 +602,7 @@ class z2ui5_cl_util_api_c {
         sy_tabix++;
         // TODO(abap2js): CALL METHOD lo_db->(`DELETE_LOG`) EXPORTING log = lo_log.
       }
-      // TODO(abap2js): COMMIT WORK AND WAIT.
+      z2ui5_port.db({ op: `commit` });
     } catch (error) {
       return;
     }

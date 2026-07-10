@@ -3,6 +3,7 @@
 // TODO(abap2js): unresolved reference cx_sy_dyn_call_illegal_class — add require manually
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cx_util_error = require("abap2UI5/z2ui5_cx_util_error");
+const z2ui5_port = require("abap2UI5/z2ui5_port");
 
 class z2ui5_cl_util_api_s {
   static gv_check_cloud = false;
@@ -455,7 +456,7 @@ class z2ui5_cl_util_api_s {
       lv_fm = `BAL_DB_SAVE`;
       // TODO(abap2js): CALL FUNCTION lv_fm EXPORTING i_t_log_handle = <handles> EXCEPTIONS OTHERS = 1.
       if (sy_subrc === 0) {
-        // TODO(abap2js): COMMIT WORK AND WAIT.
+        z2ui5_port.db({ op: `commit` });
       }
     } catch (lx_create) {
       throw new z2ui5_cx_util_error({ val: lx_create });
@@ -550,7 +551,7 @@ class z2ui5_cl_util_api_s {
       lv_fm = `BAL_DB_SAVE`;
       // TODO(abap2js): CALL FUNCTION lv_fm EXPORTING i_t_log_handle = <handles> EXCEPTIONS OTHERS = 1.
       if (sy_subrc === 0) {
-        // TODO(abap2js): COMMIT WORK AND WAIT.
+        z2ui5_port.db({ op: `commit` });
       }
     } catch (lx_update) {
       throw new z2ui5_cx_util_error({ val: lx_update });
@@ -569,7 +570,7 @@ class z2ui5_cl_util_api_s {
       lv_fm = `BAL_DB_DELETE`;
       // TODO(abap2js): CALL FUNCTION lv_fm EXPORTING i_s_log_filter = <filter> EXCEPTIONS OTHERS = 1.
       if (sy_subrc === 0) {
-        // TODO(abap2js): COMMIT WORK AND WAIT.
+        z2ui5_port.db({ op: `commit` });
       }
     } catch (lx_delete) {
       throw new z2ui5_cx_util_error({ val: lx_delete });
