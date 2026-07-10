@@ -90,18 +90,48 @@ Step-2 (porter):
 
 TODO count across the tree: **973 → 769** so far.
 
-## Finding: "clean transpile" ≠ "safe to prune"
+## Finding: base pruning is gated on adaptations the transpiler drops — and the test suite does NOT catch them
 
-Removing all 64 base classes that now transpile with **zero TODOs** and letting
-the transpile fill in produced **17 load-gate failures** (transpiled popups
-`extends` an unresolved superclass) and **29 test failures** even among the
-loadable ones — foundational glue classes (`z2ui5_if_app`, `z2ui5_if_client`,
-`z2ui5_cl_srt_*`, `util_log`, …) hand-ported behaviour the transpiler does not
-yet reproduce. So base pruning is **not** gated on TODO count; it is gated on
-per-class behavioural equivalence, proven by the jest + smoke suite. Prune a
-class only after its transpiled form load-gates AND keeps the suite green;
-expect most to need a targeted transpiler fix first (superclass/interface glue,
-RTTI, asset-string fidelity).
+Two rounds of evidence:
+
+**Round 1 — the interface cascade.** Removing all 64 zero-TODO base classes at
+once gave 17 load-gate + 29 test failures. Root cause: the ABAP *interfaces*
+(`z2ui5_if_app`, `z2ui5_if_client`, `z2ui5_if_types`, `z2ui5_if_exit`,
+`z2ui5_if_core_types`) transpile to a plain `const x = {…}` object, not a class,
+so everything that `extends` them breaks. These interface hand-ports are
+load-bearing glue and must stay in base.
+
+**Round 2 — silent regressions behind a green suite.** Keeping the interfaces +
+`srt_*` + a couple of utils, **53 classes could be pruned with the full jest +
+smoke suite staying 100% green (216/216)**. But inspecting the byte diffs shows
+the green suite is *not sufficient* — the hand-ports carry CAP adaptations the
+transpile drops and no test exercises:
+
+- `z2ui5_cl_app_*_css/_js/_html/_json/_xml` (≈35 classes) — the hand-port serves
+  the **real asset from disk** (`fs.readFileSync(app/z2ui5/webapp/…)`); the
+  transpile returns the ABAP inline placeholder string and even a different API
+  (`get_source()` → `get()`). Swapping them silently replaces real assets.
+- `z2ui5_cl_pop_*` — the hand-port wires ABAP `PREFERRED PARAMETER` positional
+  calls via `z2ui5_pop_preferred_param`; the transpile drops it. It also wraps
+  `this.client = abap_copy(client)` (deep-copying the live client) — needs an
+  audit.
+- `z2ui5_cl_app_hello_world` — hand-port button text `Send` vs upstream `Post`.
+
+**Conclusion.** "Zero TODOs" and "green suite" are both necessary but **not
+sufficient** to prune. A class is safe to remove only once the transpiler
+reproduces its adaptation, or the adaptation is proven irrelevant. Bulk pruning
+was therefore reverted, not committed.
+
+### Prunability backlog (what each class needs first)
+
+- **Interfaces / glue** (`if_*`): keep — needs a class-from-interface strategy.
+- **Frontend assets** (`01/03/*_css/_js/…`): keep — disk-backed CAP adaptation,
+  not derivable from the ABAP inline string. Different problem than transpiling.
+- **Popups** (`z2ui5_cl_pop_*`): teach the emitter to emit the
+  `PREFERRED PARAMETER` wiring, and audit `abap_copy` on live objects; then they
+  become faithful and prunable.
+- **RTTI** (`srt_*`) / **util_log / util_json_fltr**: keep until behavioural
+  equivalence is shown per class.
 
 ## Verification discipline (every change)
 
