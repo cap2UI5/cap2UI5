@@ -11,6 +11,7 @@ const z2ui5_cl_ajson = require("abap2UI5/z2ui5_cl_ajson");
 const z2ui5_cl_util_api = require("abap2UI5/z2ui5_cl_util_api");
 const z2ui5_cl_util_msg = require("abap2UI5/z2ui5_cl_util_msg");
 const z2ui5_cx_util_error = require("abap2UI5/z2ui5_cx_util_error");
+const z2ui5_port = require("abap2UI5/z2ui5_port");
 
 class z2ui5_cl_util extends z2ui5_cl_util_api {
   static mt_bool_cache = [];
@@ -2869,7 +2870,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
           sy_tabix++;
           // TODO(abap2js): CALL METHOD lo_db_c->(`DELETE_LOG`) EXPORTING log = lo_log_c.
         }
-        // TODO(abap2js): COMMIT WORK AND WAIT.
+        z2ui5_port.db({ op: `commit` });
       } catch (error) {
       }
       return;
@@ -2953,7 +2954,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
       lv_fm = `BAL_DB_DELETE`;
       // TODO(abap2js): CALL FUNCTION lv_fm EXPORTING i_s_log_filter = <filter> EXCEPTIONS OTHERS = 1.
       if (sy_subrc === 0) {
-        // TODO(abap2js): COMMIT WORK AND WAIT.
+        z2ui5_port.db({ op: `commit` });
       }
     } catch (error) {
     }
@@ -3734,7 +3735,7 @@ class z2ui5_cl_util extends z2ui5_cl_util_api {
       // TODO(abap2js): CALL METHOD lo_mail->(`SET_DOCUMENT`) EXPORTING i_document = lo_doc.
       // TODO(abap2js): CALL METHOD lo_mail->(`SET_SEND_IMMEDIATELY`) EXPORTING i_send_immediately = abap_true.
       // TODO(abap2js): CALL METHOD lo_mail->(`SEND`) RECEIVING result = result.
-      // TODO(abap2js): COMMIT WORK AND WAIT.
+      z2ui5_port.db({ op: `commit` });
     } catch (error) {
       result = false;
     }

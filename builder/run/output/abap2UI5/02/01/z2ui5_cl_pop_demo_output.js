@@ -87,9 +87,100 @@ class z2ui5_cl_pop_demo_output extends z2ui5_if_app {
 
   get_style() {
     let result = ``;
-    result = `<html:style type="text/css">` + ` ` + ` body {` + ` ` + ` font-family: Arial;` + ` ` + ` font-size: 90%;` + ` ` + ` }` + ` ` + ` table {` + ` ` + ` font-family: Arial;` + ` ` + ` font-size: 90%;` + ` ` + ` }` + ` ` + ` caption {` + ` ` + ` font-family: Arial;` + ` ` + ` font-size: 90%;` + ` ` + ` font-weight: bold;` + ` ` + ` text-align: left;` + ` ` + ` }` + ` ` + ` span.heading1 {` + ` ` + ` font-size: 150%;` + ` ` + ` color: #000080;` + ` ` + ` font-weight: bold;` + ` ` + ` }` + ` ` + ` span.heading2 {` + ` ` + ` font-size: 135%;` + ` ` + ` color: #000080;` + ` ` + ` font-weight: bold;` + ` ` + ` }` + ` ` + ` span.heading3 {` + ` ` + ` font-size: 120%;` + ` ` + ` color: #000080;` + ` ` + ` font-weight: bold;` + ` ` + ` }` + ` ` + ` span.heading4 {` + ` ` + ` font-size: 105%;` + ` ` + ` color: #000080;` + ` ` + ` font-weight: bold;` + ` ` + ` }` + ` ` + ` span.normal {` + ` ` + ` font-family: Arial;` + ` ` + ` font-size: 100%;` + ` ` + ` color: #000000;` + ` ` + ` font-weight: normal;` + ` ` + ` white-space: pre;` + ` ` + ` }` + ` ` + ` span.nonprop {` + ` ` + ` font-family: Courier New;` + ` ` + ` font-size: 100%;` + ` ` + ` color: #000000;` + ` ` + ` font-weight: 400;` + ` ` + ` white-space: pre;` + ` ` + ` }` + ` ` + ` span.nowrap {` + ` ` + ` white-space: nowrap;` + ` ` + ` }` + ` ` + ` span.nprpnwrp {` + ` ` + ` font-family: Courier New;` + ` ` + ` font-size: 100%;` + ` ` + ` color: #000000;` + ` ` + ` font-weight: 400;` + ` ` + ` white-space: nowrap;` + ` ` + ` }` + ` ` + ` tr.header {` + ` ` + ` background-color: #D1D1D1;` + ` ` + ` }` + ` ` + ` tr.body {` + ` ` + ` background-color: #F4F4F4;` + ` ` + ` }` + ` ` + ` th {` + ` ` + ` text-align: left;` + ` ` + ` }` + ` ` + ` table.nested_table {` + ` ` + ` border: 1px solid #D1D1D1;` + ` ` + ` border-collapse: collapse;` + ` ` + ` padding: 4px;` + ` ` + ` text-align: center;` + ` ` + ` }` + ` ` + ` .nested_table td {` + ` ` + ` border: 1px solid #D1D1D1;` + ` ` + ` border-collapse: collapse;` + ` ` + ` padding: 4px;` + ` ` + ` text-align: left;` + ` ` + ` }` + ` ` + ` .nested_table th {` + ` ` + ` border: 1px solid #D1D1D1;` + ` ` + ` border-collapse: collapse;` + ` ` + ` background-color: #D1D1D1;` + ` ` + ` padding: 4px;` + ` ` + ` }` + ` ` + `</html:style>`;
+    result = `<html:style type="text/css">` + `
+` + `  body {` + `
+` + `    font-family: Arial;` + `
+` + `    font-size: 90%;` + `
+` + `  }` + `
+` + `  table {` + `
+` + `    font-family: Arial;` + `
+` + `    font-size: 90%;` + `
+` + `  }` + `
+` + `  caption {` + `
+` + `    font-family: Arial;` + `
+` + `    font-size: 90%;` + `
+` + `    font-weight: bold;` + `
+` + `    text-align: left;` + `
+` + `  }` + `
+` + `  span.heading1 {` + `
+` + `    font-size: 150%;` + `
+` + `    color: #000080;` + `
+` + `    font-weight: bold;` + `
+` + `  }` + `
+` + `  span.heading2 {` + `
+` + `    font-size: 135%;` + `
+` + `    color: #000080;` + `
+` + `    font-weight: bold;` + `
+` + `  }` + `
+` + `  span.heading3 {` + `
+` + `    font-size: 120%;` + `
+` + `    color: #000080;` + `
+` + `    font-weight: bold;` + `
+` + `  }` + `
+` + `  span.heading4 {` + `
+` + `    font-size: 105%;` + `
+` + `    color: #000080;` + `
+` + `    font-weight: bold;` + `
+` + `  }` + `
+` + `  span.normal {` + `
+` + `    font-family: Arial;` + `
+` + `    font-size: 100%;` + `
+` + `    color: #000000;` + `
+` + `    font-weight: normal;` + `
+` + `    white-space: pre;` + `
+` + `  }` + `
+` + `  span.nonprop {` + `
+` + `    font-family: Courier New;` + `
+` + `    font-size: 100%;` + `
+` + `    color: #000000;` + `
+` + `    font-weight: 400;` + `
+` + `    white-space: pre;` + `
+` + `  }` + `
+` + `  span.nowrap {` + `
+` + `    white-space: nowrap;` + `
+` + `  }` + `
+` + `  span.nprpnwrp {` + `
+` + `    font-family: Courier New;` + `
+` + `    font-size: 100%;` + `
+` + `    color: #000000;` + `
+` + `    font-weight: 400;` + `
+` + `    white-space: nowrap;` + `
+` + `  }` + `
+` + `  tr.header {` + `
+` + `    background-color: #D1D1D1;` + `
+` + `  }` + `
+` + `  tr.body {` + `
+` + `    background-color: #F4F4F4;` + `
+` + `  }` + `
+` + `  th {` + `
+` + `    text-align: left;` + `
+` + `  }` + `
+` + `  table.nested_table {` + `
+` + `    border: 1px solid #D1D1D1;` + `
+` + `    border-collapse: collapse;` + `
+` + `    padding: 4px;` + `
+` + `    text-align: center;` + `
+` + `  }` + `
+` + `  .nested_table td {` + `
+` + `    border: 1px solid #D1D1D1;` + `
+` + `    border-collapse: collapse;` + `
+` + `    padding: 4px;` + `
+` + `    text-align: left;` + `
+` + `  }` + `
+` + `  .nested_table th {` + `
+` + `    border: 1px solid #D1D1D1;` + `
+` + `    border-collapse: collapse;` + `
+` + `    background-color: #D1D1D1;` + `
+` + `    padding: 4px;` + `
+` + `  }` + `
+` + `</html:style>`;
     return result;
   }
 }
+
+// abap PREFERRED PARAMETER call style — see z2ui5_pop_preferred_param.js
+require("./z2ui5_pop_preferred_param")(z2ui5_cl_pop_demo_output, {
+  factory: { preferred: `i_output`, params: [`i_output`, `i_title`, `i_icon`, `i_button_text`, `i_stretch`, `i_as_page`] },
+});
 
 module.exports = z2ui5_cl_pop_demo_output;

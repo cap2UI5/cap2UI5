@@ -6,6 +6,7 @@
 // TODO(abap2js): unresolved reference cx_sy_dyn_call_illegal_class — add require manually
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cx_util_error = require("abap2UI5/z2ui5_cx_util_error");
+const z2ui5_port = require("abap2UI5/z2ui5_port");
 
 class z2ui5_cl_util_ext {
   static rtti_get_class_descr_on_cloud({ i_classname } = {}) {
@@ -111,7 +112,6 @@ class z2ui5_cl_util_ext {
     let obj = null;
     let lv_tabname = ``;
     let lr_ddfields = null;
-    // TODO(abap2js): TYPES ty_c30 TYPE c LENGTH 30.
     let names = [];
     lv_tabname = z2ui5_cl_util.abap_copy(tabname);
     try {
@@ -510,7 +510,7 @@ class z2ui5_cl_util_ext {
       if (sy_subrc !== 0) {
         throw new z2ui5_cx_util_error();
       } else {
-        // TODO(abap2js): COMMIT WORK AND WAIT.
+        z2ui5_port.db({ op: `commit` });
       }
     }
   }

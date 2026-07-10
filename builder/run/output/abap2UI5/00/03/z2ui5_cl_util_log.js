@@ -92,7 +92,8 @@ class z2ui5_cl_util_log {
     for (const ls_msg of this.mt_log) {
       sy_tabix++;
       if (result) {
-        result = `${result} `;
+        result = `${result}
+`;
       }
       result = `${result}[${ls_msg.type}] ${ls_msg.text}`;
     }

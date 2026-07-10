@@ -60,4 +60,9 @@ class z2ui5_cl_pop_input_val extends z2ui5_if_app {
   }
 }
 
+// abap PREFERRED PARAMETER call style — see z2ui5_pop_preferred_param.js
+require("./z2ui5_pop_preferred_param")(z2ui5_cl_pop_input_val, {
+  factory: { preferred: `val`, params: [`text`, `val`, `title`, `button_text_confirm`, `button_text_cancel`] },
+});
+
 module.exports = z2ui5_cl_pop_input_val;

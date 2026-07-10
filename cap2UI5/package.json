@@ -32,6 +32,7 @@
     "./z2ui5_cl_util_api_*": "./srv/z2ui5/00/03/02/z2ui5_cl_util_api_*.js",
     "./z2ui5_cl_util_*": "./srv/z2ui5/00/03/z2ui5_cl_util_*.js",
     "./z2ui5_cx_util_error": "./srv/z2ui5/00/03/z2ui5_cx_util_error.js",
+    "./z2ui5_port": "./srv/z2ui5/z2ui5_port.js",
     "./register-apps": "./srv/z2ui5/register-apps.js"
   },
   "dependencies": {

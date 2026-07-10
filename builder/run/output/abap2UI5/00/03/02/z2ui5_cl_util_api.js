@@ -40,14 +40,6 @@ class z2ui5_cl_util_api {
   static rtti_get_t_fixvalues({ elemdescr, langu } = {}) {
     let result = [];
     let sy_tabix = 0;
-    // TODO(abap2js): TYPES BEGIN OF fixvalue,
-    // TODO(abap2js): TYPES low TYPE c LENGTH 10,
-    // TODO(abap2js): TYPES high TYPE c LENGTH 10,
-    // TODO(abap2js): TYPES option TYPE c LENGTH 2,
-    // TODO(abap2js): TYPES ddlanguage TYPE c LENGTH 1,
-    // TODO(abap2js): TYPES ddtext TYPE c LENGTH 60,
-    // TODO(abap2js): TYPES END OF fixvalue.
-    // TODO(abap2js): TYPES fixvalues TYPE STANDARD TABLE OF fixvalue WITH DEFAULT KEY.
     let lt_values = null;
     let lv_langu = ``;
     let temp1 = null;
@@ -174,14 +166,7 @@ class z2ui5_cl_util_api {
     let _fs$fs_description = null;
     let obj = null;
     let lt_implementation_names = [];
-    // TODO(abap2js): TYPES BEGIN OF ty_s_impl.
-    // TODO(abap2js): TYPES clsname TYPE c LENGTH 30.
-    // TODO(abap2js): TYPES refclsname TYPE c LENGTH 30.
-    // TODO(abap2js): TYPES END OF ty_s_impl.
     let lt_impl = [];
-    // TODO(abap2js): TYPES BEGIN OF ty_s_key.
-    // TODO(abap2js): TYPES intkey TYPE c LENGTH 30.
-    // TODO(abap2js): TYPES END OF ty_s_key.
     let ls_key = {};
     // TODO(abap2js): DATA BEGIN OF ls_clskey.
     let clsname = ``;

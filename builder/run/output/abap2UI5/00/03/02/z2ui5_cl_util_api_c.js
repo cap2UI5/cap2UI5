@@ -3,6 +3,7 @@
 // TODO(abap2js): unresolved reference cx_sy_dyn_call_illegal_class — add require manually
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cx_util_error = require("abap2UI5/z2ui5_cx_util_error");
+const z2ui5_port = require("abap2UI5/z2ui5_port");
 
 class z2ui5_cl_util_api_c {
   static gv_check_cloud = false;
@@ -43,14 +44,6 @@ class z2ui5_cl_util_api_c {
   static rtti_get_t_fixvalues({ elemdescr, langu } = {}) {
     let result = [];
     let sy_tabix = 0;
-    // TODO(abap2js): TYPES BEGIN OF fixvalue,
-    // TODO(abap2js): TYPES low TYPE c LENGTH 10,
-    // TODO(abap2js): TYPES high TYPE c LENGTH 10,
-    // TODO(abap2js): TYPES option TYPE c LENGTH 2,
-    // TODO(abap2js): TYPES ddlanguage TYPE c LENGTH 1,
-    // TODO(abap2js): TYPES ddtext TYPE c LENGTH 60,
-    // TODO(abap2js): TYPES END OF fixvalue.
-    // TODO(abap2js): TYPES fixvalues TYPE STANDARD TABLE OF fixvalue WITH DEFAULT KEY.
     let lt_values = null;
     let lv_langu = ``;
     let temp1 = null;
@@ -195,14 +188,7 @@ class z2ui5_cl_util_api_c {
     let lv_dummy;
     let obj = null;
     let lt_implementation_names = [];
-    // TODO(abap2js): TYPES BEGIN OF ty_s_impl.
-    // TODO(abap2js): TYPES clsname TYPE c LENGTH 30.
-    // TODO(abap2js): TYPES refclsname TYPE c LENGTH 30.
-    // TODO(abap2js): TYPES END OF ty_s_impl.
     let lt_impl = [];
-    // TODO(abap2js): TYPES BEGIN OF ty_s_key.
-    // TODO(abap2js): TYPES intkey TYPE c LENGTH 30.
-    // TODO(abap2js): TYPES END OF ty_s_key.
     let ls_key = {};
     // TODO(abap2js): DATA BEGIN OF ls_clskey.
     let clsname = ``;
@@ -496,7 +482,7 @@ class z2ui5_cl_util_api_c {
       lv_class = `CL_BALI_LOG_DB`;
       // TODO(abap2js): CALL METHOD (lv_class)=>(`GET_INSTANCE`) RECEIVING db_handler = lo_db.
       // TODO(abap2js): CALL METHOD lo_db->(`SAVE_LOG`) EXPORTING log = lo_log.
-      // TODO(abap2js): COMMIT WORK AND WAIT.
+      z2ui5_port.db({ op: `commit` });
     } catch (error) {
       return;
     }
@@ -506,10 +492,6 @@ class z2ui5_cl_util_api_c {
     let result = [];
     let sy_tabix = 0;
     let ls_msg;
-    // TODO(abap2js): TYPES BEGIN OF ty_item,
-    // TODO(abap2js): TYPES log_item_number TYPE i,
-    // TODO(abap2js): TYPES item TYPE REF TO object,
-    // TODO(abap2js): TYPES END OF ty_item.
     let lt_items = [];
     let lo_filter = null;
     let lo_db = null;
@@ -598,7 +580,7 @@ class z2ui5_cl_util_api_c {
       lo_log = z2ui5_cl_util.abap_copy(lt_logs[(1) - 1]);
       z2ui5_cl_util_api_c.bal_add_items({ log: lo_log, t_log });
       // TODO(abap2js): CALL METHOD lo_db->(`SAVE_LOG`) EXPORTING log = lo_log.
-      // TODO(abap2js): COMMIT WORK AND WAIT.
+      z2ui5_port.db({ op: `commit` });
     } catch (error) {
       z2ui5_cl_util_api_c.bal_create({ object, subobject, id, t_log });
     }
@@ -620,7 +602,7 @@ class z2ui5_cl_util_api_c {
         sy_tabix++;
         // TODO(abap2js): CALL METHOD lo_db->(`DELETE_LOG`) EXPORTING log = lo_log.
       }
-      // TODO(abap2js): COMMIT WORK AND WAIT.
+      z2ui5_port.db({ op: `commit` });
     } catch (error) {
       return;
     }

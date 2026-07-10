@@ -24,7 +24,7 @@ class z2ui5_cl_util_xml {
     let result = null;
     const lo_child = new z2ui5_cl_util_xml();
     lo_child.mv_name = z2ui5_cl_util.abap_copy(n);
-    lo_child.mv_ns = false /* TODO(abap2js): NS */;
+    lo_child.mv_ns = z2ui5_cl_util.abap_copy(ns);
     lo_child.mt_prop = z2ui5_cl_util.abap_copy(p);
     if (a) {
       lo_child.mt_prop.push({ n: a, v: v });
@@ -40,14 +40,14 @@ class z2ui5_cl_util_xml {
   _({ n, ns, a, v, p } = {}) {
     let result = null;
     result = z2ui5_cl_util.abap_copy(this);
-    this.__({ n, ns: false /* TODO(abap2js): NS */, a, v, p });
+    this.__({ n, ns, a, v, p });
     return result;
   }
 
   _if({ when, n, ns, a, v, p } = {}) {
     let result = null;
     if ((when === true || when === `X`)) {
-      this.__({ n, ns: false /* TODO(abap2js): NS */, a, v, p });
+      this.__({ n, ns, a, v, p });
     }
     result = z2ui5_cl_util.abap_copy(this);
     return result;
@@ -56,7 +56,7 @@ class z2ui5_cl_util_xml {
   __if({ when, n, ns, a, v, p } = {}) {
     let result = null;
     if ((when === true || when === `X`)) {
-      result = this.__({ n, ns: false /* TODO(abap2js): NS */, a, v, p });
+      result = this.__({ n, ns, a, v, p });
     } else {
       result = z2ui5_cl_util.abap_copy(this);
     }
@@ -107,7 +107,8 @@ class z2ui5_cl_util_xml {
       } else {
         this.xml_get_parts_indent({ iv_depth: { ct_parts: lt_parts } });
       }
-      result = lt_parts.join(` `);
+      result = lt_parts.join(`
+`);
     } else {
       if ((from_root === true || from_root === `X`)) {
         this.mo_root.xml_get_parts({ ct_parts: lt_parts });

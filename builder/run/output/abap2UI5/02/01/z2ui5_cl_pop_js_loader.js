@@ -66,4 +66,9 @@ class z2ui5_cl_pop_js_loader extends z2ui5_if_app {
   }
 }
 
+// abap PREFERRED PARAMETER call style — see z2ui5_pop_preferred_param.js
+require("./z2ui5_pop_preferred_param")(z2ui5_cl_pop_js_loader, {
+  factory: { preferred: `i_js`, params: [`i_js`, `i_result`] },
+});
+
 module.exports = z2ui5_cl_pop_js_loader;

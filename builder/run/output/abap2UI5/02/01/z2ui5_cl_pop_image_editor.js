@@ -74,4 +74,9 @@ class z2ui5_cl_pop_image_editor extends z2ui5_if_app {
   }
 }
 
+// abap PREFERRED PARAMETER call style — see z2ui5_pop_preferred_param.js
+require("./z2ui5_pop_preferred_param")(z2ui5_cl_pop_image_editor, {
+  factory: { preferred: `iv_image`, params: [`iv_image`, `iv_title`, `iv_cancel_text`, `iv_save_text`, `iv_customshapesrc`, `iv_keepcropaspectratio`, `iv_keepresizeaspectratio`, `iv_scalecroparea`, `iv_customshapesrctype`, `iv_enabledbuttons`, `iv_mode`] },
+});
+
 module.exports = z2ui5_cl_pop_image_editor;
