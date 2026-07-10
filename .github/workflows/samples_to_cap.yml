@@ -1,6 +1,6 @@
 name: samples to CAP
 
-# Copy output/samples into cap2UI5/srv/app/samples (flattened, overwrite,
+# Copy tools/run/output/samples into cap2UI5/srv/app/samples (flattened, overwrite,
 # upstream deletions pruned). Jest gates the commit. Step 3 of update_samples.
 
 on:

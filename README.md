@@ -197,7 +197,7 @@ project — tables, popups, layouts, drafts and more. Browse them under
 | [`cap2UI5/`](cap2UI5/) | **the CAP project** — install, run and develop your apps here |
 | [`docs/`](docs/) | internals documentation |
 | [`tools/`](tools/) | dev tooling: ABAP→JS transpiler, sync scripts, jest suite |
-| `input/`, `output/` | artifacts of the sync pipeline (mirrored upstream sources and transpiled output) |
+| `tools/run/input/`, `tools/run/output/` | artifacts of the sync pipeline (mirrored upstream sources and transpiled output) |
 
 ## How this repository is built
 

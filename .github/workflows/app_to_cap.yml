@@ -1,7 +1,7 @@
 name: app to CAP
 
-# Build the ready-to-serve frontend (input/abap2UI5/app/webapp + the two
-# cap2UI5 patches -> output/app) and copy it into cap2UI5/app/z2ui5/webapp
+# Build the ready-to-serve frontend (tools/run/input/abap2UI5/app/webapp + the two
+# cap2UI5 patches -> tools/run/output/app) and copy it into cap2UI5/app/z2ui5/webapp
 # (replaced 1:1). Jest gates the commit. Step 2 of the update_frontend pipeline.
 
 on:
@@ -31,7 +31,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add output/app cap2UI5/app/z2ui5/webapp
+          git add tools/run/output/app cap2UI5/app/z2ui5/webapp
           if git diff --cached --quiet; then
             echo "nothing to commit"
           else

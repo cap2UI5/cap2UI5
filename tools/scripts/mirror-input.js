@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 /**
- * mirror-input — snapshots an upstream repository into input/<dir>/ so the
+ * mirror-input — snapshots an upstream repository into tools/run/input/<dir>/ so the
  * transpile/copy steps work on a versioned, reviewable copy.
  *
- *   node tools/scripts/mirror-input.js abap2UI5   → input/abap2UI5/src        (backend)
- *   node tools/scripts/mirror-input.js app        → input/abap2UI5/app/webapp (frontend)
- *   node tools/scripts/mirror-input.js samples    → input/samples/            (whole cloud branch)
+ *   node tools/scripts/mirror-input.js abap2UI5   → tools/run/input/abap2UI5/src        (backend)
+ *   node tools/scripts/mirror-input.js app        → tools/run/input/abap2UI5/app/webapp (frontend)
+ *   node tools/scripts/mirror-input.js samples    → tools/run/input/samples/            (whole cloud branch)
  *
  * The three streams mirror independently: backend and frontend both come from
- * the abap2UI5 repo but touch disjoint subtrees of input/abap2UI5/, so they can
+ * the abap2UI5 repo but touch disjoint subtrees of tools/run/input/abap2UI5/, so they can
  * run in any order without clobbering each other. samples comes from the cloud
  * branch (rebuilt by its auto_cloud workflow on every push to standard) — it
  * already excludes the on-premise-only apps under src/00, which cannot run in
@@ -16,11 +16,11 @@
  *
  * Wipe policy:
  *   - A source WITH `paths` refreshes only those subtrees (each is removed and
- *     recopied), leaving the rest of input/<dir>/ untouched.
+ *     recopied), leaving the rest of tools/run/input/<dir>/ untouched.
  *   - A source WITHOUT `paths` mirrors its ENTIRE checkout (everything except
- *     .git) and wipes input/<dir>/ first, so upstream deletions propagate.
+ *     .git) and wipes tools/run/input/<dir>/ first, so upstream deletions propagate.
  *
- * The upstream commit is recorded in input/<dir>/UPSTREAM_COMMIT.
+ * The upstream commit is recorded in tools/run/input/<dir>/UPSTREAM_COMMIT.
  * Set MIRROR_SOURCE=/path/to/checkout to use a local copy instead of cloning
  * (the checkout is used as-is; the branch config is not applied then).
  */
@@ -48,7 +48,7 @@ if (!cfg) {
 }
 
 const root = path.join(__dirname, "..", "..");
-const dest = path.join(root, "input", cfg.dir);
+const dest = path.join(root, "tools", "run", "input", cfg.dir);
 const tmp = path.join(root, ".mirror_tmp");
 
 let source = process.env.MIRROR_SOURCE;
@@ -62,7 +62,7 @@ if (!source) {
 const commit = execSync("git rev-parse HEAD", { cwd: source }).toString().trim();
 
 if (cfg.paths) {
-  // Refresh only the configured subtrees; leave the rest of input/<dir> alone.
+  // Refresh only the configured subtrees; leave the rest of tools/run/input/<dir> alone.
   for (const p of cfg.paths) {
     const from = path.join(source, p);
     if (!fs.existsSync(from)) {
@@ -75,7 +75,7 @@ if (cfg.paths) {
     fs.cpSync(from, to, { recursive: true });
   }
 } else {
-  // Whole-checkout mirror: wipe input/<dir> so upstream deletions propagate.
+  // Whole-checkout mirror: wipe tools/run/input/<dir> so upstream deletions propagate.
   fs.rmSync(dest, { recursive: true, force: true });
   for (const p of fs.readdirSync(source).filter((e) => e !== ".git")) {
     fs.cpSync(path.join(source, p), path.join(dest, p), { recursive: true });
@@ -85,4 +85,4 @@ fs.mkdirSync(dest, { recursive: true });
 fs.writeFileSync(path.join(dest, "UPSTREAM_COMMIT"), commit + "\n");
 
 fs.rmSync(tmp, { recursive: true, force: true });
-console.log(`input/${cfg.dir} (${name}) updated from ${name}@${commit.slice(0, 12)} (${source === tmp ? cfg.url : source})`);
+console.log(`tools/run/input/${cfg.dir} (${name}) updated from ${name}@${commit.slice(0, 12)} (${source === tmp ? cfg.url : source})`);

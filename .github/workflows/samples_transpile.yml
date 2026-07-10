@@ -1,6 +1,6 @@
 name: samples transpile
 
-# Transpile all sample classes from input/samples/src into output/samples
+# Transpile all sample classes from tools/run/input/samples/src into tools/run/output/samples
 # (+ transpile report). Step 2 of the update_samples pipeline.
 
 on:
@@ -28,11 +28,11 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add output/samples
+          git add tools/run/output/samples
           if git diff --cached --quiet; then
             echo "nothing to commit"
           else
-            git commit -m "transpile: update output/samples ($(cut -c1-12 input/samples/UPSTREAM_COMMIT))"
+            git commit -m "transpile: update tools/run/output/samples ($(cut -c1-12 tools/run/input/samples/UPSTREAM_COMMIT))"
             git pull --rebase origin "${{ github.ref_name }}"
             git push origin "HEAD:${{ github.ref_name }}"
           fi

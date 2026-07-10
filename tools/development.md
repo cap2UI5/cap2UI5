@@ -27,10 +27,11 @@ repo weekly and only relies on the two framework hooks
 `z2ui5_cl_util.register_app_class()` and
 `z2ui5_cl_core_srv_draft.set_store()`.
 
-Three paths are wired to external repositories and must never be moved:
-`input/abap2UI5/` (the abap2UI5 repo pushes snapshots into it via deploy
-key), `input/samples/` (refreshed by the pipeline from abap2UI5/samples),
-and `cap2UI5/` (mirrored by web-cap2UI5).
+Three paths are wired to external repositories: `tools/run/input/abap2UI5/`
+(the abap2UI5 repo pushes snapshots into it via deploy key),
+`tools/run/input/samples/` (refreshed by the pipeline from abap2UI5/samples),
+and `cap2UI5/` (mirrored by web-cap2UI5). If these paths move, the external
+deploy keys and pipelines that target them must be updated to match.
 
 ## Dev tooling
 
@@ -41,10 +42,10 @@ Everything that is not deployed with the CAP project lives under
 |---|---|
 | `npm test` | jest suite (backend units, sample apps, transpiler) |
 | `npm run transpile` | abap2js — transpile ABAP classes to JS (parser: [@abaplint/core](https://github.com/abaplint/abaplint)) |
-| `npm run mirror_abap2ui5` / `mirror_app` / `mirror_samples` | snapshot upstream into `input/` (backend `src/`, frontend `app/webapp`, whole samples cloud branch) |
-| `npm run transpile_abap2ui5` / `transpile_samples` | transpile `input/*/src` → `output/` |
-| `npm run prepare_app` | `input/abap2UI5/app/webapp` → `output/app` (+ patches) |
-| `npm run copy_abap2ui5` / `copy_samples` / `copy_app` | copy one `output/` tree → cap2UI5 project (fill-in / overwrite / replace); `copy_into_cap` (no arg) does all three |
+| `npm run mirror_abap2ui5` / `mirror_app` / `mirror_samples` | snapshot upstream into `tools/run/input/` (backend `src/`, frontend `app/webapp`, whole samples cloud branch) |
+| `npm run transpile_abap2ui5` / `transpile_samples` | transpile `tools/run/input/*/src` → `tools/run/output/` |
+| `npm run prepare_app` | `tools/run/input/abap2UI5/app/webapp` → `tools/run/output/app` (+ patches) |
+| `npm run copy_abap2ui5` / `copy_samples` / `copy_app` | copy one `tools/run/output/` tree → cap2UI5 project (fill-in / overwrite / replace); `copy_into_cap` (no arg) does all three |
 | `tools/scripts/`, `tools/test/`, `tools/jest.config.js` | sources of the above |
 
 ```
@@ -92,7 +93,7 @@ by the transpiler — existing files are overwritten and files gone upstream
 are removed (the sibling `srv/app` custom apps are untouched); the webapp is
 replaced 1:1. Transpiled files that do not parse are skipped and reported.
 Classes with `TODO(abap2js)` markers or `parseError` entries are listed in
-`output/*/transpile-report.json` and need manual follow-up. Each `… to CAP`
+`tools/run/output/*/transpile-report.json` and need manual follow-up. Each `… to CAP`
 step runs jest and gates its commit — only a green suite is pushed.
 `MIRROR_SOURCE=/path` lets the mirror steps use a local checkout instead of
 cloning.
@@ -113,7 +114,7 @@ web-cap2UI5 does not rebuild.
 The UI5 frontend in `cap2UI5/app/z2ui5/webapp` is a 1:1 mirror of the
 `app/webapp` folder from abap2UI5, served by CAP at `/z2ui5/webapp`.
 
-Only two values are cap2UI5-specific and get patched into `output/app` by
+Only two values are cap2UI5-specific and get patched into `tools/run/output/app` by
 `tools/scripts/patch-frontend.js` (no stored copies): the CDN bootstrap URL
 in `index.html` and the `/rest/root/z2ui5` data source in `manifest.json`.
 Refresh with:
