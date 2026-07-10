@@ -3,22 +3,21 @@
  * mirror-input — snapshots an upstream repository into tools/run/input/<dir>/ so the
  * transpile/copy steps work on a versioned, reviewable copy.
  *
- *   node tools/scripts/mirror-input.js abap2UI5   → tools/run/input/abap2UI5/src        (backend)
- *   node tools/scripts/mirror-input.js app        → tools/run/input/abap2UI5/app/webapp (frontend)
- *   node tools/scripts/mirror-input.js samples    → tools/run/input/samples/            (whole cloud branch)
+ *   node tools/scripts/mirror-input.js abap2UI5   → tools/run/input/abap2UI5/src    (backend)
+ *   node tools/scripts/mirror-input.js app        → tools/run/input/app/webapp      (frontend)
+ *   node tools/scripts/mirror-input.js samples    → tools/run/input/samples/        (whole cloud branch)
  *
- * The three streams mirror independently: backend and frontend both come from
- * the abap2UI5 repo but touch disjoint subtrees of tools/run/input/abap2UI5/, so they can
- * run in any order without clobbering each other. samples comes from the cloud
+ * Each stream owns exactly one top-level folder under tools/run/input/ and
+ * rewrites it from scratch on every run, so upstream deletions propagate and the
+ * three streams never clobber each other (backend and frontend both come from
+ * the abap2UI5 repo but land in separate folders). samples comes from the cloud
  * branch (rebuilt by its auto_cloud workflow on every push to standard) — it
  * already excludes the on-premise-only apps under src/00, which cannot run in
  * the CAP/Node environment anyway.
  *
- * Wipe policy:
- *   - A source WITH `paths` refreshes only those subtrees (each is removed and
- *     recopied), leaving the rest of tools/run/input/<dir>/ untouched.
- *   - A source WITHOUT `paths` mirrors its ENTIRE checkout (everything except
- *     .git) and wipes tools/run/input/<dir>/ first, so upstream deletions propagate.
+ * Wipe policy: tools/run/input/<dir>/ is always wiped first, then repopulated —
+ *   - A source WITH `paths` copies each configured subtree (from → to).
+ *   - A source WITHOUT `paths` mirrors its ENTIRE checkout (everything except .git).
  *
  * The upstream commit is recorded in tools/run/input/<dir>/UPSTREAM_COMMIT.
  * Set MIRROR_SOURCE=/path/to/checkout to use a local copy instead of cloning
@@ -33,9 +32,9 @@ const { execSync } = require("child_process");
 const A2U = "https://github.com/abap2UI5/abap2UI5";
 const SOURCES = {
   // backend: the ABAP framework sources, transpiled into srv/z2ui5
-  abap2UI5: { url: A2U, dir: "abap2UI5", paths: ["src"] },
+  abap2UI5: { url: A2U, dir: "abap2UI5", paths: [{ from: "src", to: "src" }] },
   // frontend: the static UI5 webapp, prepared into the CAP app folder
-  app: { url: A2U, dir: "abap2UI5", paths: ["app/webapp"] },
+  app: { url: A2U, dir: "app", paths: [{ from: "app/webapp", to: "webapp" }] },
   // samples: the whole cloud branch mirrored 1:1 (everything except .git)
   samples: { url: "https://github.com/abap2UI5/samples", dir: "samples", branch: "cloud" },
 };
@@ -61,22 +60,22 @@ if (!source) {
 
 const commit = execSync("git rev-parse HEAD", { cwd: source }).toString().trim();
 
+// Wipe the stream's folder so upstream deletions propagate and it is rewritten fresh.
+fs.rmSync(dest, { recursive: true, force: true });
 if (cfg.paths) {
-  // Refresh only the configured subtrees; leave the rest of tools/run/input/<dir> alone.
-  for (const p of cfg.paths) {
-    const from = path.join(source, p);
+  // Copy each configured subtree from its upstream path to its slot under dest.
+  for (const { from: fromRel, to: toRel } of cfg.paths) {
+    const from = path.join(source, fromRel);
     if (!fs.existsSync(from)) {
-      console.error(`upstream path not found: ${p} — repository structure changed?`);
+      console.error(`upstream path not found: ${fromRel} — repository structure changed?`);
       process.exit(1);
     }
-    const to = path.join(dest, p);
-    fs.rmSync(to, { recursive: true, force: true });
+    const to = path.join(dest, toRel);
     fs.mkdirSync(path.dirname(to), { recursive: true });
     fs.cpSync(from, to, { recursive: true });
   }
 } else {
-  // Whole-checkout mirror: wipe tools/run/input/<dir> so upstream deletions propagate.
-  fs.rmSync(dest, { recursive: true, force: true });
+  // Whole-checkout mirror: copy everything except .git.
   for (const p of fs.readdirSync(source).filter((e) => e !== ".git")) {
     fs.cpSync(path.join(source, p), path.join(dest, p), { recursive: true });
   }

@@ -42,9 +42,9 @@ Everything that is not deployed with the CAP project lives under
 |---|---|
 | `npm test` | jest suite (backend units, sample apps, transpiler) |
 | `npm run transpile` | abap2js — transpile ABAP classes to JS (parser: [@abaplint/core](https://github.com/abaplint/abaplint)) |
-| `npm run mirror_abap2ui5` / `mirror_app` / `mirror_samples` | snapshot upstream into `tools/run/input/` (backend `src/`, frontend `app/webapp`, whole samples cloud branch) |
+| `npm run mirror_abap2ui5` / `mirror_app` / `mirror_samples` | snapshot upstream into one folder each under `tools/run/input/` — `abap2UI5/` (backend `src/`), `app/` (frontend `webapp`), `samples/` (whole cloud branch); each folder is rewritten fresh on every run |
 | `npm run transpile_abap2ui5` / `transpile_samples` | transpile `tools/run/input/*/src` → `tools/run/output/` |
-| `npm run prepare_app` | `tools/run/input/abap2UI5/app/webapp` → `tools/run/output/app` (+ patches) |
+| `npm run prepare_app` | `tools/run/input/app/webapp` → `tools/run/output/app` (+ patches) |
 | `npm run copy_abap2ui5` / `copy_samples` / `copy_app` | copy one `tools/run/output/` tree → cap2UI5 project (fill-in / overwrite / replace); `copy_into_cap` (no arg) does all three |
 | `tools/scripts/`, `tools/test/`, `tools/jest.config.js` | sources of the above |
 
@@ -120,5 +120,5 @@ in `index.html` and the `/rest/root/z2ui5` data source in `manifest.json`.
 Refresh with:
 
 ```bash
-npm run mirror_abap2ui5 && npm run prepare_app && npm run copy_into_cap
+npm run mirror_app && npm run prepare_app && npm run copy_into_cap
 ```

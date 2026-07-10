@@ -1,6 +1,6 @@
 name: app to CAP
 
-# Build the ready-to-serve frontend (tools/run/input/abap2UI5/app/webapp + the two
+# Build the ready-to-serve frontend (tools/run/input/app/webapp + the two
 # cap2UI5 patches -> tools/run/output/app) and copy it into cap2UI5/app/z2ui5/webapp
 # (replaced 1:1). Jest gates the commit. Step 2 of the update_frontend pipeline.
 
