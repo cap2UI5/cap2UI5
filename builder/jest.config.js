@@ -4,8 +4,8 @@
  * tests can load modules exactly like the samples do.
  */
 module.exports = {
-  // config lives in tools/ — anchor <rootDir> at the repository root so the
-  // mappings below and test discovery (tools/test/ and cap2UI5/test/) keep
+  // config lives in builder/ — anchor <rootDir> at the repository root so the
+  // mappings below and test discovery (builder/test/ and cap2UI5/test/) keep
   // working unchanged
   rootDir: "..",
   moduleNameMapper: {
@@ -22,9 +22,9 @@ module.exports = {
     "^abap2UI5/register-apps$": "<rootDir>/cap2UI5/srv/z2ui5/register-apps.js",
     "^abap2UI5$": "<rootDir>/cap2UI5/srv/z2ui5/00/03/z2ui5_cl_util.js",
   },
-  testPathIgnorePatterns: ["/node_modules/", "/cap2UI5/app/", "/tools/base/"],
-  // tools/base/ is a read-only snapshot of the cap2UI5 base project (see
+  testPathIgnorePatterns: ["/node_modules/", "/cap2UI5/app/", "/builder/base/"],
+  // builder/base/ is a read-only snapshot of the cap2UI5 base project (see
   // snapshot-base.js). Keep it out of module resolution so its copied
   // package.json / sources never shadow the real cap2UI5 ones.
-  modulePathIgnorePatterns: ["/tools/base/"],
+  modulePathIgnorePatterns: ["/builder/base/"],
 };

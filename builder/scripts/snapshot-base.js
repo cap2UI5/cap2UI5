@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * snapshot-base — copies the hand-maintained cap2UI5 project skeleton (the
- * "base" the sync pipeline fills in) into tools/base/, so the foundation the
+ * "base" the sync pipeline fills in) into builder/base/, so the foundation the
  * generated files build on is always visible in one place.
  *
  * What is left OUT (the generated content the jobs produce):
@@ -12,7 +12,7 @@
  *     placeholder README is written in its place to keep the folder documented.
  *
  * The file list comes from `git ls-files cap2UI5`, so gitignored build
- * artifacts and node_modules are never included. tools/base/ is wiped and
+ * artifacts and node_modules are never included. builder/base/ is wiped and
  * rewritten on every run.
  *
  *   npm run snapshot_base
@@ -26,7 +26,7 @@ const { execFileSync } = require("child_process");
 const root = path.join(__dirname, "..", "..");
 const capRel = "cap2UI5";
 const cap = path.join(root, capRel);
-const dest = path.join(root, "tools", "base");
+const dest = path.join(root, "builder", "base");
 
 // Generated trees to drop entirely (paths relative to cap2UI5/).
 const DROP_TREES = ["app/z2ui5/webapp", "srv/app/samples", "srv/z2ui5"];
@@ -63,6 +63,6 @@ for (const [tree, src] of Object.entries(PLACEHOLDERS)) {
 }
 
 console.log(
-  `tools/base: ${copied} base files copied from cap2UI5 ` +
+  `builder/base: ${copied} base files copied from cap2UI5 ` +
   `(${droppedTree} generated tree files left out)`
 );

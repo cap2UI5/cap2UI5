@@ -1,4 +1,4 @@
-# tools/ — the cap2UI5 builder project
+# builder/ — the cap2UI5 builder project
 
 This is the **builder project** — a self-contained npm project (its own
 [`package.json`](package.json) / `package-lock.json`) that is **not** deployed
@@ -13,7 +13,7 @@ own:
 | Project | What it is | Run it |
 |---|---|---|
 | [`cap2UI5/`](../cap2UI5/) | the finished, deployable CAP app | `cd cap2UI5 && npm install && npx cds watch` |
-| [`tools/`](.) (here) | the builder (transpiler + sync + tests) | `cd tools && npm install && npm test` |
+| [`builder/`](.) (here) | the builder (transpiler + sync + tests) | `cd builder && npm install && npm test` |
 
 For the full pipeline, npm scripts and GitHub Actions, see
 [development.md](development.md). This file is just a map of the folders.
@@ -32,10 +32,10 @@ For the full pipeline, npm scripts and GitHub Actions, see
 ## Install & run
 
 The builder is a normal npm project — install and run it from **inside**
-`tools/`:
+`builder/`:
 
 ```bash
-cd tools
+cd builder
 npm install        # dev deps: @abaplint/core, jest
 npm test           # run the jest suite
 

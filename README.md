@@ -14,7 +14,7 @@ frontend project needed.
 > Everything in this project is generated automatically — by AI (Claude)
 > and by a sync pipeline that mirrors and transpiles the upstream
 > [abap2UI5](https://github.com/abap2UI5/abap2UI5) sources. Review and test
-> before relying on it. Details: [tools/development.md](tools/development.md).
+> before relying on it. Details: [builder/development.md](builder/development.md).
 
 ## Features
 
@@ -198,9 +198,9 @@ its own:
 | Path | What it is |
 |---|---|
 | [`cap2UI5/`](cap2UI5/) | **the CAP project** — the finished, deployable app; install, run and develop your apps here (`cd cap2UI5 && npm install && npx cds watch`) |
-| [`tools/`](tools/) | **the builder project** — ABAP→JS transpiler, sync scripts, jest suite; its own `package.json` (`cd tools && npm install && npm test`) |
+| [`builder/`](builder/) | **the builder project** — ABAP→JS transpiler, sync scripts, jest suite; its own `package.json` (`cd builder && npm install && npm test`) |
 | [`docs/`](docs/) | internals documentation |
-| `tools/run/input/`, `tools/run/output/` | artifacts of the sync pipeline (mirrored upstream sources and transpiled output) |
+| `builder/run/input/`, `builder/run/output/` | artifacts of the sync pipeline (mirrored upstream sources and transpiled output) |
 
 ## How this repository is built
 
@@ -208,7 +208,7 @@ The codebase is not written by hand: an automated pipeline mirrors the
 upstream [abap2UI5](https://github.com/abap2UI5/abap2UI5) ABAP sources,
 transpiles them to JavaScript and copies the result into the CAP project,
 gated by the jest suite. How the pipeline, the transpiler and the dev
-tooling work is documented in [tools/development.md](tools/development.md).
+tooling work is documented in [builder/development.md](builder/development.md).
 
 ## Workflows
 
@@ -217,7 +217,7 @@ tooling work is documented in [tools/development.md](tools/development.md).
 [![test](https://github.com/cap2UI5/cap2UI5/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/cap2UI5/cap2UI5/actions/workflows/test.yml)
 
 **Nightly sync pipelines** — each runs on its own schedule (see
-[Sync pipelines](tools/development.md#sync-pipelines)):
+[Sync pipelines](builder/development.md#sync-pipelines)):
 
 [![update_samples](https://github.com/cap2UI5/cap2UI5/actions/workflows/update_samples.yml/badge.svg?branch=main)](https://github.com/cap2UI5/cap2UI5/actions/workflows/update_samples.yml)
 [![update_backend](https://github.com/cap2UI5/cap2UI5/actions/workflows/update_backend.yml/badge.svg?branch=main)](https://github.com/cap2UI5/cap2UI5/actions/workflows/update_backend.yml)

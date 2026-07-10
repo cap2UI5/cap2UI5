@@ -13,7 +13,7 @@ Bringing the [abap2UI5](https://github.com/abap2UI5/abap2UI5) concept to CAP/Nod
 > (Claude) and by an automated sync pipeline that mirrors and transpiles the
 > upstream [abap2UI5](https://github.com/abap2UI5/abap2UI5) sources — nothing
 > here is hand-written. See
-> [tools/development.md](https://github.com/cap2UI5/cap2UI5/blob/main/tools/development.md)
+> [builder/development.md](https://github.com/cap2UI5/cap2UI5/blob/main/builder/development.md)
 > for how the pipeline works. Review and test before relying on it.
 
 #### Features
@@ -55,9 +55,9 @@ For a one-off run without file watching use `npm start` (`cds-serve`).
 ## Transpiling from ABAP
 
 App classes can be transpiled automatically from the abap2UI5 ABAP sources —
-the transpiler and all other dev tooling live in the repository's `tools/`
+the transpiler and all other dev tooling live in the repository's `builder/`
 folder, see
-[tools/development.md](https://github.com/cap2UI5/cap2UI5/blob/main/tools/development.md).
+[builder/development.md](https://github.com/cap2UI5/cap2UI5/blob/main/builder/development.md).
 
 ## Samples
 All samples demonstrate complete view definition and data exchange handled entirely by the CAP server, using the same and static frontend from abap2UI5.

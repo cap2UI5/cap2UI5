@@ -8421,7 +8421,7 @@ class z2ui5_cl_xml_view {
 // parameter positionally; the JS methods destructure an options object.
 // This shim maps a primitive positional argument onto the preferred name.
 // Generated from z2ui5_cl_xml_view.clas.abap — regenerate with:
-//   node tools/scripts/abap2js.js --preferred-map <path/to/z2ui5_cl_xml_view.clas.abap>
+//   node builder/scripts/abap2js.js --preferred-map <path/to/z2ui5_cl_xml_view.clas.abap>
 // ---------------------------------------------------------------------------
 z2ui5_cl_xml_view.PREFERRED_PARAM = {
     _cc_plain_xml: `val`,

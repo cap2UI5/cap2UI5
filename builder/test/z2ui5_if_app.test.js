@@ -47,7 +47,7 @@ describe("z2ui5_if_app", () => {
     // Every sample that loads as a z2ui5_if_app subclass must implement
     // main(). Samples with unresolved transpile deps (fail to require) or
     // bundled non-app helper classes are skipped here — those are the
-    // domain of the smoke gate (tools/test/apps-smoke.*), not this
+    // domain of the smoke gate (builder/test/apps-smoke.*), not this
     // structural contract check. The contract is verified via the prototype
     // chain, so no per-app constructor side effects are triggered.
     let apps = 0;

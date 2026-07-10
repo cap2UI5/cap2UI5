@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 /**
- * mirror-input — snapshots an upstream repository into tools/run/input/<dir>/ so the
+ * mirror-input — snapshots an upstream repository into builder/run/input/<dir>/ so the
  * transpile/copy steps work on a versioned, reviewable copy.
  *
- *   node tools/scripts/mirror-input.js abap2UI5   → tools/run/input/abap2UI5/src    (backend)
- *   node tools/scripts/mirror-input.js app        → tools/run/input/app/webapp      (frontend)
- *   node tools/scripts/mirror-input.js samples    → tools/run/input/samples/        (whole cloud branch)
+ *   node builder/scripts/mirror-input.js abap2UI5   → builder/run/input/abap2UI5/src    (backend)
+ *   node builder/scripts/mirror-input.js app        → builder/run/input/app/webapp      (frontend)
+ *   node builder/scripts/mirror-input.js samples    → builder/run/input/samples/        (whole cloud branch)
  *
- * Each stream owns exactly one top-level folder under tools/run/input/ and
+ * Each stream owns exactly one top-level folder under builder/run/input/ and
  * rewrites it from scratch on every run, so upstream deletions propagate and the
  * three streams never clobber each other (backend and frontend both come from
  * the abap2UI5 repo but land in separate folders). samples comes from the cloud
@@ -15,11 +15,11 @@
  * already excludes the on-premise-only apps under src/00, which cannot run in
  * the CAP/Node environment anyway.
  *
- * Wipe policy: tools/run/input/<dir>/ is always wiped first, then repopulated —
+ * Wipe policy: builder/run/input/<dir>/ is always wiped first, then repopulated —
  *   - A source WITH `paths` copies each configured subtree (from → to).
  *   - A source WITHOUT `paths` mirrors its ENTIRE checkout (everything except .git).
  *
- * The upstream commit is recorded in tools/run/input/<dir>/UPSTREAM_COMMIT.
+ * The upstream commit is recorded in builder/run/input/<dir>/UPSTREAM_COMMIT.
  * Set MIRROR_SOURCE=/path/to/checkout to use a local copy instead of cloning
  * (the checkout is used as-is; the branch config is not applied then).
  */
@@ -42,12 +42,12 @@ const SOURCES = {
 const name = process.argv[2];
 const cfg = SOURCES[name];
 if (!cfg) {
-  console.error(`usage: node tools/scripts/mirror-input.js <${Object.keys(SOURCES).join("|")}>`);
+  console.error(`usage: node builder/scripts/mirror-input.js <${Object.keys(SOURCES).join("|")}>`);
   process.exit(1);
 }
 
 const root = path.join(__dirname, "..", "..");
-const dest = path.join(root, "tools", "run", "input", cfg.dir);
+const dest = path.join(root, "builder", "run", "input", cfg.dir);
 const tmp = path.join(root, ".mirror_tmp");
 
 let source = process.env.MIRROR_SOURCE;
@@ -84,4 +84,4 @@ fs.mkdirSync(dest, { recursive: true });
 fs.writeFileSync(path.join(dest, "UPSTREAM_COMMIT"), commit + "\n");
 
 fs.rmSync(tmp, { recursive: true, force: true });
-console.log(`tools/run/input/${cfg.dir} (${name}) updated from ${name}@${commit.slice(0, 12)} (${source === tmp ? cfg.url : source})`);
+console.log(`builder/run/input/${cfg.dir} (${name}) updated from ${name}@${commit.slice(0, 12)} (${source === tmp ? cfg.url : source})`);

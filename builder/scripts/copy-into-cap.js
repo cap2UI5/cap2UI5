@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 /**
- * copy-into-cap — step 6: copy the prepared tools/run/output/ folders into their
+ * copy-into-cap — step 6: copy the prepared builder/run/output/ folders into their
  * positions in the CAP project:
  *
- *   tools/run/output/abap2UI5/**  → cap2UI5/srv/z2ui5/**          (fill-in: new files only)
- *   tools/run/output/samples/**   → cap2UI5/srv/app/samples/*.js  (flattened, overwrite)
- *   tools/run/output/app/**       → cap2UI5/app/z2ui5/webapp/**   (replaced 1:1)
+ *   builder/run/output/abap2UI5/**  → cap2UI5/srv/z2ui5/**          (fill-in: new files only)
+ *   builder/run/output/samples/**   → cap2UI5/srv/app/samples/*.js  (flattened, overwrite)
+ *   builder/run/output/app/**       → cap2UI5/app/z2ui5/webapp/**   (replaced 1:1)
  *
  * Policies:
  * - The backend tree under srv/z2ui5 contains the hand-maintained CAP
@@ -14,11 +14,11 @@
  *   over an existing file. Promoting a transpiled class over a hand-written
  *   one is a deliberate manual step.
  * - srv/app/samples is fully owned by the transpiler: existing files are
- *   overwritten and files that no longer exist in tools/run/output/samples are
+ *   overwritten and files that no longer exist in builder/run/output/samples are
  *   removed (upstream deletions must propagate). Files whose transpiled
  *   source does not parse keep their previous version in place.
  *   The samples tree is FLATTENED: the mirror keeps the upstream ABAP
- *   package folders (tools/run/output/samples/01/03/<class>.js), but the transpiled
+ *   package folders (builder/run/output/samples/01/03/<class>.js), but the transpiled
  *   sample classes require each other as siblings (require("./z2ui5_cl_…"))
  *   and the runtime keys apps by bare class name, so every sample lands
  *   directly under srv/app/samples/. Class names are globally unique, so the
@@ -27,7 +27,7 @@
  * - Every transpiled .js file must parse; files that don't are skipped and
  *   reported (the jest run afterwards is the behavioral gate).
  *
- * transpile-report.json files stay in tools/run/output/ and are not copied.
+ * transpile-report.json files stay in builder/run/output/ and are not copied.
  */
 "use strict";
 
@@ -39,9 +39,9 @@ const { execFileSync } = require("child_process");
 const root = path.join(__dirname, "..", "..");
 
 const COPIES = [
-  { name: "abap2UI5", from: path.join(root, "tools", "run", "output", "abap2UI5"), to: path.join(root, "cap2UI5", "srv", "z2ui5"), replace: false, clobber: false, parseCheck: true },
-  { name: "samples", from: path.join(root, "tools", "run", "output", "samples"), to: path.join(root, "cap2UI5", "srv", "app", "samples"), replace: false, clobber: true, prune: true, parseCheck: true, flatten: true },
-  { name: "app", from: path.join(root, "tools", "run", "output", "app"), to: path.join(root, "cap2UI5", "app", "z2ui5", "webapp"), replace: true, clobber: true, parseCheck: false },
+  { name: "abap2UI5", from: path.join(root, "builder", "run", "output", "abap2UI5"), to: path.join(root, "cap2UI5", "srv", "z2ui5"), replace: false, clobber: false, parseCheck: true },
+  { name: "samples", from: path.join(root, "builder", "run", "output", "samples"), to: path.join(root, "cap2UI5", "srv", "app", "samples"), replace: false, clobber: true, prune: true, parseCheck: true, flatten: true },
+  { name: "app", from: path.join(root, "builder", "run", "output", "app"), to: path.join(root, "cap2UI5", "app", "z2ui5", "webapp"), replace: true, clobber: true, parseCheck: false },
 ];
 
 // Optional stream filter: `copy-into-cap.js <samples|abap2UI5|app>` copies only
@@ -49,7 +49,7 @@ const COPIES = [
 const only = process.argv[2];
 const names = COPIES.map((c) => c.name);
 if (only && !names.includes(only)) {
-  console.error(`usage: node tools/scripts/copy-into-cap.js [${names.join("|")}]`);
+  console.error(`usage: node builder/scripts/copy-into-cap.js [${names.join("|")}]`);
   process.exit(1);
 }
 
@@ -167,7 +167,7 @@ let broken = 0;
 for (const { name, from, to, replace, clobber, prune, parseCheck, flatten } of COPIES) {
   if (only && name !== only) continue;
   if (!fs.existsSync(from)) {
-    console.log(`tools/run/output/${name}: not found — skipped (run the transpile/prepare steps first)`);
+    console.log(`builder/run/output/${name}: not found — skipped (run the transpile/prepare steps first)`);
     continue;
   }
   if (replace) fs.rmSync(to, { recursive: true, force: true });
@@ -182,7 +182,7 @@ for (const { name, from, to, replace, clobber, prune, parseCheck, flatten } of C
   if (stats.pruned) parts.push(`${stats.pruned} removed (gone upstream)`);
   if (stats.invalid.length) parts.push(`${stats.invalid.length} skipped (parse error)`);
   if (stats.unloadable.length) parts.push(`${stats.unloadable.length} skipped (load error)`);
-  console.log(`tools/run/output/${name} -> ${path.relative(root, to)}: ${parts.join(", ")}`);
+  console.log(`builder/run/output/${name} -> ${path.relative(root, to)}: ${parts.join(", ")}`);
   for (const f of stats.invalid) console.error(`  SKIPPED (does not parse): ${f}`);
   for (const f of stats.unloadable) console.error(`  SKIPPED (does not load): ${f}`);
 }
@@ -190,5 +190,5 @@ console.log(`\n${total} files copied into cap2UI5`);
 if (broken) {
   // not fatal: the previous version stays in place and jest gates the sync —
   // the transpile-report.json parseError entries track the follow-up work
-  console.error(`WARNING: ${broken} file(s) skipped because they do not parse or load — fix tools/scripts/abap2js.js`);
+  console.error(`WARNING: ${broken} file(s) skipped because they do not parse or load — fix builder/scripts/abap2js.js`);
 }

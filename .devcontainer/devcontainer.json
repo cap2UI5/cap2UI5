@@ -4,7 +4,7 @@
   "features": {
     "ghcr.io/devcontainers/features/github-cli:1": {}
   },
-  "postCreateCommand": "npm install --prefix cap2UI5 && npm install --prefix tools",
+  "postCreateCommand": "npm install --prefix cap2UI5 && npm install --prefix builder",
   "forwardPorts": [4004],
   "portsAttributes": {
     "4004": {

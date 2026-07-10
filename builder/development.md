@@ -20,7 +20,7 @@ with upstream. If you just want to **use** cap2UI5, start with the
 ## Repository roles
 
 The repository holds two separate npm projects, each installed and run on its
-own: [`tools/`](../tools/) is the **builder project** (the transpiler, sync
+own: [`builder/`](../builder/) is the **builder project** (the transpiler, sync
 scripts and jest suite — its own `package.json`), and [`cap2UI5/`](../cap2UI5/)
 is the **deployable CAP project**. The repo root itself is no longer a project,
 just the container for the two. The static browser build (whole stack
@@ -30,32 +30,32 @@ repo weekly and only relies on the two framework hooks
 `z2ui5_cl_util.register_app_class()` and
 `z2ui5_cl_core_srv_draft.set_store()`.
 
-Three paths are wired to external repositories: `tools/run/input/abap2UI5/`
+Three paths are wired to external repositories: `builder/run/input/abap2UI5/`
 (the abap2UI5 repo pushes snapshots into it via deploy key),
-`tools/run/input/samples/` (refreshed by the pipeline from abap2UI5/samples),
+`builder/run/input/samples/` (refreshed by the pipeline from abap2UI5/samples),
 and `cap2UI5/` (mirrored by web-cap2UI5). If these paths move, the external
 deploy keys and pipelines that target them must be updated to match.
 
 ## Dev tooling
 
 Everything that is not deployed with the CAP project lives under
-[`tools/`](../tools/) — the builder project. Install and run these commands
-from **inside** `tools/` (`cd tools && npm install` first):
+[`builder/`](../builder/) — the builder project. Install and run these commands
+from **inside** `builder/` (`cd builder && npm install` first):
 
 | | |
 |---|---|
 | `npm test` | jest suite (backend units, sample apps, transpiler) — also needs `cap2UI5/` deps installed |
 | `npm run transpile` | abap2js — transpile ABAP classes to JS (parser: [@abaplint/core](https://github.com/abaplint/abaplint)) |
-| `npm run mirror_abap2ui5` / `mirror_app` / `mirror_samples` | snapshot upstream into one folder each under `tools/run/input/` — `abap2UI5/` (backend `src/`), `app/` (frontend `webapp`), `samples/` (whole cloud branch); each folder is rewritten fresh on every run |
-| `npm run transpile_abap2ui5` / `transpile_samples` | transpile `tools/run/input/*/src` → `tools/run/output/` |
-| `npm run prepare_app` | `tools/run/input/app/webapp` → `tools/run/output/app` (+ patches) |
-| `npm run copy_abap2ui5` / `copy_samples` / `copy_app` | copy one `tools/run/output/` tree → cap2UI5 project (fill-in / overwrite / replace); `copy_into_cap` (no arg) does all three |
-| `npm run snapshot_base` | refresh [`tools/base/`](../tools/base/) — a copy of the hand-maintained cap2UI5 base project with the generated content stripped |
-| `tools/scripts/`, `tools/test/`, `tools/jest.config.js` | sources of the above |
+| `npm run mirror_abap2ui5` / `mirror_app` / `mirror_samples` | snapshot upstream into one folder each under `builder/run/input/` — `abap2UI5/` (backend `src/`), `app/` (frontend `webapp`), `samples/` (whole cloud branch); each folder is rewritten fresh on every run |
+| `npm run transpile_abap2ui5` / `transpile_samples` | transpile `builder/run/input/*/src` → `builder/run/output/` |
+| `npm run prepare_app` | `builder/run/input/app/webapp` → `builder/run/output/app` (+ patches) |
+| `npm run copy_abap2ui5` / `copy_samples` / `copy_app` | copy one `builder/run/output/` tree → cap2UI5 project (fill-in / overwrite / replace); `copy_into_cap` (no arg) does all three |
+| `npm run snapshot_base` | refresh [`builder/base/`](../builder/base/) — a copy of the hand-maintained cap2UI5 base project with the generated content stripped |
+| `builder/scripts/`, `builder/test/`, `builder/jest.config.js` | sources of the above |
 
 ### Base project snapshot
 
-[`tools/base/`](../tools/base/) is a copy of the cap2UI5 **base project** — the
+[`builder/base/`](../builder/base/) is a copy of the cap2UI5 **base project** — the
 hand-maintained skeleton the sync pipeline fills the generated files into. It
 makes the foundation everything builds on visible in one place. It is a
 snapshot for reference only (nothing reads from it); refresh it with
@@ -79,8 +79,8 @@ Statements outside the supported subset are emitted as
 dropped silently.
 
 The sample-app smoke gate diffs actual startup results against
-`tools/test/apps-smoke.known-failures.json`; regenerate the list with
-`node tools/scripts/smoke-apps.js --json`.
+`builder/test/apps-smoke.known-failures.json`; regenerate the list with
+`node builder/scripts/smoke-apps.js --json`.
 
 ## Sync pipelines
 
@@ -113,7 +113,7 @@ by the transpiler — existing files are overwritten and files gone upstream
 are removed (the sibling `srv/app` custom apps are untouched); the webapp is
 replaced 1:1. Transpiled files that do not parse are skipped and reported.
 Classes with `TODO(abap2js)` markers or `parseError` entries are listed in
-`tools/run/output/*/transpile-report.json` and need manual follow-up. Each `… to CAP`
+`builder/run/output/*/transpile-report.json` and need manual follow-up. Each `… to CAP`
 step runs jest and gates its commit — only a green suite is pushed.
 `MIRROR_SOURCE=/path` lets the mirror steps use a local checkout instead of
 cloning.
@@ -134,8 +134,8 @@ web-cap2UI5 does not rebuild.
 The UI5 frontend in `cap2UI5/app/z2ui5/webapp` is a 1:1 mirror of the
 `app/webapp` folder from abap2UI5, served by CAP at `/z2ui5/webapp`.
 
-Only two values are cap2UI5-specific and get patched into `tools/run/output/app` by
-`tools/scripts/patch-frontend.js` (no stored copies): the CDN bootstrap URL
+Only two values are cap2UI5-specific and get patched into `builder/run/output/app` by
+`builder/scripts/patch-frontend.js` (no stored copies): the CDN bootstrap URL
 in `index.html` and the `/rest/root/z2ui5` data source in `manifest.json`.
 Refresh with:
 

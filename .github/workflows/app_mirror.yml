@@ -1,7 +1,7 @@
 name: app mirror
 
 # Mirror the abap2UI5 static UI5 webapp (app/webapp) into
-# tools/run/input/app/webapp. Step 1 of the update_frontend pipeline;
+# builder/run/input/app/webapp. Step 1 of the update_frontend pipeline;
 # also runnable standalone.
 
 on:
@@ -22,16 +22,16 @@ jobs:
         with:
           node-version: 22
       - run: npm run mirror_app
-        working-directory: tools
+        working-directory: builder
       - name: commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add tools/run/input/app/webapp tools/run/input/app/UPSTREAM_COMMIT
+          git add builder/run/input/app/webapp builder/run/input/app/UPSTREAM_COMMIT
           if git diff --cached --quiet; then
             echo "nothing to commit"
           else
-            git commit -m "mirror: update tools/run/input/app/webapp ($(cut -c1-12 tools/run/input/app/UPSTREAM_COMMIT))"
+            git commit -m "mirror: update builder/run/input/app/webapp ($(cut -c1-12 builder/run/input/app/UPSTREAM_COMMIT))"
             git pull --rebase origin "${{ github.ref_name }}"
             git push origin "HEAD:${{ github.ref_name }}"
           fi
