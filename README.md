@@ -1,5 +1,6 @@
 # cap2UI5
 
+[![test](https://github.com/cap2UI5/cap2UI5/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/cap2UI5/cap2UI5/actions/workflows/test.yml)
 [![update_samples](https://github.com/cap2UI5/cap2UI5/actions/workflows/update_samples.yml/badge.svg?branch=main)](https://github.com/cap2UI5/cap2UI5/actions/workflows/update_samples.yml)
 [![update_backend](https://github.com/cap2UI5/cap2UI5/actions/workflows/update_backend.yml/badge.svg?branch=main)](https://github.com/cap2UI5/cap2UI5/actions/workflows/update_backend.yml)
 [![update_frontend](https://github.com/cap2UI5/cap2UI5/actions/workflows/update_frontend.yml/badge.svg?branch=main)](https://github.com/cap2UI5/cap2UI5/actions/workflows/update_frontend.yml)
@@ -205,6 +206,42 @@ upstream [abap2UI5](https://github.com/abap2UI5/abap2UI5) ABAP sources,
 transpiles them to JavaScript and copies the result into the CAP project,
 gated by the jest suite. How the pipeline, the transpiler and the dev
 tooling work is documented in [docs/development.md](docs/development.md).
+
+## Workflows
+
+**Continuous integration**
+
+[![test](https://github.com/cap2UI5/cap2UI5/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/cap2UI5/cap2UI5/actions/workflows/test.yml)
+
+**Nightly sync pipelines** — each runs on its own schedule (see
+[Sync pipelines](docs/development.md#sync-pipelines)):
+
+[![update_samples](https://github.com/cap2UI5/cap2UI5/actions/workflows/update_samples.yml/badge.svg?branch=main)](https://github.com/cap2UI5/cap2UI5/actions/workflows/update_samples.yml)
+[![update_backend](https://github.com/cap2UI5/cap2UI5/actions/workflows/update_backend.yml/badge.svg?branch=main)](https://github.com/cap2UI5/cap2UI5/actions/workflows/update_backend.yml)
+[![update_frontend](https://github.com/cap2UI5/cap2UI5/actions/workflows/update_frontend.yml/badge.svg?branch=main)](https://github.com/cap2UI5/cap2UI5/actions/workflows/update_frontend.yml)
+
+**Manual triggers** (`workflow_dispatch`)
+
+[![trigger update](https://github.com/cap2UI5/cap2UI5/actions/workflows/trigger_update.yml/badge.svg?branch=main)](https://github.com/cap2UI5/cap2UI5/actions/workflows/trigger_update.yml)
+[![trigger web](https://github.com/cap2UI5/cap2UI5/actions/workflows/trigger_web.yml/badge.svg?branch=main)](https://github.com/cap2UI5/cap2UI5/actions/workflows/trigger_web.yml)
+
+**Reusable pipeline steps** — invoked via `workflow_call` from the
+pipelines above, so these badges stay grey unless a step is dispatched
+standalone:
+
+_samples_ &nbsp;
+[![samples mirror](https://github.com/cap2UI5/cap2UI5/actions/workflows/samples_mirror.yml/badge.svg?branch=main)](https://github.com/cap2UI5/cap2UI5/actions/workflows/samples_mirror.yml)
+[![samples transpile](https://github.com/cap2UI5/cap2UI5/actions/workflows/samples_transpile.yml/badge.svg?branch=main)](https://github.com/cap2UI5/cap2UI5/actions/workflows/samples_transpile.yml)
+[![samples to CAP](https://github.com/cap2UI5/cap2UI5/actions/workflows/samples_to_cap.yml/badge.svg?branch=main)](https://github.com/cap2UI5/cap2UI5/actions/workflows/samples_to_cap.yml)
+
+_backend_ &nbsp;
+[![abap2UI5 mirror](https://github.com/cap2UI5/cap2UI5/actions/workflows/abap2ui5_mirror.yml/badge.svg?branch=main)](https://github.com/cap2UI5/cap2UI5/actions/workflows/abap2ui5_mirror.yml)
+[![abap2UI5 transpile](https://github.com/cap2UI5/cap2UI5/actions/workflows/abap2ui5_transpile.yml/badge.svg?branch=main)](https://github.com/cap2UI5/cap2UI5/actions/workflows/abap2ui5_transpile.yml)
+[![abap2UI5 to CAP](https://github.com/cap2UI5/cap2UI5/actions/workflows/abap2ui5_to_cap.yml/badge.svg?branch=main)](https://github.com/cap2UI5/cap2UI5/actions/workflows/abap2ui5_to_cap.yml)
+
+_frontend_ &nbsp;
+[![app mirror](https://github.com/cap2UI5/cap2UI5/actions/workflows/app_mirror.yml/badge.svg?branch=main)](https://github.com/cap2UI5/cap2UI5/actions/workflows/app_mirror.yml)
+[![app to CAP](https://github.com/cap2UI5/cap2UI5/actions/workflows/app_to_cap.yml/badge.svg?branch=main)](https://github.com/cap2UI5/cap2UI5/actions/workflows/app_to_cap.yml)
 
 ## License
 
