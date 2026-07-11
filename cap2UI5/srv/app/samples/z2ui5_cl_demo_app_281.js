@@ -6,7 +6,7 @@ class z2ui5_cl_demo_app_281 extends z2ui5_if_app {
   client = null;
 
   view_display({ client } = {}) {
-    const css = `.tileLayout {` + ` float: left;` + `}`;
+    const css = `.tileLayout {` + `    float: left;` + `}`;
     let base_url = ``;
     const page = z2ui5_cl_xml_view.factory()
       .shell()

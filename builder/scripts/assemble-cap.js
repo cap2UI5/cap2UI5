@@ -43,10 +43,15 @@ function parses(file) {
   catch { return false; }
 }
 
+// Local-only artifacts that may exist in base/ when it was run standalone
+// (npm install, cds watch, mbt build) — never part of the published app.
+const COPY_IGNORE = new Set(["node_modules", "gen", "resources", "mta_archives", "@cds-models"]);
+
 // Recursive verbatim copy (used for base → dest).
 function copyDir(from, to) {
   fs.mkdirSync(to, { recursive: true });
   for (const entry of fs.readdirSync(from, { withFileTypes: true })) {
+    if (COPY_IGNORE.has(entry.name) || entry.name.endsWith(".sqlite") || entry.name.endsWith(".log")) continue;
     const src = path.join(from, entry.name);
     const dst = path.join(to, entry.name);
     if (entry.isDirectory()) copyDir(src, dst);

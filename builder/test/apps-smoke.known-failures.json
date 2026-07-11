@@ -10,21 +10,6 @@
     "detail": "sy_datum is not defined"
   },
   {
-    "name": "z2ui5_cl_demo_app_054",
-    "verdict": "no-view",
-    "detail": "started but no main view XML"
-  },
-  {
-    "name": "z2ui5_cl_demo_app_055",
-    "verdict": "no-view",
-    "detail": "started but no main view XML"
-  },
-  {
-    "name": "z2ui5_cl_demo_app_058",
-    "verdict": "error-popup",
-    "detail": "this.shift_right is not a function"
-  },
-  {
     "name": "z2ui5_cl_demo_app_061",
     "verdict": "error-popup",
     "detail": "Cannot read properties of null (reading 'push')"
@@ -40,34 +25,9 @@
     "detail": "page.nav_container(...).pages is not a function"
   },
   {
-    "name": "z2ui5_cl_demo_app_094",
-    "verdict": "error-popup",
-    "detail": "Cannot set properties of null (setting 'input')"
-  },
-  {
-    "name": "z2ui5_cl_demo_app_095",
-    "verdict": "error-popup",
-    "detail": "Cannot set properties of null (setting 'mo_view_parent')"
-  },
-  {
-    "name": "z2ui5_cl_demo_app_096",
-    "verdict": "error-popup",
-    "detail": "Cannot read properties of null (reading 'input')"
-  },
-  {
-    "name": "z2ui5_cl_demo_app_105",
-    "verdict": "error-popup",
-    "detail": "Cannot read properties of null (reading 'input')"
-  },
-  {
     "name": "z2ui5_cl_demo_app_110",
     "verdict": "error-popup",
     "detail": "view.shell(...).page(...).simple_form(...).label(...).mask_input(...).get(...).rules is not a function"
-  },
-  {
-    "name": "z2ui5_cl_demo_app_112",
-    "verdict": "error-popup",
-    "detail": "Cannot read properties of null (reading 'input')"
   },
   {
     "name": "z2ui5_cl_demo_app_122",
@@ -75,49 +35,14 @@
     "detail": "Cannot read properties of undefined (reading 'system')"
   },
   {
-    "name": "z2ui5_cl_demo_app_153",
-    "verdict": "error-popup",
-    "detail": "Cannot set properties of undefined (setting 'labels')"
-  },
-  {
     "name": "z2ui5_cl_demo_app_160",
     "verdict": "error-popup",
     "detail": "this.mt_output.push is not a function"
   },
   {
-    "name": "z2ui5_cl_demo_app_171",
-    "verdict": "no-view",
-    "detail": "started but no main view XML"
-  },
-  {
-    "name": "z2ui5_cl_demo_app_192",
-    "verdict": "error-popup",
-    "detail": "this.mt_new_data2 is not iterable"
-  },
-  {
-    "name": "z2ui5_cl_demo_app_193",
-    "verdict": "error-popup",
-    "detail": "li_app.main is not a function"
-  },
-  {
-    "name": "z2ui5_cl_demo_app_194",
-    "verdict": "error-popup",
-    "detail": "cl_abap_structdescr is not defined"
-  },
-  {
-    "name": "z2ui5_cl_demo_app_212",
-    "verdict": "error-popup",
-    "detail": "cl_abap_structdescr is not defined"
-  },
-  {
     "name": "z2ui5_cl_demo_app_235",
     "verdict": "error-popup",
     "detail": "page_01.page(...).header_content(...).button(...).get_parent(...).sub_header(...).toolbar(...).button(...).toolbar_spacer(...).title(...).toolbar_spacer(...).get_parent(...).get_parent(...).content(.."
-  },
-  {
-    "name": "z2ui5_cl_demo_app_258",
-    "verdict": "error-popup",
-    "detail": "navlist.navigation_list_item(...).get_child is not a function"
   },
   {
     "name": "z2ui5_cl_demo_app_266",
@@ -143,35 +68,5 @@
     "name": "z2ui5_cl_demo_app_294",
     "verdict": "error-popup",
     "detail": "this.lt_a_data.push is not a function"
-  },
-  {
-    "name": "z2ui5_cl_demo_app_329",
-    "verdict": "error-popup",
-    "detail": "li_app.main is not a function"
-  },
-  {
-    "name": "z2ui5_cl_demo_app_333",
-    "verdict": "error-popup",
-    "detail": "li_app.main is not a function"
-  },
-  {
-    "name": "z2ui5_cl_demo_app_339",
-    "verdict": "error-popup",
-    "detail": "this.mo_layout.ms_data.t_layout is not iterable"
-  },
-  {
-    "name": "z2ui5_cl_demo_app_340",
-    "verdict": "error-popup",
-    "detail": "Cannot read properties of null (reading 'mr_data')"
-  },
-  {
-    "name": "z2ui5_cl_demo_app_342",
-    "verdict": "error-popup",
-    "detail": "this.mo_lay.ms_data.t_layout is not iterable"
-  },
-  {
-    "name": "z2ui5_cl_demo_app_354",
-    "verdict": "error-popup",
-    "detail": "page._z2ui5(...).uploadset_ext is not a function"
   }
 ]

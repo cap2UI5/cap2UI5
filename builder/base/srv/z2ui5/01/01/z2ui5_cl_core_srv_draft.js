@@ -108,7 +108,7 @@ class z2ui5_cl_core_srv_draft {
     if (z2ui5_cl_core_srv_draft._custom_store) {
       return (await z2ui5_cl_core_srv_draft._custom_store.load(id)) || null;
     }
-    const { z2ui5_t_01 } = cds.entities("my.domain");
+    const { z2ui5_t_01 } = cds.entities("cap2ui5");
     return SELECT.one.from(z2ui5_t_01).where({ id: id });
   }
 
@@ -117,7 +117,7 @@ class z2ui5_cl_core_srv_draft {
       await z2ui5_cl_core_srv_draft._custom_store.save(entry);
       return;
     }
-    const { z2ui5_t_01 } = cds.entities("my.domain");
+    const { z2ui5_t_01 } = cds.entities("cap2ui5");
     await INSERT.into(z2ui5_t_01).entries(entry);
   }
 

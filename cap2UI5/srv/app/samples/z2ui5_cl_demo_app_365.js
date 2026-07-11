@@ -24,11 +24,6 @@ class z2ui5_cl_demo_app_365 extends z2ui5_if_app {
   }
 
   nav_to_output({ as_page } = {}) {
-    // TODO(abap2js): TYPES BEGIN OF ty_s_carrier,
-    // TODO(abap2js): TYPES carrid TYPE c LENGTH 3,
-    // TODO(abap2js): TYPES name TYPE string,
-    // TODO(abap2js): TYPES url TYPE string,
-    // TODO(abap2js): TYPES END OF ty_s_carrier.
     let t_carriers = [];
     t_carriers = [{ carrid: `AA`, name: `American Airlines`, url: `http://www.aa.com` }, { carrid: `LH`, name: `Lufthansa`, url: `http://www.lufthansa.com` }, { carrid: `SQ`, name: `Singapore Airlines`, url: `http://www.singaporeair.com` }];
     const xml = `<?xml version="1.0" encoding="UTF-8"?>` + `<flightplan>` + `<flight carrid="LH" connid="0400" cityfrom="FRANKFURT" cityto="NEW YORK"/>` + `<flight carrid="AA" connid="0017" cityfrom="NEW YORK" cityto="SAN FRANCISCO"/>` + `</flightplan>`;

@@ -32,8 +32,9 @@ describe("sample apps smoke", () => {
 
     expect({ regressions, fixedButStillListed: fixed }).toEqual({ regressions: [], fixedButStillListed: [] });
     // sanity floor: guard against an empty / mis-copied samples folder. The
-    // exact count drifts as upstream adds/removes samples (currently ~241),
-    // so this is a loose lower bound, not a pin.
-    expect(report.total).toBeGreaterThan(200);
+    // exact count drifts as upstream adds/removes samples (currently ~191 —
+    // the src/01 cloud subset since the upstream samples repo split into
+    // src/00 standard + src/01 cloud), so this is a loose lower bound, not a pin.
+    expect(report.total).toBeGreaterThan(150);
   });
 });

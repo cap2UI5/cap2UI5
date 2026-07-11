@@ -2,11 +2,11 @@
   "name": "abap2UI5",
   "version": "1.0.0",
   "description": "cap2UI5 — the abap2UI5 concept on CAP/Node.js. Fully auto-generated project (AI + sync pipeline, nothing hand-written).",
-  "repository": "<Add your repository here>",
-  "license": "UNLICENSED",
+  "repository": "github:cap2UI5/cap2UI5",
+  "license": "MIT",
   "private": true,
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "exports": {
     ".": "./srv/z2ui5/00/03/z2ui5_cl_util.js",
@@ -36,23 +36,25 @@
     "./register-apps": "./srv/z2ui5/register-apps.js"
   },
   "dependencies": {
-    "@sap/cds": "^9",
+    "@sap/cds": "^10",
     "express": "^5",
     "openui5-dist": "1.113.0"
   },
   "devDependencies": {
-    "@cap-js/cds-types": "^0.16",
-    "@cap-js/sqlite": "^2",
-    "@sap/cds-dk": "^9",
-    "mbt": "^1.2.29",
-    "rimraf": "^6.1.3",
-    "tsx": "^4.19.2",
-    "typescript": "^6.0.3"
+    "@cap-js/cds-test": "^1.0.1",
+    "@cap-js/cds-types": "^0.18",
+    "@cap-js/sqlite": "^3",
+    "@sap/cds-dk": "^10",
+    "jest": "^30",
+    "mbt": "^1.2.34",
+    "rimraf": "^6"
   },
   "scripts": {
     "start": "cds-serve",
+    "watch": "cds watch",
     "watch-z2ui5": "cds watch --open z2ui5/webapp/index.html?sap-ui-xx-viewCache=false",
-    "undeploy": "cf undeploy ordersched --delete-services --delete-service-keys --delete-service-brokers",
+    "test": "jest",
+    "undeploy": "cf undeploy cap2UI5 --delete-services --delete-service-keys --delete-service-brokers",
     "build": "rimraf resources mta_archives && mbt build --mtar archive",
     "deploy": "cf deploy mta_archives/archive.mtar --retries 1"
   },
@@ -64,13 +66,19 @@
         "credentials": {
           "url": "https://services.odata.org/V2/Northwind/Northwind.svc/"
         }
+      },
+      "destinations": true,
+      "html5-repo": true,
+      "workzone": true,
+      "[production]": {
+        "auth": false
       }
-    },
-    "destinations": true,
-    "html5-repo": true,
-    "workzone": true,
-    "[production]": {
-      "auth": false
     }
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": [
+      "<rootDir>/test/**/*.test.js"
+    ]
   }
 }

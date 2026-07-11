@@ -12,28 +12,6 @@ class z2ui5_cl_demo_app_154 extends z2ui5_if_app {
     let lt_msg;
     let lv_dummy;
     let lo_app;
-    // TODO(abap2js): TYPES BEGIN OF ty_s_log_entry.
-    // TODO(abap2js): TYPES msgnumber TYPE n LENGTH 6.
-    // TODO(abap2js): TYPES msgty TYPE c LENGTH 1.
-    // TODO(abap2js): TYPES msgid TYPE c LENGTH 20.
-    // TODO(abap2js): TYPES msgno TYPE n LENGTH 3.
-    // TODO(abap2js): TYPES msgv1 TYPE c LENGTH 50.
-    // TODO(abap2js): TYPES msgv2 TYPE c LENGTH 50.
-    // TODO(abap2js): TYPES msgv3 TYPE c LENGTH 50.
-    // TODO(abap2js): TYPES msgv4 TYPE c LENGTH 50.
-    // TODO(abap2js): TYPES msgv1_src TYPE c LENGTH 15.
-    // TODO(abap2js): TYPES msgv2_src TYPE c LENGTH 15.
-    // TODO(abap2js): TYPES msgv3_src TYPE c LENGTH 15.
-    // TODO(abap2js): TYPES msgv4_src TYPE c LENGTH 15.
-    // TODO(abap2js): TYPES detlevel TYPE c LENGTH 1.
-    // TODO(abap2js): TYPES probclass TYPE c LENGTH 1.
-    // TODO(abap2js): TYPES alsort TYPE c LENGTH 3.
-    // TODO(abap2js): TYPES time_stmp TYPE p LENGTH 16 DECIMALS 7.
-    // TODO(abap2js): TYPES msg_count TYPE i.
-    // TODO(abap2js): TYPES context TYPE c LENGTH 255.
-    // TODO(abap2js): TYPES params TYPE c LENGTH 255.
-    // TODO(abap2js): TYPES msg_txt TYPE string.
-    // TODO(abap2js): TYPES END OF ty_s_log_entry.
     let lt_bal = [];
     switch (this.client.get().EVENT) {
       case `POPUP_BAPIRET`:

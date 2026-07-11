@@ -92,8 +92,8 @@ published project.
 ### `base/` — the hand-written source
 
 `base/` is the **source of truth** for everything hand-written in the CAP
-project: the skeleton (`server.js`, `cat-service.*`, `db/`, `package.json`,
-`mta*.yaml`, `srv/external/`), the hand-ported `srv/z2ui5/` framework classes,
+project: the skeleton (`server.js`, `z2ui5-service.*`, `db/`, `package.json`,
+`mta.yaml`, `srv/external/`), the hand-ported `srv/z2ui5/` framework classes,
 the bundled custom app `srv/app/z2ui5_cl_app_read_odata.js`, and the docs. It
 holds everything that is **not** produced by generation — i.e. `cap2UI5/` minus:
 
@@ -104,6 +104,22 @@ holds everything that is **not** produced by generation — i.e. `cap2UI5/` minu
 
 To change a framework class or the skeleton, edit it **here** and re-run
 `npm run build_cap`.
+
+`base/` is itself a fully functional minimal CAP project — the starting
+point of cap2UI5 with the same basic setup as abap2UI5: a mini frontend
+(`app/index.html`), the http service (`POST /rest/root/z2ui5`) and the
+draft persistence (`cap2ui5.z2ui5_t_01`). Run and test it standalone
+without any generated overlays:
+
+```bash
+cd builder/base
+npm install
+npx cds watch      # → http://localhost:4004/index.html
+npm test           # jest: boots the server via cds.test(), asserts all three layers
+```
+
+See the [minimal starter section](base/README.md#the-minimal-starter) in the
+base README for details.
 
 ### `run/` — the pipeline workbench
 

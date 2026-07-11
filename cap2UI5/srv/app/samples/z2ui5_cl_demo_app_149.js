@@ -29,7 +29,10 @@ class z2ui5_cl_demo_app_149 extends z2ui5_if_app {
     let lo_app;
     switch (this.client.get().EVENT) {
       case `POPUP`:
-        lo_app = z2ui5_cl_pop_html.factory(`<h2>HTML Links</h2>` + ` ` + `<p>HTML links are defined with the a tag:</p>` + ` ` + ` ` + `<a href="https://www.w3schools.com" target="_blank">This is a link</a>`);
+        lo_app = z2ui5_cl_pop_html.factory(`<h2>HTML Links</h2>` + `
+` + `<p>HTML links are defined with the a tag:</p>` + `
+` + `
+` + `<a href="https://www.w3schools.com" target="_blank">This is a link</a>`);
         this.client.nav_app_call(lo_app);
         break;
     }
