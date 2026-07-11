@@ -118,7 +118,7 @@ npx cds watch      # → http://localhost:4004/index.html
 npm test           # jest: boots the server via cds.test(), asserts all three layers
 ```
 
-See the [minimal starter section](base/README.md#the-minimal-starter) in the
+See the [minimal base section](base/README.md#the-minimal-base) in the
 base README for details.
 
 ### `run/` — the pipeline workbench
