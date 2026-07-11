@@ -10,19 +10,37 @@
     <script id="sap-ui-bootstrap"
             src="resources/sap-ui-core.js"
             data-sap-ui-theme="sap_horizon"
-            data-sap-ui-libs="sap.m"
+            data-sap-ui-libs="sap.m,sap.ui.layout"
             data-sap-ui-async="true"
             data-sap-ui-compatVersion="edge"></script>
 
     <script>
-        // Roundtrip through all three layers:
-        //   frontend (this page) → service layer (StarterService REST action)
-        //   → database layer (row insert + count on my.domain.z2ui5_t_01).
-        async function ping(message) {
-            const response = await fetch("rest/starter/ping", {
+        // Starter roundtrip through all three layers, using the REAL cap2UI5
+        // service — the same endpoint and wire format the full z2ui5 frontend
+        // (app/z2ui5/webapp) speaks:
+        //
+        //   frontend (this page)
+        //     → POST /rest/root/z2ui5  { value: { S_FRONT: {...} } }   (service layer)
+        //       → draft persisted in my.domain.z2ui5_t_01              (database layer)
+        //     ← { S_FRONT: { APP, ID, PARAMS: { S_VIEW: { XML } } }, MODEL }
+        //
+        // The response's draft ID is the row key in z2ui5_t_01; the row count
+        // is read back through the AdminService OData endpoint as proof the
+        // database layer is involved.
+        async function roundtrip() {
+            const response = await fetch("rest/root/z2ui5", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message: message })
+                body: JSON.stringify({
+                    value: {
+                        S_FRONT: {
+                            ORIGIN: window.location.origin,
+                            PATHNAME: window.location.pathname,
+                            SEARCH: window.location.search,
+                            HASH: window.location.hash
+                        }
+                    }
+                })
             });
             if (!response.ok) {
                 throw new Error("HTTP " + response.status + " — " + await response.text());
@@ -30,29 +48,64 @@
             return response.json();
         }
 
+        async function draftCount() {
+            const response = await fetch("odata/v4/admin/z2ui5_t_01/$count");
+            if (!response.ok) {
+                throw new Error("HTTP " + response.status + " — " + await response.text());
+            }
+            return Number(await response.text());
+        }
+
         sap.ui.getCore().attachInit(function () {
             sap.ui.require([
-                "sap/m/App", "sap/m/Page", "sap/m/VBox", "sap/m/Title",
-                "sap/m/Label", "sap/m/Input", "sap/m/Button", "sap/m/Text",
-                "sap/m/MessageStrip", "sap/ui/model/json/JSONModel"
-            ], function (App, Page, VBox, Title, Label, Input, Button, Text, MessageStrip, JSONModel) {
+                "sap/m/App", "sap/m/Page", "sap/m/Panel", "sap/m/VBox",
+                "sap/m/Label", "sap/m/Text", "sap/m/Button", "sap/m/Link",
+                "sap/m/MessageStrip", "sap/m/MessageToast",
+                "sap/ui/core/mvc/XMLView", "sap/ui/core/mvc/Controller",
+                "sap/ui/model/json/JSONModel"
+            ], function (App, Page, Panel, VBox, Label, Text, Button, Link,
+                         MessageStrip, MessageToast, XMLView, Controller, JSONModel) {
 
                 const model = new JSONModel({
-                    message: "Hello from UI5",
-                    reply: "",
-                    storedId: "",
-                    rowCount: 0,
-                    error: "",
-                    busy: false
+                    app: "", draftId: "", rows: 0, error: "", busy: false
                 });
+
+                const viewPanel = new Panel({
+                    headerText: "UI5 view rendered from the backend's XML response",
+                    expandable: false,
+                    height: "34rem"
+                }).addStyleClass("sapUiSmallMarginTop");
+
+                // Backend views wire their events to .eB(...) — that protocol is
+                // implemented by the full z2ui5 frontend, not by this starter.
+                const StarterController = Controller.extend("starter.Shim", {
+                    eB: function () {
+                        MessageToast.show(
+                            "Events are handled by the full z2ui5 frontend — " +
+                            "open /z2ui5/webapp/index.html"
+                        );
+                    }
+                });
+
+                let currentView = null;
 
                 function send() {
                     model.setProperty("/busy", true);
                     model.setProperty("/error", "");
-                    ping(model.getProperty("/message")).then(function (result) {
-                        model.setProperty("/reply", result.reply);
-                        model.setProperty("/storedId", result.storedId);
-                        model.setProperty("/rowCount", result.rowCount);
+                    roundtrip().then(async function (data) {
+                        model.setProperty("/app", data.S_FRONT.APP);
+                        model.setProperty("/draftId", data.S_FRONT.ID);
+                        model.setProperty("/rows", await draftCount());
+
+                        const view = await XMLView.create({
+                            definition: data.S_FRONT.PARAMS.S_VIEW.XML,
+                            controller: new StarterController()
+                        });
+                        view.setModel(new JSONModel(data.MODEL));
+                        if (currentView) { currentView.destroy(); }
+                        currentView = view;
+                        viewPanel.removeAllContent();
+                        viewPanel.addContent(view);
                     }).catch(function (err) {
                         model.setProperty("/error", String(err.message || err));
                     }).finally(function () {
@@ -65,11 +118,8 @@
                     content: [
                         new VBox({
                             items: [
-                                new Title({ text: "Send a message through the stack", titleStyle: "H4" }),
-                                new Label({ text: "Message", labelFor: "msgInput" }),
-                                new Input("msgInput", { value: "{/message}", width: "20rem" }),
                                 new Button({
-                                    text: "POST to CAP backend",
+                                    text: "POST /rest/root/z2ui5",
                                     type: "Emphasized",
                                     enabled: "{= !${/busy}}",
                                     press: send
@@ -80,11 +130,20 @@
                                     showIcon: true,
                                     visible: "{= !!${/error}}"
                                 }).addStyleClass("sapUiSmallMarginTop"),
-                                new Title({ text: "Backend reply", titleStyle: "H5" })
-                                    .addStyleClass("sapUiMediumMarginTop"),
-                                new Text({ text: "{/reply}" }),
-                                new Text({ text: "Stored with id: {/storedId}" }),
-                                new Text({ text: "Rows in table my.domain.z2ui5_t_01: {/rowCount}" })
+                                new Label({ text: "Backend app class" })
+                                    .addStyleClass("sapUiSmallMarginTop"),
+                                new Text({ text: "{/app}" }),
+                                new Label({ text: "Draft id (row key in table my.domain.z2ui5_t_01)" })
+                                    .addStyleClass("sapUiTinyMarginTop"),
+                                new Text({ text: "{/draftId}" }),
+                                new Label({ text: "Rows in my.domain.z2ui5_t_01 (via AdminService)" })
+                                    .addStyleClass("sapUiTinyMarginTop"),
+                                new Text({ text: "{/rows}" }),
+                                new Link({
+                                    text: "Open the full z2ui5 frontend →",
+                                    href: "z2ui5/webapp/index.html"
+                                }).addStyleClass("sapUiSmallMarginTop"),
+                                viewPanel
                             ]
                         }).addStyleClass("sapUiMediumMargin")
                     ]
