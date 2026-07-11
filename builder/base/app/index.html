@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>cap2UI5 Starter</title>
+
+    <!-- UI5 bootstrap — served locally from the pinned openui5-dist dependency
+         (see srv/server.js), so the starter runs fully offline. -->
+    <script id="sap-ui-bootstrap"
+            src="resources/sap-ui-core.js"
+            data-sap-ui-theme="sap_horizon"
+            data-sap-ui-libs="sap.m"
+            data-sap-ui-async="true"
+            data-sap-ui-compatVersion="edge"></script>
+
+    <script>
+        // Roundtrip through all three layers:
+        //   frontend (this page) → service layer (StarterService REST action)
+        //   → database layer (row insert + count on my.domain.z2ui5_t_01).
+        async function ping(message) {
+            const response = await fetch("rest/starter/ping", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: message })
+            });
+            if (!response.ok) {
+                throw new Error("HTTP " + response.status + " — " + await response.text());
+            }
+            return response.json();
+        }
+
+        sap.ui.getCore().attachInit(function () {
+            sap.ui.require([
+                "sap/m/App", "sap/m/Page", "sap/m/VBox", "sap/m/Title",
+                "sap/m/Label", "sap/m/Input", "sap/m/Button", "sap/m/Text",
+                "sap/m/MessageStrip", "sap/ui/model/json/JSONModel"
+            ], function (App, Page, VBox, Title, Label, Input, Button, Text, MessageStrip, JSONModel) {
+
+                const model = new JSONModel({
+                    message: "Hello from UI5",
+                    reply: "",
+                    storedId: "",
+                    rowCount: 0,
+                    error: "",
+                    busy: false
+                });
+
+                function send() {
+                    model.setProperty("/busy", true);
+                    model.setProperty("/error", "");
+                    ping(model.getProperty("/message")).then(function (result) {
+                        model.setProperty("/reply", result.reply);
+                        model.setProperty("/storedId", result.storedId);
+                        model.setProperty("/rowCount", result.rowCount);
+                    }).catch(function (err) {
+                        model.setProperty("/error", String(err.message || err));
+                    }).finally(function () {
+                        model.setProperty("/busy", false);
+                    });
+                }
+
+                const page = new Page({
+                    title: "cap2UI5 Starter — Frontend · Service · Database",
+                    content: [
+                        new VBox({
+                            items: [
+                                new Title({ text: "Send a message through the stack", titleStyle: "H4" }),
+                                new Label({ text: "Message", labelFor: "msgInput" }),
+                                new Input("msgInput", { value: "{/message}", width: "20rem" }),
+                                new Button({
+                                    text: "POST to CAP backend",
+                                    type: "Emphasized",
+                                    enabled: "{= !${/busy}}",
+                                    press: send
+                                }),
+                                new MessageStrip({
+                                    text: "{/error}",
+                                    type: "Error",
+                                    showIcon: true,
+                                    visible: "{= !!${/error}}"
+                                }).addStyleClass("sapUiSmallMarginTop"),
+                                new Title({ text: "Backend reply", titleStyle: "H5" })
+                                    .addStyleClass("sapUiMediumMarginTop"),
+                                new Text({ text: "{/reply}" }),
+                                new Text({ text: "Stored with id: {/storedId}" }),
+                                new Text({ text: "Rows in table my.domain.z2ui5_t_01: {/rowCount}" })
+                            ]
+                        }).addStyleClass("sapUiMediumMargin")
+                    ]
+                });
+
+                new App({ pages: [page], models: model }).placeAt("content");
+
+                send();
+            });
+        });
+    </script>
+</head>
+<body class="sapUiBody" id="content"></body>
+</html>
