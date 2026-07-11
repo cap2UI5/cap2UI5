@@ -60,7 +60,9 @@ class z2ui5_cl_demo_app_231 extends z2ui5_if_app {
       source = z2ui5_cl_util.abap_copy(args[(1) - 1]);
       // TODO(abap2js): ASSIGN me->(source) TO FIELD-SYMBOL(<drs>).
       drs = ({ ...fs_drs });
-      this.text = `Id: ${source} ` + `From: ${drs.start} ` + `To: ${drs.end}`;
+      this.text = `Id: ${source}
+` + `From: ${drs.start}
+` + `To: ${drs.end}`;
     }
   }
 

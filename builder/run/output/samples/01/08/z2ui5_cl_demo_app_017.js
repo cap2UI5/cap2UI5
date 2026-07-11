@@ -87,7 +87,7 @@ class z2ui5_cl_demo_app_017 extends z2ui5_if_app {
       .label(`email`)
       .get_parent()
       .get_parent()
-      .object_page_sub_section({ id: `personalSectionWS2`, title: `Payment information ` })
+      .object_page_sub_section({ id: `personalSectionWS2`, title: `Payment information  ` })
       .blocks()
       .label(`Hello! I am an abap2UI5 developer`)
       .label(`San Jose, USA`);

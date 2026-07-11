@@ -24,8 +24,20 @@
     "todoDetails": []
   },
   {
+    "class": "z2ui5_cl_demo_app_020",
+    "path": "01/01/z2ui5_cl_demo_app_020.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
     "class": "z2ui5_cl_demo_app_024",
     "path": "01/01/z2ui5_cl_demo_app_024.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_025",
+    "path": "01/01/z2ui5_cl_demo_app_025.js",
     "todos": 0,
     "todoDetails": []
   },
@@ -38,18 +50,6 @@
   {
     "class": "z2ui5_cl_demo_app_027",
     "path": "01/01/z2ui5_cl_demo_app_027.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_028",
-    "path": "01/01/z2ui5_cl_demo_app_028.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_038",
-    "path": "01/01/z2ui5_cl_demo_app_038.js",
     "todos": 0,
     "todoDetails": []
   },
@@ -71,10 +71,12 @@
     "todoDetails": []
   },
   {
-    "class": "z2ui5_cl_demo_app_057",
-    "path": "01/01/z2ui5_cl_demo_app_057.js",
-    "todos": 0,
-    "todoDetails": []
+    "class": "z2ui5_cl_demo_app_056",
+    "path": "01/01/z2ui5_cl_demo_app_056.js",
+    "todos": 1,
+    "todoDetails": [
+      "IN range-table check approximated (sign E ignored)"
+    ]
   },
   {
     "class": "z2ui5_cl_demo_app_061",
@@ -87,14 +89,6 @@
     ]
   },
   {
-    "class": "z2ui5_cl_demo_app_064",
-    "path": "01/01/z2ui5_cl_demo_app_064.js",
-    "todos": 1,
-    "todoDetails": [
-      "unsupported statement: WAIT UP TO 2 SECONDS."
-    ]
-  },
-  {
     "class": "z2ui5_cl_demo_app_067",
     "path": "01/01/z2ui5_cl_demo_app_067.js",
     "todos": 0,
@@ -103,18 +97,6 @@
   {
     "class": "z2ui5_cl_demo_app_071",
     "path": "01/01/z2ui5_cl_demo_app_071.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_073",
-    "path": "01/01/z2ui5_cl_demo_app_073.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_079",
-    "path": "01/01/z2ui5_cl_demo_app_079.js",
     "todos": 0,
     "todoDetails": []
   },
@@ -142,16 +124,22 @@
     ]
   },
   {
-    "class": "z2ui5_cl_demo_app_122",
-    "path": "01/01/z2ui5_cl_demo_app_122.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_125",
-    "path": "01/01/z2ui5_cl_demo_app_125.js",
-    "todos": 0,
-    "todoDetails": []
+    "class": "z2ui5_cl_demo_app_126",
+    "path": "01/01/z2ui5_cl_demo_app_126.js",
+    "todos": 11,
+    "todoDetails": [
+      "unsupported statement: cl_abap_typedescr=>describe_by_name( EXPORTING p_name = `Z2UI5_T_UTIL_01` RECEIVING p_descr_ref = DATA(typedesc) EXCEPTI",
+      "unsupported statement: CREATE DATA mt_table TYPE HANDLE new_table_desc.",
+      "unsupported statement: CREATE DATA mt_table_del TYPE HANDLE new_table_desc.",
+      "unsupported statement: CREATE DATA mt_table_tmp TYPE HANDLE new_table_desc.",
+      "unsupported statement: CREATE DATA ms_table_row TYPE HANDLE new_struct_desc.",
+      "unsupported statement: ASSIGN mt_table->* TO <table>.",
+      "unsupported statement: SELECT * FROM z2ui5_t_01 INTO CORRESPONDING FIELDS OF TABLE @<table> UP TO 3 ROWS.",
+      "unsupported statement: ASSIGN mt_table_tmp->* TO <table_tmp>.",
+      "unresolved class reference: cl_abap_datadescr",
+      "unresolved class reference: cl_abap_structdescr",
+      "unresolved class reference: cl_abap_tabledescr"
+    ]
   },
   {
     "class": "z2ui5_cl_demo_app_131",
@@ -162,6 +150,15 @@
       "unsupported statement: ASSIGN mo_app->(`MO_PARENT_VIEW`) TO FIELD-SYMBOL(<view>).",
       "unsupported statement: CALL METHOD mo_app->(`Z2UI5_IF_APP~MAIN`) EXPORTING client = client.",
       "unsupported statement: ASSIGN mo_app->(`MV_VIEW_DISPLAY`) TO <view_display>."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_132",
+    "path": "01/01/z2ui5_cl_demo_app_132.js",
+    "todos": 2,
+    "todoDetails": [
+      "unsupported statement: cl_abap_typedescr=>describe_by_name( EXPORTING p_name = `Z2UI5_T_01` RECEIVING p_descr_ref = DATA(typedesc) EXCEPTIONS t",
+      "unresolved class reference: cl_abap_datadescr"
     ]
   },
   {
@@ -195,6 +192,23 @@
     "todoDetails": []
   },
   {
+    "class": "z2ui5_cl_demo_app_184",
+    "path": "01/01/z2ui5_cl_demo_app_184.js",
+    "todos": 10,
+    "todoDetails": [
+      "unsupported statement: ASSIGN mt_table->* TO <tab>.",
+      "unsupported statement: CREATE DATA mt_table TYPE HANDLE new_table_desc.",
+      "unsupported statement: CREATE DATA mt_table_tmp TYPE HANDLE new_table_desc.",
+      "unsupported statement: ASSIGN mt_table->* TO <table>.",
+      "unsupported statement: SELECT * FROM (mv_table) INTO CORRESPONDING FIELDS OF TABLE @<table> UP TO 2 ROWS.",
+      "unsupported statement: ASSIGN mt_table_tmp->* TO <table_tmp>.",
+      "unsupported statement: cl_abap_typedescr=>describe_by_name( EXPORTING p_name = mv_table RECEIVING p_descr_ref = DATA(typedesc) EXCEPTIONS type_",
+      "unresolved class reference: cl_abap_datadescr",
+      "unresolved class reference: cl_abap_structdescr",
+      "unresolved class reference: cl_abap_tabledescr"
+    ]
+  },
+  {
     "class": "z2ui5_cl_demo_app_185",
     "path": "01/01/z2ui5_cl_demo_app_185.js",
     "todos": 4,
@@ -204,12 +218,6 @@
       "unsupported statement: CALL METHOD mo_app->(`Z2UI5_IF_APP~MAIN`) EXPORTING client = client.",
       "unsupported statement: ASSIGN mo_app->(`MV_VIEW_DISPLAY`) TO <view_display>."
     ]
-  },
-  {
-    "class": "z2ui5_cl_demo_app_186",
-    "path": "01/01/z2ui5_cl_demo_app_186.js",
-    "todos": 0,
-    "todoDetails": []
   },
   {
     "class": "z2ui5_cl_demo_app_197",
@@ -222,14 +230,34 @@
     ]
   },
   {
-    "class": "z2ui5_cl_demo_app_316",
-    "path": "01/01/z2ui5_cl_demo_app_316.js",
+    "class": "z2ui5_cl_demo_app_028",
+    "path": "01/02/z2ui5_cl_demo_app_028.js",
     "todos": 0,
     "todoDetails": []
   },
   {
-    "class": "z2ui5_cl_demo_app_325",
-    "path": "01/01/z2ui5_cl_demo_app_325.js",
+    "class": "z2ui5_cl_demo_app_064",
+    "path": "01/02/z2ui5_cl_demo_app_064.js",
+    "todos": 1,
+    "todoDetails": [
+      "unsupported statement: WAIT UP TO 2 SECONDS."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_demo_app_073",
+    "path": "01/02/z2ui5_cl_demo_app_073.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_122",
+    "path": "01/02/z2ui5_cl_demo_app_122.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_125",
+    "path": "01/02/z2ui5_cl_demo_app_125.js",
     "todos": 0,
     "todoDetails": []
   },
@@ -242,6 +270,18 @@
   {
     "class": "z2ui5_cl_demo_app_189",
     "path": "01/02/z2ui5_cl_demo_app_189.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_316",
+    "path": "01/02/z2ui5_cl_demo_app_316.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_325",
+    "path": "01/02/z2ui5_cl_demo_app_325.js",
     "todos": 0,
     "todoDetails": []
   },
@@ -293,31 +333,8 @@
   {
     "class": "z2ui5_cl_demo_app_154",
     "path": "01/03/z2ui5_cl_demo_app_154.js",
-    "todos": 22,
-    "todoDetails": [
-      "unsupported statement: TYPES BEGIN OF ty_s_log_entry.",
-      "unsupported statement: TYPES msgnumber TYPE n LENGTH 6.",
-      "unsupported statement: TYPES msgty TYPE c LENGTH 1.",
-      "unsupported statement: TYPES msgid TYPE c LENGTH 20.",
-      "unsupported statement: TYPES msgno TYPE n LENGTH 3.",
-      "unsupported statement: TYPES msgv1 TYPE c LENGTH 50.",
-      "unsupported statement: TYPES msgv2 TYPE c LENGTH 50.",
-      "unsupported statement: TYPES msgv3 TYPE c LENGTH 50.",
-      "unsupported statement: TYPES msgv4 TYPE c LENGTH 50.",
-      "unsupported statement: TYPES msgv1_src TYPE c LENGTH 15.",
-      "unsupported statement: TYPES msgv2_src TYPE c LENGTH 15.",
-      "unsupported statement: TYPES msgv3_src TYPE c LENGTH 15.",
-      "unsupported statement: TYPES msgv4_src TYPE c LENGTH 15.",
-      "unsupported statement: TYPES detlevel TYPE c LENGTH 1.",
-      "unsupported statement: TYPES probclass TYPE c LENGTH 1.",
-      "unsupported statement: TYPES alsort TYPE c LENGTH 3.",
-      "unsupported statement: TYPES time_stmp TYPE p LENGTH 16 DECIMALS 7.",
-      "unsupported statement: TYPES msg_count TYPE i.",
-      "unsupported statement: TYPES context TYPE c LENGTH 255.",
-      "unsupported statement: TYPES params TYPE c LENGTH 255.",
-      "unsupported statement: TYPES msg_txt TYPE string.",
-      "unsupported statement: TYPES END OF ty_s_log_entry."
-    ]
+    "todos": 0,
+    "todoDetails": []
   },
   {
     "class": "z2ui5_cl_demo_app_155",
@@ -378,13 +395,8 @@
   {
     "class": "z2ui5_cl_demo_app_365",
     "path": "01/03/z2ui5_cl_demo_app_365.js",
-    "todos": 9,
+    "todos": 4,
     "todoDetails": [
-      "unsupported statement: TYPES BEGIN OF ty_s_carrier,",
-      "unsupported statement: TYPES carrid TYPE c LENGTH 3,",
-      "unsupported statement: TYPES name TYPE string,",
-      "unsupported statement: TYPES url TYPE string,",
-      "unsupported statement: TYPES END OF ty_s_carrier.",
       "unsupported statement: CALL METHOD (classname)=>(`NEW`) RECEIVING output = output.",
       "unsupported statement: CALL METHOD output->(`WRITE_TEXT`) EXPORTING text = `The HTML below is produced by the standard SAP class CL_DEMO_OUTPUT",
       "unsupported statement: CALL METHOD output->(`WRITE_DATA`) EXPORTING value = t_carriers.",
@@ -435,6 +447,12 @@
     ]
   },
   {
+    "class": "z2ui5_cl_demo_app_175",
+    "path": "01/04/z2ui5_cl_demo_app_175.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
     "class": "z2ui5_cl_demo_app_187",
     "path": "01/04/z2ui5_cl_demo_app_187.js",
     "todos": 0,
@@ -445,14 +463,6 @@
     "path": "01/04/z2ui5_cl_demo_app_202.js",
     "todos": 0,
     "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_056",
-    "path": "01/05/z2ui5_cl_demo_app_056.js",
-    "todos": 1,
-    "todoDetails": [
-      "IN range-table check approximated (sign E ignored)"
-    ]
   },
   {
     "class": "z2ui5_cl_demo_app_074",
@@ -483,12 +493,6 @@
     ]
   },
   {
-    "class": "z2ui5_cl_demo_app_139",
-    "path": "01/05/z2ui5_cl_demo_app_139.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
     "class": "z2ui5_cl_demo_app_279",
     "path": "01/05/z2ui5_cl_demo_app_279.js",
     "todos": 0,
@@ -500,461 +504,6 @@
     "todos": 1,
     "todoDetails": [
       "sy-uzeit used — provide manually"
-    ]
-  },
-  {
-    "class": "z2ui5_cl_demo_app_327",
-    "path": "01/05/z2ui5_cl_demo_app_327.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_354",
-    "path": "01/05/z2ui5_cl_demo_app_354.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_018",
-    "path": "01/07/z2ui5_cl_demo_app_018.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_020",
-    "path": "01/07/z2ui5_cl_demo_app_020.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_025",
-    "path": "01/07/z2ui5_cl_demo_app_025.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_034",
-    "path": "01/07/z2ui5_cl_demo_app_034.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_039",
-    "path": "01/07/z2ui5_cl_demo_app_039.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_042",
-    "path": "01/07/z2ui5_cl_demo_app_042.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_044",
-    "path": "01/07/z2ui5_cl_demo_app_044.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_045",
-    "path": "01/07/z2ui5_cl_demo_app_045.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_046",
-    "path": "01/07/z2ui5_cl_demo_app_046.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_049",
-    "path": "01/07/z2ui5_cl_demo_app_049.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_054",
-    "path": "01/07/z2ui5_cl_demo_app_054.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_055",
-    "path": "01/07/z2ui5_cl_demo_app_055.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_058",
-    "path": "01/07/z2ui5_cl_demo_app_058.js",
-    "todos": 1,
-    "todoDetails": [
-      "unsupported statement: z2ui5_cl_util=>xml_parse( EXPORTING xml = ls_layout2-data IMPORTING any = ms_layout )."
-    ]
-  },
-  {
-    "class": "z2ui5_cl_demo_app_083",
-    "path": "01/07/z2ui5_cl_demo_app_083.js",
-    "todos": 1,
-    "todoDetails": [
-      "unsupported statement: CREATE DATA mt_table TYPE (mv_name)."
-    ]
-  },
-  {
-    "class": "z2ui5_cl_demo_app_086",
-    "path": "01/07/z2ui5_cl_demo_app_086.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_087",
-    "path": "01/07/z2ui5_cl_demo_app_087.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_094",
-    "path": "01/07/z2ui5_cl_demo_app_094.js",
-    "todos": 7,
-    "todoDetails": [
-      "unsupported statement: CREATE DATA mr_input TYPE string.",
-      "unsupported statement: ASSIGN mr_input->* TO <input>.",
-      "unsupported statement: CREATE DATA mr_screen TYPE ty_s_01.",
-      "unsupported statement: ASSIGN mr_screen->* TO <screen>.",
-      "NEW #( ) — target type unknown, resolve manually",
-      "unsupported statement: ASSIGN mr_input->* TO <input>.",
-      "unsupported statement: ASSIGN mr_screen->* TO <screen>."
-    ]
-  },
-  {
-    "class": "z2ui5_cl_demo_app_095",
-    "path": "01/07/z2ui5_cl_demo_app_095.js",
-    "todos": 1,
-    "todoDetails": [
-      "NEW #( ) — target type unknown, resolve manually"
-    ]
-  },
-  {
-    "class": "z2ui5_cl_demo_app_096",
-    "path": "01/07/z2ui5_cl_demo_app_096.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_099",
-    "path": "01/07/z2ui5_cl_demo_app_099.js",
-    "todos": 3,
-    "todoDetails": [
-      "unsupported statement: CONDENSE filter_string NO-GAPS.",
-      "unsupported statement: TRANSLATE lv_field TO UPPER CASE.",
-      "unsupported statement: TRANSLATE mv_sorter_group TO UPPER CASE."
-    ]
-  },
-  {
-    "class": "z2ui5_cl_demo_app_105",
-    "path": "01/07/z2ui5_cl_demo_app_105.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_112",
-    "path": "01/07/z2ui5_cl_demo_app_112.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_114",
-    "path": "01/07/z2ui5_cl_demo_app_114.js",
-    "todos": 1,
-    "todoDetails": [
-      "sy-uname used — provide manually"
-    ]
-  },
-  {
-    "class": "z2ui5_cl_demo_app_121",
-    "path": "01/07/z2ui5_cl_demo_app_121.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_126",
-    "path": "01/07/z2ui5_cl_demo_app_126.js",
-    "todos": 11,
-    "todoDetails": [
-      "unsupported statement: cl_abap_typedescr=>describe_by_name( EXPORTING p_name = `Z2UI5_T_UTIL_01` RECEIVING p_descr_ref = DATA(typedesc) EXCEPTI",
-      "unsupported statement: CREATE DATA mt_table TYPE HANDLE new_table_desc.",
-      "unsupported statement: CREATE DATA mt_table_del TYPE HANDLE new_table_desc.",
-      "unsupported statement: CREATE DATA mt_table_tmp TYPE HANDLE new_table_desc.",
-      "unsupported statement: CREATE DATA ms_table_row TYPE HANDLE new_struct_desc.",
-      "unsupported statement: ASSIGN mt_table->* TO <table>.",
-      "unsupported statement: SELECT * FROM z2ui5_t_01 INTO CORRESPONDING FIELDS OF TABLE @<table> UP TO 3 ROWS.",
-      "unsupported statement: ASSIGN mt_table_tmp->* TO <table_tmp>.",
-      "unresolved class reference: cl_abap_datadescr",
-      "unresolved class reference: cl_abap_structdescr",
-      "unresolved class reference: cl_abap_tabledescr"
-    ]
-  },
-  {
-    "class": "z2ui5_cl_demo_app_129",
-    "path": "01/07/z2ui5_cl_demo_app_129.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_130",
-    "path": "01/07/z2ui5_cl_demo_app_130.js",
-    "todos": 2,
-    "todoDetails": [
-      "unsupported statement: REPLACE `{LOW}` IN lv_value WITH lr_filter->low.",
-      "unsupported statement: REPLACE `{HIGH}` IN lv_value WITH lr_filter->high."
-    ]
-  },
-  {
-    "class": "z2ui5_cl_demo_app_132",
-    "path": "01/07/z2ui5_cl_demo_app_132.js",
-    "todos": 2,
-    "todoDetails": [
-      "unsupported statement: cl_abap_typedescr=>describe_by_name( EXPORTING p_name = `Z2UI5_T_01` RECEIVING p_descr_ref = DATA(typedesc) EXCEPTIONS t",
-      "unresolved class reference: cl_abap_datadescr"
-    ]
-  },
-  {
-    "class": "z2ui5_cl_demo_app_140",
-    "path": "01/07/z2ui5_cl_demo_app_140.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_143",
-    "path": "01/07/z2ui5_cl_demo_app_143.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_153",
-    "path": "01/07/z2ui5_cl_demo_app_153.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_170",
-    "path": "01/07/z2ui5_cl_demo_app_170.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_171",
-    "path": "01/07/z2ui5_cl_demo_app_171.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_184",
-    "path": "01/07/z2ui5_cl_demo_app_184.js",
-    "todos": 10,
-    "todoDetails": [
-      "unsupported statement: ASSIGN mt_table->* TO <tab>.",
-      "unsupported statement: CREATE DATA mt_table TYPE HANDLE new_table_desc.",
-      "unsupported statement: CREATE DATA mt_table_tmp TYPE HANDLE new_table_desc.",
-      "unsupported statement: ASSIGN mt_table->* TO <table>.",
-      "unsupported statement: SELECT * FROM (mv_table) INTO CORRESPONDING FIELDS OF TABLE @<table> UP TO 2 ROWS.",
-      "unsupported statement: ASSIGN mt_table_tmp->* TO <table_tmp>.",
-      "unsupported statement: cl_abap_typedescr=>describe_by_name( EXPORTING p_name = mv_table RECEIVING p_descr_ref = DATA(typedesc) EXCEPTIONS type_",
-      "unresolved class reference: cl_abap_datadescr",
-      "unresolved class reference: cl_abap_structdescr",
-      "unresolved class reference: cl_abap_tabledescr"
-    ]
-  },
-  {
-    "class": "z2ui5_cl_demo_app_190",
-    "path": "01/07/z2ui5_cl_demo_app_190.js",
-    "todos": 8,
-    "todoDetails": [
-      "unsupported statement: ASSIGN mt_table->* TO <tab>.",
-      "unsupported statement: CREATE DATA mt_table TYPE HANDLE new_table_desc.",
-      "unsupported statement: ASSIGN mt_table->* TO <table>.",
-      "unsupported statement: SELECT * FROM (mv_table) INTO CORRESPONDING FIELDS OF TABLE @<table> UP TO 100 ROWS.",
-      "unsupported statement: cl_abap_typedescr=>describe_by_name( EXPORTING p_name = mv_table RECEIVING p_descr_ref = DATA(typedesc) EXCEPTIONS type_",
-      "unresolved class reference: cl_abap_datadescr",
-      "unresolved class reference: cl_abap_structdescr",
-      "unresolved class reference: cl_abap_tabledescr"
-    ]
-  },
-  {
-    "class": "z2ui5_cl_demo_app_192",
-    "path": "01/07/z2ui5_cl_demo_app_192.js",
-    "todos": 4,
-    "todoDetails": [
-      "unsupported statement: CREATE DATA lo_new_data->mt_kopf TYPE HANDLE lr_tabdescr.",
-      "unsupported statement: ASSIGN lo_new_data->mt_kopf->* TO <fs_t_head_new>.",
-      "unresolved class reference: cl_abap_structdescr",
-      "unresolved class reference: cl_abap_tabledescr"
-    ]
-  },
-  {
-    "class": "z2ui5_cl_demo_app_193",
-    "path": "01/07/z2ui5_cl_demo_app_193.js",
-    "todos": 2,
-    "todoDetails": [
-      "unsupported statement: ASSIGN mt_kopf->* TO FIELD-SYMBOL(<head>).",
-      "unsupported statement: ASSIGN mt_pos->* TO FIELD-SYMBOL(<pos>)."
-    ]
-  },
-  {
-    "class": "z2ui5_cl_demo_app_194",
-    "path": "01/07/z2ui5_cl_demo_app_194.js",
-    "todos": 21,
-    "todoDetails": [
-      "unsupported statement: ASSIGN ms_table_row->* TO <row>.",
-      "unsupported statement: ASSIGN mt_table->* TO <tab>.",
-      "unsupported statement: CREATE DATA mt_table TYPE HANDLE new_table_desc.",
-      "unsupported statement: CREATE DATA mt_table_tmp TYPE HANDLE new_table_desc.",
-      "unsupported statement: CREATE DATA ms_table_row TYPE HANDLE new_struct_desc.",
-      "unsupported statement: ASSIGN mt_table->* TO <table>.",
-      "unsupported statement: SELECT * FROM (mv_table) INTO CORRESPONDING FIELDS OF TABLE @<table> UP TO 100 ROWS.",
-      "unsupported statement: ASSIGN mt_table_tmp->* TO <table_tmp>.",
-      "unsupported statement: TYPES BEGIN OF ty_s_fixvalue,",
-      "unsupported statement: TYPES low TYPE string,",
-      "unsupported statement: TYPES high TYPE string,",
-      "unsupported statement: TYPES option TYPE string,",
-      "unsupported statement: TYPES ddlanguage TYPE string,",
-      "unsupported statement: TYPES ddtext TYPE string,",
-      "unsupported statement: TYPES END OF ty_s_fixvalue.",
-      "unsupported statement: TYPES fixvalues TYPE STANDARD TABLE OF ty_s_fixvalue WITH DEFAULT KEY.",
-      "unsupported statement: CREATE DATA ms_fixval TYPE HANDLE structdescr.",
-      "unsupported statement: cl_abap_typedescr=>describe_by_name( EXPORTING p_name = mv_table RECEIVING p_descr_ref = DATA(typedesc) EXCEPTIONS type_",
-      "unresolved class reference: cl_abap_datadescr",
-      "unresolved class reference: cl_abap_structdescr",
-      "unresolved class reference: cl_abap_tabledescr"
-    ]
-  },
-  {
-    "class": "z2ui5_cl_demo_app_211",
-    "path": "01/07/z2ui5_cl_demo_app_211.js",
-    "todos": 5,
-    "todoDetails": [
-      "unsupported statement: CALL METHOD mo_app->(`SET_APP_DATA`) EXPORTING table = t002->table.",
-      "unsupported statement: ASSIGN mo_app->(`MO_PARENT_VIEW`) TO FIELD-SYMBOL(<view>).",
-      "unsupported statement: CALL METHOD mo_app->(`Z2UI5_IF_APP~MAIN`) EXPORTING client = client.",
-      "unsupported statement: ASSIGN mo_app->(`MV_VIEW_DISPLAY`) TO FIELD-SYMBOL(<view_display>).",
-      "unsupported statement: ASSIGN mo_app->(`MV_VIEW_MODEL_UPDATE`) TO FIELD-SYMBOL(<view_update>)."
-    ]
-  },
-  {
-    "class": "z2ui5_cl_demo_app_212",
-    "path": "01/07/z2ui5_cl_demo_app_212.js",
-    "todos": 14,
-    "todoDetails": [
-      "unsupported statement: ASSIGN mt_table->* TO <tab>.",
-      "unsupported statement: ASSIGN ms_table_row->* TO <table_row>.",
-      "unsupported statement: ASSIGN ms_table_row->* TO <row>.",
-      "unsupported statement: ASSIGN mt_table->* TO <tab>.",
-      "unsupported statement: CREATE DATA mt_table TYPE HANDLE new_table_desc.",
-      "unsupported statement: CREATE DATA mt_table_tmp TYPE HANDLE new_table_desc.",
-      "unsupported statement: CREATE DATA ms_table_row TYPE HANDLE new_struct_desc.",
-      "unsupported statement: ASSIGN mt_table->* TO <table>.",
-      "unsupported statement: SELECT * FROM (mv_table) INTO CORRESPONDING FIELDS OF TABLE @<table> UP TO 100 ROWS.",
-      "unsupported statement: ASSIGN mt_table_tmp->* TO <table_tmp>.",
-      "unsupported statement: cl_abap_typedescr=>describe_by_name( EXPORTING p_name = mv_table RECEIVING p_descr_ref = DATA(typedesc) EXCEPTIONS type_",
-      "unresolved class reference: cl_abap_datadescr",
-      "unresolved class reference: cl_abap_structdescr",
-      "unresolved class reference: cl_abap_tabledescr"
-    ]
-  },
-  {
-    "class": "z2ui5_cl_demo_app_258",
-    "path": "01/07/z2ui5_cl_demo_app_258.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_318",
-    "path": "01/07/z2ui5_cl_demo_app_318.js",
-    "todos": 2,
-    "todoDetails": [
-      "builtin shift_left( ) not mapped",
-      "builtin shift_left( ) not mapped"
-    ]
-  },
-  {
-    "class": "z2ui5_cl_demo_app_329",
-    "path": "01/07/z2ui5_cl_demo_app_329.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_333",
-    "path": "01/07/z2ui5_cl_demo_app_333.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_336",
-    "path": "01/07/z2ui5_cl_demo_app_336.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_339",
-    "path": "01/07/z2ui5_cl_demo_app_339.js",
-    "todos": 11,
-    "todoDetails": [
-      "unsupported statement: cl_abap_typedescr=>describe_by_name( EXPORTING p_name = mv_table RECEIVING p_descr_ref = DATA(typedesc) EXCEPTIONS type_",
-      "unsupported statement: ASSIGN mt_table->* TO FIELD-SYMBOL(<table>).",
-      "unsupported statement: ASSIGN mo_layout->mr_data->* TO FIELD-SYMBOL(<data>).",
-      "unsupported statement: ASSIGN mt_table->* TO FIELD-SYMBOL(<table>).",
-      "unsupported statement: CREATE DATA mt_table TYPE HANDLE new_table_desc.",
-      "unsupported statement: CREATE DATA mt_table_tmp TYPE HANDLE new_table_desc.",
-      "unsupported statement: ASSIGN mt_table->* TO <table>.",
-      "unsupported statement: SELECT * FROM (mv_table) INTO CORRESPONDING FIELDS OF TABLE @<table> UP TO 3 ROWS.",
-      "unresolved class reference: cl_abap_datadescr",
-      "unresolved class reference: cl_abap_structdescr",
-      "unresolved class reference: cl_abap_tabledescr"
-    ]
-  },
-  {
-    "class": "z2ui5_cl_demo_app_340",
-    "path": "01/07/z2ui5_cl_demo_app_340.js",
-    "todos": 10,
-    "todoDetails": [
-      "unsupported statement: ASSIGN mo_layout->mr_data->* TO FIELD-SYMBOL(<data>).",
-      "unsupported statement: ASSIGN mt_data->* TO FIELD-SYMBOL(<table>).",
-      "unsupported statement: CREATE DATA result->mt_data TYPE HANDLE new_table_desc.",
-      "unsupported statement: CREATE DATA result->mt_data_tmp TYPE HANDLE new_table_desc.",
-      "unsupported statement: CREATE DATA result->ms_data_row TYPE HANDLE new_struct_desc.",
-      "unsupported statement: ASSIGN io_table->* TO FIELD-SYMBOL(<table>).",
-      "unsupported statement: ASSIGN result->mt_data->* TO FIELD-SYMBOL(<data>).",
-      "unsupported statement: ASSIGN result->mt_data_tmp->* TO <data>.",
-      "unresolved class reference: cl_abap_structdescr",
-      "unresolved class reference: cl_abap_tabledescr"
-    ]
-  },
-  {
-    "class": "z2ui5_cl_demo_app_342",
-    "path": "01/07/z2ui5_cl_demo_app_342.js",
-    "todos": 11,
-    "todoDetails": [
-      "unsupported statement: cl_abap_typedescr=>describe_by_name( EXPORTING p_name = mv_table RECEIVING p_descr_ref = DATA(typedesc) EXCEPTIONS type_",
-      "unsupported statement: ASSIGN mt_data->* TO FIELD-SYMBOL(<table>).",
-      "unsupported statement: ASSIGN mo_lay->mr_data->* TO FIELD-SYMBOL(<data>).",
-      "unsupported statement: ASSIGN mt_data->* TO FIELD-SYMBOL(<table>).",
-      "unsupported statement: CREATE DATA mt_data TYPE HANDLE new_table_desc.",
-      "unsupported statement: CREATE DATA mt_data_tmp TYPE HANDLE new_table_desc.",
-      "unsupported statement: ASSIGN mt_data->* TO <table>.",
-      "unsupported statement: SELECT * FROM (mv_table) INTO CORRESPONDING FIELDS OF TABLE @<table> UP TO 5 ROWS.",
-      "unresolved class reference: cl_abap_datadescr",
-      "unresolved class reference: cl_abap_structdescr",
-      "unresolved class reference: cl_abap_tabledescr"
-    ]
-  },
-  {
-    "class": "z2ui5_cl_demo_app_350",
-    "path": "01/07/z2ui5_cl_demo_app_350.js",
-    "todos": 1,
-    "todoDetails": [
-      "unsupported statement: CALL FUNCTION lv_fm EXPORTING tabname = `ZTEST` varkey = varkey EXCEPTIONS foreign_lock = 1 system_failure = 2 OTHERS = "
     ]
   },
   {
@@ -1034,11 +583,14 @@
   {
     "class": "z2ui5_cl_demo_app_035",
     "path": "01/08/z2ui5_cl_demo_app_035.js",
-    "todos": 2,
-    "todoDetails": [
-      "builtin shift_left( ) not mapped",
-      "builtin shift_left( ) not mapped"
-    ]
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_demo_app_038",
+    "path": "01/08/z2ui5_cl_demo_app_038.js",
+    "todos": 0,
+    "todoDetails": []
   },
   {
     "class": "z2ui5_cl_demo_app_041",
@@ -1147,12 +699,6 @@
   {
     "class": "z2ui5_cl_demo_app_173",
     "path": "01/08/z2ui5_cl_demo_app_173.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_demo_app_175",
-    "path": "01/08/z2ui5_cl_demo_app_175.js",
     "todos": 0,
     "todoDetails": []
   },
@@ -1689,9 +1235,11 @@
     "todoDetails": []
   },
   {
-    "class": "z2ui5_cl_sample_000",
-    "path": "01/z2ui5_cl_sample_000.js",
-    "todos": 0,
-    "todoDetails": []
+    "class": "z2ui5_cl_sample_app_000",
+    "path": "01/z2ui5_cl_sample_app_000.js",
+    "todos": 1,
+    "todoDetails": [
+      "unsupported statement: DELETE words INDEX n."
+    ]
   }
 ]
