@@ -21,7 +21,9 @@ CLASS z2ui5_cl_demo_app_109 DEFINITION PUBLIC.
 ENDCLASS.
 
 
-CLASS z2ui5_cl_demo_app_109 IMPLEMENTATION.
+
+CLASS Z2UI5_CL_DEMO_APP_109 IMPLEMENTATION.
+
 
   METHOD popover_display.
 
@@ -148,5 +150,4 @@ CLASS z2ui5_cl_demo_app_109 IMPLEMENTATION.
     quantity = `500`.
 
   ENDMETHOD.
-
 ENDCLASS.

@@ -30,7 +30,9 @@ CLASS z2ui5_cl_demo_app_052 DEFINITION PUBLIC.
 ENDCLASS.
 
 
-CLASS z2ui5_cl_demo_app_052 IMPLEMENTATION.
+
+CLASS Z2UI5_CL_DEMO_APP_052 IMPLEMENTATION.
+
 
   METHOD popover_display.
 
@@ -176,5 +178,4 @@ CLASS z2ui5_cl_demo_app_052 IMPLEMENTATION.
         ( product = `table2` create_date = `01.01.2023` create_by = `Julia` storage_location = `AREA_001` quantity = 110 ) ).
 
   ENDMETHOD.
-
 ENDCLASS.

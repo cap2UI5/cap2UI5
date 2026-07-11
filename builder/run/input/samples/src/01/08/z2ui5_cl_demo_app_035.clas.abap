@@ -51,9 +51,9 @@ CLASS z2ui5_cl_demo_app_035 IMPLEMENTATION.
          )->label( `Option` ).
 
     lt_types = VALUE z2ui5_if_types=>ty_t_name_value( ).
-    lt_types = VALUE #( FOR row IN z2ui5_cl_util=>source_get_file_types( )  (
-            n = shift_right( shift_left( row ) )
-            v = shift_right( shift_left( row ) ) ) ).
+  "  lt_types = VALUE #( FOR row IN z2ui5_cl_util=>source_get_file_types( )  (
+  "          n = shift_right( shift_left( row ) )
+  "          v = shift_right( shift_left( row ) ) ) ).
 
     DATA(temp3) = temp->input( value = client->_bind_edit( mv_type )
                    suggestionitems   = client->_bind( lt_types )

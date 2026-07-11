@@ -5,9 +5,18 @@
 [![auto_downport](https://github.com/abap2UI5/samples/actions/workflows/auto_downport.yaml/badge.svg)](https://github.com/abap2UI5/samples/actions/workflows/auto_downport.yaml)
 [![auto_cloud](https://github.com/abap2UI5/samples/actions/workflows/auto_cloud.yaml/badge.svg)](https://github.com/abap2UI5/samples/actions/workflows/auto_cloud.yaml)
 
+
+
 # abap2UI5-samples
 
 Install this repository and try out over 250 samples. This is the easiest way to learn abap2UI5 development. [More information here.](https://abap2ui5.github.io/docs/get_started/samples.html)
+
+
+#### Overview Apps
+
+[![generate_overview_apps](https://github.com/abap2UI5/samples/actions/workflows/generate_overview_apps.yaml/badge.svg)](https://github.com/abap2UI5/samples/actions/workflows/generate_overview_apps.yaml)
+
+_generate_overview_apps last run: <!-- last-run -->2026-07-10 13:54 UTC<!-- /last-run -->_
 
 #### Issues
 

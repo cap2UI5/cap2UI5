@@ -5,7 +5,7 @@
    <VSEOCLASS>
     <CLSNAME>Z2UI5_CL_DEMO_APP_061</CLSNAME>
     <LANGU>E</LANGU>
-    <DESCRIPT>Dynamic Types - Use S-RTTI to send tables to the frontend</DESCRIPT>
+    <DESCRIPT>Binding - Display dynamic created table RTTI</DESCRIPT>
     <STATE>1</STATE>
     <CLSCCINCL>X</CLSCCINCL>
     <FIXPT>X</FIXPT>

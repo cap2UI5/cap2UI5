@@ -32,7 +32,9 @@ CLASS z2ui5_cl_demo_app_185 DEFINITION PUBLIC.
 ENDCLASS.
 
 
-CLASS z2ui5_cl_demo_app_185 IMPLEMENTATION.
+
+CLASS Z2UI5_CL_DEMO_APP_185 IMPLEMENTATION.
+
 
   METHOD on_event.
 
@@ -164,5 +166,4 @@ CLASS z2ui5_cl_demo_app_185 IMPLEMENTATION.
     render_sub_app( ).
 
   ENDMETHOD.
-
 ENDCLASS.

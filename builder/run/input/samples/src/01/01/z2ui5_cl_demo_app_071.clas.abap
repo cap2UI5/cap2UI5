@@ -18,7 +18,9 @@ CLASS z2ui5_cl_demo_app_071 DEFINITION PUBLIC.
 ENDCLASS.
 
 
-CLASS z2ui5_cl_demo_app_071 IMPLEMENTATION.
+
+CLASS Z2UI5_CL_DEMO_APP_071 IMPLEMENTATION.
+
 
   METHOD z2ui5_if_app~main.
 
@@ -74,5 +76,4 @@ CLASS z2ui5_cl_demo_app_071 IMPLEMENTATION.
         )->stringify( ) ).
 
   ENDMETHOD.
-
 ENDCLASS.

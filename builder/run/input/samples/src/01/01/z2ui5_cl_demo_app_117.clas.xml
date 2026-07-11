@@ -5,7 +5,7 @@
    <VSEOCLASS>
     <CLSNAME>Z2UI5_CL_DEMO_APP_117</CLSNAME>
     <LANGU>E</LANGU>
-    <DESCRIPT>Dynamic Objects II - User Generic Data Refs in Subapps</DESCRIPT>
+    <DESCRIPT>SubApp I - Calling another app for rendering</DESCRIPT>
     <STATE>1</STATE>
     <CLSCCINCL>X</CLSCCINCL>
     <FIXPT>X</FIXPT>

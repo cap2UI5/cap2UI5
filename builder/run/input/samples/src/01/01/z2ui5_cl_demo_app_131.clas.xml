@@ -5,7 +5,7 @@
    <VSEOCLASS>
     <CLSNAME>Z2UI5_CL_DEMO_APP_131</CLSNAME>
     <LANGU>E</LANGU>
-    <DESCRIPT>Dynamic Objects I - Use S-RTTI to render different Subapps</DESCRIPT>
+    <DESCRIPT>SubApp II - Use RTTI to render different Subapps</DESCRIPT>
     <STATE>1</STATE>
     <CLSCCINCL>X</CLSCCINCL>
     <FIXPT>X</FIXPT>

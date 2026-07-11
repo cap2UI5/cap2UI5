@@ -33,7 +33,9 @@ CLASS z2ui5_cl_demo_app_081 DEFINITION PUBLIC.
 ENDCLASS.
 
 
-CLASS z2ui5_cl_demo_app_081 IMPLEMENTATION.
+
+CLASS Z2UI5_CL_DEMO_APP_081 IMPLEMENTATION.
+
 
   METHOD popover_display.
 
@@ -182,5 +184,4 @@ CLASS z2ui5_cl_demo_app_081 IMPLEMENTATION.
                       ( id = `4` name = `name4` ) ).
 
   ENDMETHOD.
-
 ENDCLASS.
