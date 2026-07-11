@@ -213,7 +213,7 @@ class z2ui5_cl_core_handler {
     const li_client = (new z2ui5_cl_core_client(this.mo_action));
     const li_app = (this.mo_action.mo_app.mo_app);
     if (!(li_app.check_sticky === true || li_app.check_sticky === `X`)) {
-      // TODO(abap2js): ROLLBACK WORK.
+      z2ui5_cl_util.db_rollback();
     }
     try {
       if (this.mo_action.ms_actual.event === z2ui5_if_core_types.cs_event_nav_app_leave) {
@@ -227,7 +227,7 @@ class z2ui5_cl_core_handler {
       li_client.nav_app_leave(z2ui5_cl_pop_error.factory(lx2));
     }
     if (!(li_app.check_sticky === true || li_app.check_sticky === `X`)) {
-      // TODO(abap2js): ROLLBACK WORK.
+      z2ui5_cl_util.db_rollback();
     }
     if (this.mo_action.ms_next.o_app_leave) {
       this.mo_action = this.mo_action.factory_stack_leave();

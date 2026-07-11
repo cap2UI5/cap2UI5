@@ -1,4 +1,5 @@
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cl_util_ext = require("abap2UI5/z2ui5_cl_util_ext");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
@@ -32,7 +33,7 @@ class z2ui5_cl_pop_bal extends z2ui5_if_app {
 
   static factory_by_db({ i_object, i_subobject, i_extnumber, i_title = `abap2UI5 - Business Application Log`, i_check_save = false } = {}) {
     let r_result = null;
-    r_result = z2ui5_cl_pop_bal.factory({ i_messages: z2ui5_cl_util.bal_read({ object: i_object, subobject: i_subobject, id: i_extnumber }), i_title, i_object, i_subobject, i_extnumber, i_check_save });
+    r_result = z2ui5_cl_pop_bal.factory({ i_messages: z2ui5_cl_util_ext.bal_read({ object: i_object, subobject: i_subobject, id: i_extnumber }), i_title, i_object, i_subobject, i_extnumber, i_check_save });
     return r_result;
   }
 
@@ -90,7 +91,7 @@ class z2ui5_cl_pop_bal extends z2ui5_if_app {
       return;
     }
     try {
-      z2ui5_cl_util.bal_create({ object: this.mv_object, subobject: this.mv_subobject, id: this.mv_extnumber, t_log: this.mt_msg_bal });
+      z2ui5_cl_util_ext.bal_create({ object: this.mv_object, subobject: this.mv_subobject, id: this.mv_extnumber, t_log: this.mt_msg_bal });
       this.client.message_toast_display(`Business Application Log saved`);
     } catch (x) {
       this.client.message_box_display(x.get_text(), `error`);

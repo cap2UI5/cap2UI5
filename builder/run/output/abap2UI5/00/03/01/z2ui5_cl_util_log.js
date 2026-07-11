@@ -1,4 +1,5 @@
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cl_util_ext = require("abap2UI5/z2ui5_cl_util_ext");
 
 class z2ui5_cl_util_log {
   mt_log = [];
@@ -59,12 +60,12 @@ class z2ui5_cl_util_log {
   }
 
   bal_read({ object, subobject, id } = {}) {
-    const lt_msg = z2ui5_cl_util.bal_read({ object, subobject, id });
+    const lt_msg = z2ui5_cl_util_ext.bal_read({ object, subobject, id });
     this.mt_log.push(...lt_msg);
   }
 
   bal_save({ object, subobject, id } = {}) {
-    z2ui5_cl_util.bal_create({ object, subobject, id, t_log: this.mt_log });
+    z2ui5_cl_util_ext.bal_create({ object, subobject, id, t_log: this.mt_log });
   }
 
   to_csv() {
@@ -75,7 +76,7 @@ class z2ui5_cl_util_log {
 
   to_xlsx() {
     let result = ``;
-    result = z2ui5_cl_util.conv_get_xlsx_by_itab(this.mt_log);
+    result = z2ui5_cl_util_ext.conv_get_xlsx_by_itab(this.mt_log);
     return result;
   }
 

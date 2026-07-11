@@ -33,7 +33,7 @@ class z2ui5_cl_pop_table extends z2ui5_if_app {
     for (const ls_comp of lt_comp) {
       sy_tabix++;
       if (ls_comp.type != null && (ls_comp.type.is_ddic_type() === true || ls_comp.type.is_ddic_type() === `X`)) {
-        lv_name = this.substring_after({ val: (ls_comp.type).absolute_name, sub: `\\TYPE=` });
+        lv_name = z2ui5_cl_util.rtti_get_ddic_type_name(ls_comp.type);
         lv_ddic_field_label = z2ui5_cl_util.rtti_get_data_element_text_l(lv_name);
         if (lv_ddic_field_label) {
           columns.column(`8rem`).header(``).text(lv_ddic_field_label);

@@ -1,4 +1,3 @@
-// TODO(abap2js): unresolved reference cl_abap_char_utilities — add require manually
 const cx_no_check = class {}; // TODO(abap2js): unresolved superclass — replace stub manually
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 
@@ -29,7 +28,7 @@ class z2ui5_cx_util_error extends cx_no_check {
     if (previous != null) {
       lo_x = z2ui5_cl_util.abap_copy(previous);
       while (lo_x != null) {
-        result = result + cl_abap_char_utilities.newline + lo_x.get_text();
+        result = result + z2ui5_cl_util.cv_char_util_newline + lo_x.get_text();
         lo_x = z2ui5_cl_util.abap_copy(lo_x.previous);
       }
     }

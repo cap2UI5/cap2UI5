@@ -1,4 +1,3 @@
-// TODO(abap2js): unresolved reference cl_abap_char_utilities — add require manually
 // TODO(abap2js): unresolved reference cl_abap_datadescr — add require manually
 // TODO(abap2js): unresolved reference cl_abap_typedescr — add require manually
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
@@ -195,7 +194,7 @@ class z2ui5_cl_util_msg {
 
   static msg_get_collect({ val, val2 } = {}) {
     let result = ``;
-    result = /* TODO(abap2js): VALUE FOR/BASE */ [].join(cl_abap_char_utilities.newline);
+    result = /* TODO(abap2js): VALUE FOR/BASE */ [].join(z2ui5_cl_util.cv_char_util_newline);
     return result;
   }
 

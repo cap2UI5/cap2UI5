@@ -1,6 +1,3 @@
-// TODO(abap2js): unresolved reference cl_abap_structdescr — add require manually
-// TODO(abap2js): unresolved reference cl_abap_tabledescr — add require manually
-// TODO(abap2js): unresolved reference cl_abap_typedescr — add require manually
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
@@ -113,29 +110,12 @@ class z2ui5_cl_pop_to_select extends z2ui5_if_app {
     let _fs$fs_row2 = null;
     let fs_field = null;
     let _fs$fs_field = null;
-    let lo_struct;
-    let lt_comp;
-    let lo_elem;
-    let lo_type_bool;
     let lr_row = null;
     // TODO(abap2js): ASSIGN mr_tab->* TO <tab>.
-    const lo_table = (cl_abap_typedescr.describe_by_data(fs_tab));
-    try {
-      lo_struct = (lo_table.get_table_line_type());
-      lt_comp = lo_struct.get_components();
-    } catch (error) {
-      this.check_table_line = true;
-      lo_elem = (lo_table.get_table_line_type());
-      lt_comp.push({ name: `TAB_LINE`, type: lo_elem });
-    }
-    if (!lt_comp.some((row) => row.name === `ZZSELKZ`)) {
-      lo_type_bool = cl_abap_typedescr.describe_by_name(`ABAP_BOOL`);
-      lt_comp.push({ name: `ZZSELKZ`, type: (lo_type_bool) });
-    }
-    const lo_line_type = cl_abap_structdescr.create(lt_comp);
-    const lo_tab_type = cl_abap_tabledescr.create(lo_line_type);
-    // TODO(abap2js): CREATE DATA mr_tab_popup TYPE HANDLE lo_tab_type.
-    // TODO(abap2js): CREATE DATA mr_tab_popup_backup TYPE HANDLE lo_tab_type.
+    const ls_sel_tab_type = z2ui5_cl_util.rtti_create_sel_tab_type({ ir_tab: this.mr_tab, add_sel_field: true });
+    this.check_table_line = z2ui5_cl_util.abap_copy(ls_sel_tab_type.check_table_line);
+    // TODO(abap2js): CREATE DATA mr_tab_popup TYPE HANDLE ls_sel_tab_type-tabledescr.
+    // TODO(abap2js): CREATE DATA mr_tab_popup_backup TYPE HANDLE ls_sel_tab_type-tabledescr.
     // TODO(abap2js): ASSIGN mr_tab_popup->* TO <tab_out>.
     // TODO(abap2js): ASSIGN mr_tab_popup_backup->* TO <tab_out2>.
     sy_tabix = 0;
