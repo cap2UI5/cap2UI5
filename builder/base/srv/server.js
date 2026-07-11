@@ -18,8 +18,8 @@ const UI5_RESOURCES = path.join(
 );
 
 /**
- * The z2ui5 roundtrip itself is wired as a CDS REST action (see cat-service.cds
- * + cat-service.js — `srv.on('z2ui5', …)` on the rootService). That gives us
+ * The z2ui5 roundtrip itself is wired as a CDS REST action (see z2ui5-service.cds
+ * + z2ui5-service.js — `srv.on('z2ui5', …)` on the rootService). That gives us
  * the same `{value: <oBody>}` action-param shape the abap2UI5 ABAP backend's
  * ICF wrapper produces internally before passing the inner body to the
  * z2ui5_cl_core_handler.

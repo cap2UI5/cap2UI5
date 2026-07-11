@@ -27,9 +27,9 @@ Bringing the [abap2UI5](https://github.com/abap2UI5/abap2UI5) concept to CAP/Nod
 
 ## Getting Started
 
-Prerequisites: Node.js ≥ 20 and internet access (the frontend loads SAPUI5
-from the CDN). No database setup is needed — CAP deploys an in-memory
-SQLite automatically on startup.
+Prerequisites: Node.js ≥ 22 (see `.nvmrc`). The whole stack runs offline —
+the UI5 runtime is served locally from the pinned `openui5-dist` dependency,
+and CAP deploys an in-memory SQLite database automatically on startup.
 
 ```bash
 # from the repository root
@@ -48,9 +48,59 @@ The server listens on [http://localhost:4004](http://localhost:4004):
 |---|---|
 | `http://localhost:4004/z2ui5/webapp/index.html` | the app — without a parameter the startup app is shown |
 | `http://localhost:4004/z2ui5/webapp/index.html?app_start=z2ui5_cl_app_hello_world` | start a specific app class via the `app_start` parameter (works for every sample, e.g. `z2ui5_cl_demo_app_001`) |
+| `http://localhost:4004/index.html` | the [minimal starter page](#the-minimal-starter) — one roundtrip through all three layers |
 | `http://localhost:4004/rest/root/z2ui5` | the roundtrip endpoint the frontend talks to |
+| `http://localhost:4004/odata/v4/admin/z2ui5_t_01` | the draft table (session persistence) via OData |
 
 For a one-off run without file watching use `npm start` (`cds-serve`).
+
+## The minimal starter
+
+The project is a regular CAP application with the standard layout —
+`db/` (domain model), `srv/` (services + the z2ui5 runtime), `app/`
+(frontends) — and it marks the starting point of cap2UI5: the same basic
+setup as abap2UI5, built from three layers.
+
+| Layer | Where | What it does |
+|---|---|---|
+| (1) mini frontend | [`app/index.html`](app/index.html) | a single self-contained UI5 page that POSTs one roundtrip, renders the returned view XML and shows the draft id + row count |
+| (2) http service | [`srv/z2ui5-service.cds`](srv/z2ui5-service.cds) / [`.js`](srv/z2ui5-service.js) + [`srv/server.js`](srv/server.js) | `rootService.z2ui5` — the REST action at `POST /rest/root/z2ui5` (plus `GET` bootstrap HTML), same wire format as the abap2UI5 ICF endpoint |
+| (3) persistence | [`db/schema.cds`](db/schema.cds) | entity `cap2ui5.z2ui5_t_01` — one draft row per roundtrip, chained via `id_prev` (the abap2UI5 table `Z2UI5_T_01`) |
+
+### Start it
+
+```bash
+npm install
+npx cds watch     # → http://localhost:4004/index.html
+```
+
+Open [http://localhost:4004/index.html](http://localhost:4004/index.html):
+every click on **POST /rest/root/z2ui5** runs one full roundtrip — the
+backend app class builds the view, the response's draft id is the new row
+key in `cap2ui5.z2ui5_t_01`, and the row count (read back via the
+AdminService OData endpoint) increases by one.
+
+Or exercise the service from the command line:
+
+```bash
+curl -s -X POST http://localhost:4004/rest/root/z2ui5 \
+  -H "Content-Type: application/json" \
+  -d '{"value":{"S_FRONT":{"ORIGIN":"http://localhost:4004","PATHNAME":"/index.html","SEARCH":"","HASH":""}}}'
+
+curl -s http://localhost:4004/odata/v4/admin/z2ui5_t_01/\$count
+```
+
+### Test it
+
+```bash
+npm test
+```
+
+runs the jest suite: [`test/starter.test.js`](test/starter.test.js) boots the
+real server via `cds.test()` and asserts all three layers end-to-end
+(starter page + bootstrap HTML, roundtrip returning view XML, draft row
+persisted per roundtrip), and [`test/z2ui5_cl_xml_view.test.js`](test/z2ui5_cl_xml_view.test.js)
+covers the view builder.
 
 ## Transpiling from ABAP
 

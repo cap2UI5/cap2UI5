@@ -1,43 +1,26 @@
-# CAP elo_sched_agr
-_out
-*.db
-*.sqlite
-connection.properties
-default-*.json
-.cdsrc-private.json
-gen/
 node_modules/
-resources/
 target/
+_out/
+gen/
 
-# Web IDE, App Studio
-.che/
-.gen/
+.cdsrc-private.json
+default-*.json
+*.sqlite
+*.db
 
 # MTA
+mta_archives/
 *_mta_build_tmp
 *.mtar
-mta_archives/
-app/orderschedline/dist/
+resources/
 
 # Other
 .DS_Store
 *.orig
 *.log
 
-*.iml
-*.flattened-pom.xml
-
-# IDEs
-# .vscode
-# .idea
-
 # @cap-js/cds-typer
 @cds-models
 
-# CLI tools
-cf
-cf8
-NOTICE
 # frontend mirror workdir
 .mirror_tmp/

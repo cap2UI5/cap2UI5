@@ -46,19 +46,13 @@ class z2ui5_cl_demo_app_027 extends z2ui5_if_app {
       .input(this.client._bind(this.input2))
       .input({ value: `{= $${this.client._bind(this.input2)}.toUpperCase() }`, enabled: false })
       .label(`max value of the first two inputs`)
-      .input(`{ type : "sap.ui.model.type.Integer",` + ` path:"` + bind_input31 + `" }`)
-      .input(`{ type : "sap.ui.model.type.Integer",` + ` ` + ` path:"` + bind_input32 + `" }`)
-      .input({ value: `{= Math.max($${this.client._bind(this.input31)}, $${this.client._bind(this.input32)}) }`, enabled: false })
-      .label(`only enabled when the quantity equals 500`)
-      .input(`{ type : "sap.ui.model.type.Integer",` + ` path:"` + bind_quantity + `" }`)
-      .input({ value: this.product, enabled: `{= 500===$${this.client._bind(this.quantity)} }` })
-      .label(`RegExp Set to enabled if the input contains VIP, ignoring the case.`)
-      .input(this.client._bind(this.input41))
-      .button({ text: `VIP`, enabled: `{= RegExp('vip', 'i').test($${this.client._bind(this.input41)}) }` })
-      .label(`concatenate both inputs`)
-      .input(this.client._bind(this.input51))
-      .input(this.client._bind(this.input52))
-      .input({ value: `{ parts: [` + ` ` + ` "` + bind_input51 + `",` + ` ` + ` "` + bind_input52 + `"` + ` ` + ` ] }`, enabled: false });
+      .input(`{ type : "sap.ui.model.type.Integer",` + `  path:"` + bind_input31 + `" }`)
+      .input(`{ type : "sap.ui.model.type.Integer",` + `
+` + `  path:"` + bind_input32 + `" }`).input({ value: `{= Math.max($${this.client._bind(this.input31)}, $${this.client._bind(this.input32)}) }`, enabled: false }).label(`only enabled when the quantity equals 500`).input(`{ type : "sap.ui.model.type.Integer",` + `  path:"` + bind_quantity + `" }`).input({ value: this.product, enabled: `{= 500===$${this.client._bind(this.quantity)} }` }).label(`RegExp Set to enabled if the input contains VIP, ignoring the case.`).input(this.client._bind(this.input41)).button({ text: `VIP`, enabled: `{= RegExp('vip', 'i')
+  .test($${this.client._bind(this.input41)}) }` }).label(`concatenate both inputs`).input(this.client._bind(this.input51)).input(this.client._bind(this.input52)).input({ value: `{ parts: [` + `
+` + `                "` + bind_input51 + `",` + `
+` + `                "` + bind_input52 + `"` + `
+` + `               ]  }`, enabled: false });
     this.client.view_display(view.stringify());
   }
 }

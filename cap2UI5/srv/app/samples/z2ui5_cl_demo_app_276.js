@@ -6,7 +6,7 @@ class z2ui5_cl_demo_app_276 extends z2ui5_if_app {
   client = null;
 
   view_display({ client } = {}) {
-    const css = `.tileLayout {` + ` float: left;` + `}`;
+    const css = `.tileLayout {` + `    float: left;` + `}`;
     const page = z2ui5_cl_xml_view.factory()
       .shell()
       .page({ title: `abap2UI5 - Sample: Monitor Tile`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });

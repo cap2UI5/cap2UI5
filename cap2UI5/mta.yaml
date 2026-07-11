@@ -1,6 +1,6 @@
 _schema-version: 3.3.0
-ID: abap2UI5
-description: A simple CAP project.
+ID: cap2UI5
+description: cap2UI5 — the abap2UI5 concept on CAP/Node.js.
 version: 1.0.0
 modules:
 - name: abap2UI5-srv

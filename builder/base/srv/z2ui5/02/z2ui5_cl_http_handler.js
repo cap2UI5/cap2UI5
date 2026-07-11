@@ -5,7 +5,7 @@ const z2ui5_cl_exit         = require("./z2ui5_cl_exit");
 /**
  * z2ui5_cl_http_handler — JS port of abap2UI5 z2ui5_cl_http_handler.
  *
- * Wired in cat-service.js as `srv.on('z2ui5', ...)`. CDS unwraps the
+ * Wired in z2ui5-service.js as `srv.on('z2ui5', ...)`. CDS unwraps the
  * OData/REST action call into `req.data` containing the named `value`
  * parameter — that inner object is the raw oBody that abap2UI5's ICF servlet
  * would receive.

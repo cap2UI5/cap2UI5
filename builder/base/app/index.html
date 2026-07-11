@@ -21,7 +21,7 @@
         //
         //   frontend (this page)
         //     → POST /rest/root/z2ui5  { value: { S_FRONT: {...} } }   (service layer)
-        //       → draft persisted in my.domain.z2ui5_t_01              (database layer)
+        //       → draft persisted in cap2ui5.z2ui5_t_01              (database layer)
         //     ← { S_FRONT: { APP, ID, PARAMS: { S_VIEW: { XML } } }, MODEL }
         //
         // The response's draft ID is the row key in z2ui5_t_01; the row count
@@ -133,10 +133,10 @@
                                 new Label({ text: "Backend app class" })
                                     .addStyleClass("sapUiSmallMarginTop"),
                                 new Text({ text: "{/app}" }),
-                                new Label({ text: "Draft id (row key in table my.domain.z2ui5_t_01)" })
+                                new Label({ text: "Draft id (row key in table cap2ui5.z2ui5_t_01)" })
                                     .addStyleClass("sapUiTinyMarginTop"),
                                 new Text({ text: "{/draftId}" }),
-                                new Label({ text: "Rows in my.domain.z2ui5_t_01 (via AdminService)" })
+                                new Label({ text: "Rows in cap2ui5.z2ui5_t_01 (via AdminService)" })
                                     .addStyleClass("sapUiTinyMarginTop"),
                                 new Text({ text: "{/rows}" }),
                                 new Link({
