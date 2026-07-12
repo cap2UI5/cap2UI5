@@ -1,10 +1,10 @@
+// TODO(abap2js): unresolved reference z2ui5_cl_abap2ui5_http — add require manually
 const z2ui5_cl_app_preload = require("abap2UI5/z2ui5_cl_app_preload");
 const z2ui5_cl_app_style_css = require("abap2UI5/z2ui5_cl_app_style_css");
 // TODO(abap2js): unresolved reference z2ui5_cl_core_handler — add require manually
 // TODO(abap2js): unresolved reference z2ui5_cl_exit — add require manually
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_util_http = require("abap2UI5/z2ui5_cl_util_http");
-const z2ui5_cx_util_error = require("abap2UI5/z2ui5_cx_util_error");
+// TODO(abap2js): unresolved reference z2ui5_cx_abap2ui5_error — add require manually
 
 class z2ui5_cl_http_handler {
   static so_sticky_handler = null;
@@ -31,11 +31,11 @@ class z2ui5_cl_http_handler {
     let result = null;
     if (server != null) {
       result = new z2ui5_cl_http_handler();
-      result.mo_server = z2ui5_cl_util_http.factory(server);
+      result.mo_server = z2ui5_cl_abap2ui5_http.factory(server);
     } else if (req != null && res != null) {
       result = z2ui5_cl_http_handler.factory_cloud({ req, res });
     } else {
-      throw new z2ui5_cx_util_error({ val: `EMPTY_HTTP_HANDLER_CALL_ERROR` });
+      throw new z2ui5_cx_abap2ui5_error({ val: `EMPTY_HTTP_HANDLER_CALL_ERROR` });
     }
     return result;
   }
@@ -43,7 +43,7 @@ class z2ui5_cl_http_handler {
   static factory_cloud({ req, res } = {}) {
     let result = null;
     result = new z2ui5_cl_http_handler();
-    result.mo_server = z2ui5_cl_util_http.factory_cloud({ req, res });
+    result.mo_server = z2ui5_cl_abap2ui5_http.factory_cloud({ req, res });
     return result;
   }
 

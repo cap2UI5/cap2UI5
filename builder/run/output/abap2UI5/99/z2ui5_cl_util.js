@@ -10,7 +10,6 @@
 // TODO(abap2js): unresolved reference cl_abap_typedescr — add require manually
 // TODO(abap2js): unresolved reference cx_sy_dyn_call_illegal_class — add require manually
 const z2ui5_cl_ajson = require("abap2UI5/z2ui5_cl_ajson");
-const z2ui5_cl_util_msg = require("abap2UI5/z2ui5_cl_util_msg");
 const z2ui5_cx_util_error = require("abap2UI5/z2ui5_cx_util_error");
 
 class z2ui5_cl_util {
@@ -234,6 +233,9 @@ class z2ui5_cl_util {
   static filter_get_range_by_token({ val } = {}) {
     let result = {};
     let lv_value = z2ui5_cl_util.abap_copy(val);
+    if (!lv_value) {
+      return result;
+    }
     const lv_length = lv_value.length - 1;
     switch (lv_value (1)) {
       case `=`:
@@ -254,9 +256,11 @@ class z2ui5_cl_util {
         }
         break;
       case `*`:
-        if (String(lv_value).substr(lv_length, 1) === `*`) {
+        if (lv_length > 0 && String(lv_value).substr(lv_length, 1) === `*`) {
           lv_value = lv_value.substr(1, lv_length - 1);
           result = { sign: `I`, option: `CP`, low: lv_value };
+        } else if (lv_length === 0) {
+          result = { sign: `I`, option: `CP`, low: `` };
         }
         break;
       default:
@@ -368,10 +372,15 @@ class z2ui5_cl_util {
         lv_value = `${fs_field}`;
         if ((ignore_case === true || ignore_case === `X`)) {
           lv_value = lv_value.toUpperCase();
-        }
-        if (String(lv_value).toLowerCase().includes(String(lv_search).toLowerCase())) {
-          lv_check_found = true;
-          break;
+          if (String(lv_value).toLowerCase().includes(String(lv_search).toLowerCase())) {
+            lv_check_found = true;
+            break;
+          }
+        } else {
+          if (this.find({ val: lv_value, sub: lv_search }) >= 0) {
+            lv_check_found = true;
+            break;
+          }
         }
         lv_index = lv_index + 1;
       }
@@ -844,14 +853,15 @@ class z2ui5_cl_util {
     let sy_subrc = 0;
     const lt_params = z2ui5_cl_util.url_param_get_tab({ i_val: url });
     const lv_n = z2ui5_cl_util.c_trim_lower({ val: name });
+    const lv_v = z2ui5_cl_util.c_trim({ val: value });
     sy_tabix = 0;
     for (const lr_params of lt_params) {
       sy_tabix++;
       if (!(lr_params.n === lv_n)) continue;
-      lr_params.v = z2ui5_cl_util.c_trim_lower({ val: value });
+      lr_params.v = z2ui5_cl_util.abap_copy(lv_v);
     }
     if (sy_subrc !== 0) {
-      lt_params.push({ n: lv_n, v: z2ui5_cl_util.c_trim_lower({ val: value }) });
+      lt_params.push({ n: lv_n, v: lv_v });
     }
     result = z2ui5_cl_util.url_param_create_url({ t_params: lt_params });
     return result;
@@ -1312,6 +1322,7 @@ class z2ui5_cl_util {
     let lv_start = 0;
     let lv_pos = 0;
     let lv_in_quote = false;
+    let lv_in_between = false;
     if (!lv_val) {
       return result;
     }
@@ -1344,7 +1355,17 @@ class z2ui5_cl_util {
         lv_pos = lv_pos + 1;
         continue;
       }
-      if (lv_depth === 0 && lv_pos + lv_sep_len <= lv_len && String(lv_val).substr(lv_pos, lv_sep_len) === lv_sep) {
+      if (lv_depth === 0 && !(lv_in_between === true || lv_in_between === `X`) && (lv_char === `B` || lv_char === `b`) && lv_pos + 8 <= lv_len && String(lv_val).substr(lv_pos, 8).toUpperCase() === `BETWEEN `) {
+        lv_in_between = true;
+        lv_pos = lv_pos + 8;
+        continue;
+      }
+      if ((lv_in_between === true || lv_in_between === `X`) && lv_char === ` ` && lv_pos + 5 <= lv_len && String(lv_val).substr(lv_pos, 5).toUpperCase() === ` AND `) {
+        lv_in_between = false;
+        lv_pos = lv_pos + 5;
+        continue;
+      }
+      if (lv_depth === 0 && !(lv_in_between === true || lv_in_between === `X`) && lv_pos + lv_sep_len <= lv_len && String(lv_val).substr(lv_pos, lv_sep_len) === lv_sep) {
         result.push(lv_val.substr(lv_start, lv_pos - lv_start));
         lv_pos = lv_pos + lv_sep_len;
         lv_start = z2ui5_cl_util.abap_copy(lv_pos);
@@ -1369,7 +1390,10 @@ class z2ui5_cl_util {
 
   static msg_get_t() {
     let result = [];
-    result = z2ui5_cl_util_msg.msg_get({ val, val2 });
+    result = z2ui5_cl_util.msg_get_internal({ val: val });
+    if (!result && val2) {
+      result = z2ui5_cl_util.msg_get_internal({ val: val2 });
+    }
     return result;
   }
 
@@ -1411,7 +1435,7 @@ class z2ui5_cl_util {
 
   static msg_get_collect() {
     let result = ``;
-    result = z2ui5_cl_util_msg.msg_get_collect({ val, val2 });
+    result = /* TODO(abap2js): VALUE FOR/BASE */ [].join(z2ui5_cl_util.cv_char_util_newline);
     return result;
   }
 
@@ -1710,8 +1734,9 @@ class z2ui5_cl_util {
   static c_pad_left({ val, len, pad = `0` } = {}) {
     let result = ``;
     result = z2ui5_cl_util.abap_copy(val);
+    const lv_pad = (!pad ? ` ` : (pad));
     while (result.length < len) {
-      result = pad + result;
+      result = lv_pad + result;
     }
     return result;
   }
@@ -1719,8 +1744,9 @@ class z2ui5_cl_util {
   static c_pad_right({ val, len, pad = ` ` } = {}) {
     let result = ``;
     result = z2ui5_cl_util.abap_copy(val);
+    const lv_pad = (!pad ? ` ` : (pad));
     while (result.length < len) {
-      result = result + pad;
+      result = result + lv_pad;
     }
     return result;
   }
@@ -1862,6 +1888,12 @@ class z2ui5_cl_util {
       }
       lv_i = lv_i + 1;
     }
+    let lv_dot_count = 0;
+    // TODO(abap2js): FIND ALL OCCURRENCES OF `.` IN lv_clean MATCH COUNT lv_dot_count.
+    if (lv_dot_count > 1 || ![...String(lv_clean)].some(($c) => String(`0123456789`).includes($c))) {
+      result = 0;
+      return result;
+    }
     try {
       result = z2ui5_cl_util.abap_copy(lv_clean);
     } catch (error) {
@@ -1871,12 +1903,64 @@ class z2ui5_cl_util {
   }
 
   static itab_sort_by({ fieldname, descending = false, tab } = {}) {
-    const lv_field = (fieldname);
+    let sy_tabix = 0;
+    let sy_subrc = 0;
+    let fs_val = null;
+    let _fs$fs_val = null;
+    let fs_tab_copy = null;
+    let _fs$fs_tab_copy = null;
+    let fs_src = null;
+    let _fs$fs_src = null;
+    let lv_tabix;
+    let lt_key = [];
+    let lv_numeric = false;
+    const lv_field = fieldname.toUpperCase();
+    sy_tabix = 0;
+    for (const symbol of tab) {
+      sy_tabix++;
+      lv_tabix = z2ui5_cl_util.abap_copy(sy_tabix);
+      _fs$fs_val = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_row, lv_field);
+      fs_val = _fs$fs_val ? _fs$fs_val.o[_fs$fs_val.k] : null;
+      sy_subrc = _fs$fs_val ? 0 : 4;
+      if (sy_subrc !== 0) {
+        return;
+      }
+      if (lv_tabix === 1) {
+        lv_numeric = z2ui5_cl_util.rtti_check_numeric({ val: fs_val });
+      }
+      const fs_key = {};
+      lt_key.push(fs_key);
+      if ((lv_numeric === true || lv_numeric === `X`)) {
+        fs_key.key_num = z2ui5_cl_util.abap_copy(fs_val);
+      } else {
+        fs_key.key_str = z2ui5_cl_util.abap_copy(fs_val);
+      }
+      fs_key.idx = z2ui5_cl_util.abap_copy(lv_tabix);
+    }
     if ((descending === true || descending === `X`)) {
-      { const _f = String(lv_field)
-        .toLowerCase(); tab.sort((a, b) => (a[_f] > b[_f] ? 1 : a[_f] < b[_f] ? -1 : 0) * -1); }
+      lt_key.sort((a, b) => ((a.key_num > b.key_num ? 1 : a.key_num < b.key_num ? -1 : 0) || (a.key_str > b.key_str ? 1 : a.key_str < b.key_str ? -1 : 0)) * -1);
     } else {
-      { const _f = String(lv_field).toLowerCase(); tab.sort((a, b) => (a[_f] > b[_f] ? 1 : a[_f] < b[_f] ? -1 : 0)); }
+      lt_key.sort((a, b) => ((a.key_num > b.key_num ? 1 : a.key_num < b.key_num ? -1 : 0) || (a.key_str > b.key_str ? 1 : a.key_str < b.key_str ? -1 : 0)));
+    }
+    let lr_copy = null;
+    // TODO(abap2js): CREATE DATA lr_copy LIKE tab.
+    // TODO(abap2js): ASSIGN lr_copy->* TO <tab_copy>.
+    fs_tab_copy = z2ui5_cl_util.abap_copy(tab);
+    if (_fs$fs_tab_copy) _fs$fs_tab_copy.o[_fs$fs_tab_copy.k] = fs_tab_copy;
+    tab = null;
+    sy_tabix = 0;
+    for (const fs_key of lt_key) {
+      sy_tabix++;
+      {
+        const _t = fs_tab_copy;
+        const _i = (fs_key.idx) - 1;
+        sy_subrc = _i >= 0 && _i < _t.length ? 0 : 4;
+        fs_src = sy_subrc === 0 ? _t[_i] : null;
+        _fs$fs_src = sy_subrc === 0 ? { o: _t, k: _i } : null;
+      }
+      if (sy_subrc === 0) {
+        tab.push(fs_src);
+      }
     }
   }
 
@@ -2643,6 +2727,543 @@ class z2ui5_cl_util {
   static context_get_sy() {
     let result = null;
     result = ({ ...sy });
+    return result;
+  }
+
+  static msg_get_text({ val, val2 } = {}) {
+    let result = ``;
+    const lt_msg = z2ui5_cl_util.msg_get_t({ val, val2 });
+    if (lt_msg) {
+      result = z2ui5_cl_util.abap_copy(lt_msg[(1) - 1].text);
+    }
+    return result;
+  }
+
+  static msg_get_by_sy() {
+    let result = [];
+    result = z2ui5_cl_util.msg_get_t(z2ui5_cl_util.context_get_sy());
+    return result;
+  }
+
+  static msg_get_internal({ val } = {}) {
+    let result = [];
+    let sy_tabix = 0;
+    let sy_subrc = 0;
+    let fs_tab = null;
+    let _fs$fs_tab = null;
+    let fs_comp = null;
+    let _fs$fs_comp = null;
+    let lt_tab;
+    let lt_attri;
+    let ls_result;
+    const lv_kind = z2ui5_cl_util.rtti_get_type_kind({ val: val });
+    switch (lv_kind) {
+      case cl_abap_datadescr.typekind_table:
+        fs_tab = val;
+        _fs$fs_tab = null;
+        sy_subrc = 0;
+        sy_tabix = 0;
+        for (const symbol of fs_tab) {
+          sy_tabix++;
+          lt_tab = z2ui5_cl_util.msg_get_internal({ val: fs_row });
+          result.push(...lt_tab);
+        }
+        break;
+      case cl_abap_datadescr.typekind_struct1:
+      case cl_abap_datadescr.typekind_struct2:
+        if (!val) {
+          return result;
+        }
+        if ((z2ui5_cl_util.check_is_rap_struct({ val: val }) === true || z2ui5_cl_util.check_is_rap_struct({ val: val }) === `X`)) {
+          result = z2ui5_cl_util.msg_get_rap({ val: val });
+          return result;
+        }
+        lt_attri = z2ui5_cl_util.rtti_get_t_attri_by_any({ val: val });
+        ls_result = {};
+        sy_tabix = 0;
+        for (const ls_attri of lt_attri) {
+          sy_tabix++;
+          _fs$fs_comp = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(val, ls_attri.name);
+          fs_comp = _fs$fs_comp ? _fs$fs_comp.o[_fs$fs_comp.k] : null;
+          sy_subrc = _fs$fs_comp ? 0 : 4;
+          if (sy_subrc !== 0) {
+            continue;
+          }
+          if (ls_attri.name === `ITEM`) {
+            lt_tab = z2ui5_cl_util.msg_get_internal({ val: fs_comp });
+            result.push(...lt_tab);
+            return result;
+          } else {
+            ls_result = z2ui5_cl_util.msg_map({ name: ls_attri.name, val: fs_comp, is_msg: ls_result });
+          }
+        }
+        if (!ls_result.text && ls_result.id) {
+          ls_result.id = ls_result.id.toUpperCase();
+          // TODO(abap2js): MESSAGE ID ls_result-id TYPE `I` NUMBER ls_result-no WITH ls_result-v1 ls_result-v2 ls_result-v3 ls_result-v4 INTO ls_result-text.
+        }
+        result.push(ls_result);
+        break;
+      case cl_abap_datadescr.typekind_oref:
+        result = z2ui5_cl_util.msg_get_by_oref({ val: val });
+        break;
+      default:
+        if (z2ui5_cl_util.rtti_check_clike({ val: val })) {
+          result.push({ text: val });
+        }
+        break;
+    }
+    return result;
+  }
+
+  static msg_get_by_oref({ val } = {}) {
+    let result = [];
+    let sy_tabix = 0;
+    let sy_subrc = 0;
+    let fs_comp = null;
+    let _fs$fs_comp = null;
+    let fs_tab2 = null;
+    let _fs$fs_tab2 = null;
+    let lx;
+    let ls_result;
+    let lt_attri_o;
+    let lv_name;
+    let lt_tab2;
+    try {
+      lx = (val);
+      ls_result = { type: `E`, text: lx.get_text() };
+      lt_attri_o = z2ui5_cl_util.rtti_get_t_attri_by_oref({ val: val });
+      sy_tabix = 0;
+      for (const ls_attri_o of lt_attri_o) {
+        sy_tabix++;
+        if (!(ls_attri_o.visibility === `U`)) continue;
+        lv_name = z2ui5_cl_util.abap_copy(ls_attri_o.name);
+        // TODO(abap2js): ASSIGN lx->(lv_name) TO <comp>.
+        if (sy_subrc !== 0) {
+          continue;
+        }
+        ls_result = z2ui5_cl_util.msg_map({ name: ls_attri_o.name, val: fs_comp, is_msg: ls_result });
+      }
+      result.push(ls_result);
+    } catch (error) {
+      let obj = null;
+      obj = z2ui5_cl_util.abap_copy(val);
+      try {
+        let lr_tab = null;
+        // TODO(abap2js): CREATE DATA lr_tab TYPE (`if_bali_log=>ty_item_table`).
+        // TODO(abap2js): ASSIGN lr_tab->* TO FIELD-SYMBOL(<tab2>).
+        // TODO(abap2js): CALL METHOD obj->(`IF_BALI_LOG~GET_ALL_ITEMS`) RECEIVING item_table = <tab2>.
+        lt_tab2 = z2ui5_cl_util.msg_get_internal({ val: fs_tab2 });
+        result.push(...lt_tab2);
+      } catch (error) {
+        try {
+          // TODO(abap2js): CREATE DATA lr_tab TYPE (`BAPIRETTAB`).
+          // TODO(abap2js): ASSIGN lr_tab->* TO <tab2>.
+          // TODO(abap2js): CALL METHOD obj->(`ZIF_LOGGER~EXPORT_TO_TABLE`) RECEIVING rt_bapiret = <tab2>.
+          lt_tab2 = z2ui5_cl_util.msg_get_internal({ val: fs_tab2 });
+          result.push(...lt_tab2);
+        } catch (error) {
+          lt_attri_o = z2ui5_cl_util.rtti_get_t_attri_by_oref({ val: val });
+          sy_tabix = 0;
+          for (const ls_attri_o of lt_attri_o) {
+            sy_tabix++;
+            if (!(ls_attri_o.visibility === `U`)) continue;
+            lv_name = z2ui5_cl_util.abap_copy(ls_attri_o.name);
+            // TODO(abap2js): ASSIGN obj->(lv_name) TO <comp>.
+            if (sy_subrc !== 0) {
+              continue;
+            }
+            ls_result = z2ui5_cl_util.msg_map({ name: ls_attri_o.name, val: fs_comp, is_msg: ls_result });
+          }
+          result.push(ls_result);
+        }
+      }
+    }
+    return result;
+  }
+
+  static msg_map({ name, val, is_msg } = {}) {
+    let result = {};
+    result = z2ui5_cl_util.abap_copy(is_msg);
+    switch (name) {
+      case `ID`:
+      case `MSGID`:
+        result.id = z2ui5_cl_util.abap_copy(val);
+        break;
+      case `NO`:
+      case `NUMBER`:
+      case `MSGNO`:
+        result.no = z2ui5_cl_util.abap_copy(val);
+        break;
+      case `MESSAGE`:
+      case `TEXT`:
+        result.text = z2ui5_cl_util.abap_copy(val);
+        break;
+      case `TYPE`:
+      case `MSGTY`:
+      case `M_SEVERITY`:
+        result.type = z2ui5_cl_util.abap_copy(val);
+        break;
+      case `MESSAGE_V1`:
+      case `MSGV1`:
+      case `V1`:
+        result.v1 = z2ui5_cl_util.abap_copy(val);
+        break;
+      case `MESSAGE_V2`:
+      case `MSGV2`:
+      case `V2`:
+        result.v2 = z2ui5_cl_util.abap_copy(val);
+        break;
+      case `MESSAGE_V3`:
+      case `MSGV3`:
+      case `V3`:
+        result.v3 = z2ui5_cl_util.abap_copy(val);
+        break;
+      case `MESSAGE_V4`:
+      case `MSGV4`:
+      case `V4`:
+        result.v4 = z2ui5_cl_util.abap_copy(val);
+        break;
+      case `TIME_STMP`:
+        result.timestampl = z2ui5_cl_util.abap_copy(val);
+        break;
+    }
+    return result;
+  }
+
+  static check_is_rap_struct({ val } = {}) {
+    let result = false;
+    let sy_tabix = 0;
+    let sy_subrc = 0;
+    let fs_tab = null;
+    let _fs$fs_tab = null;
+    let lo_tab;
+    let lo_line;
+    let lt_comps;
+    const lt_attri = z2ui5_cl_util.rtti_get_t_attri_by_any({ val: val });
+    sy_tabix = 0;
+    for (const ls_attri of lt_attri) {
+      sy_tabix++;
+      switch (ls_attri.name) {
+        case `%MSG`:
+        case `%FAIL`:
+        case `%OTHER`:
+          result = true;
+          return result;
+          break;
+      }
+    }
+    sy_tabix = 0;
+    for (const ls_attri of lt_attri) {
+      sy_tabix++;
+      _fs$fs_tab = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(val, ls_attri.name);
+      fs_tab = _fs$fs_tab ? _fs$fs_tab.o[_fs$fs_tab.k] : null;
+      sy_subrc = _fs$fs_tab ? 0 : 4;
+      if (!(sy_subrc === 0)) continue;
+      if (!(z2ui5_cl_util.rtti_get_type_kind({ val: fs_tab }) === cl_abap_datadescr.typekind_table)) continue;
+      try {
+        lo_tab = (cl_abap_typedescr.describe_by_data(fs_tab));
+        lo_line = lo_tab.get_table_line_type();
+        if (!(lo_line.kind === cl_abap_typedescr.kind_struct)) continue;
+        lt_comps = (lo_line).get_components();
+        const _sy_tabix_1 = sy_tabix;
+        sy_tabix = 0;
+        for (const ls_comp of lt_comps) {
+          sy_tabix++;
+          if (ls_comp.name === `%MSG` || ls_comp.name === `%FAIL`) {
+            result = true;
+            return result;
+          }
+        }
+        sy_tabix = _sy_tabix_1;
+      } catch (error) {
+      }
+    }
+    return result;
+  }
+
+  static msg_get_rap({ val, entity_name } = {}) {
+    let result = [];
+    let sy_tabix = 0;
+    let sy_subrc = 0;
+    let fs_tab = null;
+    let _fs$fs_tab = null;
+    let fs_ftab = null;
+    let _fs$fs_ftab = null;
+    const lv_kind = z2ui5_cl_util.rtti_get_type_kind({ val: val });
+    if (lv_kind !== cl_abap_datadescr.typekind_struct1 && lv_kind !== cl_abap_datadescr.typekind_struct2) {
+      return result;
+    }
+    // TODO(abap2js): msg_get_rap_row( EXPORTING val = val entity_name = entity_name IMPORTING messages = result is_row = DATA(lv_is_row) ).
+    if ((lv_is_row === true || lv_is_row === `X`)) {
+      return result;
+    }
+    const lt_attri = z2ui5_cl_util.rtti_get_t_attri_by_any({ val: val });
+    sy_tabix = 0;
+    for (const ls_attri of lt_attri) {
+      sy_tabix++;
+      _fs$fs_tab = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(val, ls_attri.name);
+      fs_tab = _fs$fs_tab ? _fs$fs_tab.o[_fs$fs_tab.k] : null;
+      sy_subrc = _fs$fs_tab ? 0 : 4;
+      if (!(sy_subrc === 0)) continue;
+      if (!(z2ui5_cl_util.rtti_get_type_kind({ val: fs_tab }) === cl_abap_datadescr.typekind_table)) continue;
+      fs_ftab = fs_tab;
+      _fs$fs_ftab = null;
+      sy_subrc = 0;
+      const _sy_tabix_1 = sy_tabix;
+      sy_tabix = 0;
+      for (const symbol of fs_ftab) {
+        sy_tabix++;
+        if (z2ui5_cl_util.rtti_get_type_kind({ val: fs_row }) === cl_abap_datadescr.typekind_oref) {
+          if (fs_row) {
+            try {
+              result.push(...z2ui5_cl_util.msg_get_t(fs_row));
+            } catch (error) {
+            }
+          }
+        } else {
+          result.push(...z2ui5_cl_util.msg_get_rap({ val: fs_row, entity_name: ls_attri.name }));
+        }
+      }
+      sy_tabix = _sy_tabix_1;
+    }
+    return result;
+  }
+
+  static msg_get_rap_row({ val, entity_name, messages, is_row } = {}) {
+    let sy_tabix = 0;
+    let sy_subrc = 0;
+    let fs_msg = null;
+    let _fs$fs_msg = null;
+    let fs_fail = null;
+    let _fs$fs_fail = null;
+    let fs_cause = null;
+    let _fs$fs_cause = null;
+    let lt_one;
+    let lv_text;
+    messages = null;
+    is_row = false;
+    const lt_meta = z2ui5_cl_util.msg_get_rap_meta({ val: val });
+    _fs$fs_msg = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(val, `%MSG`);
+    fs_msg = _fs$fs_msg ? _fs$fs_msg.o[_fs$fs_msg.k] : null;
+    sy_subrc = _fs$fs_msg ? 0 : 4;
+    if (sy_subrc === 0) {
+      is_row = true;
+      if (fs_msg) {
+        try {
+          lt_one = z2ui5_cl_util.msg_get_t(fs_msg);
+          sy_tabix = 0;
+          for (const symbol of lt_one) {
+            sy_tabix++;
+            fs_m.t_meta = z2ui5_cl_util.abap_copy(lt_meta);
+          }
+          messages.push(...lt_one);
+        } catch (error) {
+        }
+      }
+    }
+    _fs$fs_fail = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(val, `%FAIL`);
+    fs_fail = _fs$fs_fail ? _fs$fs_fail.o[_fs$fs_fail.k] : null;
+    sy_subrc = _fs$fs_fail ? 0 : 4;
+    if (sy_subrc === 0) {
+      is_row = true;
+      _fs$fs_cause = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_fail, `CAUSE`);
+      fs_cause = _fs$fs_cause ? _fs$fs_cause.o[_fs$fs_cause.k] : null;
+      sy_subrc = _fs$fs_cause ? 0 : 4;
+      if (sy_subrc === 0) {
+        let lv_cause = 0;
+        lv_cause = z2ui5_cl_util.abap_copy(fs_cause);
+        lv_text = z2ui5_cl_util.msg_get_rap_fail_text({ cause: lv_cause });
+        if (entity_name) {
+          lv_text = `${entity_name}: ${lv_text}`;
+        }
+        messages.push({ type: `E`, text: lv_text, t_meta: lt_meta });
+      }
+    }
+  }
+
+  static msg_get_rap_element({ val } = {}) {
+    let result = ``;
+    let sy_tabix = 0;
+    let sy_subrc = 0;
+    let fs_flag = null;
+    let _fs$fs_flag = null;
+    const lt_attri = z2ui5_cl_util.rtti_get_t_attri_by_any({ val: val });
+    sy_tabix = 0;
+    for (const ls_attri of lt_attri) {
+      sy_tabix++;
+      if (!(ls_attri.name.length > 9)) continue;
+      if (!(ls_attri.name(9) === `%ELEMENT-`)) continue;
+      _fs$fs_flag = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(val, ls_attri.name);
+      fs_flag = _fs$fs_flag ? _fs$fs_flag.o[_fs$fs_flag.k] : null;
+      sy_subrc = _fs$fs_flag ? 0 : 4;
+      if (!(sy_subrc === 0)) continue;
+      if (!(fs_flag)) continue;
+      if (!result) {
+        result = ls_attri.name + 9;
+      } else {
+        result = `${result}, ${ls_attri.name + 9}`;
+      }
+    }
+    return result;
+  }
+
+  static msg_get_rap_state_area({ val } = {}) {
+    let result = ``;
+    let sy_subrc = 0;
+    let fs_sa = null;
+    let _fs$fs_sa = null;
+    _fs$fs_sa = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(val, `%STATE_AREA`);
+    fs_sa = _fs$fs_sa ? _fs$fs_sa.o[_fs$fs_sa.k] : null;
+    sy_subrc = _fs$fs_sa ? 0 : 4;
+    if (sy_subrc === 0) {
+      result = z2ui5_cl_util.abap_copy(fs_sa);
+    }
+    return result;
+  }
+
+  static msg_get_rap_action({ val } = {}) {
+    let result = ``;
+    let sy_tabix = 0;
+    let sy_subrc = 0;
+    let fs_flag = null;
+    let _fs$fs_flag = null;
+    const lt_attri = z2ui5_cl_util.rtti_get_t_attri_by_any({ val: val });
+    sy_tabix = 0;
+    for (const ls_attri of lt_attri) {
+      sy_tabix++;
+      if (!(ls_attri.name.length > 12)) continue;
+      if (!(ls_attri.name(12) === `%OP-%ACTION-`)) continue;
+      _fs$fs_flag = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(val, ls_attri.name);
+      fs_flag = _fs$fs_flag ? _fs$fs_flag.o[_fs$fs_flag.k] : null;
+      sy_subrc = _fs$fs_flag ? 0 : 4;
+      if (!(sy_subrc === 0)) continue;
+      if (!(fs_flag)) continue;
+      result = ls_attri.name + 12;
+      return result;
+    }
+    return result;
+  }
+
+  static msg_get_rap_pid({ val } = {}) {
+    let result = ``;
+    let sy_subrc = 0;
+    let fs_pid = null;
+    let _fs$fs_pid = null;
+    _fs$fs_pid = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(val, `%PID`);
+    fs_pid = _fs$fs_pid ? _fs$fs_pid.o[_fs$fs_pid.k] : null;
+    sy_subrc = _fs$fs_pid ? 0 : 4;
+    if (sy_subrc === 0) {
+      result = z2ui5_cl_util.abap_copy(fs_pid);
+    }
+    return result;
+  }
+
+  static msg_get_rap_cid({ val } = {}) {
+    let result = ``;
+    let sy_subrc = 0;
+    let fs_cid = null;
+    let _fs$fs_cid = null;
+    _fs$fs_cid = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(val, `%CID`);
+    fs_cid = _fs$fs_cid ? _fs$fs_cid.o[_fs$fs_cid.k] : null;
+    sy_subrc = _fs$fs_cid ? 0 : 4;
+    if (sy_subrc === 0) {
+      result = z2ui5_cl_util.abap_copy(fs_cid);
+    }
+    return result;
+  }
+
+  static msg_get_rap_tky({ val } = {}) {
+    let result = ``;
+    let sy_subrc = 0;
+    let fs_tky = null;
+    let _fs$fs_tky = null;
+    _fs$fs_tky = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(val, `%TKY`);
+    fs_tky = _fs$fs_tky ? _fs$fs_tky.o[_fs$fs_tky.k] : null;
+    sy_subrc = _fs$fs_tky ? 0 : 4;
+    if (sy_subrc !== 0 || !fs_tky) {
+      return result;
+    }
+    result = z2ui5_cl_util.msg_get_rap_flatten({ val: fs_tky });
+    return result;
+  }
+
+  static msg_get_rap_flatten({ val } = {}) {
+    let result = ``;
+    let sy_tabix = 0;
+    let sy_subrc = 0;
+    let fs_comp = null;
+    let _fs$fs_comp = null;
+    let lv_sub_kind;
+    let lv_sub;
+    const lv_kind = z2ui5_cl_util.rtti_get_type_kind({ val: val });
+    if (lv_kind !== cl_abap_datadescr.typekind_struct1 && lv_kind !== cl_abap_datadescr.typekind_struct2) {
+      return result;
+    }
+    const lt_attri = z2ui5_cl_util.rtti_get_t_attri_by_any({ val: val });
+    sy_tabix = 0;
+    for (const ls_attri of lt_attri) {
+      sy_tabix++;
+      _fs$fs_comp = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(val, ls_attri.name);
+      fs_comp = _fs$fs_comp ? _fs$fs_comp.o[_fs$fs_comp.k] : null;
+      sy_subrc = _fs$fs_comp ? 0 : 4;
+      if (!(sy_subrc === 0)) continue;
+      lv_sub_kind = z2ui5_cl_util.rtti_get_type_kind({ val: fs_comp });
+      if (lv_sub_kind === cl_abap_datadescr.typekind_struct1 || lv_sub_kind === cl_abap_datadescr.typekind_struct2) {
+        lv_sub = z2ui5_cl_util.msg_get_rap_flatten({ val: fs_comp });
+        if (lv_sub) {
+          if (result) {
+            result = `${result}, `;
+          }
+          result = `${result}${lv_sub}`;
+        }
+      } else if (fs_comp) {
+        try {
+          let lv_str = ``;
+          lv_str = z2ui5_cl_util.abap_copy(fs_comp);
+          if (result) {
+            result = `${result}, `;
+          }
+          result = `${result}${ls_attri.name}=${lv_str}`;
+        } catch (error) {
+        }
+      }
+    }
+    return result;
+  }
+
+  static msg_get_rap_meta({ val } = {}) {
+    let result = [];
+    let lv = ``;
+    lv = z2ui5_cl_util.msg_get_rap_element({ val: val });
+    if (lv) {
+      result.push({ n: `element`, v: lv });
+    }
+    lv = z2ui5_cl_util.msg_get_rap_state_area({ val: val });
+    if (lv) {
+      result.push({ n: `state_area`, v: lv });
+    }
+    lv = z2ui5_cl_util.msg_get_rap_action({ val: val });
+    if (lv) {
+      result.push({ n: `action`, v: lv });
+    }
+    lv = z2ui5_cl_util.msg_get_rap_pid({ val: val });
+    if (lv) {
+      result.push({ n: `pid`, v: lv });
+    }
+    lv = z2ui5_cl_util.msg_get_rap_cid({ val: val });
+    if (lv) {
+      result.push({ n: `cid`, v: lv });
+    }
+    lv = z2ui5_cl_util.msg_get_rap_tky({ val: val });
+    if (lv) {
+      result.push({ n: `tky`, v: lv });
+    }
+    return result;
+  }
+
+  static msg_get_rap_fail_text({ cause } = {}) {
+    let result = ``;
+    result = (cause === 0 ? `Operation failed` : cause === 1 ? `Entity not found` : cause === 2 ? `Entity is locked` : cause === 3 ? `Authorization failure` : cause === 4 ? `Concurrent modification` : cause === 5 ? `Concurrent modification` : cause === 6 ? `Operation disabled` : cause === 7 ? `Operation forbidden` : cause === 8 ? `Semantic error` : cause === 9 ? `Determination failed` : cause === 10 ? `Permission denied` : cause === 11 ? `Validation failed` : `Operation failed (cause code ${cause})`);
     return result;
   }
 }

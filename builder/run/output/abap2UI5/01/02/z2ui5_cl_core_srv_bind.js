@@ -1,6 +1,7 @@
+// TODO(abap2js): unresolved reference z2ui5_cl_abap2ui5_context — add require manually
 // TODO(abap2js): unresolved reference z2ui5_cl_core_srv_model — add require manually
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cx_util_error = require("abap2UI5/z2ui5_cx_util_error");
+// TODO(abap2js): unresolved reference z2ui5_cx_abap2ui5_error — add require manually
 const z2ui5_if_client = require("abap2UI5/z2ui5_if_client");
 const z2ui5_if_core_types = require("abap2UI5/z2ui5_if_core_types");
 
@@ -25,7 +26,7 @@ class z2ui5_cl_core_srv_bind {
     fs_row = fs_tab[(this.ms_config.tab_index) - 1];
     _fs$fs_row = null;
     sy_subrc = 0;
-    const lt_attri = z2ui5_cl_util.rtti_get_t_attri_by_any(this.ms_config.tab);
+    const lt_attri = z2ui5_cl_abap2ui5_context.rtti_get_t_attri_by_any(this.ms_config.tab);
     sy_tabix = 0;
     for (const symbol of lt_attri) {
       sy_tabix++;
@@ -39,31 +40,31 @@ class z2ui5_cl_core_srv_bind {
         return result;
       }
     }
-    throw new z2ui5_cx_util_error({ val: `BINDING_ERROR_TAB_CELL_LEVEL - No class attribute for binding found - Please check if the bound values are public attributes of your class` });
+    throw new z2ui5_cx_abap2ui5_error({ val: `BINDING_ERROR_TAB_CELL_LEVEL - No class attribute for binding found - Please check if the bound values are public attributes of your class` });
     return result;
   }
 
   check_raise_existing() {
     if (this.mr_attri.bind_type !== this.mv_type) {
-      throw new z2ui5_cx_util_error({ val: `<p>Binding Error - Two different binding types for same attribute used (${this.mr_attri.name}).` });
+      throw new z2ui5_cx_abap2ui5_error({ val: `<p>Binding Error - Two different binding types for same attribute used (${this.mr_attri.name}).` });
     }
-    if (this.mr_attri.custom_mapper != null && this.ms_config.custom_mapper != null && z2ui5_cl_util.rtti_get_classname_by_ref(this.mr_attri.custom_mapper) !== z2ui5_cl_util.rtti_get_classname_by_ref(this.ms_config.custom_mapper)) {
-      throw new z2ui5_cx_util_error({ val: `<p>Binding Error - Two different mappers used for the same attribute (${this.mr_attri.name}).` });
+    if (this.mr_attri.custom_mapper != null && this.ms_config.custom_mapper != null && z2ui5_cl_abap2ui5_context.rtti_get_classname_by_ref(this.mr_attri.custom_mapper) !== z2ui5_cl_abap2ui5_context.rtti_get_classname_by_ref(this.ms_config.custom_mapper)) {
+      throw new z2ui5_cx_abap2ui5_error({ val: `<p>Binding Error - Two different mappers used for the same attribute (${this.mr_attri.name}).` });
     }
-    if (this.mr_attri.custom_mapper_back != null && this.ms_config.custom_mapper_back != null && z2ui5_cl_util.rtti_get_classname_by_ref(this.mr_attri.custom_mapper_back) !== z2ui5_cl_util.rtti_get_classname_by_ref(this.ms_config.custom_mapper_back)) {
-      throw new z2ui5_cx_util_error({ val: `<p>Binding Error - Two different mappers back used for the same attribute (${this.mr_attri.name}).` });
+    if (this.mr_attri.custom_mapper_back != null && this.ms_config.custom_mapper_back != null && z2ui5_cl_abap2ui5_context.rtti_get_classname_by_ref(this.mr_attri.custom_mapper_back) !== z2ui5_cl_abap2ui5_context.rtti_get_classname_by_ref(this.ms_config.custom_mapper_back)) {
+      throw new z2ui5_cx_abap2ui5_error({ val: `<p>Binding Error - Two different mappers back used for the same attribute (${this.mr_attri.name}).` });
     }
-    if (this.mr_attri.custom_filter != null && this.ms_config.custom_filter != null && z2ui5_cl_util.rtti_get_classname_by_ref(this.mr_attri.custom_filter) !== z2ui5_cl_util.rtti_get_classname_by_ref(this.ms_config.custom_filter)) {
-      throw new z2ui5_cx_util_error({ val: `<p>Binding Error - Two different filters used for the same attribute (${this.mr_attri.name}).` });
+    if (this.mr_attri.custom_filter != null && this.ms_config.custom_filter != null && z2ui5_cl_abap2ui5_context.rtti_get_classname_by_ref(this.mr_attri.custom_filter) !== z2ui5_cl_abap2ui5_context.rtti_get_classname_by_ref(this.ms_config.custom_filter)) {
+      throw new z2ui5_cx_abap2ui5_error({ val: `<p>Binding Error - Two different filters used for the same attribute (${this.mr_attri.name}).` });
     }
   }
 
   check_raise_new() {
-    if (!(z2ui5_cl_util.rtti_check_serializable(this.mr_attri.custom_filter_back) === true || z2ui5_cl_util.rtti_check_serializable(this.mr_attri.custom_filter_back) === `X`)) {
-      throw new z2ui5_cx_util_error({ val: `<p>custom_filter_back used but it is not serializable - please use if_serializable_object` });
+    if (!(z2ui5_cl_abap2ui5_context.rtti_check_serializable(this.mr_attri.custom_filter_back) === true || z2ui5_cl_abap2ui5_context.rtti_check_serializable(this.mr_attri.custom_filter_back) === `X`)) {
+      throw new z2ui5_cx_abap2ui5_error({ val: `<p>custom_filter_back used but it is not serializable - please use if_serializable_object` });
     }
-    if (!(z2ui5_cl_util.rtti_check_serializable(this.mr_attri.custom_mapper_back) === true || z2ui5_cl_util.rtti_check_serializable(this.mr_attri.custom_mapper_back) === `X`)) {
-      throw new z2ui5_cx_util_error({ val: `<p>custom_mapper_back used but it is not serializable - please use if_serializable_object` });
+    if (!(z2ui5_cl_abap2ui5_context.rtti_check_serializable(this.mr_attri.custom_mapper_back) === true || z2ui5_cl_abap2ui5_context.rtti_check_serializable(this.mr_attri.custom_mapper_back) === `X`)) {
+      throw new z2ui5_cx_abap2ui5_error({ val: `<p>custom_mapper_back used but it is not serializable - please use if_serializable_object` });
     }
   }
 
@@ -80,7 +81,7 @@ class z2ui5_cl_core_srv_bind {
 
   main({ val, data, config } = {}) {
     let result = ``;
-    if (z2ui5_cl_util.check_bound_a_not_initial(config.tab)) {
+    if (z2ui5_cl_abap2ui5_context.check_bound_a_not_initial(config.tab)) {
       result = this.main_cell({ val, type, config });
       return result;
     }
@@ -99,7 +100,7 @@ class z2ui5_cl_core_srv_bind {
     }
     result = z2ui5_cl_util.abap_copy(this.mr_attri.name_client);
     if (result === `/${z2ui5_if_core_types.cs_ui5.two_way_model}`) {
-      throw new z2ui5_cx_util_error({ val: `<p>Name of variable not allowed - XX is a reserved word - use another name for your attribute` });
+      throw new z2ui5_cx_abap2ui5_error({ val: `<p>Name of variable not allowed - XX is a reserved word - use another name for your attribute` });
     }
     if ((this.ms_config.switch_default_model === true || this.ms_config.switch_default_model === `X`)) {
       result = `http>${result}`;

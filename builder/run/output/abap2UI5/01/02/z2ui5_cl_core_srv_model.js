@@ -1,7 +1,8 @@
+// TODO(abap2js): unresolved reference z2ui5_cl_abap2ui5_context — add require manually
 const z2ui5_cl_ajson = require("abap2UI5/z2ui5_cl_ajson");
 const z2ui5_cl_ajson_mapping = require("abap2UI5/z2ui5_cl_ajson_mapping");
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cx_util_error = require("abap2UI5/z2ui5_cx_util_error");
+// TODO(abap2js): unresolved reference z2ui5_cx_abap2ui5_error — add require manually
 const z2ui5_if_ajson_types = require("abap2UI5/z2ui5_if_ajson_types");
 const z2ui5_if_client = require("abap2UI5/z2ui5_if_client");
 const z2ui5_if_core_types = require("abap2UI5/z2ui5_if_core_types");
@@ -47,7 +48,7 @@ class z2ui5_cl_core_srv_model {
         // TODO(abap2js): ASSIGN lr_ref->* TO FIELD-SYMBOL(<val>).
         // TODO(abap2js): lo_val_front->to_abap( EXPORTING iv_corresponding = abap_true IMPORTING ev_container = <val> ).
       } catch (x) {
-        throw new z2ui5_cx_util_error({ val: `JSON_PARSING_ERROR: ${x.get_text()}` });
+        throw new z2ui5_cx_abap2ui5_error({ val: `JSON_PARSING_ERROR: ${x.get_text()}` });
       }
     }
   }
@@ -70,7 +71,7 @@ class z2ui5_cl_core_srv_model {
       sy_tabix = 0;
       for (const lr_attri of this.mt_attri) {
         sy_tabix++;
-        if (!(lr_attri.bind_type !== `` && lr_attri.type_kind !== z2ui5_cl_util.cv_typedescr_typekind_dref && lr_attri.type_kind !== z2ui5_cl_util.cv_typedescr_typekind_oref)) continue;
+        if (!(lr_attri.bind_type !== `` && lr_attri.type_kind !== z2ui5_cl_abap2ui5_context.cv_typedescr_typekind_dref && lr_attri.type_kind !== z2ui5_cl_abap2ui5_context.cv_typedescr_typekind_oref)) continue;
         if (lr_attri.custom_mapper != null) {
           lr_mapper_cache = {};
           {
@@ -105,7 +106,7 @@ class z2ui5_cl_core_srv_model {
         result = `{}`;
       }
     } catch (x) {
-      throw new z2ui5_cx_util_error({ val: x });
+      throw new z2ui5_cx_abap2ui5_error({ val: x });
     }
     return result;
   }
@@ -126,10 +127,10 @@ class z2ui5_cl_core_srv_model {
       sy_tabix++;
       if (!(lr_attri.name_ref)) continue;
       switch (lr_attri.type_kind) {
-        case z2ui5_cl_util.cv_typedescr_typekind_table:
+        case z2ui5_cl_abap2ui5_context.cv_typedescr_typekind_table:
           this.main_attri_db_load_table({ ir_attri: lr_attri });
           break;
-        case z2ui5_cl_util.cv_typedescr_typekind_dref:
+        case z2ui5_cl_abap2ui5_context.cv_typedescr_typekind_dref:
           this.main_attri_db_load_dref({ ir_attri: lr_attri, ir_child_idx: lr_child_idx });
           break;
       }
@@ -148,10 +149,10 @@ class z2ui5_cl_core_srv_model {
       if (!(!lr_attri.name_ref)) continue;
       try {
         lr_ref = this.attri_get_val_ref({ iv_path: lr_attri.name });
-        lr_attri.o_typedescr = z2ui5_cl_util.rtti_get_typedescr_by_data_ref(lr_ref);
+        lr_attri.o_typedescr = z2ui5_cl_abap2ui5_context.rtti_get_typedescr_by_data_ref(lr_ref);
         if (lr_attri.srtti_data) {
           // TODO(abap2js): ASSIGN lr_ref->* TO FIELD-SYMBOL(<val>).
-          fs_val = z2ui5_cl_util.xml_srtti_parse(lr_attri.srtti_data);
+          fs_val = z2ui5_cl_abap2ui5_context.xml_srtti_parse(lr_attri.srtti_data);
           if (_fs$fs_val) _fs$fs_val.o[_fs$fs_val.k] = fs_val;
           lr_attri.srtti_data = null;
         }
@@ -167,7 +168,7 @@ class z2ui5_cl_core_srv_model {
     let fs_source_value = null;
     let _fs$fs_source_value = null;
     const lr_ref_source = this.attri_get_val_ref({ iv_path: ir_attri.name_ref });
-    ir_attri.o_typedescr = z2ui5_cl_util.rtti_get_typedescr_by_data_ref(lr_ref_source);
+    ir_attri.o_typedescr = z2ui5_cl_abap2ui5_context.rtti_get_typedescr_by_data_ref(lr_ref_source);
     let lr_attri_parent = {};
     {
       const _t = this.mt_attri;
@@ -186,7 +187,7 @@ class z2ui5_cl_core_srv_model {
     // TODO(abap2js): ASSIGN lr_ref_source->* TO FIELD-SYMBOL(<source_value>).
     // TODO(abap2js): GET REFERENCE OF <source_value> INTO <parent_ref>.
     const lr_ref_parent = (fs_parent_ref);
-    lr_attri_parent.o_typedescr = z2ui5_cl_util.rtti_get_typedescr_by_data_ref(lr_ref_parent);
+    lr_attri_parent.o_typedescr = z2ui5_cl_abap2ui5_context.rtti_get_typedescr_by_data_ref(lr_ref_parent);
   }
 
   main_attri_db_load_dref({ ir_attri, ir_child_idx } = {}) {
@@ -209,7 +210,7 @@ class z2ui5_cl_core_srv_model {
       return;
     }
     // TODO(abap2js): GET REFERENCE OF <source_ref> INTO <parent_ref>.
-    ir_attri.o_typedescr = z2ui5_cl_util.rtti_get_typedescr_by_data_ref(fs_parent_ref);
+    ir_attri.o_typedescr = z2ui5_cl_abap2ui5_context.rtti_get_typedescr_by_data_ref(fs_parent_ref);
     sy_tabix = 0;
     for (const lr_child_idx of ir_child_idx) {
       sy_tabix++;
@@ -225,7 +226,7 @@ class z2ui5_cl_core_srv_model {
         continue;
       }
       lr_child_ref = this.attri_get_val_ref({ iv_path: lr_child.name });
-      lr_child.o_typedescr = z2ui5_cl_util.rtti_get_typedescr_by_data_ref(lr_child_ref);
+      lr_child.o_typedescr = z2ui5_cl_abap2ui5_context.rtti_get_typedescr_by_data_ref(lr_child_ref);
     }
   }
 
@@ -252,7 +253,7 @@ class z2ui5_cl_core_srv_model {
     sy_tabix = 0;
     for (const lr_attri of this.mt_attri) {
       sy_tabix++;
-      if (!(!lr_attri.name_ref && lr_attri.type_kind === z2ui5_cl_util.cv_typedescr_typekind_dref)) continue;
+      if (!(!lr_attri.name_ref && lr_attri.type_kind === z2ui5_cl_abap2ui5_context.cv_typedescr_typekind_dref)) continue;
       lv_name5 = `MO_APP->${lr_attri.name}`;
       // TODO(abap2js): ASSIGN (lv_name5) TO FIELD-SYMBOL(<ref>).
       if (sy_subrc !== 0) {
@@ -263,20 +264,20 @@ class z2ui5_cl_core_srv_model {
       if (sy_subrc !== 0) {
         continue;
       }
-      lo_descr = z2ui5_cl_util.rtti_get_typedescr_by_data(fs_val1);
+      lo_descr = z2ui5_cl_abap2ui5_context.rtti_get_typedescr_by_data(fs_val1);
       switch (lo_descr.type_kind) {
-        case z2ui5_cl_util.cv_typedescr_typekind_table:
+        case z2ui5_cl_abap2ui5_context.cv_typedescr_typekind_table:
           const _sy_tabix_1 = sy_tabix;
           sy_tabix = 0;
           for (const lr_attri_child of this.mt_attri) {
             sy_tabix++;
-            if (!(!lr_attri_child.name_ref && lr_attri_child.type_kind === z2ui5_cl_util.cv_typedescr_typekind_table && lr_attri_child.name_parent === lr_attri.name)) continue;
+            if (!(!lr_attri_child.name_ref && lr_attri_child.type_kind === z2ui5_cl_abap2ui5_context.cv_typedescr_typekind_table && lr_attri_child.name_parent === lr_attri.name)) continue;
             lv_name6 = `MO_APP->${lr_attri_child.name}`;
             // TODO(abap2js): ASSIGN (lv_name6) TO FIELD-SYMBOL(<val_ref>).
             if (sy_subrc !== 0) {
               continue;
             }
-            lr_attri.srtti_data = z2ui5_cl_util.xml_srtti_stringify(fs_val_ref);
+            lr_attri.srtti_data = z2ui5_cl_abap2ui5_context.xml_srtti_stringify(fs_val_ref);
             fs_val_ref = null;
             if (_fs$fs_val_ref) _fs$fs_val_ref.o[_fs$fs_val_ref.k] = fs_val_ref;
             fs_val1 = null;
@@ -287,16 +288,16 @@ class z2ui5_cl_core_srv_model {
           }
           sy_tabix = _sy_tabix_1;
           break;
-        case z2ui5_cl_util.cv_typedescr_typekind_struct1:
-        case z2ui5_cl_util.cv_typedescr_typekind_struct2:
-          lr_attri.srtti_data = z2ui5_cl_util.xml_srtti_stringify(fs_val1);
+        case z2ui5_cl_abap2ui5_context.cv_typedescr_typekind_struct1:
+        case z2ui5_cl_abap2ui5_context.cv_typedescr_typekind_struct2:
+          lr_attri.srtti_data = z2ui5_cl_abap2ui5_context.xml_srtti_stringify(fs_val1);
           break;
       }
     }
     sy_tabix = 0;
     for (const lr_attri2 of this.mt_attri) {
       sy_tabix++;
-      if (!(lr_attri2.type_kind === z2ui5_cl_util.cv_typedescr_typekind_dref)) continue;
+      if (!(lr_attri2.type_kind === z2ui5_cl_abap2ui5_context.cv_typedescr_typekind_dref)) continue;
       lv_name8 = `MO_APP->${lr_attri2.name}`;
       // TODO(abap2js): ASSIGN (lv_name8) TO FIELD-SYMBOL(<ref2>).
       if (sy_subrc !== 0) {
@@ -333,7 +334,7 @@ class z2ui5_cl_core_srv_model {
     if (result != null) {
       return result;
     }
-    throw new z2ui5_cx_util_error({ val: `BINDING_ERROR - No class attribute for binding found - Please check if the bound values are public attributes of your class` });
+    throw new z2ui5_cx_abap2ui5_error({ val: `BINDING_ERROR - No class attribute for binding found - Please check if the bound values are public attributes of your class` });
     return result;
   }
 
@@ -352,11 +353,11 @@ class z2ui5_cl_core_srv_model {
       // TODO(abap2js): ASSIGN (lv_name) TO <attri>.
     }
     if (!(fs_attri != null)) {
-      throw new z2ui5_cx_util_error({ val: `ATTRI_GET_VAL_REF_ERROR` });
+      throw new z2ui5_cx_abap2ui5_error({ val: `ATTRI_GET_VAL_REF_ERROR` });
     }
     // TODO(abap2js): GET REFERENCE OF <attri> INTO result.
     if (result != null) {
-      throw new z2ui5_cx_util_error({ val: `ATTRI_GET_VAL_REF_ERROR` });
+      throw new z2ui5_cx_abap2ui5_error({ val: `ATTRI_GET_VAL_REF_ERROR` });
     }
     return result;
   }
@@ -372,9 +373,9 @@ class z2ui5_cl_core_srv_model {
     let lv_name_attri;
     let lv_name_val;
     let lr_ref;
-    const lo_datadescr = z2ui5_cl_util.rtti_get_typedescr_by_data_ref(val);
-    if (lo_datadescr.type_kind === z2ui5_cl_util.cv_typedescr_typekind_dref || lo_datadescr.type_kind === z2ui5_cl_util.cv_typedescr_typekind_oref) {
-      throw new z2ui5_cx_util_error({ val: `NO DATA REFERENCES FOR BINDING ALLOWED: DEREFERENCE YOUR DATA FIRST` });
+    const lo_datadescr = z2ui5_cl_abap2ui5_context.rtti_get_typedescr_by_data_ref(val);
+    if (lo_datadescr.type_kind === z2ui5_cl_abap2ui5_context.cv_typedescr_typekind_dref || lo_datadescr.type_kind === z2ui5_cl_abap2ui5_context.cv_typedescr_typekind_oref) {
+      throw new z2ui5_cx_abap2ui5_error({ val: `NO DATA REFERENCES FOR BINDING ALLOWED: DEREFERENCE YOUR DATA FIRST` });
     }
     sy_tabix = 0;
     for (const lr_attri of this.mt_attri) {
@@ -400,7 +401,7 @@ class z2ui5_cl_core_srv_model {
 
   attri_create_new({ name } = {}) {
     let result = null;
-    const lo_descr = z2ui5_cl_util.rtti_get_typedescr_by_data_ref(this.attri_get_val_ref({ iv_path: name }));
+    const lo_descr = z2ui5_cl_abap2ui5_context.rtti_get_typedescr_by_data_ref(this.attri_get_val_ref({ iv_path: name }));
     result = { name: name, o_typedescr: lo_descr, type_kind: lo_descr.type_kind, kind: lo_descr.kind };
     return result;
   }
@@ -409,17 +410,17 @@ class z2ui5_cl_core_srv_model {
     let result = [];
     let lt_attri;
     const lr_ref_tmp = this.attri_get_val_ref({ iv_path: ir_attri.name });
-    if (z2ui5_cl_util.check_unassign_initial(lr_ref_tmp)) {
+    if (z2ui5_cl_abap2ui5_context.check_unassign_initial(lr_ref_tmp)) {
       return result;
     }
-    const lr_ref = z2ui5_cl_util.unassign_data(lr_ref_tmp);
+    const lr_ref = z2ui5_cl_abap2ui5_context.unassign_data(lr_ref_tmp);
     if (!lr_ref) {
       return result;
     }
     const ls_attri2 = {};
-    ls_attri2.o_typedescr = z2ui5_cl_util.rtti_get_typedescr_by_data_ref(lr_ref);
+    ls_attri2.o_typedescr = z2ui5_cl_abap2ui5_context.rtti_get_typedescr_by_data_ref(lr_ref);
     switch (ls_attri2.o_typedescr.kind) {
-      case z2ui5_cl_util.cv_typedescr_kind_struct:
+      case z2ui5_cl_abap2ui5_context.cv_typedescr_kind_struct:
         lt_attri = this.diss_struc({ ir_attri: ir_attri });
         result.push(...lt_attri);
         break;
@@ -439,16 +440,16 @@ class z2ui5_cl_core_srv_model {
     let sy_tabix = 0;
     let ls_new;
     const lr_val = this.attri_get_val_ref({ iv_path: ir_attri.name });
-    if (z2ui5_cl_util.check_unassign_initial(lr_val)) {
+    if (z2ui5_cl_abap2ui5_context.check_unassign_initial(lr_val)) {
       return result;
     }
-    const lr_ref = z2ui5_cl_util.unassign_object(lr_val);
-    const lt_attri = z2ui5_cl_util.rtti_get_t_attri_by_oref(lr_ref);
+    const lr_ref = z2ui5_cl_abap2ui5_context.unassign_object(lr_val);
+    const lt_attri = z2ui5_cl_abap2ui5_context.rtti_get_t_attri_by_oref(lr_ref);
     const lv_prefix = (ir_attri.name ? `${ir_attri.name}->` : null);
     sy_tabix = 0;
     for (const lr_attri of lt_attri) {
       sy_tabix++;
-      if (!(lr_attri.visibility === z2ui5_cl_util.cv_objectdescr_public && !(lr_attri.is_interface === true || lr_attri.is_interface === `X`) && !(lr_attri.is_class === true || lr_attri.is_class === `X`) && !(lr_attri.is_constant === true || lr_attri.is_constant === `X`))) continue;
+      if (!(lr_attri.visibility === z2ui5_cl_abap2ui5_context.cv_objectdescr_public && !(lr_attri.is_interface === true || lr_attri.is_interface === `X`) && !(lr_attri.is_class === true || lr_attri.is_class === `X`) && !(lr_attri.is_constant === true || lr_attri.is_constant === `X`))) continue;
       try {
         ls_new = this.attri_create_new({ name: lv_prefix + lr_attri.name });
         ls_new.name_parent = z2ui5_cl_util.abap_copy(ir_attri.name);
@@ -467,15 +468,15 @@ class z2ui5_cl_core_srv_model {
     let lt_attri;
     let ls_new;
     const lr_val = this.attri_get_val_ref({ iv_path: ir_attri.name });
-    if (ir_attri.o_typedescr.kind === z2ui5_cl_util.cv_typedescr_kind_ref) {
+    if (ir_attri.o_typedescr.kind === z2ui5_cl_abap2ui5_context.cv_typedescr_kind_ref) {
       lv_name = `${ir_attri.name}->`;
-      lr_ref = z2ui5_cl_util.unassign_data(lr_val);
+      lr_ref = z2ui5_cl_abap2ui5_context.unassign_data(lr_val);
     } else {
       lv_name = `${ir_attri.name}-`;
       lr_ref = z2ui5_cl_util.abap_copy(lr_val);
     }
     if (lr_ref != null) {
-      lt_attri = z2ui5_cl_util.rtti_get_t_attri_by_any(lr_ref);
+      lt_attri = z2ui5_cl_abap2ui5_context.rtti_get_t_attri_by_any(lr_ref);
       sy_tabix = 0;
       for (const ls_attri of lt_attri) {
         sy_tabix++;
@@ -520,12 +521,12 @@ class z2ui5_cl_core_srv_model {
         continue;
       }
       switch (lr_attri.type_kind) {
-        case z2ui5_cl_util.cv_typedescr_typekind_table:
+        case z2ui5_cl_abap2ui5_context.cv_typedescr_typekind_table:
           const _sy_tabix_1 = sy_tabix;
           sy_tabix = 0;
           for (const lr_attri_ref of this.mt_attri) {
             sy_tabix++;
-            if (!((lr_attri_ref.check_dissolved === true || lr_attri_ref.check_dissolved === `X`) && lr_attri_ref.name !== lr_attri.name && !lr_attri_ref.name_ref && lr_attri_ref.type_kind === z2ui5_cl_util.cv_typedescr_typekind_table)) continue;
+            if (!((lr_attri_ref.check_dissolved === true || lr_attri_ref.check_dissolved === `X`) && lr_attri_ref.name !== lr_attri.name && !lr_attri_ref.name_ref && lr_attri_ref.type_kind === z2ui5_cl_abap2ui5_context.cv_typedescr_typekind_table)) continue;
             try {
               lr_attri_ref_ref = this.attri_get_val_ref({ iv_path: lr_attri_ref.name });
             } catch (error) {
@@ -538,13 +539,13 @@ class z2ui5_cl_core_srv_model {
           }
           sy_tabix = _sy_tabix_1;
           break;
-        case z2ui5_cl_util.cv_typedescr_typekind_dref:
+        case z2ui5_cl_abap2ui5_context.cv_typedescr_typekind_dref:
           // TODO(abap2js): ASSIGN lr_ref->* TO FIELD-SYMBOL(<ref>).
           const _sy_tabix_2 = sy_tabix;
           sy_tabix = 0;
           for (const lr_attri_ref of this.mt_attri) {
             sy_tabix++;
-            if (!((lr_attri_ref.check_dissolved === true || lr_attri_ref.check_dissolved === `X`) && lr_attri_ref.name !== lr_attri.name && !lr_attri_ref.name_ref && (lr_attri_ref.type_kind === z2ui5_cl_util.cv_typedescr_typekind_struct1 || lr_attri_ref.type_kind === z2ui5_cl_util.cv_typedescr_typekind_struct2))) continue;
+            if (!((lr_attri_ref.check_dissolved === true || lr_attri_ref.check_dissolved === `X`) && lr_attri_ref.name !== lr_attri.name && !lr_attri_ref.name_ref && (lr_attri_ref.type_kind === z2ui5_cl_abap2ui5_context.cv_typedescr_typekind_struct1 || lr_attri_ref.type_kind === z2ui5_cl_abap2ui5_context.cv_typedescr_typekind_struct2))) continue;
             try {
               lr_attri_ref_ref = this.attri_get_val_ref({ iv_path: lr_attri_ref.name });
             } catch (error) {
@@ -601,17 +602,17 @@ class z2ui5_cl_core_srv_model {
         lr_attri.o_typedescr = z2ui5_cl_util.abap_copy(ls_entry.o_typedescr);
       }
       switch (lr_attri.o_typedescr.kind) {
-        case z2ui5_cl_util.cv_typedescr_kind_struct:
+        case z2ui5_cl_abap2ui5_context.cv_typedescr_kind_struct:
           lt_attri_struc = this.diss_struc({ ir_attri: lr_attri });
           lt_attri_new.push(...lt_attri_struc);
           break;
-        case z2ui5_cl_util.cv_typedescr_kind_ref:
+        case z2ui5_cl_abap2ui5_context.cv_typedescr_kind_ref:
           switch (lr_attri.o_typedescr.type_kind) {
-            case z2ui5_cl_util.cv_typedescr_typekind_oref:
+            case z2ui5_cl_abap2ui5_context.cv_typedescr_typekind_oref:
               lt_attri_oref = this.diss_oref({ ir_attri: lr_attri });
               lt_attri_new.push(...lt_attri_oref);
               break;
-            case z2ui5_cl_util.cv_typedescr_typekind_dref:
+            case z2ui5_cl_abap2ui5_context.cv_typedescr_typekind_dref:
               lt_attri_dref = this.diss_dref({ ir_attri: lr_attri });
               lt_attri_new.push(...lt_attri_dref);
               break;

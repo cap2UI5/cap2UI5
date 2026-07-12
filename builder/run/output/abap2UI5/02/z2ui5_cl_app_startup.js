@@ -1,3 +1,4 @@
+// TODO(abap2js): unresolved reference z2ui5_cl_abap2ui5_context — add require manually
 const z2ui5_cl_app_hello_world = require("abap2UI5/z2ui5_cl_app_hello_world");
 // TODO(abap2js): unresolved reference z2ui5_cl_core_srv_draft — add require manually
 // TODO(abap2js): unresolved reference z2ui5_cl_exit — add require manually
@@ -22,7 +23,7 @@ class z2ui5_cl_app_startup extends z2ui5_if_app {
   get_app_url({ classname } = {}) {
     let result = ``;
     const ls_config = this.client.get().S_CONFIG;
-    result = z2ui5_cl_util.app_get_url({ classname, origin: ls_config.ORIGIN, pathname: ls_config.PATHNAME, search: ls_config.SEARCH, hash: ls_config.HASH });
+    result = z2ui5_cl_abap2ui5_context.app_get_url({ classname, origin: ls_config.ORIGIN, pathname: ls_config.PATHNAME, search: ls_config.SEARCH, hash: ls_config.HASH });
     return result;
   }
 
@@ -43,7 +44,7 @@ class z2ui5_cl_app_startup extends z2ui5_if_app {
   on_event_check() {
     let li_app_test = null;
     try {
-      this.ms_home.classname = z2ui5_cl_util.c_trim_upper(this.ms_home.classname);
+      this.ms_home.classname = z2ui5_cl_abap2ui5_context.c_trim_upper(this.ms_home.classname);
       li_app_test = (() => { const _n = String(this.ms_home.classname); const _c = z2ui5_cl_util.rtti_get_class(_n.toLowerCase()); if (!_c) throw new Error(`CREATE OBJECT: class ${_n} not found`); return new _c(); })();
       this.client.message_toast_display(`App is ready to start!`);
       this.ms_home.btn_text = `Edit`;
@@ -68,7 +69,7 @@ class z2ui5_cl_app_startup extends z2ui5_if_app {
     toolbar.toolbar_spacer()
       .button({ text: `Debugging Tools`, icon: `sap-icon://enablement`, press: this.client._event(z2ui5_cl_app_startup.cs_event.open_debug) })
       .button({ text: `System`, icon: `sap-icon://information`, press: this.client._event(z2ui5_cl_app_startup.cs_event.open_info) });
-    if (z2ui5_cl_util.rtti_check_class_exists(`z2ui5_cl_app_icf_config`)) {
+    if (z2ui5_cl_abap2ui5_context.rtti_check_class_exists(`z2ui5_cl_app_icf_config`)) {
       toolbar.button({ text: `Config`, icon: `sap-icon://settings`, press: this.client._event(z2ui5_cl_app_startup.cs_event.set_config) });
     }
     const simple_form = this.create_layout_form({ view: page });
@@ -92,7 +93,7 @@ class z2ui5_cl_app_startup extends z2ui5_if_app {
     simple_form.label(`Step 5`)
       .link({ text: `Link to the Application`, target: `_blank`, href: this.client._bind(this.ms_home.url, { name: `ms_home-url` }), enabled: `{= $${this.client._bind(this.ms_home.class_editable, { name: `ms_home-class_editable` })} === false }` });
     simple_form.toolbar().title(`What's next?`);
-    const lv_class_samples = (z2ui5_cl_util.rtti_check_class_exists(`z2ui5_cl_sample_app_000`) ? `z2ui5_cl_sample_app_000` : z2ui5_cl_util.rtti_check_class_exists(`z2ui5_cl_demo_app_000`) ? `z2ui5_cl_demo_app_000` : null);
+    const lv_class_samples = (z2ui5_cl_abap2ui5_context.rtti_check_class_exists(`z2ui5_cl_sample_app_001`) ? `z2ui5_cl_sample_app_001` : z2ui5_cl_abap2ui5_context.rtti_check_class_exists(`z2ui5_cl_demo_app_000`) ? `z2ui5_cl_demo_app_000` : null);
     if (lv_class_samples) {
       lv_url_samples = this.get_app_url({ classname: lv_class_samples });
       simple_form.label(`Start Developing`);
@@ -153,7 +154,7 @@ class z2ui5_cl_app_startup extends z2ui5_if_app {
     simple_form2.checkbox({ enabled: false, selected: ls_client.CHECK_LAUNCHPAD_ACTIVE });
     simple_form2.toolbar().title(`Backend`);
     simple_form2.label(`ABAP for Cloud`);
-    simple_form2.checkbox({ enabled: false, selected: z2ui5_cl_util.context_check_abap_cloud() });
+    simple_form2.checkbox({ enabled: false, selected: z2ui5_cl_abap2ui5_context.context_check_abap_cloud() });
     simple_form2.label(`User Exit`);
     simple_form2.text(z2ui5_cl_exit.get_user_exit_class());
     const lv_count = (new z2ui5_cl_core_srv_draft().count_entries());
@@ -194,7 +195,7 @@ class z2ui5_cl_app_startup extends z2ui5_if_app {
         break;
       case z2ui5_cl_app_startup.cs_event.value_help:
         try {
-          this.mt_classes = z2ui5_cl_util.rtti_get_classes_impl_intf(z2ui5_cl_util.rtti_get_intfname_by_ref(li_app));
+          this.mt_classes = z2ui5_cl_abap2ui5_context.rtti_get_classes_impl_intf(z2ui5_cl_abap2ui5_context.rtti_get_intfname_by_ref(li_app));
         } catch (error) {
           this.client.message_box_display(`Unfortunately the value help is not available on your ABAP release!`);
           return;
@@ -206,7 +207,7 @@ class z2ui5_cl_app_startup extends z2ui5_if_app {
 
   z2ui5_on_init() {
     this.reset_button_state();
-    this.ms_home.classname = z2ui5_cl_util.rtti_get_classname_by_ref(new z2ui5_cl_app_hello_world());
+    this.ms_home.classname = z2ui5_cl_abap2ui5_context.rtti_get_classname_by_ref(new z2ui5_cl_app_hello_world());
   }
 }
 

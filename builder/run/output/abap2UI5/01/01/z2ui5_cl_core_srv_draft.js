@@ -1,6 +1,7 @@
+// TODO(abap2js): unresolved reference z2ui5_cl_abap2ui5_context — add require manually
 // TODO(abap2js): unresolved reference z2ui5_cl_exit — add require manually
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cx_util_error = require("abap2UI5/z2ui5_cx_util_error");
+// TODO(abap2js): unresolved reference z2ui5_cx_abap2ui5_error — add require manually
 const z2ui5_port = require("abap2UI5/z2ui5_port");
 
 class z2ui5_cl_core_srv_draft {
@@ -14,7 +15,7 @@ class z2ui5_cl_core_srv_draft {
     if (lv_exp_time_in_hours < z2ui5_cl_core_srv_draft.c_min_exp_time_in_hours) {
       lv_exp_time_in_hours = z2ui5_cl_util.abap_copy(z2ui5_cl_core_srv_draft.c_min_exp_time_in_hours);
     }
-    const lv_n_hours_ago = z2ui5_cl_util.time_subtract_seconds({ time: z2ui5_cl_util.time_get_timestampl(), seconds: z2ui5_cl_core_srv_draft.c_seconds_per_hour * lv_exp_time_in_hours });
+    const lv_n_hours_ago = z2ui5_cl_abap2ui5_context.time_subtract_seconds({ time: z2ui5_cl_abap2ui5_context.time_get_timestampl(), seconds: z2ui5_cl_core_srv_draft.c_seconds_per_hour * lv_exp_time_in_hours });
     // TODO(abap2js): DELETE FROM z2ui5_t_01 WHERE timestampl < @lv_n_hours_ago .
     z2ui5_port.db({ op: `commit` });
   }
@@ -22,11 +23,11 @@ class z2ui5_cl_core_srv_draft {
   create({ draft, model_xml } = {}) {
     let sy_subrc = 0;
     if (!(draft.id)) throw new Error(`ASSERT failed`);
-    const ls_db = { id: draft.id, id_prev: draft.id_prev, id_prev_app: draft.id_prev_app, id_prev_app_stack: draft.id_prev_app_stack, timestampl: z2ui5_cl_util.time_get_timestampl(), data: model_xml };
+    const ls_db = { id: draft.id, id_prev: draft.id_prev, id_prev_app: draft.id_prev_app, id_prev_app_stack: draft.id_prev_app_stack, timestampl: z2ui5_cl_abap2ui5_context.time_get_timestampl(), data: model_xml };
     z2ui5_port.db({ op: `modify`, table: `z2ui5_t_01`, row: ls_db });
     sy_subrc = z2ui5_port.sy_subrc;
     if (sy_subrc !== 0) {
-      throw new z2ui5_cx_util_error({ val: `CREATE_OF_DRAFT_ENTRY_ON_DATABASE_FAILED` });
+      throw new z2ui5_cx_abap2ui5_error({ val: `CREATE_OF_DRAFT_ENTRY_ON_DATABASE_FAILED` });
     }
     z2ui5_port.db({ op: `commit` });
   }
@@ -42,7 +43,7 @@ class z2ui5_cl_core_srv_draft {
       sy_subrc = z2ui5_port.sy_subrc;
     }
     if (sy_subrc !== 0) {
-      throw new z2ui5_cx_util_error({ val: `NO_DRAFT_ENTRY_OF_PREVIOUS_REQUEST_FOUND` });
+      throw new z2ui5_cx_abap2ui5_error({ val: `NO_DRAFT_ENTRY_OF_PREVIOUS_REQUEST_FOUND` });
     }
     return result;
   }

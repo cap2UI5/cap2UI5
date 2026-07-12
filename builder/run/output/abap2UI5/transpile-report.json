@@ -218,8 +218,761 @@
     ]
   },
   {
+    "class": "z2ui5_cl_abap2ui5_context",
+    "path": "00/03/z2ui5_cl_abap2ui5_context.js",
+    "todos": 99,
+    "todoDetails": [
+      "unsupported statement: ROLLBACK WORK.",
+      "unsupported statement: ASSIGN val->* TO <any>.",
+      "unsupported statement: ASSIGN from->* TO <from>.",
+      "unsupported statement: CREATE DATA result LIKE <from>.",
+      "unsupported statement: ASSIGN result->* TO <result>.",
+      "unsupported statement: GET REFERENCE OF val INTO result.",
+      "builtin shift_left( ) not mapped",
+      "builtin shift_left( ) not mapped",
+      "unsupported statement: REPLACE `{LOW}` IN lv_value WITH lr_row->low.",
+      "unsupported statement: REPLACE `{HIGH}` IN lv_value WITH lr_row->high.",
+      "unsupported statement: DELETE tab INDEX lv_tabix.",
+      "unsupported statement: cl_abap_classdescr=>describe_by_name( EXPORTING p_name = val EXCEPTIONS type_not_found = 1 ).",
+      "IN comparison without operand — rewrite manually",
+      "IN comparison without operand — rewrite manually",
+      "unsupported statement: cl_abap_typedescr=>describe_by_name( EXPORTING p_name = type->absolute_name RECEIVING p_descr_ref = DATA(type_desc) EXCE",
+      "unsupported statement: GET TIME STAMP FIELD result.",
+      "unsupported statement: ASSIGN val->* TO <unassign>.",
+      "unsupported statement: ASSIGN val->* TO <unassign>.",
+      "unsupported statement: CALL TRANSFORMATION id SOURCE XML xml RESULT data = any.",
+      "unsupported statement: CALL TRANSFORMATION id SOURCE XML rtti_data RESULT srtti = srtti.",
+      "unsupported statement: CALL METHOD srtti->(`GET_RTTI`) RECEIVING rtti = rtti_type.",
+      "unsupported statement: CREATE DATA result TYPE HANDLE lo_datadescr.",
+      "unsupported statement: ASSIGN result->* TO FIELD-SYMBOL(<variable>).",
+      "unsupported statement: CALL TRANSFORMATION id SOURCE XML rtti_data RESULT dobj = <variable>.",
+      "unsupported statement: CALL METHOD (lv_classname)=>(`CREATE_BY_DATA_OBJECT`) EXPORTING data_object = data RECEIVING srtti = srtti.",
+      "unsupported statement: CALL TRANSFORMATION id SOURCE srtti = srtti dobj = data RESULT XML result.",
+      "unsupported statement: CALL METHOD z2ui5_cl_srt_typedescr=>(`CREATE_BY_DATA_OBJECT`) EXPORTING data_object = data RECEIVING srtti = srtti.",
+      "unsupported statement: CALL TRANSFORMATION id SOURCE srtti = srtti dobj = data RESULT XML result.",
+      "unsupported statement: CALL TRANSFORMATION id SOURCE data = any RESULT XML result OPTIONS data_refs = `heap-or-create`.",
+      "unsupported statement: MOVE-CORRESPONDING <row_in> TO <row_out>.",
+      "unsupported statement: ASSIGN ir_tab->* TO <tab>.",
+      "builtin concat_lines_of( ) not mapped",
+      "unsupported statement: CALL METHOD (lv_web_http_name)=>(`DECODE_X_BASE64`) EXPORTING encoded = val RECEIVING decoded = result.",
+      "unsupported statement: CALL METHOD (classname)=>(`DECODE_X_BASE64`) EXPORTING encoded = val RECEIVING decoded = result.",
+      "unsupported statement: CALL METHOD (lv_web_http_name)=>(`ENCODE_X_BASE64`) EXPORTING unencoded = val RECEIVING encoded = result.",
+      "unsupported statement: CALL METHOD (classname)=>(`ENCODE_X_BASE64`) EXPORTING unencoded = val RECEIVING encoded = result.",
+      "unsupported statement: CALL METHOD (conv_codepage)=>create_in RECEIVING instance = conv.",
+      "unsupported statement: CALL METHOD conv->(`IF_ABAP_CONV_IN~CONVERT`) EXPORTING source = val RECEIVING result = result.",
+      "unsupported statement: CALL METHOD (conv_in_class)=>create EXPORTING encoding = `UTF-8` RECEIVING conv = conv.",
+      "unsupported statement: CALL METHOD conv->(`CONVERT`) EXPORTING input = val IMPORTING data = result.",
+      "unsupported statement: CALL METHOD (conv_codepage)=>create_out RECEIVING instance = conv.",
+      "unsupported statement: CALL METHOD conv->(`IF_ABAP_CONV_OUT~CONVERT`) EXPORTING source = val RECEIVING result = result.",
+      "unsupported statement: CALL METHOD (conv_out_class)=>create EXPORTING encoding = `UTF-8` RECEIVING conv = conv.",
+      "unsupported statement: CALL METHOD conv->(`CONVERT`) EXPORTING data = val IMPORTING buffer = result.",
+      "unsupported statement: DATA BEGIN OF ls_clskey.",
+      "unsupported statement: DATA END OF ls_clskey.",
+      "unsupported statement: CALL METHOD (xco_cp_abap)=>interface EXPORTING iv_name = ls_clskey-clsname RECEIVING ro_interface = obj.",
+      "unsupported statement: ASSIGN obj->(`IF_XCO_AO_INTERFACE~IMPLEMENTATIONS`) TO <any>.",
+      "unsupported statement: ASSIGN obj->(`IF_XCO_INTF_IMPLEMENTATIONS_FC~ALL`) TO <any>.",
+      "unsupported statement: CALL METHOD obj->(`IF_XCO_INTF_IMPLEMENTATIONS~GET_NAMES`) RECEIVING rt_names = lt_implementation_names.",
+      "unsupported statement: DATA BEGIN OF ls_clskey.",
+      "unsupported statement: DATA END OF ls_clskey.",
+      "unsupported statement: CALL FUNCTION lv_fm EXPORTING intkey = ls_key IMPORTING impkeys = lt_impl EXCEPTIONS error_message = 1 OTHERS = 2.",
+      "unsupported statement: CREATE DATA class TYPE (type).",
+      "unsupported statement: ASSIGN class->* TO <class>.",
+      "unsupported statement: CALL FUNCTION lv_fm EXPORTING clskey = ls_clskey IMPORTING class = <class> EXCEPTIONS error_message = 1 OTHERS = 2.",
+      "unsupported statement: rtti_get_dtel_texts_by_ddic( EXPORTING name = data_element_name IMPORTING texts = result do_fallback = lv_do_fallback ).",
+      "unsupported statement: rtti_get_dtel_texts_by_xco( EXPORTING name = data_element_name IMPORTING texts = result do_fallback = lv_do_fallback ).",
+      "unsupported statement: DATA BEGIN OF ddic,",
+      "unsupported statement: DATA END OF ddic.",
+      "unsupported statement: CREATE DATA ddic_ref TYPE HANDLE struct_desrc.",
+      "unsupported statement: ASSIGN ddic_ref->* TO <ddic>.",
+      "unsupported statement: cl_abap_elemdescr=>describe_by_name( EXPORTING p_name = name RECEIVING p_descr_ref = lo_typedescr EXCEPTIONS OTHERS = 1 ",
+      "unsupported statement: CALL METHOD data_descr->(`GET_DDIC_FIELD`) RECEIVING p_flddescr = <ddic> EXCEPTIONS not_found = 1 no_ddic_type = 2 OTHER",
+      "unsupported statement: MOVE-CORRESPONDING <ddic> TO ddic.",
+      "unsupported statement: CALL METHOD (lv_xco_cp_abap_dictionary)=>(`DATA_ELEMENT`) EXPORTING iv_name = name RECEIVING ro_data_element = data_elem",
+      "unsupported statement: CALL METHOD data_element->(`IF_XCO_AD_DATA_ELEMENT~EXISTS`) RECEIVING rv_exists = exists.",
+      "unsupported statement: CALL METHOD data_element->(`IF_XCO_AD_DATA_ELEMENT~CONTENT`) RECEIVING ro_content = content.",
+      "unsupported statement: CALL METHOD content->(`IF_XCO_DTEL_CONTENT~GET_HEADING_FIELD_LABEL`) RECEIVING rs_heading_field_label = texts-header.",
+      "unsupported statement: CALL METHOD content->(`IF_XCO_DTEL_CONTENT~GET_SHORT_FIELD_LABEL`) RECEIVING rs_short_field_label = texts-short.",
+      "unsupported statement: CALL METHOD content->(`IF_XCO_DTEL_CONTENT~GET_MEDIUM_FIELD_LABEL`) RECEIVING rs_medium_field_label = texts-medium.",
+      "unsupported statement: CALL METHOD content->(`IF_XCO_DTEL_CONTENT~GET_LONG_FIELD_LABEL`) RECEIVING rs_long_field_label = texts-long.",
+      "unsupported statement: CALL METHOD (lv_classname)=>if_system_uuid_static~create_uuid_c32 RECEIVING uuid = lv_uuid.",
+      "unsupported statement: CALL FUNCTION lv_fm IMPORTING ev_guid_32 = lv_uuid.",
+      "unsupported statement: CALL METHOD (xco_cp_abap)=>(`CLASS`) EXPORTING iv_name = lv_classname RECEIVING ro_class = obj.",
+      "unsupported statement: CALL METHOD obj->(`IF_XCO_AO_CLASS~CONTENT`) RECEIVING ro_content = content.",
+      "unsupported statement: CALL METHOD content->(`IF_XCO_CLAS_CONTENT~GET_SHORT_DESCRIPTION`) RECEIVING rv_short_description = result.",
+      "unsupported statement: MESSAGE ID ls_result-id TYPE `I` NUMBER ls_result-no WITH ls_result-v1 ls_result-v2 ls_result-v3 ls_result-v4 INTO ls_re",
+      "unsupported statement: ASSIGN lx->(lv_name) TO <comp>.",
+      "unsupported statement: CREATE DATA lr_tab TYPE (`if_bali_log=>ty_item_table`).",
+      "unsupported statement: ASSIGN lr_tab->* TO FIELD-SYMBOL(<tab2>).",
+      "unsupported statement: CALL METHOD obj->(`IF_BALI_LOG~GET_ALL_ITEMS`) RECEIVING item_table = <tab2>.",
+      "unsupported statement: CREATE DATA lr_tab TYPE (`BAPIRETTAB`).",
+      "unsupported statement: ASSIGN lr_tab->* TO <tab2>.",
+      "unsupported statement: CALL METHOD obj->(`ZIF_LOGGER~EXPORT_TO_TABLE`) RECEIVING rt_bapiret = <tab2>.",
+      "unsupported statement: ASSIGN obj->(lv_name) TO <comp>.",
+      "unsupported statement: msg_get_rap_row( EXPORTING val = val entity_name = entity_name IMPORTING messages = result is_row = DATA(lv_is_row) ).",
+      "unresolved class reference: cl_abap_char_utilities",
+      "unresolved class reference: cl_abap_classdescr",
+      "unresolved class reference: cl_abap_datadescr",
+      "unresolved class reference: cl_abap_elemdescr",
+      "unresolved class reference: cl_abap_format",
+      "unresolved class reference: cl_abap_objectdescr",
+      "unresolved class reference: cl_abap_structdescr",
+      "unresolved class reference: cl_abap_tabledescr",
+      "unresolved class reference: cl_abap_tstmp",
+      "unresolved class reference: cl_abap_typedescr",
+      "unresolved class reference: cx_sy_dyn_call_illegal_class",
+      "unresolved class reference: z2ui5_cx_abap2ui5_error"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_abap2ui5_http",
+    "path": "00/03/z2ui5_cl_abap2ui5_http.js",
+    "todos": 38,
+    "todoDetails": [
+      "unsupported statement: CALL METHOD (lv_classname)=>create_by_destination EXPORTING destination = lv_destination IMPORTING client = result EXCEP",
+      "unsupported statement: CALL METHOD (lv_classname)=>create_by_url EXPORTING url = lv_url IMPORTING client = result EXCEPTIONS argument_not_found",
+      "unsupported statement: ASSIGN lo_client->(`REQUEST`) TO <any>.",
+      "unsupported statement: CALL METHOD lo_request->(`SET_METHOD`) EXPORTING method = lv_method.",
+      "unsupported statement: CALL METHOD lo_request->(`SET_CDATA`) EXPORTING data = lv_body.",
+      "unsupported statement: CALL METHOD lo_client->(`SEND`) EXCEPTIONS http_communication_failure = 1 http_invalid_state = 2 http_processing_failed ",
+      "unsupported statement: CALL METHOD lo_client->(`RECEIVE`) EXCEPTIONS http_communication_failure = 1 http_invalid_state = 2 http_processing_fail",
+      "unsupported statement: CALL METHOD lo_client->(`GET_LAST_ERROR`) IMPORTING message = lv_message.",
+      "unsupported statement: CALL METHOD lo_client->(`CLOSE`) EXCEPTIONS OTHERS = 1.",
+      "unsupported statement: ASSIGN lo_client->(`RESPONSE`) TO <any>.",
+      "unsupported statement: CALL METHOD lo_response->(`GET_CDATA`) RECEIVING data = result-body.",
+      "unsupported statement: CALL METHOD lo_response->(`GET_STATUS`) IMPORTING code = result-status_code reason = result-status_reason.",
+      "unsupported statement: CALL METHOD lo_client->(`CLOSE`) EXCEPTIONS OTHERS = 1.",
+      "unsupported statement: ASSIGN mo_server_onprem->(`RESPONSE`) TO <any>.",
+      "unsupported statement: CALL METHOD object->(`DELETE_COOKIE`) EXPORTING name = lv_val.",
+      "unsupported statement: ASSIGN mo_server_onprem->(`RESPONSE`) TO <any>.",
+      "unsupported statement: CALL METHOD object->(`GET_COOKIE`) EXPORTING name = lv_val IMPORTING value = result.",
+      "unsupported statement: ASSIGN mo_server_onprem->(`REQUEST`) TO <any>.",
+      "unsupported statement: CALL METHOD object->(`GET_HEADER_FIELD`) EXPORTING name = lv_val RECEIVING value = result.",
+      "unsupported statement: CALL METHOD mo_request_cloud->(`IF_WEB_HTTP_REQUEST~GET_HEADER_FIELD`) EXPORTING i_name = lv_val RECEIVING r_value = res",
+      "unsupported statement: ASSIGN mo_server_onprem->(`RESPONSE`) TO <any>.",
+      "unsupported statement: CALL METHOD object->(`SET_HEADER_FIELD`) EXPORTING name = lv_n value = lv_v.",
+      "unsupported statement: CALL METHOD mo_response_cloud->(`IF_WEB_HTTP_RESPONSE~SET_HEADER_FIELD`) EXPORTING i_name = lv_n i_value = lv_v.",
+      "unsupported statement: ASSIGN mo_server_onprem->(`REQUEST`) TO <any>.",
+      "unsupported statement: CALL METHOD object->(`GET_CDATA`) RECEIVING data = result.",
+      "unsupported statement: CALL METHOD mo_request_cloud->(`IF_WEB_HTTP_REQUEST~GET_TEXT`) RECEIVING r_value = result.",
+      "unsupported statement: ASSIGN mo_server_onprem->(`REQUEST`) TO <any>.",
+      "unsupported statement: CALL METHOD object->(`IF_HTTP_REQUEST~GET_METHOD`) RECEIVING method = result.",
+      "unsupported statement: CALL METHOD mo_request_cloud->(`IF_WEB_HTTP_REQUEST~GET_METHOD`) RECEIVING r_value = result.",
+      "unsupported statement: ASSIGN mo_server_onprem->(`RESPONSE`) TO <any>.",
+      "unsupported statement: CALL METHOD object->(`SET_CDATA`) EXPORTING data = val.",
+      "unsupported statement: CALL METHOD mo_response_cloud->(`IF_WEB_HTTP_RESPONSE~SET_TEXT`) EXPORTING i_text = val.",
+      "unsupported statement: ASSIGN mo_server_onprem->(`RESPONSE`) TO <any>.",
+      "unsupported statement: CALL METHOD object->(`IF_HTTP_RESPONSE~SET_STATUS`) EXPORTING code = code reason = lv_reason.",
+      "unsupported statement: CALL METHOD mo_response_cloud->(`IF_WEB_HTTP_RESPONSE~SET_STATUS`) EXPORTING i_code = code i_reason = lv_reason.",
+      "unsupported statement: CALL METHOD mo_server_onprem->(`SET_SESSION_STATEFUL`) EXPORTING stateful = val.",
+      "unresolved class reference: z2ui5_cl_abap2ui5_context",
+      "unresolved class reference: z2ui5_cx_abap2ui5_error"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_abap2ui5_json_fltr",
+    "path": "00/03/z2ui5_cl_abap2ui5_json_fltr.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cx_abap2ui5_error",
+    "path": "00/03/z2ui5_cx_abap2ui5_error.js",
+    "todos": 2,
+    "todoDetails": [
+      "unresolved superclass stubbed: cx_no_check",
+      "unresolved class reference: z2ui5_cl_abap2ui5_context"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_core_srv_draft",
+    "path": "01/01/z2ui5_cl_core_srv_draft.js",
+    "todos": 5,
+    "todoDetails": [
+      "unsupported statement: DELETE FROM z2ui5_t_01 WHERE timestampl < @lv_n_hours_ago .",
+      "unsupported statement: SELECT COUNT( * ) FROM z2ui5_t_01 INTO @result.",
+      "unresolved class reference: z2ui5_cl_abap2ui5_context",
+      "unresolved class reference: z2ui5_cl_exit",
+      "unresolved class reference: z2ui5_cx_abap2ui5_error"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_core_action",
+    "path": "01/02/z2ui5_cl_core_action.js",
+    "todos": 5,
+    "todoDetails": [
+      "NEW #( ) — target type unknown, resolve manually",
+      "unresolved class reference: z2ui5_cl_abap2ui5_context",
+      "unresolved class reference: z2ui5_cl_core_app",
+      "unresolved class reference: z2ui5_cl_core_srv_draft",
+      "unresolved class reference: z2ui5_cx_abap2ui5_error"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_core_app",
+    "path": "01/02/z2ui5_cl_core_app.js",
+    "todos": 6,
+    "todoDetails": [
+      "unsupported statement: z2ui5_cl_abap2ui5_context=>xml_parse( EXPORTING xml = xml IMPORTING any = result ).",
+      "unsupported statement: CREATE DATA mt_attri.",
+      "unresolved class reference: z2ui5_cl_abap2ui5_context",
+      "unresolved class reference: z2ui5_cl_core_srv_draft",
+      "unresolved class reference: z2ui5_cl_core_srv_model",
+      "unresolved class reference: z2ui5_cx_abap2ui5_error"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_core_client",
+    "path": "01/02/z2ui5_cl_core_client.js",
+    "todos": 5,
+    "todoDetails": [
+      "NEW #( ) — target type unknown, resolve manually",
+      "NEW #( ) — target type unknown, resolve manually",
+      "unresolved class reference: z2ui5_cl_abap2ui5_context",
+      "unresolved class reference: z2ui5_cl_core_app",
+      "unresolved class reference: z2ui5_cx_abap2ui5_error"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_core_handler",
+    "path": "01/02/z2ui5_cl_core_handler.js",
+    "todos": 12,
+    "todoDetails": [
+      "unsupported statement: lo_ajson->to_abap( EXPORTING iv_corresponding = abap_true IMPORTING ev_container = result-s_front ).",
+      "unsupported statement: lo_device->to_abap( EXPORTING iv_corresponding = abap_true IMPORTING ev_container = result-s_front-s_device ).",
+      "unsupported statement: lo_focus->to_abap( EXPORTING iv_corresponding = abap_true IMPORTING ev_container = result-s_front-s_focus ).",
+      "unsupported statement: lo_scroll->to_abap( EXPORTING iv_corresponding = abap_true IMPORTING ev_container = result-s_front-s_scroll ).",
+      "unsupported statement: REPLACE FIRST OCCURRENCE OF `-` IN result WITH `/`.",
+      "unsupported statement: REPLACE FIRST OCCURRENCE OF `-` IN result WITH `/`.",
+      "unresolved class reference: z2ui5_cl_abap2ui5_context",
+      "unresolved class reference: z2ui5_cl_abap2ui5_json_fltr",
+      "unresolved class reference: z2ui5_cl_core_action",
+      "unresolved class reference: z2ui5_cl_core_client",
+      "unresolved class reference: z2ui5_cl_core_srv_draft",
+      "unresolved class reference: z2ui5_cx_abap2ui5_error"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_core_srv_bind",
+    "path": "01/02/z2ui5_cl_core_srv_bind.js",
+    "todos": 4,
+    "todoDetails": [
+      "unsupported statement: ASSIGN ms_config-tab->* TO <tab>.",
+      "unresolved class reference: z2ui5_cl_abap2ui5_context",
+      "unresolved class reference: z2ui5_cl_core_srv_model",
+      "unresolved class reference: z2ui5_cx_abap2ui5_error"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_core_srv_event",
+    "path": "01/02/z2ui5_cl_core_srv_event.js",
+    "todos": 1,
+    "todoDetails": [
+      "NP pattern match approximated with includes()"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_core_srv_model",
+    "path": "01/02/z2ui5_cl_core_srv_model.js",
+    "todos": 21,
+    "todoDetails": [
+      "unsupported statement: ASSIGN lr_ref->* TO FIELD-SYMBOL(<val>).",
+      "unsupported statement: lo_val_front->to_abap( EXPORTING iv_corresponding = abap_true IMPORTING ev_container = <val> ).",
+      "unsupported statement: ASSIGN lr_ref->* TO FIELD-SYMBOL(<val>).",
+      "unsupported statement: ASSIGN lr_ref->* TO FIELD-SYMBOL(<val>).",
+      "unsupported statement: ASSIGN (lv_parent_path) TO FIELD-SYMBOL(<parent_ref>).",
+      "unsupported statement: ASSIGN lr_ref_source->* TO FIELD-SYMBOL(<source_value>).",
+      "unsupported statement: GET REFERENCE OF <source_value> INTO <parent_ref>.",
+      "unsupported statement: ASSIGN (lv_source_path) TO FIELD-SYMBOL(<source_ref>).",
+      "unsupported statement: ASSIGN (lv_target_path) TO FIELD-SYMBOL(<parent_ref>).",
+      "unsupported statement: GET REFERENCE OF <source_ref> INTO <parent_ref>.",
+      "unsupported statement: ASSIGN (lv_name5) TO FIELD-SYMBOL(<ref>).",
+      "unsupported statement: ASSIGN (lv_name) TO FIELD-SYMBOL(<val1>).",
+      "unsupported statement: ASSIGN (lv_name6) TO FIELD-SYMBOL(<val_ref>).",
+      "unsupported statement: ASSIGN (lv_name8) TO FIELD-SYMBOL(<ref2>).",
+      "unsupported statement: ASSIGN (lv_name10) TO FIELD-SYMBOL(<val8>).",
+      "unsupported statement: ASSIGN (lv_name) TO <attri>.",
+      "unsupported statement: GET REFERENCE OF <attri> INTO result.",
+      "unsupported statement: ASSIGN lr_ref->* TO FIELD-SYMBOL(<ref>).",
+      "unsupported statement: ASSIGN lr_ref_d->* TO <delta_tab>.",
+      "unresolved class reference: z2ui5_cl_abap2ui5_context",
+      "unresolved class reference: z2ui5_cx_abap2ui5_error"
+    ]
+  },
+  {
+    "class": "z2ui5_if_core_types",
+    "path": "01/02/z2ui5_if_core_types.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_app_app_js",
+    "path": "01/03/z2ui5_cl_app_app_js.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_app_app_xml",
+    "path": "01/03/z2ui5_cl_app_app_xml.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_app_appstate_js",
+    "path": "01/03/z2ui5_cl_app_appstate_js.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_app_camerapicture_js",
+    "path": "01/03/z2ui5_cl_app_camerapicture_js.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_app_cameraselector_js",
+    "path": "01/03/z2ui5_cl_app_cameraselector_js.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_app_component_js",
+    "path": "01/03/z2ui5_cl_app_component_js.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_app_debugtool_js",
+    "path": "01/03/z2ui5_cl_app_debugtool_js.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_app_debugtool_xml",
+    "path": "01/03/z2ui5_cl_app_debugtool_xml.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_app_dirty_js",
+    "path": "01/03/z2ui5_cl_app_dirty_js.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_app_errorview_js",
+    "path": "01/03/z2ui5_cl_app_errorview_js.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_app_favicon_js",
+    "path": "01/03/z2ui5_cl_app_favicon_js.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_app_fileuploader_js",
+    "path": "01/03/z2ui5_cl_app_fileuploader_js.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_app_focus_js",
+    "path": "01/03/z2ui5_cl_app_focus_js.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_app_frontendaction_js",
+    "path": "01/03/z2ui5_cl_app_frontendaction_js.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_app_geolocation_js",
+    "path": "01/03/z2ui5_cl_app_geolocation_js.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_app_history_js",
+    "path": "01/03/z2ui5_cl_app_history_js.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_app_index_html",
+    "path": "01/03/z2ui5_cl_app_index_html.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_app_info_js",
+    "path": "01/03/z2ui5_cl_app_info_js.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_app_lib_js",
+    "path": "01/03/z2ui5_cl_app_lib_js.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_app_lptitle_js",
+    "path": "01/03/z2ui5_cl_app_lptitle_js.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_app_manifest_json",
+    "path": "01/03/z2ui5_cl_app_manifest_json.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_app_messages_js",
+    "path": "01/03/z2ui5_cl_app_messages_js.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_app_models_js",
+    "path": "01/03/z2ui5_cl_app_models_js.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_app_multiinputext_js",
+    "path": "01/03/z2ui5_cl_app_multiinputext_js.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_app_preload",
+    "path": "01/03/z2ui5_cl_app_preload.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_app_scrolling_js",
+    "path": "01/03/z2ui5_cl_app_scrolling_js.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_app_server_js",
+    "path": "01/03/z2ui5_cl_app_server_js.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_app_smartmultiinpu_js",
+    "path": "01/03/z2ui5_cl_app_smartmultiinpu_js.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_app_storage_js",
+    "path": "01/03/z2ui5_cl_app_storage_js.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_app_style_css",
+    "path": "01/03/z2ui5_cl_app_style_css.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_app_timer_js",
+    "path": "01/03/z2ui5_cl_app_timer_js.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_app_title_js",
+    "path": "01/03/z2ui5_cl_app_title_js.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_app_tree_js",
+    "path": "01/03/z2ui5_cl_app_tree_js.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_app_uitableext_js",
+    "path": "01/03/z2ui5_cl_app_uitableext_js.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_app_uploadsetext_js",
+    "path": "01/03/z2ui5_cl_app_uploadsetext_js.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_app_util_js",
+    "path": "01/03/z2ui5_cl_app_util_js.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_app_view1_js",
+    "path": "01/03/z2ui5_cl_app_view1_js.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_app_viewslots_js",
+    "path": "01/03/z2ui5_cl_app_viewslots_js.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_pop_data",
+    "path": "02/01/z2ui5_cl_pop_data.js",
+    "todos": 4,
+    "todoDetails": [
+      "unsupported statement: ASSIGN mr_data->* TO <data>.",
+      "unsupported statement: CREATE DATA r_result->mr_data LIKE val.",
+      "unsupported statement: ASSIGN r_result->mr_data->* TO <data>.",
+      "unresolved class reference: z2ui5_cl_abap2ui5_context"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_pop_demo_output",
+    "path": "02/01/z2ui5_cl_pop_demo_output.js",
+    "todos": 1,
+    "todoDetails": [
+      "unsupported statement: CALL METHOD i_output->('GET') RECEIVING output = r_result->html."
+    ]
+  },
+  {
+    "class": "z2ui5_cl_pop_error",
+    "path": "02/01/z2ui5_cl_pop_error.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_pop_file_dl",
+    "path": "02/01/z2ui5_cl_pop_file_dl.js",
+    "todos": 1,
+    "todoDetails": [
+      "unresolved class reference: z2ui5_cl_abap2ui5_context"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_pop_file_ul",
+    "path": "02/01/z2ui5_cl_pop_file_ul.js",
+    "todos": 1,
+    "todoDetails": [
+      "unresolved class reference: z2ui5_cl_abap2ui5_context"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_pop_get_range_m",
+    "path": "02/01/z2ui5_cl_pop_get_range_m.js",
+    "todos": 1,
+    "todoDetails": [
+      "unresolved class reference: z2ui5_cl_abap2ui5_context"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_pop_get_range",
+    "path": "02/01/z2ui5_cl_pop_get_range.js",
+    "todos": 1,
+    "todoDetails": [
+      "unresolved class reference: z2ui5_cl_abap2ui5_context"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_pop_html",
+    "path": "02/01/z2ui5_cl_pop_html.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_pop_image_editor",
+    "path": "02/01/z2ui5_cl_pop_image_editor.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_pop_input_val",
+    "path": "02/01/z2ui5_cl_pop_input_val.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_pop_js_loader",
+    "path": "02/01/z2ui5_cl_pop_js_loader.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_pop_messages",
+    "path": "02/01/z2ui5_cl_pop_messages.js",
+    "todos": 1,
+    "todoDetails": [
+      "unresolved class reference: z2ui5_cl_abap2ui5_context"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_pop_pdf",
+    "path": "02/01/z2ui5_cl_pop_pdf.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_pop_table",
+    "path": "02/01/z2ui5_cl_pop_table.js",
+    "todos": 3,
+    "todoDetails": [
+      "unsupported statement: ASSIGN mr_tab->* TO <tab_out>.",
+      "unsupported statement: CREATE DATA r_result->ms_result-row LIKE LINE OF i_tab.",
+      "unresolved class reference: z2ui5_cl_abap2ui5_context"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_pop_textedit",
+    "path": "02/01/z2ui5_cl_pop_textedit.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_pop_to_confirm",
+    "path": "02/01/z2ui5_cl_pop_to_confirm.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_pop_to_inform",
+    "path": "02/01/z2ui5_cl_pop_to_inform.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_pop_to_select",
+    "path": "02/01/z2ui5_cl_pop_to_select.js",
+    "todos": 19,
+    "todoDetails": [
+      "unsupported statement: CREATE DATA r_result->ms_result-row LIKE LINE OF i_tab.",
+      "unsupported statement: CREATE DATA r_result->ms_result-table LIKE i_tab.",
+      "unsupported statement: ASSIGN mr_tab_popup->* TO <tab_out>.",
+      "unsupported statement: ASSIGN mr_tab->* TO <tab>.",
+      "unsupported statement: CREATE DATA mr_tab_popup TYPE HANDLE ls_sel_tab_type-tabledescr.",
+      "unsupported statement: CREATE DATA mr_tab_popup_backup TYPE HANDLE ls_sel_tab_type-tabledescr.",
+      "unsupported statement: ASSIGN mr_tab_popup->* TO <tab_out>.",
+      "unsupported statement: ASSIGN mr_tab_popup_backup->* TO <tab_out2>.",
+      "unsupported statement: CREATE DATA lr_row LIKE LINE OF <tab_out>.",
+      "unsupported statement: ASSIGN lr_row->* TO <row2>.",
+      "unsupported statement: ASSIGN lr_row->(`TAB_LINE`) TO <field>.",
+      "unsupported statement: MOVE-CORRESPONDING <row> TO <row2>.",
+      "unsupported statement: ASSIGN mr_tab_popup->* TO <tab>.",
+      "unsupported statement: ASSIGN ms_result-table->* TO <table_result>.",
+      "unsupported statement: ASSIGN ms_result-row->* TO <row_result>.",
+      "unsupported statement: MOVE-CORRESPONDING <row_selected> TO <row_result>.",
+      "unsupported statement: ASSIGN mr_tab_popup->* TO <tab_out>.",
+      "unsupported statement: ASSIGN mr_tab_popup_backup->* TO <tab_out_backup>.",
+      "unresolved class reference: z2ui5_cl_abap2ui5_context"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_app_hello_world",
+    "path": "02/z2ui5_cl_app_hello_world.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_cl_app_startup",
+    "path": "02/z2ui5_cl_app_startup.js",
+    "todos": 4,
+    "todoDetails": [
+      "unsupported statement: ASSIGN ls_result-row->* TO FIELD-SYMBOL(<class>).",
+      "unresolved class reference: z2ui5_cl_abap2ui5_context",
+      "unresolved class reference: z2ui5_cl_core_srv_draft",
+      "unresolved class reference: z2ui5_cl_exit"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_exit",
+    "path": "02/z2ui5_cl_exit.js",
+    "todos": 1,
+    "todoDetails": [
+      "unresolved class reference: z2ui5_cl_abap2ui5_context"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_http_handler",
+    "path": "02/z2ui5_cl_http_handler.js",
+    "todos": 4,
+    "todoDetails": [
+      "unresolved class reference: z2ui5_cl_abap2ui5_http",
+      "unresolved class reference: z2ui5_cl_core_handler",
+      "unresolved class reference: z2ui5_cl_exit",
+      "unresolved class reference: z2ui5_cx_abap2ui5_error"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_xml_view_cc",
+    "path": "02/z2ui5_cl_xml_view_cc.js",
+    "todos": 2,
+    "todoDetails": [
+      "unsupported statement: CALL METHOD (lv_class)=>(`GET_STYLE`) RECEIVING result = lv_style.",
+      "unresolved class reference: z2ui5_cl_abap2ui5_context"
+    ]
+  },
+  {
+    "class": "z2ui5_cl_xml_view",
+    "path": "02/z2ui5_cl_xml_view.js",
+    "todos": 7,
+    "todoDetails": [
+      "builtin concat_lines_of( ) not mapped",
+      "VALUE #( FOR/BASE/LINES OF ... ) not supported — rewrite manually",
+      "VALUE #( FOR/BASE/LINES OF ... ) not supported — rewrite manually",
+      "builtin concat_lines_of( ) not mapped",
+      "REDUCE #( ) not supported",
+      "unresolved class reference: z2ui5_cl_abap2ui5_context",
+      "unresolved class reference: z2ui5_cx_abap2ui5_error"
+    ]
+  },
+  {
+    "class": "z2ui5_if_action",
+    "path": "02/z2ui5_if_action.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_if_app",
+    "path": "02/z2ui5_if_app.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_if_client",
+    "path": "02/z2ui5_if_client.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_if_exit",
+    "path": "02/z2ui5_if_exit.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
+    "class": "z2ui5_if_types",
+    "path": "02/z2ui5_if_types.js",
+    "todos": 0,
+    "todoDetails": []
+  },
+  {
     "class": "z2ui5_cl_util_db",
-    "path": "00/03/01/z2ui5_cl_util_db.js",
+    "path": "99/z2ui5_cl_util_db.js",
     "todos": 2,
     "todoDetails": [
       "unsupported statement: z2ui5_cl_util=>xml_parse( EXPORTING xml = lv_data IMPORTING any = result ).",
@@ -228,7 +981,7 @@
   },
   {
     "class": "z2ui5_cl_util_ext",
-    "path": "00/03/01/z2ui5_cl_util_ext.js",
+    "path": "99/z2ui5_cl_util_ext.js",
     "todos": 305,
     "todoDetails": [
       "unsupported statement: CALL METHOD (xco_cp_abap)=>(`CLASS`) EXPORTING iv_name = lv_classname RECEIVING ro_class = obj.",
@@ -539,14 +1292,8 @@
     ]
   },
   {
-    "class": "z2ui5_cl_util_log",
-    "path": "00/03/01/z2ui5_cl_util_log.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
     "class": "z2ui5_cl_util_http",
-    "path": "00/03/z2ui5_cl_util_http.js",
+    "path": "99/z2ui5_cl_util_http.js",
     "todos": 36,
     "todoDetails": [
       "unsupported statement: CALL METHOD (lv_classname)=>create_by_destination EXPORTING destination = lv_destination IMPORTING client = result EXCEP",
@@ -588,14 +1335,14 @@
     ]
   },
   {
-    "class": "z2ui5_cl_util_json_fltr",
-    "path": "00/03/z2ui5_cl_util_json_fltr.js",
+    "class": "z2ui5_cl_util_log",
+    "path": "99/z2ui5_cl_util_log.js",
     "todos": 0,
     "todoDetails": []
   },
   {
     "class": "z2ui5_cl_util_msg",
-    "path": "00/03/z2ui5_cl_util_msg.js",
+    "path": "99/z2ui5_cl_util_msg.js",
     "todos": 12,
     "todoDetails": [
       "unsupported statement: MESSAGE ID ls_result-id TYPE `I` NUMBER ls_result-no WITH ls_result-v1 ls_result-v2 ls_result-v3 ls_result-v4 INTO ls_re",
@@ -614,7 +1361,7 @@
   },
   {
     "class": "z2ui5_cl_util_range",
-    "path": "00/03/z2ui5_cl_util_range.js",
+    "path": "99/z2ui5_cl_util_range.js",
     "todos": 3,
     "todoDetails": [
       "unsupported statement: ASSIGN me->mr_range->* TO <lt_range>.",
@@ -624,7 +1371,7 @@
   },
   {
     "class": "z2ui5_cl_util_xml",
-    "path": "00/03/z2ui5_cl_util_xml.js",
+    "path": "99/z2ui5_cl_util_xml.js",
     "todos": 3,
     "todoDetails": [
       "builtin concat_lines_of( ) not mapped",
@@ -634,8 +1381,8 @@
   },
   {
     "class": "z2ui5_cl_util",
-    "path": "00/03/z2ui5_cl_util.js",
-    "todos": 150,
+    "path": "99/z2ui5_cl_util.js",
+    "todos": 164,
     "todoDetails": [
       "unsupported statement: ROLLBACK WORK.",
       "unsupported statement: ASSIGN val->* TO <any>.",
@@ -702,6 +1449,7 @@
       "unsupported statement: REPLACE ALL OCCURRENCES OF `%` IN lv_like WITH `*`.",
       "unsupported statement: REPLACE ALL OCCURRENCES OF `_` IN lv_like WITH `+`.",
       "unsupported statement: CREATE DATA result TYPE HANDLE gr_dyntable_typ.",
+      "VALUE #( FOR/BASE/LINES OF ... ) not supported — rewrite manually",
       "unsupported statement: ASSIGN ir_tab->* TO <tab>.",
       "unsupported statement: CONVERT DATE date TIME time INTO TIME STAMP result TIME ZONE ls_sy-zonlo.",
       "unsupported statement: REPLACE `YYYY` IN result WITH lv_year.",
@@ -709,6 +1457,9 @@
       "unsupported statement: REPLACE `DD` IN result WITH lv_day.",
       "builtin concat_lines_of( ) not mapped",
       "unsupported statement: REPLACE ALL OCCURRENCES OF sub IN result WITH new_val.",
+      "unsupported statement: FIND ALL OCCURRENCES OF `.` IN lv_clean MATCH COUNT lv_dot_count.",
+      "unsupported statement: CREATE DATA lr_copy LIKE tab.",
+      "unsupported statement: ASSIGN lr_copy->* TO <tab_copy>.",
       "unsupported statement: CREATE DATA result TYPE HANDLE lo_tabledescr.",
       "unsupported statement: ASSIGN result->* TO <result>.",
       "unsupported statement: GET TIME STAMP FIELD result.",
@@ -776,6 +1527,16 @@
       "unsupported statement: CALL METHOD text_obj->(`IF_XCO_TEXT~GET_LINES`) RECEIVING ro_lines = ro_lines.",
       "unsupported statement: ASSIGN ro_lines->(`IF_XCO_STRINGS~VALUE`) TO <lt_lines>.",
       "unsupported statement: DELETE result INDEX 1.",
+      "unsupported statement: MESSAGE ID ls_result-id TYPE `I` NUMBER ls_result-no WITH ls_result-v1 ls_result-v2 ls_result-v3 ls_result-v4 INTO ls_re",
+      "unsupported statement: ASSIGN lx->(lv_name) TO <comp>.",
+      "unsupported statement: CREATE DATA lr_tab TYPE (`if_bali_log=>ty_item_table`).",
+      "unsupported statement: ASSIGN lr_tab->* TO FIELD-SYMBOL(<tab2>).",
+      "unsupported statement: CALL METHOD obj->(`IF_BALI_LOG~GET_ALL_ITEMS`) RECEIVING item_table = <tab2>.",
+      "unsupported statement: CREATE DATA lr_tab TYPE (`BAPIRETTAB`).",
+      "unsupported statement: ASSIGN lr_tab->* TO <tab2>.",
+      "unsupported statement: CALL METHOD obj->(`ZIF_LOGGER~EXPORT_TO_TABLE`) RECEIVING rt_bapiret = <tab2>.",
+      "unsupported statement: ASSIGN obj->(lv_name) TO <comp>.",
+      "unsupported statement: msg_get_rap_row( EXPORTING val = val entity_name = entity_name IMPORTING messages = result is_row = DATA(lv_is_row) ).",
       "unresolved class reference: cl_abap_char_utilities",
       "unresolved class reference: cl_abap_classdescr",
       "unresolved class reference: cl_abap_datadescr",
@@ -791,567 +1552,10 @@
   },
   {
     "class": "z2ui5_cx_util_error",
-    "path": "00/03/z2ui5_cx_util_error.js",
+    "path": "99/z2ui5_cx_util_error.js",
     "todos": 1,
     "todoDetails": [
       "unresolved superclass stubbed: cx_no_check"
     ]
-  },
-  {
-    "class": "z2ui5_cl_core_srv_draft",
-    "path": "01/01/z2ui5_cl_core_srv_draft.js",
-    "todos": 3,
-    "todoDetails": [
-      "unsupported statement: DELETE FROM z2ui5_t_01 WHERE timestampl < @lv_n_hours_ago .",
-      "unsupported statement: SELECT COUNT( * ) FROM z2ui5_t_01 INTO @result.",
-      "unresolved class reference: z2ui5_cl_exit"
-    ]
-  },
-  {
-    "class": "z2ui5_cl_core_action",
-    "path": "01/02/z2ui5_cl_core_action.js",
-    "todos": 3,
-    "todoDetails": [
-      "NEW #( ) — target type unknown, resolve manually",
-      "unresolved class reference: z2ui5_cl_core_app",
-      "unresolved class reference: z2ui5_cl_core_srv_draft"
-    ]
-  },
-  {
-    "class": "z2ui5_cl_core_app",
-    "path": "01/02/z2ui5_cl_core_app.js",
-    "todos": 4,
-    "todoDetails": [
-      "unsupported statement: z2ui5_cl_util=>xml_parse( EXPORTING xml = xml IMPORTING any = result ).",
-      "unsupported statement: CREATE DATA mt_attri.",
-      "unresolved class reference: z2ui5_cl_core_srv_draft",
-      "unresolved class reference: z2ui5_cl_core_srv_model"
-    ]
-  },
-  {
-    "class": "z2ui5_cl_core_client",
-    "path": "01/02/z2ui5_cl_core_client.js",
-    "todos": 3,
-    "todoDetails": [
-      "NEW #( ) — target type unknown, resolve manually",
-      "NEW #( ) — target type unknown, resolve manually",
-      "unresolved class reference: z2ui5_cl_core_app"
-    ]
-  },
-  {
-    "class": "z2ui5_cl_core_handler",
-    "path": "01/02/z2ui5_cl_core_handler.js",
-    "todos": 9,
-    "todoDetails": [
-      "unsupported statement: lo_ajson->to_abap( EXPORTING iv_corresponding = abap_true IMPORTING ev_container = result-s_front ).",
-      "unsupported statement: lo_device->to_abap( EXPORTING iv_corresponding = abap_true IMPORTING ev_container = result-s_front-s_device ).",
-      "unsupported statement: lo_focus->to_abap( EXPORTING iv_corresponding = abap_true IMPORTING ev_container = result-s_front-s_focus ).",
-      "unsupported statement: lo_scroll->to_abap( EXPORTING iv_corresponding = abap_true IMPORTING ev_container = result-s_front-s_scroll ).",
-      "unsupported statement: REPLACE FIRST OCCURRENCE OF `-` IN result WITH `/`.",
-      "unsupported statement: REPLACE FIRST OCCURRENCE OF `-` IN result WITH `/`.",
-      "unresolved class reference: z2ui5_cl_core_action",
-      "unresolved class reference: z2ui5_cl_core_client",
-      "unresolved class reference: z2ui5_cl_core_srv_draft"
-    ]
-  },
-  {
-    "class": "z2ui5_cl_core_srv_bind",
-    "path": "01/02/z2ui5_cl_core_srv_bind.js",
-    "todos": 2,
-    "todoDetails": [
-      "unsupported statement: ASSIGN ms_config-tab->* TO <tab>.",
-      "unresolved class reference: z2ui5_cl_core_srv_model"
-    ]
-  },
-  {
-    "class": "z2ui5_cl_core_srv_event",
-    "path": "01/02/z2ui5_cl_core_srv_event.js",
-    "todos": 1,
-    "todoDetails": [
-      "NP pattern match approximated with includes()"
-    ]
-  },
-  {
-    "class": "z2ui5_cl_core_srv_model",
-    "path": "01/02/z2ui5_cl_core_srv_model.js",
-    "todos": 19,
-    "todoDetails": [
-      "unsupported statement: ASSIGN lr_ref->* TO FIELD-SYMBOL(<val>).",
-      "unsupported statement: lo_val_front->to_abap( EXPORTING iv_corresponding = abap_true IMPORTING ev_container = <val> ).",
-      "unsupported statement: ASSIGN lr_ref->* TO FIELD-SYMBOL(<val>).",
-      "unsupported statement: ASSIGN lr_ref->* TO FIELD-SYMBOL(<val>).",
-      "unsupported statement: ASSIGN (lv_parent_path) TO FIELD-SYMBOL(<parent_ref>).",
-      "unsupported statement: ASSIGN lr_ref_source->* TO FIELD-SYMBOL(<source_value>).",
-      "unsupported statement: GET REFERENCE OF <source_value> INTO <parent_ref>.",
-      "unsupported statement: ASSIGN (lv_source_path) TO FIELD-SYMBOL(<source_ref>).",
-      "unsupported statement: ASSIGN (lv_target_path) TO FIELD-SYMBOL(<parent_ref>).",
-      "unsupported statement: GET REFERENCE OF <source_ref> INTO <parent_ref>.",
-      "unsupported statement: ASSIGN (lv_name5) TO FIELD-SYMBOL(<ref>).",
-      "unsupported statement: ASSIGN (lv_name) TO FIELD-SYMBOL(<val1>).",
-      "unsupported statement: ASSIGN (lv_name6) TO FIELD-SYMBOL(<val_ref>).",
-      "unsupported statement: ASSIGN (lv_name8) TO FIELD-SYMBOL(<ref2>).",
-      "unsupported statement: ASSIGN (lv_name10) TO FIELD-SYMBOL(<val8>).",
-      "unsupported statement: ASSIGN (lv_name) TO <attri>.",
-      "unsupported statement: GET REFERENCE OF <attri> INTO result.",
-      "unsupported statement: ASSIGN lr_ref->* TO FIELD-SYMBOL(<ref>).",
-      "unsupported statement: ASSIGN lr_ref_d->* TO <delta_tab>."
-    ]
-  },
-  {
-    "class": "z2ui5_if_core_types",
-    "path": "01/02/z2ui5_if_core_types.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_app_app_js",
-    "path": "01/03/z2ui5_cl_app_app_js.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_app_app_xml",
-    "path": "01/03/z2ui5_cl_app_app_xml.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_app_appstate_js",
-    "path": "01/03/z2ui5_cl_app_appstate_js.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_app_camerapicture_js",
-    "path": "01/03/z2ui5_cl_app_camerapicture_js.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_app_cameraselector_js",
-    "path": "01/03/z2ui5_cl_app_cameraselector_js.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_app_component_js",
-    "path": "01/03/z2ui5_cl_app_component_js.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_app_debugtool_js",
-    "path": "01/03/z2ui5_cl_app_debugtool_js.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_app_debugtool_xml",
-    "path": "01/03/z2ui5_cl_app_debugtool_xml.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_app_dirty_js",
-    "path": "01/03/z2ui5_cl_app_dirty_js.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_app_errorview_js",
-    "path": "01/03/z2ui5_cl_app_errorview_js.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_app_favicon_js",
-    "path": "01/03/z2ui5_cl_app_favicon_js.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_app_fileuploader_js",
-    "path": "01/03/z2ui5_cl_app_fileuploader_js.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_app_focus_js",
-    "path": "01/03/z2ui5_cl_app_focus_js.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_app_frontendaction_js",
-    "path": "01/03/z2ui5_cl_app_frontendaction_js.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_app_geolocation_js",
-    "path": "01/03/z2ui5_cl_app_geolocation_js.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_app_history_js",
-    "path": "01/03/z2ui5_cl_app_history_js.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_app_index_html",
-    "path": "01/03/z2ui5_cl_app_index_html.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_app_info_js",
-    "path": "01/03/z2ui5_cl_app_info_js.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_app_lib_js",
-    "path": "01/03/z2ui5_cl_app_lib_js.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_app_lptitle_js",
-    "path": "01/03/z2ui5_cl_app_lptitle_js.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_app_manifest_json",
-    "path": "01/03/z2ui5_cl_app_manifest_json.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_app_messages_js",
-    "path": "01/03/z2ui5_cl_app_messages_js.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_app_models_js",
-    "path": "01/03/z2ui5_cl_app_models_js.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_app_multiinputext_js",
-    "path": "01/03/z2ui5_cl_app_multiinputext_js.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_app_preload",
-    "path": "01/03/z2ui5_cl_app_preload.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_app_scrolling_js",
-    "path": "01/03/z2ui5_cl_app_scrolling_js.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_app_server_js",
-    "path": "01/03/z2ui5_cl_app_server_js.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_app_smartmultiinpu_js",
-    "path": "01/03/z2ui5_cl_app_smartmultiinpu_js.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_app_storage_js",
-    "path": "01/03/z2ui5_cl_app_storage_js.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_app_style_css",
-    "path": "01/03/z2ui5_cl_app_style_css.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_app_timer_js",
-    "path": "01/03/z2ui5_cl_app_timer_js.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_app_title_js",
-    "path": "01/03/z2ui5_cl_app_title_js.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_app_tree_js",
-    "path": "01/03/z2ui5_cl_app_tree_js.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_app_uitableext_js",
-    "path": "01/03/z2ui5_cl_app_uitableext_js.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_app_uploadsetext_js",
-    "path": "01/03/z2ui5_cl_app_uploadsetext_js.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_app_util_js",
-    "path": "01/03/z2ui5_cl_app_util_js.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_app_view1_js",
-    "path": "01/03/z2ui5_cl_app_view1_js.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_app_viewslots_js",
-    "path": "01/03/z2ui5_cl_app_viewslots_js.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_pop_bal",
-    "path": "02/01/z2ui5_cl_pop_bal.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_pop_data",
-    "path": "02/01/z2ui5_cl_pop_data.js",
-    "todos": 3,
-    "todoDetails": [
-      "unsupported statement: ASSIGN mr_data->* TO <data>.",
-      "unsupported statement: CREATE DATA r_result->mr_data LIKE val.",
-      "unsupported statement: ASSIGN r_result->mr_data->* TO <data>."
-    ]
-  },
-  {
-    "class": "z2ui5_cl_pop_demo_output",
-    "path": "02/01/z2ui5_cl_pop_demo_output.js",
-    "todos": 1,
-    "todoDetails": [
-      "unsupported statement: CALL METHOD i_output->('GET') RECEIVING output = r_result->html."
-    ]
-  },
-  {
-    "class": "z2ui5_cl_pop_error",
-    "path": "02/01/z2ui5_cl_pop_error.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_pop_file_dl",
-    "path": "02/01/z2ui5_cl_pop_file_dl.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_pop_file_ul",
-    "path": "02/01/z2ui5_cl_pop_file_ul.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_pop_get_range_m",
-    "path": "02/01/z2ui5_cl_pop_get_range_m.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_pop_get_range",
-    "path": "02/01/z2ui5_cl_pop_get_range.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_pop_html",
-    "path": "02/01/z2ui5_cl_pop_html.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_pop_image_editor",
-    "path": "02/01/z2ui5_cl_pop_image_editor.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_pop_input_val",
-    "path": "02/01/z2ui5_cl_pop_input_val.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_pop_js_loader",
-    "path": "02/01/z2ui5_cl_pop_js_loader.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_pop_messages",
-    "path": "02/01/z2ui5_cl_pop_messages.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_pop_pdf",
-    "path": "02/01/z2ui5_cl_pop_pdf.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_pop_table",
-    "path": "02/01/z2ui5_cl_pop_table.js",
-    "todos": 2,
-    "todoDetails": [
-      "unsupported statement: ASSIGN mr_tab->* TO <tab_out>.",
-      "unsupported statement: CREATE DATA r_result->ms_result-row LIKE LINE OF i_tab."
-    ]
-  },
-  {
-    "class": "z2ui5_cl_pop_textedit",
-    "path": "02/01/z2ui5_cl_pop_textedit.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_pop_to_confirm",
-    "path": "02/01/z2ui5_cl_pop_to_confirm.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_pop_to_inform",
-    "path": "02/01/z2ui5_cl_pop_to_inform.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_pop_to_select",
-    "path": "02/01/z2ui5_cl_pop_to_select.js",
-    "todos": 18,
-    "todoDetails": [
-      "unsupported statement: CREATE DATA r_result->ms_result-row LIKE LINE OF i_tab.",
-      "unsupported statement: CREATE DATA r_result->ms_result-table LIKE i_tab.",
-      "unsupported statement: ASSIGN mr_tab_popup->* TO <tab_out>.",
-      "unsupported statement: ASSIGN mr_tab->* TO <tab>.",
-      "unsupported statement: CREATE DATA mr_tab_popup TYPE HANDLE ls_sel_tab_type-tabledescr.",
-      "unsupported statement: CREATE DATA mr_tab_popup_backup TYPE HANDLE ls_sel_tab_type-tabledescr.",
-      "unsupported statement: ASSIGN mr_tab_popup->* TO <tab_out>.",
-      "unsupported statement: ASSIGN mr_tab_popup_backup->* TO <tab_out2>.",
-      "unsupported statement: CREATE DATA lr_row LIKE LINE OF <tab_out>.",
-      "unsupported statement: ASSIGN lr_row->* TO <row2>.",
-      "unsupported statement: ASSIGN lr_row->(`TAB_LINE`) TO <field>.",
-      "unsupported statement: MOVE-CORRESPONDING <row> TO <row2>.",
-      "unsupported statement: ASSIGN mr_tab_popup->* TO <tab>.",
-      "unsupported statement: ASSIGN ms_result-table->* TO <table_result>.",
-      "unsupported statement: ASSIGN ms_result-row->* TO <row_result>.",
-      "unsupported statement: MOVE-CORRESPONDING <row_selected> TO <row_result>.",
-      "unsupported statement: ASSIGN mr_tab_popup->* TO <tab_out>.",
-      "unsupported statement: ASSIGN mr_tab_popup_backup->* TO <tab_out_backup>."
-    ]
-  },
-  {
-    "class": "z2ui5_cl_app_hello_world",
-    "path": "02/z2ui5_cl_app_hello_world.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_app_startup",
-    "path": "02/z2ui5_cl_app_startup.js",
-    "todos": 3,
-    "todoDetails": [
-      "unsupported statement: ASSIGN ls_result-row->* TO FIELD-SYMBOL(<class>).",
-      "unresolved class reference: z2ui5_cl_core_srv_draft",
-      "unresolved class reference: z2ui5_cl_exit"
-    ]
-  },
-  {
-    "class": "z2ui5_cl_exit",
-    "path": "02/z2ui5_cl_exit.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_cl_http_handler",
-    "path": "02/z2ui5_cl_http_handler.js",
-    "todos": 2,
-    "todoDetails": [
-      "unresolved class reference: z2ui5_cl_core_handler",
-      "unresolved class reference: z2ui5_cl_exit"
-    ]
-  },
-  {
-    "class": "z2ui5_cl_xml_view_cc",
-    "path": "02/z2ui5_cl_xml_view_cc.js",
-    "todos": 1,
-    "todoDetails": [
-      "unsupported statement: CALL METHOD (lv_class)=>(`GET_STYLE`) RECEIVING result = lv_style."
-    ]
-  },
-  {
-    "class": "z2ui5_cl_xml_view",
-    "path": "02/z2ui5_cl_xml_view.js",
-    "todos": 5,
-    "todoDetails": [
-      "builtin concat_lines_of( ) not mapped",
-      "VALUE #( FOR/BASE/LINES OF ... ) not supported — rewrite manually",
-      "VALUE #( FOR/BASE/LINES OF ... ) not supported — rewrite manually",
-      "builtin concat_lines_of( ) not mapped",
-      "REDUCE #( ) not supported"
-    ]
-  },
-  {
-    "class": "z2ui5_if_action",
-    "path": "02/z2ui5_if_action.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_if_app",
-    "path": "02/z2ui5_if_app.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_if_client",
-    "path": "02/z2ui5_if_client.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_if_exit",
-    "path": "02/z2ui5_if_exit.js",
-    "todos": 0,
-    "todoDetails": []
-  },
-  {
-    "class": "z2ui5_if_types",
-    "path": "02/z2ui5_if_types.js",
-    "todos": 0,
-    "todoDetails": []
   }
 ]

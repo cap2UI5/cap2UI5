@@ -1,3 +1,4 @@
+// TODO(abap2js): unresolved reference z2ui5_cl_abap2ui5_context — add require manually
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
@@ -11,7 +12,7 @@ class z2ui5_cl_pop_get_range extends z2ui5_if_app {
   static factory({ t_range } = {}) {
     let r_result = null;
     r_result = new z2ui5_cl_pop_get_range();
-    z2ui5_cl_util.itab_corresponding({ val: t_range, tab: r_result.ms_result.t_range });
+    z2ui5_cl_abap2ui5_context.itab_corresponding({ val: t_range, tab: r_result.ms_result.t_range });
     r_result.ms_result.t_range.push({});
     return r_result;
   }
@@ -47,12 +48,12 @@ class z2ui5_cl_pop_get_range extends z2ui5_if_app {
     let sy_tabix = 0;
     this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
-      this.mt_mapping = z2ui5_cl_util.filter_get_token_range_mapping();
+      this.mt_mapping = z2ui5_cl_abap2ui5_context.filter_get_token_range_mapping();
       this.mt_filter = [];
       sy_tabix = 0;
       for (const lr_range of this.ms_result.t_range) {
         sy_tabix++;
-        this.mt_filter.push({ low: lr_range.low, high: lr_range.high, option: lr_range.option, key: z2ui5_cl_util.uuid_get_c32() });
+        this.mt_filter.push({ low: lr_range.low, high: lr_range.high, option: lr_range.option, key: z2ui5_cl_abap2ui5_context.uuid_get_c32() });
       }
       this.view_display();
       return;
@@ -77,7 +78,7 @@ class z2ui5_cl_pop_get_range extends z2ui5_if_app {
         client.nav_app_leave();
         break;
       case `POPUP_ADD`:
-        this.mt_filter.push({ key: z2ui5_cl_util.uuid_get_c32() });
+        this.mt_filter.push({ key: z2ui5_cl_abap2ui5_context.uuid_get_c32() });
         client.popup_model_update();
         break;
       case `POPUP_DELETE`:

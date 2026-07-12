@@ -184,8 +184,11 @@ class z2ui5_cl_util_ext {
     if (z2ui5_cl_util.context_check_abap_cloud()) {
       ddtext = z2ui5_cl_util.abap_copy(tabname);
     } else {
-      lv_tabname = `dd02t`;
-      // TODO(abap2js): SELECT SINGLE ddtext FROM (lv_tabname) WHERE tabname = @tabname AND ddlanguage = @lan INTO @ddtext.
+      try {
+        lv_tabname = `dd02t`;
+        // TODO(abap2js): SELECT SINGLE ddtext FROM (lv_tabname) WHERE tabname = @tabname AND ddlanguage = @lan INTO @ddtext.
+      } catch (error) {
+      }
     }
     if (ddtext) {
       result = z2ui5_cl_util.abap_copy(ddtext);

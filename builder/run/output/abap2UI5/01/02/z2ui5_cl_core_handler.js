@@ -1,3 +1,5 @@
+// TODO(abap2js): unresolved reference z2ui5_cl_abap2ui5_context — add require manually
+// TODO(abap2js): unresolved reference z2ui5_cl_abap2ui5_json_fltr — add require manually
 const z2ui5_cl_ajson = require("abap2UI5/z2ui5_cl_ajson");
 const z2ui5_cl_ajson_mapping = require("abap2UI5/z2ui5_cl_ajson_mapping");
 // TODO(abap2js): unresolved reference z2ui5_cl_core_action — add require manually
@@ -5,8 +7,7 @@ const z2ui5_cl_ajson_mapping = require("abap2UI5/z2ui5_cl_ajson_mapping");
 // TODO(abap2js): unresolved reference z2ui5_cl_core_srv_draft — add require manually
 const z2ui5_cl_pop_error = require("abap2UI5/z2ui5_cl_pop_error");
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_util_json_fltr = require("abap2UI5/z2ui5_cl_util_json_fltr");
-const z2ui5_cx_util_error = require("abap2UI5/z2ui5_cx_util_error");
+// TODO(abap2js): unresolved reference z2ui5_cx_abap2ui5_error — add require manually
 const z2ui5_if_core_types = require("abap2UI5/z2ui5_if_core_types");
 
 class z2ui5_cl_core_handler {
@@ -27,7 +28,7 @@ class z2ui5_cl_core_handler {
       result.s_control.app_start = this.request_app_start({ iv_search: result.s_front.search, io_comp_data: result.s_front.o_comp_data });
       result.s_control.app_start_draft = this.request_app_start_draft({ iv_hash: result.s_front.hash });
     } catch (x) {
-      throw new z2ui5_cx_util_error({ val: x });
+      throw new z2ui5_cx_abap2ui5_error({ val: x });
     }
     return result;
   }
@@ -71,7 +72,7 @@ class z2ui5_cl_core_handler {
     let result = ``;
     try {
       if (io_comp_data != null) {
-        result = z2ui5_cl_util.c_trim_upper(io_comp_data.get(`/startupParameters/app_start/1`));
+        result = z2ui5_cl_abap2ui5_context.c_trim_upper(io_comp_data.get(`/startupParameters/app_start/1`));
       }
     } catch (error) {
     }
@@ -82,7 +83,7 @@ class z2ui5_cl_core_handler {
       }
       return result;
     }
-    result = z2ui5_cl_util.c_trim_upper(z2ui5_cl_util.url_param_get({ val: `app_start`, url: iv_search }));
+    result = z2ui5_cl_abap2ui5_context.c_trim_upper(z2ui5_cl_abap2ui5_context.url_param_get({ val: `app_start`, url: iv_search }));
     return result;
   }
 
@@ -94,7 +95,7 @@ class z2ui5_cl_core_handler {
       if (!lv_hash) {
         lv_hash = iv_hash + 2;
       }
-      result = z2ui5_cl_util.c_trim_upper(z2ui5_cl_util.url_param_get({ val: `z2ui5-xapp-state`, url: lv_hash }));
+      result = z2ui5_cl_abap2ui5_context.c_trim_upper(z2ui5_cl_abap2ui5_context.url_param_get({ val: `z2ui5-xapp-state`, url: lv_hash }));
     } catch (error) {
     }
     return result;
@@ -108,12 +109,12 @@ class z2ui5_cl_core_handler {
     try {
       ajson_result = (z2ui5_cl_ajson.create_empty({ ii_custom_mapping: z2ui5_cl_ajson_mapping.create_upper_case() }));
       ajson_result.set({ iv_path: `/`, iv_val: val.s_front });
-      ajson_result = ajson_result.filter(z2ui5_cl_util_json_fltr.create_no_empty_values());
+      ajson_result = ajson_result.filter(z2ui5_cl_abap2ui5_json_fltr.create_no_empty_values());
       lv_frontend = ajson_result.stringify();
       lv_model = (val.model ? val.model : `{}`);
       result = `{"S_FRONT":${lv_frontend},"MODEL":${lv_model}}`;
     } catch (x) {
-      throw new z2ui5_cx_util_error({ val: x });
+      throw new z2ui5_cx_abap2ui5_error({ val: x });
     }
     return result;
   }
@@ -139,7 +140,7 @@ class z2ui5_cl_core_handler {
       }
       lv_dispatch_count = lv_dispatch_count + 1;
       if (lv_dispatch_count >= this.mv_dispatch_limit) {
-        throw new z2ui5_cx_util_error({ val: `Dispatch limit of ${this.mv_dispatch_limit} app navigations in one request reached - check for an endless nav_app_call/nav_app_leave loop in main( )` });
+        throw new z2ui5_cx_abap2ui5_error({ val: `Dispatch limit of ${this.mv_dispatch_limit} app navigations in one request reached - check for an endless nav_app_call/nav_app_leave loop in main( )` });
       }
     }
   }
@@ -191,7 +192,7 @@ class z2ui5_cl_core_handler {
   }
 
   main_end() {
-    this.ms_response = { s_front: { params: this.mo_action.ms_next.s_set, id: this.mo_action.mo_app.ms_draft.id, app: z2ui5_cl_util.rtti_get_classname_by_ref(this.mo_action.mo_app.mo_app) } };
+    this.ms_response = { s_front: { params: this.mo_action.ms_next.s_set, id: this.mo_action.mo_app.ms_draft.id, app: z2ui5_cl_abap2ui5_context.rtti_get_classname_by_ref(this.mo_action.mo_app.mo_app) } };
     if (this.check_view_update_needed()) {
       this.ms_response.model = this.mo_action.mo_app.model_json_stringify();
     } else {
@@ -213,7 +214,7 @@ class z2ui5_cl_core_handler {
     const li_client = (new z2ui5_cl_core_client(this.mo_action));
     const li_app = (this.mo_action.mo_app.mo_app);
     if (!(li_app.check_sticky === true || li_app.check_sticky === `X`)) {
-      z2ui5_cl_util.db_rollback();
+      z2ui5_cl_abap2ui5_context.db_rollback();
     }
     try {
       if (this.mo_action.ms_actual.event === z2ui5_if_core_types.cs_event_nav_app_leave) {
@@ -223,11 +224,11 @@ class z2ui5_cl_core_handler {
         li_app.main(li_client);
       }
     } catch (lx) {
-      lx2 = new z2ui5_cx_util_error({ val: `UNCAUGHT EXCEPTION - Please Restart App:`, previous: lx });
+      lx2 = new z2ui5_cx_abap2ui5_error({ val: `UNCAUGHT EXCEPTION - Please Restart App:`, previous: lx });
       li_client.nav_app_leave(z2ui5_cl_pop_error.factory(lx2));
     }
     if (!(li_app.check_sticky === true || li_app.check_sticky === `X`)) {
-      z2ui5_cl_util.db_rollback();
+      z2ui5_cl_abap2ui5_context.db_rollback();
     }
     if (this.mo_action.ms_next.o_app_leave) {
       this.mo_action = this.mo_action.factory_stack_leave();

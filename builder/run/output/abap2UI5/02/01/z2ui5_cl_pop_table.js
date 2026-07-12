@@ -1,3 +1,4 @@
+// TODO(abap2js): unresolved reference z2ui5_cl_abap2ui5_context — add require manually
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
@@ -20,7 +21,7 @@ class z2ui5_cl_pop_table extends z2ui5_if_app {
       .dialog({ afterclose: this.client._event(`CANCEL`), stretch: true, title: this.title })
       .content();
     const tab = popup.table(this.client._bind(fs_tab_out));
-    const lt_comp = z2ui5_cl_util.rtti_get_t_attri_by_any(fs_tab_out);
+    const lt_comp = z2ui5_cl_abap2ui5_context.rtti_get_t_attri_by_any(fs_tab_out);
     const list = tab.column_list_item({ valign: `Top` });
     const cells = list.cells();
     sy_tabix = 0;
@@ -33,8 +34,8 @@ class z2ui5_cl_pop_table extends z2ui5_if_app {
     for (const ls_comp of lt_comp) {
       sy_tabix++;
       if (ls_comp.type != null && (ls_comp.type.is_ddic_type() === true || ls_comp.type.is_ddic_type() === `X`)) {
-        lv_name = z2ui5_cl_util.rtti_get_ddic_type_name(ls_comp.type);
-        lv_ddic_field_label = z2ui5_cl_util.rtti_get_data_element_text_l(lv_name);
+        lv_name = z2ui5_cl_abap2ui5_context.rtti_get_ddic_type_name(ls_comp.type);
+        lv_ddic_field_label = z2ui5_cl_abap2ui5_context.rtti_get_data_element_text_l(lv_name);
         if (lv_ddic_field_label) {
           columns.column(`8rem`).header(``).text(lv_ddic_field_label);
           continue;
@@ -54,7 +55,7 @@ class z2ui5_cl_pop_table extends z2ui5_if_app {
     if (i_title) {
       r_result.title = z2ui5_cl_util.abap_copy(i_title);
     }
-    r_result.mr_tab = z2ui5_cl_util.conv_copy_ref_data(i_tab);
+    r_result.mr_tab = z2ui5_cl_abap2ui5_context.conv_copy_ref_data(i_tab);
     // TODO(abap2js): CREATE DATA r_result->ms_result-row LIKE LINE OF i_tab.
     return r_result;
   }

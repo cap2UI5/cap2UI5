@@ -1,3 +1,4 @@
+// TODO(abap2js): unresolved reference z2ui5_cl_abap2ui5_context — add require manually
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
@@ -31,7 +32,7 @@ class z2ui5_cl_pop_to_select extends z2ui5_if_app {
     r_result.multiselect = z2ui5_cl_util.abap_copy(i_multiselect);
     r_result.event_confirmed = z2ui5_cl_util.abap_copy(i_event_confirmed);
     r_result.event_canceled = z2ui5_cl_util.abap_copy(i_event_canceled);
-    r_result.mr_tab = z2ui5_cl_util.conv_copy_ref_data(i_tab);
+    r_result.mr_tab = z2ui5_cl_abap2ui5_context.conv_copy_ref_data(i_tab);
     // TODO(abap2js): CREATE DATA r_result->ms_result-row LIKE LINE OF i_tab.
     // TODO(abap2js): CREATE DATA r_result->ms_result-table LIKE i_tab.
     return r_result;
@@ -45,8 +46,8 @@ class z2ui5_cl_pop_to_select extends z2ui5_if_app {
     let text;
     // TODO(abap2js): ASSIGN mr_tab_popup->* TO <tab_out>.
     const popup = z2ui5_cl_xml_view.factory_popup();
-    const tab = popup.table_select_dialog({ items: `{path:'` + this.client._bind_edit(fs_tab_out, { path: true }) + `', sorter : { path : '${this.sort_field.toUpperCase()}', descending : ` + z2ui5_cl_util.boolean_abap_2_json(this.descending) + ` } }`, cancel: this.client._event(`CANCEL`), search: this.client._event(`SEARCH`, [`\${$parameters>/value}`, `\${$parameters>/clearButtonPressed}`]), confirm: this.client._event(`CONFIRM`, [`\${$parameters>/selectedContexts[0]/sPath}`]), growing: true, contentwidth: this.content_width, contentheight: this.content_height, growingthreshold: this.growing_threshold, title: this.title, multiselect: this.multiselect });
-    const lt_comp = z2ui5_cl_util.rtti_get_t_attri_by_any(fs_tab_out);
+    const tab = popup.table_select_dialog({ items: `{path:'` + this.client._bind_edit(fs_tab_out, { path: true }) + `', sorter : { path : '${this.sort_field.toUpperCase()}', descending : ` + z2ui5_cl_abap2ui5_context.boolean_abap_2_json(this.descending) + ` } }`, cancel: this.client._event(`CANCEL`), search: this.client._event(`SEARCH`, [`\${$parameters>/value}`, `\${$parameters>/clearButtonPressed}`]), confirm: this.client._event(`CONFIRM`, [`\${$parameters>/selectedContexts[0]/sPath}`]), growing: true, contentwidth: this.content_width, contentheight: this.content_height, growingthreshold: this.growing_threshold, title: this.title, multiselect: this.multiselect });
+    const lt_comp = z2ui5_cl_abap2ui5_context.rtti_get_t_attri_by_any(fs_tab_out);
     for (let _i = lt_comp.length - 1; _i >= 0; _i--) { const row = lt_comp[_i]; if (row.name === `ZZSELKZ`) lt_comp.splice(_i, 1); }
     const list = tab.column_list_item({ valign: `Top`, selected: `{ZZSELKZ}` });
     const cells = list.cells();
@@ -112,7 +113,7 @@ class z2ui5_cl_pop_to_select extends z2ui5_if_app {
     let _fs$fs_field = null;
     let lr_row = null;
     // TODO(abap2js): ASSIGN mr_tab->* TO <tab>.
-    const ls_sel_tab_type = z2ui5_cl_util.rtti_create_sel_tab_type({ ir_tab: this.mr_tab, add_sel_field: true });
+    const ls_sel_tab_type = z2ui5_cl_abap2ui5_context.rtti_create_sel_tab_type({ ir_tab: this.mr_tab, add_sel_field: true });
     this.check_table_line = z2ui5_cl_util.abap_copy(ls_sel_tab_type.check_table_line);
     // TODO(abap2js): CREATE DATA mr_tab_popup TYPE HANDLE ls_sel_tab_type-tabledescr.
     // TODO(abap2js): CREATE DATA mr_tab_popup_backup TYPE HANDLE ls_sel_tab_type-tabledescr.
@@ -196,7 +197,7 @@ class z2ui5_cl_pop_to_select extends z2ui5_if_app {
     // TODO(abap2js): ASSIGN mr_tab_popup_backup->* TO <tab_out_backup>.
     fs_tab_out = z2ui5_cl_util.abap_copy(fs_tab_out_backup);
     if (_fs$fs_tab_out) _fs$fs_tab_out.o[_fs$fs_tab_out.k] = fs_tab_out;
-    z2ui5_cl_util.itab_filter_by_val({ val: this.client.get_event_arg(1), ignore_case: true, tab: fs_tab_out });
+    z2ui5_cl_abap2ui5_context.itab_filter_by_val({ val: this.client.get_event_arg(1), ignore_case: true, tab: fs_tab_out });
     this.client.popup_model_update();
   }
 }

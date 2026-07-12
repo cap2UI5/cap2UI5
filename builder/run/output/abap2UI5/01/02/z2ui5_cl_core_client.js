@@ -1,6 +1,7 @@
+// TODO(abap2js): unresolved reference z2ui5_cl_abap2ui5_context — add require manually
 // TODO(abap2js): unresolved reference z2ui5_cl_core_app — add require manually
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cx_util_error = require("abap2UI5/z2ui5_cx_util_error");
+// TODO(abap2js): unresolved reference z2ui5_cx_abap2ui5_error — add require manually
 const z2ui5_if_core_types = require("abap2UI5/z2ui5_if_core_types");
 
 class z2ui5_cl_core_client {
@@ -23,7 +24,7 @@ class z2ui5_cl_core_client {
     let lv_val = ``;
     lv_val = z2ui5_cl_util.abap_copy(val);
     if (!lv_val || ![...String(lv_val)].every(($c) => String(`ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_`).includes($c))) {
-      throw new z2ui5_cx_util_error({ val: `action: invalid event name '${val}' - only A-Z, a-z, 0-9 and _ allowed` });
+      throw new z2ui5_cx_abap2ui5_error({ val: `action: invalid event name '${val}' - only A-Z, a-z, 0-9 and _ allowed` });
     }
     this.mo_action.ms_next.s_set.s_follow_up_action.custom_js.push(this.mo_srv_event.get_event_client({ val, t_arg }));
   }
@@ -83,8 +84,8 @@ class z2ui5_cl_core_client {
     let lv_type = ``;
     let lv_title = ``;
     let lv_details = ``;
-    if (!(z2ui5_cl_util.rtti_check_clike(text) === true || z2ui5_cl_util.rtti_check_clike(text) === `X`)) {
-      ls_msg_box = z2ui5_cl_util.ui5_msg_box_format(text);
+    if (!(z2ui5_cl_abap2ui5_context.rtti_check_clike(text) === true || z2ui5_cl_abap2ui5_context.rtti_check_clike(text) === `X`)) {
+      ls_msg_box = z2ui5_cl_abap2ui5_context.ui5_msg_box_format(text);
       if ((ls_msg_box.skip === true || ls_msg_box.skip === `X`)) {
         return;
       }
@@ -117,10 +118,10 @@ class z2ui5_cl_core_client {
   nav_app_set_id({ app } = {}) {
     let result = ``;
     if (app != null) {
-      throw new z2ui5_cx_util_error({ val: `NAV_APP_LEAVE_TO_INITIAL_APP_ERROR` });
+      throw new z2ui5_cx_abap2ui5_error({ val: `NAV_APP_LEAVE_TO_INITIAL_APP_ERROR` });
     }
     if (!app.id_app) {
-      app.id_app = z2ui5_cl_util.uuid_get_c32();
+      app.id_app = z2ui5_cl_abap2ui5_context.uuid_get_c32();
     }
     result = z2ui5_cl_util.abap_copy(app.id_app);
     return result;
@@ -137,8 +138,8 @@ class z2ui5_cl_core_client {
     }
     this.mo_action.ms_next.o_app_leave = z2ui5_cl_util.abap_copy(app);
     this.mo_action.ms_next.next_event = z2ui5_cl_util.abap_copy(event);
-    if (r_data) {
-      this.mo_action.ms_next.r_data = z2ui5_cl_util.conv_copy_ref_data(r_data);
+    if (r_data !== undefined) {
+      this.mo_action.ms_next.r_data = z2ui5_cl_abap2ui5_context.conv_copy_ref_data(r_data);
     }
     result = this.nav_app_set_id({ app: app });
   }
@@ -215,17 +216,17 @@ class z2ui5_cl_core_client {
   }
 
   _bind() {
-    result = this.mo_srv_bind.main({ val: z2ui5_cl_util.conv_get_as_data_ref(val), type: z2ui5_if_core_types.cs_bind_type.one_way, config: { path_only: path, custom_filter: custom_filter, custom_mapper: custom_mapper, tab: z2ui5_cl_util.conv_get_as_data_ref(tab), tab_index: tab_index, switch_default_model: switch_default_model } });
+    result = this.mo_srv_bind.main({ val: z2ui5_cl_abap2ui5_context.conv_get_as_data_ref(val), type: z2ui5_if_core_types.cs_bind_type.one_way, config: { path_only: path, custom_filter: custom_filter, custom_mapper: custom_mapper, tab: z2ui5_cl_abap2ui5_context.conv_get_as_data_ref(tab), tab_index: tab_index, switch_default_model: switch_default_model } });
   }
 
   _bind_edit() {
-    result = this.mo_srv_bind.main({ val: z2ui5_cl_util.conv_get_as_data_ref(val), type: z2ui5_if_core_types.cs_bind_type.two_way, config: { path_only: path, custom_filter: custom_filter, custom_filter_back: custom_filter_back, custom_mapper: custom_mapper, custom_mapper_back: custom_mapper_back, tab: z2ui5_cl_util.conv_get_as_data_ref(tab), tab_index: tab_index, switch_default_model: switch_default_model } });
+    result = this.mo_srv_bind.main({ val: z2ui5_cl_abap2ui5_context.conv_get_as_data_ref(val), type: z2ui5_if_core_types.cs_bind_type.two_way, config: { path_only: path, custom_filter: custom_filter, custom_filter_back: custom_filter_back, custom_mapper: custom_mapper, custom_mapper_back: custom_mapper_back, tab: z2ui5_cl_abap2ui5_context.conv_get_as_data_ref(tab), tab_index: tab_index, switch_default_model: switch_default_model } });
   }
 
   _event() {
     result = this.mo_srv_event.get_event({ val, t_arg, s_cnt: s_ctrl });
     if (r_data) {
-      this.mo_action.ms_next.r_data = z2ui5_cl_util.conv_copy_ref_data(r_data);
+      this.mo_action.ms_next.r_data = z2ui5_cl_abap2ui5_context.conv_copy_ref_data(r_data);
     }
   }
 

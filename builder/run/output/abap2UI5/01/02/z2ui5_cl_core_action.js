@@ -1,8 +1,9 @@
+// TODO(abap2js): unresolved reference z2ui5_cl_abap2ui5_context — add require manually
 const z2ui5_cl_app_startup = require("abap2UI5/z2ui5_cl_app_startup");
 // TODO(abap2js): unresolved reference z2ui5_cl_core_app — add require manually
 // TODO(abap2js): unresolved reference z2ui5_cl_core_srv_draft — add require manually
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cx_util_error = require("abap2UI5/z2ui5_cx_util_error");
+// TODO(abap2js): unresolved reference z2ui5_cx_abap2ui5_error — add require manually
 const z2ui5_if_core_types = require("abap2UI5/z2ui5_if_core_types");
 
 class z2ui5_cl_core_action {
@@ -24,7 +25,7 @@ class z2ui5_cl_core_action {
     } else {
       result.mo_app = z2ui5_cl_core_app.db_load(this.mo_http_post.ms_request.s_front.id);
     }
-    result.mo_app.ms_draft.id = z2ui5_cl_util.uuid_get_c32();
+    result.mo_app.ms_draft.id = z2ui5_cl_abap2ui5_context.uuid_get_c32();
     result.mo_app.ms_draft.id_prev = z2ui5_cl_util.abap_copy(this.mo_http_post.ms_request.s_front.id);
     result.ms_actual.view = z2ui5_cl_util.abap_copy(this.mo_http_post.ms_request.s_front.view);
     if (!(this.mo_http_post.ms_request.o_model.is_empty() === true || this.mo_http_post.ms_request.o_model.is_empty() === `X`)) {
@@ -47,20 +48,20 @@ class z2ui5_cl_core_action {
           result.ms_actual.check_on_navigated = true;
           result.ms_next.s_set.set_app_state_active = true;
           result.mo_app.ms_draft.id_prev_app_stack = ``;
-          result.mo_app.ms_draft.id = z2ui5_cl_util.uuid_get_c32();
+          result.mo_app.ms_draft.id = z2ui5_cl_abap2ui5_context.uuid_get_c32();
           return result;
         } catch (error) {
           result.ms_next.s_set.s_msg_toast.text = `Bookmarked app state expired or could not be restored - starting with a fresh app`;
         }
       }
-      result.mo_app.ms_draft.id = z2ui5_cl_util.uuid_get_c32();
+      result.mo_app.ms_draft.id = z2ui5_cl_abap2ui5_context.uuid_get_c32();
       let li_app = null;
       li_app = (() => { const _n = String(this.mo_http_post.ms_request.s_control.app_start); const _c = z2ui5_cl_util.rtti_get_class(_n.toLowerCase()); if (!_c) throw new Error(`CREATE OBJECT: class ${_n} not found`); return new _c(); })();
       result.mo_app.mo_app = z2ui5_cl_util.abap_copy(li_app);
       li_app.id_draft = z2ui5_cl_util.abap_copy(result.mo_app.ms_draft.id);
       result.ms_actual.check_on_navigated = true;
     } catch (x) {
-      throw new z2ui5_cx_util_error({ val: `App with name ${this.mo_http_post.ms_request.s_control.app_start} not found...`, previous: x });
+      throw new z2ui5_cx_abap2ui5_error({ val: `App with name ${this.mo_http_post.ms_request.s_control.app_start} not found...`, previous: x });
     }
     return result;
   }
@@ -91,7 +92,7 @@ class z2ui5_cl_core_action {
   factory_system_startup() {
     let result = null;
     result = new z2ui5_cl_core_action(this.mo_http_post);
-    result.mo_app.ms_draft.id = z2ui5_cl_util.uuid_get_c32();
+    result.mo_app.ms_draft.id = z2ui5_cl_abap2ui5_context.uuid_get_c32();
     result.ms_actual.check_on_navigated = true;
     result.mo_app.mo_app = z2ui5_cl_app_startup.factory();
     (result.mo_app.mo_app).id_draft = z2ui5_cl_util.abap_copy(result.mo_app.ms_draft.id);
@@ -127,7 +128,7 @@ class z2ui5_cl_core_action {
     let lv_action;
     this.mo_app.db_save();
     if (!val.id_draft) {
-      val.id_draft = z2ui5_cl_util.uuid_get_c32();
+      val.id_draft = z2ui5_cl_abap2ui5_context.uuid_get_c32();
     }
     result = new z2ui5_cl_core_action(this.mo_http_post);
     try {
