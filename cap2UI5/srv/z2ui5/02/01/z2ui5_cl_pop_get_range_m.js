@@ -1,3 +1,4 @@
+// TODO(abap2js): unresolved reference z2ui5_cl_abap2ui5_context — add require manually
 const z2ui5_cl_pop_get_range = require("abap2UI5/z2ui5_cl_pop_get_range");
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
@@ -66,7 +67,7 @@ class z2ui5_cl_pop_get_range_m extends z2ui5_if_app {
         _fs$fs_tab = null;
         sy_subrc = 0;
         fs_tab.t_range = z2ui5_cl_util.abap_copy(ls_popup_result.t_range);
-        fs_tab.t_token = z2ui5_cl_util.filter_get_token_t_by_range_t(fs_tab.t_range);
+        fs_tab.t_token = z2ui5_cl_abap2ui5_context.filter_get_token_t_by_range_t(fs_tab.t_range);
       }
       this.popup_display();
     }

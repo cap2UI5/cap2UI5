@@ -1,3 +1,4 @@
+// TODO(abap2js): unresolved reference z2ui5_cl_abap2ui5_context — add require manually
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
@@ -44,8 +45,8 @@ class z2ui5_cl_pop_file_dl extends z2ui5_if_app {
       .dialog({ title: this.title, afterclose: this.client._event(`BUTTON_CANCEL`) })
       .content();
     if ((this.mv_check_download === true || this.mv_check_download === `X`)) {
-      lv_csv_x = z2ui5_cl_util.conv_get_xstring_by_string(this.mv_value);
-      lv_base64 = z2ui5_cl_util.conv_encode_x_base64(lv_csv_x);
+      lv_csv_x = z2ui5_cl_abap2ui5_context.conv_get_xstring_by_string(this.mv_value);
+      lv_base64 = z2ui5_cl_abap2ui5_context.conv_encode_x_base64(lv_csv_x);
       popup._generic({ ns: `html`, name: `iframe`, t_prop: [{ n: `src`, v: this.mv_type + lv_base64 }, { n: `hidden`, v: `hidden` }] });
       popup._z2ui5().timer(this.client._event(`CALLBACK_DOWNLOAD`));
     }

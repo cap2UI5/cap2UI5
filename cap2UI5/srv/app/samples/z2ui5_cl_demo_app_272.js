@@ -8,15 +8,15 @@ class z2ui5_cl_demo_app_272 extends z2ui5_if_app {
   view_display({ client } = {}) {
     let base_url = ``;
     const view = z2ui5_cl_xml_view.factory();
-    const page = view.object_page_layout({ showtitleinheadercontent: true });
+    const page = view.shell()
+      .page({ title: `abap2UI5 - Object Header with Circle-shaped Image`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() })
+      .object_page_layout({ showtitleinheadercontent: true });
     const header = page.header_title()
       .object_page_header({ objecttitle: `Denise Smith`, objectsubtitle: `Senior Developer`, objectimageuri: base_url + `test-resources/sap/m/images/Woman_04.png`, objectimageshape: `Circle`, objectimagedensityaware: false, objectimagealt: `Denise Smith` });
     header.attributes(`uxap`)
       .object_attribute({ title: `Email address`, text: `DeniseSmith@sap.com`, active: true })
       .object_attribute({ title: `Office Phone`, text: `+33 6 453 564` })
       .object_attribute({ title: `Functional Area`, text: `Development` });
-    header.actions(`uxap`)
-      .object_page_header_action_btn({ icon: `sap-icon://nav-back`, text: `Go Back`, visible: client.check_app_prev_stack(), press: client._event_nav_app_leave() });
     page.header_content(`uxap`)
       .button({ id: `button_hint_id`, icon: `sap-icon://hint`, tooltip: `Sample information`, press: client._event(`CLICK_HINT_ICON`) });
     page.header_content(`uxap`)

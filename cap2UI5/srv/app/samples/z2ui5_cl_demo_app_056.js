@@ -1,4 +1,5 @@
 const z2ui5_cl_pop_get_range = require("abap2UI5/z2ui5_cl_pop_get_range");
+// TODO(abap2js): unresolved reference z2ui5_cl_sample_context — add require manually
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
@@ -31,7 +32,7 @@ class z2ui5_cl_demo_app_056 extends z2ui5_if_app {
         }
         this.mt_tokens_removed = {};
         this.mt_tokens_added = {};
-        this.mt_range = z2ui5_cl_util.filter_get_range_t_by_token_t(this.mt_token);
+        this.mt_range = z2ui5_cl_sample_context.filter_get_range_t_by_token_t(this.mt_token);
         this.set_data();
         this.client.view_model_update();
         break;
@@ -97,7 +98,7 @@ class z2ui5_cl_demo_app_056 extends z2ui5_if_app {
           return;
         }
         this.mt_range = lo_value_help.result().t_range;
-        this.mt_token = z2ui5_cl_util.filter_get_token_t_by_range_t(this.mt_range);
+        this.mt_token = z2ui5_cl_sample_context.filter_get_token_t_by_range_t(this.mt_range);
         this.set_data();
         client.view_model_update();
       } catch (error) {

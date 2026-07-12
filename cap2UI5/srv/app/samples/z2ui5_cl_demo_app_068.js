@@ -21,7 +21,7 @@ class z2ui5_cl_demo_app_068 extends z2ui5_if_app {
   view_display({ client } = {}) {
     const page = z2ui5_cl_xml_view.factory()
       .shell()
-      .page({ title: `abap2UI5 - Popup Tree select Entry`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: true });
+      .page({ title: `abap2UI5 - Popup Tree select Entry`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
     client.view_display(page.button({ text: `Open Popup here...`, press: client._event(`POPUP_TREE`) }).stringify());
   }
 

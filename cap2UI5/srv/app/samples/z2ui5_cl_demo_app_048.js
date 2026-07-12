@@ -24,7 +24,7 @@ class z2ui5_cl_demo_app_048 extends z2ui5_if_app {
     }
     const page = z2ui5_cl_xml_view.factory()
       .shell()
-      .page({ title: `abap2UI5 - List`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: true });
+      .page({ title: `abap2UI5 - List`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
     page.list({ headertext: `List Output`, items: client._bind_edit(this.t_tab), mode: `SingleSelectMaster`, selectionchange: client._event(`SELCHANGE`) })
       ._generic({ name: `StandardListItem`, t_prop: [{ n: `title`, v: `{TITLE}` }, { n: `description`, v: `{DESCR}` }, { n: `icon`, v: `{ICON}` }, { n: `iconInset`, v: `false` }, { n: `highlight`, v: `{HIGHLIGHT}` }, { n: `info`, v: `{INFO}` }, { n: `infoState`, v: `{HIGHLIGHT}` }, { n: `infoStateInverted`, v: `true` }, { n: `type`, v: `Detail` }, { n: `wrapping`, v: `true` }, { n: `wrapCharLimit`, v: `{WRAPCHARLIMIT}` }, { n: `selected`, v: `{SELECTED}` }, { n: `detailPress`, v: client._event(`EDIT`, [`\${TITLE}`, `\${DESCR}`, `\${ICON}`, `\${HIGHLIGHT}`, `\${INFO}`, `\${WRAPCHARLIMIT}`, `\${SELECTED}`]) }] });
     client.view_display(page.stringify());

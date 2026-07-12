@@ -7,7 +7,9 @@ class z2ui5_cl_demo_app_017 extends z2ui5_if_app {
 
   view_display() {
     const view = z2ui5_cl_xml_view.factory();
-    const page = view.object_page_layout({ showtitleinheadercontent: true, showeditheaderbutton: true, editheaderbuttonpress: this.client._event(`EDIT_HEADER_PRESS`), uppercaseanchorbar: false });
+    const page = view.shell()
+      .page({ title: `abap2UI5 - Object Page with Avatar`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() })
+      .object_page_layout({ showtitleinheadercontent: true, showeditheaderbutton: true, editheaderbuttonpress: this.client._event(`EDIT_HEADER_PRESS`), uppercaseanchorbar: false });
     const header_title = page.header_title().object_page_dyn_header_title();
     header_title.expanded_heading().hbox().title({ text: `Oblomov Dev`, wrapping: true });
     header_title.snapped_heading()
@@ -21,8 +23,7 @@ class z2ui5_cl_demo_app_017 extends z2ui5_if_app {
       .overflow_toolbar()
       .overflow_toolbar_button({ icon: `sap-icon://edit`, text: `edit header`, type: `Emphasized`, tooltip: `edit` })
       .overflow_toolbar_button({ icon: `sap-icon://pull-down`, text: `show section`, type: `Emphasized`, tooltip: `pull-down` })
-      .overflow_toolbar_button({ icon: `sap-icon://show`, text: `show state`, tooltip: `show` })
-      .button({ text: `Go Back`, press: this.client._event_nav_app_leave() });
+      .overflow_toolbar_button({ icon: `sap-icon://show`, text: `show state`, tooltip: `show` });
     const header_content = page.header_content(`uxap`);
     header_content.flex_box({ wrap: `Wrap` })
       .icon({ src: `sap-icon://person-placeholder`, size: `5rem`, class: `sapUiSmallMarginEnd` })
