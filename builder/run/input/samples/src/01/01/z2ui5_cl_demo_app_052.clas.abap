@@ -30,9 +30,7 @@ CLASS z2ui5_cl_demo_app_052 DEFINITION PUBLIC.
 ENDCLASS.
 
 
-
-CLASS Z2UI5_CL_DEMO_APP_052 IMPLEMENTATION.
-
+CLASS z2ui5_cl_demo_app_052 IMPLEMENTATION.
 
   METHOD popover_display.
 
@@ -68,7 +66,7 @@ CLASS Z2UI5_CL_DEMO_APP_052 IMPLEMENTATION.
 
     DATA(view) = z2ui5_cl_xml_view=>factory( ).
 
-    DATA(page) = view->page( id = `page_main`
+    DATA(page) = view->shell( )->page( id = `page_main`
             title               = `abap2UI5 - List Report Features`
             navbuttonpress      = client->_event_nav_app_leave( )
             shownavbutton       = client->check_app_prev_stack( ) ).
@@ -118,7 +116,7 @@ CLASS Z2UI5_CL_DEMO_APP_052 IMPLEMENTATION.
 
       WHEN `POPOVER_DETAIL`.
         mv_check_popover = abap_true.
-        mv_product = client->get_event_arg( 2 ).
+        mv_product       = client->get_event_arg( 2 ).
         popover_display( client->get_event_arg( 1 ) ).
     ENDCASE.
 
@@ -178,4 +176,5 @@ CLASS Z2UI5_CL_DEMO_APP_052 IMPLEMENTATION.
         ( product = `table2` create_date = `01.01.2023` create_by = `Julia` storage_location = `AREA_001` quantity = 110 ) ).
 
   ENDMETHOD.
+
 ENDCLASS.

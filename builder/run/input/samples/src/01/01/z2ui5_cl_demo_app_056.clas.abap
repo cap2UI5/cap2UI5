@@ -15,10 +15,10 @@ CLASS z2ui5_cl_demo_app_056 DEFINITION PUBLIC.
     TYPES ty_t_table TYPE STANDARD TABLE OF ty_s_tab WITH EMPTY KEY.
 
     DATA mt_table TYPE ty_t_table.
-    DATA mt_token TYPE z2ui5_cl_util=>ty_t_token.
+    DATA mt_token TYPE z2ui5_cl_sample_context=>ty_t_token.
 
-    DATA mt_tokens_added TYPE z2ui5_cl_util=>ty_t_token.
-    DATA mt_tokens_removed TYPE z2ui5_cl_util=>ty_t_token.
+    DATA mt_tokens_added TYPE z2ui5_cl_sample_context=>ty_t_token.
+    DATA mt_tokens_removed TYPE z2ui5_cl_sample_context=>ty_t_token.
 
   PROTECTED SECTION.
     DATA client TYPE REF TO z2ui5_if_client.
@@ -33,9 +33,7 @@ CLASS z2ui5_cl_demo_app_056 DEFINITION PUBLIC.
 ENDCLASS.
 
 
-
-CLASS Z2UI5_CL_DEMO_APP_056 IMPLEMENTATION.
-
+CLASS z2ui5_cl_demo_app_056 IMPLEMENTATION.
 
   METHOD on_event.
 
@@ -55,9 +53,9 @@ CLASS Z2UI5_CL_DEMO_APP_056 IMPLEMENTATION.
         ENDLOOP.
 
         mt_tokens_removed = VALUE #( ).
-        mt_tokens_added = VALUE #( ).
+        mt_tokens_added   = VALUE #( ).
 
-        mt_range = z2ui5_cl_util=>filter_get_range_t_by_token_t( mt_token ).
+        mt_range = z2ui5_cl_sample_context=>filter_get_range_t_by_token_t( mt_token ).
         set_data( ).
         client->view_model_update( ).
 
@@ -87,10 +85,10 @@ CLASS Z2UI5_CL_DEMO_APP_056 IMPLEMENTATION.
 
     DATA(view) = z2ui5_cl_xml_view=>factory( ).
 
-    view = view->shell( )->page( id = `page_main`
-             title                  = `abap2UI5 - Select-Options`
-             navbuttonpress         = client->_event_nav_app_leave( )
-             shownavbutton          = client->check_app_prev_stack( )
+    view           = view->shell( )->page( id = `page_main`
+    title          = `abap2UI5 - Select-Options`
+    navbuttonpress = client->_event_nav_app_leave( )
+    shownavbutton  = client->check_app_prev_stack( )
         )->get_parent( ).
 
     DATA(vbox) = view->vbox( ).
@@ -167,7 +165,7 @@ CLASS Z2UI5_CL_DEMO_APP_056 IMPLEMENTATION.
           ENDIF.
 
           mt_range = lo_value_help->result( )-t_range.
-          mt_token = z2ui5_cl_util=>filter_get_token_t_by_range_t( mt_range ).
+          mt_token = z2ui5_cl_sample_context=>filter_get_token_t_by_range_t( mt_range ).
           set_data( ).
           client->view_model_update( ).
 
@@ -181,4 +179,5 @@ CLASS Z2UI5_CL_DEMO_APP_056 IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
+
 ENDCLASS.

@@ -22,9 +22,7 @@ CLASS z2ui5_cl_demo_app_075 DEFINITION PUBLIC.
 ENDCLASS.
 
 
-
-CLASS Z2UI5_CL_DEMO_APP_075 IMPLEMENTATION.
-
+CLASS z2ui5_cl_demo_app_075 IMPLEMENTATION.
 
   METHOD on_event.
 
@@ -40,15 +38,15 @@ CLASS Z2UI5_CL_DEMO_APP_075 IMPLEMENTATION.
             SPLIT mv_value AT `;` INTO DATA(lv_dummy) DATA(lv_data).
             SPLIT lv_data AT `,` INTO lv_dummy lv_data.
 
-            DATA(lv_data2) = z2ui5_cl_util=>conv_decode_x_base64( lv_data ).
-            mv_file = z2ui5_cl_util=>conv_get_string_by_xstring( lv_data2 ).
+            DATA(lv_data2) = z2ui5_cl_sample_context=>conv_decode_x_base64( lv_data ).
+            mv_file = z2ui5_cl_sample_context=>conv_get_string_by_xstring( lv_data2 ).
 
             client->message_box_display( `CSV loaded to table` ).
 
             view_display( ).
 
             mv_value = VALUE #( ).
-            mv_path = VALUE #( ).
+            mv_path  = VALUE #( ).
         ENDCASE.
 
       CATCH cx_root INTO DATA(x).
@@ -106,4 +104,5 @@ CLASS Z2UI5_CL_DEMO_APP_075 IMPLEMENTATION.
     on_event( ).
 
   ENDMETHOD.
+
 ENDCLASS.

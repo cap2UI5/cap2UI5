@@ -74,11 +74,11 @@ CLASS z2ui5_cl_demo_app_053 IMPLEMENTATION.
          search = client->_event( `BUTTON_SEARCH` )
          change = client->_event( `BUTTON_SEARCH` )
 *         livechange = client->__event( 'BUTTON_SEARCH' )
-         width  = `17.5rem`
-         id     = `SEARCH` )->button(
-        text  = `Go`
-        press = client->_event( `BUTTON_START` )
-        type  = `Emphasized` ).
+         width = `17.5rem`
+         id    = `SEARCH` )->button(
+         text  = `Go`
+         press = client->_event( `BUTTON_START` )
+         type  = `Emphasized` ).
 
     DATA(tab) = vbox->table( client->_bind( val = mt_table ) ).
 
@@ -118,7 +118,7 @@ CLASS z2ui5_cl_demo_app_053 IMPLEMENTATION.
 
     IF mv_search_value IS NOT INITIAL.
 
-      z2ui5_cl_util=>itab_filter_by_val(
+      z2ui5_cl_sample_context=>itab_filter_by_val(
         EXPORTING
           val = mv_search_value
         CHANGING

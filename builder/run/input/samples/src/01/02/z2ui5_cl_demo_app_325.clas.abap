@@ -64,7 +64,7 @@ CLASS Z2UI5_CL_DEMO_APP_325 IMPLEMENTATION.
                       editable        = abap_true
                       value           = client->_bind_edit( text )
                       growing         = abap_true
-        growingmaxlines               = `50`
+                      growingmaxlines = `50`
                       width           = `100%`
                       rows            = `15`
                       id              = `text_id` ).
