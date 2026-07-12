@@ -1220,11 +1220,119 @@ CLASS z2ui5_cl_util DEFINITION
       RETURNING
         VALUE(result) TYPE string ##NEEDED.
 
+
+    CLASS-METHODS msg_get_text
+      IMPORTING
+        val           TYPE any
+        val2          TYPE any OPTIONAL
+      RETURNING
+        VALUE(result) TYPE string.
+
+    CLASS-METHODS msg_get_by_sy
+      RETURNING
+        VALUE(result) TYPE ty_t_msg.
+
+    CLASS-METHODS msg_map
+      IMPORTING
+        name          TYPE clike
+        val           TYPE data
+        is_msg        TYPE ty_s_msg
+      RETURNING
+        VALUE(result) TYPE ty_s_msg.
+
   PROTECTED SECTION.
 
     CLASS-METHODS rtti_get_class_descr_on_cloud
       IMPORTING
         i_classname   TYPE clike
+      RETURNING
+        VALUE(result) TYPE string.
+
+
+    CLASS-METHODS msg_get_internal
+      IMPORTING
+        val           TYPE any
+      RETURNING
+        VALUE(result) TYPE ty_t_msg.
+
+    CLASS-METHODS msg_get_by_oref
+      IMPORTING
+        val           TYPE any
+      RETURNING
+        VALUE(result) TYPE ty_t_msg.
+
+    CLASS-METHODS check_is_rap_struct
+      IMPORTING
+        val           TYPE any
+      RETURNING
+        VALUE(result) TYPE abap_bool.
+
+    CLASS-METHODS msg_get_rap
+      IMPORTING
+        val           TYPE any
+        entity_name   TYPE string OPTIONAL
+      RETURNING
+        VALUE(result) TYPE ty_t_msg.
+
+    CLASS-METHODS msg_get_rap_row
+      IMPORTING
+        val         TYPE any
+        entity_name TYPE string OPTIONAL
+      EXPORTING
+        messages    TYPE ty_t_msg
+        is_row      TYPE abap_bool.
+
+    CLASS-METHODS msg_get_rap_element
+      IMPORTING
+        val           TYPE any
+      RETURNING
+        VALUE(result) TYPE string.
+
+    CLASS-METHODS msg_get_rap_state_area
+      IMPORTING
+        val           TYPE any
+      RETURNING
+        VALUE(result) TYPE string.
+
+    CLASS-METHODS msg_get_rap_action
+      IMPORTING
+        val           TYPE any
+      RETURNING
+        VALUE(result) TYPE string.
+
+    CLASS-METHODS msg_get_rap_pid
+      IMPORTING
+        val           TYPE any
+      RETURNING
+        VALUE(result) TYPE string.
+
+    CLASS-METHODS msg_get_rap_cid
+      IMPORTING
+        val           TYPE any
+      RETURNING
+        VALUE(result) TYPE string.
+
+    CLASS-METHODS msg_get_rap_tky
+      IMPORTING
+        val           TYPE any
+      RETURNING
+        VALUE(result) TYPE string.
+
+    CLASS-METHODS msg_get_rap_flatten
+      IMPORTING
+        val           TYPE any
+      RETURNING
+        VALUE(result) TYPE string.
+
+    CLASS-METHODS msg_get_rap_meta
+      IMPORTING
+        val           TYPE any
+      RETURNING
+        VALUE(result) TYPE ty_t_name_value.
+
+    CLASS-METHODS msg_get_rap_fail_text
+      IMPORTING
+        cause         TYPE i
       RETURNING
         VALUE(result) TYPE string.
 
@@ -1477,6 +1585,9 @@ CLASS z2ui5_cl_util IMPLEMENTATION.
   METHOD filter_get_range_by_token.
 
     DATA(lv_value) = val.
+    IF lv_value IS INITIAL.
+      RETURN.
+    ENDIF.
     DATA(lv_length) = strlen( lv_value ) - 1.
 
     CASE lv_value(1).
@@ -1507,11 +1618,16 @@ CLASS z2ui5_cl_util IMPLEMENTATION.
         ENDIF.
 
       WHEN `*`.
-        IF lv_value+lv_length(1) = `*`.
+        IF lv_length > 0 AND lv_value+lv_length(1) = `*`.
           lv_value = substring( val = lv_value off = 1 len = lv_length - 1 ).
           result = VALUE #( sign   = `I`
                             option = `CP`
                             low    = lv_value ).
+        ELSEIF lv_length = 0.
+          " Single '*' means contains-pattern with empty value
+          result = VALUE #( sign   = `I`
+                            option = `CP`
+                            low    = `` ).
         ENDIF.
 
       WHEN OTHERS.
@@ -1602,7 +1718,10 @@ CLASS z2ui5_cl_util IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD itab_filter_by_val.
-
+    " TRANSPILER NOTE: ABAP CS operator is ALWAYS case-insensitive regardless
+    " of the ignore_case flag. The flag only pre-converts to uppercase for
+    " consistency, but CS itself never does case-sensitive matching.
+    " JS equivalent: always use toLowerCase().includes(toLowerCase()).
     FIELD-SYMBOLS <row>   TYPE any.
     FIELD-SYMBOLS <field> TYPE any.
 
@@ -1635,10 +1754,16 @@ CLASS z2ui5_cl_util IMPLEMENTATION.
         DATA(lv_value) = |{ <field> }|.
         IF ignore_case = abap_true.
           lv_value = to_upper( lv_value ).
-        ENDIF.
-        IF lv_value CS lv_search.
-          lv_check_found = abap_true.
-          EXIT.
+          IF lv_value CS lv_search.
+            lv_check_found = abap_true.
+            EXIT.
+          ENDIF.
+        ELSE.
+          " Case-sensitive: use find() because CS is always case-insensitive
+          IF find( val = lv_value sub = lv_search ) >= 0.
+            lv_check_found = abap_true.
+            EXIT.
+          ENDIF.
         ENDIF.
 
         lv_index = lv_index + 1.
@@ -2142,14 +2267,15 @@ CLASS z2ui5_cl_util IMPLEMENTATION.
 
     DATA(lt_params) = url_param_get_tab( url ).
     DATA(lv_n) = c_trim_lower( name ).
+    DATA(lv_v) = c_trim( value ).
 
     LOOP AT lt_params REFERENCE INTO DATA(lr_params)
          WHERE n = lv_n.
-      lr_params->v = c_trim_lower( value ).
+      lr_params->v = lv_v.
     ENDLOOP.
     IF sy-subrc <> 0.
       INSERT VALUE #( n = lv_n
-                      v = c_trim_lower( value ) ) INTO TABLE lt_params.
+                      v = lv_v ) INTO TABLE lt_params.
     ENDIF.
 
     result = url_param_create_url( lt_params ).
@@ -2659,6 +2785,7 @@ CLASS z2ui5_cl_util IMPLEMENTATION.
     DATA(lv_start) = 0.
     DATA(lv_pos) = 0.
     DATA(lv_in_quote) = abap_false.
+    DATA(lv_in_between) = abap_false.
 
     IF lv_val IS INITIAL.
       RETURN.
@@ -2700,7 +2827,30 @@ CLASS z2ui5_cl_util IMPLEMENTATION.
         CONTINUE.
       ENDIF.
 
+      " Track BETWEEN ... AND to avoid splitting at the AND inside BETWEEN
+      " Only check when current char is B or b (performance: skip to_upper on every pos)
+      IF lv_depth = 0 AND lv_in_between = abap_false
+         AND ( lv_char = `B` OR lv_char = `b` )
+         AND lv_pos + 8 <= lv_len
+         AND to_upper( lv_val+lv_pos(8) ) = `BETWEEN `.
+        lv_in_between = abap_true.
+        lv_pos = lv_pos + 8.
+        CONTINUE.
+      ENDIF.
+
+      " The first AND after BETWEEN is the range AND, not a logical AND
+      " Only check when current char is space (the ` AND ` pattern starts with space)
+      IF lv_in_between = abap_true
+         AND lv_char = ` `
+         AND lv_pos + 5 <= lv_len
+         AND to_upper( lv_val+lv_pos(5) ) = ` AND `.
+        lv_in_between = abap_false.
+        lv_pos = lv_pos + 5.
+        CONTINUE.
+      ENDIF.
+
       IF lv_depth = 0
+         AND lv_in_between = abap_false
          AND lv_pos + lv_sep_len <= lv_len
          AND lv_val+lv_pos(lv_sep_len) = lv_sep.
         INSERT substring( val = lv_val
@@ -2743,7 +2893,10 @@ CLASS z2ui5_cl_util IMPLEMENTATION.
 
   METHOD msg_get_t.
 
-    result = z2ui5_cl_util_msg=>msg_get( val = val val2 = val2 ).
+    result = msg_get_internal( val ).
+    IF result IS INITIAL AND val2 IS NOT INITIAL.
+      result = msg_get_internal( val2 ).
+    ENDIF.
 
   ENDMETHOD.
 
@@ -2788,7 +2941,9 @@ CLASS z2ui5_cl_util IMPLEMENTATION.
 
   METHOD msg_get_collect.
 
-    result = z2ui5_cl_util_msg=>msg_get_collect( val = val val2 = val2 ).
+    result = concat_lines_of(
+      table = VALUE string_table( FOR <r> IN msg_get_t( val = val val2 = val2 ) ( |- { <r>-text }| ) )
+      sep   = cv_char_util_newline ).
 
   ENDMETHOD.
 
@@ -2861,7 +3016,9 @@ CLASS z2ui5_cl_util IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD c_contains.
-
+    " Note: ABAP CS operator is CASE-INSENSITIVE.
+    " JS transpilation must use a case-insensitive comparison
+    " (e.g. val.toLowerCase().includes(sub.toLowerCase())).
     result = xsdbool( CONV string( val ) CS sub ).
 
   ENDMETHOD.
@@ -3103,8 +3260,10 @@ CLASS z2ui5_cl_util IMPLEMENTATION.
   METHOD c_pad_left.
 
     result = val.
+    " pad is TYPE c - space value would be trimmed by && (same as c_pad_right fix)
+    DATA(lv_pad) = COND string( WHEN pad IS INITIAL THEN ` ` ELSE CONV #( pad ) ).
     WHILE strlen( result ) < len.
-      result = pad && result.
+      result = lv_pad && result.
     ENDWHILE.
 
   ENDMETHOD.
@@ -3112,8 +3271,11 @@ CLASS z2ui5_cl_util IMPLEMENTATION.
   METHOD c_pad_right.
 
     result = val.
+    " pad is TYPE c - a space value IS INITIAL in ABAP and CONV string trims it.
+    " Preserve the space explicitly via COND.
+    DATA(lv_pad) = COND string( WHEN pad IS INITIAL THEN ` ` ELSE CONV #( pad ) ).
     WHILE strlen( result ) < len.
-      result = result && pad.
+      result = result && lv_pad.
     ENDWHILE.
 
   ENDMETHOD.
@@ -3233,7 +3395,11 @@ CLASS z2ui5_cl_util IMPLEMENTATION.
 
     DATA(lv_val) = c_trim( CONV string( val ) ).
 
-    " Remove thousands separators (comma or period depending on format)
+    " Heuristic: A comma is treated as DECIMAL separator when it is the
+    " LAST separator in the string (no further comma or dot follows).
+    " Otherwise it is treated as THOUSANDS separator and skipped.
+    " Edge case: '1,000' (no dot) is interpreted as 1.000 (decimal), NOT 1000.
+    " This matches European number formatting conventions.
     " Normalize: keep only digits, minus, and decimal point
     DATA(lv_clean) = ``.
     DATA(lv_i) = 0.
@@ -3256,6 +3422,17 @@ CLASS z2ui5_cl_util IMPLEMENTATION.
       lv_i = lv_i + 1.
     ENDWHILE.
 
+    " Validate the normalized value explicitly: it needs at least one
+    " digit and at most one decimal point (e.g. European format `1.234,56`
+    " normalizes to the invalid `1.234.56`). Return 0 for invalid input -
+    " the JS transpiler converts such strings leniently instead of raising
+    DATA lv_dot_count TYPE i.
+    FIND ALL OCCURRENCES OF `.` IN lv_clean MATCH COUNT lv_dot_count.
+    IF lv_dot_count > 1 OR lv_clean NA `0123456789`.
+      result = 0.
+      RETURN.
+    ENDIF.
+
     TRY.
         result = lv_clean.
       CATCH cx_root.
@@ -3270,12 +3447,56 @@ CLASS z2ui5_cl_util IMPLEMENTATION.
 
   METHOD itab_sort_by.
 
-    DATA(lv_field) = CONV string( fieldname ).
+    " SORT itab BY (dynamic) is not supported by the JS transpiler used
+    " for the Node unit tests - extract the sort key per row into a
+    " helper table, sort that statically and rebuild the table
+    TYPES: BEGIN OF ty_s_sort_key,
+             key_str TYPE string,
+             key_num TYPE decfloat34,
+             idx     TYPE i,
+           END OF ty_s_sort_key.
+    DATA lt_key TYPE STANDARD TABLE OF ty_s_sort_key WITH EMPTY KEY.
+    DATA lv_numeric TYPE abap_bool.
+
+    DATA(lv_field) = to_upper( fieldname ).
+
+    LOOP AT tab ASSIGNING FIELD-SYMBOL(<row>).
+      DATA(lv_tabix) = sy-tabix.
+      ASSIGN COMPONENT lv_field OF STRUCTURE <row> TO FIELD-SYMBOL(<val>).
+      IF sy-subrc <> 0.
+        RETURN.
+      ENDIF.
+      IF lv_tabix = 1.
+        lv_numeric = rtti_check_numeric( <val> ).
+      ENDIF.
+      APPEND INITIAL LINE TO lt_key ASSIGNING FIELD-SYMBOL(<key>).
+      IF lv_numeric = abap_true.
+        <key>-key_num = <val>.
+      ELSE.
+        <key>-key_str = <val>.
+      ENDIF.
+      <key>-idx = lv_tabix.
+    ENDLOOP.
+
     IF descending = abap_true.
-      SORT tab BY (lv_field) DESCENDING.
+      SORT lt_key BY key_num DESCENDING key_str DESCENDING.
     ELSE.
-      SORT tab BY (lv_field) ASCENDING.
+      SORT lt_key BY key_num ASCENDING key_str ASCENDING.
     ENDIF.
+
+    DATA lr_copy TYPE REF TO data.
+    CREATE DATA lr_copy LIKE tab.
+    FIELD-SYMBOLS <tab_copy> TYPE STANDARD TABLE.
+    ASSIGN lr_copy->* TO <tab_copy>.
+    <tab_copy> = tab.
+
+    CLEAR tab.
+    LOOP AT lt_key ASSIGNING <key>.
+      READ TABLE <tab_copy> INDEX <key>-idx ASSIGNING FIELD-SYMBOL(<src>).
+      IF sy-subrc = 0.
+        APPEND <src> TO tab.
+      ENDIF.
+    ENDLOOP.
 
   ENDMETHOD.
 
@@ -4311,6 +4532,461 @@ CLASS z2ui5_cl_util IMPLEMENTATION.
   METHOD context_get_sy.
 
     result = CORRESPONDING #( sy ).
+
+  ENDMETHOD.
+
+
+  METHOD msg_get_text.
+
+    DATA(lt_msg) = msg_get_t( val = val val2 = val2 ).
+    IF lt_msg IS NOT INITIAL.
+      result = lt_msg[ 1 ]-text.
+    ENDIF.
+
+  ENDMETHOD.
+
+  METHOD msg_get_by_sy.
+
+    result = msg_get_t( context_get_sy( ) ).
+
+  ENDMETHOD.
+
+  METHOD msg_get_internal.
+
+    DATA(lv_kind) = rtti_get_type_kind( val ).
+    CASE lv_kind.
+
+      WHEN cl_abap_datadescr=>typekind_table.
+        FIELD-SYMBOLS <tab> TYPE ANY TABLE.
+        ASSIGN val TO <tab>.
+        LOOP AT <tab> ASSIGNING FIELD-SYMBOL(<row>).
+          DATA(lt_tab) = msg_get_internal( <row> ).
+          INSERT LINES OF lt_tab INTO TABLE result.
+        ENDLOOP.
+
+      WHEN cl_abap_datadescr=>typekind_struct1 OR cl_abap_datadescr=>typekind_struct2.
+
+        IF val IS INITIAL.
+          RETURN.
+        ENDIF.
+
+        IF check_is_rap_struct( val ) = abap_true.
+          result = msg_get_rap( val ).
+          RETURN.
+        ENDIF.
+
+        DATA(lt_attri) = rtti_get_t_attri_by_any( val ).
+
+        DATA(ls_result) = VALUE ty_s_msg( ).
+        LOOP AT lt_attri REFERENCE INTO DATA(ls_attri).
+          ASSIGN COMPONENT ls_attri->name OF STRUCTURE val TO FIELD-SYMBOL(<comp>).
+          IF sy-subrc <> 0.
+            CONTINUE.
+          ENDIF.
+
+          IF ls_attri->name = `ITEM`.
+            lt_tab = msg_get_internal( <comp> ).
+            INSERT LINES OF lt_tab INTO TABLE result.
+            RETURN.
+          ELSE.
+            ls_result = msg_map( name = ls_attri->name val = <comp> is_msg = ls_result ).
+          ENDIF.
+
+        ENDLOOP.
+        IF ls_result-text IS INITIAL AND ls_result-id IS NOT INITIAL.
+          ls_result-id = to_upper( ls_result-id ).
+          MESSAGE ID ls_result-id TYPE `I` NUMBER ls_result-no
+                  WITH ls_result-v1 ls_result-v2 ls_result-v3 ls_result-v4
+                  INTO ls_result-text.
+        ENDIF.
+        INSERT ls_result INTO TABLE result.
+
+      WHEN cl_abap_datadescr=>typekind_oref.
+        result = msg_get_by_oref( val ).
+
+      WHEN OTHERS.
+
+        IF rtti_check_clike( val ).
+          INSERT VALUE #( text = val ) INTO TABLE result.
+        ENDIF.
+    ENDCASE.
+
+  ENDMETHOD.
+
+  METHOD msg_get_by_oref.
+
+    FIELD-SYMBOLS <comp> TYPE any.
+
+    TRY.
+        DATA(lx) = CAST cx_root( val ).
+        DATA(ls_result) = VALUE ty_s_msg( type = `E` text = lx->get_text( ) ).
+        DATA(lt_attri_o) = rtti_get_t_attri_by_oref( val ).
+        LOOP AT lt_attri_o REFERENCE INTO DATA(ls_attri_o)
+             WHERE visibility = `U`.
+          DATA(lv_name) = ls_attri_o->name.
+          ASSIGN lx->(lv_name) TO <comp>.
+          IF sy-subrc <> 0.
+            CONTINUE.
+          ENDIF.
+          ls_result = msg_map( name = ls_attri_o->name val = <comp> is_msg = ls_result ).
+        ENDLOOP.
+        INSERT ls_result INTO TABLE result.
+      CATCH cx_root.
+
+        DATA obj TYPE REF TO object.
+        obj = val.
+
+        TRY.
+
+            DATA lr_tab TYPE REF TO data.
+            CREATE DATA lr_tab TYPE (`if_bali_log=>ty_item_table`).
+            ASSIGN lr_tab->* TO FIELD-SYMBOL(<tab2>).
+
+            CALL METHOD obj->(`IF_BALI_LOG~GET_ALL_ITEMS`)
+              RECEIVING
+                item_table = <tab2>.
+
+            DATA(lt_tab2) = msg_get_internal( <tab2> ).
+            INSERT LINES OF lt_tab2 INTO TABLE result.
+
+          CATCH cx_root.
+
+            TRY.
+
+                CREATE DATA lr_tab TYPE (`BAPIRETTAB`).
+                ASSIGN lr_tab->* TO <tab2>.
+
+                CALL METHOD obj->(`ZIF_LOGGER~EXPORT_TO_TABLE`)
+                  RECEIVING
+                    rt_bapiret = <tab2>.
+
+                lt_tab2 = msg_get_internal( <tab2> ).
+                INSERT LINES OF lt_tab2 INTO TABLE result.
+
+              CATCH cx_root.
+
+                lt_attri_o = rtti_get_t_attri_by_oref( val ).
+                LOOP AT lt_attri_o REFERENCE INTO ls_attri_o
+                     WHERE visibility = `U`.
+                  lv_name = ls_attri_o->name.
+                  ASSIGN obj->(lv_name) TO <comp>.
+                  IF sy-subrc <> 0.
+                    CONTINUE.
+                  ENDIF.
+                  ls_result = msg_map( name = ls_attri_o->name val = <comp> is_msg = ls_result ).
+                ENDLOOP.
+                INSERT ls_result INTO TABLE result.
+
+            ENDTRY.
+        ENDTRY.
+    ENDTRY.
+
+  ENDMETHOD.
+
+  METHOD msg_map.
+
+    result = is_msg.
+    CASE name.
+      WHEN `ID` OR `MSGID`.
+        result-id = val.
+      WHEN `NO` OR `NUMBER` OR `MSGNO`.
+        result-no = val.
+      WHEN `MESSAGE` OR `TEXT`.
+        result-text = val.
+      WHEN `TYPE` OR `MSGTY` OR `M_SEVERITY`.
+        result-type = val.
+      WHEN `MESSAGE_V1` OR `MSGV1` OR `V1`.
+        result-v1 = val.
+      WHEN `MESSAGE_V2` OR `MSGV2` OR `V2`.
+        result-v2 = val.
+      WHEN `MESSAGE_V3` OR `MSGV3` OR `V3`.
+        result-v3 = val.
+      WHEN `MESSAGE_V4` OR `MSGV4` OR `V4`.
+        result-v4 = val.
+      WHEN `TIME_STMP`.
+        result-timestampl = val.
+    ENDCASE.
+
+  ENDMETHOD.
+
+  METHOD check_is_rap_struct.
+
+    DATA(lt_attri) = rtti_get_t_attri_by_any( val ).
+
+    LOOP AT lt_attri REFERENCE INTO DATA(ls_attri).
+      CASE ls_attri->name.
+        WHEN `%MSG` OR `%FAIL` OR `%OTHER`.
+          result = abap_true.
+          RETURN.
+      ENDCASE.
+    ENDLOOP.
+
+    LOOP AT lt_attri REFERENCE INTO ls_attri.
+      ASSIGN COMPONENT ls_attri->name OF STRUCTURE val TO FIELD-SYMBOL(<tab>).
+      CHECK sy-subrc = 0.
+      CHECK rtti_get_type_kind( <tab> ) = cl_abap_datadescr=>typekind_table.
+
+      TRY.
+          DATA(lo_tab) = CAST cl_abap_tabledescr( cl_abap_typedescr=>describe_by_data( <tab> ) ).
+          DATA(lo_line) = lo_tab->get_table_line_type( ).
+          CHECK lo_line->kind = cl_abap_typedescr=>kind_struct.
+          DATA(lt_comps) = CAST cl_abap_structdescr( lo_line )->get_components( ).
+          LOOP AT lt_comps REFERENCE INTO DATA(ls_comp).
+            IF ls_comp->name = `%MSG` OR ls_comp->name = `%FAIL`.
+              result = abap_true.
+              RETURN.
+            ENDIF.
+          ENDLOOP.
+        CATCH cx_root ##NO_HANDLER.
+      ENDTRY.
+    ENDLOOP.
+
+  ENDMETHOD.
+
+  METHOD msg_get_rap.
+
+    DATA(lv_kind) = rtti_get_type_kind( val ).
+    IF lv_kind <> cl_abap_datadescr=>typekind_struct1
+       AND lv_kind <> cl_abap_datadescr=>typekind_struct2.
+      RETURN.
+    ENDIF.
+
+    msg_get_rap_row( EXPORTING val         = val
+                               entity_name = entity_name
+                     IMPORTING messages    = result
+                               is_row      = DATA(lv_is_row) ).
+    IF lv_is_row = abap_true.
+      RETURN.
+    ENDIF.
+
+    DATA(lt_attri) = rtti_get_t_attri_by_any( val ).
+    LOOP AT lt_attri REFERENCE INTO DATA(ls_attri).
+      ASSIGN COMPONENT ls_attri->name OF STRUCTURE val TO FIELD-SYMBOL(<tab>).
+      CHECK sy-subrc = 0.
+      CHECK rtti_get_type_kind( <tab> ) = cl_abap_datadescr=>typekind_table.
+
+      FIELD-SYMBOLS <ftab> TYPE ANY TABLE.
+      ASSIGN <tab> TO <ftab>.
+
+      LOOP AT <ftab> ASSIGNING FIELD-SYMBOL(<row>).
+        IF rtti_get_type_kind( <row> ) = cl_abap_datadescr=>typekind_oref.
+          IF <row> IS NOT INITIAL.
+            TRY.
+                INSERT LINES OF msg_get_t( <row> ) INTO TABLE result.
+              CATCH cx_root ##NO_HANDLER.
+            ENDTRY.
+          ENDIF.
+        ELSE.
+          INSERT LINES OF msg_get_rap( val         = <row>
+                                       entity_name = ls_attri->name ) INTO TABLE result.
+        ENDIF.
+      ENDLOOP.
+    ENDLOOP.
+
+  ENDMETHOD.
+
+  METHOD msg_get_rap_row.
+
+    CLEAR messages.
+    is_row = abap_false.
+
+    DATA(lt_meta) = msg_get_rap_meta( val ).
+
+    ASSIGN COMPONENT `%MSG` OF STRUCTURE val TO FIELD-SYMBOL(<msg>).
+    IF sy-subrc = 0.
+      is_row = abap_true.
+      IF <msg> IS NOT INITIAL.
+        TRY.
+            DATA(lt_one) = msg_get_t( <msg> ).
+            LOOP AT lt_one ASSIGNING FIELD-SYMBOL(<m>).
+              <m>-t_meta = lt_meta.
+            ENDLOOP.
+            INSERT LINES OF lt_one INTO TABLE messages.
+          CATCH cx_root ##NO_HANDLER.
+        ENDTRY.
+      ENDIF.
+    ENDIF.
+
+    ASSIGN COMPONENT `%FAIL` OF STRUCTURE val TO FIELD-SYMBOL(<fail>).
+    IF sy-subrc = 0.
+      is_row = abap_true.
+      ASSIGN COMPONENT `CAUSE` OF STRUCTURE <fail> TO FIELD-SYMBOL(<cause>).
+      IF sy-subrc = 0.
+        DATA lv_cause TYPE i.
+        lv_cause = <cause>.
+        DATA(lv_text) = msg_get_rap_fail_text( lv_cause ).
+        IF entity_name IS NOT INITIAL.
+          lv_text = |{ entity_name }: { lv_text }|.
+        ENDIF.
+        INSERT VALUE #( type   = `E`
+                        text   = lv_text
+                        t_meta = lt_meta ) INTO TABLE messages.
+      ENDIF.
+    ENDIF.
+
+  ENDMETHOD.
+
+  METHOD msg_get_rap_element.
+
+    DATA(lt_attri) = rtti_get_t_attri_by_any( val ).
+    LOOP AT lt_attri REFERENCE INTO DATA(ls_attri).
+      CHECK strlen( ls_attri->name ) > 9.
+      CHECK ls_attri->name(9) = `%ELEMENT-`.
+      ASSIGN COMPONENT ls_attri->name OF STRUCTURE val TO FIELD-SYMBOL(<flag>).
+      CHECK sy-subrc = 0.
+      CHECK <flag> IS NOT INITIAL.
+
+      IF result IS INITIAL.
+        result = ls_attri->name+9.
+      ELSE.
+        result = |{ result }, { ls_attri->name+9 }|.
+      ENDIF.
+    ENDLOOP.
+
+  ENDMETHOD.
+
+  METHOD msg_get_rap_state_area.
+
+    ASSIGN COMPONENT `%STATE_AREA` OF STRUCTURE val TO FIELD-SYMBOL(<sa>).
+    IF sy-subrc = 0.
+      result = <sa>.
+    ENDIF.
+
+  ENDMETHOD.
+
+  METHOD msg_get_rap_action.
+
+    DATA(lt_attri) = rtti_get_t_attri_by_any( val ).
+    LOOP AT lt_attri REFERENCE INTO DATA(ls_attri).
+      CHECK strlen( ls_attri->name ) > 12.
+      CHECK ls_attri->name(12) = `%OP-%ACTION-`.
+      ASSIGN COMPONENT ls_attri->name OF STRUCTURE val TO FIELD-SYMBOL(<flag>).
+      CHECK sy-subrc = 0.
+      CHECK <flag> IS NOT INITIAL.
+      result = ls_attri->name+12.
+      RETURN.
+    ENDLOOP.
+
+  ENDMETHOD.
+
+  METHOD msg_get_rap_pid.
+
+    ASSIGN COMPONENT `%PID` OF STRUCTURE val TO FIELD-SYMBOL(<pid>).
+    IF sy-subrc = 0.
+      result = <pid>.
+    ENDIF.
+
+  ENDMETHOD.
+
+  METHOD msg_get_rap_cid.
+
+    ASSIGN COMPONENT `%CID` OF STRUCTURE val TO FIELD-SYMBOL(<cid>).
+    IF sy-subrc = 0.
+      result = <cid>.
+    ENDIF.
+
+  ENDMETHOD.
+
+  METHOD msg_get_rap_tky.
+
+    ASSIGN COMPONENT `%TKY` OF STRUCTURE val TO FIELD-SYMBOL(<tky>).
+    IF sy-subrc <> 0 OR <tky> IS INITIAL.
+      RETURN.
+    ENDIF.
+    result = msg_get_rap_flatten( <tky> ).
+
+  ENDMETHOD.
+
+  METHOD msg_get_rap_flatten.
+
+    DATA(lv_kind) = rtti_get_type_kind( val ).
+    IF lv_kind <> cl_abap_datadescr=>typekind_struct1
+       AND lv_kind <> cl_abap_datadescr=>typekind_struct2.
+      RETURN.
+    ENDIF.
+
+    DATA(lt_attri) = rtti_get_t_attri_by_any( val ).
+    LOOP AT lt_attri REFERENCE INTO DATA(ls_attri).
+      ASSIGN COMPONENT ls_attri->name OF STRUCTURE val TO FIELD-SYMBOL(<comp>).
+      CHECK sy-subrc = 0.
+
+      DATA(lv_sub_kind) = rtti_get_type_kind( <comp> ).
+      IF lv_sub_kind = cl_abap_datadescr=>typekind_struct1
+         OR lv_sub_kind = cl_abap_datadescr=>typekind_struct2.
+        DATA(lv_sub) = msg_get_rap_flatten( <comp> ).
+        IF lv_sub IS NOT INITIAL.
+          IF result IS NOT INITIAL.
+            result = |{ result }, |.
+          ENDIF.
+          result = |{ result }{ lv_sub }|.
+        ENDIF.
+      ELSEIF <comp> IS NOT INITIAL.
+        TRY.
+            DATA lv_str TYPE string.
+            lv_str = <comp>.
+            IF result IS NOT INITIAL.
+              result = |{ result }, |.
+            ENDIF.
+            result = |{ result }{ ls_attri->name }={ lv_str }|.
+          CATCH cx_root ##NO_HANDLER.
+        ENDTRY.
+      ENDIF.
+    ENDLOOP.
+
+  ENDMETHOD.
+
+  METHOD msg_get_rap_meta.
+
+    DATA lv TYPE string.
+
+    lv = msg_get_rap_element( val ).
+    IF lv IS NOT INITIAL.
+      INSERT VALUE #( n = `element` v = lv ) INTO TABLE result.
+    ENDIF.
+
+    lv = msg_get_rap_state_area( val ).
+    IF lv IS NOT INITIAL.
+      INSERT VALUE #( n = `state_area` v = lv ) INTO TABLE result.
+    ENDIF.
+
+    lv = msg_get_rap_action( val ).
+    IF lv IS NOT INITIAL.
+      INSERT VALUE #( n = `action` v = lv ) INTO TABLE result.
+    ENDIF.
+
+    lv = msg_get_rap_pid( val ).
+    IF lv IS NOT INITIAL.
+      INSERT VALUE #( n = `pid` v = lv ) INTO TABLE result.
+    ENDIF.
+
+    lv = msg_get_rap_cid( val ).
+    IF lv IS NOT INITIAL.
+      INSERT VALUE #( n = `cid` v = lv ) INTO TABLE result.
+    ENDIF.
+
+    lv = msg_get_rap_tky( val ).
+    IF lv IS NOT INITIAL.
+      INSERT VALUE #( n = `tky` v = lv ) INTO TABLE result.
+    ENDIF.
+
+  ENDMETHOD.
+
+  METHOD msg_get_rap_fail_text.
+
+    result = SWITCH string( cause
+      WHEN 0  THEN `Operation failed`
+      WHEN 1  THEN `Entity not found`
+      WHEN 2  THEN `Entity is locked`
+      WHEN 3  THEN `Authorization failure`
+      WHEN 4  THEN `Concurrent modification`
+      WHEN 5  THEN `Concurrent modification`
+      WHEN 6  THEN `Operation disabled`
+      WHEN 7  THEN `Operation forbidden`
+      WHEN 8  THEN `Semantic error`
+      WHEN 9  THEN `Determination failed`
+      WHEN 10 THEN `Permission denied`
+      WHEN 11 THEN `Validation failed`
+      ELSE         |Operation failed (cause code { cause })| ).
 
   ENDMETHOD.
 
