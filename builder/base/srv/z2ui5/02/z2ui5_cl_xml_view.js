@@ -3321,6 +3321,29 @@ class z2ui5_cl_xml_view {
     });
   }
 
+  menu({ id, title, itemselected, closed } = {}) {
+    return this._container({
+      name: "Menu",
+      aProp: this._filterProps([
+      { n: "id", v: id },
+      { n: "title", v: title },
+      { n: "itemSelected", v: itemselected },
+      { n: "closed", v: closed },
+      ]),
+    });
+  }
+
+  menu_item({ press, text, icon } = {}) {
+    return this._leaf({
+      name: "MenuItem",
+      aProp: this._filterProps([
+      { n: "press", v: press },
+      { n: "text", v: text },
+      { n: "icon", v: icon },
+      ]),
+    });
+  }
+
   panel({ expandable, expanded, headertext, stickyheader, height, class: cssClass, id, width, backgrounddesign, expandanimation, visible, expand } = {}) {
     return this._container({
       name: "Panel",
@@ -6819,6 +6842,22 @@ class z2ui5_cl_xml_view {
       { n: "masterNavigate", v: masternavigate },
       { n: "mode", v: mode },
       ]),
+    });
+  }
+
+  master_pages(args = {}) {
+    return this._container({
+      name: "masterPages",
+      ns: this._aggNs(args),
+      aProp: [],
+    });
+  }
+
+  detail_pages(args = {}) {
+    return this._container({
+      name: "detailPages",
+      ns: this._aggNs(args),
+      aProp: [],
     });
   }
 
