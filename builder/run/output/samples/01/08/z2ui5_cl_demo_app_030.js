@@ -18,7 +18,9 @@ class z2ui5_cl_demo_app_030 extends z2ui5_if_app {
 
   view_display() {
     const view = z2ui5_cl_xml_view.factory();
-    const page = view.dynamic_page({ showfooter: true });
+    const page = view.shell()
+      .page({ title: `abap2UI5 - Dynamic Page`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() })
+      .dynamic_page({ showfooter: true });
     const header_title = page.title({ ns: `f` }).get().dynamic_page_title();
     header_title.heading(`f`).title(`Header Title`);
     header_title.expanded_content(`f`).label(`this is a subheading`);
@@ -27,8 +29,7 @@ class z2ui5_cl_demo_app_030 extends z2ui5_if_app {
       .overflow_toolbar()
       .overflow_toolbar_button({ icon: `sap-icon://edit`, text: `edit header`, type: `Emphasized`, tooltip: `edit` })
       .overflow_toolbar_button({ icon: `sap-icon://pull-down`, text: `show section`, type: `Emphasized`, tooltip: `pull-down` })
-      .overflow_toolbar_button({ icon: `sap-icon://show`, text: `show state`, tooltip: `show` })
-      .button({ text: `Go Back`, press: this.client._event_nav_app_leave() });
+      .overflow_toolbar_button({ icon: `sap-icon://show`, text: `show state`, tooltip: `show` });
     header_title.navigation_actions()
       .button({ icon: `sap-icon://full-screen`, type: `Transparent` })
       .button({ icon: `sap-icon://exit-full-screen`, type: `Transparent` })

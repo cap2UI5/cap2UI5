@@ -1,3 +1,4 @@
+// TODO(abap2js): unresolved reference z2ui5_cl_sample_context — add require manually
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
@@ -22,9 +23,9 @@ class z2ui5_cl_demo_app_136 extends z2ui5_if_app {
         case `UPLOAD`:
           let [lv_dummy, lv_data] = this.mv_value.split(`;`);
           [lv_dummy, lv_data] = lv_data.split(`,`);
-          lv_data2 = z2ui5_cl_util.conv_decode_x_base64(lv_data);
-          lv_ready = z2ui5_cl_util.conv_get_string_by_xstring(lv_data2);
-          this.mr_table = z2ui5_cl_util.itab_get_itab_by_csv(lv_ready);
+          lv_data2 = z2ui5_cl_sample_context.conv_decode_x_base64(lv_data);
+          lv_ready = z2ui5_cl_sample_context.conv_get_string_by_xstring(lv_data2);
+          this.mr_table = z2ui5_cl_sample_context.itab_get_itab_by_csv(lv_ready);
           this.client.message_box_display(`CSV loaded to table`);
           this.view_display();
           this.mv_value = {};
@@ -57,7 +58,7 @@ class z2ui5_cl_demo_app_136 extends z2ui5_if_app {
         .toolbar_spacer()
         .get_parent()
         .get_parent();
-      lr_fields = z2ui5_cl_util.rtti_get_t_attri_by_any(fs_tab);
+      lr_fields = z2ui5_cl_sample_context.rtti_get_t_attri_by_any(fs_tab);
       lo_cols = tab.columns();
       sy_tabix = 0;
       for (const lr_col of lr_fields) {

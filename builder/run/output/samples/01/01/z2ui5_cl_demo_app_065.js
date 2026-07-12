@@ -8,7 +8,7 @@ class z2ui5_cl_demo_app_065 extends z2ui5_if_app {
   async main(client) {
     const lo_view = z2ui5_cl_xml_view.factory();
     const page = lo_view.shell()
-      .page({ title: `Main View`, id: `test`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: true })
+      .page({ title: `Main View`, id: `test`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() })
       .header_content()
       .link()
       .get_parent();
