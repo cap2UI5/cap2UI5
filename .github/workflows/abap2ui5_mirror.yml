@@ -1,6 +1,6 @@
 name: abap2UI5 mirror
 
-# Mirror the abap2UI5 framework ABAP sources (src/) into abap2UI5-js/run/input/abap2UI5/src.
+# Mirror the abap2UI5 framework ABAP sources (src/) into builder-abap2UI5-js/run/input/abap2UI5/src.
 # Step 1 of the update_backend pipeline; also runnable standalone.
 
 on:
@@ -21,16 +21,16 @@ jobs:
         with:
           node-version: 22
       - run: npm run mirror_abap2ui5
-        working-directory: abap2UI5-js
+        working-directory: builder-abap2UI5-js
       - name: commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add abap2UI5-js/run/input/abap2UI5/src abap2UI5-js/run/input/abap2UI5/UPSTREAM_COMMIT
+          git add builder-abap2UI5-js/run/input/abap2UI5/src builder-abap2UI5-js/run/input/abap2UI5/UPSTREAM_COMMIT
           if git diff --cached --quiet; then
             echo "nothing to commit"
           else
-            git commit -m "mirror: update abap2UI5-js/run/input/abap2UI5/src ($(cut -c1-12 abap2UI5-js/run/input/abap2UI5/UPSTREAM_COMMIT))"
+            git commit -m "mirror: update builder-abap2UI5-js/run/input/abap2UI5/src ($(cut -c1-12 builder-abap2UI5-js/run/input/abap2UI5/UPSTREAM_COMMIT))"
             git pull --rebase origin "${{ github.ref_name }}"
             git push origin "HEAD:${{ github.ref_name }}"
           fi

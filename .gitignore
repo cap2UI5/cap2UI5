@@ -1,7 +1,7 @@
 node_modules/
 .mirror_tmp/
 .DS_Store
-cap-builder/run/output/cap2UI5/
-abap2UI5-js/run/output/core/
-abap2UI5-js/adapters/web/dist/
-abap2UI5-js/adapters/web/register-all.generated.js
+builder-cap2UI5/run/output/cap2UI5/
+builder-abap2UI5-js/run/output/core/
+builder-abap2UI5-js/adapters/web/dist/
+builder-abap2UI5-js/adapters/web/register-all.generated.js

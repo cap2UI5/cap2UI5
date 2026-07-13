@@ -23,33 +23,33 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
           cache-dependency-path: |
-            abap2UI5-js/package-lock.json
-            abap2UI5-js/core/package-lock.json
+            builder-abap2UI5-js/package-lock.json
+            builder-abap2UI5-js/core/package-lock.json
             cap2UI5/package-lock.json
-            abap2UI5-js/adapters/cap/package-lock.json
-            abap2UI5-js/adapters/node/package-lock.json
-            abap2UI5-js/adapters/express/package-lock.json
-            abap2UI5-js/adapters/web/package-lock.json
-      # dev tooling (jest) lives in the abap2UI5-js project; the runtime deps
+            builder-abap2UI5-js/adapters/cap/package-lock.json
+            builder-abap2UI5-js/adapters/node/package-lock.json
+            builder-abap2UI5-js/adapters/express/package-lock.json
+            builder-abap2UI5-js/adapters/web/package-lock.json
+      # dev tooling (jest) lives in the builder-abap2UI5-js project; the runtime deps
       # the tests import (@sap/cds, @cap-js/sqlite, …) live in the CAP project
       # cap2UI5/.
       - run: npm ci
-        working-directory: abap2UI5-js
+        working-directory: builder-abap2UI5-js
       - run: npm ci
-        working-directory: abap2UI5-js/core
+        working-directory: builder-abap2UI5-js/core
       - run: npm ci
         working-directory: cap2UI5
       # platform adapters — armed as smoke gates in the jest suite
-      # (abap2UI5-js/test/adapters.test.js skips them when not installed)
+      # (builder-abap2UI5-js/test/adapters.test.js skips them when not installed)
       - run: npm ci
-        working-directory: abap2UI5-js/adapters/cap
+        working-directory: builder-abap2UI5-js/adapters/cap
       - run: npm ci
-        working-directory: abap2UI5-js/adapters/node
+        working-directory: builder-abap2UI5-js/adapters/node
       - run: npm ci
-        working-directory: abap2UI5-js/adapters/express
+        working-directory: builder-abap2UI5-js/adapters/express
       - run: npm ci
-        working-directory: abap2UI5-js/adapters/web
+        working-directory: builder-abap2UI5-js/adapters/web
       - run: npm test
-        working-directory: abap2UI5-js
+        working-directory: builder-abap2UI5-js
       - run: npm test
         working-directory: cap2UI5

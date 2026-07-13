@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 /**
  * publish-core — the very last build step of the transpile project: copy the
- * assembled package 1:1 from abap2UI5-js/run/output/core into abap2UI5-js/core/,
+ * assembled package 1:1 from builder-abap2UI5-js/run/output/core into builder-abap2UI5-js/core/,
  * the published npm package `abap2UI5`.
  *
- * abap2UI5-js/core/ is a pure build artifact — it is wiped and rewritten on
- * every publish, so nothing there should be hand-edited (edit abap2UI5-js/src/
+ * builder-abap2UI5-js/core/ is a pure build artifact — it is wiped and rewritten on
+ * every publish, so nothing there should be hand-edited (edit builder-abap2UI5-js/src/
  * instead). Only `node_modules/` is preserved, to avoid a reinstall after
  * each build.
  *
@@ -16,7 +16,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const root = path.join(__dirname, "..");          // abap2UI5-js/
+const root = path.join(__dirname, "..");          // builder-abap2UI5-js/
 const src = path.join(root, "run", "output", "core");
 const dest = path.join(root, "core");
 
@@ -34,7 +34,7 @@ function copyDir(from, to) {
 }
 
 if (!fs.existsSync(src)) {
-  console.error("abap2UI5-js/run/output/core not found — run `npm run assemble_core` first");
+  console.error("builder-abap2UI5-js/run/output/core not found — run `npm run assemble_core` first");
   process.exit(1);
 }
 
@@ -51,4 +51,4 @@ const count = (function walk(d) {
   for (const e of fs.readdirSync(d, { withFileTypes: true })) n += e.isDirectory() ? walk(path.join(d, e.name)) : 1;
   return n;
 })(src);
-console.log(`published ${count} files → abap2UI5-js/core/ (1:1 copy of run/output/core)`);
+console.log(`published ${count} files → builder-abap2UI5-js/core/ (1:1 copy of run/output/core)`);
