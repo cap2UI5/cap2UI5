@@ -38,6 +38,9 @@ function requirePathFor(className) {
   if (/^cx_sy_[a-z0-9_]+$/.test(className)) return `abap2UI5/${className}`;
   if (
     /^z2ui5_(cl|cx)_abap2ui5_/.test(className) ||
+    /^z2ui5_cl_core_/.test(className) ||
+    className === "z2ui5_cl_exit" ||
+    className === "z2ui5_cl_http_handler" ||
     /^z2ui5_(cl|cx)_srt_?/.test(className) ||
     /^z2ui5_(cl|cx)_ajson/.test(className) ||
     /^z2ui5_if_/.test(className) ||
@@ -458,6 +461,8 @@ class Ctx {
     this.method = method; // { name, def }
     this.locals = new Set(); // declared local vars (lowercase)
     this.upperLocals = new Set(); // locals holding client.get() structs (UPPERCASE keys)
+    this.localRefTypes = new Map(); // local var → class name (DATA x TYPE REF TO cls)
+    this.newTargetType = null; // declared type of the current assignment target (NEW # inference)
     this.requires = null; // shared Set on emitter
     this.todos = null; // shared array
     this.rowVar = null; // WHERE context: bare names resolve to <rowVar>.<name>
@@ -1000,7 +1005,17 @@ function txConstructor(kind, typeName, inner, ctx) {
         if (/^z2ui5_/.test(typeName)) ctx.requires?.add(typeName);
         return `new ${typeName}(${txArgs(inner, ctx, typeName)})`;
       }
-      // NEW #( ) — only resolvable for the factory pattern (returning own class)
+      // NEW #( ) — infer from the assignment target's declared REF TO type
+      // (DATA x TYPE REF TO cls; x = NEW #( … )) …
+      if (ctx.newTargetType && /^[a-z_][a-z0-9_]*$/.test(ctx.newTargetType)) {
+        const cls = ctx.newTargetType;
+        if (cls === ctx.model.name) return `new ${ctx.model.name}(${txArgs(inner, ctx, cls)})`;
+        if (requirePathFor(cls)) {
+          ctx.requires?.add(cls);
+          return `new ${cls}(${txArgs(inner, ctx, cls)})`;
+        }
+      }
+      // … or from the factory pattern (method returning REF TO own class)
       const ret = ctx.method?.def?.returning;
       if (ret && ret.typeTokens.join(" ").toUpperCase().includes("REF TO")) {
         const cls = ret.typeTokens[ret.typeTokens.length - 1].toLowerCase();
@@ -1879,6 +1894,9 @@ function emitStatement(s, ctx, st, push, assignedTwice, methodDef) {
       const name = safeIdent(toks[1].str.toLowerCase());
       ctx.locals.add(name);
       const { typeTokens } = parseTypeAfter(toks.slice(2), 0);
+      // remember REF TO targets so `x = NEW #( … )` can infer the class
+      const refIdx = typeTokens.findIndex((t, k) => KW(t) === "REF" && KW(typeTokens[k + 1] || "") === "TO");
+      if (refIdx >= 0 && typeTokens[refIdx + 2]) ctx.localRefTypes.set(name, typeTokens[refIdx + 2].toLowerCase());
       push(`let ${name} = ${typeDefault(typeTokens)};`);
       break;
     }
@@ -2057,7 +2075,11 @@ function emitStatement(s, ctx, st, push, assignedTwice, methodDef) {
         }
       }
       if (eq < 0) return todo();
+      // `x = NEW #( … )` — expose x's declared REF TO class for inference
+      const lhsName = eq === i + 1 && isId(toks[i]) ? toks[i].str.toLowerCase() : decl;
+      ctx.newTargetType = lhsName ? ctx.localRefTypes.get(lhsName) || null : null;
       let rhs = txExpr(toks.slice(eq + 1), ctx);
+      ctx.newTargetType = null;
       // vars initialized from client.get() carry UPPERCASE component keys
       if (decl && /(?:^|\.)client\.get\(\)/.test(rhs)) ctx.upperLocals.add(decl);
       // ABAP assignments have VALUE semantics: copying a table/struct variable

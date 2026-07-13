@@ -2,7 +2,7 @@
   "name": "cap2ui5-builder",
   "version": "1.0.0",
   "private": true,
-  "description": "Builder project for cap2UI5 — the ABAP→JS transpiler, sync scripts and jest suite that mirror upstream abap2UI5 and generate the deployable CAP project in ../cap2UI5",
+  "description": "Builder project for cap2UI5 \u2014 the ABAP\u2192JS transpiler, sync scripts and jest suite that mirror upstream abap2UI5 and generate the deployable CAP project in ../cap2UI5",
   "license": "MIT",
   "engines": {
     "node": ">=20"
@@ -19,7 +19,9 @@
     "prepare_app": "node scripts/prepare-app.js",
     "assemble": "node scripts/assemble-cap.js",
     "publish": "node scripts/publish-cap.js",
-    "build_cap": "node scripts/assemble-cap.js && node scripts/publish-cap.js"
+    "build_cap": "node scripts/assemble-cap.js && node scripts/publish-cap.js",
+    "transpile_tests": "node scripts/transpile-tests.js",
+    "run_units": "node scripts/run-units.js"
   },
   "devDependencies": {
     "@abaplint/core": "^2.119.56",
