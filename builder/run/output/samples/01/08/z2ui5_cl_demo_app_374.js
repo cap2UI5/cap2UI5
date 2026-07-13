@@ -26,7 +26,7 @@ class z2ui5_cl_demo_app_374 extends z2ui5_if_app {
       .button({ id: `button_hint_id`, icon: `sap-icon://hint`, tooltip: `Sample information`, press: this.client._event(`CLICK_HINT_ICON`) });
     page.header_content()
       .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.SplitContainer` });
-    const split = page.split_container();
+    const split = page._generic(`SplitContainer`);
     split.master_pages()
       .page(`Master`)
       .list(this.client._bind(this.t_items))
