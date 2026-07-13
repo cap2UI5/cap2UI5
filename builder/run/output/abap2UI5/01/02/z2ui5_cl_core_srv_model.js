@@ -1,8 +1,8 @@
-// TODO(abap2js): unresolved reference z2ui5_cl_abap2ui5_context — add require manually
+const z2ui5_cl_abap2ui5_context = require("abap2UI5/z2ui5_cl_abap2ui5_context");
 const z2ui5_cl_ajson = require("abap2UI5/z2ui5_cl_ajson");
 const z2ui5_cl_ajson_mapping = require("abap2UI5/z2ui5_cl_ajson_mapping");
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-// TODO(abap2js): unresolved reference z2ui5_cx_abap2ui5_error — add require manually
+const z2ui5_cx_abap2ui5_error = require("abap2UI5/z2ui5_cx_abap2ui5_error");
 const z2ui5_if_ajson_types = require("abap2UI5/z2ui5_if_ajson_types");
 const z2ui5_if_client = require("abap2UI5/z2ui5_if_client");
 const z2ui5_if_core_types = require("abap2UI5/z2ui5_if_core_types");

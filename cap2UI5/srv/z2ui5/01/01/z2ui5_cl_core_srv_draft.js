@@ -1,4 +1,3 @@
-const cds = require("@sap/cds");
 const path = require("path");
 const fs = require("fs");
 const z2ui5_cl_util = require("../../00/03/z2ui5_cl_util");
@@ -108,6 +107,10 @@ class z2ui5_cl_core_srv_draft {
     if (z2ui5_cl_core_srv_draft._custom_store) {
       return (await z2ui5_cl_core_srv_draft._custom_store.load(id)) || null;
     }
+    // @sap/cds is required lazily so the framework core loads on platforms
+    // without the CAP runtime (bare node, express, browser) — those inject a
+    // custom store via set_store() and never reach this fallback.
+    const cds = require("@sap/cds");
     const { z2ui5_t_01 } = cds.entities("cap2ui5");
     return SELECT.one.from(z2ui5_t_01).where({ id: id });
   }
@@ -117,6 +120,7 @@ class z2ui5_cl_core_srv_draft {
       await z2ui5_cl_core_srv_draft._custom_store.save(entry);
       return;
     }
+    const cds = require("@sap/cds");
     const { z2ui5_t_01 } = cds.entities("cap2ui5");
     await INSERT.into(z2ui5_t_01).entries(entry);
   }

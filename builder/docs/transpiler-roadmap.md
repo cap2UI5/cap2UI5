@@ -67,6 +67,26 @@ native JSON, no XML), not a translation. The porter instead targets a
 stated goal "selects usw. in node/cap lauffähig machen". Surface is tiny: one
 table `z2ui5_t_91`, ~8 operations across ~8 classes.
 
+## The self-healing loop (upstream unit tests as oracle)
+
+The upstream testclasses (~40 includes, ~300 test methods) are transpiled and
+executed against the published cap2UI5 code on every test run:
+
+```
+transpile-tests.js  →  run/output/tests/*.units.js   (abap2js over *.clas.testclasses.abap)
+run-units.js        →  pass/fail per method          (AUnit semantics: fresh instance, setup/teardown)
+upstream-units.test.js  →  diff vs test/upstream-units.known-failures.json  (the ratchet)
+```
+
+The known-failures baseline IS the transpiler/port bug worklist (currently
+195 entries, 104 tests passing): a new failure is a regression (suite red), a
+fixed entry must be delisted (suite red), so the list only shrinks — and the
+nightly syncs re-arm it against fresh upstream sources. Burn-down method:
+cluster the reasons (`node scripts/run-units.js --json`), fix the emitter or
+port for the biggest cluster, regenerate the baseline, repeat. First two
+cluster fixes (NEW #( ) target-type inference, positional unit-assert args)
+took the failures from 196+stale to 195 with deeper test progression.
+
 ## Backlog (prioritised)
 
 Step-1 (mechanical, shrink TODO noise + enable base pruning), safest first:
@@ -85,7 +105,14 @@ Step-2 (porter):
 - [x] DB pilot: SELECT/MODIFY/DELETE/COMMIT → `z2ui5_port.db()` +
       synchronous in-memory `z2ui5_port` store (−~24 TODOs, end-to-end tested).
 - [ ] CDS-backed `z2ui5_port` store (async — see ripple note) via `set_store`.
-- [ ] RTTI schema → `z2ui5_cl_srt_*`.
+- [x] Kernel shims: `cl_abap_*` / `cx_sy_*` references now resolve to native
+      shim modules under `base/srv/z2ui5/00/00/` (`abap_rtti.js` derives
+      ABAP-shaped descriptors from JS typeof/shape; constants use the real
+      kernel literals). `class_constructor()` is invoked at module load.
+      TODOs 809→736 (framework) / 114→91 (samples); the context classes
+      (`z2ui5_cl_abap2ui5_context`, `z2ui5_cl_sample_context`) load and their
+      RTTI-based boolean detection works natively.
+- [ ] RTTI schema → `z2ui5_cl_srt_*` (deep serialization paths).
 - [ ] sxml schema → XML shim.
 
 TODO count across the tree: **973 → 769** so far.

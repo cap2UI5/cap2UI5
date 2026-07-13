@@ -27,7 +27,7 @@ class z2ui5_cl_demo_app_038 extends z2ui5_if_app {
   view_display() {
     const view = z2ui5_cl_xml_view.factory();
     const page = view.shell()
-      .page({ title: `abap2UI5 - Message View`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: true });
+      .page({ title: `abap2UI5 - Message View`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
     page.button({ text: `Messages in Popup`, press: this.client._event(`POPUP`) });
     page.message_view({ items: this.client._bind(this.t_msg), groupitems: true })
       .message_item({ type: `{TYPE}`, title: `{TITLE}`, subtitle: `{SUBTITLE}`, description: `{DESCRIPTION}`, groupname: `{GROUP}` });

@@ -1,0 +1,20 @@
+{
+  "name": "cap2ui5-adapter-web",
+  "version": "1.0.0",
+  "description": "abap2UI5 web-packed — the whole stack bundled client-side as a static site, no server at all.",
+  "private": true,
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "abap2UI5": "file:../cap2UI5"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25"
+  },
+  "scripts": {
+    "build": "node build.js",
+    "serve": "node test-server.js"
+  }
+}

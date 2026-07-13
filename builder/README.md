@@ -69,7 +69,7 @@ published project.
 
 | Command | What it does |
 |---|---|
-| `npm test` | jest suite (backend units, sample apps, transpiler) — also needs `cap2UI5/` deps installed |
+| `npm test` | jest suite (backend units, sample apps, transpiler, platform adapters) — also needs `cap2UI5/` deps installed; the adapter smokes (`test/adapters.test.js`) additionally need `npm install` in `adapter-node/`, `adapter-express/` and `adapter-web/` and are skipped with a warning otherwise |
 | `npm run transpile` | abap2js — transpile ABAP classes to JS (parser: [@abaplint/core](https://github.com/abaplint/abaplint)) |
 | `npm run mirror_abap2ui5` / `mirror_app` / `mirror_samples` | snapshot upstream into one folder each under `run/input/` — rewritten fresh on every run |
 | `npm run transpile_abap2ui5` / `transpile_samples` | transpile `run/input/*/src` → `run/output/` |

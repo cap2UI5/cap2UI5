@@ -1,5 +1,4 @@
-const fs = require("fs");
-const path = require("path");
+const z2ui5_asset = require("../../z2ui5_asset");
 
 /**
  * z2ui5_cl_app_component_js — JS port of abap2UI5 z2ui5_cl_app_component_js.
@@ -13,15 +12,11 @@ const path = require("path");
 class z2ui5_cl_app_component_js {
 
   static MIME = "application/javascript";
-  static FILE_PATH = path.join(__dirname, "../../../../app/z2ui5/webapp/Component.js");
+  static ASSET_PATH = "Component.js";
 
   /** Returns the file content as a string (or null if missing). */
   static get_source() {
-    try {
-      return fs.readFileSync(z2ui5_cl_app_component_js.FILE_PATH, "utf8");
-    } catch {
-      return null;
-    }
+    return z2ui5_asset.read(z2ui5_cl_app_component_js.ASSET_PATH);
   }
 }
 

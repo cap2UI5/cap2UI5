@@ -1,4 +1,4 @@
-// TODO(abap2js): unresolved reference cl_abap_char_utilities — add require manually
+const cl_abap_char_utilities = require("abap2UI5/cl_abap_char_utilities");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 

@@ -25,6 +25,9 @@ jobs:
           cache-dependency-path: |
             builder/package-lock.json
             cap2UI5/package-lock.json
+            adapter-node/package-lock.json
+            adapter-express/package-lock.json
+            adapter-web/package-lock.json
       # dev tooling (jest) lives in the builder project builder/; the runtime deps
       # the tests import (@sap/cds, @cap-js/sqlite, …) live in the CAP project
       # cap2UI5/.
@@ -32,5 +35,13 @@ jobs:
         working-directory: builder
       - run: npm ci
         working-directory: cap2UI5
+      # platform adapters — armed as smoke gates in the jest suite
+      # (builder/test/adapters.test.js skips them when not installed)
+      - run: npm ci
+        working-directory: adapter-node
+      - run: npm ci
+        working-directory: adapter-express
+      - run: npm ci
+        working-directory: adapter-web
       - run: npm test
         working-directory: builder

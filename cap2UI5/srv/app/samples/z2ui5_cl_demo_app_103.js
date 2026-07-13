@@ -16,7 +16,7 @@ class z2ui5_cl_demo_app_103 extends z2ui5_if_app {
   view_display() {
     const page = z2ui5_cl_xml_view.factory()
       .shell()
-      .page({ title: `abap2UI5 - Side Panel Example`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: true });
+      .page({ title: `abap2UI5 - Side Panel Example`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
     page.header_content().link();
     page.responsive_splitter({ defaultpane: `default` })
       .pane_container()

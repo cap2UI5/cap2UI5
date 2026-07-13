@@ -1,3 +1,4 @@
+const z2ui5_cl_abap2ui5_context = require("abap2UI5/z2ui5_cl_abap2ui5_context");
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
@@ -56,8 +57,8 @@ class z2ui5_cl_pop_file_ul extends z2ui5_if_app {
     const lv_event = client.get().EVENT;
     switch (lv_event) {
       case `UPLOAD`:
-        lv_data = z2ui5_cl_util.conv_get_xstring_by_data_uri(this.mv_value);
-        this.ms_result.value = z2ui5_cl_util.conv_get_string_by_xstring(lv_data);
+        lv_data = z2ui5_cl_abap2ui5_context.conv_get_xstring_by_data_uri(this.mv_value);
+        this.ms_result.value = z2ui5_cl_abap2ui5_context.conv_get_string_by_xstring(lv_data);
         this.check_confirm_enabled = true;
         this.mv_value = ``;
         this.mv_path = ``;

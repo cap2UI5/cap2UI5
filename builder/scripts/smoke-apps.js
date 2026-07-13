@@ -42,13 +42,24 @@ const TIMEOUT_MS = 10000;
 const jsonMode = process.argv.includes("--json");
 const only = process.argv.slice(2).filter((a) => !a.startsWith("--"));
 
+// Helper classes (e.g. z2ui5_cl_sample_context) live next to the apps but
+// implement no main() — only classes that can actually be started are smoked.
+function isApp(file) {
+  try {
+    const Cls = require(file);
+    return typeof Cls?.prototype?.main === "function";
+  } catch {
+    return true; // cannot tell — smoke it and let the handler surface the failure
+  }
+}
+
 function listAppClasses() {
   const out = [];
   const walk = (dir) => {
     for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
       const p = path.join(dir, entry.name);
       if (entry.isDirectory()) walk(p);
-      else if (entry.name.endsWith(".js")) out.push(path.basename(entry.name, ".js"));
+      else if (entry.name.endsWith(".js") && isApp(p)) out.push(path.basename(entry.name, ".js"));
     }
   };
   walk(samplesDir);

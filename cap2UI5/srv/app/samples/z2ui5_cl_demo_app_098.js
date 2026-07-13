@@ -43,7 +43,8 @@ class z2ui5_cl_demo_app_098 extends z2ui5_if_app {
 
   view_display_master() {
     const page = z2ui5_cl_xml_view.factory()
-      .page({ showheader: (!((this.client.get().CHECK_LAUNCHPAD_ACTIVE) === true || (this.client.get().CHECK_LAUNCHPAD_ACTIVE) === `X`)), title: `abap2UI5 - Master Detail Page with Nested View`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: true });
+      .shell()
+      .page({ showheader: (!((this.client.get().CHECK_LAUNCHPAD_ACTIVE) === true || (this.client.get().CHECK_LAUNCHPAD_ACTIVE) === `X`)), title: `abap2UI5 - Master Detail Page with Nested View`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
     const col_layout = page.flexible_column_layout({ layout: this.client._bind_edit(this.mv_layout), id: `test` });
     const lr_master = col_layout.begin_column_pages();
     const lr_list = lr_master.list({ headertext: `List Output`, items: this.client._bind_edit(this.t_tab, { view: this.client.cs_view.main }), mode: `SingleSelectMaster`, selectionchange: this.client._event(`SELCHANGE`) })

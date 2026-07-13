@@ -1,3 +1,4 @@
+const z2ui5_cl_sample_context = require("./z2ui5_cl_sample_context");
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
@@ -22,8 +23,8 @@ class z2ui5_cl_demo_app_075 extends z2ui5_if_app {
         case `UPLOAD`:
           let [lv_dummy, lv_data] = this.mv_value.split(`;`);
           [lv_dummy, lv_data] = lv_data.split(`,`);
-          lv_data2 = z2ui5_cl_util.conv_decode_x_base64(lv_data);
-          this.mv_file = z2ui5_cl_util.conv_get_string_by_xstring(lv_data2);
+          lv_data2 = z2ui5_cl_sample_context.conv_decode_x_base64(lv_data);
+          this.mv_file = z2ui5_cl_sample_context.conv_get_string_by_xstring(lv_data2);
           this.client.message_box_display(`CSV loaded to table`);
           this.view_display();
           this.mv_value = {};

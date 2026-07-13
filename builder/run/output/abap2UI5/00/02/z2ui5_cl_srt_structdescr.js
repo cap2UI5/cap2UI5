@@ -1,4 +1,4 @@
-// TODO(abap2js): unresolved reference cl_abap_structdescr — add require manually
+const cl_abap_structdescr = require("abap2UI5/cl_abap_structdescr");
 const z2ui5_cl_srt_complexdescr = require("abap2UI5/z2ui5_cl_srt_complexdescr");
 const z2ui5_cl_srt_datadescr = require("abap2UI5/z2ui5_cl_srt_datadescr");
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
