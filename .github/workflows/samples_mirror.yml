@@ -1,6 +1,6 @@
 name: samples mirror
 
-# Mirror the abap2UI5/samples cloud branch (whole branch, 1:1) into builder/run/input/samples/.
+# Mirror the abap2UI5/samples cloud branch (whole branch, 1:1) into transpile/run/input/samples/.
 # Step 1 of the update_samples pipeline; also runnable standalone.
 
 on:
@@ -21,16 +21,16 @@ jobs:
         with:
           node-version: 22
       - run: npm run mirror_samples
-        working-directory: builder
+        working-directory: transpile
       - name: commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add builder/run/input/samples
+          git add transpile/run/input/samples
           if git diff --cached --quiet; then
             echo "nothing to commit"
           else
-            git commit -m "mirror: update builder/run/input/samples ($(cut -c1-12 builder/run/input/samples/UPSTREAM_COMMIT))"
+            git commit -m "mirror: update transpile/run/input/samples ($(cut -c1-12 transpile/run/input/samples/UPSTREAM_COMMIT))"
             git pull --rebase origin "${{ github.ref_name }}"
             git push origin "HEAD:${{ github.ref_name }}"
           fi

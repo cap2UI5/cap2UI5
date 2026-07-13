@@ -16,29 +16,26 @@ project needed.
 > [abap2UI5](https://github.com/abap2UI5/abap2UI5) sources. Review and test
 > before relying on it.
 
-## Two projects
+## Three projects
 
-The repository is organized as **core + consumers**: the platform-neutral
-framework package, and everything built on top of it.
+The repository is organized as three projects, from framework to finished app:
 
 | Project | What it is | Start here |
 |---|---|---|
-| [**`core/`**](core/) | **The framework** — the npm package `abap2UI5`: engine, transpiled classes, webapp and samples. Platform-neutral (no CAP, no express); every project below consumes it via `"abap2UI5": "file:../core"`. | [core/README.md](core/README.md) |
-| [**`cap2UI5/`**](cap2UI5/) | The finished, deployable CAP app derived from the core — install it, run `cds watch`, and write your own UI5 apps as JavaScript classes. **This is what you want if you just want to use cap2UI5.** | [cap2UI5/README.md](cap2UI5/README.md) |
-| [**`builder/`**](builder/) | The build machinery **and hand-written source** that generates `core/` and `cap2UI5/`: the ABAP→JS transpiler, the sync scripts that mirror upstream abap2UI5, the hand-maintained source in `builder/base/`, and the jest suite. **This is what you want to change how the code is produced.** | [builder/README.md](builder/README.md) |
-| [**`adapter-cap/`**](adapter-cap/) | The thinnest possible CAP wrapper around the `abap2UI5/engine` seam — one CDS REST action, no database, no OData. Read this to understand how `cap2UI5/` (the full app) is wired. | [adapter-cap/README.md](adapter-cap/README.md) |
-| [**`adapter-node/`**](adapter-node/) | The same framework on a bare `node:http` server — no CAP, no express. Proof of the platform-neutral `abap2UI5/engine` seam (roundtrip + bootstrap + injectable store/asset ports) that every adapter builds on. | [adapter-node/README.md](adapter-node/README.md) |
-| [**`adapter-express/`**](adapter-express/) | The same framework mounted as express middleware — for embedding abap2UI5 into an existing express app. | [adapter-express/README.md](adapter-express/README.md) |
-| [**`adapter-web/`**](adapter-web/) | The whole stack web-packed into a static site — no server: the roundtrip is answered in-browser by the bundled engine. | [adapter-web/README.md](adapter-web/README.md) |
+| [**`transpile/`**](transpile/) | **The framework project**: the ABAP→JS transpiler and sync scripts that generate the platform-neutral core package, plus the platform adapters that consume it. | [transpile/README.md](transpile/README.md) |
+| ├─ [`transpile/core/`](transpile/core/) | the generated npm package `abap2UI5` — engine, transpiled classes, webapp, samples. Everything below consumes it via a `file:` link. | [core/README.md](transpile/core/README.md) |
+| └─ [`transpile/adapter/`](transpile/adapter/) | the four platform adapters: [`adapter-cap`](transpile/adapter/adapter-cap/) (thinnest CAP wrapper), [`adapter-node`](transpile/adapter/adapter-node/) (bare `node:http`), [`adapter-express`](transpile/adapter/adapter-express/) (middleware), [`adapter-web`](transpile/adapter/adapter-web/) (serverless browser bundle). | each adapter's README |
+| [**`builder-cap/`**](builder-cap/) | **The CAP app build project**: generates the full CAP app from its hand-written `base/` plus the core package. | [builder-cap/README.md](builder-cap/README.md) |
+| [**`cap2UI5/`**](cap2UI5/) | **The finished, deployable CAP app** — install it, run `cds watch`, and write your own UI5 apps as JavaScript classes. **This is what you want if you just want to use cap2UI5.** | [cap2UI5/README.md](cap2UI5/README.md) |
 
 > [!NOTE]
-> **`core/` and `cap2UI5/` are generated build artifacts in this repository** —
-> every build wipes and rewrites them from `builder/base/core/` resp.
-> `builder/base/cap/` + the transpiled sources. If you are contributing here,
-> edit the source in `builder/base/`, not the published folders, and re-run
-> `npm run build_cap` in `builder/`. (Consumers who copy `core/` + `cap2UI5/`
-> out and use them standalone can of course edit them freely — see
-> [builder/README.md](builder/README.md).)
+> **`transpile/core/` and `cap2UI5/` are generated build artifacts in this
+> repository** — every build wipes and rewrites them from `transpile/base/`
+> resp. `builder-cap/base/` + the transpiled sources. If you are contributing
+> here, edit the sources in the `base/` folders, not the published ones, and
+> re-run `npm run build_core` (transpile) / `npm run build_cap` (builder-cap).
+> (Consumers who copy `transpile/core/` + `cap2UI5/` out and use them
+> standalone can of course edit them freely.)
 
 ### Use it
 
@@ -55,12 +52,13 @@ the samples without installing anything in the
 
 ### How it's built
 
-The [builder](builder/) mirrors the upstream abap2UI5 ABAP sources, transpiles
-them to JavaScript, **assembles** the core package and the CAP app by
-overlaying the generated trees on the hand-written source in `builder/base/`,
-and **publishes** them 1:1 into `core/` and `cap2UI5/` — gated by the jest
-suite. The full pipeline — transpiler, sync scripts and GitHub Actions — is
-documented in [builder/README.md](builder/README.md).
+[transpile/](transpile/) mirrors the upstream abap2UI5 ABAP sources, transpiles
+them to JavaScript, **assembles** the core package by overlaying the generated
+trees on the hand-written source in `transpile/base/`, and **publishes** it 1:1
+into `transpile/core/`; [builder-cap/](builder-cap/) then derives the full CAP
+app from its own `base/` + that core — everything gated by the jest suites.
+The full pipeline — transpiler, sync scripts and GitHub Actions — is documented
+in [transpile/README.md](transpile/README.md).
 
 ## License
 
