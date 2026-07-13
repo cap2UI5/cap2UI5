@@ -1,7 +1,7 @@
 name: app prepare
 
-# Build the ready-to-serve frontend from transpile/run/input/app/webapp into
-# transpile/run/output/app (1:1 copy + the two cap2UI5-specific patches applied by
+# Build the ready-to-serve frontend from framework/run/input/app/webapp into
+# framework/run/output/app (1:1 copy + the two cap2UI5-specific patches applied by
 # patch-frontend.js). Step 2 of the update_frontend pipeline; also runnable
 # standalone.
 
@@ -23,20 +23,20 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: transpile/package-lock.json
+          cache-dependency-path: framework/package-lock.json
       - run: npm ci
-        working-directory: transpile
+        working-directory: framework
       - run: npm run prepare_app
-        working-directory: transpile
+        working-directory: framework
       - name: commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add transpile/run/output/app
+          git add framework/run/output/app
           if git diff --cached --quiet; then
             echo "nothing to commit"
           else
-            git commit -m "prepare: update transpile/run/output/app ($(cut -c1-12 transpile/run/input/app/UPSTREAM_COMMIT))"
+            git commit -m "prepare: update framework/run/output/app ($(cut -c1-12 framework/run/input/app/UPSTREAM_COMMIT))"
             git pull --rebase origin "${{ github.ref_name }}"
             git push origin "HEAD:${{ github.ref_name }}"
           fi

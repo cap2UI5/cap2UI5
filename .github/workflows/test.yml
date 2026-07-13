@@ -23,33 +23,33 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
           cache-dependency-path: |
-            transpile/package-lock.json
-            transpile/core/package-lock.json
+            framework/package-lock.json
+            framework/core/package-lock.json
             cap2UI5/package-lock.json
-            transpile/adapter/adapter-cap/package-lock.json
-            transpile/adapter/adapter-node/package-lock.json
-            transpile/adapter/adapter-express/package-lock.json
-            transpile/adapter/adapter-web/package-lock.json
-      # dev tooling (jest) lives in the transpile project; the runtime deps
+            framework/adapters/cap/package-lock.json
+            framework/adapters/node/package-lock.json
+            framework/adapters/express/package-lock.json
+            framework/adapters/web/package-lock.json
+      # dev tooling (jest) lives in the framework project; the runtime deps
       # the tests import (@sap/cds, @cap-js/sqlite, …) live in the CAP project
       # cap2UI5/.
       - run: npm ci
-        working-directory: transpile
+        working-directory: framework
       - run: npm ci
-        working-directory: transpile/core
+        working-directory: framework/core
       - run: npm ci
         working-directory: cap2UI5
       # platform adapters — armed as smoke gates in the jest suite
-      # (transpile/test/adapters.test.js skips them when not installed)
+      # (framework/test/adapters.test.js skips them when not installed)
       - run: npm ci
-        working-directory: transpile/adapter/adapter-cap
+        working-directory: framework/adapters/cap
       - run: npm ci
-        working-directory: transpile/adapter/adapter-node
+        working-directory: framework/adapters/node
       - run: npm ci
-        working-directory: transpile/adapter/adapter-express
+        working-directory: framework/adapters/express
       - run: npm ci
-        working-directory: transpile/adapter/adapter-web
+        working-directory: framework/adapters/web
       - run: npm test
-        working-directory: transpile
+        working-directory: framework
       - run: npm test
         working-directory: cap2UI5

@@ -22,19 +22,19 @@ The repository is organized as three projects, from framework to finished app:
 
 | Project | What it is | Start here |
 |---|---|---|
-| [**`transpile/`**](transpile/) | **The framework project**: the ABAP→JS transpiler and sync scripts that generate the platform-neutral core package, plus the platform adapters that consume it. | [transpile/README.md](transpile/README.md) |
-| ├─ [`transpile/core/`](transpile/core/) | the generated npm package `abap2UI5` — engine, transpiled classes, webapp, samples. Everything below consumes it via a `file:` link. | [core/README.md](transpile/core/README.md) |
-| └─ [`transpile/adapter/`](transpile/adapter/) | the four platform adapters: [`adapter-cap`](transpile/adapter/adapter-cap/) (thinnest CAP wrapper), [`adapter-node`](transpile/adapter/adapter-node/) (bare `node:http`), [`adapter-express`](transpile/adapter/adapter-express/) (middleware), [`adapter-web`](transpile/adapter/adapter-web/) (serverless browser bundle). | each adapter's README |
-| [**`builder-cap/`**](builder-cap/) | **The CAP app build project**: generates the full CAP app from its hand-written `base/` plus the core package. | [builder-cap/README.md](builder-cap/README.md) |
+| [**`framework/`**](framework/) | **The framework project**: the ABAP→JS transpiler and sync scripts that generate the platform-neutral core package, plus the platform adapters that consume it. | [framework/README.md](framework/README.md) |
+| ├─ [`framework/core/`](framework/core/) | the generated npm package `abap2UI5` — engine, transpiled classes, webapp, samples. Everything below consumes it via a `file:` link. | [core/README.md](framework/core/README.md) |
+| └─ [`framework/adapters/`](framework/adapters/) | the four platform adapters: [`cap`](framework/adapters/cap/) (thinnest CAP wrapper), [`node`](framework/adapters/node/) (bare `node:http`), [`express`](framework/adapters/express/) (middleware), [`web`](framework/adapters/web/) (serverless browser bundle). | each adapter's README |
+| [**`cap-builder/`**](cap-builder/) | **The CAP app build project**: generates the full CAP app from its hand-written `src/` plus the core package. | [cap-builder/README.md](cap-builder/README.md) |
 | [**`cap2UI5/`**](cap2UI5/) | **The finished, deployable CAP app** — install it, run `cds watch`, and write your own UI5 apps as JavaScript classes. **This is what you want if you just want to use cap2UI5.** | [cap2UI5/README.md](cap2UI5/README.md) |
 
 > [!NOTE]
-> **`transpile/core/` and `cap2UI5/` are generated build artifacts in this
-> repository** — every build wipes and rewrites them from `transpile/base/`
-> resp. `builder-cap/base/` + the transpiled sources. If you are contributing
-> here, edit the sources in the `base/` folders, not the published ones, and
-> re-run `npm run build_core` (transpile) / `npm run build_cap` (builder-cap).
-> (Consumers who copy `transpile/core/` + `cap2UI5/` out and use them
+> **`framework/core/` and `cap2UI5/` are generated build artifacts in this
+> repository** — every build wipes and rewrites them from `framework/src/`
+> resp. `cap-builder/src/` + the transpiled sources. If you are contributing
+> here, edit the sources in the `src/` folders, not the published ones, and
+> re-run `npm run build_core` (framework) / `npm run build_cap` (cap-builder).
+> (Consumers who copy `framework/core/` + `cap2UI5/` out and use them
 > standalone can of course edit them freely.)
 
 ### Use it
@@ -52,13 +52,13 @@ the samples without installing anything in the
 
 ### How it's built
 
-[transpile/](transpile/) mirrors the upstream abap2UI5 ABAP sources, transpiles
+[framework/](framework/) mirrors the upstream abap2UI5 ABAP sources, transpiles
 them to JavaScript, **assembles** the core package by overlaying the generated
-trees on the hand-written source in `transpile/base/`, and **publishes** it 1:1
-into `transpile/core/`; [builder-cap/](builder-cap/) then derives the full CAP
-app from its own `base/` + that core — everything gated by the jest suites.
+trees on the hand-written source in `framework/src/`, and **publishes** it 1:1
+into `framework/core/`; [cap-builder/](cap-builder/) then derives the full CAP
+app from its own `src/` + that core — everything gated by the jest suites.
 The full pipeline — transpiler, sync scripts and GitHub Actions — is documented
-in [transpile/README.md](transpile/README.md).
+in [framework/README.md](framework/README.md).
 
 ## License
 

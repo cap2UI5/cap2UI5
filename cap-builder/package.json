@@ -1,0 +1,16 @@
+{
+  "name": "cap2ui5-cap-builder",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Builder project for the full CAP app \u2014 assembles cap-builder/src + the webapp from the published core package (framework/core) and publishes the result 1:1 into ../cap2UI5",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "assemble": "node scripts/assemble-cap.js",
+    "publish": "node scripts/publish-cap.js",
+    "build_cap": "node scripts/assemble-cap.js && node scripts/publish-cap.js",
+    "test": "cd ../cap2UI5 && npm test"
+  }
+}
