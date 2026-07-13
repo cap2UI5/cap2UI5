@@ -1,7 +1,26 @@
 node_modules/
-.mirror_tmp/
+target/
+_out/
+gen/
+
+.cdsrc-private.json
+default-*.json
+*.sqlite
+*.db
+
+# MTA
+mta_archives/
+*_mta_build_tmp
+*.mtar
+resources/
+
+# Other
 .DS_Store
-builder-cap2UI5/run/output/cap2UI5/
-builder-abap2UI5-js/run/output/core/
-builder-abap2UI5-js/adapters/web/dist/
-builder-abap2UI5-js/adapters/web/register-all.generated.js
+*.orig
+*.log
+
+# @cap-js/cds-typer
+@cds-models
+
+# frontend mirror workdir
+.mirror_tmp/

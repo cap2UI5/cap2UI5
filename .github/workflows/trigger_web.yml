@@ -1,14 +1,15 @@
 name: trigger web
 
-# Kick the browser build in web-cap2UI5. Writes the sha of the
-# last commit touching core/ or cap2UI5/ into web-cap2UI5:UPSTREAM_HEAD and pushes
-# it via a deploy key registered on web-cap2UI5 with write access (private
-# half: secret ACTION_KEY_WEB here) — that push starts web-cap2UI5's
+# Kick the browser build in builder-cap2UI5-web. Writes the sha of this
+# repo's HEAD into builder-cap2UI5-web:UPSTREAM_HEAD and pushes it via a
+# deploy key registered on builder-cap2UI5-web with write access (private
+# half: secret ACTION_KEY_WEB here) — that push starts builder-cap2UI5-web's
 # "build web" workflow, which mirrors this repo and redeploys the site.
 # Same pattern as abap2UI5's trigger_cap. Manual only (workflow_dispatch):
 # run it whenever a rebuild of the browser site should be kicked off — e.g.
-# after a nightly sync updated core/ or cap2UI5/. If both are unchanged since the
-# last trigger, nothing is pushed and web-cap2UI5 does not rebuild.
+# after builder-cap2UI5 published a new app build here. If the sha is
+# unchanged since the last trigger, nothing is pushed and
+# builder-cap2UI5-web does not rebuild.
 
 on:
   workflow_dispatch:
@@ -26,8 +27,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           ref: ${{ github.ref_name }}
-          fetch-depth: 0 # full history: the trigger sha is the last commit touching core/ or cap2UI5/
-      - name: push trigger commit to web-cap2UI5
+      - name: push trigger commit to builder-cap2UI5-web
         env:
           ACTION_KEY_WEB: ${{ secrets.ACTION_KEY_WEB }}
         run: |
@@ -38,15 +38,15 @@ jobs:
           key_file="$(mktemp)"
           printf '%s\n' "$ACTION_KEY_WEB" > "$key_file"
           export GIT_SSH_COMMAND="ssh -i $key_file -o StrictHostKeyChecking=accept-new"
-          sha="$(git rev-list -1 HEAD -- builder-abap2UI5-js/core cap2UI5)"
-          git clone --depth 1 git@github.com:cap2UI5/web-cap2UI5.git /tmp/web
+          sha="$(git rev-parse HEAD)"
+          git clone --depth 1 git@github.com:cap2UI5/builder-cap2UI5-web.git /tmp/web
           echo "$sha" > /tmp/web/UPSTREAM_HEAD
           cd /tmp/web
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add UPSTREAM_HEAD
           if git diff --cached --quiet; then
-            echo "web-cap2UI5 already at ${sha} — nothing to trigger"
+            echo "builder-cap2UI5-web already at ${sha} — nothing to trigger"
           else
             git commit -m "trigger: rebuild for cap2UI5/cap2UI5@${sha:0:12}"
             git push origin HEAD:main
