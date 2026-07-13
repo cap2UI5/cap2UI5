@@ -1,7 +1,7 @@
 CLASS ltcl_fake_request DEFINITION FINAL.
   PUBLIC SECTION.
     DATA mv_cdata  TYPE string.
-    DATA mt_header TYPE z2ui5_cl_abap2ui5_context=>ty_t_name_value.
+    DATA mt_header TYPE z2ui5_cl_a2ui5_context=>ty_t_name_value.
 
     METHODS get_cdata
       RETURNING
@@ -40,8 +40,8 @@ ENDCLASS.
 CLASS ltcl_fake_response DEFINITION FINAL.
   PUBLIC SECTION.
     DATA mv_cdata          TYPE string.
-    DATA mt_header         TYPE z2ui5_cl_abap2ui5_context=>ty_t_name_value.
-    DATA mt_cookie         TYPE z2ui5_cl_abap2ui5_context=>ty_t_name_value.
+    DATA mt_header         TYPE z2ui5_cl_a2ui5_context=>ty_t_name_value.
+    DATA mt_cookie         TYPE z2ui5_cl_a2ui5_context=>ty_t_name_value.
     DATA mv_cookie_deleted TYPE string.
 
     METHODS set_cdata
@@ -140,7 +140,7 @@ CLASS ltcl_test DEFINITION FINAL
 
   PRIVATE SECTION.
     DATA mo_server TYPE REF TO ltcl_fake_server.
-    DATA mo_cut    TYPE REF TO z2ui5_cl_abap2ui5_http.
+    DATA mo_cut    TYPE REF TO z2ui5_cl_a2ui5_http.
 
     METHODS setup.
 
@@ -153,6 +153,7 @@ CLASS ltcl_test DEFINITION FINAL
     METHODS test_get_response_cookie  FOR TESTING RAISING cx_static_check.
     METHODS test_delete_resp_cookie   FOR TESTING RAISING cx_static_check.
     METHODS test_set_session_stateful FOR TESTING RAISING cx_static_check.
+    METHODS test_request_cached       FOR TESTING RAISING cx_static_check.
 
 ENDCLASS.
 
@@ -162,7 +163,7 @@ CLASS ltcl_test IMPLEMENTATION.
   METHOD setup.
 
     mo_server = NEW #( ).
-    mo_cut = z2ui5_cl_abap2ui5_http=>factory( mo_server ).
+    mo_cut = z2ui5_cl_a2ui5_http=>factory( mo_server ).
 
   ENDMETHOD.
 
@@ -175,7 +176,7 @@ CLASS ltcl_test IMPLEMENTATION.
 
   METHOD test_factory_cloud.
 
-    DATA(lo_cut) = z2ui5_cl_abap2ui5_http=>factory_cloud( req = NEW ltcl_fake_request( )
+    DATA(lo_cut) = z2ui5_cl_a2ui5_http=>factory_cloud( req = NEW ltcl_fake_request( )
                                                       res     = NEW ltcl_fake_response( ) ).
 
     cl_abap_unit_assert=>assert_bound( lo_cut->mo_request_cloud ).
@@ -248,6 +249,24 @@ CLASS ltcl_test IMPLEMENTATION.
 
     cl_abap_unit_assert=>assert_equals( exp = 1
                                         act = mo_server->mv_stateful ).
+
+  ENDMETHOD.
+
+  METHOD test_request_cached.
+
+    mo_server->request->mv_cdata = `first`.
+
+    cl_abap_unit_assert=>assert_equals( exp = `first`
+                                        act = mo_cut->get_cdata( ) ).
+
+    " the resolved request object is cached per instance - a wrapper
+    " always serves exactly one request, so swapping the server's
+    " request object afterwards has no effect anymore
+    mo_server->request = NEW #( ).
+    mo_server->request->mv_cdata = `second`.
+
+    cl_abap_unit_assert=>assert_equals( exp = `first`
+                                        act = mo_cut->get_cdata( ) ).
 
   ENDMETHOD.
 

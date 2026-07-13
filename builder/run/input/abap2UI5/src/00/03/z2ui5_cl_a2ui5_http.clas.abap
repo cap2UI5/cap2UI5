@@ -1,4 +1,4 @@
-CLASS z2ui5_cl_abap2ui5_http DEFINITION PUBLIC.
+CLASS z2ui5_cl_a2ui5_http DEFINITION PUBLIC.
 
   PUBLIC SECTION.
 
@@ -7,7 +7,7 @@ CLASS z2ui5_cl_abap2ui5_http DEFINITION PUBLIC.
         method   TYPE string,
         body     TYPE string,
         path     TYPE string,
-        t_params TYPE z2ui5_cl_abap2ui5_context=>ty_t_name_value,
+        t_params TYPE z2ui5_cl_a2ui5_context=>ty_t_name_value,
       END OF ty_s_http_req.
 
     TYPES:
@@ -37,14 +37,14 @@ CLASS z2ui5_cl_abap2ui5_http DEFINITION PUBLIC.
       IMPORTING
         server        TYPE REF TO object
       RETURNING
-        VALUE(result) TYPE REF TO z2ui5_cl_abap2ui5_http.
+        VALUE(result) TYPE REF TO z2ui5_cl_a2ui5_http.
 
     CLASS-METHODS factory_cloud
       IMPORTING
         req           TYPE REF TO object
         res           TYPE REF TO object
       RETURNING
-        VALUE(result) TYPE REF TO z2ui5_cl_abap2ui5_http.
+        VALUE(result) TYPE REF TO z2ui5_cl_a2ui5_http.
 
     METHODS get_req_info
       RETURNING
@@ -99,10 +99,24 @@ CLASS z2ui5_cl_abap2ui5_http DEFINITION PUBLIC.
   PROTECTED SECTION.
 
   PRIVATE SECTION.
+
+    " resolved once per instance - every accessor would otherwise repeat
+    " the dynamic ASSIGN on the server object
+    DATA mo_request_onprem  TYPE REF TO object.
+    DATA mo_response_onprem TYPE REF TO object.
+
+    METHODS get_request_onprem
+      RETURNING
+        VALUE(result) TYPE REF TO object.
+
+    METHODS get_response_onprem
+      RETURNING
+        VALUE(result) TYPE REF TO object.
+
 ENDCLASS.
 
 
-CLASS z2ui5_cl_abap2ui5_http IMPLEMENTATION.
+CLASS z2ui5_cl_a2ui5_http IMPLEMENTATION.
 
   METHOD client_create.
 
@@ -150,12 +164,12 @@ CLASS z2ui5_cl_abap2ui5_http IMPLEMENTATION.
         ENDIF.
 
       CATCH cx_root INTO DATA(x).
-        RAISE EXCEPTION TYPE z2ui5_cx_abap2ui5_error
+        RAISE EXCEPTION TYPE z2ui5_cx_a2ui5_error
           EXPORTING val = x.
     ENDTRY.
 
     IF result IS NOT BOUND.
-      RAISE EXCEPTION TYPE z2ui5_cx_abap2ui5_error
+      RAISE EXCEPTION TYPE z2ui5_cx_a2ui5_error
         EXPORTING val = `HTTP_CLIENT_CREATE_ERROR - check the destination/url configuration`.
     ENDIF.
 
@@ -211,7 +225,7 @@ CLASS z2ui5_cl_abap2ui5_http IMPLEMENTATION.
           CALL METHOD lo_client->(`CLOSE`)
             EXCEPTIONS
               OTHERS = 1.
-          RAISE EXCEPTION TYPE z2ui5_cx_abap2ui5_error
+          RAISE EXCEPTION TYPE z2ui5_cx_a2ui5_error
             EXPORTING val = |HTTP_COMMUNICATION_ERROR - { lv_message }|.
         ENDIF.
 
@@ -233,7 +247,7 @@ CLASS z2ui5_cl_abap2ui5_http IMPLEMENTATION.
             OTHERS = 1.
 
       CATCH cx_root INTO DATA(x).
-        RAISE EXCEPTION TYPE z2ui5_cx_abap2ui5_error
+        RAISE EXCEPTION TYPE z2ui5_cx_a2ui5_error
           EXPORTING val = x.
     ENDTRY.
 
@@ -245,12 +259,7 @@ CLASS z2ui5_cl_abap2ui5_http IMPLEMENTATION.
 
     IF mo_server_onprem IS BOUND.
 
-      DATA object TYPE REF TO object.
-      FIELD-SYMBOLS <any> TYPE any.
-
-      ASSIGN mo_server_onprem->(`RESPONSE`) TO <any>.
-      ASSERT sy-subrc = 0.
-      object = <any>.
+      DATA(object) = get_response_onprem( ).
 
       CALL METHOD object->(`DELETE_COOKIE`)
         EXPORTING
@@ -262,16 +271,11 @@ CLASS z2ui5_cl_abap2ui5_http IMPLEMENTATION.
 
   METHOD get_response_cookie.
 
-    DATA object TYPE REF TO object.
-    FIELD-SYMBOLS <any> TYPE any.
-
     DATA(lv_val) = CONV string( val ).
 
     IF mo_server_onprem IS BOUND.
 
-      ASSIGN mo_server_onprem->(`RESPONSE`) TO <any>.
-      ASSERT sy-subrc = 0.
-      object = <any>.
+      DATA(object) = get_response_onprem( ).
 
       CALL METHOD object->(`GET_COOKIE`)
         EXPORTING
@@ -285,16 +289,11 @@ CLASS z2ui5_cl_abap2ui5_http IMPLEMENTATION.
 
   METHOD get_header_field.
 
-    DATA object TYPE REF TO object.
-    FIELD-SYMBOLS <any> TYPE any.
-
     DATA(lv_val) = CONV string( val ).
 
     IF mo_server_onprem IS BOUND.
 
-      ASSIGN mo_server_onprem->(`REQUEST`) TO <any>.
-      ASSERT sy-subrc = 0.
-      object = <any>.
+      DATA(object) = get_request_onprem( ).
 
       CALL METHOD object->(`GET_HEADER_FIELD`)
         EXPORTING
@@ -316,16 +315,11 @@ CLASS z2ui5_cl_abap2ui5_http IMPLEMENTATION.
 
   METHOD set_header_field.
 
-    DATA object TYPE REF TO object.
-    FIELD-SYMBOLS <any> TYPE any.
-
     DATA(lv_n) = CONV string( n ).
     DATA(lv_v) = CONV string( v ).
     IF mo_server_onprem IS BOUND.
 
-      ASSIGN mo_server_onprem->(`RESPONSE`) TO <any>.
-      ASSERT sy-subrc = 0.
-      object = <any>.
+      DATA(object) = get_response_onprem( ).
 
       CALL METHOD object->(`SET_HEADER_FIELD`)
         EXPORTING
@@ -360,14 +354,9 @@ CLASS z2ui5_cl_abap2ui5_http IMPLEMENTATION.
 
   METHOD get_cdata.
 
-    DATA object TYPE REF TO object.
-    FIELD-SYMBOLS <any> TYPE any.
-
     IF mo_server_onprem IS BOUND.
 
-      ASSIGN mo_server_onprem->(`REQUEST`) TO <any>.
-      ASSERT sy-subrc = 0.
-      object = <any>.
+      DATA(object) = get_request_onprem( ).
 
       CALL METHOD object->(`GET_CDATA`)
         RECEIVING
@@ -385,14 +374,9 @@ CLASS z2ui5_cl_abap2ui5_http IMPLEMENTATION.
 
   METHOD get_method.
 
-    DATA object TYPE REF TO object.
-    FIELD-SYMBOLS <any> TYPE any.
-
     IF mo_server_onprem IS BOUND.
 
-      ASSIGN mo_server_onprem->(`REQUEST`) TO <any>.
-      ASSERT sy-subrc = 0.
-      object = <any>.
+      DATA(object) = get_request_onprem( ).
 
       CALL METHOD object->(`IF_HTTP_REQUEST~GET_METHOD`)
         RECEIVING
@@ -410,14 +394,9 @@ CLASS z2ui5_cl_abap2ui5_http IMPLEMENTATION.
 
   METHOD set_cdata.
 
-    DATA object TYPE REF TO object.
-    FIELD-SYMBOLS <any> TYPE any.
-
     IF mo_server_onprem IS BOUND.
 
-      ASSIGN mo_server_onprem->(`RESPONSE`) TO <any>.
-      ASSERT sy-subrc = 0.
-      object = <any>.
+      DATA(object) = get_response_onprem( ).
 
       CALL METHOD object->(`SET_CDATA`)
         EXPORTING
@@ -435,16 +414,11 @@ CLASS z2ui5_cl_abap2ui5_http IMPLEMENTATION.
 
   METHOD set_status.
 
-    DATA object TYPE REF TO object.
-    FIELD-SYMBOLS <any> TYPE any.
-
     DATA(lv_reason) = CONV string( reason ).
 
     IF mo_server_onprem IS BOUND.
 
-      ASSIGN mo_server_onprem->(`RESPONSE`) TO <any>.
-      ASSERT sy-subrc = 0.
-      object = <any>.
+      DATA(object) = get_response_onprem( ).
 
       CALL METHOD object->(`IF_HTTP_RESPONSE~SET_STATUS`)
         EXPORTING
@@ -475,12 +449,38 @@ CLASS z2ui5_cl_abap2ui5_http IMPLEMENTATION.
 
   ENDMETHOD.
 
+  METHOD get_request_onprem.
+
+    IF mo_request_onprem IS NOT BOUND.
+      FIELD-SYMBOLS <any> TYPE any.
+      ASSIGN mo_server_onprem->(`REQUEST`) TO <any>.
+      ASSERT sy-subrc = 0.
+      mo_request_onprem = <any>.
+    ENDIF.
+
+    result = mo_request_onprem.
+
+  ENDMETHOD.
+
+  METHOD get_response_onprem.
+
+    IF mo_response_onprem IS NOT BOUND.
+      FIELD-SYMBOLS <any> TYPE any.
+      ASSIGN mo_server_onprem->(`RESPONSE`) TO <any>.
+      ASSERT sy-subrc = 0.
+      mo_response_onprem = <any>.
+    ENDIF.
+
+    result = mo_response_onprem.
+
+  ENDMETHOD.
+
   METHOD get_req_info.
 
     result-body     = get_cdata( ).
     result-method   = get_method( ).
     result-path     = get_header_field( `~path` ).
-    result-t_params = z2ui5_cl_abap2ui5_context=>url_param_get_tab( get_header_field( `~request_uri` ) ).
+    result-t_params = z2ui5_cl_a2ui5_context=>url_param_get_tab( get_header_field( `~request_uri` ) ).
 
   ENDMETHOD.
 
