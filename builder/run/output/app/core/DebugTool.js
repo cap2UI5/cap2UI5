@@ -65,14 +65,11 @@ sap.ui.define(
     }
 
     function getViewContent(view) {
-      // cap2UI5 patch: "viewContent" is a special setting on current UI5
-      // releases — getProperty() throws. XMLView.create stashes the view
-      // definition in mProperties, read it from there as fallback.
-      try {
-        return view?.getProperty("viewContent");
-      } catch {
-        return view?.mProperties?.viewContent;
-      }
+      // Private member access (debug tool only): XMLView keeps the raw XML
+      // string as a pseudo property in mProperties, but does not declare it
+      // in its metadata - getProperty("viewContent") therefore throws and
+      // would abort the whole tab selection. Read the plain object instead.
+      return view?.mProperties?.viewContent;
     }
 
     function getRenderedContent(view) {
