@@ -1,14 +1,14 @@
-// TODO(abap2js): unresolved reference cl_abap_char_utilities — add require manually
-// TODO(abap2js): unresolved reference cl_abap_datadescr — add require manually
-// TODO(abap2js): unresolved reference cl_abap_elemdescr — add require manually
-// TODO(abap2js): unresolved reference cl_abap_format — add require manually
-// TODO(abap2js): unresolved reference cl_abap_objectdescr — add require manually
-// TODO(abap2js): unresolved reference cl_abap_structdescr — add require manually
-// TODO(abap2js): unresolved reference cl_abap_tabledescr — add require manually
-// TODO(abap2js): unresolved reference cl_abap_typedescr — add require manually
-// TODO(abap2js): unresolved reference cx_sy_dyn_call_illegal_class — add require manually
+const cl_abap_char_utilities = require("abap2UI5/cl_abap_char_utilities");
+const cl_abap_datadescr = require("abap2UI5/cl_abap_datadescr");
+const cl_abap_elemdescr = require("abap2UI5/cl_abap_elemdescr");
+const cl_abap_format = require("abap2UI5/cl_abap_format");
+const cl_abap_objectdescr = require("abap2UI5/cl_abap_objectdescr");
+const cl_abap_structdescr = require("abap2UI5/cl_abap_structdescr");
+const cl_abap_tabledescr = require("abap2UI5/cl_abap_tabledescr");
+const cl_abap_typedescr = require("abap2UI5/cl_abap_typedescr");
+const cx_sy_dyn_call_illegal_class = require("abap2UI5/cx_sy_dyn_call_illegal_class");
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-// TODO(abap2js): unresolved reference z2ui5_cx_sample_error — add require manually
+const z2ui5_cx_sample_error = require("./z2ui5_cx_sample_error");
 
 class z2ui5_cl_sample_context {
   static cv_char_util_newline = ``;
@@ -1478,5 +1478,7 @@ class z2ui5_cl_sample_context {
     return result;
   }
 }
+
+z2ui5_cl_sample_context.class_constructor();
 
 module.exports = z2ui5_cl_sample_context;

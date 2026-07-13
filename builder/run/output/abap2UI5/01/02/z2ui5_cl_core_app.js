@@ -1,8 +1,8 @@
-// TODO(abap2js): unresolved reference z2ui5_cl_abap2ui5_context — add require manually
+const z2ui5_cl_abap2ui5_context = require("abap2UI5/z2ui5_cl_abap2ui5_context");
 // TODO(abap2js): unresolved reference z2ui5_cl_core_srv_draft — add require manually
 // TODO(abap2js): unresolved reference z2ui5_cl_core_srv_model — add require manually
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-// TODO(abap2js): unresolved reference z2ui5_cx_abap2ui5_error — add require manually
+const z2ui5_cx_abap2ui5_error = require("abap2UI5/z2ui5_cx_abap2ui5_error");
 
 class z2ui5_cl_core_app {
   static mt_buffer = [];

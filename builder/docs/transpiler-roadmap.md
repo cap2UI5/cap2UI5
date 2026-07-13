@@ -85,7 +85,14 @@ Step-2 (porter):
 - [x] DB pilot: SELECT/MODIFY/DELETE/COMMIT → `z2ui5_port.db()` +
       synchronous in-memory `z2ui5_port` store (−~24 TODOs, end-to-end tested).
 - [ ] CDS-backed `z2ui5_port` store (async — see ripple note) via `set_store`.
-- [ ] RTTI schema → `z2ui5_cl_srt_*`.
+- [x] Kernel shims: `cl_abap_*` / `cx_sy_*` references now resolve to native
+      shim modules under `base/srv/z2ui5/00/00/` (`abap_rtti.js` derives
+      ABAP-shaped descriptors from JS typeof/shape; constants use the real
+      kernel literals). `class_constructor()` is invoked at module load.
+      TODOs 809→736 (framework) / 114→91 (samples); the context classes
+      (`z2ui5_cl_abap2ui5_context`, `z2ui5_cl_sample_context`) load and their
+      RTTI-based boolean detection works natively.
+- [ ] RTTI schema → `z2ui5_cl_srt_*` (deep serialization paths).
 - [ ] sxml schema → XML shim.
 
 TODO count across the tree: **973 → 769** so far.

@@ -14,10 +14,8 @@
   {
     "class": "z2ui5_cl_demo_app_008",
     "path": "01/01/z2ui5_cl_demo_app_008.js",
-    "todos": 1,
-    "todoDetails": [
-      "unresolved class reference: cl_abap_char_utilities"
-    ]
+    "todos": 0,
+    "todoDetails": []
   },
   {
     "class": "z2ui5_cl_demo_app_009",
@@ -81,10 +79,9 @@
   {
     "class": "z2ui5_cl_demo_app_056",
     "path": "01/01/z2ui5_cl_demo_app_056.js",
-    "todos": 2,
+    "todos": 1,
     "todoDetails": [
-      "IN range-table check approximated (sign E ignored)",
-      "unresolved class reference: z2ui5_cl_sample_context"
+      "IN range-table check approximated (sign E ignored)"
     ]
   },
   {
@@ -159,7 +156,7 @@
   {
     "class": "z2ui5_cl_demo_app_126",
     "path": "01/01/z2ui5_cl_demo_app_126.js",
-    "todos": 11,
+    "todos": 8,
     "todoDetails": [
       "unsupported statement: cl_abap_typedescr=>describe_by_name( EXPORTING p_name = `Z2UI5_T_UTIL_01` RECEIVING p_descr_ref = DATA(typedesc) EXCEPTI",
       "unsupported statement: CREATE DATA mt_table TYPE HANDLE new_table_desc.",
@@ -168,10 +165,7 @@
       "unsupported statement: CREATE DATA ms_table_row TYPE HANDLE new_struct_desc.",
       "unsupported statement: ASSIGN mt_table->* TO <table>.",
       "unsupported statement: SELECT * FROM z2ui5_t_01 INTO CORRESPONDING FIELDS OF TABLE @<table> UP TO 3 ROWS.",
-      "unsupported statement: ASSIGN mt_table_tmp->* TO <table_tmp>.",
-      "unresolved class reference: cl_abap_datadescr",
-      "unresolved class reference: cl_abap_structdescr",
-      "unresolved class reference: cl_abap_tabledescr"
+      "unsupported statement: ASSIGN mt_table_tmp->* TO <table_tmp>."
     ]
   },
   {
@@ -219,10 +213,8 @@
   {
     "class": "z2ui5_cl_demo_app_187",
     "path": "01/01/z2ui5_cl_demo_app_187.js",
-    "todos": 1,
-    "todoDetails": [
-      "unresolved class reference: z2ui5_cl_sample_context"
-    ]
+    "todos": 0,
+    "todoDetails": []
   },
   {
     "class": "z2ui5_cl_demo_app_197",
@@ -305,19 +297,16 @@
   {
     "class": "z2ui5_cl_demo_app_074",
     "path": "01/05/z2ui5_cl_demo_app_074.js",
-    "todos": 2,
+    "todos": 1,
     "todoDetails": [
-      "unsupported statement: ASSIGN mr_table->* TO <tab>.",
-      "unresolved class reference: z2ui5_cl_sample_context"
+      "unsupported statement: ASSIGN mr_table->* TO <tab>."
     ]
   },
   {
     "class": "z2ui5_cl_demo_app_075",
     "path": "01/05/z2ui5_cl_demo_app_075.js",
-    "todos": 1,
-    "todoDetails": [
-      "unresolved class reference: z2ui5_cl_sample_context"
-    ]
+    "todos": 0,
+    "todoDetails": []
   },
   {
     "class": "z2ui5_cl_demo_app_078",
@@ -334,10 +323,9 @@
   {
     "class": "z2ui5_cl_demo_app_136",
     "path": "01/05/z2ui5_cl_demo_app_136.js",
-    "todos": 2,
+    "todos": 1,
     "todoDetails": [
-      "unsupported statement: ASSIGN mr_table->* TO <tab>.",
-      "unresolved class reference: z2ui5_cl_sample_context"
+      "unsupported statement: ASSIGN mr_table->* TO <tab>."
     ]
   },
   {
@@ -375,10 +363,8 @@
   {
     "class": "z2ui5_cl_demo_app_005",
     "path": "01/08/z2ui5_cl_demo_app_005.js",
-    "todos": 1,
-    "todoDetails": [
-      "unresolved class reference: cl_abap_char_utilities"
-    ]
+    "todos": 0,
+    "todoDetails": []
   },
   {
     "class": "z2ui5_cl_demo_app_006",
@@ -461,18 +447,14 @@
   {
     "class": "z2ui5_cl_demo_app_053",
     "path": "01/08/z2ui5_cl_demo_app_053.js",
-    "todos": 1,
-    "todoDetails": [
-      "unresolved class reference: z2ui5_cl_sample_context"
-    ]
+    "todos": 0,
+    "todoDetails": []
   },
   {
     "class": "z2ui5_cl_demo_app_059",
     "path": "01/08/z2ui5_cl_demo_app_059.js",
-    "todos": 1,
-    "todoDetails": [
-      "unresolved class reference: z2ui5_cl_sample_context"
-    ]
+    "todos": 0,
+    "todoDetails": []
   },
   {
     "class": "z2ui5_cl_demo_app_062",
@@ -1163,7 +1145,7 @@
   {
     "class": "z2ui5_cl_sample_context",
     "path": "01/z2ui5_cl_sample_context.js",
-    "todos": 74,
+    "todos": 64,
     "todoDetails": [
       "builtin shift_left( ) not mapped",
       "builtin shift_left( ) not mapped",
@@ -1228,26 +1210,15 @@
       "unsupported statement: ASSIGN lr_tab->* TO <tab2>.",
       "unsupported statement: CALL METHOD obj->(`ZIF_LOGGER~EXPORT_TO_TABLE`) RECEIVING rt_bapiret = <tab2>.",
       "unsupported statement: ASSIGN obj->(lv_name) TO <comp>.",
-      "unsupported statement: msg_get_rap_row( EXPORTING val = val entity_name = entity_name IMPORTING messages = result is_row = DATA(lv_is_row) ).",
-      "unresolved class reference: cl_abap_char_utilities",
-      "unresolved class reference: cl_abap_datadescr",
-      "unresolved class reference: cl_abap_elemdescr",
-      "unresolved class reference: cl_abap_format",
-      "unresolved class reference: cl_abap_objectdescr",
-      "unresolved class reference: cl_abap_structdescr",
-      "unresolved class reference: cl_abap_tabledescr",
-      "unresolved class reference: cl_abap_typedescr",
-      "unresolved class reference: cx_sy_dyn_call_illegal_class",
-      "unresolved class reference: z2ui5_cx_sample_error"
+      "unsupported statement: msg_get_rap_row( EXPORTING val = val entity_name = entity_name IMPORTING messages = result is_row = DATA(lv_is_row) )."
     ]
   },
   {
     "class": "z2ui5_cx_sample_error",
     "path": "01/z2ui5_cx_sample_error.js",
-    "todos": 2,
+    "todos": 1,
     "todoDetails": [
-      "unresolved superclass stubbed: cx_no_check",
-      "unresolved class reference: z2ui5_cl_sample_context"
+      "unresolved superclass stubbed: cx_no_check"
     ]
   }
 ]

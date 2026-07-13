@@ -1,5 +1,5 @@
 const cx_no_check = class {}; // TODO(abap2js): unresolved superclass — replace stub manually
-// TODO(abap2js): unresolved reference z2ui5_cl_sample_context — add require manually
+const z2ui5_cl_sample_context = require("./z2ui5_cl_sample_context");
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 
 class z2ui5_cx_sample_error extends cx_no_check {

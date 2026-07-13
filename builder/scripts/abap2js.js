@@ -30,7 +30,14 @@ const path = require("path");
 
 function requirePathFor(className) {
   if (/^z2ui5_cl_demo_/.test(className)) return `./${className}`;
+  // sample-tree helpers (context, error) — flattened next to the demo apps
+  if (/^z2ui5_(cl|cx)_sample_/.test(className)) return `./${className}`;
+  // SAP kernel classes — native shims under srv/z2ui5/00/00 (see abap_rtti.js);
+  // a class without a shim fails the assemble load-gate visibly, not silently
+  if (/^cl_abap_[a-z0-9_]+$/.test(className)) return `abap2UI5/${className}`;
+  if (/^cx_sy_[a-z0-9_]+$/.test(className)) return `abap2UI5/${className}`;
   if (
+    /^z2ui5_(cl|cx)_abap2ui5_/.test(className) ||
     /^z2ui5_(cl|cx)_srt_?/.test(className) ||
     /^z2ui5_(cl|cx)_ajson/.test(className) ||
     /^z2ui5_if_/.test(className) ||
@@ -1667,6 +1674,13 @@ function transpileClass(source, filename) {
       lines.push(`});`);
       lines.push("");
     }
+  }
+
+  // ABAP CLASS_CONSTRUCTOR runs before first use of the class — invoke it at
+  // module load (the closest JS equivalent; ABAP is lazy-on-first-touch)
+  if (lines.some((l) => /^\s*static class_constructor\(/.test(l))) {
+    lines.push(`${model.name}.class_constructor();`);
+    lines.push("");
   }
 
   lines.push(`module.exports = ${model.name};`);

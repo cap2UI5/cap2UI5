@@ -1,5 +1,5 @@
 const z2ui5_cl_pop_get_range = require("abap2UI5/z2ui5_cl_pop_get_range");
-// TODO(abap2js): unresolved reference z2ui5_cl_sample_context — add require manually
+const z2ui5_cl_sample_context = require("./z2ui5_cl_sample_context");
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");

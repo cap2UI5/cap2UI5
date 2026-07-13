@@ -1,6 +1,6 @@
-// TODO(abap2js): unresolved reference cl_abap_char_utilities — add require manually
-// TODO(abap2js): unresolved reference cl_abap_elemdescr — add require manually
-// TODO(abap2js): unresolved reference cl_abap_typedescr — add require manually
+const cl_abap_char_utilities = require("abap2UI5/cl_abap_char_utilities");
+const cl_abap_elemdescr = require("abap2UI5/cl_abap_elemdescr");
+const cl_abap_typedescr = require("abap2UI5/cl_abap_typedescr");
 const z2ui5_cl_srt_datadescr = require("abap2UI5/z2ui5_cl_srt_datadescr");
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cx_srt = require("abap2UI5/z2ui5_cx_srt");
