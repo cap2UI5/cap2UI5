@@ -1,5 +1,4 @@
-const fs = require("fs");
-const path = require("path");
+const z2ui5_asset = require("../../z2ui5_asset");
 
 /**
  * z2ui5_cl_app_debugtool_xml — JS port of abap2UI5 z2ui5_cl_app_debugtool_xml.
@@ -13,15 +12,11 @@ const path = require("path");
 class z2ui5_cl_app_debugtool_xml {
 
   static MIME = "application/xml";
-  static FILE_PATH = path.join(__dirname, "../../../../app/z2ui5/webapp/core/DebugTool.fragment.xml");
+  static ASSET_PATH = "core/DebugTool.fragment.xml";
 
   /** Returns the file content as a string (or null if missing). */
   static get_source() {
-    try {
-      return fs.readFileSync(z2ui5_cl_app_debugtool_xml.FILE_PATH, "utf8");
-    } catch {
-      return null;
-    }
+    return z2ui5_asset.read(z2ui5_cl_app_debugtool_xml.ASSET_PATH);
   }
 }
 

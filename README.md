@@ -25,6 +25,7 @@ matches what you want to do:
 |---|---|---|
 | [**`cap2UI5/`**](cap2UI5/) | The finished, deployable CAP app — install it, run `cds watch`, and write your own UI5 apps as JavaScript classes. **This is what you want if you just want to use cap2UI5.** | [cap2UI5/README.md](cap2UI5/README.md) |
 | [**`builder/`**](builder/) | The build machinery **and hand-written source** that generates `cap2UI5/`: the ABAP→JS transpiler, the sync scripts that mirror upstream abap2UI5, the hand-maintained source in `builder/base/`, and the jest suite. **This is what you want to change how the code is produced.** | [builder/README.md](builder/README.md) |
+| [**`adapter-node/`**](adapter-node/) | The same framework on a bare `node:http` server — no CAP, no express. Proof of the platform-neutral `abap2UI5/engine` seam (roundtrip + bootstrap + injectable store/asset ports) that every adapter builds on. | [adapter-node/README.md](adapter-node/README.md) |
 
 > [!NOTE]
 > **`cap2UI5/` is a generated build artifact in this repository** — every build
