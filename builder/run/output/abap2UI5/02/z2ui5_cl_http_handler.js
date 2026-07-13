@@ -1,10 +1,10 @@
-// TODO(abap2js): unresolved reference z2ui5_cl_a2ui5_http — add require manually
+const z2ui5_cl_a2ui5_http = require("abap2UI5/z2ui5_cl_a2ui5_http");
 const z2ui5_cl_app_preload = require("abap2UI5/z2ui5_cl_app_preload");
 const z2ui5_cl_app_style_css = require("abap2UI5/z2ui5_cl_app_style_css");
 const z2ui5_cl_core_handler = require("abap2UI5/z2ui5_cl_core_handler");
 const z2ui5_cl_exit = require("abap2UI5/z2ui5_cl_exit");
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-// TODO(abap2js): unresolved reference z2ui5_cx_a2ui5_error — add require manually
+const z2ui5_cx_a2ui5_error = require("abap2UI5/z2ui5_cx_a2ui5_error");
 
 class z2ui5_cl_http_handler {
   static so_sticky_handler = null;

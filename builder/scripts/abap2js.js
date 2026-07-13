@@ -38,6 +38,7 @@ function requirePathFor(className) {
   if (/^cx_sy_[a-z0-9_]+$/.test(className)) return `abap2UI5/${className}`;
   if (
     /^z2ui5_(cl|cx)_abap2ui5_/.test(className) ||
+    /^z2ui5_(cl|cx)_a2ui5_/.test(className) ||
     /^z2ui5_cl_core_/.test(className) ||
     className === "z2ui5_cl_exit" ||
     className === "z2ui5_cl_http_handler" ||
@@ -384,7 +385,7 @@ let _clientSig;
 function clientSignature() {
   if (_clientSig !== undefined) return _clientSig;
   _clientSig = null;
-  const p = path.join(__dirname, "..", "..", "cap2UI5", "srv", "z2ui5", "01", "02", "z2ui5_cl_core_client.js");
+  const p = path.join(__dirname, "..", "..", "core", "srv", "z2ui5", "01", "02", "z2ui5_cl_core_client.js");
   if (!fs.existsSync(p)) return _clientSig;
   _clientSig = new Map();
   const src = fs.readFileSync(p, "utf8");

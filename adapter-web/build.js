@@ -29,7 +29,7 @@ const dist = path.join(__dirname, "dist");
 // subpath specifier per app-class location (must match the package exports map)
 const SOURCES = [
   { dir: "srv/z2ui5/02",        spec: (n) => `abap2UI5/${n}`,             filter: (n) => /^z2ui5_cl_app_/.test(n) },
-  { dir: "srv/z2ui5/02/01",     spec: (n) => `abap2UI5/${n}`,             filter: (n) => /^z2ui5_cl_pop_/.test(n) },
+  { dir: "srv/z2ui5/99/02",     spec: (n) => `abap2UI5/${n}`,             filter: (n) => /^z2ui5_cl_pop_/.test(n) },
   { dir: "srv/app",             spec: (n) => `abap2UI5/app/${n}`,         filter: (n) => /^z2ui5_c[lx]_/.test(n) },
   { dir: "srv/app/samples",     spec: (n) => `abap2UI5/app/samples/${n}`, filter: (n) => /^z2ui5_c[lx]_/.test(n) },
 ];

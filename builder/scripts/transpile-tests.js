@@ -92,7 +92,7 @@ fs.mkdirSync(OUTPUT, { recursive: true });
 // so the runner works standalone, without jest module mapping
 const nm = path.join(OUTPUT, "node_modules");
 fs.mkdirSync(nm, { recursive: true });
-fs.symlinkSync(path.join(root, "..", "cap2UI5"), path.join(nm, "abap2UI5"), "junction");
+fs.symlinkSync(path.join(root, "..", "core"), path.join(nm, "abap2UI5"), "junction");
 
 const report = [];
 for (const file of walk(INPUT).sort()) {

@@ -17,7 +17,7 @@ adapter first to understand that project.
 ## Run
 
 ```bash
-npm install     # links ../cap2UI5 as the abap2UI5 package + @sap/cds
+npm install     # links ../core as the abap2UI5 package + @sap/cds
 npm start       # → http://localhost:4404/z2ui5/webapp/index.html
                 # (or: npx cds serve — server.js is a regular CAP custom server)
 ```

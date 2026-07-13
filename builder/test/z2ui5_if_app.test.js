@@ -1,4 +1,4 @@
-const z2ui5_if_app = require("../../cap2UI5/srv/z2ui5/02/z2ui5_if_app");
+const z2ui5_if_app = require("../../core/srv/z2ui5/02/z2ui5_if_app");
 const { sampleClassNames, requireSample } = require("./helpers/samples");
 
 describe("z2ui5_if_app", () => {
@@ -28,8 +28,8 @@ describe("z2ui5_if_app", () => {
 
   test("built-in apps extend z2ui5_if_app", () => {
     const apps = [
-      require("../../cap2UI5/srv/z2ui5/02/z2ui5_cl_app_hello_world"),
-      require("../../cap2UI5/srv/z2ui5/02/z2ui5_cl_app_startup"),
+      require("../../core/srv/z2ui5/02/z2ui5_cl_app_hello_world"),
+      require("../../core/srv/z2ui5/02/z2ui5_cl_app_startup"),
     ];
 
     for (const AppClass of apps) {

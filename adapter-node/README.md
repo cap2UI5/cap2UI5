@@ -3,7 +3,7 @@
 Proof that the framework's platform surface is tiny: this adapter runs the
 complete abap2UI5 stack — hello world and all bundled samples — **without CAP
 and without express**, on nothing but `node:http` and the
-[`abap2UI5/engine`](../cap2UI5/srv/z2ui5/engine.js) seam:
+[`abap2UI5/engine`](../core/srv/z2ui5/engine.js) seam:
 
 ```js
 const engine = require("abap2UI5/engine");
@@ -21,7 +21,7 @@ CAP wiring so the unchanged upstream webapp works 1:1.
 ## Run
 
 ```bash
-npm install     # links ../cap2UI5 as the abap2UI5 package
+npm install     # links ../core as the abap2UI5 package
 npm start       # → http://localhost:4104/z2ui5/webapp/index.html
 ```
 

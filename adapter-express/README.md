@@ -8,7 +8,7 @@ three `/rest/root/z2ui5` methods (~60 lines, see [server.js](server.js)).
 ## Run
 
 ```bash
-npm install     # links ../cap2UI5 as the abap2UI5 package + express
+npm install     # links ../core as the abap2UI5 package + express
 npm start       # → http://localhost:4204/z2ui5/webapp/index.html
 ```
 

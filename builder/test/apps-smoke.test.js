@@ -3,7 +3,7 @@ const path = require("path");
 
 /**
  * Smoke gate over all bundled sample apps — every class in
- * cap2UI5/srv/app/samples is started through the real core handler
+ * core/srv/app/samples is started through the real core handler
  * (`?app_start=<class>`, same code path the browser hits) by
  * builder/scripts/smoke-apps.js in a child process.
  *

@@ -28,15 +28,15 @@ const fs = require("fs");
 const path = require("path");
 
 const root = path.join(__dirname, "..", "..");
-const samplesDir = path.join(root, "cap2UI5", "srv", "app", "samples");
+const samplesDir = path.join(root, "core", "srv", "app", "samples");
 
 // stub the async DB layer before anything pulls in the handler
-const DB = require(path.join(root, "cap2UI5", "srv", "z2ui5", "01", "01", "z2ui5_cl_core_srv_draft"));
+const DB = require(path.join(root, "core", "srv", "z2ui5", "01", "01", "z2ui5_cl_core_srv_draft"));
 DB.loadApp = async () => null;
 DB.saveApp = async () => "smoke-uuid";
 DB.loadPreviousApp = async () => null;
 
-const Handler = require(path.join(root, "cap2UI5", "srv", "z2ui5", "01", "02", "z2ui5_cl_core_handler"));
+const Handler = require(path.join(root, "core", "srv", "z2ui5", "01", "02", "z2ui5_cl_core_handler"));
 
 const TIMEOUT_MS = 10000;
 const jsonMode = process.argv.includes("--json");

@@ -208,7 +208,7 @@
   {
     "class": "z2ui5_cl_a2ui5_context",
     "path": "00/03/z2ui5_cl_a2ui5_context.js",
-    "todos": 88,
+    "todos": 87,
     "todoDetails": [
       "unsupported statement: ROLLBACK WORK.",
       "unsupported statement: ASSIGN val->* TO <any>.",
@@ -296,14 +296,13 @@
       "unsupported statement: ASSIGN lr_tab->* TO <tab2>.",
       "unsupported statement: CALL METHOD obj->(`ZIF_LOGGER~EXPORT_TO_TABLE`) RECEIVING rt_bapiret = <tab2>.",
       "unsupported statement: ASSIGN obj->(lv_name) TO <comp>.",
-      "unsupported statement: msg_get_rap_row( EXPORTING val = val entity_name = entity_name IMPORTING messages = result is_row = DATA(lv_is_row) ).",
-      "unresolved class reference: z2ui5_cx_a2ui5_error"
+      "unsupported statement: msg_get_rap_row( EXPORTING val = val entity_name = entity_name IMPORTING messages = result is_row = DATA(lv_is_row) )."
     ]
   },
   {
     "class": "z2ui5_cl_a2ui5_http",
     "path": "00/03/z2ui5_cl_a2ui5_http.js",
-    "todos": 32,
+    "todos": 30,
     "todoDetails": [
       "unsupported statement: CALL METHOD (lv_classname)=>create_by_destination EXPORTING destination = lv_destination IMPORTING client = result EXCEP",
       "unsupported statement: CALL METHOD (lv_classname)=>create_by_url EXPORTING url = lv_url IMPORTING client = result EXCEPTIONS argument_not_found",
@@ -334,9 +333,7 @@
       "unsupported statement: CALL METHOD mo_response_cloud->(`IF_WEB_HTTP_RESPONSE~SET_STATUS`) EXPORTING i_code = code i_reason = lv_reason.",
       "unsupported statement: CALL METHOD mo_server_onprem->(`SET_SESSION_STATEFUL`) EXPORTING stateful = val.",
       "unsupported statement: ASSIGN mo_server_onprem->(`REQUEST`) TO <any>.",
-      "unsupported statement: ASSIGN mo_server_onprem->(`RESPONSE`) TO <any>.",
-      "unresolved class reference: z2ui5_cl_a2ui5_context",
-      "unresolved class reference: z2ui5_cx_a2ui5_error"
+      "unsupported statement: ASSIGN mo_server_onprem->(`RESPONSE`) TO <any>."
     ]
   },
   {
@@ -348,59 +345,50 @@
   {
     "class": "z2ui5_cx_a2ui5_error",
     "path": "00/03/z2ui5_cx_a2ui5_error.js",
-    "todos": 2,
+    "todos": 1,
     "todoDetails": [
-      "unresolved superclass stubbed: cx_no_check",
-      "unresolved class reference: z2ui5_cl_a2ui5_context"
+      "unresolved superclass stubbed: cx_no_check"
     ]
   },
   {
     "class": "z2ui5_cl_core_srv_draft",
     "path": "01/01/z2ui5_cl_core_srv_draft.js",
-    "todos": 4,
+    "todos": 2,
     "todoDetails": [
       "unsupported statement: DELETE FROM z2ui5_t_01 WHERE timestampl < @lv_n_hours_ago .",
-      "unsupported statement: SELECT COUNT( * ) FROM z2ui5_t_01 INTO @result.",
-      "unresolved class reference: z2ui5_cl_a2ui5_context",
-      "unresolved class reference: z2ui5_cx_a2ui5_error"
+      "unsupported statement: SELECT COUNT( * ) FROM z2ui5_t_01 INTO @result."
     ]
   },
   {
     "class": "z2ui5_cl_core_action",
     "path": "01/02/z2ui5_cl_core_action.js",
-    "todos": 3,
+    "todos": 1,
     "todoDetails": [
-      "NEW #( ) — target type unknown, resolve manually",
-      "unresolved class reference: z2ui5_cl_a2ui5_context",
-      "unresolved class reference: z2ui5_cx_a2ui5_error"
+      "NEW #( ) — target type unknown, resolve manually"
     ]
   },
   {
     "class": "z2ui5_cl_core_app",
     "path": "01/02/z2ui5_cl_core_app.js",
-    "todos": 4,
+    "todos": 2,
     "todoDetails": [
       "unsupported statement: z2ui5_cl_a2ui5_context=>xml_parse( EXPORTING xml = xml IMPORTING any = result ).",
-      "unsupported statement: CREATE DATA mt_attri.",
-      "unresolved class reference: z2ui5_cl_a2ui5_context",
-      "unresolved class reference: z2ui5_cx_a2ui5_error"
+      "unsupported statement: CREATE DATA mt_attri."
     ]
   },
   {
     "class": "z2ui5_cl_core_client",
     "path": "01/02/z2ui5_cl_core_client.js",
-    "todos": 4,
+    "todos": 2,
     "todoDetails": [
       "NEW #( ) — target type unknown, resolve manually",
-      "NEW #( ) — target type unknown, resolve manually",
-      "unresolved class reference: z2ui5_cl_a2ui5_context",
-      "unresolved class reference: z2ui5_cx_a2ui5_error"
+      "NEW #( ) — target type unknown, resolve manually"
     ]
   },
   {
     "class": "z2ui5_cl_core_handler",
     "path": "01/02/z2ui5_cl_core_handler.js",
-    "todos": 10,
+    "todos": 7,
     "todoDetails": [
       "unsupported statement: request_parse_event_args( EXPORTING io_front = lo_ajson IMPORTING ev_check_override = DATA(lv_check_arg_object) et_event",
       "unsupported statement: lo_ajson->to_abap( EXPORTING iv_corresponding = abap_true IMPORTING ev_container = result-s_front ).",
@@ -408,20 +396,15 @@
       "unsupported statement: lo_focus->to_abap( EXPORTING iv_corresponding = abap_true IMPORTING ev_container = result-s_front-s_focus ).",
       "unsupported statement: lo_scroll->to_abap( EXPORTING iv_corresponding = abap_true IMPORTING ev_container = result-s_front-s_scroll ).",
       "unsupported statement: REPLACE FIRST OCCURRENCE OF `-` IN result WITH `/`.",
-      "unsupported statement: REPLACE FIRST OCCURRENCE OF `-` IN result WITH `/`.",
-      "unresolved class reference: z2ui5_cl_a2ui5_context",
-      "unresolved class reference: z2ui5_cl_a2ui5_json_fltr",
-      "unresolved class reference: z2ui5_cx_a2ui5_error"
+      "unsupported statement: REPLACE FIRST OCCURRENCE OF `-` IN result WITH `/`."
     ]
   },
   {
     "class": "z2ui5_cl_core_srv_bind",
     "path": "01/02/z2ui5_cl_core_srv_bind.js",
-    "todos": 3,
+    "todos": 1,
     "todoDetails": [
-      "unsupported statement: ASSIGN ms_config-tab->* TO <tab>.",
-      "unresolved class reference: z2ui5_cl_a2ui5_context",
-      "unresolved class reference: z2ui5_cx_a2ui5_error"
+      "unsupported statement: ASSIGN ms_config-tab->* TO <tab>."
     ]
   },
   {
@@ -435,7 +418,7 @@
   {
     "class": "z2ui5_cl_core_srv_model",
     "path": "01/02/z2ui5_cl_core_srv_model.js",
-    "todos": 25,
+    "todos": 23,
     "todoDetails": [
       "unsupported statement: ASSIGN lr_ref->* TO FIELD-SYMBOL(<val>).",
       "unsupported statement: lo_val_front->to_abap( EXPORTING iv_corresponding = abap_true IMPORTING ev_container = <val> ).",
@@ -459,9 +442,7 @@
       "unsupported statement: GET REFERENCE OF <comp> INTO lr_sub.",
       "unsupported statement: ASSIGN lr_sub->* TO <sub_tab>.",
       "unsupported statement: lo_sub->to_abap( EXPORTING iv_corresponding = abap_true IMPORTING ev_container = <comp> ).",
-      "unsupported statement: lo_row_d->slice( lv_fld_path )->to_abap( EXPORTING iv_corresponding = abap_true IMPORTING ev_container = <comp> ).",
-      "unresolved class reference: z2ui5_cl_a2ui5_context",
-      "unresolved class reference: z2ui5_cx_a2ui5_error"
+      "unsupported statement: lo_row_d->slice( lv_fld_path )->to_abap( EXPORTING iv_corresponding = abap_true IMPORTING ev_container = <comp> )."
     ]
   },
   {
@@ -707,42 +688,35 @@
   {
     "class": "z2ui5_cl_app_startup",
     "path": "02/z2ui5_cl_app_startup.js",
-    "todos": 2,
+    "todos": 1,
     "todoDetails": [
-      "unsupported statement: ASSIGN ls_result-row->* TO FIELD-SYMBOL(<class>).",
-      "unresolved class reference: z2ui5_cl_a2ui5_context"
+      "unsupported statement: ASSIGN ls_result-row->* TO FIELD-SYMBOL(<class>)."
     ]
   },
   {
     "class": "z2ui5_cl_exit",
     "path": "02/z2ui5_cl_exit.js",
-    "todos": 1,
-    "todoDetails": [
-      "unresolved class reference: z2ui5_cl_a2ui5_context"
-    ]
+    "todos": 0,
+    "todoDetails": []
   },
   {
     "class": "z2ui5_cl_http_handler",
     "path": "02/z2ui5_cl_http_handler.js",
-    "todos": 2,
-    "todoDetails": [
-      "unresolved class reference: z2ui5_cl_a2ui5_http",
-      "unresolved class reference: z2ui5_cx_a2ui5_error"
-    ]
+    "todos": 0,
+    "todoDetails": []
   },
   {
     "class": "z2ui5_cl_xml_view_cc",
     "path": "02/z2ui5_cl_xml_view_cc.js",
-    "todos": 2,
+    "todos": 1,
     "todoDetails": [
-      "unsupported statement: CALL METHOD (lv_class)=>(`GET_STYLE`) RECEIVING result = lv_style.",
-      "unresolved class reference: z2ui5_cl_a2ui5_context"
+      "unsupported statement: CALL METHOD (lv_class)=>(`GET_STYLE`) RECEIVING result = lv_style."
     ]
   },
   {
     "class": "z2ui5_cl_xml_view",
     "path": "02/z2ui5_cl_xml_view.js",
-    "todos": 8,
+    "todos": 6,
     "parseError": "missing ) after argument list",
     "todoDetails": [
       "builtin concat_lines_of( ) not mapped",
@@ -750,9 +724,7 @@
       "VALUE #( FOR/BASE/LINES OF ... ) not supported — rewrite manually",
       "builtin concat_lines_of( ) not mapped",
       "builtin escape( ) not mapped",
-      "builtin concat_lines_of( ) not mapped",
-      "unresolved class reference: z2ui5_cl_a2ui5_context",
-      "unresolved class reference: z2ui5_cx_a2ui5_error"
+      "builtin concat_lines_of( ) not mapped"
     ]
   },
   {
@@ -1358,12 +1330,11 @@
   {
     "class": "z2ui5_cl_pop_data",
     "path": "99/02/z2ui5_cl_pop_data.js",
-    "todos": 4,
+    "todos": 3,
     "todoDetails": [
       "unsupported statement: ASSIGN mr_data->* TO <data>.",
       "unsupported statement: CREATE DATA r_result->mr_data LIKE val.",
-      "unsupported statement: ASSIGN r_result->mr_data->* TO <data>.",
-      "unresolved class reference: z2ui5_cl_a2ui5_context"
+      "unsupported statement: ASSIGN r_result->mr_data->* TO <data>."
     ]
   },
   {
@@ -1383,34 +1354,26 @@
   {
     "class": "z2ui5_cl_pop_file_dl",
     "path": "99/02/z2ui5_cl_pop_file_dl.js",
-    "todos": 1,
-    "todoDetails": [
-      "unresolved class reference: z2ui5_cl_a2ui5_context"
-    ]
+    "todos": 0,
+    "todoDetails": []
   },
   {
     "class": "z2ui5_cl_pop_file_ul",
     "path": "99/02/z2ui5_cl_pop_file_ul.js",
-    "todos": 1,
-    "todoDetails": [
-      "unresolved class reference: z2ui5_cl_a2ui5_context"
-    ]
+    "todos": 0,
+    "todoDetails": []
   },
   {
     "class": "z2ui5_cl_pop_get_range_m",
     "path": "99/02/z2ui5_cl_pop_get_range_m.js",
-    "todos": 1,
-    "todoDetails": [
-      "unresolved class reference: z2ui5_cl_a2ui5_context"
-    ]
+    "todos": 0,
+    "todoDetails": []
   },
   {
     "class": "z2ui5_cl_pop_get_range",
     "path": "99/02/z2ui5_cl_pop_get_range.js",
-    "todos": 1,
-    "todoDetails": [
-      "unresolved class reference: z2ui5_cl_a2ui5_context"
-    ]
+    "todos": 0,
+    "todoDetails": []
   },
   {
     "class": "z2ui5_cl_pop_html",
@@ -1439,10 +1402,8 @@
   {
     "class": "z2ui5_cl_pop_messages",
     "path": "99/02/z2ui5_cl_pop_messages.js",
-    "todos": 1,
-    "todoDetails": [
-      "unresolved class reference: z2ui5_cl_a2ui5_context"
-    ]
+    "todos": 0,
+    "todoDetails": []
   },
   {
     "class": "z2ui5_cl_pop_pdf",
@@ -1453,11 +1414,10 @@
   {
     "class": "z2ui5_cl_pop_table",
     "path": "99/02/z2ui5_cl_pop_table.js",
-    "todos": 3,
+    "todos": 2,
     "todoDetails": [
       "unsupported statement: ASSIGN mr_tab->* TO <tab_out>.",
-      "unsupported statement: CREATE DATA r_result->ms_result-row LIKE LINE OF i_tab.",
-      "unresolved class reference: z2ui5_cl_a2ui5_context"
+      "unsupported statement: CREATE DATA r_result->ms_result-row LIKE LINE OF i_tab."
     ]
   },
   {
@@ -1481,7 +1441,7 @@
   {
     "class": "z2ui5_cl_pop_to_select",
     "path": "99/02/z2ui5_cl_pop_to_select.js",
-    "todos": 19,
+    "todos": 18,
     "todoDetails": [
       "unsupported statement: CREATE DATA r_result->ms_result-row LIKE LINE OF i_tab.",
       "unsupported statement: CREATE DATA r_result->ms_result-table LIKE i_tab.",
@@ -1500,8 +1460,7 @@
       "unsupported statement: ASSIGN ms_result-row->* TO <row_result>.",
       "unsupported statement: MOVE-CORRESPONDING <row_selected> TO <row_result>.",
       "unsupported statement: ASSIGN mr_tab_popup->* TO <tab_out>.",
-      "unsupported statement: ASSIGN mr_tab_popup_backup->* TO <tab_out_backup>.",
-      "unresolved class reference: z2ui5_cl_a2ui5_context"
+      "unsupported statement: ASSIGN mr_tab_popup_backup->* TO <tab_out_backup>."
     ]
   }
 ]

@@ -19,7 +19,7 @@ are skipped at registry load with a console warning — everything else runs.
 ## Build & try
 
 ```bash
-npm install    # links ../cap2UI5 + esbuild
+npm install    # links ../core + esbuild
 npm run build  # → dist/
 npm run serve  # → http://localhost:4304/index.html?app_start=z2ui5_cl_app_hello_world
 ```

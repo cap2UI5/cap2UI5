@@ -1,7 +1,7 @@
 "use strict";
 
 /**
- * Dynamic discovery of the bundled sample apps under cap2UI5/srv/app/samples.
+ * Dynamic discovery of the bundled sample apps under core/srv/app/samples.
  *
  * The samples folder is mirrored + transpiled from the upstream
  * abap2UI5/samples repo on every sync run, so its exact set of classes
@@ -19,7 +19,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const samplesDir = path.join(__dirname, "..", "..", "..", "cap2UI5", "srv", "app", "samples");
+const samplesDir = path.join(__dirname, "..", "..", "..", "core", "srv", "app", "samples");
 
 // Walk the samples tree and return a { className -> absolute file path } map
 // for every sample class on disk, regardless of how deep the mirror nests it.
@@ -58,7 +58,7 @@ function requireSample(name) {
 // while skipping samples with unresolved transpile deps or bundled non-app
 // helper classes so those can't spuriously break the generic tests.
 function firstSampleName() {
-  const z2ui5_if_app = require(path.join(__dirname, "..", "..", "..", "cap2UI5", "srv", "z2ui5", "02", "z2ui5_if_app"));
+  const z2ui5_if_app = require(path.join(__dirname, "..", "..", "..", "core", "srv", "z2ui5", "02", "z2ui5_if_app"));
   for (const name of sampleClassNames()) {
     let AppClass;
     try {

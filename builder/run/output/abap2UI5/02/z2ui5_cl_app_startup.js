@@ -1,4 +1,4 @@
-// TODO(abap2js): unresolved reference z2ui5_cl_a2ui5_context — add require manually
+const z2ui5_cl_a2ui5_context = require("abap2UI5/z2ui5_cl_a2ui5_context");
 const z2ui5_cl_app_hello_world = require("abap2UI5/z2ui5_cl_app_hello_world");
 const z2ui5_cl_core_srv_draft = require("abap2UI5/z2ui5_cl_core_srv_draft");
 const z2ui5_cl_exit = require("abap2UI5/z2ui5_cl_exit");

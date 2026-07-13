@@ -1,5 +1,5 @@
 const { transpileClass } = require("../scripts/abap2js");
-const shim = require("../base/srv/z2ui5/02/01/z2ui5_pop_preferred_param");
+const shim = require("../base/core/srv/z2ui5/99/02/z2ui5_pop_preferred_param");
 
 /** load generated code, resolving the popup shim + framework self-refs */
 function loadGenerated(code) {

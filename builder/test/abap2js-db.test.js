@@ -1,5 +1,5 @@
 const { transpileClass } = require("../scripts/abap2js");
-const z2ui5_port = require("../base/srv/z2ui5/z2ui5_port");
+const z2ui5_port = require("../base/core/srv/z2ui5/z2ui5_port");
 
 /**
  * Load generated code, resolving the transpiler's neutral persistence import

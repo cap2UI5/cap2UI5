@@ -1,10 +1,10 @@
-const Handler = require("../../cap2UI5/srv/z2ui5/01/02/z2ui5_cl_core_handler");
-const DB = require("../../cap2UI5/srv/z2ui5/01/01/z2ui5_cl_core_srv_draft");
+const Handler = require("../../core/srv/z2ui5/01/02/z2ui5_cl_core_handler");
+const DB = require("../../core/srv/z2ui5/01/01/z2ui5_cl_core_srv_draft");
 
 // Mock only the async DB methods that need CDS runtime;
 // keep static utility methods (findAppClass, serialize, etc.) from the real module
-jest.mock("../../cap2UI5/srv/z2ui5/01/01/z2ui5_cl_core_srv_draft", () => {
-  const actual = jest.requireActual("../../cap2UI5/srv/z2ui5/01/01/z2ui5_cl_core_srv_draft");
+jest.mock("../../core/srv/z2ui5/01/01/z2ui5_cl_core_srv_draft", () => {
+  const actual = jest.requireActual("../../core/srv/z2ui5/01/01/z2ui5_cl_core_srv_draft");
   actual.loadApp = jest.fn().mockResolvedValue(null);
   actual.saveApp = jest.fn().mockResolvedValue("mock-uuid-123");
   actual.loadPreviousApp = jest.fn().mockResolvedValue(null);
@@ -70,7 +70,7 @@ describe("z2ui5_cl_core_handler", () => {
 
   describe("app loading from DB", () => {
     test("loads app from DB when ID is provided", async () => {
-      const HelloWorld = require("../../cap2UI5/srv/z2ui5/02/z2ui5_cl_app_hello_world");
+      const HelloWorld = require("../../core/srv/z2ui5/02/z2ui5_cl_app_hello_world");
       const app = new HelloWorld();
       app.NAME = "Loaded";
       DB.loadApp.mockResolvedValueOnce(app);
@@ -96,7 +96,7 @@ describe("z2ui5_cl_core_handler", () => {
 
   describe("two-way binding (XX data)", () => {
     test("XX data is applied to loaded app", async () => {
-      const HelloWorld = require("../../cap2UI5/srv/z2ui5/02/z2ui5_cl_app_hello_world");
+      const HelloWorld = require("../../core/srv/z2ui5/02/z2ui5_cl_app_hello_world");
       const app = new HelloWorld();
       DB.loadApp.mockResolvedValueOnce(app);
 
@@ -120,8 +120,8 @@ describe("z2ui5_cl_core_handler", () => {
   describe("navigation", () => {
     test("nav_app_call from previous-app handler navigates correctly", async () => {
       // Simulate: a custom app (running in DB) navigates to hello_world via nav_app_call.
-      const HelloWorld = require("../../cap2UI5/srv/z2ui5/02/z2ui5_cl_app_hello_world");
-      const z2ui5_if_app = require("../../cap2UI5/srv/z2ui5/02/z2ui5_if_app");
+      const HelloWorld = require("../../core/srv/z2ui5/02/z2ui5_cl_app_hello_world");
+      const z2ui5_if_app = require("../../core/srv/z2ui5/02/z2ui5_if_app");
 
       // Use a one-off caller app whose only behavior is to push HelloWorld
       class CallerApp extends z2ui5_if_app {
@@ -180,7 +180,7 @@ describe("z2ui5_cl_core_handler", () => {
   describe("messages in response", () => {
     // A minimal in-test app that exercises the client message API directly,
     // so the plumbing check does not depend on a specific mirrored sample.
-    const z2ui5_if_app = require("../../cap2UI5/srv/z2ui5/02/z2ui5_if_app");
+    const z2ui5_if_app = require("../../core/srv/z2ui5/02/z2ui5_if_app");
     class MsgApp extends z2ui5_if_app {
       async main(client) {
         if (client.check_on_event("TOAST")) {

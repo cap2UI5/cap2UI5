@@ -1,4 +1,4 @@
-const View = require("../../cap2UI5/srv/z2ui5/02/z2ui5_cl_xml_view");
+const View = require("../../core/srv/z2ui5/02/z2ui5_cl_xml_view");
 
 // Regression tests for the frontend module-load error
 // `ModuleError: failed to load 'null/content.js'`: aggregation tags rendered

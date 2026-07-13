@@ -24,6 +24,7 @@ jobs:
           cache: npm
           cache-dependency-path: |
             builder/package-lock.json
+            core/package-lock.json
             cap2UI5/package-lock.json
             adapter-cap/package-lock.json
             adapter-node/package-lock.json
@@ -34,6 +35,8 @@ jobs:
       # cap2UI5/.
       - run: npm ci
         working-directory: builder
+      - run: npm ci
+        working-directory: core
       - run: npm ci
         working-directory: cap2UI5
       # platform adapters — armed as smoke gates in the jest suite

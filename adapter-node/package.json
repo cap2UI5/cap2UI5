@@ -8,7 +8,7 @@
     "node": ">=22"
   },
   "dependencies": {
-    "abap2UI5": "file:../cap2UI5"
+    "abap2UI5": "file:../core"
   },
   "scripts": {
     "start": "node server.js"

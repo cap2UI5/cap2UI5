@@ -2,5 +2,6 @@ node_modules/
 .mirror_tmp/
 .DS_Store
 builder/run/output/cap2UI5/
+builder/run/output/core/
 adapter-web/dist/
 adapter-web/register-all.generated.js

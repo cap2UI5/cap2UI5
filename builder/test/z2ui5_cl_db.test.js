@@ -1,4 +1,4 @@
-const DB = require("../../cap2UI5/srv/z2ui5/01/01/z2ui5_cl_core_srv_draft");
+const DB = require("../../core/srv/z2ui5/01/01/z2ui5_cl_core_srv_draft");
 const { firstSampleName, requireSample } = require("./helpers/samples");
 
 // A representative sample app, picked dynamically so the suite tracks the
@@ -10,7 +10,7 @@ describe("z2ui5_cl_db", () => {
 
   describe("serialize", () => {
     test("serializes app with class name and file path", () => {
-      const HelloWorld = require("../../cap2UI5/srv/z2ui5/02/z2ui5_cl_app_hello_world");
+      const HelloWorld = require("../../core/srv/z2ui5/02/z2ui5_cl_app_hello_world");
       const app = new HelloWorld();
       app.name = "Test";
 
@@ -23,7 +23,7 @@ describe("z2ui5_cl_db", () => {
     });
 
     test("serializes only data properties, not functions", () => {
-      const HelloWorld = require("../../cap2UI5/srv/z2ui5/02/z2ui5_cl_app_hello_world");
+      const HelloWorld = require("../../core/srv/z2ui5/02/z2ui5_cl_app_hello_world");
       const app = new HelloWorld();
 
       const json = DB.serialize(app);
@@ -38,7 +38,7 @@ describe("z2ui5_cl_db", () => {
 
   describe("deserialize", () => {
     test("round-trip: serialize then deserialize restores app", () => {
-      const HelloWorld = require("../../cap2UI5/srv/z2ui5/02/z2ui5_cl_app_hello_world");
+      const HelloWorld = require("../../core/srv/z2ui5/02/z2ui5_cl_app_hello_world");
       const original = new HelloWorld();
       original.name = "RoundTrip";
 
@@ -51,7 +51,7 @@ describe("z2ui5_cl_db", () => {
     });
 
     test("deserialize restores app class instance (not plain object)", () => {
-      const HelloWorld = require("../../cap2UI5/srv/z2ui5/02/z2ui5_cl_app_hello_world");
+      const HelloWorld = require("../../core/srv/z2ui5/02/z2ui5_cl_app_hello_world");
       const original = new HelloWorld();
       const json = DB.serialize(original);
       const restored = DB.deserialize(json);

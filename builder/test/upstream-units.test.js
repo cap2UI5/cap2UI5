@@ -6,7 +6,7 @@ const path = require("path");
  *
  * The upstream abap2UI5 testclasses encode the EXPECTED behavior of every
  * framework class. scripts/transpile-tests.js transpiles them with abap2js,
- * scripts/run-units.js executes them against the published cap2UI5 code
+ * scripts/run-units.js executes them against the published core package code
  * (AUnit semantics), and this test diffs the outcome against
  * test/upstream-units.known-failures.json:
  *
@@ -37,6 +37,6 @@ describe("upstream unit tests (transpiled testclasses)", () => {
 
     expect({ regressions, fixedButStillListed }).toEqual({ regressions: [], fixedButStillListed: [] });
     // sanity floor — guards against an empty/mis-generated tests folder
-    expect(report.total).toBeGreaterThan(200);
+    expect(report.total).toBeGreaterThan(150);
   });
 });

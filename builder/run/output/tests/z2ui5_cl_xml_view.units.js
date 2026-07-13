@@ -451,6 +451,21 @@ class ltcl_unit_test {
     temp74 = (String(lv_xml).toLowerCase().includes(String(`Order 123`).toLowerCase()));
     cl_abap_unit_assert.assert_true(temp74);
   }
+
+  test_split_container() {
+    const lo_split = z2ui5_cl_xml_view.factory().page(`Test`).split_container({ mode: `ShowHideMode` });
+    lo_split.master_pages().page(`Master`);
+    lo_split.detail_pages().page(`Detail`);
+    const lv_xml = lo_split.stringify();
+    const lv_off_open = this.find({ val: lv_xml, sub: `<SplitContainer` });
+    const lv_off_master = this.find({ val: lv_xml, sub: `<masterPages` });
+    const lv_off_detail = this.find({ val: lv_xml, sub: `<detailPages` });
+    const lv_off_close = this.find({ val: lv_xml, sub: `</SplitContainer>` });
+    cl_abap_unit_assert.assert_true((lv_off_open >= 0));
+    cl_abap_unit_assert.assert_true((lv_off_master > lv_off_open));
+    cl_abap_unit_assert.assert_true((lv_off_detail > lv_off_master));
+    cl_abap_unit_assert.assert_true((lv_off_close > lv_off_detail));
+  }
 }
 
 
@@ -493,5 +508,5 @@ class ltcl_test_xml_output {
 module.exports = {
   __main: "z2ui5_cl_xml_view",
   __classes: { ltcl_unit_test, ltcl_test_xml_output },
-  __tests: {"ltcl_unit_test":["test_create","test_factory_popup","test_shell_page","test_simple_form","test_button","test_input","test_label","test_text","test_vbox_hbox","test_table","test_dialog","test_get_parent","test_content","test_columns_cells","test_message_page","test_icon_tab_bar","test_select","test_combobox","test_checkbox","test_date_picker","test_text_area","test_link","test_title","test_toolbar","test_toolbar_spacer","test_scroll_container","test_list","test_switch","test_radio_button","test_progress_ind","test_slider","test_deep_nesting","test_multi_get_parent","test_xml_ns_decl","test_button_props","test_generic_method","test_segmented_button","test_object_header"],"ltcl_test_xml_output":["test_attribute_escaping","test_no_raw_specials","test_closing_tags","test_stringify_idempotent","test_z2ui5_cc_namespace"]},
+  __tests: {"ltcl_unit_test":["test_create","test_factory_popup","test_shell_page","test_simple_form","test_button","test_input","test_label","test_text","test_vbox_hbox","test_table","test_dialog","test_get_parent","test_content","test_columns_cells","test_message_page","test_icon_tab_bar","test_select","test_combobox","test_checkbox","test_date_picker","test_text_area","test_link","test_title","test_toolbar","test_toolbar_spacer","test_scroll_container","test_list","test_switch","test_radio_button","test_progress_ind","test_slider","test_deep_nesting","test_multi_get_parent","test_xml_ns_decl","test_button_props","test_generic_method","test_segmented_button","test_object_header","test_split_container"],"ltcl_test_xml_output":["test_attribute_escaping","test_no_raw_specials","test_closing_tags","test_stringify_idempotent","test_z2ui5_cc_namespace"]},
 };
