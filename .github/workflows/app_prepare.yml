@@ -1,7 +1,7 @@
 name: app prepare
 
-# Build the ready-to-serve frontend from builder/run/input/app/webapp into
-# builder/run/output/app (1:1 copy + the two cap2UI5-specific patches applied by
+# Build the ready-to-serve frontend from abap2UI5-js/run/input/app/webapp into
+# abap2UI5-js/run/output/app (1:1 copy + the two cap2UI5-specific patches applied by
 # patch-frontend.js). Step 2 of the update_frontend pipeline; also runnable
 # standalone.
 
@@ -23,20 +23,20 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: builder/package-lock.json
+          cache-dependency-path: abap2UI5-js/package-lock.json
       - run: npm ci
-        working-directory: builder
+        working-directory: abap2UI5-js
       - run: npm run prepare_app
-        working-directory: builder
+        working-directory: abap2UI5-js
       - name: commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add builder/run/output/app
+          git add abap2UI5-js/run/output/app
           if git diff --cached --quiet; then
             echo "nothing to commit"
           else
-            git commit -m "prepare: update builder/run/output/app ($(cut -c1-12 builder/run/input/app/UPSTREAM_COMMIT))"
+            git commit -m "prepare: update abap2UI5-js/run/output/app ($(cut -c1-12 abap2UI5-js/run/input/app/UPSTREAM_COMMIT))"
             git pull --rebase origin "${{ github.ref_name }}"
             git push origin "HEAD:${{ github.ref_name }}"
           fi

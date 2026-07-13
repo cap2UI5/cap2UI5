@@ -1,6 +1,7 @@
 name: abap2UI5 to CAP
 
-# Rebuild the CAP project from builder/base + the generated trees
+# Rebuild the core package (abap2UI5-js/base + generated trees) and the CAP
+# project (cap-builder/src + the core webapp)
 # (assemble → publish) after the backend transpile refreshed run/output/abap2UI5.
 # Jest gates the commit. Step 3 of the update_backend pipeline.
 
@@ -23,36 +24,46 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: |
-            builder/package-lock.json
+            abap2UI5-js/package-lock.json
+            abap2UI5-js/core/package-lock.json
             cap2UI5/package-lock.json
-            adapter-node/package-lock.json
-            adapter-express/package-lock.json
-            adapter-web/package-lock.json
+            abap2UI5-js/adapters/cap/package-lock.json
+            abap2UI5-js/adapters/node/package-lock.json
+            abap2UI5-js/adapters/express/package-lock.json
+            abap2UI5-js/adapters/web/package-lock.json
       - run: npm ci
-        working-directory: builder
+        working-directory: abap2UI5-js
+      - run: npm ci
+        working-directory: abap2UI5-js/core
       - run: npm ci
         working-directory: cap2UI5
       # platform adapters — armed as smoke gates in the jest suite
-      # (builder/test/adapters.test.js skips them when not installed)
+      # (abap2UI5-js/test/adapters.test.js skips them when not installed)
       - run: npm ci
-        working-directory: adapter-node
+        working-directory: abap2UI5-js/adapters/cap
       - run: npm ci
-        working-directory: adapter-express
+        working-directory: abap2UI5-js/adapters/node
       - run: npm ci
-        working-directory: adapter-web
+        working-directory: abap2UI5-js/adapters/express
+      - run: npm ci
+        working-directory: abap2UI5-js/adapters/web
+      - run: npm run build_core
+        working-directory: abap2UI5-js
       - run: npm run build_cap
-        working-directory: builder
+        working-directory: cap-builder
       - run: npm test
-        working-directory: builder
+        working-directory: abap2UI5-js
+      - run: npm test
+        working-directory: cap2UI5
       - name: commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add cap2UI5
+          git add abap2UI5-js/core cap2UI5
           if git diff --cached --quiet; then
             echo "nothing to commit"
           else
-            git commit -m "build: regenerate cap2UI5 (backend sync)"
+            git commit -m "build: regenerate core + cap2UI5 (backend sync)"
             git pull --rebase origin "${{ github.ref_name }}"
             git push origin "HEAD:${{ github.ref_name }}"
           fi

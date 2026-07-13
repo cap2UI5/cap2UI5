@@ -1,0 +1,50 @@
+{
+  "name": "abap2UI5",
+  "version": "1.0.0",
+  "description": "abap2UI5 core \u2014 the platform-neutral framework package: engine, transpiled classes, webapp and samples. Fully auto-generated (AI + sync pipeline).",
+  "repository": "github:cap2UI5/cap2UI5",
+  "license": "MIT",
+  "private": true,
+  "engines": {
+    "node": ">=22"
+  },
+  "exports": {
+    ".": "./srv/z2ui5/00/03/z2ui5_cl_util.js",
+    "./engine": "./srv/z2ui5/engine.js",
+    "./z2ui5_asset": "./srv/z2ui5/z2ui5_asset.js",
+    "./cl_abap_*": "./srv/z2ui5/00/00/cl_abap_*.js",
+    "./cx_sy_*": "./srv/z2ui5/00/00/cx_sy_*.js",
+    "./z2ui5_cl_a2ui5_*": "./srv/z2ui5/00/03/z2ui5_cl_a2ui5_*.js",
+    "./z2ui5_cx_a2ui5_error": "./srv/z2ui5/00/03/z2ui5_cx_a2ui5_error.js",
+    "./z2ui5_cl_core_srv_draft": "./srv/z2ui5/01/01/z2ui5_cl_core_srv_draft.js",
+    "./z2ui5_cl_core_*": "./srv/z2ui5/01/02/z2ui5_cl_core_*.js",
+    "./z2ui5_cl_exit": "./srv/z2ui5/02/z2ui5_cl_exit.js",
+    "./z2ui5_cl_http_handler": "./srv/z2ui5/02/z2ui5_cl_http_handler.js",
+    "./z2ui5_if_ajson": "./srv/z2ui5/00/01/z2ui5_if_ajson.js",
+    "./z2ui5_if_ajson_*": "./srv/z2ui5/00/01/z2ui5_if_ajson_*.js",
+    "./z2ui5_if_core_types": "./srv/z2ui5/01/02/z2ui5_if_core_types.js",
+    "./z2ui5_if_*": "./srv/z2ui5/02/z2ui5_if_*.js",
+    "./z2ui5_cl_xml_view": "./srv/z2ui5/02/z2ui5_cl_xml_view.js",
+    "./z2ui5_cl_xml_view_cc": "./srv/z2ui5/02/z2ui5_cl_xml_view_cc.js",
+    "./z2ui5_cl_pop_*": "./srv/z2ui5/99/02/z2ui5_cl_pop_*.js",
+    "./z2ui5_cl_app_*": "./srv/z2ui5/02/z2ui5_cl_app_*.js",
+    "./app/*": "./srv/app/*.js",
+    "./z2ui5_cl_ajson": "./srv/z2ui5/00/01/z2ui5_cl_ajson.js",
+    "./z2ui5_cl_ajson_*": "./srv/z2ui5/00/01/z2ui5_cl_ajson_*.js",
+    "./z2ui5_cx_ajson_error": "./srv/z2ui5/00/01/z2ui5_cx_ajson_error.js",
+    "./z2ui5_cl_srt_*": "./srv/z2ui5/00/02/z2ui5_cl_srt_*.js",
+    "./z2ui5_cx_srt": "./srv/z2ui5/00/02/z2ui5_cx_srt.js",
+    "./z2ui5_cl_util": "./srv/z2ui5/00/03/z2ui5_cl_util.js",
+    "./z2ui5_cl_util_db": "./srv/z2ui5/00/03/01/z2ui5_cl_util_db.js",
+    "./z2ui5_cl_util_ext": "./srv/z2ui5/00/03/01/z2ui5_cl_util_ext.js",
+    "./z2ui5_cl_util_api": "./srv/z2ui5/00/03/02/z2ui5_cl_util_api.js",
+    "./z2ui5_cl_util_api_*": "./srv/z2ui5/00/03/02/z2ui5_cl_util_api_*.js",
+    "./z2ui5_cl_util_*": "./srv/z2ui5/00/03/z2ui5_cl_util_*.js",
+    "./z2ui5_cx_util_error": "./srv/z2ui5/00/03/z2ui5_cx_util_error.js",
+    "./z2ui5_port": "./srv/z2ui5/z2ui5_port.js",
+    "./register-apps": "./srv/z2ui5/register-apps.js"
+  },
+  "dependencies": {
+    "openui5-dist": "1.113.0"
+  }
+}

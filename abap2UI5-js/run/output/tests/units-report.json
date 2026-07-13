@@ -1,0 +1,126 @@
+[
+  {
+    "main": "z2ui5_cl_ajson",
+    "error": "z2ui5_cl_ajson: no class found in z2ui5_cl_ajson.clas.abap"
+  },
+  {
+    "main": "z2ui5_cl_ajson_filter_lib",
+    "classes": 1,
+    "tests": 8,
+    "todos": 0
+  },
+  {
+    "main": "z2ui5_cl_ajson_mapping",
+    "classes": 4,
+    "tests": 21,
+    "todos": 0
+  },
+  {
+    "main": "z2ui5_cl_ajson_utilities",
+    "classes": 3,
+    "tests": 8,
+    "todos": 0
+  },
+  {
+    "main": "z2ui5_cx_ajson_error",
+    "classes": 1,
+    "tests": 4,
+    "todos": 0
+  },
+  {
+    "main": "z2ui5_cl_a2ui5_context",
+    "classes": 1,
+    "tests": 8,
+    "todos": 0
+  },
+  {
+    "main": "z2ui5_cl_a2ui5_http",
+    "classes": 4,
+    "tests": 10,
+    "todos": 0
+  },
+  {
+    "main": "z2ui5_cl_a2ui5_json_fltr",
+    "classes": 1,
+    "tests": 10,
+    "todos": 0
+  },
+  {
+    "main": "z2ui5_cx_a2ui5_error",
+    "classes": 1,
+    "tests": 6,
+    "todos": 0
+  },
+  {
+    "main": "z2ui5_cl_core_srv_draft",
+    "classes": 1,
+    "tests": 5,
+    "todos": 0
+  },
+  {
+    "main": "z2ui5_cl_core_action",
+    "error": "z2ui5_cl_core_action: no class found in z2ui5_cl_core_action.clas.abap"
+  },
+  {
+    "main": "z2ui5_cl_core_app",
+    "error": "z2ui5_cl_core_app: no class found in z2ui5_cl_core_app.clas.abap"
+  },
+  {
+    "main": "z2ui5_cl_core_client",
+    "error": "z2ui5_cl_core_client: no class found in z2ui5_cl_core_client.clas.abap"
+  },
+  {
+    "main": "z2ui5_cl_core_handler",
+    "error": "z2ui5_cl_core_handler: no class found in z2ui5_cl_core_handler.clas.abap"
+  },
+  {
+    "main": "z2ui5_cl_core_srv_bind",
+    "error": "ltcl_test_app: no class found in ltcl_test_app.clas.abap"
+  },
+  {
+    "main": "z2ui5_cl_core_srv_event",
+    "classes": 1,
+    "tests": 9,
+    "todos": 0
+  },
+  {
+    "main": "z2ui5_cl_core_srv_model",
+    "error": "z2ui5_cl_core_srv_model: no class found in z2ui5_cl_core_srv_model.clas.abap"
+  },
+  {
+    "main": "z2ui5_cl_app_hello_world",
+    "classes": 1,
+    "tests": 3,
+    "todos": 0
+  },
+  {
+    "main": "z2ui5_cl_app_startup",
+    "classes": 1,
+    "tests": 1,
+    "todos": 0
+  },
+  {
+    "main": "z2ui5_cl_exit",
+    "classes": 1,
+    "tests": 6,
+    "todos": 0
+  },
+  {
+    "main": "z2ui5_cl_http_handler",
+    "classes": 1,
+    "tests": 7,
+    "todos": 0
+  },
+  {
+    "main": "z2ui5_cl_xml_view",
+    "classes": 2,
+    "tests": 44,
+    "todos": 0
+  },
+  {
+    "main": "z2ui5_cl_xml_view_cc",
+    "classes": 1,
+    "tests": 29,
+    "todos": 0
+  }
+]
