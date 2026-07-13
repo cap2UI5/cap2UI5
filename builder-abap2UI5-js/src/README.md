@@ -6,7 +6,7 @@ platform code**. Every platform consumes this one package:
 
 | Consumer | How |
 |---|---|
-| [`cap2UI5/`](../../cap2UI5/) | the full CAP app — `"abap2UI5": "file:../abap2UI5-js/core"` |
+| [`cap2UI5/`](../../cap2UI5/) | the full CAP app — `"abap2UI5": "file:../builder-abap2UI5-js/core"` |
 | [`adapters/cap/`](../adapters/cap/) | minimal CAP wrapper |
 | [`adapters/node/`](../adapters/node/) | bare `node:http` server |
 | [`adapters/express/`](../adapters/express/) | express middleware |
@@ -14,10 +14,10 @@ platform code**. Every platform consumes this one package:
 
 > [!IMPORTANT]
 > **This folder is a generated build artifact** — assembled from the
-> hand-written source in [`abap2UI5-js/src/`](../src/) plus the transpiled
+> hand-written source in [`builder-abap2UI5-js/src/`](../src/) plus the transpiled
 > upstream [abap2UI5](https://github.com/abap2UI5/abap2UI5) sources. Do not
-> hand-edit it; edit `abap2UI5-js/src/` and re-run `npm run build_core` in
-> [`abap2UI5-js/`](../).
+> hand-edit it; edit `builder-abap2UI5-js/src/` and re-run `npm run build_core` in
+> [`builder-abap2UI5-js/`](../).
 
 ## The seam
 

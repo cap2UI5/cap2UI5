@@ -1,8 +1,8 @@
 {
-  "name": "cap2ui5-cap-builder",
+  "name": "builder-cap2ui5",
   "version": "1.0.0",
   "private": true,
-  "description": "Builder project for the full CAP app \u2014 assembles cap-builder/src + the webapp from the published core package (abap2UI5-js/core) and publishes the result 1:1 into ../cap2UI5",
+  "description": "Builder project for the full CAP app \u2014 assembles builder-cap2UI5/src + the webapp from the published core package (builder-abap2UI5-js/core) and publishes the result 1:1 into ../cap2UI5",
   "license": "MIT",
   "engines": {
     "node": ">=20"

@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 /**
  * publish-cap — the very last build step: copy the assembled app 1:1 from
- * cap-builder/run/output/cap2UI5 into the deployable ../cap2UI5/ project.
+ * builder-cap2UI5/run/output/cap2UI5 into the deployable ../cap2UI5/ project.
  *
  * cap2UI5/ is a pure build artifact — it is wiped and rewritten on every
- * publish, so nothing there should be hand-edited (edit cap-builder/src/
+ * publish, so nothing there should be hand-edited (edit builder-cap2UI5/src/
  * instead). Only `node_modules/` is preserved, to avoid a reinstall after
  * each build.
  *
@@ -15,7 +15,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const root = path.join(__dirname, "..");          // cap-builder/
+const root = path.join(__dirname, "..");          // builder-cap2UI5/
 const src = path.join(root, "run", "output", "cap2UI5");
 const dest = path.join(root, "..", "cap2UI5");
 
@@ -33,7 +33,7 @@ function copyDir(from, to) {
 }
 
 if (!fs.existsSync(src)) {
-  console.error("cap-builder/run/output/cap2UI5 not found — run `npm run assemble` first");
+  console.error("builder-cap2UI5/run/output/cap2UI5 not found — run `npm run assemble` first");
   process.exit(1);
 }
 

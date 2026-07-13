@@ -1,4 +1,4 @@
-# abap2UI5-js/ — the framework project
+# builder-abap2UI5-js/ — the framework project
 
 [![test](https://github.com/cap2UI5/cap2UI5/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/cap2UI5/cap2UI5/actions/workflows/test.yml)
 [![update_samples](https://github.com/cap2UI5/cap2UI5/actions/workflows/update_samples.yml/badge.svg?branch=main)](https://github.com/cap2UI5/cap2UI5/actions/workflows/update_samples.yml)
@@ -14,7 +14,7 @@ hand-maintained source in [`src/`](src/) and the upstream
 transpiled to JavaScript). It also hosts the four [platform
 adapters](adapter/) that consume the core, and the jest suite that gates it
 all. The full CAP app is built downstream by
-[`cap-builder/`](../cap-builder/).
+[`builder-cap2UI5/`](../builder-cap2UI5/).
 
 > [!IMPORTANT]
 > **`core/` is a build artifact — do not hand-edit it.** Every build wipes and
@@ -25,17 +25,17 @@ The repository is organized as three projects:
 
 | Project | What it is | Run it |
 |---|---|---|
-| [`abap2UI5-js/`](.) (here) | transpiler + sync scripts → generates [`core/`](core/); hosts the [adapters](adapters/) | `npm install && npm test` |
-| [`cap-builder/`](../cap-builder/) | generates the full CAP app from its `src/` + the core webapp | `npm run build_cap` |
+| [`builder-abap2UI5-js/`](.) (here) | transpiler + sync scripts → generates [`core/`](core/); hosts the [adapters](adapters/) | `npm install && npm test` |
+| [`builder-cap2UI5/`](../builder-cap2UI5/) | generates the full CAP app from its `src/` + the core webapp | `npm run build_cap` |
 | [`cap2UI5/`](../cap2UI5/) | the finished, deployable CAP app (**generated**) | `cd cap2UI5 && npm install && npx cds watch` |
 
 ## Install & run
 
 The builder is a normal npm project — install and run it from **inside**
-`builder/`:
+`builder-abap2UI5-js/`:
 
 ```bash
-cd abap2UI5-js
+cd builder-abap2UI5-js
 npm install         # dev deps: @abaplint/core, jest
 npm test            # run the jest suite
 
@@ -61,14 +61,14 @@ upstream ──────────────▶ run/input/ ────�
  samples branch          samples/src      abap2js    samples/      ├─▶ run/output/core ──1:1──▶ core/
  app/webapp              app/webapp        patch      app/         │
                                                                    │
-abap2UI5-js/src/  (hand-written framework: engine + ports + class ports) ──┘
+builder-abap2UI5-js/src/  (hand-written framework: engine + ports + class ports) ──┘
 ```
 
 The key move: **`src/` wins on every conflict.** The generated trees are
 overlaid *under* the hand-written source, so a hand-adapted class always beats
 the raw transpile. The result in `run/output/core` is exactly what `publish`
 copies 1:1 into `core/` — the build never reads the state of the published
-package. Downstream, [`cap-builder/`](../cap-builder/) assembles the full CAP
+package. Downstream, [`builder-cap2UI5/`](../builder-cap2UI5/) assembles the full CAP
 app from its own `src/` plus the webapp shipped in the published core.
 
 | Command | What it does |
@@ -106,9 +106,9 @@ fill-ins, samples and webapp.
 To change a framework class, edit it **here** and re-run `npm run build_core`.
 
 The CAP app's hand-written source lives in
-[`cap-builder/src/`](../cap-builder/src/) — together with this source it forms
+[`builder-cap2UI5/src/`](../builder-cap2UI5/src/) — together with this source it forms
 a fully functional minimal CAP project runnable without any generated
-overlays; see [cap-builder/README.md](../cap-builder/README.md).
+overlays; see [builder-cap2UI5/README.md](../builder-cap2UI5/README.md).
 
 ### `run/` — the pipeline workbench
 
@@ -158,7 +158,7 @@ The sample-app smoke gate diffs actual startup results against
   class lands directly under `samples/`, keyed by bare class name) and
   overwritten; the hand-written `samples/README.md` from `src/` stays.
 - **frontend** (`run/output/app` → `core/app/z2ui5/webapp`): replaced 1:1. The
-  CAP app's webapp copy is made downstream by `cap-builder` from this published
+  CAP app's webapp copy is made downstream by `builder-cap2UI5` from this published
   core, so the two cannot drift.
 
 Transpiled `.js` that does not parse is skipped and reported; `publish` then
@@ -177,8 +177,8 @@ Every step commits with `GITHUB_TOKEN` and does `git pull --rebase` before
 pushing, so concurrent commits to `main` are safe.
 
 Each pipeline's final **… to CAP** step runs `npm run build_core` here and
-`npm run build_cap` in `cap-builder/` — it regenerates the *whole*
-`abap2UI5-js/core/` + `cap2UI5/` from the sources plus all three `run/output/`
+`npm run build_cap` in `builder-cap2UI5/` — it regenerates the *whole*
+`builder-abap2UI5-js/core/` + `cap2UI5/` from the sources plus all three `run/output/`
 trees, so only the diff caused by the freshly refreshed stream lands in the
 commit. `trigger_update` (manual) runs all three pipelines
 back-to-back — update_samples → update_backend → update_frontend — for a
@@ -186,9 +186,9 @@ one-click full refresh.
 
 | Pipeline (nightly) | Steps → npm scripts | What it refreshes |
 |---|---|---|
-| **update_samples** (03:00) | samples mirror → samples transpile → build_cap<br>(`mirror_samples`, `transpile_samples`, `build_cap`) | `abap2UI5-js/core/srv/app/samples` from the abap2UI5/samples **whole cloud branch** |
-| **update_backend** (04:00) | abap2UI5 mirror → abap2UI5 transpile → build_cap<br>(`mirror_abap2ui5`, `transpile_abap2ui5`, `build_cap`) | `abap2UI5-js/core/srv/z2ui5` from the abap2UI5 framework `src/` |
-| **update_frontend** (05:00) | app mirror → app prepare → build_cap<br>(`mirror_app`, `prepare_app`, `build_cap`) | `abap2UI5-js/core/app/z2ui5/webapp` + `cap2UI5/app/z2ui5/webapp` from the abap2UI5 `app/webapp` |
+| **update_samples** (03:00) | samples mirror → samples transpile → build_cap<br>(`mirror_samples`, `transpile_samples`, `build_cap`) | `builder-abap2UI5-js/core/srv/app/samples` from the abap2UI5/samples **whole cloud branch** |
+| **update_backend** (04:00) | abap2UI5 mirror → abap2UI5 transpile → build_cap<br>(`mirror_abap2ui5`, `transpile_abap2ui5`, `build_cap`) | `builder-abap2UI5-js/core/srv/z2ui5` from the abap2UI5 framework `src/` |
+| **update_frontend** (05:00) | app mirror → app prepare → build_cap<br>(`mirror_app`, `prepare_app`, `build_cap`) | `builder-abap2UI5-js/core/app/z2ui5/webapp` + `cap2UI5/app/z2ui5/webapp` from the abap2UI5 `app/webapp` |
 
 Each `… to CAP` step runs jest and gates its commit — only a green suite is
 pushed. `MIRROR_SOURCE=/path` lets the mirror steps use a local checkout
@@ -197,7 +197,7 @@ instead of cloning.
 ### Web deploy
 
 Downstream web deploy (`trigger_web`) pushes the sha of the last commit
-touching `abap2UI5-js/core/` or `cap2UI5/` to
+touching `builder-abap2UI5-js/core/` or `cap2UI5/` to
 [web-cap2UI5](https://github.com/cap2UI5/web-cap2UI5) (`UPSTREAM_HEAD`) via a
 deploy key registered there with write access (private half: secret
 `ACTION_KEY_WEB` here) — that push starts web-cap2UI5's **build web**
@@ -214,8 +214,8 @@ repo weekly and only relies on the two framework hooks
 
 ## External wiring
 
-Three paths are wired to external repositories: `builder/run/input/abap2UI5/`
+Three paths are wired to external repositories: `builder-abap2UI5-js/run/input/abap2UI5/`
 (the abap2UI5 repo pushes snapshots into it via deploy key),
-`builder/run/input/samples/` (refreshed by the pipeline from abap2UI5/samples),
+`builder-abap2UI5-js/run/input/samples/` (refreshed by the pipeline from abap2UI5/samples),
 and `cap2UI5/` (mirrored by web-cap2UI5). If these paths move, the external
 deploy keys and pipelines that target them must be updated to match.

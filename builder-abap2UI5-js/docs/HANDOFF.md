@@ -2,11 +2,11 @@
 
 > [!NOTE]
 > **Layout update (2026-07):** the repository was since reorganized into three
-> projects — `abap2UI5-js/` (transpiler + `src/` + generated `core/` + `adapters/`),
-> `cap-builder/` (builds the CAP app from its `src/`), and `cap2UI5/` (the
+> projects — `builder-abap2UI5-js/` (transpiler + `src/` + generated `core/` + `adapters/`),
+> `builder-cap2UI5/` (builds the CAP app from its `src/`), and `cap2UI5/` (the
 > published app). Path references below use the old layout: `builder/scripts` →
-> `abap2UI5-js/scripts`, `builder/base/srv/z2ui5` → `abap2UI5-js/src/srv/z2ui5`,
-> `builder/base` (CAP parts) → `cap-builder/src`.
+> `builder-abap2UI5-js/scripts`, `builder/base/srv/z2ui5` → `builder-abap2UI5-js/src/srv/z2ui5`,
+> `builder/base` (CAP parts) → `builder-cap2UI5/src`.
 
 Start here in a new session. Full design + backlog is in
 [`transpiler-roadmap.md`](transpiler-roadmap.md); this file is the operational

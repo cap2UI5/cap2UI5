@@ -1,20 +1,20 @@
 #!/usr/bin/env node
 /**
- * assemble-cap — build the full CAP app under cap-builder/run/output/cap2UI5
+ * assemble-cap — build the full CAP app under builder-cap2UI5/run/output/cap2UI5
  * from two inputs:
  *
  *   src/**                                 →  run/output/cap2UI5/**  (verbatim — the source)
- *   ../abap2UI5-js/core/app/z2ui5/webapp/**  →  app/z2ui5/webapp/**    (replace — the webapp
+ *   ../builder-abap2UI5-js/core/app/z2ui5/webapp/**  →  app/z2ui5/webapp/**    (replace — the webapp
  *                                             copy served by CDS statics and zipped by the
  *                                             mta html5 module; taken from the PUBLISHED core
- *                                             package, so run the abap2UI5-js build first)
+ *                                             package, so run the builder-abap2UI5-js build first)
  *
  * The framework itself is NOT copied — the app consumes it as the npm
- * dependency `abap2UI5` (file:../abap2UI5-js/core).
+ * dependency `abap2UI5` (file:../builder-abap2UI5-js/core).
  *
  * src/ is one directory deeper than the published cap2UI5/, so the relative
  * `abap2UI5` dependency path differs between the two locations. The copy
- * rewrites `file:../../abap2UI5-js/core` → `file:../abap2UI5-js/core` in
+ * rewrites `file:../../builder-abap2UI5-js/core` → `file:../builder-abap2UI5-js/core` in
  * package.json and package-lock.json — the only transformation in the build.
  *
  *   npm run assemble
@@ -24,16 +24,16 @@
 const fs = require("fs");
 const path = require("path");
 
-const root = path.join(__dirname, "..");          // cap-builder/
+const root = path.join(__dirname, "..");          // builder-cap2UI5/
 const repo = path.join(root, "..");
 const base = path.join(root, "src");
 const dest = path.join(root, "run", "output", "cap2UI5");
-const webappSrc = path.join(repo, "abap2UI5-js", "core", "app", "z2ui5", "webapp");
+const webappSrc = path.join(repo, "builder-abap2UI5-js", "core", "app", "z2ui5", "webapp");
 
-// the source is at cap-builder/src/, the published app at cap2UI5/ — one level
+// the source is at builder-cap2UI5/src/, the published app at cap2UI5/ — one level
 // less deep, so the file: link to the core package loses one "../".
-const DEP_BASE = "file:../../abap2UI5-js/core";
-const DEP_PUBLISHED = "file:../abap2UI5-js/core";
+const DEP_BASE = "file:../../builder-abap2UI5-js/core";
+const DEP_PUBLISHED = "file:../builder-abap2UI5-js/core";
 const REWRITE = new Set(["package.json", "package-lock.json"]);
 
 // Local-only artifacts that may exist in src/ when it was run standalone
@@ -57,11 +57,11 @@ function copyDir(from, to, topLevel) {
 }
 
 if (!fs.existsSync(base)) {
-  console.error("cap-builder/src not found — it is the hand-maintained source of the CAP app");
+  console.error("builder-cap2UI5/src not found — it is the hand-maintained source of the CAP app");
   process.exit(1);
 }
 if (!fs.existsSync(webappSrc)) {
-  console.error("abap2UI5-js/core/app/z2ui5/webapp not found — run the abap2UI5-js build first (`npm run build_core` in abap2UI5-js/)");
+  console.error("builder-abap2UI5-js/core/app/z2ui5/webapp not found — run the builder-abap2UI5-js build first (`npm run build_core` in builder-abap2UI5-js/)");
   process.exit(1);
 }
 
@@ -77,6 +77,6 @@ const count = (function walk(d) {
   for (const e of fs.readdirSync(d, { withFileTypes: true })) n += e.isDirectory() ? walk(path.join(d, e.name)) : 1;
   return n;
 })(webappDest);
-console.log(`  overlay webapp (from abap2UI5-js/core) → app/z2ui5/webapp: ${count} files`);
+console.log(`  overlay webapp (from builder-abap2UI5-js/core) → app/z2ui5/webapp: ${count} files`);
 
 console.log(`\nassembled → run/output/cap2UI5`);
