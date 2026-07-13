@@ -3333,17 +3333,6 @@ class z2ui5_cl_xml_view {
     });
   }
 
-  menu_item({ press, text, icon } = {}) {
-    return this._leaf({
-      name: "MenuItem",
-      aProp: this._filterProps([
-      { n: "press", v: press },
-      { n: "text", v: text },
-      { n: "icon", v: icon },
-      ]),
-    });
-  }
-
   panel({ expandable, expanded, headertext, stickyheader, height, class: cssClass, id, width, backgrounddesign, expandanimation, visible, expand } = {}) {
     return this._container({
       name: "Panel",
