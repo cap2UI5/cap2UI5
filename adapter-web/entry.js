@@ -16,12 +16,37 @@
 const engine = require("abap2UI5/engine");
 require("./register-all.generated.js");
 
-// draft persistence: per-tab in-memory store
-const drafts = new Map();
-engine.set_store({
-  load: (id) => drafts.get(id) || null,
-  save: (entry) => { drafts.set(entry.id, entry); },
-});
+// draft persistence: IndexedDB when available (drafts survive reloads),
+// in-memory Map otherwise (e.g. the in-process node smoke probe)
+function idbStore() {
+  const open = new Promise((resolve, reject) => {
+    const req = indexedDB.open("z2ui5", 1);
+    req.onupgradeneeded = () => req.result.createObjectStore("drafts", { keyPath: "id" });
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+  const tx = (mode, run) =>
+    open.then((db) => new Promise((resolve, reject) => {
+      const t = db.transaction("drafts", mode);
+      const req = run(t.objectStore("drafts"));
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    }));
+  return {
+    load: (id) => tx("readonly", (s) => s.get(id)).then((r) => r || null),
+    save: (entry) => tx("readwrite", (s) => s.put(entry)).then(() => undefined),
+  };
+}
+
+if (typeof indexedDB !== "undefined") {
+  engine.set_store(idbStore());
+} else {
+  const drafts = new Map();
+  engine.set_store({
+    load: (id) => drafts.get(id) || null,
+    save: (entry) => { drafts.set(entry.id, entry); },
+  });
+}
 
 // intercept the webapp's roundtrip — no server behind it
 const ROUNDTRIP = "/rest/root/z2ui5";

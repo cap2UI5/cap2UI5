@@ -22,6 +22,40 @@ const HELLO = {
   value: { S_FRONT: { APP: "", SEARCH: "?app_start=z2ui5_cl_app_hello_world", T_EVENT_ARG: [] } },
 };
 
+// Representative sample cross-section for the transport equivalence check:
+// plain form, table binding, popup helper, xml-view breadth, new upstream
+// features (menu), framework startup app. Per-app behavior is covered by the
+// full apps-smoke gate — here we prove each ADAPTER runs the same set.
+const CROSS_SECTION = [
+  "z2ui5_cl_demo_app_001",
+  "z2ui5_cl_demo_app_003",
+  "z2ui5_cl_demo_app_070",
+  "z2ui5_cl_demo_app_372",
+  "z2ui5_cl_app_startup",
+];
+
+function startBody(app) {
+  return { value: { S_FRONT: { APP: "", SEARCH: `?app_start=${app}`, T_EVENT_ARG: [] } } };
+}
+
+async function roundtripSamples(baseUrl) {
+  const results = {};
+  for (const app of CROSS_SECTION) {
+    const res = await fetch(`${baseUrl}/rest/root/z2ui5`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(startBody(app)),
+    });
+    const data = await res.json();
+    const started = data?.S_FRONT?.APP === app && Boolean(data?.S_FRONT?.PARAMS?.S_VIEW?.XML);
+    const crashed = JSON.stringify(data).includes("UNCAUGHT EXCEPTION");
+    results[app] = started && !crashed ? "ok" : "failed";
+  }
+  return results;
+}
+
+const CROSS_SECTION_OK = Object.fromEntries(CROSS_SECTION.map((a) => [a, "ok"]));
+
 function installed(dir) {
   return fs.existsSync(path.join(root, dir, "node_modules"));
 }
@@ -67,6 +101,7 @@ async function bootAndRoundtrip(dir, port) {
       status: res.status,
       app: data?.S_FRONT?.APP,
       hasView: Boolean(data?.S_FRONT?.PARAMS?.S_VIEW?.XML),
+      samples: await roundtripSamples(`http://localhost:${port}`),
     };
   } finally {
     child.kill("SIGKILL");
@@ -84,6 +119,7 @@ describe("platform adapters", () => {
       status: 200,
       app: "z2ui5_cl_app_hello_world",
       hasView: true,
+      samples: CROSS_SECTION_OK,
     });
   });
 
@@ -95,6 +131,7 @@ describe("platform adapters", () => {
       status: 200,
       app: "z2ui5_cl_app_hello_world",
       hasView: true,
+      samples: CROSS_SECTION_OK,
     });
   });
 
@@ -117,13 +154,21 @@ describe("platform adapters", () => {
       (async () => {
         const res = await window.fetch("/rest/root/z2ui5", { method: "POST", body: JSON.stringify(${JSON.stringify(HELLO)}) });
         const data = await res.json();
-        console.log(JSON.stringify({ app: data?.S_FRONT?.APP, hasView: Boolean(data?.S_FRONT?.PARAMS?.S_VIEW?.XML) }));
+        const samples = {};
+        for (const app of ${JSON.stringify(CROSS_SECTION)}) {
+          const r = await window.fetch("/rest/root/z2ui5", { method: "POST", body: JSON.stringify({ value: { S_FRONT: { APP: "", SEARCH: "?app_start=" + app, T_EVENT_ARG: [] } } }) });
+          const d = await r.json();
+          const started = d?.S_FRONT?.APP === app && Boolean(d?.S_FRONT?.PARAMS?.S_VIEW?.XML);
+          samples[app] = started && !JSON.stringify(d).includes("UNCAUGHT EXCEPTION") ? "ok" : "failed";
+        }
+        console.log(JSON.stringify({ app: data?.S_FRONT?.APP, hasView: Boolean(data?.S_FRONT?.PARAMS?.S_VIEW?.XML), samples }));
       })().catch((e) => { console.error(e); process.exit(1); });
     `;
     const out = execFileSync(process.execPath, ["-e", probe], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
     expect(JSON.parse(out.trim().split("\n").pop())).toEqual({
       app: "z2ui5_cl_app_hello_world",
       hasView: true,
+      samples: CROSS_SECTION_OK,
     });
   });
 });

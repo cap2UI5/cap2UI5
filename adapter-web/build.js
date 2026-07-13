@@ -67,6 +67,10 @@ require("esbuild").buildSync({
   platform: "browser",
   format: "iife",
   minify: false,
+  // class names are runtime-relevant: constructor.name is the app name in
+  // the draft store and the S_FRONT.APP echo — esbuild's class lowering
+  // (var X = class _X) must not leak the renamed symbol
+  keepNames: true,
   alias: {
     fs: path.join(__dirname, "shims/fs.js"),
     "node:fs": path.join(__dirname, "shims/fs.js"),
