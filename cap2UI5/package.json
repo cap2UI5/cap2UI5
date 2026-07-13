@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@sap/cds": "^10",
-    "abap2UI5": "file:../framework/core",
+    "abap2UI5": "file:../abap2UI5-js/core",
     "express": "^5"
   },
   "devDependencies": {

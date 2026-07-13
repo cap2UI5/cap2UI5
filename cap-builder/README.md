@@ -2,7 +2,7 @@
 
 This project **generates the deployable CAP app** [`cap2UI5/`](../cap2UI5/)
 from the hand-maintained source in [`src/`](src/) plus the webapp shipped by
-the published [core package](../framework/core/).
+the published [core package](../abap2UI5-js/core/).
 
 > [!IMPORTANT]
 > **`cap2UI5/` is a build artifact — do not hand-edit it.** Every build wipes
@@ -15,7 +15,7 @@ the published [core package](../framework/core/).
 
 ```bash
 # prerequisite: the core package must be published
-cd ../framework && npm install && npm run build_core
+cd ../abap2UI5-js && npm install && npm run build_core
 
 cd ../cap-builder
 npm run build_cap    # assemble + publish → regenerate ../cap2UI5
@@ -25,16 +25,16 @@ No dependencies — the scripts are plain Node. What the build does:
 
 | Step | What it does |
 |---|---|
-| `npm run assemble` | `base/` → `run/output/cap2UI5` (verbatim), then overlay `../framework/core/app/z2ui5/webapp` → `app/z2ui5/webapp` (the copy served by CDS statics and zipped by the mta html5 module — taken from the published core, so the two cannot drift) |
+| `npm run assemble` | `base/` → `run/output/cap2UI5` (verbatim), then overlay `../abap2UI5-js/core/app/z2ui5/webapp` → `app/z2ui5/webapp` (the copy served by CDS statics and zipped by the mta html5 module — taken from the published core, so the two cannot drift) |
 | `npm run publish` | 1:1 copy `run/output/cap2UI5` → `../cap2UI5/` (the very last step) |
 | `npm run build_cap` | `assemble` then `publish` |
 | `npm test` | runs the CAP app's own jest suite (in `../cap2UI5`) |
 
 The framework itself is **not** copied — the app consumes it as the npm
-dependency `abap2UI5` (`file:../framework/core`). The only transformation in
+dependency `abap2UI5` (`file:../abap2UI5-js/core`). The only transformation in
 the build: `src/` is one directory deeper than the published `cap2UI5/`, so
 the copy rewrites the relative dependency path
-(`file:../../framework/core` → `file:../framework/core`) in `package.json` and
+(`file:../../abap2UI5-js/core` → `file:../abap2UI5-js/core`) in `package.json` and
 `package-lock.json`.
 
 ## `src/` — the hand-written source
@@ -49,7 +49,7 @@ and the docs. Published as `cap2UI5/` minus the generated webapp overlay.
 of cap2UI5 with the same basic setup as abap2UI5: a mini frontend
 (`app/index.html`), the http service (`POST /rest/root/z2ui5`) and the draft
 persistence. Run and test it standalone (it links the core via
-`file:../../framework/core`):
+`file:../../abap2UI5-js/core`):
 
 ```bash
 cd src

@@ -2,10 +2,10 @@
 
 > [!NOTE]
 > **Layout update (2026-07):** the repository was since reorganized into three
-> projects — `framework/` (transpiler + `src/` + generated `core/` + `adapters/`),
+> projects — `abap2UI5-js/` (transpiler + `src/` + generated `core/` + `adapters/`),
 > `cap-builder/` (builds the CAP app from its `src/`), and `cap2UI5/` (the
 > published app). Path references below use the old layout: `builder/scripts` →
-> `framework/scripts`, `builder/base/srv/z2ui5` → `framework/src/srv/z2ui5`,
+> `abap2UI5-js/scripts`, `builder/base/srv/z2ui5` → `abap2UI5-js/src/srv/z2ui5`,
 > `builder/base` (CAP parts) → `cap-builder/src`.
 
 Start here in a new session. Full design + backlog is in

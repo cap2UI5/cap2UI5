@@ -22,19 +22,19 @@ The repository is organized as three projects, from framework to finished app:
 
 | Project | What it is | Start here |
 |---|---|---|
-| [**`framework/`**](framework/) | **The framework project**: the ABAP→JS transpiler and sync scripts that generate the platform-neutral core package, plus the platform adapters that consume it. | [framework/README.md](framework/README.md) |
-| ├─ [`framework/core/`](framework/core/) | the generated npm package `abap2UI5` — engine, transpiled classes, webapp, samples. Everything below consumes it via a `file:` link. | [core/README.md](framework/core/README.md) |
-| └─ [`framework/adapters/`](framework/adapters/) | the four platform adapters: [`cap`](framework/adapters/cap/) (thinnest CAP wrapper), [`node`](framework/adapters/node/) (bare `node:http`), [`express`](framework/adapters/express/) (middleware), [`web`](framework/adapters/web/) (serverless browser bundle). | each adapter's README |
+| [**`abap2UI5-js/`**](abap2UI5-js/) | **abap2UI5 ported to JavaScript**: the ABAP→JS transpiler and sync scripts that generate the platform-neutral core package, plus the platform adapters that consume it. | [abap2UI5-js/README.md](abap2UI5-js/README.md) |
+| ├─ [`abap2UI5-js/core/`](abap2UI5-js/core/) | the generated npm package `abap2UI5` — engine, transpiled classes, webapp, samples. Everything below consumes it via a `file:` link. | [core/README.md](abap2UI5-js/core/README.md) |
+| └─ [`abap2UI5-js/adapters/`](abap2UI5-js/adapters/) | the four platform adapters: [`cap`](abap2UI5-js/adapters/cap/) (thinnest CAP wrapper), [`node`](abap2UI5-js/adapters/node/) (bare `node:http`), [`express`](abap2UI5-js/adapters/express/) (middleware), [`web`](abap2UI5-js/adapters/web/) (serverless browser bundle). | each adapter's README |
 | [**`cap-builder/`**](cap-builder/) | **The CAP app build project**: generates the full CAP app from its hand-written `src/` plus the core package. | [cap-builder/README.md](cap-builder/README.md) |
 | [**`cap2UI5/`**](cap2UI5/) | **The finished, deployable CAP app** — install it, run `cds watch`, and write your own UI5 apps as JavaScript classes. **This is what you want if you just want to use cap2UI5.** | [cap2UI5/README.md](cap2UI5/README.md) |
 
 > [!NOTE]
-> **`framework/core/` and `cap2UI5/` are generated build artifacts in this
-> repository** — every build wipes and rewrites them from `framework/src/`
+> **`abap2UI5-js/core/` and `cap2UI5/` are generated build artifacts in this
+> repository** — every build wipes and rewrites them from `abap2UI5-js/src/`
 > resp. `cap-builder/src/` + the transpiled sources. If you are contributing
 > here, edit the sources in the `src/` folders, not the published ones, and
-> re-run `npm run build_core` (framework) / `npm run build_cap` (cap-builder).
-> (Consumers who copy `framework/core/` + `cap2UI5/` out and use them
+> re-run `npm run build_core` (abap2UI5-js) / `npm run build_cap` (cap-builder).
+> (Consumers who copy `abap2UI5-js/core/` + `cap2UI5/` out and use them
 > standalone can of course edit them freely.)
 
 ### Use it
@@ -52,13 +52,13 @@ the samples without installing anything in the
 
 ### How it's built
 
-[framework/](framework/) mirrors the upstream abap2UI5 ABAP sources, transpiles
+[abap2UI5-js/](abap2UI5-js/) mirrors the upstream abap2UI5 ABAP sources, transpiles
 them to JavaScript, **assembles** the core package by overlaying the generated
-trees on the hand-written source in `framework/src/`, and **publishes** it 1:1
-into `framework/core/`; [cap-builder/](cap-builder/) then derives the full CAP
+trees on the hand-written source in `abap2UI5-js/src/`, and **publishes** it 1:1
+into `abap2UI5-js/core/`; [cap-builder/](cap-builder/) then derives the full CAP
 app from its own `src/` + that core — everything gated by the jest suites.
 The full pipeline — transpiler, sync scripts and GitHub Actions — is documented
-in [framework/README.md](framework/README.md).
+in [abap2UI5-js/README.md](abap2UI5-js/README.md).
 
 ## License
 

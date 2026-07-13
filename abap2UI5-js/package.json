@@ -1,8 +1,8 @@
 {
-  "name": "cap2ui5-framework",
+  "name": "abap2ui5-js",
   "version": "1.0.0",
   "private": true,
-  "description": "Framework project for cap2UI5 \u2014 the ABAP\u2192JS transpiler, sync scripts and jest suite that generate the platform-neutral core package in framework/core (consumed by the adapters and the CAP app)",
+  "description": "abap2UI5 ported to JavaScript \u2014 the ABAP\u2192JS transpiler, sync scripts and jest suite that generate the platform-neutral core package in abap2UI5-js/core (consumed by the adapters and the CAP app)",
   "license": "MIT",
   "engines": {
     "node": ">=20"

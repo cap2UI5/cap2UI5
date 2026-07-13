@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * assemble-core — build the core package under framework/run/output/core by
+ * assemble-core — build the core package under abap2UI5-js/run/output/core by
  * overlaying the generated trees on top of the hand-maintained base/ source:
  *
  *   src/**                   →  run/output/core/**             (verbatim — the source)
@@ -24,7 +24,7 @@ const path = require("path");
 const vm = require("vm");
 const { execFileSync } = require("child_process");
 
-const root = path.join(__dirname, "..");          // framework/
+const root = path.join(__dirname, "..");          // abap2UI5-js/
 const repo = path.join(root, "..");
 const base = path.join(root, "src");
 const outRoot = path.join(root, "run", "output");
@@ -104,7 +104,7 @@ function loadGate(files, stats) {
 }
 
 if (!fs.existsSync(base)) {
-  console.error("framework/src not found — it is the hand-maintained source of the core package");
+  console.error("abap2UI5-js/src not found — it is the hand-maintained source of the core package");
   process.exit(1);
 }
 
@@ -133,4 +133,4 @@ for (const { name, from, to, clobber, parseCheck, flatten } of OVERLAYS) {
 }
 
 console.log(`\nassembled → ${path.relative(root, dest)}`);
-if (broken) console.error(`WARNING: ${broken} transpiled file(s) skipped (parse/load error) — fix framework/scripts/abap2js.js`);
+if (broken) console.error(`WARNING: ${broken} transpiled file(s) skipped (parse/load error) — fix abap2UI5-js/scripts/abap2js.js`);

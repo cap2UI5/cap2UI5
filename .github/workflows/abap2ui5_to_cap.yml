@@ -1,6 +1,6 @@
 name: abap2UI5 to CAP
 
-# Rebuild the core package (framework/base + generated trees) and the CAP
+# Rebuild the core package (abap2UI5-js/base + generated trees) and the CAP
 # project (cap-builder/src + the core webapp)
 # (assemble → publish) after the backend transpile refreshed run/output/abap2UI5.
 # Jest gates the commit. Step 3 of the update_backend pipeline.
@@ -24,42 +24,42 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: |
-            framework/package-lock.json
-            framework/core/package-lock.json
+            abap2UI5-js/package-lock.json
+            abap2UI5-js/core/package-lock.json
             cap2UI5/package-lock.json
-            framework/adapters/cap/package-lock.json
-            framework/adapters/node/package-lock.json
-            framework/adapters/express/package-lock.json
-            framework/adapters/web/package-lock.json
+            abap2UI5-js/adapters/cap/package-lock.json
+            abap2UI5-js/adapters/node/package-lock.json
+            abap2UI5-js/adapters/express/package-lock.json
+            abap2UI5-js/adapters/web/package-lock.json
       - run: npm ci
-        working-directory: framework
+        working-directory: abap2UI5-js
       - run: npm ci
-        working-directory: framework/core
+        working-directory: abap2UI5-js/core
       - run: npm ci
         working-directory: cap2UI5
       # platform adapters — armed as smoke gates in the jest suite
-      # (framework/test/adapters.test.js skips them when not installed)
+      # (abap2UI5-js/test/adapters.test.js skips them when not installed)
       - run: npm ci
-        working-directory: framework/adapters/cap
+        working-directory: abap2UI5-js/adapters/cap
       - run: npm ci
-        working-directory: framework/adapters/node
+        working-directory: abap2UI5-js/adapters/node
       - run: npm ci
-        working-directory: framework/adapters/express
+        working-directory: abap2UI5-js/adapters/express
       - run: npm ci
-        working-directory: framework/adapters/web
+        working-directory: abap2UI5-js/adapters/web
       - run: npm run build_core
-        working-directory: framework
+        working-directory: abap2UI5-js
       - run: npm run build_cap
         working-directory: cap-builder
       - run: npm test
-        working-directory: framework
+        working-directory: abap2UI5-js
       - run: npm test
         working-directory: cap2UI5
       - name: commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add framework/core cap2UI5
+          git add abap2UI5-js/core cap2UI5
           if git diff --cached --quiet; then
             echo "nothing to commit"
           else

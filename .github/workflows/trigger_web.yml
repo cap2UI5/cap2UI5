@@ -38,7 +38,7 @@ jobs:
           key_file="$(mktemp)"
           printf '%s\n' "$ACTION_KEY_WEB" > "$key_file"
           export GIT_SSH_COMMAND="ssh -i $key_file -o StrictHostKeyChecking=accept-new"
-          sha="$(git rev-list -1 HEAD -- framework/core cap2UI5)"
+          sha="$(git rev-list -1 HEAD -- abap2UI5-js/core cap2UI5)"
           git clone --depth 1 git@github.com:cap2UI5/web-cap2UI5.git /tmp/web
           echo "$sha" > /tmp/web/UPSTREAM_HEAD
           cd /tmp/web

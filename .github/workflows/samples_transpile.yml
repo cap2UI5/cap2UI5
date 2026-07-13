@@ -1,6 +1,6 @@
 name: samples transpile
 
-# Transpile all sample classes from framework/run/input/samples/src into framework/run/output/samples
+# Transpile all sample classes from abap2UI5-js/run/input/samples/src into abap2UI5-js/run/output/samples
 # (+ transpile report). Step 2 of the update_samples pipeline.
 
 on:
@@ -22,23 +22,23 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: |
-            framework/package-lock.json
+            abap2UI5-js/package-lock.json
             cap2UI5/package-lock.json
       - run: npm ci
-        working-directory: framework
+        working-directory: abap2UI5-js
       - run: npm ci
         working-directory: cap2UI5
       - run: npm run transpile_samples
-        working-directory: framework
+        working-directory: abap2UI5-js
       - name: commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add framework/run/output/samples
+          git add abap2UI5-js/run/output/samples
           if git diff --cached --quiet; then
             echo "nothing to commit"
           else
-            git commit -m "transpile: update framework/run/output/samples ($(cut -c1-12 framework/run/input/samples/UPSTREAM_COMMIT))"
+            git commit -m "transpile: update abap2UI5-js/run/output/samples ($(cut -c1-12 abap2UI5-js/run/input/samples/UPSTREAM_COMMIT))"
             git pull --rebase origin "${{ github.ref_name }}"
             git push origin "HEAD:${{ github.ref_name }}"
           fi

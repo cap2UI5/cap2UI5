@@ -4,7 +4,7 @@
  * tests can load modules exactly like the samples do.
  */
 module.exports = {
-  // anchored at framework/ — this suite covers the transpile project (core
+  // anchored at abap2UI5-js/ — this suite covers the transpile project (core
   // package, transpiler, adapters); the CAP app has its own suite under
   // cap2UI5/test (run via `npm test` there)
   rootDir: ".",
@@ -23,10 +23,10 @@ module.exports = {
     "^abap2UI5/z2ui5_port$": "<rootDir>/core/srv/z2ui5/z2ui5_port.js",
     "^abap2UI5$": "<rootDir>/core/srv/z2ui5/00/03/z2ui5_cl_util.js",
   },
-  testPathIgnorePatterns: ["/node_modules/", "/core/app/", "/framework/src/", "/framework/run/output/", "/adapters/"],
-  // framework/src/ is the hand-maintained SOURCE of the core package and
-  // framework/run/output/core is the assembled copy — keep both out of module
+  testPathIgnorePatterns: ["/node_modules/", "/core/app/", "/abap2UI5-js/src/", "/abap2UI5-js/run/output/", "/adapters/"],
+  // abap2UI5-js/src/ is the hand-maintained SOURCE of the core package and
+  // abap2UI5-js/run/output/core is the assembled copy — keep both out of module
   // resolution so their package.json / sources never shadow the real
-  // framework/core the tests load.
-  modulePathIgnorePatterns: ["/framework/src/", "/framework/run/output/core/"],
+  // abap2UI5-js/core the tests load.
+  modulePathIgnorePatterns: ["/abap2UI5-js/src/", "/abap2UI5-js/run/output/core/"],
 };
