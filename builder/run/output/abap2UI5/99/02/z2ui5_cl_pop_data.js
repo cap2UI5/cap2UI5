@@ -1,4 +1,4 @@
-const z2ui5_cl_abap2ui5_context = require("abap2UI5/z2ui5_cl_abap2ui5_context");
+// TODO(abap2js): unresolved reference z2ui5_cl_a2ui5_context — add require manually
 const z2ui5_cl_pop_table = require("abap2UI5/z2ui5_cl_pop_table");
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
@@ -14,10 +14,10 @@ class z2ui5_cl_pop_data extends z2ui5_if_app {
     let _fs$fs_data = null;
     let lt_result;
     // TODO(abap2js): ASSIGN mr_data->* TO <data>.
-    if (z2ui5_cl_abap2ui5_context.rtti_check_table(fs_data)) {
+    if (z2ui5_cl_a2ui5_context.rtti_check_table(fs_data)) {
       this.client.nav_app_call(z2ui5_cl_pop_table.factory({ i_tab: fs_data, i_title: this.title }));
-    } else if (z2ui5_cl_abap2ui5_context.rtti_check_structure(fs_data)) {
-      lt_result = z2ui5_cl_abap2ui5_context.itab_get_by_struc(fs_data);
+    } else if (z2ui5_cl_a2ui5_context.rtti_check_structure(fs_data)) {
+      lt_result = z2ui5_cl_a2ui5_context.itab_get_by_struc(fs_data);
       this.client.nav_app_call(z2ui5_cl_pop_table.factory({ i_tab: lt_result, i_title: this.title }));
     }
   }

@@ -228,6 +228,16 @@ class z2ui5_cl_app_server_js {
 ` + `      },` + `
 ` + `` + `
 ` + `      _getScrollInfo() {` + `
+` + `        // Release the per-element resolution cache of onScrollCapture once` + `
+` + `        // its DOM node left the document (view replaced/destroyed) - the` + `
+` + `        // detached element and its control would otherwise stay referenced` + `
+` + `        // until the user scrolls the next time.` + `
+` + `        if (this._lastScrollTarget && !this._lastScrollTarget.isConnected) {` + `
+` + `          this._lastScrollTarget = undefined;` + `
+` + `          this._lastScrollUi5El = undefined;` + `
+` + `          this._lastScrollSlotKey = undefined;` + `
+` + `        }` + `
+` + `` + `
 ` + `        // Reads scrollLeft/scrollTop straight from the DOM element the user` + `
 ` + `        // last scrolled in each view slot (recorded by onScrollCapture).` + `
 ` + `        // X = scrollLeft, Y = scrollTop. Slots the user never scrolled are` + `
@@ -392,7 +402,8 @@ class z2ui5_cl_app_server_js {
 ` + `              text = \`HTTP \${response.status}: could not read error body\`;` + `
 ` + `            }` + `
 ` + `            // An empty error body would render an empty overlay - fall back` + `
-` + `            // to the status code so the user sees at least what failed.` + `
+`;
+    result = result + `            // to the status code so the user sees at least what failed.` + `
 ` + `            this.responseError(text || \`HTTP \${response.status}\`);` + `
 ` + `            return;` + `
 ` + `          }` + `
@@ -402,8 +413,7 @@ class z2ui5_cl_app_server_js {
 ` + `          try {` + `
 ` + `            responseData = await response.json();` + `
 ` + `          } catch (e) {` + `
-`;
-    result = result + `            this.responseError(\`Invalid JSON response: \${e.message}\`);` + `
+` + `            this.responseError(\`Invalid JSON response: \${e.message}\`);` + `
 ` + `            return;` + `
 ` + `          }` + `
 ` + `          if (!responseData || !responseData.S_FRONT) {` + `

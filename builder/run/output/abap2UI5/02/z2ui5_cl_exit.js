@@ -1,4 +1,4 @@
-const z2ui5_cl_abap2ui5_context = require("abap2UI5/z2ui5_cl_abap2ui5_context");
+// TODO(abap2js): unresolved reference z2ui5_cl_a2ui5_context — add require manually
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 
 class z2ui5_cl_exit {
@@ -28,7 +28,7 @@ class z2ui5_cl_exit {
     let r_class_name = ``;
     let exit_classes;
     try {
-      exit_classes = z2ui5_cl_abap2ui5_context.rtti_get_classes_impl_intf(`Z2UI5_IF_EXIT`);
+      exit_classes = z2ui5_cl_a2ui5_context.rtti_get_classes_impl_intf(`Z2UI5_IF_EXIT`);
       for (let _i = exit_classes.length - 1; _i >= 0; _i--) { const row = exit_classes[_i]; if (row.classname === `Z2UI5_CL_EXIT`) exit_classes.splice(_i, 1); }
       r_class_name = (() => { try { return exit_classes[(1) - 1].classname ?? null; } catch { return null; } })();
     } catch (error) {

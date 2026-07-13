@@ -1,8 +1,8 @@
-const z2ui5_cl_abap2ui5_context = require("abap2UI5/z2ui5_cl_abap2ui5_context");
-// TODO(abap2js): unresolved reference z2ui5_cl_core_srv_draft — add require manually
-// TODO(abap2js): unresolved reference z2ui5_cl_core_srv_model — add require manually
+// TODO(abap2js): unresolved reference z2ui5_cl_a2ui5_context — add require manually
+const z2ui5_cl_core_srv_draft = require("abap2UI5/z2ui5_cl_core_srv_draft");
+const z2ui5_cl_core_srv_model = require("abap2UI5/z2ui5_cl_core_srv_model");
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cx_abap2ui5_error = require("abap2UI5/z2ui5_cx_abap2ui5_error");
+// TODO(abap2js): unresolved reference z2ui5_cx_a2ui5_error — add require manually
 
 class z2ui5_cl_core_app {
   static mt_buffer = [];
@@ -13,7 +13,7 @@ class z2ui5_cl_core_app {
 
   static all_xml_parse({ xml } = {}) {
     let result = null;
-    // TODO(abap2js): z2ui5_cl_abap2ui5_context=>xml_parse( EXPORTING xml = xml IMPORTING any = result ).
+    // TODO(abap2js): z2ui5_cl_a2ui5_context=>xml_parse( EXPORTING xml = xml IMPORTING any = result ).
     return result;
   }
 
@@ -22,25 +22,25 @@ class z2ui5_cl_core_app {
     const lo_model = this.create_model();
     try {
       lo_model.main_attri_db_save_srtti();
-      result = z2ui5_cl_abap2ui5_context.xml_stringify(this);
+      result = z2ui5_cl_a2ui5_context.xml_stringify(this);
       lo_model.main_attri_db_load();
       return result;
     } catch (error) {
     }
     try {
-      result = z2ui5_cl_abap2ui5_context.xml_stringify(this);
+      result = z2ui5_cl_a2ui5_context.xml_stringify(this);
       return result;
     } catch (error) {
     }
     try {
       lo_model.main_attri_refresh();
       lo_model.main_attri_db_save_srtti();
-      result = z2ui5_cl_abap2ui5_context.xml_stringify(this);
+      result = z2ui5_cl_a2ui5_context.xml_stringify(this);
       lo_model.main_attri_db_load();
       return result;
     } catch (x) {
     }
-    throw new z2ui5_cx_abap2ui5_error({ val: `<p>${x.get_text()}<p>Please check if all generic data references are public attributes of your class` });
+    throw new z2ui5_cx_a2ui5_error({ val: `<p>${x.get_text()}<p>Please check if all generic data references are public attributes of your class` });
     return result;
   }
 

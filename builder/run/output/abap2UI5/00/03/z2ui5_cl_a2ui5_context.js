@@ -10,9 +10,9 @@ const cl_abap_tstmp = require("abap2UI5/cl_abap_tstmp");
 const cl_abap_typedescr = require("abap2UI5/cl_abap_typedescr");
 const cx_sy_dyn_call_illegal_class = require("abap2UI5/cx_sy_dyn_call_illegal_class");
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cx_abap2ui5_error = require("abap2UI5/z2ui5_cx_abap2ui5_error");
+// TODO(abap2js): unresolved reference z2ui5_cx_a2ui5_error — add require manually
 
-class z2ui5_cl_abap2ui5_context {
+class z2ui5_cl_a2ui5_context {
   static cv_char_util_newline = ``;
   static cv_char_util_cr_lf = ``;
   static cv_char_util_horizontal_tab = ``;
@@ -33,19 +33,19 @@ class z2ui5_cl_abap2ui5_context {
   static cs_ui5_msg_type = { e: `Error`, s: `Success`, w: `Warning`, i: `Information` };
 
   static class_constructor() {
-    z2ui5_cl_abap2ui5_context.cv_char_util_newline = z2ui5_cl_util.abap_copy(cl_abap_char_utilities.newline);
-    z2ui5_cl_abap2ui5_context.cv_char_util_cr_lf = z2ui5_cl_util.abap_copy(cl_abap_char_utilities.cr_lf);
-    z2ui5_cl_abap2ui5_context.cv_char_util_horizontal_tab = z2ui5_cl_util.abap_copy(cl_abap_char_utilities.horizontal_tab);
-    z2ui5_cl_abap2ui5_context.cv_char_util_charsize = z2ui5_cl_util.abap_copy(cl_abap_char_utilities.charsize);
-    z2ui5_cl_abap2ui5_context.cv_format_e_xml_attr = z2ui5_cl_util.abap_copy(cl_abap_format.e_xml_attr);
-    z2ui5_cl_abap2ui5_context.cv_typedescr_typekind_table = z2ui5_cl_util.abap_copy(cl_abap_typedescr.typekind_table);
-    z2ui5_cl_abap2ui5_context.cv_typedescr_typekind_dref = z2ui5_cl_util.abap_copy(cl_abap_typedescr.typekind_dref);
-    z2ui5_cl_abap2ui5_context.cv_typedescr_typekind_oref = z2ui5_cl_util.abap_copy(cl_abap_typedescr.typekind_oref);
-    z2ui5_cl_abap2ui5_context.cv_typedescr_typekind_struct1 = z2ui5_cl_util.abap_copy(cl_abap_typedescr.typekind_struct1);
-    z2ui5_cl_abap2ui5_context.cv_typedescr_typekind_struct2 = z2ui5_cl_util.abap_copy(cl_abap_typedescr.typekind_struct2);
-    z2ui5_cl_abap2ui5_context.cv_typedescr_kind_struct = z2ui5_cl_util.abap_copy(cl_abap_typedescr.kind_struct);
-    z2ui5_cl_abap2ui5_context.cv_typedescr_kind_ref = z2ui5_cl_util.abap_copy(cl_abap_typedescr.kind_ref);
-    z2ui5_cl_abap2ui5_context.cv_objectdescr_public = z2ui5_cl_util.abap_copy(cl_abap_objectdescr.public);
+    z2ui5_cl_a2ui5_context.cv_char_util_newline = z2ui5_cl_util.abap_copy(cl_abap_char_utilities.newline);
+    z2ui5_cl_a2ui5_context.cv_char_util_cr_lf = z2ui5_cl_util.abap_copy(cl_abap_char_utilities.cr_lf);
+    z2ui5_cl_a2ui5_context.cv_char_util_horizontal_tab = z2ui5_cl_util.abap_copy(cl_abap_char_utilities.horizontal_tab);
+    z2ui5_cl_a2ui5_context.cv_char_util_charsize = z2ui5_cl_util.abap_copy(cl_abap_char_utilities.charsize);
+    z2ui5_cl_a2ui5_context.cv_format_e_xml_attr = z2ui5_cl_util.abap_copy(cl_abap_format.e_xml_attr);
+    z2ui5_cl_a2ui5_context.cv_typedescr_typekind_table = z2ui5_cl_util.abap_copy(cl_abap_typedescr.typekind_table);
+    z2ui5_cl_a2ui5_context.cv_typedescr_typekind_dref = z2ui5_cl_util.abap_copy(cl_abap_typedescr.typekind_dref);
+    z2ui5_cl_a2ui5_context.cv_typedescr_typekind_oref = z2ui5_cl_util.abap_copy(cl_abap_typedescr.typekind_oref);
+    z2ui5_cl_a2ui5_context.cv_typedescr_typekind_struct1 = z2ui5_cl_util.abap_copy(cl_abap_typedescr.typekind_struct1);
+    z2ui5_cl_a2ui5_context.cv_typedescr_typekind_struct2 = z2ui5_cl_util.abap_copy(cl_abap_typedescr.typekind_struct2);
+    z2ui5_cl_a2ui5_context.cv_typedescr_kind_struct = z2ui5_cl_util.abap_copy(cl_abap_typedescr.kind_struct);
+    z2ui5_cl_a2ui5_context.cv_typedescr_kind_ref = z2ui5_cl_util.abap_copy(cl_abap_typedescr.kind_ref);
+    z2ui5_cl_a2ui5_context.cv_objectdescr_public = z2ui5_cl_util.abap_copy(cl_abap_objectdescr.public);
   }
 
   static db_rollback() {
@@ -54,7 +54,7 @@ class z2ui5_cl_abap2ui5_context {
 
   static boolean_abap_2_json({ val } = {}) {
     let result = ``;
-    if (z2ui5_cl_abap2ui5_context.boolean_check_by_data({ val: val })) {
+    if (z2ui5_cl_a2ui5_context.boolean_check_by_data({ val: val })) {
       result = ((val === true || val === `X`) ? `true` : `false`);
     } else {
       result = z2ui5_cl_util.abap_copy(val);
@@ -66,7 +66,6 @@ class z2ui5_cl_abap2ui5_context {
     let result = false;
     let sy_subrc = 0;
     let lo_descr;
-    let lv_abs_name;
     let lr_cache;
     let lo_ele;
     try {
@@ -74,11 +73,10 @@ class z2ui5_cl_abap2ui5_context {
       if (lo_descr.type_kind !== cl_abap_typedescr.typekind_char) {
         return result;
       }
-      lv_abs_name = (lo_descr.absolute_name);
       lr_cache = {};
       {
-        const _t = z2ui5_cl_abap2ui5_context.mt_bool_cache;
-        const _i = _t.findIndex((_r) => _r.absolute_name === lv_abs_name);
+        const _t = z2ui5_cl_a2ui5_context.mt_bool_cache;
+        const _i = _t.findIndex((_r) => _r.typedescr === lo_descr);
         sy_subrc = _i >= 0 && _i < _t.length ? 0 : 4;
         if (sy_subrc === 0) lr_cache = _t[_i];
       }
@@ -87,8 +85,8 @@ class z2ui5_cl_abap2ui5_context {
         return result;
       }
       lo_ele = (lo_descr);
-      result = z2ui5_cl_abap2ui5_context.boolean_check_by_name({ val: lo_ele.get_relative_name() });
-      z2ui5_cl_abap2ui5_context.mt_bool_cache.push({ absolute_name: lv_abs_name, is_bool: result });
+      result = z2ui5_cl_a2ui5_context.boolean_check_by_name({ val: lo_ele.get_relative_name() });
+      z2ui5_cl_a2ui5_context.mt_bool_cache.push({ typedescr: lo_descr, is_bool: result });
     } catch (error) {
     }
     return result;
@@ -118,7 +116,7 @@ class z2ui5_cl_abap2ui5_context {
       result = false;
       return result;
     }
-    result = (!(z2ui5_cl_abap2ui5_context.check_unassign_initial({ val: val }) === true || z2ui5_cl_abap2ui5_context.check_unassign_initial({ val: val }) === `X`));
+    result = (!(z2ui5_cl_a2ui5_context.check_unassign_initial({ val: val }) === true || z2ui5_cl_a2ui5_context.check_unassign_initial({ val: val }) === `X`));
     return result;
   }
 
@@ -143,7 +141,7 @@ class z2ui5_cl_abap2ui5_context {
     let _fs$fs_from = null;
     let fs_result = null;
     let _fs$fs_result = null;
-    if (z2ui5_cl_abap2ui5_context.rtti_check_ref_data({ val: from })) {
+    if (z2ui5_cl_a2ui5_context.rtti_check_ref_data({ val: from })) {
       // TODO(abap2js): ASSIGN from->* TO <from>.
       if (!(fs_from != null)) {
         return result;
@@ -171,28 +169,28 @@ class z2ui5_cl_abap2ui5_context {
     let lv_metadata = ``;
     let lv_base64 = ``;
     [lv_metadata, lv_base64] = val.split(`,`);
-    result = z2ui5_cl_abap2ui5_context.conv_decode_x_base64({ val: lv_base64 });
+    result = z2ui5_cl_a2ui5_context.conv_decode_x_base64({ val: lv_base64 });
     return result;
   }
 
   static c_trim({ val } = {}) {
     let result = ``;
     result = /* TODO(abap2js) */ shift_left(this.shift_right((val)));
-    result = this.shift_right({ val: result, sub: z2ui5_cl_abap2ui5_context.cv_char_util_horizontal_tab });
-    result = (result.startsWith(z2ui5_cl_abap2ui5_context.cv_char_util_horizontal_tab) ? result.slice((z2ui5_cl_abap2ui5_context.cv_char_util_horizontal_tab).length) : result);
+    result = this.shift_right({ val: result, sub: z2ui5_cl_a2ui5_context.cv_char_util_horizontal_tab });
+    result = (result.startsWith(z2ui5_cl_a2ui5_context.cv_char_util_horizontal_tab) ? result.slice((z2ui5_cl_a2ui5_context.cv_char_util_horizontal_tab).length) : result);
     result = /* TODO(abap2js) */ shift_left(this.shift_right(result));
     return result;
   }
 
   static c_trim_lower({ val } = {}) {
     let result = ``;
-    result = z2ui5_cl_abap2ui5_context.c_trim({ val: (val) }).toLowerCase();
+    result = z2ui5_cl_a2ui5_context.c_trim({ val: (val) }).toLowerCase();
     return result;
   }
 
   static c_trim_upper({ val } = {}) {
     let result = ``;
-    result = z2ui5_cl_abap2ui5_context.c_trim({ val: (val) }).toUpperCase();
+    result = z2ui5_cl_a2ui5_context.c_trim({ val: (val) }).toUpperCase();
     return result;
   }
 
@@ -206,9 +204,9 @@ class z2ui5_cl_abap2ui5_context {
     let result = [];
     let sy_tabix = 0;
     let lv_value;
-    const lt_mapping = z2ui5_cl_abap2ui5_context.filter_get_token_range_mapping();
+    const lt_mapping = z2ui5_cl_a2ui5_context.filter_get_token_range_mapping();
     const lt_tab = {};
-    z2ui5_cl_abap2ui5_context.itab_corresponding({ val: { val, tab: lt_tab } });
+    z2ui5_cl_a2ui5_context.itab_corresponding({ val: { val, tab: lt_tab } });
     sy_tabix = 0;
     for (const lr_row of lt_tab) {
       sy_tabix++;
@@ -333,7 +331,7 @@ class z2ui5_cl_abap2ui5_context {
     try {
       // TODO(abap2js): cl_abap_typedescr=>describe_by_name( EXPORTING p_name = type->absolute_name RECEIVING p_descr_ref = DATA(type_desc) EXCEPTIONS type_not_found = 1 ).
     } catch (x) {
-      throw new z2ui5_cx_abap2ui5_error({ previous: x });
+      throw new z2ui5_cx_a2ui5_error({ previous: x });
     }
     const sdescr = (type_desc);
     const comps = sdescr.get_components();
@@ -341,7 +339,7 @@ class z2ui5_cl_abap2ui5_context {
     for (const lr_comp of comps) {
       sy_tabix++;
       if ((lr_comp.as_include === true || lr_comp.as_include === `X`)) {
-        incl_comps = z2ui5_cl_abap2ui5_context.rtti_get_t_attri_by_include(lr_comp.type);
+        incl_comps = z2ui5_cl_a2ui5_context.rtti_get_t_attri_by_include(lr_comp.type);
         const _sy_tabix_1 = sy_tabix;
         sy_tabix = 0;
         for (const lr_incl_comp of incl_comps) {
@@ -396,7 +394,7 @@ class z2ui5_cl_abap2ui5_context {
     const lv_absolute_name = (lo_struct.absolute_name);
     let lr_cache = {};
     {
-      const _t = z2ui5_cl_abap2ui5_context.mt_attri_cache;
+      const _t = z2ui5_cl_a2ui5_context.mt_attri_cache;
       const _i = _t.findIndex((_r) => _r.absolute_name === lv_absolute_name);
       sy_subrc = _i >= 0 && _i < _t.length ? 0 : 4;
       if (sy_subrc === 0) lr_cache = _t[_i];
@@ -412,7 +410,7 @@ class z2ui5_cl_abap2ui5_context {
       if (!(lr_comp.as_include === true || lr_comp.as_include === `X`)) {
         result.push(lr_comp);
       } else {
-        lt_attri = z2ui5_cl_abap2ui5_context.rtti_get_t_attri_by_include(lr_comp.type);
+        lt_attri = z2ui5_cl_a2ui5_context.rtti_get_t_attri_by_include(lr_comp.type);
         result.push(...lt_attri);
       }
     }
@@ -420,7 +418,7 @@ class z2ui5_cl_abap2ui5_context {
       lr_cache.o_struct = z2ui5_cl_util.abap_copy(lo_struct);
       lr_cache.t_attri = z2ui5_cl_util.abap_copy(result);
     } else {
-      z2ui5_cl_abap2ui5_context.mt_attri_cache.push({ absolute_name: lv_absolute_name, o_struct: lo_struct, t_attri: result });
+      z2ui5_cl_a2ui5_context.mt_attri_cache.push({ absolute_name: lv_absolute_name, o_struct: lo_struct, t_attri: result });
     }
     return result;
   }
@@ -471,8 +469,8 @@ class z2ui5_cl_abap2ui5_context {
 
   static url_param_get({ val, url } = {}) {
     let result = ``;
-    const lt_params = z2ui5_cl_abap2ui5_context.url_param_get_tab({ i_val: url });
-    const lv_val = z2ui5_cl_abap2ui5_context.c_trim_lower({ val: val });
+    const lt_params = z2ui5_cl_a2ui5_context.url_param_get_tab({ i_val: url });
+    const lv_val = z2ui5_cl_a2ui5_context.c_trim_lower({ val: val });
     result = (() => { try { return lt_params.find((row) => row.n === lv_val).v ?? null; } catch { return null; } })();
     return result;
   }
@@ -485,7 +483,7 @@ class z2ui5_cl_abap2ui5_context {
     lv_search = (lv_search.startsWith(`?`) ? lv_search.slice((`?`).length) : lv_search);
     let lv_search2 = this.substring_after({ val: lv_search, sub: `&sap-startup-params=` });
     lv_search = (lv_search2 ? lv_search2 : lv_search);
-    lv_search2 = this.substring_after({ val: z2ui5_cl_abap2ui5_context.c_trim_lower({ val: lv_search }), sub: `?` });
+    lv_search2 = this.substring_after({ val: z2ui5_cl_a2ui5_context.c_trim_lower({ val: lv_search }), sub: `?` });
     if (lv_search2) {
       lv_search = z2ui5_cl_util.abap_copy(lv_search2);
     }
@@ -528,7 +526,7 @@ class z2ui5_cl_abap2ui5_context {
     let result = ``;
     let lv_classname;
     let lv_text;
-    if ((z2ui5_cl_abap2ui5_context.rtti_check_class_exists({ val: `ZCL_SRTTI_TYPEDESCR` }) === true || z2ui5_cl_abap2ui5_context.rtti_check_class_exists({ val: `ZCL_SRTTI_TYPEDESCR` }) === `X`)) {
+    if ((z2ui5_cl_a2ui5_context.rtti_check_class_exists({ val: `ZCL_SRTTI_TYPEDESCR` }) === true || z2ui5_cl_a2ui5_context.rtti_check_class_exists({ val: `ZCL_SRTTI_TYPEDESCR` }) === `X`)) {
       let srtti = null;
       lv_classname = `ZCL_SRTTI_TYPEDESCR`;
       // TODO(abap2js): CALL METHOD (lv_classname)=>(`CREATE_BY_DATA_OBJECT`) EXPORTING data_object = data RECEIVING srtti = srtti.
@@ -539,7 +537,7 @@ class z2ui5_cl_abap2ui5_context {
         // TODO(abap2js): CALL TRANSFORMATION id SOURCE srtti = srtti dobj = data RESULT XML result.
       } catch (error) {
         lv_text = `UNSUPPORTED_FEATURE`;
-        throw new z2ui5_cx_abap2ui5_error({ val: lv_text });
+        throw new z2ui5_cx_a2ui5_error({ val: lv_text });
       }
     }
     return result;
@@ -567,7 +565,7 @@ class z2ui5_cl_abap2ui5_context {
     let sy_subrc = 0;
     let fs_component = null;
     let _fs$fs_component = null;
-    const lt_attri = z2ui5_cl_abap2ui5_context.rtti_get_t_attri_by_any({ val: val });
+    const lt_attri = z2ui5_cl_a2ui5_context.rtti_get_t_attri_by_any({ val: val });
     sy_tabix = 0;
     for (const lr_attri of lt_attri) {
       sy_tabix++;
@@ -577,7 +575,7 @@ class z2ui5_cl_abap2ui5_context {
       if (sy_subrc !== 0) {
         continue;
       }
-      switch (z2ui5_cl_abap2ui5_context.rtti_get_type_kind({ val: fs_component })) {
+      switch (z2ui5_cl_a2ui5_context.rtti_get_type_kind({ val: fs_component })) {
         case cl_abap_typedescr.typekind_table:
           break;
         default:
@@ -590,16 +588,16 @@ class z2ui5_cl_abap2ui5_context {
 
   static msg_get_t({ val, val2 } = {}) {
     let result = [];
-    result = z2ui5_cl_abap2ui5_context.msg_get_internal({ val: val });
+    result = z2ui5_cl_a2ui5_context.msg_get_internal({ val: val });
     if (!result && val2) {
-      result = z2ui5_cl_abap2ui5_context.msg_get_internal({ val: val2 });
+      result = z2ui5_cl_a2ui5_context.msg_get_internal({ val: val2 });
     }
     return result;
   }
 
   static rtti_check_clike({ val } = {}) {
     let result = false;
-    const lv_type = z2ui5_cl_abap2ui5_context.rtti_get_type_kind({ val: val });
+    const lv_type = z2ui5_cl_a2ui5_context.rtti_get_type_kind({ val: val });
     switch (lv_type) {
       case cl_abap_datadescr.typekind_char:
       case cl_abap_datadescr.typekind_clike:
@@ -613,20 +611,33 @@ class z2ui5_cl_abap2ui5_context {
 
   static ui5_get_msg_type({ val } = {}) {
     let result = ``;
-    result = (val === `E` ? z2ui5_cl_abap2ui5_context.cs_ui5_msg_type.e : val === `S` ? z2ui5_cl_abap2ui5_context.cs_ui5_msg_type.s : val === `W` ? z2ui5_cl_abap2ui5_context.cs_ui5_msg_type.w : z2ui5_cl_abap2ui5_context.cs_ui5_msg_type.i);
+    switch (val) {
+      case `E`:
+        result = z2ui5_cl_util.abap_copy(z2ui5_cl_a2ui5_context.cs_ui5_msg_type.e);
+        break;
+      case `S`:
+        result = z2ui5_cl_util.abap_copy(z2ui5_cl_a2ui5_context.cs_ui5_msg_type.s);
+        break;
+      case `W`:
+        result = z2ui5_cl_util.abap_copy(z2ui5_cl_a2ui5_context.cs_ui5_msg_type.w);
+        break;
+      default:
+        result = z2ui5_cl_util.abap_copy(z2ui5_cl_a2ui5_context.cs_ui5_msg_type.i);
+        break;
+    }
     return result;
   }
 
   static msg_get({ val, val2 } = {}) {
     let result = {};
-    const lt_msg = z2ui5_cl_abap2ui5_context.msg_get_t({ val, val2 });
+    const lt_msg = z2ui5_cl_a2ui5_context.msg_get_t({ val, val2 });
     result = z2ui5_cl_util.abap_copy(lt_msg[(1) - 1]);
     return result;
   }
 
   static rtti_get_data_element_text_l({ val } = {}) {
     let result = ``;
-    result = z2ui5_cl_abap2ui5_context.rtti_get_data_element_texts({ val: val }).long;
+    result = z2ui5_cl_a2ui5_context.rtti_get_data_element_texts({ val: val }).long;
     return result;
   }
 
@@ -698,11 +709,11 @@ class z2ui5_cl_abap2ui5_context {
   static ui5_msg_box_format({ val } = {}) {
     let result = {};
     let sy_tabix = 0;
-    const lt_msg = z2ui5_cl_abap2ui5_context.msg_get_t({ val: val });
+    const lt_msg = z2ui5_cl_a2ui5_context.msg_get_t({ val: val });
     if (lt_msg.length === 1) {
       result.text = z2ui5_cl_util.abap_copy(lt_msg[(1) - 1].text);
-      result.type = z2ui5_cl_abap2ui5_context.ui5_get_msg_type({ val: lt_msg[(1) - 1].type }).toLowerCase();
-      result.title = z2ui5_cl_abap2ui5_context.ui5_get_msg_type({ val: lt_msg[(1) - 1].type });
+      result.type = z2ui5_cl_a2ui5_context.ui5_get_msg_type({ val: lt_msg[(1) - 1].type }).toLowerCase();
+      result.title = z2ui5_cl_a2ui5_context.ui5_get_msg_type({ val: lt_msg[(1) - 1].type });
     } else if (lt_msg.length > 1) {
       result.text = ` ${lt_msg.length} Messages found: `;
       let lt_detail_items = [];
@@ -712,8 +723,8 @@ class z2ui5_cl_abap2ui5_context {
         lt_detail_items.push(`<li>${lr_msg.text}</li>`);
       }
       result.details = `<ul>` + /* TODO(abap2js) */ concat_lines_of(lt_detail_items) + `</ul>`;
-      result.title = z2ui5_cl_abap2ui5_context.ui5_get_msg_type({ val: lt_msg[(1) - 1].type });
-      result.type = z2ui5_cl_abap2ui5_context.ui5_get_msg_type({ val: lt_msg[(1) - 1].type });
+      result.title = z2ui5_cl_a2ui5_context.ui5_get_msg_type({ val: lt_msg[(1) - 1].type });
+      result.type = z2ui5_cl_a2ui5_context.ui5_get_msg_type({ val: lt_msg[(1) - 1].type });
     } else {
       result.skip = true;
     }
@@ -738,27 +749,27 @@ class z2ui5_cl_abap2ui5_context {
 
   static app_get_url({ classname, origin, pathname, search, hash } = {}) {
     let result = ``;
-    const lt_param = z2ui5_cl_abap2ui5_context.url_param_get_tab({ i_val: search });
+    const lt_param = z2ui5_cl_a2ui5_context.url_param_get_tab({ i_val: search });
     for (let _i = lt_param.length - 1; _i >= 0; _i--) { const row = lt_param[_i]; if (row.n === `app_start`) lt_param.splice(_i, 1); }
     lt_param.push({ n: `app_start`, v: classname.toLowerCase() });
-    result = `${origin}${pathname}?` + z2ui5_cl_abap2ui5_context.url_param_create_url({ t_params: lt_param }) + hash;
+    result = `${origin}${pathname}?` + z2ui5_cl_a2ui5_context.url_param_create_url({ t_params: lt_param }) + hash;
     return result;
   }
 
   static context_check_abap_cloud() {
     let result = false;
-    if ((z2ui5_cl_abap2ui5_context.gv_check_cloud_cached === true || z2ui5_cl_abap2ui5_context.gv_check_cloud_cached === `X`)) {
-      result = z2ui5_cl_util.abap_copy(z2ui5_cl_abap2ui5_context.gv_check_cloud);
+    if ((z2ui5_cl_a2ui5_context.gv_check_cloud_cached === true || z2ui5_cl_a2ui5_context.gv_check_cloud_cached === `X`)) {
+      result = z2ui5_cl_util.abap_copy(z2ui5_cl_a2ui5_context.gv_check_cloud);
       return result;
     }
     try {
       cl_abap_typedescr.describe_by_name(`T100`);
-      z2ui5_cl_abap2ui5_context.gv_check_cloud = false;
+      z2ui5_cl_a2ui5_context.gv_check_cloud = false;
     } catch (error) {
-      z2ui5_cl_abap2ui5_context.gv_check_cloud = true;
+      z2ui5_cl_a2ui5_context.gv_check_cloud = true;
     }
-    z2ui5_cl_abap2ui5_context.gv_check_cloud_cached = true;
-    result = z2ui5_cl_util.abap_copy(z2ui5_cl_abap2ui5_context.gv_check_cloud);
+    z2ui5_cl_a2ui5_context.gv_check_cloud_cached = true;
+    result = z2ui5_cl_util.abap_copy(z2ui5_cl_a2ui5_context.gv_check_cloud);
     return result;
   }
 
@@ -826,10 +837,10 @@ class z2ui5_cl_abap2ui5_context {
 
   static rtti_get_classes_impl_intf({ val } = {}) {
     let result = [];
-    if (z2ui5_cl_abap2ui5_context.context_check_abap_cloud()) {
-      result = z2ui5_cl_abap2ui5_context.rtti_get_classes_intf_cloud({ val: val });
+    if (z2ui5_cl_a2ui5_context.context_check_abap_cloud()) {
+      result = z2ui5_cl_a2ui5_context.rtti_get_classes_intf_cloud({ val: val });
     } else {
-      result = z2ui5_cl_abap2ui5_context.rtti_get_classes_intf_std({ val: val });
+      result = z2ui5_cl_a2ui5_context.rtti_get_classes_intf_std({ val: val });
     }
     return result;
   }
@@ -866,7 +877,7 @@ class z2ui5_cl_abap2ui5_context {
     for (const implementation_name of lt_implementation_names) {
       sy_tabix++;
       ls_class.classname = z2ui5_cl_util.abap_copy(implementation_name);
-      ls_class.description = z2ui5_cl_abap2ui5_context.rtti_get_class_descr_on_cloud({ i_classname: implementation_name });
+      ls_class.description = z2ui5_cl_a2ui5_context.rtti_get_class_descr_on_cloud({ i_classname: implementation_name });
       result.push(ls_class);
     }
     return result;
@@ -908,7 +919,7 @@ class z2ui5_cl_abap2ui5_context {
       lv_fm = `SEO_CLASS_READ`;
       // TODO(abap2js): CALL FUNCTION lv_fm EXPORTING clskey = ls_clskey IMPORTING class = <class> EXCEPTIONS error_message = 1 OTHERS = 2.
       if (sy_subrc !== 0) {
-        throw new z2ui5_cx_abap2ui5_error();
+        throw new z2ui5_cx_a2ui5_error();
       }
       _fs$fs_description = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(fs_class, `DESCRIPT`);
       fs_description = _fs$fs_description ? _fs$fs_description.o[_fs$fs_description.k] : null;
@@ -1052,7 +1063,7 @@ class z2ui5_cl_abap2ui5_context {
     let lt_tab;
     let lt_attri;
     let ls_result;
-    const lv_kind = z2ui5_cl_abap2ui5_context.rtti_get_type_kind({ val: val });
+    const lv_kind = z2ui5_cl_a2ui5_context.rtti_get_type_kind({ val: val });
     switch (lv_kind) {
       case cl_abap_datadescr.typekind_table:
         fs_tab = val;
@@ -1061,7 +1072,7 @@ class z2ui5_cl_abap2ui5_context {
         sy_tabix = 0;
         for (const symbol of fs_tab) {
           sy_tabix++;
-          lt_tab = z2ui5_cl_abap2ui5_context.msg_get_internal({ val: fs_row });
+          lt_tab = z2ui5_cl_a2ui5_context.msg_get_internal({ val: fs_row });
           result.push(...lt_tab);
         }
         break;
@@ -1070,11 +1081,11 @@ class z2ui5_cl_abap2ui5_context {
         if (!val) {
           return result;
         }
-        if ((z2ui5_cl_abap2ui5_context.check_is_rap_struct({ val: val }) === true || z2ui5_cl_abap2ui5_context.check_is_rap_struct({ val: val }) === `X`)) {
-          result = z2ui5_cl_abap2ui5_context.msg_get_rap({ val: val });
+        if ((z2ui5_cl_a2ui5_context.check_is_rap_struct({ val: val }) === true || z2ui5_cl_a2ui5_context.check_is_rap_struct({ val: val }) === `X`)) {
+          result = z2ui5_cl_a2ui5_context.msg_get_rap({ val: val });
           return result;
         }
-        lt_attri = z2ui5_cl_abap2ui5_context.rtti_get_t_attri_by_any({ val: val });
+        lt_attri = z2ui5_cl_a2ui5_context.rtti_get_t_attri_by_any({ val: val });
         ls_result = {};
         sy_tabix = 0;
         for (const ls_attri of lt_attri) {
@@ -1086,11 +1097,11 @@ class z2ui5_cl_abap2ui5_context {
             continue;
           }
           if (ls_attri.name === `ITEM`) {
-            lt_tab = z2ui5_cl_abap2ui5_context.msg_get_internal({ val: fs_comp });
+            lt_tab = z2ui5_cl_a2ui5_context.msg_get_internal({ val: fs_comp });
             result.push(...lt_tab);
             return result;
           } else {
-            ls_result = z2ui5_cl_abap2ui5_context.msg_map({ name: ls_attri.name, val: fs_comp, is_msg: ls_result });
+            ls_result = z2ui5_cl_a2ui5_context.msg_map({ name: ls_attri.name, val: fs_comp, is_msg: ls_result });
           }
         }
         if (!ls_result.text && ls_result.id) {
@@ -1100,10 +1111,10 @@ class z2ui5_cl_abap2ui5_context {
         result.push(ls_result);
         break;
       case cl_abap_datadescr.typekind_oref:
-        result = z2ui5_cl_abap2ui5_context.msg_get_by_oref({ val: val });
+        result = z2ui5_cl_a2ui5_context.msg_get_by_oref({ val: val });
         break;
       default:
-        if (z2ui5_cl_abap2ui5_context.rtti_check_clike({ val: val })) {
+        if (z2ui5_cl_a2ui5_context.rtti_check_clike({ val: val })) {
           result.push({ text: val });
         }
         break;
@@ -1127,7 +1138,7 @@ class z2ui5_cl_abap2ui5_context {
     try {
       lx = (val);
       ls_result = { type: `E`, text: lx.get_text() };
-      lt_attri_o = z2ui5_cl_abap2ui5_context.rtti_get_t_attri_by_oref({ val: val });
+      lt_attri_o = z2ui5_cl_a2ui5_context.rtti_get_t_attri_by_oref({ val: val });
       sy_tabix = 0;
       for (const ls_attri_o of lt_attri_o) {
         sy_tabix++;
@@ -1137,7 +1148,7 @@ class z2ui5_cl_abap2ui5_context {
         if (sy_subrc !== 0) {
           continue;
         }
-        ls_result = z2ui5_cl_abap2ui5_context.msg_map({ name: ls_attri_o.name, val: fs_comp, is_msg: ls_result });
+        ls_result = z2ui5_cl_a2ui5_context.msg_map({ name: ls_attri_o.name, val: fs_comp, is_msg: ls_result });
       }
       result.push(ls_result);
     } catch (error) {
@@ -1148,17 +1159,17 @@ class z2ui5_cl_abap2ui5_context {
         // TODO(abap2js): CREATE DATA lr_tab TYPE (`if_bali_log=>ty_item_table`).
         // TODO(abap2js): ASSIGN lr_tab->* TO FIELD-SYMBOL(<tab2>).
         // TODO(abap2js): CALL METHOD obj->(`IF_BALI_LOG~GET_ALL_ITEMS`) RECEIVING item_table = <tab2>.
-        lt_tab2 = z2ui5_cl_abap2ui5_context.msg_get_internal({ val: fs_tab2 });
+        lt_tab2 = z2ui5_cl_a2ui5_context.msg_get_internal({ val: fs_tab2 });
         result.push(...lt_tab2);
       } catch (error) {
         try {
           // TODO(abap2js): CREATE DATA lr_tab TYPE (`BAPIRETTAB`).
           // TODO(abap2js): ASSIGN lr_tab->* TO <tab2>.
           // TODO(abap2js): CALL METHOD obj->(`ZIF_LOGGER~EXPORT_TO_TABLE`) RECEIVING rt_bapiret = <tab2>.
-          lt_tab2 = z2ui5_cl_abap2ui5_context.msg_get_internal({ val: fs_tab2 });
+          lt_tab2 = z2ui5_cl_a2ui5_context.msg_get_internal({ val: fs_tab2 });
           result.push(...lt_tab2);
         } catch (error) {
-          lt_attri_o = z2ui5_cl_abap2ui5_context.rtti_get_t_attri_by_oref({ val: val });
+          lt_attri_o = z2ui5_cl_a2ui5_context.rtti_get_t_attri_by_oref({ val: val });
           sy_tabix = 0;
           for (const ls_attri_o of lt_attri_o) {
             sy_tabix++;
@@ -1168,7 +1179,7 @@ class z2ui5_cl_abap2ui5_context {
             if (sy_subrc !== 0) {
               continue;
             }
-            ls_result = z2ui5_cl_abap2ui5_context.msg_map({ name: ls_attri_o.name, val: fs_comp, is_msg: ls_result });
+            ls_result = z2ui5_cl_a2ui5_context.msg_map({ name: ls_attri_o.name, val: fs_comp, is_msg: ls_result });
           }
           result.push(ls_result);
         }
@@ -1235,7 +1246,7 @@ class z2ui5_cl_abap2ui5_context {
     let lo_tab;
     let lo_line;
     let lt_comps;
-    const lt_attri = z2ui5_cl_abap2ui5_context.rtti_get_t_attri_by_any({ val: val });
+    const lt_attri = z2ui5_cl_a2ui5_context.rtti_get_t_attri_by_any({ val: val });
     sy_tabix = 0;
     for (const ls_attri of lt_attri) {
       sy_tabix++;
@@ -1255,7 +1266,7 @@ class z2ui5_cl_abap2ui5_context {
       fs_tab = _fs$fs_tab ? _fs$fs_tab.o[_fs$fs_tab.k] : null;
       sy_subrc = _fs$fs_tab ? 0 : 4;
       if (!(sy_subrc === 0)) continue;
-      if (!(z2ui5_cl_abap2ui5_context.rtti_get_type_kind({ val: fs_tab }) === cl_abap_datadescr.typekind_table)) continue;
+      if (!(z2ui5_cl_a2ui5_context.rtti_get_type_kind({ val: fs_tab }) === cl_abap_datadescr.typekind_table)) continue;
       try {
         lo_tab = (cl_abap_typedescr.describe_by_data(fs_tab));
         lo_line = lo_tab.get_table_line_type();
@@ -1285,7 +1296,7 @@ class z2ui5_cl_abap2ui5_context {
     let _fs$fs_tab = null;
     let fs_ftab = null;
     let _fs$fs_ftab = null;
-    const lv_kind = z2ui5_cl_abap2ui5_context.rtti_get_type_kind({ val: val });
+    const lv_kind = z2ui5_cl_a2ui5_context.rtti_get_type_kind({ val: val });
     if (lv_kind !== cl_abap_datadescr.typekind_struct1 && lv_kind !== cl_abap_datadescr.typekind_struct2) {
       return result;
     }
@@ -1293,7 +1304,7 @@ class z2ui5_cl_abap2ui5_context {
     if ((lv_is_row === true || lv_is_row === `X`)) {
       return result;
     }
-    const lt_attri = z2ui5_cl_abap2ui5_context.rtti_get_t_attri_by_any({ val: val });
+    const lt_attri = z2ui5_cl_a2ui5_context.rtti_get_t_attri_by_any({ val: val });
     sy_tabix = 0;
     for (const ls_attri of lt_attri) {
       sy_tabix++;
@@ -1301,7 +1312,7 @@ class z2ui5_cl_abap2ui5_context {
       fs_tab = _fs$fs_tab ? _fs$fs_tab.o[_fs$fs_tab.k] : null;
       sy_subrc = _fs$fs_tab ? 0 : 4;
       if (!(sy_subrc === 0)) continue;
-      if (!(z2ui5_cl_abap2ui5_context.rtti_get_type_kind({ val: fs_tab }) === cl_abap_datadescr.typekind_table)) continue;
+      if (!(z2ui5_cl_a2ui5_context.rtti_get_type_kind({ val: fs_tab }) === cl_abap_datadescr.typekind_table)) continue;
       fs_ftab = fs_tab;
       _fs$fs_ftab = null;
       sy_subrc = 0;
@@ -1309,15 +1320,15 @@ class z2ui5_cl_abap2ui5_context {
       sy_tabix = 0;
       for (const symbol of fs_ftab) {
         sy_tabix++;
-        if (z2ui5_cl_abap2ui5_context.rtti_get_type_kind({ val: fs_row }) === cl_abap_datadescr.typekind_oref) {
+        if (z2ui5_cl_a2ui5_context.rtti_get_type_kind({ val: fs_row }) === cl_abap_datadescr.typekind_oref) {
           if (fs_row) {
             try {
-              result.push(...z2ui5_cl_abap2ui5_context.msg_get_t({ val: fs_row }));
+              result.push(...z2ui5_cl_a2ui5_context.msg_get_t({ val: fs_row }));
             } catch (error) {
             }
           }
         } else {
-          result.push(...z2ui5_cl_abap2ui5_context.msg_get_rap({ val: fs_row, entity_name: ls_attri.name }));
+          result.push(...z2ui5_cl_a2ui5_context.msg_get_rap({ val: fs_row, entity_name: ls_attri.name }));
         }
       }
       sy_tabix = _sy_tabix_1;
@@ -1338,7 +1349,7 @@ class z2ui5_cl_abap2ui5_context {
     let lv_text;
     messages = null;
     is_row = false;
-    const lt_meta = z2ui5_cl_abap2ui5_context.msg_get_rap_meta({ val: val });
+    const lt_meta = z2ui5_cl_a2ui5_context.msg_get_rap_meta({ val: val });
     _fs$fs_msg = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(val, `%MSG`);
     fs_msg = _fs$fs_msg ? _fs$fs_msg.o[_fs$fs_msg.k] : null;
     sy_subrc = _fs$fs_msg ? 0 : 4;
@@ -1346,7 +1357,7 @@ class z2ui5_cl_abap2ui5_context {
       is_row = true;
       if (fs_msg) {
         try {
-          lt_one = z2ui5_cl_abap2ui5_context.msg_get_t({ val: fs_msg });
+          lt_one = z2ui5_cl_a2ui5_context.msg_get_t({ val: fs_msg });
           sy_tabix = 0;
           for (const symbol of lt_one) {
             sy_tabix++;
@@ -1368,7 +1379,7 @@ class z2ui5_cl_abap2ui5_context {
       if (sy_subrc === 0) {
         let lv_cause = 0;
         lv_cause = z2ui5_cl_util.abap_copy(fs_cause);
-        lv_text = z2ui5_cl_abap2ui5_context.msg_get_rap_fail_text({ cause: lv_cause });
+        lv_text = z2ui5_cl_a2ui5_context.msg_get_rap_fail_text({ cause: lv_cause });
         if (entity_name) {
           lv_text = `${entity_name}: ${lv_text}`;
         }
@@ -1383,7 +1394,7 @@ class z2ui5_cl_abap2ui5_context {
     let sy_subrc = 0;
     let fs_flag = null;
     let _fs$fs_flag = null;
-    const lt_attri = z2ui5_cl_abap2ui5_context.rtti_get_t_attri_by_any({ val: val });
+    const lt_attri = z2ui5_cl_a2ui5_context.rtti_get_t_attri_by_any({ val: val });
     sy_tabix = 0;
     for (const ls_attri of lt_attri) {
       sy_tabix++;
@@ -1423,7 +1434,7 @@ class z2ui5_cl_abap2ui5_context {
     let sy_subrc = 0;
     let fs_flag = null;
     let _fs$fs_flag = null;
-    const lt_attri = z2ui5_cl_abap2ui5_context.rtti_get_t_attri_by_any({ val: val });
+    const lt_attri = z2ui5_cl_a2ui5_context.rtti_get_t_attri_by_any({ val: val });
     sy_tabix = 0;
     for (const ls_attri of lt_attri) {
       sy_tabix++;
@@ -1479,7 +1490,7 @@ class z2ui5_cl_abap2ui5_context {
     if (sy_subrc !== 0 || !fs_tky) {
       return result;
     }
-    result = z2ui5_cl_abap2ui5_context.msg_get_rap_flatten({ val: fs_tky });
+    result = z2ui5_cl_a2ui5_context.msg_get_rap_flatten({ val: fs_tky });
     return result;
   }
 
@@ -1491,11 +1502,11 @@ class z2ui5_cl_abap2ui5_context {
     let _fs$fs_comp = null;
     let lv_sub_kind;
     let lv_sub;
-    const lv_kind = z2ui5_cl_abap2ui5_context.rtti_get_type_kind({ val: val });
+    const lv_kind = z2ui5_cl_a2ui5_context.rtti_get_type_kind({ val: val });
     if (lv_kind !== cl_abap_datadescr.typekind_struct1 && lv_kind !== cl_abap_datadescr.typekind_struct2) {
       return result;
     }
-    const lt_attri = z2ui5_cl_abap2ui5_context.rtti_get_t_attri_by_any({ val: val });
+    const lt_attri = z2ui5_cl_a2ui5_context.rtti_get_t_attri_by_any({ val: val });
     sy_tabix = 0;
     for (const ls_attri of lt_attri) {
       sy_tabix++;
@@ -1503,9 +1514,9 @@ class z2ui5_cl_abap2ui5_context {
       fs_comp = _fs$fs_comp ? _fs$fs_comp.o[_fs$fs_comp.k] : null;
       sy_subrc = _fs$fs_comp ? 0 : 4;
       if (!(sy_subrc === 0)) continue;
-      lv_sub_kind = z2ui5_cl_abap2ui5_context.rtti_get_type_kind({ val: fs_comp });
+      lv_sub_kind = z2ui5_cl_a2ui5_context.rtti_get_type_kind({ val: fs_comp });
       if (lv_sub_kind === cl_abap_datadescr.typekind_struct1 || lv_sub_kind === cl_abap_datadescr.typekind_struct2) {
-        lv_sub = z2ui5_cl_abap2ui5_context.msg_get_rap_flatten({ val: fs_comp });
+        lv_sub = z2ui5_cl_a2ui5_context.msg_get_rap_flatten({ val: fs_comp });
         if (lv_sub) {
           if (result) {
             result = `${result}, `;
@@ -1530,27 +1541,27 @@ class z2ui5_cl_abap2ui5_context {
   static msg_get_rap_meta({ val } = {}) {
     let result = [];
     let lv = ``;
-    lv = z2ui5_cl_abap2ui5_context.msg_get_rap_element({ val: val });
+    lv = z2ui5_cl_a2ui5_context.msg_get_rap_element({ val: val });
     if (lv) {
       result.push({ n: `element`, v: lv });
     }
-    lv = z2ui5_cl_abap2ui5_context.msg_get_rap_state_area({ val: val });
+    lv = z2ui5_cl_a2ui5_context.msg_get_rap_state_area({ val: val });
     if (lv) {
       result.push({ n: `state_area`, v: lv });
     }
-    lv = z2ui5_cl_abap2ui5_context.msg_get_rap_action({ val: val });
+    lv = z2ui5_cl_a2ui5_context.msg_get_rap_action({ val: val });
     if (lv) {
       result.push({ n: `action`, v: lv });
     }
-    lv = z2ui5_cl_abap2ui5_context.msg_get_rap_pid({ val: val });
+    lv = z2ui5_cl_a2ui5_context.msg_get_rap_pid({ val: val });
     if (lv) {
       result.push({ n: `pid`, v: lv });
     }
-    lv = z2ui5_cl_abap2ui5_context.msg_get_rap_cid({ val: val });
+    lv = z2ui5_cl_a2ui5_context.msg_get_rap_cid({ val: val });
     if (lv) {
       result.push({ n: `cid`, v: lv });
     }
-    lv = z2ui5_cl_abap2ui5_context.msg_get_rap_tky({ val: val });
+    lv = z2ui5_cl_a2ui5_context.msg_get_rap_tky({ val: val });
     if (lv) {
       result.push({ n: `tky`, v: lv });
     }
@@ -1564,6 +1575,6 @@ class z2ui5_cl_abap2ui5_context {
   }
 }
 
-z2ui5_cl_abap2ui5_context.class_constructor();
+z2ui5_cl_a2ui5_context.class_constructor();
 
-module.exports = z2ui5_cl_abap2ui5_context;
+module.exports = z2ui5_cl_a2ui5_context;

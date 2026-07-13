@@ -1,4 +1,4 @@
-const z2ui5_cl_abap2ui5_context = require("abap2UI5/z2ui5_cl_abap2ui5_context");
+// TODO(abap2js): unresolved reference z2ui5_cl_a2ui5_context — add require manually
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 
 class z2ui5_cl_xml_view_cc {
@@ -25,14 +25,14 @@ class z2ui5_cl_xml_view_cc {
   camera_picture({ id, value, thumbnail, height, width, press, autoplay, onphoto, facingmode, deviceid } = {}) {
     let result = null;
     result = z2ui5_cl_util.abap_copy(this.mo_view);
-    this.mo_view._generic({ name: `CameraPicture`, ns: `z2ui5`, t_prop: [{ n: `id`, v: id }, { n: `value`, v: value }, { n: `thumbnail`, v: thumbnail }, { n: `press`, v: press }, { n: `height`, v: height }, { n: `width`, v: width }, { n: `OnPhoto`, v: onphoto }, { n: `autoplay`, v: z2ui5_cl_abap2ui5_context.boolean_abap_2_json(autoplay) }, { n: `facingMode`, v: facingmode }, { n: `deviceId`, v: deviceid }] });
+    this.mo_view._generic({ name: `CameraPicture`, ns: `z2ui5`, t_prop: [{ n: `id`, v: id }, { n: `value`, v: value }, { n: `thumbnail`, v: thumbnail }, { n: `press`, v: press }, { n: `height`, v: height }, { n: `width`, v: width }, { n: `OnPhoto`, v: onphoto }, { n: `autoplay`, v: z2ui5_cl_a2ui5_context.boolean_abap_2_json(autoplay) }, { n: `facingMode`, v: facingmode }, { n: `deviceId`, v: deviceid }] });
     return result;
   }
 
   camera_selector({ selectedkey, showclearicon, selectionchange, selecteditem, items, change, width, showsecondaryvalues, placeholder, selecteditemid, name, value, valuestate, valuestatetext, textalign, visible, showvaluestatemessage, showbutton, required, editable, enabled, filtersecondaryvalues, id, class: class_ } = {}) {
     let result = null;
     result = z2ui5_cl_util.abap_copy(this.mo_view);
-    this.mo_view._generic({ name: `CameraSelector`, ns: `z2ui5`, t_prop: [{ n: `showClearIcon`, v: z2ui5_cl_abap2ui5_context.boolean_abap_2_json(showclearicon) }, { n: `selectedKey`, v: selectedkey }, { n: `items`, v: items }, { n: `id`, v: id }, { n: `class`, v: class_ }, { n: `selectionChange`, v: selectionchange }, { n: `selectedItem`, v: selecteditem }, { n: `selectedItemId`, v: selecteditemid }, { n: `name`, v: name }, { n: `value`, v: value }, { n: `valueState`, v: valuestate }, { n: `valueStateText`, v: valuestatetext }, { n: `textAlign`, v: textalign }, { n: `showSecondaryValues`, v: z2ui5_cl_abap2ui5_context.boolean_abap_2_json(showsecondaryvalues) }, { n: `visible`, v: z2ui5_cl_abap2ui5_context.boolean_abap_2_json(visible) }, { n: `showValueStateMessage`, v: z2ui5_cl_abap2ui5_context.boolean_abap_2_json(showvaluestatemessage) }, { n: `showButton`, v: z2ui5_cl_abap2ui5_context.boolean_abap_2_json(showbutton) }, { n: `required`, v: z2ui5_cl_abap2ui5_context.boolean_abap_2_json(required) }, { n: `editable`, v: z2ui5_cl_abap2ui5_context.boolean_abap_2_json(editable) }, { n: `enabled`, v: z2ui5_cl_abap2ui5_context.boolean_abap_2_json(enabled) }, { n: `filterSecondaryValues`, v: z2ui5_cl_abap2ui5_context.boolean_abap_2_json(filtersecondaryvalues) }, { n: `width`, v: width }, { n: `placeholder`, v: placeholder }, { n: `change`, v: change }] });
+    this.mo_view._generic({ name: `CameraSelector`, ns: `z2ui5`, t_prop: [{ n: `showClearIcon`, v: z2ui5_cl_a2ui5_context.boolean_abap_2_json(showclearicon) }, { n: `selectedKey`, v: selectedkey }, { n: `items`, v: items }, { n: `id`, v: id }, { n: `class`, v: class_ }, { n: `selectionChange`, v: selectionchange }, { n: `selectedItem`, v: selecteditem }, { n: `selectedItemId`, v: selecteditemid }, { n: `name`, v: name }, { n: `value`, v: value }, { n: `valueState`, v: valuestate }, { n: `valueStateText`, v: valuestatetext }, { n: `textAlign`, v: textalign }, { n: `showSecondaryValues`, v: z2ui5_cl_a2ui5_context.boolean_abap_2_json(showsecondaryvalues) }, { n: `visible`, v: z2ui5_cl_a2ui5_context.boolean_abap_2_json(visible) }, { n: `showValueStateMessage`, v: z2ui5_cl_a2ui5_context.boolean_abap_2_json(showvaluestatemessage) }, { n: `showButton`, v: z2ui5_cl_a2ui5_context.boolean_abap_2_json(showbutton) }, { n: `required`, v: z2ui5_cl_a2ui5_context.boolean_abap_2_json(required) }, { n: `editable`, v: z2ui5_cl_a2ui5_context.boolean_abap_2_json(editable) }, { n: `enabled`, v: z2ui5_cl_a2ui5_context.boolean_abap_2_json(enabled) }, { n: `filterSecondaryValues`, v: z2ui5_cl_a2ui5_context.boolean_abap_2_json(filtersecondaryvalues) }, { n: `width`, v: width }, { n: `placeholder`, v: placeholder }, { n: `change`, v: change }] });
     return result;
   }
 
@@ -67,7 +67,7 @@ class z2ui5_cl_xml_view_cc {
   file_uploader({ value, path, placeholder, upload, icononly, buttononly, buttontext, uploadbuttontext, checkdirectupload, filetype, icon, enabled } = {}) {
     let result = null;
     result = z2ui5_cl_util.abap_copy(this.mo_view);
-    this.mo_view._generic({ name: `FileUploader`, ns: `z2ui5`, t_prop: [{ n: `placeholder`, v: placeholder }, { n: `upload`, v: upload }, { n: `path`, v: path }, { n: `value`, v: value }, { n: `iconOnly`, v: z2ui5_cl_abap2ui5_context.boolean_abap_2_json(icononly) }, { n: `buttonOnly`, v: z2ui5_cl_abap2ui5_context.boolean_abap_2_json(buttononly) }, { n: `buttonText`, v: buttontext }, { n: `uploadButtonText`, v: uploadbuttontext }, { n: `fileType`, v: filetype }, { n: `checkDirectUpload`, v: z2ui5_cl_abap2ui5_context.boolean_abap_2_json(checkdirectupload) }, { n: `icon`, v: icon }, { n: `enabled`, v: z2ui5_cl_abap2ui5_context.boolean_abap_2_json(enabled) }] });
+    this.mo_view._generic({ name: `FileUploader`, ns: `z2ui5`, t_prop: [{ n: `placeholder`, v: placeholder }, { n: `upload`, v: upload }, { n: `path`, v: path }, { n: `value`, v: value }, { n: `iconOnly`, v: z2ui5_cl_a2ui5_context.boolean_abap_2_json(icononly) }, { n: `buttonOnly`, v: z2ui5_cl_a2ui5_context.boolean_abap_2_json(buttononly) }, { n: `buttonText`, v: buttontext }, { n: `uploadButtonText`, v: uploadbuttontext }, { n: `fileType`, v: filetype }, { n: `checkDirectUpload`, v: z2ui5_cl_a2ui5_context.boolean_abap_2_json(checkdirectupload) }, { n: `icon`, v: icon }, { n: `enabled`, v: z2ui5_cl_a2ui5_context.boolean_abap_2_json(enabled) }] });
     return result;
   }
 
@@ -81,7 +81,7 @@ class z2ui5_cl_xml_view_cc {
   geolocation({ finished, longitude, latitude, altitude, accuracy, altitudeaccuracy, speed, heading, enablehighaccuracy, timeout } = {}) {
     let result = null;
     result = z2ui5_cl_util.abap_copy(this.mo_view);
-    this.mo_view._generic({ name: `Geolocation`, ns: `z2ui5`, t_prop: [{ n: `finished`, v: finished }, { n: `longitude`, v: longitude }, { n: `latitude`, v: latitude }, { n: `altitude`, v: altitude }, { n: `accuracy`, v: accuracy }, { n: `altitudeAccuracy`, v: altitudeaccuracy }, { n: `speed`, v: speed }, { n: `heading`, v: heading }, { n: `enableHighAccuracy`, v: z2ui5_cl_abap2ui5_context.boolean_abap_2_json(enablehighaccuracy) }, { n: `timeout`, v: timeout }] });
+    this.mo_view._generic({ name: `Geolocation`, ns: `z2ui5`, t_prop: [{ n: `finished`, v: finished }, { n: `longitude`, v: longitude }, { n: `latitude`, v: latitude }, { n: `altitude`, v: altitude }, { n: `accuracy`, v: accuracy }, { n: `altitudeAccuracy`, v: altitudeaccuracy }, { n: `speed`, v: speed }, { n: `heading`, v: heading }, { n: `enableHighAccuracy`, v: z2ui5_cl_a2ui5_context.boolean_abap_2_json(enablehighaccuracy) }, { n: `timeout`, v: timeout }] });
     return result;
   }
 
@@ -158,7 +158,7 @@ class z2ui5_cl_xml_view_cc {
   timer({ finished, delayms, checkrepeat, checkactive } = {}) {
     let result = null;
     result = z2ui5_cl_util.abap_copy(this.mo_view);
-    this.mo_view._generic({ name: `Timer`, ns: `z2ui5`, t_prop: [{ n: `delayMS`, v: delayms }, { n: `finished`, v: finished }, { n: `checkActive`, v: z2ui5_cl_abap2ui5_context.boolean_abap_2_json(checkactive) }, { n: `checkRepeat`, v: z2ui5_cl_abap2ui5_context.boolean_abap_2_json(checkrepeat) }] });
+    this.mo_view._generic({ name: `Timer`, ns: `z2ui5`, t_prop: [{ n: `delayMS`, v: delayms }, { n: `finished`, v: finished }, { n: `checkActive`, v: z2ui5_cl_a2ui5_context.boolean_abap_2_json(checkactive) }, { n: `checkRepeat`, v: z2ui5_cl_a2ui5_context.boolean_abap_2_json(checkrepeat) }] });
     return result;
   }
 
@@ -172,14 +172,14 @@ class z2ui5_cl_xml_view_cc {
   websocket({ value, received, path, checkrepeat, checkactive } = {}) {
     let result = null;
     result = z2ui5_cl_util.abap_copy(this.mo_view);
-    this.mo_view._generic({ name: `Websocket`, ns: `z2ui5`, t_prop: [{ n: `value`, v: value }, { n: `path`, v: path }, { n: `received`, v: received }, { n: `checkActive`, v: z2ui5_cl_abap2ui5_context.boolean_abap_2_json(checkactive) }, { n: `checkRepeat`, v: z2ui5_cl_abap2ui5_context.boolean_abap_2_json(checkrepeat) }] });
+    this.mo_view._generic({ name: `Websocket`, ns: `z2ui5`, t_prop: [{ n: `value`, v: value }, { n: `path`, v: path }, { n: `received`, v: received }, { n: `checkActive`, v: z2ui5_cl_a2ui5_context.boolean_abap_2_json(checkactive) }, { n: `checkRepeat`, v: z2ui5_cl_a2ui5_context.boolean_abap_2_json(checkrepeat) }] });
     return result;
   }
 
   lp_title({ title, applicationfullwidth } = {}) {
     let result = null;
     result = z2ui5_cl_util.abap_copy(this.mo_view);
-    this.mo_view._generic({ name: `LPTitle`, ns: `z2ui5`, t_prop: [{ n: `title`, v: title }, { n: `ApplicationFullWidth`, v: z2ui5_cl_abap2ui5_context.boolean_abap_2_json(applicationfullwidth) }] });
+    this.mo_view._generic({ name: `LPTitle`, ns: `z2ui5`, t_prop: [{ n: `title`, v: title }, { n: `ApplicationFullWidth`, v: z2ui5_cl_a2ui5_context.boolean_abap_2_json(applicationfullwidth) }] });
     return result;
   }
 
@@ -193,7 +193,7 @@ class z2ui5_cl_xml_view_cc {
   dirty({ isdirty } = {}) {
     let result = null;
     result = z2ui5_cl_util.abap_copy(this.mo_view);
-    this.mo_view._generic({ name: `Dirty`, ns: `z2ui5`, t_prop: [{ n: `isDirty`, v: z2ui5_cl_abap2ui5_context.boolean_abap_2_json(isdirty) }] });
+    this.mo_view._generic({ name: `Dirty`, ns: `z2ui5`, t_prop: [{ n: `isDirty`, v: z2ui5_cl_a2ui5_context.boolean_abap_2_json(isdirty) }] });
     return result;
   }
 

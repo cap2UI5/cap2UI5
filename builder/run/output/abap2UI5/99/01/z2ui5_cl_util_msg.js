@@ -92,7 +92,7 @@ class z2ui5_cl_util_msg {
             sy_tabix++;
             if (!(ls_attri_o.visibility === `U`)) continue;
             lv_name = z2ui5_cl_util.abap_copy(ls_attri_o.name);
-            // TODO(abap2js): ASSIGN val->(lv_name) TO <comp>.
+            // TODO(abap2js): ASSIGN lx->(lv_name) TO <comp>.
             ls_result = z2ui5_cl_util_msg.msg_map({ name: ls_attri_o.name, val: fs_comp, is_msg: ls_result });
           }
           result.push(ls_result);
