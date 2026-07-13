@@ -6,6 +6,7 @@ const path = require("path");
  * Platform-adapter smoke gate — proves the abap2UI5/engine seam works on
  * every target platform, not just CAP:
  *
+ *   adapter-cap      minimal CAP server           boot → POST roundtrip
  *   adapter-node     bare node:http server        boot → POST roundtrip
  *   adapter-express  express middleware           boot → POST roundtrip
  *   adapter-web      web-packed static bundle     build → in-process roundtrip
@@ -110,6 +111,18 @@ async function bootAndRoundtrip(dir, port) {
 
 describe("platform adapters", () => {
   jest.setTimeout(180000);
+
+  gate("adapter-cap")("minimal CAP adapter serves statics, bootstrap and the roundtrip", async () => {
+    const r = await bootAndRoundtrip("adapter-cap", 4411);
+    expect(r).toEqual({
+      indexOk: true,
+      bootstrapOk: true,
+      status: 200,
+      app: "z2ui5_cl_app_hello_world",
+      hasView: true,
+      samples: CROSS_SECTION_OK,
+    });
+  });
 
   gate("adapter-node")("bare node:http adapter serves statics, bootstrap and the roundtrip", async () => {
     const r = await bootAndRoundtrip("adapter-node", 4111);

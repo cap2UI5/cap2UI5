@@ -1,0 +1,18 @@
+{
+  "name": "cap2ui5-adapter-cap",
+  "version": "1.0.0",
+  "description": "abap2UI5 on a minimal CAP server — the abap2UI5/engine seam wired as a CDS REST action.",
+  "private": true,
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@sap/cds": "^10",
+    "abap2UI5": "file:../cap2UI5",
+    "express": "^5"
+  },
+  "scripts": {
+    "start": "node server.js"
+  }
+}
