@@ -46,7 +46,7 @@ class z2ui5_cl_demo_app_264 extends z2ui5_if_app {
       sy_tabix = 0;
       for (const fs_fs_a_data of this.lt_a_data) {
         sy_tabix++;
-        fs_fs_a_data.label = this.s_text + ` ` + fs_fs_a_data.value_state;
+        fs_fs_a_data.label = this.s_text + fs_fs_a_data.value_state;
       }
     }
     this.on_event({ client: client });

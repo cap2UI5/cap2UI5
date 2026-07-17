@@ -178,10 +178,16 @@ class z2ui5_cl_core_srv_model {
   //  INSTANCE API (1:1 with abap)
   // ============================================================
 
-  constructor(attri, app) {
-    // mt_attri is by-ref in abap (REF TO ty_t_attri). We mirror that with a
-    // {value: [...]} holder so callers can pass a shared list around.
-    this.mt_attri = attri && Array.isArray(attri.value) ? attri : { value: attri || [] };
+  constructor({ attri, app } = {}) {
+    // Named-args ctor — the transpiler invokes `NEW cls( attri = .. app = .. )`
+    // as `new cls({ attri, app })`; hand-port callers pass the same shape.
+    // mt_attri is by-ref in abap (REF TO ty_t_attri); we mirror that with a
+    // {value: [...]} holder so mutations propagate to the caller's list. The
+    // transpiler passes an internal table as a plain array (REF #( itab )), so
+    // wrap it while sharing the array identity; an existing holder is reused.
+    this.mt_attri = attri && Array.isArray(attri.value) ? attri
+                  : Array.isArray(attri) ? { value: attri }
+                  : { value: [] };
     this.mo_app   = app;
   }
 

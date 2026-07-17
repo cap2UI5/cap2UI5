@@ -51,7 +51,7 @@ class z2ui5_cl_demo_app_161 extends z2ui5_if_app {
 
   async main(client) {
     this.client = z2ui5_cl_util.abap_copy(client);
-    if (((client.get().CHECK_ON_NAVIGATED) === true || (client.get().CHECK_ON_NAVIGATED) === `X`)) {
+    if (client.check_on_navigated()) {
       this.view_display();
       return;
     }

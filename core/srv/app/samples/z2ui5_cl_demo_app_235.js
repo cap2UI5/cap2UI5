@@ -6,6 +6,8 @@ class z2ui5_cl_demo_app_235 extends z2ui5_if_app {
     const page_01 = z2ui5_cl_xml_view.factory()
       .shell()
       .page({ title: `abap2UI5 - Sample: Toolbar vs Bar vs OverflowToolbar`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
+    page_01.header_content()
+      .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.Toolbar/sample/sap.m.sample.ToolbarVsBar` });
     const page_02 = page_01.page({ title: `Bar can center a Title.`, titlelevel: `H2`, class: `sapUiContentPadding`, shownavbutton: true })
       .header_content()
       .button({ icon: `sap-icon://action` })

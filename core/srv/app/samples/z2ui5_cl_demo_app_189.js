@@ -12,10 +12,10 @@ class z2ui5_cl_demo_app_189 extends z2ui5_if_app {
   dispatch() {
     switch (this.client.get().EVENT) {
       case `one_enter`:
-        this.client.action.gen({ val: z2ui5_if_client.cs_event.set_focus, t_arg: [`IdTwo`] });
+        this.client.follow_up_action({ val: z2ui5_if_client.cs_event.set_focus, t_arg: [`IdTwo`] });
         break;
       case `two_enter`:
-        this.client.action.gen({ val: z2ui5_if_client.cs_event.set_focus, t_arg: [`IdThree`] });
+        this.client.follow_up_action({ val: z2ui5_if_client.cs_event.set_focus, t_arg: [`IdThree`] });
         break;
     }
     this.client.view_model_update();
@@ -40,7 +40,7 @@ class z2ui5_cl_demo_app_189 extends z2ui5_if_app {
     this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.render();
-      client.action.gen({ val: z2ui5_if_client.cs_event.set_focus, t_arg: [`IdOne`] });
+      client.follow_up_action({ val: z2ui5_if_client.cs_event.set_focus, t_arg: [`IdOne`] });
     }
     this.dispatch();
   }

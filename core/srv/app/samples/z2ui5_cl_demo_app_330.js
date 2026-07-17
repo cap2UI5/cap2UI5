@@ -9,6 +9,9 @@ class z2ui5_cl_demo_app_330 extends z2ui5_if_app {
     const view = z2ui5_cl_xml_view.factory();
     const object_page_layout = view.shell()
       .page({ title: `Robot Arm Series 9`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() })
+      .header_content()
+      .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.uxap.ObjectPageLayout/sample/sap.uxap.sample.ObjectPageSectionShowTitle` })
+      .get_parent()
       .object_page_layout({ uppercaseanchorbar: false });
     const header_title = object_page_layout.header_title().object_page_dyn_header_title();
     header_title.expanded_heading().title(`Robot Arm Series 9`);

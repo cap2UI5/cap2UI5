@@ -16,7 +16,7 @@ class z2ui5_cl_demo_app_296 extends z2ui5_if_app {
     page_01.page({ showheader: false })
       .sub_header()
       .toolbar()
-      .search_field({ width: `100%`, search: client._event(`onSearch`) })
+      .search_field({ width: `100%`, search: client._event(`onSearch`, [`\${$parameters>/searchButtonPressed}`]) })
       .text({ text: `Default Search`, id: `idSearchListToolbar` })
       .get_parent()
       .get_parent()
@@ -33,7 +33,9 @@ class z2ui5_cl_demo_app_296 extends z2ui5_if_app {
         this.popover_display({ id: `button_hint_id` });
         break;
       case `onSearch`:
-        client.message_toast_display(`'search' event fired with 'searchButtonPressed' parameter`);
+        if (client.get_event_arg() === `true`) {
+          client.message_toast_display(`'search' event fired with 'searchButtonPressed' parameter`);
+        }
         break;
     }
   }

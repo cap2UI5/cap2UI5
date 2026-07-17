@@ -10,8 +10,8 @@ class z2ui5_cl_demo_app_052 extends z2ui5_if_app {
 
   popover_display({ id } = {}) {
     const lo_popover = z2ui5_cl_xml_view.factory_popup();
-    lo_popover.popover({ placement: `Right`, title: `abap2UI5 - Popover - ${this.mv_product}`, contentwidth: `50%` })
-      .simple_form({ editable: true })
+    lo_popover.popover({ placement: `Right`, title: `abap2UI5 - Popover - ${this.mv_product}`, contentwidth: `20rem` })
+      .simple_form({ editable: false, layout: `ColumnLayout` })
       .content(`form`)
       .label(`Product`)
       .text(this.mv_product)
@@ -65,7 +65,7 @@ class z2ui5_cl_demo_app_052 extends z2ui5_if_app {
       case `POPOVER_DETAIL`:
         this.mv_check_popover = true;
         this.mv_product = client.get_event_arg(2);
-        this.popover_display({ id: client.get_event_arg(1) });
+        this.popover_display({ id: client.get_event_arg() });
         break;
     }
   }

@@ -9,7 +9,7 @@ class z2ui5_cl_demo_app_372 extends z2ui5_if_app {
     this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.view_display();
-    } else {
+    } else if (client.check_on_event()) {
       this.on_event();
     }
   }
@@ -21,29 +21,54 @@ class z2ui5_cl_demo_app_372 extends z2ui5_if_app {
     page.header_content()
       .button({ id: `button_hint_id`, icon: `sap-icon://hint`, tooltip: `Sample information`, press: this.client._event(`CLICK_HINT_ICON`) });
     page.header_content()
-      .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.MenuButton` });
+      .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.MenuButton/sample/sap.m.sample.MenuButton` });
+    const toolbar = page.overflow_toolbar();
+    toolbar.toolbar_spacer();
+    toolbar.label(`In a toolbar`);
+    toolbar.menu_button({ text: `File` })
+      .menu()
+      .menu_item({ text: `Edit`, icon: `sap-icon://edit`, press: this.client._event(`ITEM_PRESS`, [`\${$source>/text}`]) })
+      .menu_item({ text: `Save`, icon: `sap-icon://save`, press: this.client._event(`ITEM_PRESS`, [`\${$source>/text}`]) })
+      .menu_item({ text: `Open`, icon: `sap-icon://open-folder`, press: this.client._event(`ITEM_PRESS`, [`\${$source>/text}`]) });
+    toolbar.toolbar_spacer();
     const vbox = page.vbox(`sapUiSmallMargin`);
-    vbox.label(`Regular mode - the button only opens the menu:`);
-    vbox.menu_button({ text: `File` })
+    vbox.label(`Regular mode button`);
+    this.file_menu_display({ menu_button: vbox.menu_button({ text: `File` }) });
+    vbox.label(`Split mode button with associated last action`);
+    this.file_menu_display({ menu_button: vbox.menu_button({ text: `File Menu`, buttonmode: `Split`, defaultaction: this.client._event(`DEFAULT_ACTION`) }) });
+    vbox.label(`Split mode button with associated last action with initial icon`);
+    this.file_menu_display({ menu_button: vbox.menu_button({ text: `File Menu`, buttonmode: `Split`, defaultaction: this.client._event(`DEFAULT_ACTION`) }) });
+    vbox.label(`Split mode button with default action only`);
+    this.file_menu_display({ menu_button: vbox.menu_button({ text: `File Menu`, buttonmode: `Split`, defaultaction: this.client._event(`DEFAULT_ACTION`) }) });
+    vbox.label(`Split mode with type Accept and constant default action`);
+    vbox.menu_button({ text: `Accept`, buttonmode: `Split`, type: `Accept`, defaultaction: this.client._event(`DEFAULT_ACTION_ACCEPT`) })
       .menu()
-      .menu_item({ text: `New`, icon: `sap-icon://create`, press: this.client._event(`MENU_ITEM`, [`\${$source>/text}`]) })
-      .menu_item({ text: `Open`, icon: `sap-icon://open-folder`, press: this.client._event(`MENU_ITEM`, [`\${$source>/text}`]) })
-      .menu_item({ text: `Save`, icon: `sap-icon://save`, press: this.client._event(`MENU_ITEM`, [`\${$source>/text}`]) });
-    vbox.label({ text: `Split mode - the button fires a default action, the arrow opens the menu:`, class: `sapUiSmallMarginTop` });
-    vbox.menu_button({ text: `Save`, buttonmode: `Split`, defaultaction: this.client._event(`DEFAULT_ACTION`) })
-      .menu()
-      .menu_item({ text: `Save`, icon: `sap-icon://save`, press: this.client._event(`MENU_ITEM`, [`\${$source>/text}`]) })
-      .menu_item({ text: `Save As`, icon: `sap-icon://duplicate`, press: this.client._event(`MENU_ITEM`, [`\${$source>/text}`]) });
+      .menu_item({ text: `Send the response now`, icon: `sap-icon://response`, press: this.client._event(`MENU_ACTION`, [`\${$source>/text}`]) })
+      .menu_item({ text: `Edit the response before sending`, icon: `sap-icon://edit-outside`, press: this.client._event(`MENU_ACTION`, [`\${$source>/text}`]) })
+      .menu_item({ text: `Do not send a response`, icon: `sap-icon://action`, press: this.client._event(`MENU_ACTION`, [`\${$source>/text}`]) });
     this.client.view_display(page.stringify());
+  }
+
+  file_menu_display({ menu_button } = {}) {
+    menu_button.menu()
+      .menu_item({ text: `Edit`, icon: `sap-icon://edit`, press: this.client._event(`MENU_ACTION`, [`\${$source>/text}`]) })
+      .menu_item({ text: `Save`, icon: `sap-icon://save`, press: this.client._event(`MENU_ACTION`, [`\${$source>/text}`]) })
+      .menu_item({ text: `Open`, icon: `sap-icon://open-folder`, press: this.client._event(`MENU_ACTION`, [`\${$source>/text}`]) });
   }
 
   on_event() {
     switch (this.client.get().EVENT) {
-      case `MENU_ITEM`:
-        this.client.message_toast_display(`${this.client.get_event_arg(1)} selected`);
+      case `ITEM_PRESS`:
+        this.client.message_toast_display(`${this.client.get_event_arg()} Pressed`);
+        break;
+      case `MENU_ACTION`:
+        this.client.message_toast_display(`Action triggered on item: ${this.client.get_event_arg()}`);
         break;
       case `DEFAULT_ACTION`:
-        this.client.message_toast_display(`Default action pressed`);
+        this.client.message_toast_display(`Default action triggered`);
+        break;
+      case `DEFAULT_ACTION_ACCEPT`:
+        this.client.message_toast_display(`Accepted`);
         break;
       case `CLICK_HINT_ICON`:
         this.popover_display({ id: `button_hint_id` });

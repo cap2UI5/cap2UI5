@@ -24,6 +24,8 @@ class z2ui5_cl_demo_app_307 extends z2ui5_if_app {
     const view = z2ui5_cl_xml_view.factory();
     const page = view.shell()
       .page({ title: `Grid List with Drag and Drop`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
+    page.header_content()
+      .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.f.GridList/sample/sap.f.sample.GridListDragAndDrop` });
     page.panel({ id: `panelForGridList`, backgrounddesign: `Transparent` })
       .header_toolbar()
       .toolbar({ height: `3rem` })
@@ -47,7 +49,7 @@ class z2ui5_cl_demo_app_307 extends z2ui5_if_app {
       .title({ text: `{TITLE}`, wrapping: true })
       .label({ text: `{SUBTITLE}`, wrapping: true });
     client.view_display(view.stringify());
-    client.action.gen({ val: z2ui5_if_client.cs_event.set_title, t_arg: [`Grid List with Drag and Drop`] });
+    client.follow_up_action({ val: z2ui5_if_client.cs_event.set_title, t_arg: [`Grid List with Drag and Drop`] });
   }
 
   on_event({ client } = {}) {

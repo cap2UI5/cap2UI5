@@ -6,6 +6,9 @@ class z2ui5_cl_demo_app_303 extends z2ui5_if_app {
     const view = z2ui5_cl_xml_view.factory();
     const object_page_layout = view.shell()
       .page({ title: `Object Page Header with Header Container`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() })
+      .header_content()
+      .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.uxap.ObjectPageLayout/sample/sap.uxap.sample.ObjectPageWithHeaderContainer` })
+      .get_parent()
       .object_page_layout({ showtitleinheadercontent: `Title`, uppercaseanchorbar: false });
     const header_title = object_page_layout.header_title().object_page_dyn_header_title();
     header_title.expanded_heading().title({ text: `Object Page Header with Header Container`, wrapping: true });

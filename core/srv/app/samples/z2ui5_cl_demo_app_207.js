@@ -6,6 +6,8 @@ class z2ui5_cl_demo_app_207 extends z2ui5_if_app {
     const page = z2ui5_cl_xml_view.factory()
       .shell()
       .page({ title: `abap2UI5 - Sample: Radio Button`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
+    page.header_content()
+      .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.RadioButton/sample/sap.m.sample.RadioButton` });
     const layout = page.vbox(`sapUiSmallMargin`)
       .label({ text: `Default RadioButton use`, labelfor: `GroupA` })
       .radio_button_group({ id: `GroupA` })

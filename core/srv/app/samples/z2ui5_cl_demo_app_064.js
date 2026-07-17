@@ -47,7 +47,7 @@ class z2ui5_cl_demo_app_064 extends z2ui5_if_app {
       this.client.message_toast_display(`loaded`);
       // TODO(abap2js): WAIT UP TO 2 SECONDS.
       if ((this.mv_check_active === true || this.mv_check_active === `X`)) {
-        this.client.action.gen({ val: z2ui5_if_client.cs_event.start_timer, t_arg: [this.client._event(`LOAD`), `0`] });
+        this.client.follow_up_action({ val: z2ui5_if_client.cs_event.start_timer, t_arg: [`LOAD`, `0`] });
       }
       this.client.view_model_update();
     }

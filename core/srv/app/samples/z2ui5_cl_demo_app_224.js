@@ -6,6 +6,8 @@ class z2ui5_cl_demo_app_224 extends z2ui5_if_app {
     const page = z2ui5_cl_xml_view.factory()
       .shell()
       .page({ title: `Sample: Icon Tab Bar - Text Only`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
+    page.header_content()
+      .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.IconTabBar/sample/sap.m.sample.IconTabBarNoIcons` });
     const layout = page.icon_tab_bar({ id: `idIconTabBarNoIcons`, expanded: `{device>/isNoPhone}`, class: `sapUiResponsiveContentPadding` })
       .items()
       .icon_tab_filter({ text: `Info`, key: `info` })

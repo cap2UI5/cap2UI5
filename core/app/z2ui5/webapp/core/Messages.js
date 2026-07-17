@@ -3,8 +3,14 @@
 // calling controller is only needed for the optional ONCLOSE follow-up
 // events, which trigger a backend roundtrip through its eB().
 sap.ui.define(
-  ["sap/m/MessageBox", "sap/m/MessageToast", "z2ui5/core/Lib"],
-  (MessageBox, MessageToast, Lib) => {
+  [
+    "sap/m/MessageBox",
+    "sap/m/MessageToast",
+    "sap/ui/core/Popup",
+    "z2ui5/core/Lib",
+    "z2ui5/core/ViewSlots",
+  ],
+  (MessageBox, MessageToast, Popup, Lib, ViewSlots) => {
     "use strict";
 
     // Parse a value as integer milliseconds, falling back to `fallback`
@@ -15,10 +21,32 @@ sap.ui.define(
       return val && Number.isFinite(parsed) ? parsed : fallback;
     }
 
+    // Resolve a dock position ("center bottom", "begin top", ...) to the
+    // sap.ui.core.Popup.Dock value of the running UI5 version. Older UI5
+    // keeps the jQuery-style "center bottom" spelling, newer UI5 switched
+    // the enum to "CenterBottom" (and rejects the old form in MessageToast's
+    // dock validation with a console error). Looking the position up by its
+    // PascalCase key returns whichever spelling this version expects, so the
+    // value validates on both. Unknown values are passed through unchanged.
+    function toDockValue(pos) {
+      if (!pos) return pos;
+      const key = pos
+        .trim()
+        .split(/\s+/)
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+        .join("");
+      return Popup.Dock[key] || pos;
+    }
+
     function showToast(msg, oController) {
       MessageToast.show(msg.TEXT, {
         duration: parseMs(msg.DURATION, 3000),
         width: msg.WIDTH || "15em",
+        my: toDockValue(msg.MY || "center bottom"),
+        at: toDockValue(msg.AT || "center bottom"),
+        offset: msg.OFFSET || "0 0",
+        collision: msg.COLLISION || "fit fit",
+        ...(msg.OF && { of: msg.OF }),
         onClose: msg.ONCLOSE ? () => oController.eB([msg.ONCLOSE]) : null,
         autoClose: Boolean(msg.AUTOCLOSE),
         animationTimingFunction: msg.ANIMATIONTIMINGFUNCTION || "ease",
@@ -55,6 +83,12 @@ sap.ui.define(
         closeOnNavigation: Boolean(msg.CLOSEONNAVIGATION),
       };
       if (msg.ICON && msg.ICON !== "NONE") oParams.icon = msg.ICON;
+      if (msg.CONTENTWIDTH) oParams.contentWidth = msg.CONTENTWIDTH;
+      // dependentOn (UI5 >= 1.124) adds the message box to an element's
+      // lifecycle - the backend sends the control id, resolved to the element
+      // here. A missing/unresolvable id drops the option silently.
+      const oDependentOn = ViewSlots.resolveById(msg.DEPENDENTON);
+      if (oDependentOn) oParams.dependentOn = oDependentOn;
       // MessageBox display methods are lowercase (show, error, warning,
       // ...), but the type can arrive capitalized - the ABAP message
       // formatter sends e.g. "Error" for multi-message boxes - or as a

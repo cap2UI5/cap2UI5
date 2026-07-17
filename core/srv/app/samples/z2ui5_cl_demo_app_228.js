@@ -6,6 +6,8 @@ class z2ui5_cl_demo_app_228 extends z2ui5_if_app {
     const page = z2ui5_cl_xml_view.factory()
       .shell()
       .page({ title: `abap2UI5 - Sample: Numeric Content Without Margins`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
+    page.header_content()
+      .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.NumericContent/sample/sap.m.sample.NumericContentWithoutMargin` });
     const layout = page.label(`Numeric content with margins`);
     layout.numeric_content({ value: `65.5`, scale: `MM`, class: `sapUiSmallMargin`, withmargin: true });
     layout.numeric_content({ value: `65.5`, scale: `MM`, valuecolor: `Good`, indicator: `Up`, class: `sapUiSmallMargin`, withmargin: true });

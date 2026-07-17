@@ -6,6 +6,8 @@ class z2ui5_cl_demo_app_226 extends z2ui5_if_app {
     const page = z2ui5_cl_xml_view.factory()
       .shell()
       .page({ title: `abap2UI5 - Sample: Icon Tab Bar - Sub tabs`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
+    page.header_content()
+      .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.IconTabBar/sample/sap.m.sample.IconTabBarSubTabs` });
     const layout = page.label({ wrapping: `true`, text: `IconTabBar with filters with own content and sub tabs. The click area is split to allow the user to display the content or alternatively to expand/collapse the sub tabs.`, class: `sapUiSmallMargin` });
     layout.icon_tab_bar({ class: `sapUiResponsiveContentPadding` })
       .items()

@@ -6,6 +6,8 @@ class z2ui5_cl_demo_app_205 extends z2ui5_if_app {
     const page = z2ui5_cl_xml_view.factory()
       .shell()
       .page({ title: `abap2UI5 - Sample: Flex Box - Basic Alignment`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
+    page.header_content()
+      .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.FlexBox/sample/sap.m.sample.FlexBoxBasicAlignment` });
     const layout = page.vbox()
       .panel({ headertext: `Upper left` })
       .flex_box({ height: `100px`, alignitems: `Start`, justifycontent: `Start` })

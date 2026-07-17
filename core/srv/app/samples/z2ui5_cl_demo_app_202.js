@@ -32,10 +32,10 @@ class z2ui5_cl_demo_app_202 extends z2ui5_if_app {
     }
     switch (client.get().EVENT) {
       case `STEP22`:
-        client.action.gen({ val: z2ui5_if_client.cs_event.wizard_set_next_step, t_arg: [`wiz`, `STEP2`, `STEP22`] });
+        client.follow_up_action({ val: z2ui5_if_client.cs_event.wizard_set_next_step, t_arg: [`wiz`, `STEP2`, `STEP22`] });
         break;
       case `STEP23`:
-        client.action.gen({ val: z2ui5_if_client.cs_event.wizard_set_next_step, t_arg: [`wiz`, `STEP2`, `STEP23`] });
+        client.follow_up_action({ val: z2ui5_if_client.cs_event.wizard_set_next_step, t_arg: [`wiz`, `STEP2`, `STEP23`] });
         break;
     }
     client.view_model_update();

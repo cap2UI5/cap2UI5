@@ -6,6 +6,8 @@ class z2ui5_cl_demo_app_230 extends z2ui5_if_app {
     const page = z2ui5_cl_xml_view.factory()
       .shell()
       .page({ title: `abap2UI5 - Sample: Segmented Button in Input List Item`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
+    page.header_content()
+      .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.SegmentedButton/sample/sap.m.sample.SegmentedButtonLI` });
     const layout = page.list({ headertext: `Input List Item` })
       .input_list_item(`Battery Saving`)
       .segmented_button(`SBYes`)

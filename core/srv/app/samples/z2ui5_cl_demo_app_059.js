@@ -21,7 +21,7 @@ class z2ui5_cl_demo_app_059 extends z2ui5_if_app {
     this.client = z2ui5_cl_util.abap_copy(this.client);
     if (this.client.check_on_event(`BUTTON_SEARCH`)) {
       this.set_data();
-      z2ui5_cl_sample_context.itab_filter_by_val({ val: this.client.get_event_arg(1), tab: this.mt_table });
+      z2ui5_cl_sample_context.itab_filter_by_val({ val: this.client.get_event_arg(), tab: this.mt_table });
       this.client.view_model_update();
     }
   }

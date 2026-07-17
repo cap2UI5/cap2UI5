@@ -26,14 +26,13 @@ class z2ui5_cl_demo_app_167 extends z2ui5_if_app {
       this.mv_value = `my value`;
       this.set_view();
     }
-    const lt_arg = client.get().T_EVENT_ARG;
     switch (client.get().EVENT) {
       case `EVENT_FIX_VAL`:
       case `EVENT_MODEL_VALUE`:
       case `SOURCE_PROPERTY_TEXT`:
       case `EVENT_PROPERTY_VALUE`:
       case `PARENT_PROPERTY_ID`:
-        client.message_box_display(`backend event: ${lt_arg[(1) - 1]}`);
+        client.message_box_display(`backend event: ${client.get_event_arg()}`);
         break;
     }
     client.view_model_update();

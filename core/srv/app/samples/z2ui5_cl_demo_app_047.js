@@ -14,6 +14,8 @@ class z2ui5_cl_demo_app_047 extends z2ui5_if_app {
   mt_tab = [];
 
   async main(client) {
+    let sy_datum = "";
+    let sy_uzeit = "";
     if (client.check_on_init()) {
       this.date = z2ui5_cl_util.abap_copy(sy_datum);
       this.time = z2ui5_cl_util.abap_copy(sy_uzeit);

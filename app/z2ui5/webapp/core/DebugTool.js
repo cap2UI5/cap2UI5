@@ -16,13 +16,27 @@ sap.ui.define(
 
     // Pretty-print any value (object, array, primitive) as indented JSON.
     // `null` is used as a fallback so undefined values still produce output.
+    // A replacer drops circular references (the z2ui5 global can hold them,
+    // e.g. via ComponentData) so the output stays useful JSON instead of
+    // throwing and degrading to a bare "[object Object]".
     function toJson(val) {
       const safe = val === undefined ? null : val;
+      const seen = new WeakSet();
       try {
-        return JSON.stringify(safe, null, 3);
+        return JSON.stringify(
+          safe,
+          (key, value) => {
+            if (typeof value === "object" && value !== null) {
+              if (seen.has(value)) return "[Circular]";
+              seen.add(value);
+            }
+            return value;
+          },
+          3,
+        );
       } catch {
-        // e.g. circular references in ComponentData - the debug tool must
-        // never crash the host app, so degrade to the plain string form.
+        // The debug tool must never crash the host app, so degrade to the
+        // plain string form if serialization still fails.
         return String(safe);
       }
     }
@@ -78,6 +92,15 @@ sap.ui.define(
       return view?._xContent?.outerHTML;
     }
 
+    // Minimal text dump of the shared error log (the entries Lib.logError
+    // pushes to AppState.state.errors): one "<ts>  <message>" line per entry,
+    // oldest first. Empty log yields a short placeholder.
+    function formatErrorLog() {
+      const errors = AppState.state.errors || [];
+      if (!errors.length) return "(log is empty)";
+      return errors.map((e) => `${e.ts}  ${e.message}`).join("\n");
+    }
+
     function getResponseXml(key) {
       const params = AppState.state.oResponse?.PARAMS;
       const slot = params?.[key];
@@ -106,7 +129,12 @@ sap.ui.define(
     // (the latter optionally with the rendered DOM for the templating
     // toggle). The "SOURCE" entry is handled separately in onItemSelect.
     const jsonSources = {
-      CONFIG: () => AppState.getGlobal("oConfig"),
+      // The whole public z2ui5 global facade (oConfig, url, checkLocal,
+      // Util, app-registered members, ...). Read directly here on purpose:
+      // this is the debug inspector, whose job is to surface the live global
+      // as-is - functions drop out under JSON.stringify, which is fine.
+      // ui5lint-disable-next-line no-project-globals -- see reason above
+      SYSTEM: () => window.z2ui5,
       MODEL: () => getModelJson(ViewSlots.getView("MAIN")),
       PLAIN: () => AppState.state.responseData,
       REQUEST: () => AppState.state.oBody,
@@ -179,6 +207,11 @@ sap.ui.define(
             "xml",
             this.prettifyXml(rendered),
           );
+          return;
+        }
+
+        if (selItem === "LOG") {
+          this.displayEditor(oEvent, formatErrorLog(), "text");
           return;
         }
 

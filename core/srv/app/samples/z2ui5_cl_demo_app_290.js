@@ -79,7 +79,7 @@ class z2ui5_cl_demo_app_290 extends z2ui5_if_app {
         this.popover_display({ id: `button_hint_id` });
         break;
       case `onListItemPress`:
-        client.message_toast_display(`Pressed: ${client.get_event_arg(1)}`);
+        client.message_toast_display(`Pressed: ${client.get_event_arg()}`);
         break;
     }
   }

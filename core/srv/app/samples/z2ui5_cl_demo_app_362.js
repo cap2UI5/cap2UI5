@@ -26,16 +26,16 @@ class z2ui5_cl_demo_app_362 extends z2ui5_if_app {
   on_event() {
     switch (this.client.get().EVENT) {
       case `SCROLL_TOP`:
-        this.client.action.gen({ val: z2ui5_if_client.cs_event.scroll_to, t_arg: [`id_page`, `0`, `0`, `smooth`] });
+        this.client.follow_up_action({ val: z2ui5_if_client.cs_event.scroll_to, t_arg: [`id_page`, `0`, `0`, `smooth`] });
         break;
       case `SCROLL_MIDDLE`:
-        this.client.action.gen({ val: z2ui5_if_client.cs_event.scroll_to, t_arg: [`id_page`, `1500`, `0`, `smooth`] });
+        this.client.follow_up_action({ val: z2ui5_if_client.cs_event.scroll_to, t_arg: [`id_page`, `1500`, `0`, `smooth`] });
         break;
       case `SCROLL_BOTTOM`:
-        this.client.action.gen({ val: z2ui5_if_client.cs_event.scroll_to, t_arg: [`id_page`, `99999`, `0`, `smooth`] });
+        this.client.follow_up_action({ val: z2ui5_if_client.cs_event.scroll_to, t_arg: [`id_page`, `99999`, `0`, `smooth`] });
         break;
       case `SCROLL_JUMP`:
-        this.client.action.gen({ val: z2ui5_if_client.cs_event.scroll_to, t_arg: [`id_page`, `1500`, `0`] });
+        this.client.follow_up_action({ val: z2ui5_if_client.cs_event.scroll_to, t_arg: [`id_page`, `1500`, `0`] });
         break;
       case `REFRESH`:
         this.restore_scroll();
@@ -49,7 +49,7 @@ class z2ui5_cl_demo_app_362 extends z2ui5_if_app {
     if (!scroll.ID) {
       return;
     }
-    this.client.action.gen({ val: z2ui5_if_client.cs_event.scroll_to, t_arg: [scroll.ID, `${scroll.Y}`, `${scroll.X}`] });
+    this.client.follow_up_action({ val: z2ui5_if_client.cs_event.scroll_to, t_arg: [scroll.ID, `${scroll.Y}`, `${scroll.X}`] });
   }
 
   view_display() {

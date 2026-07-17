@@ -12,6 +12,8 @@ class z2ui5_cl_demo_app_237 extends z2ui5_if_app {
       .header_content()
       .button({ id: `hint_icon`, icon: `sap-icon://hint`, tooltip: `Sample information`, press: client._event(`POPOVER`) })
       .get_parent();
+    page.header_content()
+      .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.Slider/sample/sap.m.sample.Slider` });
     const layout = page.vertical_layout({ class: `sapUiContentPadding`, width: `100%` })
       .text({ text: `Slider without text field`, class: `sapUiSmallMarginBottom` })
       .slider({ value: `30`, width: `90%`, class: `sapUiSmallMarginBottom` })

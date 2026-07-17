@@ -9,6 +9,9 @@ class z2ui5_cl_demo_app_017 extends z2ui5_if_app {
     const view = z2ui5_cl_xml_view.factory();
     const page = view.shell()
       .page({ title: `abap2UI5 - Object Page with Avatar`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() })
+      .header_content()
+      .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.uxap.ObjectPageLayout/sample/sap.uxap.sample.ObjectPageOnJSON` })
+      .get_parent()
       .object_page_layout({ showtitleinheadercontent: true, showeditheaderbutton: true, editheaderbuttonpress: this.client._event(`EDIT_HEADER_PRESS`), uppercaseanchorbar: false });
     const header_title = page.header_title().object_page_dyn_header_title();
     header_title.expanded_heading().hbox().title({ text: `Oblomov Dev`, wrapping: true });

@@ -28,7 +28,7 @@ class z2ui5_cl_demo_app_250 extends z2ui5_if_app {
       .button({ text: `Centered content`, type: `Accept` })
       .toolbar_spacer()
       .get_parent()
-      .message_strip({ text: `Right aligned content.`, class: `sapUiTinyMargin` })
+      .message_strip({ text: `Right Aligned Content.`, class: `sapUiTinyMargin` })
       .overflow_toolbar({ class: `sapUiMediumMarginTop` })
       .toolbar_spacer()
       .button({ text: `Right aligned content`, type: `Accept` })

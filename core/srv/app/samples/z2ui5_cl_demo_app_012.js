@@ -46,7 +46,7 @@ class z2ui5_cl_demo_app_012 extends z2ui5_if_app {
       case `BUTTON_POPUP_05`:
         this.check_popup = true;
         this.client.view_destroy();
-        this.client.nav_app_call(z2ui5_cl_demo_app_020.factory({ i_text: `(new app )this is a popup to decide, the text is sent from the previous app and the answer will be sent back`, i_cancel_text: `Cancel `, i_cancel_event: `POPUP_DECIDE_CANCEL`, i_confirm_text: `Continue`, i_confirm_event: `POPUP_DECIDE_CONTINUE` }));
+        this.client.nav_app_call(z2ui5_cl_demo_app_020.factory({ i_text: `(new app )this is a popup to decide, the text is sent from the previous app and the answer will be sent back`, i_cancel_text: `Cancel`, i_cancel_event: `POPUP_DECIDE_CANCEL`, i_confirm_text: `Continue`, i_confirm_event: `POPUP_DECIDE_CONTINUE` }));
         break;
       case `BUTTON_POPUP_06`:
         this.check_popup = true;

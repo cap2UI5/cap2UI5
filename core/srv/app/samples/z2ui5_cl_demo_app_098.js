@@ -37,7 +37,7 @@ class z2ui5_cl_demo_app_098 extends z2ui5_if_app {
     const lo_view_nested = z2ui5_cl_xml_view.factory();
     let page = lo_view_nested.page(`Nested View`);
     page = page.text(this.client._bind(this.mv_title))
-      .button({ text: `frontend event`, press: this.client._event_client(this.client.cs_event.open_new_tab, [`https://github.com/abap2UI5/abap2UI5/`]) });
+      .button({ text: `frontend event`, press: this.client._event(`NN_VIEW`) });
     this.client.nest2_view_display(lo_view_nested.stringify(), `test`, `addEndColumnPage`, `removeAllEndColumnPages`);
   }
 
@@ -64,10 +64,13 @@ class z2ui5_cl_demo_app_098 extends z2ui5_if_app {
       this.view_display_detail();
     }
     switch (client.get().EVENT) {
+      case `NN_VIEW`:
+        client.message_box_display(`Event in nested nested view raised`);
+        break;
       case `ROW_NAVIGATE`:
-        if (client.get_event_arg(1)) {
+        if (client.get_event_arg()) {
           this.mv_layout = `ThreeColumnsEndExpanded`;
-          this.mv_title = client.get_event_arg(1);
+          this.mv_title = client.get_event_arg();
         }
         client.nest_view_model_update();
         client.view_model_update();
@@ -83,7 +86,9 @@ class z2ui5_cl_demo_app_098 extends z2ui5_if_app {
           sy_subrc = _i >= 0 && _i < _t.length ? 0 : 4;
           if (sy_subrc === 0) ls_sel = _t[_i];
         }
-        this.t_tab2.push(ls_sel);
+        if (!this.t_tab2.some((row) => row.title === ls_sel.title)) {
+          this.t_tab2.push(ls_sel);
+        }
         this.mv_layout = `TwoColumnsMidExpanded`;
         client.nest_view_model_update();
         client.view_model_update();

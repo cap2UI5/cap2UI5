@@ -41,7 +41,7 @@ class z2ui5_cl_demo_app_302 extends z2ui5_if_app {
         this.popover_display({ id: `button_hint_id` });
         break;
       case `onPress`:
-        client.message_toast_display(`${client.get_event_arg(1)} marker pressed!`);
+        client.message_toast_display(`${client.get_event_arg()} marker pressed!`);
         break;
     }
   }
