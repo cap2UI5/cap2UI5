@@ -19,6 +19,7 @@ class z2ui5_cl_demo_app_114 extends z2ui5_if_app {
   }
 
   on_event() {
+    let sy_uname = "";
     if (this.client.check_on_event(`POST`)) {
       if (this.mv_value) {
         this.ms_feed = {};

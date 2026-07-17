@@ -78,10 +78,10 @@ class z2ui5_cl_xml_view_cc {
     return result;
   }
 
-  geolocation({ finished, longitude, latitude, altitude, accuracy, altitudeaccuracy, speed, heading, enablehighaccuracy, timeout } = {}) {
+  geolocation({ finished, error, longitude, latitude, altitude, accuracy, altitudeaccuracy, speed, heading, enablehighaccuracy, timeout } = {}) {
     let result = null;
     result = z2ui5_cl_util.abap_copy(this.mo_view);
-    this.mo_view._generic({ name: `Geolocation`, ns: `z2ui5`, t_prop: [{ n: `finished`, v: finished }, { n: `longitude`, v: longitude }, { n: `latitude`, v: latitude }, { n: `altitude`, v: altitude }, { n: `accuracy`, v: accuracy }, { n: `altitudeAccuracy`, v: altitudeaccuracy }, { n: `speed`, v: speed }, { n: `heading`, v: heading }, { n: `enableHighAccuracy`, v: z2ui5_cl_a2ui5_context.boolean_abap_2_json(enablehighaccuracy) }, { n: `timeout`, v: timeout }] });
+    this.mo_view._generic({ name: `Geolocation`, ns: `z2ui5`, t_prop: [{ n: `finished`, v: finished }, { n: `error`, v: error }, { n: `longitude`, v: longitude }, { n: `latitude`, v: latitude }, { n: `altitude`, v: altitude }, { n: `accuracy`, v: accuracy }, { n: `altitudeAccuracy`, v: altitudeaccuracy }, { n: `speed`, v: speed }, { n: `heading`, v: heading }, { n: `enableHighAccuracy`, v: z2ui5_cl_a2ui5_context.boolean_abap_2_json(enablehighaccuracy) }, { n: `timeout`, v: timeout }] });
     return result;
   }
 

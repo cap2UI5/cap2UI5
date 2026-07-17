@@ -24,6 +24,8 @@ class z2ui5_cl_demo_app_101 extends z2ui5_if_app {
   }
 
   on_event() {
+    let sy_datum = "";
+    let sy_uzeit = "";
     if (this.client.check_on_event(`POST`)) {
       if (!this.value) {
         return;

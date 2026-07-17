@@ -197,6 +197,16 @@ class z2ui5_cl_xml_view {
   }
 
   /**
+   * Returns the child at `index` (1-based, mirroring abap `mt_child[ index ]`).
+   * Used to descend into a just-added container leaf to attach nested items,
+   * e.g. `navlist.navigation_list_item({...}).get_child().navigation_list_item({...})`
+   * builds a NavigationListItem with sub-items.
+   */
+  get_child(index = 1) {
+    return this.aChild[index - 1];
+  }
+
+  /**
    * Returns a z2ui5_cl_xml_view_cc wrapper bound to this view — mirrors abap
    * z2ui5_cl_xml_view->_z2ui5( ). Use as `view._z2ui5().info({...})`.
    */

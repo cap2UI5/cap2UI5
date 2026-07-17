@@ -173,6 +173,7 @@ class z2ui5_cl_util_ext {
 
   static rtti_get_table_desrc({ tabname, langu } = {}) {
     let result = ``;
+    let sy_langu = "E";
     let lan;
     let lv_tabname;
     let ddtext = ``;
@@ -715,6 +716,7 @@ class z2ui5_cl_util_ext {
   static _read_e070({ mt_data } = {}) {
     let sy_tabix = 0;
     let sy_subrc = 0;
+    let sy_uname = "";
     let fs_table = null;
     let _fs$fs_table = null;
     let fs_line = null;
@@ -792,7 +794,7 @@ class z2ui5_cl_util_ext {
     } else {
       let lo_tab = null;
       let lo_line = null;
-      z2ui5_cl_util_ext._read_e070({ mt_data: { mt_data } });
+      z2ui5_cl_util_ext._read_e070({ mt_data });
       table_name = `E07T`;
       try {
         t_comp = z2ui5_cl_util.rtti_get_t_attri_by_table_name(table_name);
@@ -855,6 +857,7 @@ class z2ui5_cl_util_ext {
   static set_mandt({ ir_data } = {}) {
     let sy_tabix = 0;
     let sy_subrc = 0;
+    let sy_mandt = "000";
     let fs_tab = null;
     let _fs$fs_tab = null;
     let fs_row = null;
@@ -899,6 +902,7 @@ class z2ui5_cl_util_ext {
     let result = [];
     let sy_tabix = 0;
     let sy_subrc = 0;
+    let sy_datum = "";
     let fs_filter = null;
     let _fs$fs_filter = null;
     let fs_range = null;
@@ -1153,6 +1157,7 @@ class z2ui5_cl_util_ext {
   static bal_delete_before({ object, subobject, days = 30 } = {}) {
     let sy_tabix = 0;
     let sy_subrc = 0;
+    let sy_datum = "";
     let fs_filter = null;
     let _fs$fs_filter = null;
     let fs_range = null;
@@ -1690,6 +1695,7 @@ class z2ui5_cl_util_ext {
     let result = [];
     let sy_tabix = 0;
     let sy_subrc = 0;
+    let sy_uname = "";
     let fs_prop = null;
     let _fs$fs_prop = null;
     let fs_pcomp = null;
@@ -1826,6 +1832,7 @@ class z2ui5_cl_util_ext {
 
   static tr_get_description({ trkorr } = {}) {
     let result = ``;
+    let sy_langu = "E";
     let lv_xco_d;
     let lv_tab;
     let lv_where;
@@ -2008,6 +2015,7 @@ class z2ui5_cl_util_ext {
   static tr_import({ trkorr, target_system, client, ignore_version = true } = {}) {
     let result = 0;
     let sy_subrc = 0;
+    let sy_mandt = "000";
     let fs_exc = null;
     let _fs$fs_exc = null;
     if (z2ui5_cl_util.context_check_abap_cloud()) {
@@ -2244,9 +2252,9 @@ class z2ui5_cl_util_ext {
     let _fs$fs_filter = null;
     // TODO(abap2js): CREATE DATA result TYPE ('BAL_S_LFIL').
     // TODO(abap2js): ASSIGN result->* TO <filter>.
-    z2ui5_cl_util_ext.bal_std_filter_add({ comp: { comp: `OBJECT`, value: object, filter: fs_filter } });
-    z2ui5_cl_util_ext.bal_std_filter_add({ comp: { comp: `SUBOBJECT`, value: subobject, filter: fs_filter } });
-    z2ui5_cl_util_ext.bal_std_filter_add({ comp: { comp: `EXTNUMBER`, value: id, filter: fs_filter } });
+    z2ui5_cl_util_ext.bal_std_filter_add({ comp: `OBJECT`, value: object, filter: fs_filter });
+    z2ui5_cl_util_ext.bal_std_filter_add({ comp: `SUBOBJECT`, value: subobject, filter: fs_filter });
+    z2ui5_cl_util_ext.bal_std_filter_add({ comp: `EXTNUMBER`, value: id, filter: fs_filter });
     return result;
   }
 
@@ -2708,6 +2716,7 @@ class z2ui5_cl_util_ext {
     let result = false;
     let sy_tabix = 0;
     let sy_subrc = 0;
+    let sy_uname = "";
     let fs_body = null;
     let _fs$fs_body = null;
     let fs_line = null;
@@ -2787,6 +2796,9 @@ class z2ui5_cl_util_ext {
   static job_submit_report({ report, variant, start_immediate = true, job_name } = {}) {
     let result = ``;
     let sy_subrc = 0;
+    let sy_uname = "";
+    let sy_datum = "";
+    let sy_uzeit = "";
     if (z2ui5_cl_util.context_check_abap_cloud()) {
       throw new z2ui5_cx_util_error({ val: `job_submit_report: On ABAP Cloud use CL_APJ_RT_API with a registered job catalog entry instead` });
     }

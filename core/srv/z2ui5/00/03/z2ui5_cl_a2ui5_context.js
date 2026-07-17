@@ -206,7 +206,7 @@ class z2ui5_cl_a2ui5_context {
     let lv_value;
     const lt_mapping = z2ui5_cl_a2ui5_context.filter_get_token_range_mapping();
     const lt_tab = {};
-    z2ui5_cl_a2ui5_context.itab_corresponding({ val: { val, tab: lt_tab } });
+    z2ui5_cl_a2ui5_context.itab_corresponding({ val, tab: lt_tab });
     sy_tabix = 0;
     for (const lr_row of lt_tab) {
       sy_tabix++;

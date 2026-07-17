@@ -105,7 +105,7 @@ class z2ui5_cl_util_xml {
       if ((from_root === true || from_root === `X`)) {
         this.mo_root.xml_get_parts_indent({ ct_parts: lt_parts });
       } else {
-        this.xml_get_parts_indent({ iv_depth: { ct_parts: lt_parts } });
+        this.xml_get_parts_indent({ ct_parts: lt_parts });
       }
       result = lt_parts.join(`
 `);
@@ -113,7 +113,7 @@ class z2ui5_cl_util_xml {
       if ((from_root === true || from_root === `X`)) {
         this.mo_root.xml_get_parts({ ct_parts: lt_parts });
       } else {
-        this.xml_get_parts({ ct_parts: { ct_parts: lt_parts } });
+        this.xml_get_parts({ ct_parts: lt_parts });
       }
       result = /* TODO(abap2js) */ concat_lines_of(lt_parts);
     }

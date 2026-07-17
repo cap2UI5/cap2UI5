@@ -127,7 +127,7 @@ class z2ui5_cl_core_app {
   }
 
   _create_model() {
-    return new z2ui5_cl_core_srv_model(this.mt_attri, this.mo_app);
+    return new z2ui5_cl_core_srv_model({ attri: this.mt_attri, app: this.mo_app });
   }
 
   _serializable_state() {

@@ -77,7 +77,7 @@ class z2ui5_cl_demo_app_258 extends z2ui5_if_app {
       .layout_data()
       .flex_item_data({ growfactor: `4`, backgrounddesign: `Solid` })
       .get_parent();
-    this.render_site_content({ client: { client, site_content } });
+    this.render_site_content({ client, site_content });
     client.view_display(page.stringify());
   }
 

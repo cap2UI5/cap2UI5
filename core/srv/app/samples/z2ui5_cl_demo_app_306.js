@@ -45,6 +45,7 @@ class z2ui5_cl_demo_app_306 extends z2ui5_if_app {
   }
 
   async main(client) {
+    let sy_uzeit = "";
     this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.facing_modes = [{ key: ``, text: `` }, { key: `environment`, text: `environment` }, { key: `user`, text: `user` }, { key: `left`, text: `left` }, { key: `right`, text: `right` }];
