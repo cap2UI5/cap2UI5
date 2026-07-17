@@ -29,11 +29,11 @@ class z2ui5_cl_demo_app_009 extends z2ui5_if_app {
 
   on_event() {
     switch (this.client.get().EVENT) {
-      case `POPUP_TABLE_value`:
+      case `POPUP_TABLE_VALUE`:
         this.t_suggestion_sel = z2ui5_cl_util.abap_copy(this.t_suggestion);
         this.popup_value_suggestion();
         break;
-      case `POPUP_TABLE_value_CUSTOM`:
+      case `POPUP_TABLE_VALUE_CUSTOM`:
         this.t_employees_sel = {};
         this.popup_value_employee();
         break;
@@ -44,21 +44,25 @@ class z2ui5_cl_demo_app_009 extends z2ui5_if_app {
         }
         this.popup_value_employee();
         break;
-      case `POPUP_TABLE_value_CUSTOM_CONTINUE`:
+      case `POPUP_TABLE_VALUE_CUSTOM_CONTINUE`:
         for (let _i = this.t_employees_sel.length - 1; _i >= 0; _i--) { const row = this.t_employees_sel[_i]; if (!(row.selkz === true || row.selkz === `X`)) this.t_employees_sel.splice(_i, 1); }
         if (this.t_employees_sel.length === 1) {
           this.s_screen.name = z2ui5_cl_util.abap_copy(this.t_employees_sel[(1) - 1].name);
           this.s_screen.lastname = z2ui5_cl_util.abap_copy(this.t_employees_sel[(1) - 1].lastname);
           this.client.message_toast_display(`value selected`);
           this.client.popup_destroy();
+        } else {
+          this.client.message_toast_display(`please select exactly one employee`);
         }
         break;
-      case `POPUP_TABLE_value_CONTINUE`:
+      case `POPUP_TABLE_VALUE_CONTINUE`:
         for (let _i = this.t_suggestion_sel.length - 1; _i >= 0; _i--) { const row = this.t_suggestion_sel[_i]; if (!(row.selkz === true || row.selkz === `X`)) this.t_suggestion_sel.splice(_i, 1); }
         if (this.t_suggestion_sel.length === 1) {
           this.s_screen.color_02 = z2ui5_cl_util.abap_copy(this.t_suggestion_sel[(1) - 1].value);
           this.client.message_toast_display(`value selected`);
           this.client.popup_destroy();
+        } else {
+          this.client.message_toast_display(`please select exactly one color`);
         }
         break;
       case `BUTTON_SEND`:
@@ -76,6 +80,7 @@ class z2ui5_cl_demo_app_009 extends z2ui5_if_app {
     const view = z2ui5_cl_xml_view.factory();
     const page = view.shell()
       .page({ title: `abap2UI5 - Value Help Examples`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    page.message_strip({ text: `Four value-help patterns: inline suggestions, numeric-only input, a value-help popup with a selectable table, ` + `and a custom popup with a city search. Fill the fields, then Clear resets the view and Send simulates a submit.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     const form = page.grid(`L7 M7 S7`).content(`layout`).simple_form(`Input with Value Help`).content(`form`);
     form.label(`Input with suggestion items`)
       .input({ value: this.client._bind_edit(this.s_screen.color_01, { name: `s_screen-color_01` }), placeholder: `fill in your favorite colour`, suggestionitems: this.client._bind(this.t_suggestion), showsuggestion: true })
@@ -86,15 +91,15 @@ class z2ui5_cl_demo_app_009 extends z2ui5_if_app {
     form.label(`Input only numbers allowed`)
       .input({ value: this.client._bind_edit(this.s_screen.quantity, { name: `s_screen-quantity` }), type: `Number`, placeholder: `quantity` });
     form.label(`Input with value`)
-      .input({ value: this.client._bind_edit(this.s_screen.color_02, { name: `s_screen-color_02` }), placeholder: `fill in your favorite colour`, showvaluehelp: true, valuehelprequest: this.client._event(`POPUP_TABLE_value`) });
+      .input({ value: this.client._bind_edit(this.s_screen.color_02, { name: `s_screen-color_02` }), placeholder: `fill in your favorite colour`, showvaluehelp: true, valuehelprequest: this.client._event(`POPUP_TABLE_VALUE`) });
     form.label(`Custom value Popup`)
-      .input({ value: this.client._bind_edit(this.s_screen.name, { name: `s_screen-name` }), placeholder: `name`, showvaluehelp: true, valuehelprequest: this.client._event(`POPUP_TABLE_value_CUSTOM`) })
-      .input({ value: this.client._bind_edit(this.s_screen.lastname, { name: `s_screen-lastname` }), placeholder: `lastname`, showvaluehelp: true, valuehelprequest: this.client._event(`POPUP_TABLE_value_CUSTOM`) });
+      .input({ value: this.client._bind_edit(this.s_screen.name, { name: `s_screen-name` }), placeholder: `name`, showvaluehelp: true, valuehelprequest: this.client._event(`POPUP_TABLE_VALUE_CUSTOM`) })
+      .input({ value: this.client._bind_edit(this.s_screen.lastname, { name: `s_screen-lastname` }), placeholder: `lastname`, showvaluehelp: true, valuehelprequest: this.client._event(`POPUP_TABLE_VALUE_CUSTOM`) });
     page.footer()
       .overflow_toolbar()
       .toolbar_spacer()
-      .button({ text: `Clear`, press: this.client._event(`BUTTON_CLEAR`), type: `Reject`, enabled: false, icon: `sap-icon://delete` })
-      .button({ text: `Send to Server`, press: this.client._event(`BUTTON_SEND`), enabled: false, type: `Success` });
+      .button({ text: `Clear`, press: this.client._event(`BUTTON_CLEAR`), type: `Reject`, icon: `sap-icon://delete` })
+      .button({ text: `Send to Server`, press: this.client._event(`BUTTON_SEND`), type: `Success`, icon: `sap-icon://paper-plane` });
     this.client.view_display(view.stringify());
   }
 
@@ -105,7 +110,7 @@ class z2ui5_cl_demo_app_009 extends z2ui5_if_app {
     tab.columns().column(`20rem`).text(`Color`).get_parent().column().text(`Description`).get_parent();
     tab.items().column_list_item({ selected: `{SELKZ}` }).cells().text(`{VALUE}`).text(`{DESCR}`);
     dialog.buttons()
-      .button({ text: `continue`, press: this.client._event(`POPUP_TABLE_value_CONTINUE`), type: `Emphasized` });
+      .button({ text: `continue`, press: this.client._event(`POPUP_TABLE_VALUE_CONTINUE`), type: `Emphasized` });
     this.client.popup_display(popup.stringify());
   }
 
@@ -144,7 +149,7 @@ class z2ui5_cl_demo_app_009 extends z2ui5_if_app {
       .text(`{NAME}`)
       .text(`{LASTNAME}`);
     dialog.buttons()
-      .button({ text: `continue`, press: this.client._event(`POPUP_TABLE_value_CUSTOM_CONTINUE`), type: `Emphasized` });
+      .button({ text: `continue`, press: this.client._event(`POPUP_TABLE_VALUE_CUSTOM_CONTINUE`), type: `Emphasized` });
     this.client.popup_display(popup.stringify());
   }
 }

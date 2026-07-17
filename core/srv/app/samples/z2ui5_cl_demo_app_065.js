@@ -4,6 +4,7 @@ const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 class z2ui5_cl_demo_app_065 extends z2ui5_if_app {
   mv_input_main = ``;
   mv_input_nest = ``;
+  mv_count = 0;
 
   async main(client) {
     const lo_view = z2ui5_cl_xml_view.factory();
@@ -16,11 +17,11 @@ class z2ui5_cl_demo_app_065 extends z2ui5_if_app {
       .button({ text: `Rerender all`, press: client._event(`ALL`) })
       .button({ text: `Rerender Main without nest`, press: client._event(`MAIN`) })
       .button({ text: `Rerender only nested view`, press: client._event(`NEST`) })
+      .button({ text: `Update only nested MODEL (nest_view_model_update)`, press: client._event(`NEST_MODEL`) })
       .input(client._bind_edit(this.mv_input_main));
     const lo_view_nested = z2ui5_cl_xml_view.factory()
       .page(`Nested View`)
       .button({ text: `event`, press: client._event(`TEST`) })
-      .button({ text: `frontend event`, press: client._event_client(client.cs_event.open_new_tab, [`https://github.com/abap2UI5/abap2UI5/`]) })
       .input(client._bind_edit(this.mv_input_nest));
     if (client.check_on_init()) {
       client.view_display(lo_view.stringify());
@@ -38,6 +39,11 @@ class z2ui5_cl_demo_app_065 extends z2ui5_if_app {
         break;
       case `NEST`:
         client.nest_view_display(lo_view_nested.stringify(), `test`, `addContent`);
+        break;
+      case `NEST_MODEL`:
+        this.mv_count = this.mv_count + 1;
+        this.mv_input_nest = `nest model updated #${this.mv_count}`;
+        client.nest_view_model_update();
         break;
     }
   }

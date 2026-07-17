@@ -14,7 +14,7 @@ class z2ui5_cl_demo_app_300 extends z2ui5_if_app {
     page_01.header_content()
       .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.ObjectStatus/sample/sap.m.sample.ObjectStatus` });
     page_01.vertical_layout({ width: `100%` })
-      .block_layout({ background: `transparent` })
+      .block_layout()
       .block_layout_row()
       .block_layout_cell()
       .vertical_layout({ class: `sapUiContentPadding`, width: `100%` })
@@ -57,7 +57,7 @@ class z2ui5_cl_demo_app_300 extends z2ui5_if_app {
       .get_parent()
       .get_parent();
     page_01.vertical_layout({ class: `sapUiContentPadding`, width: `100%` })
-      .block_layout({ background: `transparent` })
+      .block_layout()
       .block_layout_row()
       .block_layout_cell()
       .label({ text: `ObjectStatus with different indication states.`, design: `Bold`, wrapping: true, class: `sapUiSmallMarginBottom` })

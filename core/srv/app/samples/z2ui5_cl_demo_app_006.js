@@ -49,7 +49,7 @@ class z2ui5_cl_demo_app_006 extends z2ui5_if_app {
     tab.header_toolbar()
       .toolbar()
       .title(`title of the table`)
-      .button({ text: `letf side button`, icon: `sap-icon://account`, press: this.client._event(`BUTTON_SORT`) })
+      .button({ text: `left side button`, icon: `sap-icon://account`, press: this.client._event(`BUTTON_SORT`) })
       .segmented_button(this.key)
       .items()
       .segmented_button_item({ key: `BLUE`, icon: `sap-icon://accept`, text: `blue` })

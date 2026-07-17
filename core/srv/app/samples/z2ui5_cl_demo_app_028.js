@@ -36,7 +36,7 @@ class z2ui5_cl_demo_app_028 extends z2ui5_if_app {
   }
 
   start_timer() {
-    this.client.action.gen({ val: z2ui5_if_client.cs_event.start_timer, t_arg: [this.client._event(`TIMER_FINISHED`), `2000`] });
+    this.client.follow_up_action({ val: z2ui5_if_client.cs_event.start_timer, t_arg: [`TIMER_FINISHED`, `2000`] });
   }
 
   view_display() {

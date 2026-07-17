@@ -12,7 +12,7 @@ class z2ui5_cl_demo_app_266 extends z2ui5_if_app {
     page_01.header_content()
       .button({ id: `button_hint_id`, icon: `sap-icon://hint`, tooltip: `Sample information`, press: client._event(`CLICK_HINT_ICON`) });
     page_01.header_content()
-      .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/#/entity/sap.m.ToggleButton/sample/sap.m.sample.ToggleButton` });
+      .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.ToggleButton/sample/sap.m.sample.ToggleButton` });
     const page_02 = page_01.page({ title: `Page`, class: `sapUiContentPadding` })
       .custom_header()
       .bar()
@@ -73,7 +73,7 @@ class z2ui5_cl_demo_app_266 extends z2ui5_if_app {
         this.popover_display({ id: `button_hint_id` });
         break;
       case `onPress`:
-        if (client.get_event_arg(1) === `X`) {
+        if (client.get_event_arg() === `X`) {
           client.message_toast_display(`${client.get_event_arg(2)} Pressed`);
         } else {
           client.message_toast_display(`${client.get_event_arg(2)} Unpressed`);

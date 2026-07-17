@@ -12,7 +12,7 @@ class z2ui5_cl_demo_app_261 extends z2ui5_if_app {
     page.header_content()
       .button({ id: `hint_icon`, icon: `sap-icon://hint`, tooltip: `Sample information`, press: client._event(`POPOVER`) });
     page.header_content()
-      .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/#/entity/sap.m.NewsContent/sample/sap.m.sample.NewsContent` });
+      .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.NewsContent/sample/sap.m.sample.NewsContent` });
     page.tile_content({ class: `sapUiSmallMargin` })
       .content()
       .news_content({ contenttext: `SAP Unveils Powerful New Player Comparison Tool Exclusively on NFL.com`, subheader: `August 21, 2013`, press: client._event(`NEWS_CONTENT_PRESS`) });

@@ -19,7 +19,7 @@ class z2ui5_cl_demo_app_279 extends z2ui5_if_app {
     box.button({ text: `Reset`, press: this.client._event(`reset`), class: `sapUiSmallMarginBegin`, visible: this.client._bind(this.dirty) });
     page._z2ui5().dirty(this.client._bind(this.dirty));
     this.client.view_display(page.stringify());
-    this.client.action.gen({ val: z2ui5_if_client.cs_event.set_focus, t_arg: [`input`] });
+    this.client.follow_up_action({ val: z2ui5_if_client.cs_event.set_focus, t_arg: [`input`] });
   }
 
   on_event() {

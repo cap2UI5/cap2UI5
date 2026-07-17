@@ -14,7 +14,7 @@ class z2ui5_cl_demo_app_241 extends z2ui5_if_app {
     page.header_content()
       .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.TileContent/sample/sap.m.sample.TileContent` });
     const layout = page.grid({ containerquery: true, class: `sapUiSmallMarginTop` })
-      .tile_content({ footer: `Current Quarter`, unit: `EUR` })
+      .tile_content({ footer: `Current Quarter`, unit: `EUR`, class: `sapUiSmallMargin` })
       .numeric_content({ scale: `M`, value: `1.96`, valuecolor: `Error`, indicator: `Up` })
       .get_parent()
       .get_parent()

@@ -12,9 +12,9 @@ class z2ui5_cl_demo_app_173 extends z2ui5_if_app {
     let view = z2ui5_cl_xml_view.factory();
     view = view.shell()
       .page({ id: `page_main`, class: `sapUiContentPadding`, title: `abap2UI5 - Sample Templating I`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
-    view.table(this.client._bind(this.mt_data))
+    view.table(this.client._bind_edit(this.mt_data))
       .columns()
-      .template_repeat({ list: `{template>/MT_LAYOUT}`, var: `L0` })
+      .template_repeat({ list: `{template>/XX/MT_LAYOUT}`, var: `L0` })
       .column({ mergeduplicates: `{L0>MERGE}`, visible: `{L0>VISIBLE}` })
       .text(`{L0>FNAME}`)
       .get_parent()
@@ -23,7 +23,7 @@ class z2ui5_cl_demo_app_173 extends z2ui5_if_app {
       .items()
       .column_list_item()
       .cells()
-      .template_repeat({ list: `{template>/MT_LAYOUT}`, var: `L1` })
+      .template_repeat({ list: `{template>/XX/MT_LAYOUT}`, var: `L1` })
       .object_identifier({ text: `{= '{' + \${L1>FNAME} + '}' }` });
     view.label(`IF Template (with re-rendering)`);
     view.switch({ state: this.client._bind_edit(this.mv_flag), change: this.client._event(`CHANGE_FLAG`) });

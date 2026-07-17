@@ -1,3 +1,4 @@
+const z2ui5_cl_sample_context = require("./z2ui5_cl_sample_context");
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
@@ -28,7 +29,7 @@ class z2ui5_cl_demo_app_097 extends z2ui5_if_app {
     lo_columns.get_parent()
       .ui_row_action_template()
       .ui_row_action()
-      .ui_row_action_item({ icon: `sap-icon://delete`, press: this.client._event(`ROW_DELETE`, [`\${TITLE}`]) });
+      .ui_row_action_item({ icon: `sap-icon://delete`, press: this.client._event(`ROW_DELETE`, [`\${UUID}`]) });
     this.client.nest_view_display(lo_view_nested.stringify(), `test`, `addMidColumnPage`, `removeAllMidColumnPages`);
   }
 
@@ -45,8 +46,6 @@ class z2ui5_cl_demo_app_097 extends z2ui5_if_app {
 
   async main(client) {
     let sy_subrc = 0;
-    let lt_arg;
-    let ls_arg;
     let lt_sel;
     let ls_sel;
     this.client = z2ui5_cl_util.abap_copy(client);
@@ -58,17 +57,7 @@ class z2ui5_cl_demo_app_097 extends z2ui5_if_app {
     }
     switch (client.get().EVENT) {
       case `ROW_DELETE`:
-        lt_arg = client.get().T_EVENT_ARG;
-        ls_arg = {};
-        {
-          const _t = lt_arg;
-          const _i = (1) - 1;
-          sy_subrc = _i >= 0 && _i < _t.length ? 0 : 4;
-          if (sy_subrc === 0) ls_arg = _t[_i];
-        }
-        if (ls_arg) {
-          for (let _i = this.t_tab2.length - 1; _i >= 0; _i--) { const row = this.t_tab2[_i]; if (row.title === ls_arg) this.t_tab2.splice(_i, 1); }
-        }
+        for (let _i = this.t_tab2.length - 1; _i >= 0; _i--) { const row = this.t_tab2[_i]; if (row.uuid === client.get_event_arg()) this.t_tab2.splice(_i, 1); }
         client.nest_view_model_update();
         break;
       case `SELCHANGE`:
@@ -81,6 +70,7 @@ class z2ui5_cl_demo_app_097 extends z2ui5_if_app {
           sy_subrc = _i >= 0 && _i < _t.length ? 0 : 4;
           if (sy_subrc === 0) ls_sel = _t[_i];
         }
+        ls_sel.uuid = z2ui5_cl_sample_context.uuid_get_c32();
         this.t_tab2.push(ls_sel);
         this.mv_layout = `TwoColumnsMidExpanded`;
         client.nest_view_model_update();

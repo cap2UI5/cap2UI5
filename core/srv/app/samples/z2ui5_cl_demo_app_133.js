@@ -43,7 +43,7 @@ class z2ui5_cl_demo_app_133 extends z2ui5_if_app {
     switch (client.get().EVENT) {
       case `BUTTON01`:
       case `BUTTON02`:
-        client.action.gen({ val: z2ui5_if_client.cs_event.set_focus, t_arg: [client.get().EVENT, this.selstart, this.selend] });
+        client.follow_up_action({ val: z2ui5_if_client.cs_event.set_focus, t_arg: [client.get().EVENT, this.selstart, this.selend] });
         client.message_toast_display(`focus changed`);
         break;
     }

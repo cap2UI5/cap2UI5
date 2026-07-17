@@ -6,6 +6,8 @@ class z2ui5_cl_demo_app_213 extends z2ui5_if_app {
     const page = z2ui5_cl_xml_view.factory()
       .shell()
       .page({ title: `abap2UI5 - Sample: Input - Password`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
+    page.header_content()
+      .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.Input/sample/sap.m.sample.InputPassword` });
     const layout = page.vertical_layout({ class: `sapUiContentPadding`, width: `100%` });
     layout.label({ text: `Password`, labelfor: `passwordInput` });
     layout.input({ id: `passwordInput`, type: `Password`, placeholder: `Enter password` });

@@ -18,6 +18,8 @@ class z2ui5_cl_demo_app_181 extends z2ui5_if_app {
     const view = z2ui5_cl_xml_view.factory();
     const page = view.shell()
       .page({ title: `Cards Demo`, class: `sapUiContentPadding`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    page.header_content()
+      .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.f.Card/sample/sap.f.sample.Card` });
     this.mt_cities = [{ text: `Berlin`, key: `BR` }, { text: `London`, key: `LN` }, { text: `Madrid`, key: `MD` }, { text: `Prague`, key: `PR` }, { text: `Paris`, key: `PS` }, { text: `Sofia`, key: `SF` }, { text: `Vienna`, key: `VN` }];
     this.mt_products = [{ title: `Notebook HT`, subtitle: `ID23452256-D44`, revenue: `27.25K EUR`, status: `success`, status_schema: `Success` }, { title: `Notebook XT`, subtitle: `ID27852256-D47`, revenue: `7.35K EUR`, status: `exceeded`, status_schema: `Error` }, { title: `Notebook ST`, subtitle: `ID123555587-I05`, revenue: `22.89K EUR`, status: `warning`, status_schema: `Warning` }];
     const card_1 = page.card({ width: `300px`, class: `sapUiMediumMargin` })

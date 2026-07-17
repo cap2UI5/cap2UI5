@@ -11,8 +11,8 @@ class z2ui5_cl_demo_app_352 extends z2ui5_if_app {
     this.client = z2ui5_cl_util.abap_copy(client);
     if (client.check_on_init()) {
       this.view_display();
-      client.action.gen({ val: z2ui5_if_client.cs_event.set_focus, t_arg: [`ZINPUT`] });
-      client.action.gen({ val: z2ui5_if_client.cs_event.keyboard_set_mode, t_arg: [`ZINPUT`, `numeric`] });
+      client.follow_up_action({ val: z2ui5_if_client.cs_event.set_focus, t_arg: [`ZINPUT`] });
+      client.follow_up_action({ val: z2ui5_if_client.cs_event.keyboard_set_mode, t_arg: [`ZINPUT`, `numeric`] });
     }
     this.on_event();
   }
@@ -31,7 +31,7 @@ class z2ui5_cl_demo_app_352 extends z2ui5_if_app {
 
   on_event() {
     if (this.client.check_on_event(`CALL_KEYBOARD`)) {
-      this.client.action.gen({ val: z2ui5_if_client.cs_event.keyboard_set_mode, t_arg: [`ZINPUT`, `none`] });
+      this.client.follow_up_action({ val: z2ui5_if_client.cs_event.keyboard_set_mode, t_arg: [`ZINPUT`, `none`] });
     }
   }
 }

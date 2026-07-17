@@ -1,4 +1,5 @@
 const cl_abap_char_utilities = require("abap2UI5/cl_abap_char_utilities");
+const z2ui5_cl_sample_context = require("./z2ui5_cl_sample_context");
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
@@ -18,6 +19,9 @@ class z2ui5_cl_demo_app_008 extends z2ui5_if_app {
   }
 
   on_event() {
+    let ls_msg_sy;
+    let ls_msg_bapiret;
+    let lv_val;
     switch (this.client.get().EVENT) {
       case `BUTTON_MESSAGE_BOX_CONFIRM`:
         this.client.message_box_display(`Approve purchase order 12345?`, `confirm`);
@@ -54,6 +58,21 @@ class z2ui5_cl_demo_app_008 extends z2ui5_if_app {
       case `BUTTON_MESSAGE_STRIP_SUCCESS`:
         this.check_strip_active = true;
         this.strip_type = `Success`;
+        break;
+      case `BUTTON_MESSAGE_BOX_SY`:
+        ls_msg_sy = z2ui5_cl_sample_context.msg_get_by_msg({ id: `NET`, no: `001` });
+        this.client.message_box_display(ls_msg_sy);
+        break;
+      case `BUTTON_MESSAGE_BOX_BAPIRET`:
+        ls_msg_bapiret = { id: `NET`, number: `001` };
+        this.client.message_box_display(ls_msg_bapiret);
+        break;
+      case `BUTTON_MESSAGE_BOX_CX_ROOT`:
+        try {
+          lv_val = z2ui5_cl_util.abap_div(1, 0);
+        } catch (lx) {
+          this.client.message_box_display(lx);
+        }
         break;
     }
     this.view_display();
@@ -92,6 +111,13 @@ class z2ui5_cl_demo_app_008 extends z2ui5_if_app {
       .content(`form`)
       .button({ text: `Message Toast`, press: this.client._event(`BUTTON_MESSAGE_TOAST`) })
       .button({ text: `Message Toast Customized`, press: this.client._event(`BUTTON_MESSAGE_TOAST2`) });
+    page.grid(`L6 M12 S12`)
+      .content(`layout`)
+      .simple_form(`Message Box from ABAP Object`)
+      .content(`form`)
+      .button({ text: `SY Message`, press: this.client._event(`BUTTON_MESSAGE_BOX_SY`) })
+      .button({ text: `BAPIRET2`, press: this.client._event(`BUTTON_MESSAGE_BOX_BAPIRET`) })
+      .button({ text: `CX_ROOT`, press: this.client._event(`BUTTON_MESSAGE_BOX_CX_ROOT`) });
     this.client.view_display(view.stringify());
   }
 }

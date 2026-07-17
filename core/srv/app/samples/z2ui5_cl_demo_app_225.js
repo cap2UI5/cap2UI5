@@ -6,6 +6,8 @@ class z2ui5_cl_demo_app_225 extends z2ui5_if_app {
     const page = z2ui5_cl_xml_view.factory()
       .shell()
       .page({ title: `abap2UI5 - Sample: Icon Tab Bar - Separator`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
+    page.header_content()
+      .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.IconTabBar/sample/sap.m.sample.IconTabSeparator` });
     const layout = page.label({ wrapping: `true`, text: `No icon(='') used as separator, the separator will be a vertical line.`, class: `sapUiSmallMargin` });
     layout.icon_tab_bar({ id: `idIconTabBarSeparatorNoIcon`, expanded: `false`, class: `sapUiResponsiveContentPadding` })
       .items()

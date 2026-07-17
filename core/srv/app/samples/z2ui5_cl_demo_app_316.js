@@ -38,7 +38,7 @@ class z2ui5_cl_demo_app_316 extends z2ui5_if_app {
     url_form.input({ id: `inputUrl`, value: client._bind_edit(this.url.url, { name: `url-url` }), type: `Url`, placeholder: `Enter URL`, class: `sapUiSmallMarginBottom` });
     url_form.button({ text: `Redirect`, press: client._event_client(client.cs_event.urlhelper, [`REDIRECT`, `$${client._bind_edit(this.url)}`]) });
     client.view_display(page.stringify());
-    client.action.gen({ val: z2ui5_if_client.cs_event.set_title, t_arg: [`URL Helper Sample`] });
+    client.follow_up_action({ val: z2ui5_if_client.cs_event.set_title, t_arg: [`URL Helper Sample`] });
   }
 
   async main(client) {

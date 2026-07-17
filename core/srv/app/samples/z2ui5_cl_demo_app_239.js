@@ -14,6 +14,7 @@ class z2ui5_cl_demo_app_239 extends z2ui5_if_app {
     page.header_content()
       .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.CheckBox/sample/sap.m.sample.CheckBox` });
     const layout = page.vbox()
+      .checkbox()
       .checkbox({ text: `Option a`, selected: true })
       .checkbox({ text: `Option b` })
       .checkbox({ text: `Option c`, selected: true })

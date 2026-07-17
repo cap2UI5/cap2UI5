@@ -15,25 +15,13 @@ class z2ui5_cl_demo_app_292 extends z2ui5_if_app {
       .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.Breadcrumbs/sample/sap.m.sample.BreadcrumbsWithCurrentPageLink` });
     page.vertical_layout({ class: `sapUiContentPadding`, width: `100%` })
       .title(`Breadcrumbs with current page aggregation set`)
-      .breadcrumbs({ id: `idBreadcrumbs`, separatorstyle: `{/selected}`, currentlocationtext: `Page 7` })
+      .breadcrumbs({ id: `idBreadcrumbs`, currentlocationtext: `Page 6` })
       .link({ text: `Home`, press: client._event(`onPress`, [`\${$source>/text}`]) })
       .link({ text: `Page 1`, press: client._event(`onPress`, [`\${$source>/text}`]) })
       .link({ text: `Page 2`, press: client._event(`onPress`, [`\${$source>/text}`]) })
       .link({ text: `Page 3`, press: client._event(`onPress`, [`\${$source>/text}`]) })
       .link({ text: `Page 4`, press: client._event(`onPress`, [`\${$source>/text}`]) })
-      .link({ text: `Page 5`, press: client._event(`onPress`, [`\${$source>/text}`]) })
-      .link({ text: `Page 6`, press: client._event(`onPress`, [`\${$source>/text}`]) })
-      .get_parent()
-      .get_parent();
-    page.hbox({ alignitems: `Center` })
-      .label({ labelfor: `idSeparatorSelect`, text: `Change separator style` })
-      .select({ class: `sapUiSmallMarginBegin`, id: `idSeparatorSelect`, selectedkey: `{/selected}`, change: `onChange` })
-      .item({ key: `Slash`, text: `Slash` })
-      .item({ key: `BackSlash`, text: `BackSlash` })
-      .item({ key: `DoubleSlash`, text: `DoubleSlash` })
-      .item({ key: `DoubleBackSlash`, text: `DoubleBackSlash` })
-      .item({ key: `GreaterThan`, text: `GreaterThan` })
-      .item({ key: `DoubleGreaterThan`, text: `DoubleGreaterThan` });
+      .link({ text: `Page 5`, press: client._event(`onPress`, [`\${$source>/text}`]) });
     client.view_display(page.stringify());
   }
 
@@ -43,7 +31,7 @@ class z2ui5_cl_demo_app_292 extends z2ui5_if_app {
         this.popover_display({ id: `button_hint_id` });
         break;
       case `onPress`:
-        client.message_toast_display(`${client.get_event_arg(1)} has been clicked`);
+        client.message_toast_display(`${client.get_event_arg()} has been clicked`);
         break;
     }
   }

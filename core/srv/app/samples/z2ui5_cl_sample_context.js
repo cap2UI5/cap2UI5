@@ -253,6 +253,9 @@ class z2ui5_cl_sample_context {
     let lv_index;
     let lv_name;
     let lv_value;
+    if (!val) {
+      return;
+    }
     const lv_search = ((ignore_case === true || ignore_case === `X`) ? val.toUpperCase() : val);
     sy_tabix = 0;
     for (const fs_row of tab) {

@@ -17,7 +17,7 @@ class z2ui5_cl_demo_app_294 extends z2ui5_if_app {
       .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.DatePicker/sample/sap.m.sample.DatePickerValueState` });
     page.flex_box({ items: client._bind(this.lt_a_data), direction: `Column` })
       .vbox(`sapUiTinyMargin`)
-      .label({ text: `{LABEL}`, labelfor: `SI` })
+      .label({ text: `{LABEL}`, labelfor: `DP` })
       .date_picker({ id: `DP`, width: `100%`, valuestate: `{VALUE_STATE}`, valuestatetext: `{VALUE_STATE_TEXT}` })
       .get_parent()
       .get_parent();

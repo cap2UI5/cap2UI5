@@ -13,7 +13,7 @@ class z2ui5_cl_demo_app_048 extends z2ui5_if_app {
     }
     switch (client.get().EVENT) {
       case `EDIT`:
-        lv_row_title = client.get_event_arg(1);
+        lv_row_title = client.get_event_arg();
         client.message_box_display(`EDIT - ${lv_row_title}`);
         break;
       case `SELCHANGE`:

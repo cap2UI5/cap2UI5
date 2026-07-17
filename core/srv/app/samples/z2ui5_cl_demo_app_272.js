@@ -20,7 +20,7 @@ class z2ui5_cl_demo_app_272 extends z2ui5_if_app {
     page.header_content(`uxap`)
       .button({ id: `button_hint_id`, icon: `sap-icon://hint`, tooltip: `Sample information`, press: client._event(`CLICK_HINT_ICON`) });
     page.header_content(`uxap`)
-      .link({ text: `UI5 Demo Kit`, target: `_blank`, href: base_url + `sdk/#/api/sap.uxap.ObjectPageHeader` });
+      .link({ text: `UI5 Demo Kit`, target: `_blank`, href: base_url + `sdk/#/entity/sap.m.ObjectHeader/sample/sap.m.sample.ObjectHeaderCircleImage` });
     client.view_display(view.stringify());
   }
 

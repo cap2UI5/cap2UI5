@@ -17,7 +17,7 @@ class z2ui5_cl_demo_app_295 extends z2ui5_if_app {
     page.flex_box({ items: client._bind(this.t_data), direction: `Column` })
       .vbox(`sapUiTinyMargin`)
       .label(`{LABEL}`)
-      .date_range_selection({ width: `100%`, valuestate: `{VALUE_STATE}`, valuestatetext: `{VALUE_STATE_TEXT}` })
+      .date_range_selection({ width: `100%`, delimiter: `–`, valuestate: `{VALUE_STATE}`, valuestatetext: `{VALUE_STATE_TEXT}` })
       .get_parent()
       .get_parent();
     client.view_display(page.stringify());
