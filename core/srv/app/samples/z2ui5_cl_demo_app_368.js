@@ -1,5 +1,3 @@
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_368 extends z2ui5_if_app {
@@ -12,7 +10,7 @@ class z2ui5_cl_demo_app_368 extends z2ui5_if_app {
   client = null;
 
   async main(client) {
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init()) {
       this.set_data();
       this.view_display();
@@ -70,8 +68,8 @@ class z2ui5_cl_demo_app_368 extends z2ui5_if_app {
   }
 
   set_data() {
-    this.t_products = [{ productname: `table`, suppliername: `Company 1`, measure: 100, unit: `KG` }, { productname: `chair`, suppliername: `Company 2`, measure: 123, unit: `KG` }, { productname: `sofa`, suppliername: `Company 3`, measure: 700, unit: `KG` }, { productname: `computer`, suppliername: `Company 4`, measure: 200, unit: `KG` }, { productname: `printer`, suppliername: `Company 5`, measure: 90, unit: `KG` }, { productname: `table2`, suppliername: `Company 6`, measure: 600, unit: `KG` }];
-    this.cnt_total = z2ui5_cl_util.abap_copy(this.t_products.length);
+    this.t_products = z2ui5_cl_util.abap_tab_assign(this.t_products, [{ productname: `table`, suppliername: `Company 1`, measure: 100, unit: `KG` }, { productname: `chair`, suppliername: `Company 2`, measure: 123, unit: `KG` }, { productname: `sofa`, suppliername: `Company 3`, measure: 700, unit: `KG` }, { productname: `computer`, suppliername: `Company 4`, measure: 200, unit: `KG` }, { productname: `printer`, suppliername: `Company 5`, measure: 90, unit: `KG` }, { productname: `table2`, suppliername: `Company 6`, measure: 600, unit: `KG` }]);
+    this.cnt_total = z2ui5_cl_util.abap_tab_assign(this.cnt_total, z2ui5_cl_util.abap_copy(this.t_products.length));
     this.cnt_ok = /* TODO(abap2js): REDUCE */ null;
     this.cnt_heavy = /* TODO(abap2js): REDUCE */ null;
     this.cnt_overweight = /* TODO(abap2js): REDUCE */ null;
@@ -97,3 +95,7 @@ class z2ui5_cl_demo_app_368 extends z2ui5_if_app {
 }
 
 module.exports = z2ui5_cl_demo_app_368;
+
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+

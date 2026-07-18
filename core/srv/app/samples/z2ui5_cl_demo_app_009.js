@@ -1,5 +1,3 @@
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_009 extends z2ui5_if_app {
@@ -12,7 +10,7 @@ class z2ui5_cl_demo_app_009 extends z2ui5_if_app {
   t_employees = [];
 
   async main(client) {
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init()) {
       this.on_init();
     } else if (client.check_on_event()) {
@@ -21,16 +19,16 @@ class z2ui5_cl_demo_app_009 extends z2ui5_if_app {
   }
 
   on_init() {
-    this.t_suggestion = [{ descr: `this is the color Green`, value: `GREEN` }, { descr: `this is the color Blue`, value: `BLUE` }, { descr: `this is the color Black`, value: `BLACK` }, { descr: `this is the color Grey`, value: `GREY` }, { descr: `this is the color Blue2`, value: `BLUE2` }, { descr: `this is the color Blue3`, value: `BLUE3` }];
-    this.t_cities = [{ value: `London`, descr: `London` }, { value: `Paris`, descr: `Paris` }, { value: `Rome`, descr: `Rome` }];
-    this.t_employees = [{ city: `London`, name: `Tom`, lastname: `lastname1`, nr: `00001` }, { city: `London`, name: `Tom2`, lastname: `lastname2`, nr: `00002` }, { city: `London`, name: `Tom3`, lastname: `lastname3`, nr: `00003` }, { city: `London`, name: `Tom4`, lastname: `lastname4`, nr: `00004` }, { city: `Rome`, name: `Michaela1`, lastname: `lastname5`, nr: `00005` }, { city: `Rome`, name: `Michaela2`, lastname: `lastname6`, nr: `00006` }, { city: `Rome`, name: `Michaela3`, lastname: `lastname7`, nr: `00007` }, { city: `Rome`, name: `Michaela4`, lastname: `lastname8`, nr: `00008` }, { city: `Paris`, name: `Hermine1`, lastname: `lastname9`, nr: `00009` }, { city: `Paris`, name: `Hermine2`, lastname: `lastname10`, nr: `00010` }, { city: `Paris`, name: `Hermine3`, lastname: `lastname11`, nr: `00011` }];
+    this.t_suggestion = z2ui5_cl_util.abap_tab_assign(this.t_suggestion, [{ descr: `this is the color Green`, value: `GREEN` }, { descr: `this is the color Blue`, value: `BLUE` }, { descr: `this is the color Black`, value: `BLACK` }, { descr: `this is the color Grey`, value: `GREY` }, { descr: `this is the color Blue2`, value: `BLUE2` }, { descr: `this is the color Blue3`, value: `BLUE3` }]);
+    this.t_cities = z2ui5_cl_util.abap_tab_assign(this.t_cities, [{ value: `London`, descr: `London` }, { value: `Paris`, descr: `Paris` }, { value: `Rome`, descr: `Rome` }]);
+    this.t_employees = z2ui5_cl_util.abap_tab_assign(this.t_employees, [{ city: `London`, name: `Tom`, lastname: `lastname1`, nr: `00001` }, { city: `London`, name: `Tom2`, lastname: `lastname2`, nr: `00002` }, { city: `London`, name: `Tom3`, lastname: `lastname3`, nr: `00003` }, { city: `London`, name: `Tom4`, lastname: `lastname4`, nr: `00004` }, { city: `Rome`, name: `Michaela1`, lastname: `lastname5`, nr: `00005` }, { city: `Rome`, name: `Michaela2`, lastname: `lastname6`, nr: `00006` }, { city: `Rome`, name: `Michaela3`, lastname: `lastname7`, nr: `00007` }, { city: `Rome`, name: `Michaela4`, lastname: `lastname8`, nr: `00008` }, { city: `Paris`, name: `Hermine1`, lastname: `lastname9`, nr: `00009` }, { city: `Paris`, name: `Hermine2`, lastname: `lastname10`, nr: `00010` }, { city: `Paris`, name: `Hermine3`, lastname: `lastname11`, nr: `00011` }]);
     this.view_display();
   }
 
   on_event() {
     switch (this.client.get().EVENT) {
       case `POPUP_TABLE_VALUE`:
-        this.t_suggestion_sel = z2ui5_cl_util.abap_copy(this.t_suggestion);
+        this.t_suggestion_sel = z2ui5_cl_util.abap_tab_assign(this.t_suggestion_sel, z2ui5_cl_util.abap_copy(this.t_suggestion));
         this.popup_value_suggestion();
         break;
       case `POPUP_TABLE_VALUE_CUSTOM`:
@@ -38,7 +36,7 @@ class z2ui5_cl_demo_app_009 extends z2ui5_if_app {
         this.popup_value_employee();
         break;
       case `SEARCH`:
-        this.t_employees_sel = z2ui5_cl_util.abap_copy(this.t_employees);
+        this.t_employees_sel = z2ui5_cl_util.abap_tab_assign(this.t_employees_sel, z2ui5_cl_util.abap_copy(this.t_employees));
         if (this.s_screen.city) {
           for (let _i = this.t_employees_sel.length - 1; _i >= 0; _i--) { const row = this.t_employees_sel[_i]; if (row.city !== this.s_screen.city) this.t_employees_sel.splice(_i, 1); }
         }
@@ -47,8 +45,8 @@ class z2ui5_cl_demo_app_009 extends z2ui5_if_app {
       case `POPUP_TABLE_VALUE_CUSTOM_CONTINUE`:
         for (let _i = this.t_employees_sel.length - 1; _i >= 0; _i--) { const row = this.t_employees_sel[_i]; if (!(row.selkz === true || row.selkz === `X`)) this.t_employees_sel.splice(_i, 1); }
         if (this.t_employees_sel.length === 1) {
-          this.s_screen.name = z2ui5_cl_util.abap_copy(this.t_employees_sel[(1) - 1].name);
-          this.s_screen.lastname = z2ui5_cl_util.abap_copy(this.t_employees_sel[(1) - 1].lastname);
+          this.s_screen.name = z2ui5_cl_util.abap_tab_assign(this.s_screen.name, z2ui5_cl_util.abap_copy(this.t_employees_sel[(1) - 1].name));
+          this.s_screen.lastname = z2ui5_cl_util.abap_tab_assign(this.s_screen.lastname, z2ui5_cl_util.abap_copy(this.t_employees_sel[(1) - 1].lastname));
           this.client.message_toast_display(`value selected`);
           this.client.popup_destroy();
         } else {
@@ -58,7 +56,7 @@ class z2ui5_cl_demo_app_009 extends z2ui5_if_app {
       case `POPUP_TABLE_VALUE_CONTINUE`:
         for (let _i = this.t_suggestion_sel.length - 1; _i >= 0; _i--) { const row = this.t_suggestion_sel[_i]; if (!(row.selkz === true || row.selkz === `X`)) this.t_suggestion_sel.splice(_i, 1); }
         if (this.t_suggestion_sel.length === 1) {
-          this.s_screen.color_02 = z2ui5_cl_util.abap_copy(this.t_suggestion_sel[(1) - 1].value);
+          this.s_screen.color_02 = z2ui5_cl_util.abap_tab_assign(this.s_screen.color_02, z2ui5_cl_util.abap_copy(this.t_suggestion_sel[(1) - 1].value));
           this.client.message_toast_display(`value selected`);
           this.client.popup_destroy();
         } else {
@@ -155,3 +153,7 @@ class z2ui5_cl_demo_app_009 extends z2ui5_if_app {
 }
 
 module.exports = z2ui5_cl_demo_app_009;
+
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+

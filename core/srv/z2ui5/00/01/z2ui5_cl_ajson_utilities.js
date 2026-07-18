@@ -1,6 +1,86 @@
+// Hand-port of z2ui5_cl_ajson_utilities (upstream sbcgua/ajson clone) —
+// diff / merge / sort / is_equal / iterators over ajson instances. The ABAP
+// local class lcl_node_iterator lives in-file and is exposed as __locals for
+// the transpiled upstream unit tests. EXPORTING params (diff's eo_*) are
+// written back onto the args object per the out-param convention.
+"use strict";
+
 const z2ui5_cl_ajson = require("abap2UI5/z2ui5_cl_ajson");
 const z2ui5_cx_ajson_error = require("abap2UI5/z2ui5_cx_ajson_error");
 const z2ui5_if_ajson_types = require("abap2UI5/z2ui5_if_ajson_types");
+
+const NT = z2ui5_if_ajson_types.node_type;
+
+const num = (v) => {
+  const n = Number(String(v ?? "").trim());
+  return Number.isNaN(n) ? 0 : n;
+};
+const isInitial = (v) => v === undefined || v === null || v === "" || v === 0 || v === false;
+
+const byPrimaryKey = (a, b) => {
+  const ap = String(a.path ?? ""), bp = String(b.path ?? "");
+  if (ap !== bp) return ap < bp ? -1 : 1;
+  const an = String(a.name ?? ""), bn = String(b.name ?? "");
+  return an < bn ? -1 : an > bn ? 1 : 0;
+};
+const byArrayIndex = (a, b) => num(a.index) - num(b.index) || byPrimaryKey(a, b);
+
+function rowsOfPath(tree, path, cmp) {
+  return tree.filter((r) => String(r.path ?? "") === path).sort(cmp);
+}
+
+// ---------------------------------------------------------------------------
+// lcl_node_iterator
+// ---------------------------------------------------------------------------
+
+class lcl_node_iterator {
+  mi_json = null;
+  mv_node_type = "";
+  mv_base_path = "";
+  mt_rows = [];
+  mv_pos = 0;
+
+  constructor({ ii_json, iv_path, iv_node_type } = {}) {
+    if (iv_node_type !== NT.array && iv_node_type !== NT.object) {
+      z2ui5_cx_ajson_error.raise(`Iterator can iterate arrays or objects only ("${iv_node_type}" passed)`);
+    }
+
+    this.mv_base_path = z2ui5_cl_ajson.normalize_path(iv_path);
+    this.mv_node_type = iv_node_type;
+    this.mi_json = ii_json;
+
+    const nodeType = ii_json.get_node_type(this.mv_base_path);
+    if (isInitial(nodeType)) {
+      z2ui5_cx_ajson_error.raise(`Path not found: ${iv_path}`);
+    } else if (iv_node_type === NT.array && nodeType !== iv_node_type) {
+      z2ui5_cx_ajson_error.raise(`Array expected at: ${iv_path}`);
+    } else if (iv_node_type === NT.object && nodeType !== iv_node_type) {
+      z2ui5_cx_ajson_error.raise(`Object expected at: ${iv_path}`);
+    }
+
+    this.mt_rows = rowsOfPath(
+      ii_json.mt_json_tree,
+      this.mv_base_path,
+      iv_node_type === NT.array ? byArrayIndex : byPrimaryKey
+    );
+    this.mv_pos = 0;
+  }
+
+  has_next() {
+    return this.mv_pos < this.mt_rows.length;
+  }
+
+  next() {
+    if (!this.has_next()) return null;
+    const cursor = this.mt_rows[this.mv_pos];
+    this.mv_pos++;
+    return this.mi_json.slice(`${cursor.path}${cursor.name}`);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// z2ui5_cl_ajson_utilities
+// ---------------------------------------------------------------------------
 
 class z2ui5_cl_ajson_utilities {
   mo_json_a = null;
@@ -9,223 +89,215 @@ class z2ui5_cl_ajson_utilities {
   mo_delete = null;
   mo_change = null;
 
-  delete_empty_nodes({ io_json, iv_keep_empty_arrays } = {}) {
-    let sy_tabix = 0;
-    let ls_json_tree = null;
-    let lv_done = false;
-    while (true) {
-      lv_done = true;
-      if (iv_keep_empty_arrays === false) {
-        sy_tabix = 0;
-        for (const ls_json_tree of io_json.mt_json_tree) {
-          sy_tabix++;
-          if (!(ls_json_tree.type === z2ui5_if_ajson_types.node_type.array && ls_json_tree.children === 0)) continue;
-          io_json.delete_(ls_json_tree.path + ls_json_tree.name);
-        }
-        if (sy_subrc === 0) {
-          lv_done = false;
-        }
-      }
-      sy_tabix = 0;
-      for (const ls_json_tree of io_json.mt_json_tree) {
-        sy_tabix++;
-        if (!(ls_json_tree.type === z2ui5_if_ajson_types.node_type.object && ls_json_tree.children === 0)) continue;
-        io_json.delete_(ls_json_tree.path + ls_json_tree.name);
-      }
-      if (sy_subrc === 0) {
-        lv_done = false;
-      }
-      if (lv_done === true) {
-        break;
-      }
-    }
-  }
-
-  diff({ iv_json_a, iv_json_b, io_json_a, io_json_b, iv_keep_empty_arrays = false, eo_insert, eo_delete, eo_change } = {}) {
-    this.mo_json_a = this.normalize_input({ iv_json: iv_json_a, io_json: io_json_a });
-    this.mo_json_b = this.normalize_input({ iv_json: iv_json_b, io_json: io_json_b });
-    this.mo_insert = z2ui5_cl_ajson.create_empty();
-    this.mo_delete = z2ui5_cl_ajson.create_empty();
-    this.mo_change = z2ui5_cl_ajson.create_empty();
-    this.diff_a_b({ iv_path: `/` });
-    this.diff_b_a({ iv_path: `/` });
-    eo_insert = this.mo_insert;
-    eo_delete = this.mo_delete;
-    eo_change = this.mo_change;
-    this.delete_empty_nodes({ io_json: eo_insert, iv_keep_empty_arrays });
-    this.delete_empty_nodes({ io_json: eo_delete, iv_keep_empty_arrays });
-    this.delete_empty_nodes({ io_json: eo_change, iv_keep_empty_arrays });
-  }
-
-  diff_a_b({ iv_path } = {}) {
-    let sy_tabix = 0;
-    let lv_path_a = ``;
-    let lv_path_b = ``;
-    // TODO(abap2js): FIELD-SYMBOLS <node_a> LIKE LINE OF mo_json_a->mt_json_tree,
-    // TODO(abap2js): FIELD-SYMBOLS <node_b> LIKE LINE OF mo_json_a->mt_json_tree.
-    sy_tabix = 0;
-    for (const node_a of this.mo_json_a.mt_json_tree) {
-      sy_tabix++;
-      if (!(node_a.path === iv_path)) continue;
-      lv_path_a = node_a.path + node_a.name + `/`;
-      // TODO(abap2js): READ TABLE mo_json_b->mt_json_tree ASSIGNING <node_b> WITH TABLE KEY path = <node_a>-path name = <node_a>-name.
-      if (sy_subrc === 0) {
-        lv_path_b = node_b.path + node_b.name + `/`;
-        if (node_a.type === node_b.type) {
-          switch (node_a.type) {
-            case z2ui5_if_ajson_types.node_type.array:
-              this.mo_insert.touch_array(lv_path_a);
-              this.mo_change.touch_array(lv_path_a);
-              this.mo_delete.touch_array(lv_path_a);
-              this.diff_a_b({ iv_path: lv_path_a });
-              break;
-            case z2ui5_if_ajson_types.node_type.object:
-              this.diff_a_b({ iv_path: lv_path_a });
-              break;
-            default:
-              if (node_a.value !== node_b.value) {
-                this.mo_change.set({ iv_path: lv_path_b, iv_val: node_b.value, iv_node_type: node_b.type });
-              }
-              break;
-          }
-        } else {
-          switch (node_a.type) {
-            case z2ui5_if_ajson_types.node_type.array:
-              this.mo_delete.touch_array(lv_path_a);
-              this.diff_a_b({ iv_path: lv_path_a });
-              break;
-            case z2ui5_if_ajson_types.node_type.object:
-              this.diff_a_b({ iv_path: lv_path_a });
-              break;
-            default:
-              this.mo_delete.set({ iv_path: lv_path_a, iv_val: node_a.value, iv_node_type: node_a.type });
-              break;
-          }
-          switch (node_b.type) {
-            case z2ui5_if_ajson_types.node_type.array:
-              this.mo_insert.touch_array(lv_path_b);
-              this.diff_b_a({ iv_path: lv_path_b });
-              break;
-            case z2ui5_if_ajson_types.node_type.object:
-              this.diff_b_a({ iv_path: lv_path_b });
-              break;
-            default:
-              this.mo_insert.set({ iv_path: lv_path_b, iv_val: node_b.value, iv_node_type: node_b.type });
-              break;
-          }
-        }
-      } else {
-        switch (node_a.type) {
-          case z2ui5_if_ajson_types.node_type.array:
-            this.mo_delete.touch_array(lv_path_a);
-            this.diff_a_b({ iv_path: lv_path_a });
-            break;
-          case z2ui5_if_ajson_types.node_type.object:
-            this.diff_a_b({ iv_path: lv_path_a });
-            break;
-          default:
-            this.mo_delete.set({ iv_path: lv_path_a, iv_val: node_a.value, iv_node_type: node_a.type });
-            break;
-        }
-      }
-    }
-  }
-
-  diff_b_a({ iv_path, iv_array = false } = {}) {
-    let sy_tabix = 0;
-    let lv_path = ``;
-    // TODO(abap2js): FIELD-SYMBOLS <node_b> LIKE LINE OF mo_json_b->mt_json_tree.
-    sy_tabix = 0;
-    for (const node_b of this.mo_json_b.mt_json_tree) {
-      sy_tabix++;
-      if (!(node_b.path === iv_path)) continue;
-      lv_path = node_b.path + node_b.name + `/`;
-      switch (node_b.type) {
-        case z2ui5_if_ajson_types.node_type.array:
-          this.mo_insert.touch_array(lv_path);
-          this.diff_b_a({ iv_path: lv_path, iv_array: true });
-          break;
-        case z2ui5_if_ajson_types.node_type.object:
-          this.diff_b_a({ iv_path: lv_path });
-          break;
-        default:
-          if (iv_array === false) {
-            // TODO(abap2js): READ TABLE mo_json_a->mt_json_tree TRANSPORTING NO FIELDS WITH TABLE KEY path = <node_b>-path name = <node_b>-name.
-            if (sy_subrc !== 0) {
-              this.mo_insert.set({ iv_path: lv_path, iv_val: node_b.value, iv_node_type: node_b.type });
-            }
-          } else {
-            // TODO(abap2js): READ TABLE mo_insert->mt_json_tree TRANSPORTING NO FIELDS WITH KEY path = <node_b>-path value = <node_b>-value.
-            if (sy_subrc !== 0) {
-              this.mo_insert.push({ iv_path, iv_val: node_b.value });
-            }
-          }
-          break;
-      }
-    }
-  }
-
-  is_equal({ iv_json_a, iv_json_b, ii_json_a, ii_json_b } = {}) {
-    let rv_yes = false;
-    let li_ins = null;
-    let li_del = null;
-    let li_mod = null;
-    // TODO(abap2js): diff( EXPORTING iv_json_a = iv_json_a iv_json_b = iv_json_b io_json_a = ii_json_a io_json_b = ii_json_b IMPORTING eo_insert = li_ins eo_delete = li_del eo_change = li_mod ).
-    rv_yes = Boolean(li_ins.is_empty() === true && li_del.is_empty() === true && li_mod.is_empty() === true);
-    return rv_yes;
-  }
-
-  static iterate_array({ ii_json, iv_path } = {}) {
-    let ri_iterator = null;
-    ri_iterator = null; // TODO(abap2js): CREATE OBJECT ri_iterator TYPE lcl_node_iterator EXPORTING iv_node_type = z2ui5_if_ajson_types=>node_type-array ii_json = ii_json iv_path = iv_path.
-    return ri_iterator;
-  }
-
-  static iterate_object({ ii_json, iv_path } = {}) {
-    let ri_iterator = null;
-    ri_iterator = null; // TODO(abap2js): CREATE OBJECT ri_iterator TYPE lcl_node_iterator EXPORTING iv_node_type = z2ui5_if_ajson_types=>node_type-object ii_json = ii_json iv_path = iv_path.
-    return ri_iterator;
-  }
-
-  merge({ iv_json_a, iv_json_b, io_json_a, io_json_b, iv_keep_empty_arrays = false } = {}) {
-    let ro_json = null;
-    this.mo_json_a = this.normalize_input({ iv_json: iv_json_a, io_json: io_json_a });
-    this.mo_json_b = this.normalize_input({ iv_json: iv_json_b, io_json: io_json_b });
-    this.mo_insert = this.mo_json_a;
-    this.diff_b_a({ iv_path: `/` });
-    ro_json = this.mo_insert;
-    this.delete_empty_nodes({ io_json: ro_json, iv_keep_empty_arrays });
-    return ro_json;
-  }
-
   static new() {
-    let ro_instance = null;
-    ro_instance = null; // TODO(abap2js): CREATE OBJECT ro_instance.
-    return ro_instance;
+    return new z2ui5_cl_ajson_utilities();
   }
 
   normalize_input({ iv_json, io_json } = {}) {
-    let ro_json = null;
-    if (Boolean(!iv_json) === Boolean(!io_json)) {
+    if (isInitial(iv_json) === isInitial(io_json)) {
       z2ui5_cx_ajson_error.raise(`Either supply JSON string or instance, but not both`);
     }
-    if (iv_json) {
-      ro_json = z2ui5_cl_ajson.parse(iv_json);
-    } else if (io_json) {
-      ro_json = io_json;
-    } else {
-      z2ui5_cx_ajson_error.raise(`Supply either JSON string or instance`);
+    if (!isInitial(iv_json)) {
+      return z2ui5_cl_ajson.parse(iv_json);
     }
-    return ro_json;
+    return io_json;
+  }
+
+  delete_empty_nodes({ io_json, iv_keep_empty_arrays } = {}) {
+    for (;;) {
+      let done = true;
+
+      if (!(iv_keep_empty_arrays === true || iv_keep_empty_arrays === "X")) {
+        const emptyArrays = io_json.mt_json_tree.filter((r) => r.type === NT.array && num(r.children) === 0);
+        for (const row of emptyArrays) {
+          io_json.delete(`${row.path}${row.name}`);
+        }
+        if (emptyArrays.length > 0) done = false;
+      }
+
+      const emptyObjects = io_json.mt_json_tree.filter((r) => r.type === NT.object && num(r.children) === 0);
+      for (const row of emptyObjects) {
+        io_json.delete(`${row.path}${row.name}`);
+      }
+      if (emptyObjects.length > 0) done = false;
+
+      if (done) break; // nothing else to delete
+    }
+  }
+
+  diff(args = {}) {
+    const { iv_json_a, iv_json_b, io_json_a, io_json_b, iv_keep_empty_arrays = false } = args;
+
+    this.mo_json_a = this.normalize_input({ iv_json: iv_json_a, io_json: io_json_a });
+    this.mo_json_b = this.normalize_input({ iv_json: iv_json_b, io_json: io_json_b });
+
+    this.mo_insert = z2ui5_cl_ajson.create_empty();
+    this.mo_delete = z2ui5_cl_ajson.create_empty();
+    this.mo_change = z2ui5_cl_ajson.create_empty();
+
+    this.diff_a_b(`/`);
+    this.diff_b_a({ iv_path: `/` });
+
+    this.delete_empty_nodes({ io_json: this.mo_insert, iv_keep_empty_arrays });
+    this.delete_empty_nodes({ io_json: this.mo_delete, iv_keep_empty_arrays });
+    this.delete_empty_nodes({ io_json: this.mo_change, iv_keep_empty_arrays });
+
+    // EXPORTING eo_* — write back onto the args object
+    if (args !== null && typeof args === "object") {
+      args.eo_insert = this.mo_insert;
+      args.eo_delete = this.mo_delete;
+      args.eo_change = this.mo_change;
+    }
+    return { eo_insert: this.mo_insert, eo_delete: this.mo_delete, eo_change: this.mo_change };
+  }
+
+  diff_a_b(arg) {
+    const iv_path = typeof arg === "string" ? arg : arg.iv_path;
+
+    for (const nodeA of rowsOfPath(this.mo_json_a.mt_json_tree, iv_path, byPrimaryKey)) {
+      const pathA = `${nodeA.path}${nodeA.name}/`;
+      const nodeB = this.mo_json_b.mt_json_tree.find(
+        (r) => String(r.path ?? "") === String(nodeA.path ?? "") && String(r.name ?? "") === String(nodeA.name ?? "")
+      );
+
+      if (nodeB) {
+        const pathB = `${nodeB.path}${nodeB.name}/`;
+        if (nodeA.type === nodeB.type) {
+          switch (nodeA.type) {
+            case NT.array:
+              this.mo_insert.touch_array(pathA);
+              this.mo_change.touch_array(pathA);
+              this.mo_delete.touch_array(pathA);
+              this.diff_a_b(pathA);
+              break;
+            case NT.object:
+              this.diff_a_b(pathA);
+              break;
+            default:
+              if (String(nodeA.value ?? "") !== String(nodeB.value ?? "")) {
+                // save as changed value
+                this.mo_change.set({ iv_path: pathB, iv_val: nodeB.value, iv_node_type: nodeB.type });
+              }
+          }
+        } else {
+          // save changed type as delete + insert
+          switch (nodeA.type) {
+            case NT.array:
+              this.mo_delete.touch_array(pathA);
+              this.diff_a_b(pathA);
+              break;
+            case NT.object:
+              this.diff_a_b(pathA);
+              break;
+            default:
+              this.mo_delete.set({ iv_path: pathA, iv_val: nodeA.value, iv_node_type: nodeA.type });
+          }
+          switch (nodeB.type) {
+            case NT.array:
+              this.mo_insert.touch_array(pathB);
+              this.diff_b_a({ iv_path: pathB });
+              break;
+            case NT.object:
+              this.diff_b_a({ iv_path: pathB });
+              break;
+            default:
+              this.mo_insert.set({ iv_path: pathB, iv_val: nodeB.value, iv_node_type: nodeB.type });
+          }
+        }
+      } else {
+        // save as delete
+        switch (nodeA.type) {
+          case NT.array:
+            this.mo_delete.touch_array(pathA);
+            this.diff_a_b(pathA);
+            break;
+          case NT.object:
+            this.diff_a_b(pathA);
+            break;
+          default:
+            this.mo_delete.set({ iv_path: pathA, iv_val: nodeA.value, iv_node_type: nodeA.type });
+        }
+      }
+    }
+  }
+
+  diff_b_a(arg) {
+    const bag = typeof arg === "string" ? { iv_path: arg } : arg || {};
+    const { iv_path, iv_array = false } = bag;
+    const isArray = iv_array === true || iv_array === "X";
+
+    for (const nodeB of rowsOfPath(this.mo_json_b.mt_json_tree, iv_path, byPrimaryKey)) {
+      const path = `${nodeB.path}${nodeB.name}/`;
+      switch (nodeB.type) {
+        case NT.array:
+          this.mo_insert.touch_array(path);
+          this.diff_b_a({ iv_path: path, iv_array: true });
+          break;
+        case NT.object:
+          this.diff_b_a({ iv_path: path });
+          break;
+        default:
+          if (!isArray) {
+            const inA = this.mo_json_a.mt_json_tree.some(
+              (r) =>
+                String(r.path ?? "") === String(nodeB.path ?? "") && String(r.name ?? "") === String(nodeB.name ?? "")
+            );
+            if (!inA) {
+              // save as insert
+              this.mo_insert.set({ iv_path: path, iv_val: nodeB.value, iv_node_type: nodeB.type });
+            }
+          } else {
+            const inserted = this.mo_insert.mt_json_tree.some(
+              (r) =>
+                String(r.path ?? "") === String(nodeB.path ?? "") && String(r.value ?? "") === String(nodeB.value ?? "")
+            );
+            if (!inserted) {
+              // save as new array value
+              this.mo_insert.push({ iv_path, iv_val: nodeB.value });
+            }
+          }
+      }
+    }
+  }
+
+  merge({ iv_json_a, iv_json_b, io_json_a, io_json_b, iv_keep_empty_arrays = false } = {}) {
+    this.mo_json_a = this.normalize_input({ iv_json: iv_json_a, io_json: io_json_a });
+    this.mo_json_b = this.normalize_input({ iv_json: iv_json_b, io_json: io_json_b });
+
+    // start with first JSON and add all nodes from second JSON
+    this.mo_insert = this.mo_json_a;
+    this.diff_b_a({ iv_path: `/` });
+
+    const result = this.mo_insert;
+    this.delete_empty_nodes({ io_json: result, iv_keep_empty_arrays });
+    return result;
   }
 
   sort({ iv_json, io_json } = {}) {
-    let rv_sorted = ``;
-    let lo_json = null;
-    lo_json = this.normalize_input({ iv_json, io_json });
-    rv_sorted = lo_json.stringify(2);
-    return rv_sorted;
+    const json = this.normalize_input({ iv_json, io_json });
+    // nodes are kept in primary-key order by the serializer — no explicit sorting required
+    return json.stringify({ iv_indent: 2 });
+  }
+
+  is_equal({ iv_json_a, iv_json_b, ii_json_a, ii_json_b } = {}) {
+    const { eo_insert, eo_delete, eo_change } = this.diff({
+      iv_json_a,
+      iv_json_b,
+      io_json_a: ii_json_a,
+      io_json_b: ii_json_b,
+    });
+    return eo_insert.is_empty() === true && eo_delete.is_empty() === true && eo_change.is_empty() === true;
+  }
+
+  static iterate_array({ ii_json, iv_path } = {}) {
+    return new lcl_node_iterator({ iv_node_type: NT.array, ii_json, iv_path });
+  }
+
+  static iterate_object({ ii_json, iv_path } = {}) {
+    return new lcl_node_iterator({ iv_node_type: NT.object, ii_json, iv_path });
   }
 }
+
+z2ui5_cl_ajson_utilities.__locals = { lcl_node_iterator };
 
 module.exports = z2ui5_cl_ajson_utilities;

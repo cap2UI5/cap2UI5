@@ -1,5 +1,3 @@
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_295 extends z2ui5_if_app {
@@ -37,7 +35,7 @@ class z2ui5_cl_demo_app_295 extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init()) {
       this.view_display({ client: client });
       this.set_data();
@@ -47,8 +45,12 @@ class z2ui5_cl_demo_app_295 extends z2ui5_if_app {
 
   set_data() {
     const text = `DateRangeSelection with valueState `;
-    this.t_data = [{ label: `${text}None`, value_state: `None` }, { label: `${text}Information`, value_state: `Information` }, { label: `${text}Success`, value_state: `Success` }, { label: `${text}Warning and long valueStateText`, value_state: `Warning`, value_state_text: `Warning message. This is an extra long text used as a warning message. ` + `It illustrates how the text wraps into two or more lines without truncation to show the full length of the message.` }, { label: `${text}Error`, value_state: `Error` }];
+    this.t_data = z2ui5_cl_util.abap_tab_assign(this.t_data, [{ label: `${text}None`, value_state: `None` }, { label: `${text}Information`, value_state: `Information` }, { label: `${text}Success`, value_state: `Success` }, { label: `${text}Warning and long valueStateText`, value_state: `Warning`, value_state_text: `Warning message. This is an extra long text used as a warning message. ` + `It illustrates how the text wraps into two or more lines without truncation to show the full length of the message.` }, { label: `${text}Error`, value_state: `Error` }]);
   }
 }
 
 module.exports = z2ui5_cl_demo_app_295;
+
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+

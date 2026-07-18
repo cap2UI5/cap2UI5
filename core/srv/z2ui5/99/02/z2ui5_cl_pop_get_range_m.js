@@ -1,18 +1,14 @@
-const z2ui5_cl_a2ui5_context = require("abap2UI5/z2ui5_cl_a2ui5_context");
-const z2ui5_cl_pop_get_range = require("abap2UI5/z2ui5_cl_pop_get_range");
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_pop_get_range_m extends z2ui5_if_app {
-  ms_result = {};
+  ms_result = { t_filter: [], check_confirmed: false };
   client = null;
   mv_popup_name = ``;
 
   static factory({ val } = {}) {
     let r_result = null;
     r_result = new z2ui5_cl_pop_get_range_m();
-    r_result.ms_result.t_filter = z2ui5_cl_util.abap_copy(val);
+    r_result.ms_result.t_filter = z2ui5_cl_util.abap_tab_assign(r_result.ms_result.t_filter, z2ui5_cl_util.abap_copy(val));
     return r_result;
   }
 
@@ -42,7 +38,7 @@ class z2ui5_cl_pop_get_range_m extends z2ui5_if_app {
 
   result() {
     let result = {};
-    result = z2ui5_cl_util.abap_copy(this.ms_result);
+    result = z2ui5_cl_util.abap_tab_assign(result, z2ui5_cl_util.abap_copy(this.ms_result));
     return result;
   }
 
@@ -53,7 +49,7 @@ class z2ui5_cl_pop_get_range_m extends z2ui5_if_app {
     let _fs$fs_tab = null;
     let lo_popup;
     let ls_popup_result;
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init()) {
       this.init();
       return;
@@ -66,7 +62,7 @@ class z2ui5_cl_pop_get_range_m extends z2ui5_if_app {
         fs_tab = this.ms_result.t_filter.find((row) => row.name === this.mv_popup_name);
         _fs$fs_tab = null;
         sy_subrc = 0;
-        fs_tab.t_range = z2ui5_cl_util.abap_copy(ls_popup_result.t_range);
+        fs_tab.t_range = z2ui5_cl_util.abap_tab_assign(fs_tab.t_range, z2ui5_cl_util.abap_copy(ls_popup_result.t_range));
         fs_tab.t_token = z2ui5_cl_a2ui5_context.filter_get_token_t_by_range_t(fs_tab.t_range);
       }
       this.popup_display();
@@ -106,9 +102,15 @@ class z2ui5_cl_pop_get_range_m extends z2ui5_if_app {
   }
 }
 
+module.exports = z2ui5_cl_pop_get_range_m;
+
+const z2ui5_cl_a2ui5_context = require("abap2UI5/z2ui5_cl_a2ui5_context");
+const z2ui5_cl_pop_get_range = require("abap2UI5/z2ui5_cl_pop_get_range");
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+
 // abap PREFERRED PARAMETER call style — see z2ui5_pop_preferred_param.js
 require("./z2ui5_pop_preferred_param")(z2ui5_cl_pop_get_range_m, {
   factory: { preferred: `val`, params: [`val`] },
 });
 
-module.exports = z2ui5_cl_pop_get_range_m;

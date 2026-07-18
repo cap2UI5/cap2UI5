@@ -28,10 +28,14 @@ class z2ui5_cl_core_handler {
    */
   constructor(val) {
     const Action = require("./z2ui5_cl_core_action");
+    const types = require("./z2ui5_if_core_types");
+    // named-args form ({ val }) from transpiled callers
+    if (val !== null && typeof val === `object` && `val` in val && Object.keys(val).length === 1) val = val.val;
     this.mv_request_json = typeof val === `string` ? val : JSON.stringify(val ?? {});
-    this.ms_request  = {};
-    this.ms_response = {};
+    this.ms_request  = types.ty_s_request();
+    this.ms_response = types.ty_s_response();
     this.mv_response = ``;
+    this.mv_dispatch_limit = 1000;
     this.mo_action   = new Action(this);
   }
 
@@ -53,10 +57,10 @@ class z2ui5_cl_core_handler {
       this.mv_request_json = typeof val === `string` ? val : JSON.stringify(val);
     }
 
-    await this.main_begin();
+    await this.main_begin_js();
     /* eslint-disable no-await-in-loop */
     while (true) {
-      const done = await this.main_process();
+      const done = await this.main_process_js();
       if (done) break;
     }
     /* eslint-enable no-await-in-loop */
@@ -78,10 +82,10 @@ class z2ui5_cl_core_handler {
   //  Phase 1 — main_begin
   // ============================================================
 
-  async main_begin() {
+  async main_begin_js() {
     const Action = require("./z2ui5_cl_core_action");
 
-    this.ms_request = await this.request_json_to_abap(this.mv_request_json);
+    this.ms_request = await this.request_json_to_abap_js(this.mv_request_json);
 
     if (this.ms_request?.S_FRONT?.ID) {
       this.mo_action = await Action.factory_by_frontend(this);
@@ -97,7 +101,7 @@ class z2ui5_cl_core_handler {
   //  Phase 2 — main_process — returns true when nav-loop is done
   // ============================================================
 
-  async main_process() {
+  async main_process_js() {
     const Client = require("./z2ui5_cl_core_client");
     const Action = require("./z2ui5_cl_core_action");
 
@@ -181,7 +185,7 @@ class z2ui5_cl_core_handler {
       return false;   // continue loop
     }
 
-    await this.main_end(oClient);
+    await this.main_end_js(oClient);
     return true;        // done
   }
 
@@ -189,7 +193,7 @@ class z2ui5_cl_core_handler {
   //  Phase 3 — main_end
   // ============================================================
 
-  async main_end(oClient) {
+  async main_end_js(oClient) {
     const previousId  = this.ms_request?.S_FRONT?.ID || null;
 
     // Persist the binding metadata (name/type/mappers — not the value
@@ -235,7 +239,7 @@ class z2ui5_cl_core_handler {
       this.ms_response.S_FRONT.PARAMS.S_POPUP.CHECK_UPDATE_MODEL = false;
     }
 
-    this.mv_response = await this.response_abap_to_json(this.ms_response);
+    this.mv_response = await this.response_abap_to_json_js(this.ms_response);
   }
 
   // ============================================================
@@ -245,7 +249,7 @@ class z2ui5_cl_core_handler {
   /**
    * @returns {{S_FRONT, MODEL, S_CONTROL, _raw_oReq}}
    */
-  async request_json_to_abap(val) {
+  async request_json_to_abap_js(val) {
     try {
       const result = this.request_parse_body(val);
       if (result?.S_FRONT?.ID) return result;
@@ -343,7 +347,7 @@ class z2ui5_cl_core_handler {
    * In JS our keys are already UPPER-case, so we only need to drop empty
    * values to match the abap output shape.
    */
-  async response_abap_to_json(val) {
+  async response_abap_to_json_js(val) {
     try {
       const filtered = z2ui5_cl_core_handler._filter_empty(val.S_FRONT);
       const model    = val.MODEL && val.MODEL !== `null` ? val.MODEL : `{}`;
@@ -392,8 +396,16 @@ class z2ui5_cl_core_handler {
   /**
    * Was any view/popup/popover updated this roundtrip? Same condition the
    * abap version uses to decide whether to emit MODEL or just `{}`.
+   * Handles both the ABAP-shaped (lowercase) and JS wire (UPPERCASE) response.
    */
   check_view_update_needed() {
+    const lower = this.ms_response?.s_front?.params;
+    if (lower) {
+      for (const slot of [`s_view`, `s_view_nest`, `s_view_nest2`, `s_popup`, `s_popover`]) {
+        const v = lower[slot];
+        if (v && (v.check_update_model === true || v.xml)) return true;
+      }
+    }
     const p = this.ms_response?.S_FRONT?.PARAMS;
     if (!p) return false;
     const slots = [`S_VIEW`, `S_VIEW_NEST`, `S_VIEW_NEST2`, `S_POPUP`, `S_POPOVER`];
@@ -403,6 +415,259 @@ class z2ui5_cl_core_handler {
       if (v.CHECK_UPDATE_MODEL || v.XML) return true;
     }
     return false;
+  }
+
+  // ============================================================
+  //  ABAP-parity pipeline (synchronous, 1:1 with the ABAP class).
+  //  The async JS wire pipeline above (main → main_begin_js/main_process_js/
+  //  main_end_js) serves the platform adapters; the methods below carry the
+  //  exact ABAP names/semantics for transpiled callers and the unit tests.
+  // ============================================================
+
+  /** abap request_json_to_abap — parse the request body into ty_s_request. */
+  request_json_to_abap(val) {
+    if (val !== null && typeof val === `object` && `val` in val) ({ val } = val);
+    const types = require("./z2ui5_if_core_types");
+    const Model = require("./z2ui5_cl_core_srv_model");
+    try {
+      const z2ui5_cl_ajson = require("../../00/01/z2ui5_cl_ajson");
+      const result = types.ty_s_request();
+
+      let lo_ajson = z2ui5_cl_ajson.parse(val);
+      const lv_root = lo_ajson.exists(`/value`) === true ? `/value` : ``;
+
+      // /XX model slice → o_model (an ajson holding /XX/…)
+      const xxPath = `/XX`;
+      const lo_model = lo_ajson.slice(`${lv_root}${xxPath}`);
+      const modelArgs = { ev_container: null };
+      const xxVal = lo_model.mt_json_tree.length ? lo_model.to_abap(modelArgs) : null;
+      result.o_model = z2ui5_cl_ajson.parse(JSON.stringify(xxVal !== null ? { XX: xxVal } : {}));
+
+      lo_ajson = lo_ajson.slice(`${lv_root}/S_FRONT`);
+
+      // event args — objects/arrays are re-serialized (string table target)
+      const parsedArgs = this._request_parse_event_args(lo_ajson);
+
+      const args = { iv_corresponding: true, ev_container: result.s_front };
+      lo_ajson.to_abap(args);
+      result.s_front = args.ev_container;
+      if (parsedArgs.override) result.s_front.t_event_arg = parsedArgs.t_event_arg;
+      if (!Array.isArray(result.s_front.t_event_arg)) result.s_front.t_event_arg = [];
+
+      // CONFIG subtree
+      const lo_config = lo_ajson.slice(`/CONFIG`);
+      if (lo_config.mt_json_tree.length) {
+        const lo_comp = lo_config.slice(`/ComponentData`);
+        result.s_front.o_comp_data = lo_comp.mt_json_tree.length ? lo_comp : null;
+
+        const lo_device = lo_config.slice(`/S_DEVICE`);
+        if (lo_device.mt_json_tree.length) {
+          const a = { iv_corresponding: true, ev_container: result.s_front.s_device };
+          lo_device.to_abap(a);
+          result.s_front.s_device = a.ev_container;
+        }
+        const lo_focus = lo_config.slice(`/S_FOCUS`);
+        if (lo_focus.mt_json_tree.length) {
+          const a = { iv_corresponding: true, ev_container: result.s_front.s_focus };
+          lo_focus.to_abap(a);
+          result.s_front.s_focus = a.ev_container;
+        }
+        const lo_scroll = lo_config.slice(`/S_SCROLL`);
+        if (lo_scroll.mt_json_tree.length) {
+          const a = { iv_corresponding: true, ev_container: result.s_front.s_scroll };
+          lo_scroll.to_abap(a);
+          result.s_front.s_scroll = a.ev_container;
+        }
+        result.s_front.s_ui5.version         = lo_config.get_string(`/S_UI5/VERSION`);
+        result.s_front.s_ui5.build_timestamp = lo_config.get_string(`/S_UI5/BUILDTIMESTAMP`);
+        result.s_front.s_ui5.gav             = lo_config.get_string(`/S_UI5/GAV`);
+        result.s_front.s_ui5.theme           = lo_config.get_string(`/S_UI5/THEME`);
+      }
+
+      result.s_control.check_launchpad =
+        String(result.s_front.search).includes(`scenario=LAUNCHPAD`)
+        || String(result.s_front.pathname).includes(`/ui2/flp`)
+        || String(result.s_front.pathname).includes(`test/flpSandbox`);
+
+      if (result.s_front.id) return result;
+
+      result.s_control.app_start = this._request_app_start(result.s_front.search, result.s_front.o_comp_data);
+      result.s_control.app_start_draft = this._request_app_start_draft(result.s_front.hash);
+      return result;
+    } catch (x) {
+      throw Model._cx(x?.get_text?.() ?? x?.message ?? String(x));
+    }
+  }
+
+  /** abap request_parse_event_args — non-scalar args become JSON strings. */
+  _request_parse_event_args(io_front) {
+    const out = { override: false, t_event_arg: [] };
+    let idx = 1;
+    for (;;) {
+      const p = `/T_EVENT_ARG/${idx}`;
+      const nt = io_front.get_node_type(p);
+      if (nt === ``) break;
+      if (nt === `object` || nt === `array`) {
+        out.override = true;
+        out.t_event_arg.push(io_front.slice(p).stringify());
+      } else if (nt === `bool`) {
+        // same result as the to_abap conversion of a boolean node
+        out.t_event_arg.push(io_front.get_boolean(p) === true ? `X` : ``);
+      } else {
+        out.t_event_arg.push(io_front.get_string(p));
+      }
+      idx += 1;
+    }
+    if (out.override) {
+      try { io_front.delete({ iv_path: `/T_EVENT_ARG` }); } catch { /* keep */ }
+    }
+    return out;
+  }
+
+  /** abap request_app_start — FLP startupParameters first, then ?app_start=. */
+  _request_app_start(iv_search, io_comp_data) {
+    let result = ``;
+    try {
+      if (io_comp_data) {
+        result = String(io_comp_data.get(`/startupParameters/app_start/1`) ?? ``).trim().toUpperCase();
+      }
+    } catch { /* fall through */ }
+    if (result) {
+      if (result[0] === `-`) result = result.replace(`-`, `/`).replace(`-`, `/`);
+      return result;
+    }
+    return this._url_param(`app_start`, iv_search).trim().toUpperCase();
+  }
+
+  /** abap request_app_start_draft — z2ui5-xapp-state from the FLP hash. */
+  _request_app_start_draft(iv_hash) {
+    try {
+      const hash = String(iv_hash ?? ``);
+      let lv_hash = hash.includes(`&/`) ? hash.split(`&/`).slice(1).join(`&/`) : hash.slice(2);
+      return this._url_param(`z2ui5-xapp-state`, lv_hash).trim().toUpperCase();
+    } catch {
+      return ``;
+    }
+  }
+
+  _url_param(name, url) {
+    const q = String(url ?? ``).replace(/^[^?]*\?/, ``).replace(/^\?/, ``);
+    for (const pair of q.split(`&`)) {
+      const [n, v = ``] = pair.split(`=`);
+      if (String(n).toLowerCase() === name.toLowerCase()) return decodeURIComponent(v);
+    }
+    return ``;
+  }
+
+  /** abap response_abap_to_json — UPPERCASE S_FRONT minus empty values. */
+  response_abap_to_json(val) {
+    if (val !== null && typeof val === `object` && `val` in val && !(`s_front` in val)) ({ val } = val);
+    const Model = require("./z2ui5_cl_core_srv_model");
+    const dropEmpty = (v) => {
+      if (Array.isArray(v)) {
+        const arr = v.map(dropEmpty).filter((x) => x !== undefined);
+        return arr.length ? arr : undefined;
+      }
+      if (v !== null && typeof v === `object`) {
+        const out = {};
+        for (const k of Object.keys(v)) {
+          const d = dropEmpty(v[k]);
+          if (d !== undefined) out[k] = d;
+        }
+        return Object.keys(out).length ? out : undefined;
+      }
+      if (v === `` || v === null || v === undefined || v === false || v === 0) return undefined;
+      return v;
+    };
+    const front = dropEmpty(Model._deep_upper(val.s_front)) ?? {};
+    const lv_model = val.model ? val.model : `{}`;
+    return `{"S_FRONT":${JSON.stringify(front)},"MODEL":${lv_model}}`;
+  }
+
+  /** abap main_begin — parse the request, pick the action factory. */
+  main_begin() {
+    this.ms_request = this.request_json_to_abap(this.mv_request_json);
+
+    if (this.ms_request.s_front.id) {
+      this.mo_action = this.mo_action.factory_by_frontend();
+    } else if (this.ms_request.s_control.app_start) {
+      const DraftCls = require(`../01/z2ui5_cl_core_srv_draft`);
+      new DraftCls().cleanup();
+      this.mo_action = this.mo_action.factory_first_start();
+    } else {
+      this.mo_action = this.mo_action.factory_system_startup();
+    }
+  }
+
+  /** abap main_loop — dispatch until done, guard against nav loops. */
+  main_loop() {
+    const Model = require("./z2ui5_cl_core_srv_model");
+    let lv_dispatch_count = 0;
+    for (;;) {
+      if (this.main_process() === true) return;
+      lv_dispatch_count += 1;
+      if (lv_dispatch_count >= this.mv_dispatch_limit) {
+        throw Model._cx(
+          `Dispatch limit of ${this.mv_dispatch_limit} app navigations in one request reached - check for an endless nav_app_call/nav_app_leave loop in main( )`
+        );
+      }
+    }
+  }
+
+  /**
+   * abap main_process — run the app once (or execute the queued back-nav),
+   * then either switch the action (nav) or finish the response.
+   * NOTE: a JS app's async main() body runs synchronously up to its first
+   * await — nav flags set before that point drive the loop, matching ABAP.
+   */
+  main_process() {
+    const types = require("./z2ui5_if_core_types");
+    const Client = require("./z2ui5_cl_core_client");
+    const li_client = new Client({ action: this.mo_action });
+    const li_app = this.mo_action.mo_app.mo_app;
+
+    if (this.mo_action.ms_actual.event === types.cs_event_nav_app_leave) {
+      li_client.popup_destroy();
+      li_client.nav_app_leave();
+    } else {
+      li_app.main(li_client);
+    }
+
+    if (this.mo_action.ms_next.o_app_leave) {
+      this.mo_action = this.mo_action.factory_stack_leave();
+      return false;
+    }
+    if (this.mo_action.ms_next.o_app_call) {
+      this.mo_action = this.mo_action.factory_stack_call();
+      return false;
+    }
+    this.main_end_abap();
+    return true;
+  }
+
+  /** abap main_end — build ms_response + serialize + persist the draft. */
+  main_end_abap() {
+    const types = require("./z2ui5_if_core_types");
+    this.ms_response = types.ty_s_response();
+    this.ms_response.s_front.params = this.mo_action.ms_next.s_set;
+    this.ms_response.s_front.id     = this.mo_action.mo_app.ms_draft.id;
+    this.ms_response.s_front.app    = String(this.mo_action.mo_app.mo_app?.constructor?.name ?? ``).toUpperCase();
+
+    this.ms_response.model = this.check_view_update_needed()
+      ? this.mo_action.mo_app.model_json_stringify()
+      : `{}`;
+
+    if (this.ms_response.s_front.params.s_popup.xml) {
+      this.ms_response.s_front.params.s_popup.check_update_model = false;
+    }
+
+    this.mv_response = this.response_abap_to_json(this.ms_response);
+
+    this.mo_action.ms_next = types.ty_s_next();
+
+    if (this.mo_action.mo_app.mo_app?.check_sticky !== true) {
+      this.mo_action.mo_app.db_save();
+    }
   }
 }
 

@@ -424,6 +424,17 @@ class z2ui5_cl_util {
   }
 
   /**
+   * ABAP `?=` downcast onto an object reference — scalars can never satisfy
+   * a REF TO target, ABAP raises cx_sy_move_cast_error (the transpiler emits
+   * this guard only for targets declared as object references).
+   */
+  static abap_cast(val) {
+    if (val === null || val === undefined) return null;
+    if (typeof val === `object` || typeof val === `function`) return val;
+    z2ui5_cl_util.x_raise(`CX_SY_MOVE_CAST_ERROR - scalar value cannot be cast to an object reference`);
+  }
+
+  /**
    * ABAP value semantics for assignments — `a = b` copies tables and
    * structures, it never aliases them (JS assignment shares the reference,
    * so a later DELETE on the copy would mutate the original too). Arrays
@@ -441,6 +452,41 @@ class z2ui5_cl_util {
       }
     }
     return val;
+  }
+
+  /**
+   * ABAP table assignment mutates the target table IN PLACE (data
+   * references onto it stay valid). Used by the transpiler for
+   * `itab = VALUE #( … )` / table-to-table moves.
+   */
+  static abap_tab_assign(target, val) {
+    if (Array.isArray(target) && Array.isArray(val) && target !== val) {
+      target.length = 0;
+      target.push(...val);
+      return target;
+    }
+    return val;
+  }
+
+  /**
+   * CREATE DATA … LIKE <val> — the INITIAL value of <val>'s shape: tables
+   * become empty, structures keep their keys with each component reset to
+   * its type's initial value. Scalars reset per JS type; references → null.
+   */
+  static abap_initial_like(val) {
+    if (Array.isArray(val)) return [];
+    if (typeof val === `string`) return ``;
+    if (typeof val === `number`) return 0;
+    if (typeof val === `boolean`) return false;
+    if (val !== null && typeof val === `object`) {
+      const proto = Object.getPrototypeOf(val);
+      if (proto === Object.prototype || proto === null) {
+        const out = {};
+        for (const k of Object.keys(val)) out[k] = z2ui5_cl_util.abap_initial_like(val[k]);
+        return out;
+      }
+    }
+    return null;
   }
 
   /**

@@ -1,5 +1,3 @@
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_294 extends z2ui5_if_app {
@@ -38,7 +36,7 @@ class z2ui5_cl_demo_app_294 extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init()) {
       this.view_display({ client: client });
       this.set_data();
@@ -50,12 +48,16 @@ class z2ui5_cl_demo_app_294 extends z2ui5_if_app {
     this.s_text = {};
     this.lt_a_data = {};
     this.s_text = `DatePicker with valueState `;
-    this.lt_a_data.push({ label: this.s_text + `None`, value_state: `None` });
-    this.lt_a_data.push({ label: this.s_text + `Information`, value_state: `Information` });
-    this.lt_a_data.push({ label: this.s_text + `Success`, value_state: `Success` });
-    this.lt_a_data.push({ label: this.s_text + `Warning and long valueStateText`, value_state: `Warning`, value_state_text: `Warning message. This is an extra long text used as a warning message. ` + `It illustrates how the text wraps into two or more lines without truncation to show the full length of the message.` });
-    this.lt_a_data.push({ label: this.s_text + `Error`, value_state: `Error` });
+    this.lt_a_data.push(z2ui5_cl_util.abap_copy({ label: this.s_text + `None`, value_state: `None`, value_state_text: `` }));
+    this.lt_a_data.push(z2ui5_cl_util.abap_copy({ label: this.s_text + `Information`, value_state: `Information`, value_state_text: `` }));
+    this.lt_a_data.push(z2ui5_cl_util.abap_copy({ label: this.s_text + `Success`, value_state: `Success`, value_state_text: `` }));
+    this.lt_a_data.push(z2ui5_cl_util.abap_copy({ label: this.s_text + `Warning and long valueStateText`, value_state: `Warning`, value_state_text: `Warning message. This is an extra long text used as a warning message. ` + `It illustrates how the text wraps into two or more lines without truncation to show the full length of the message.` }));
+    this.lt_a_data.push(z2ui5_cl_util.abap_copy({ label: this.s_text + `Error`, value_state: `Error`, value_state_text: `` }));
   }
 }
 
 module.exports = z2ui5_cl_demo_app_294;
+
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+

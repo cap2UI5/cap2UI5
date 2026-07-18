@@ -1,7 +1,4 @@
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
-const z2ui5_if_types = require("abap2UI5/z2ui5_if_types");
 
 class z2ui5_cl_demo_app_122 extends z2ui5_if_app {
   ui5_version = ``;
@@ -27,25 +24,25 @@ class z2ui5_cl_demo_app_122 extends z2ui5_if_app {
 
   read_frontend_info() {
     const ls_get = this.client.get();
-    this.device_browser = z2ui5_cl_util.abap_copy(ls_get.S_DEVICE.BROWSER.NAME);
-    this.device_browser_version = z2ui5_cl_util.abap_copy(ls_get.S_DEVICE.BROWSER.VERSION);
-    this.device_os = z2ui5_cl_util.abap_copy(ls_get.S_DEVICE.OS.NAME);
-    this.device_os_version = z2ui5_cl_util.abap_copy(ls_get.S_DEVICE.OS.VERSION);
-    this.device_systemtype = z2ui5_cl_util.abap_copy(ls_get.S_DEVICE.SYSTEM);
-    this.device_orientation = z2ui5_cl_util.abap_copy(ls_get.S_DEVICE.ORIENTATION);
+    this.device_browser = z2ui5_cl_util.abap_tab_assign(this.device_browser, z2ui5_cl_util.abap_copy(ls_get.S_DEVICE.BROWSER.NAME));
+    this.device_browser_version = z2ui5_cl_util.abap_tab_assign(this.device_browser_version, z2ui5_cl_util.abap_copy(ls_get.S_DEVICE.BROWSER.VERSION));
+    this.device_os = z2ui5_cl_util.abap_tab_assign(this.device_os, z2ui5_cl_util.abap_copy(ls_get.S_DEVICE.OS.NAME));
+    this.device_os_version = z2ui5_cl_util.abap_tab_assign(this.device_os_version, z2ui5_cl_util.abap_copy(ls_get.S_DEVICE.OS.VERSION));
+    this.device_systemtype = z2ui5_cl_util.abap_tab_assign(this.device_systemtype, z2ui5_cl_util.abap_copy(ls_get.S_DEVICE.SYSTEM));
+    this.device_orientation = z2ui5_cl_util.abap_tab_assign(this.device_orientation, z2ui5_cl_util.abap_copy(ls_get.S_DEVICE.ORIENTATION));
     this.device_height = (ls_get.S_DEVICE.RESIZE.HEIGHT);
     this.device_width = (ls_get.S_DEVICE.RESIZE.WIDTH);
     this.device_phone = (ls_get.S_DEVICE.SYSTEM === z2ui5_if_types.cs_device.system.phone);
     this.device_desktop = (ls_get.S_DEVICE.SYSTEM === z2ui5_if_types.cs_device.system.desktop);
     this.device_tablet = (ls_get.S_DEVICE.SYSTEM === z2ui5_if_types.cs_device.system.tablet);
     this.device_combi = (ls_get.S_DEVICE.SYSTEM === z2ui5_if_types.cs_device.system.combi);
-    this.device_touch = z2ui5_cl_util.abap_copy(ls_get.S_DEVICE.SUPPORT.TOUCH);
-    this.device_pointer = z2ui5_cl_util.abap_copy(ls_get.S_DEVICE.SUPPORT.POINTER);
-    this.device_retina = z2ui5_cl_util.abap_copy(ls_get.S_DEVICE.SUPPORT.RETINA);
-    this.ui5_version = z2ui5_cl_util.abap_copy(ls_get.S_UI5.VERSION);
-    this.ui5_theme = z2ui5_cl_util.abap_copy(ls_get.S_UI5.THEME);
-    this.ui5_gav = z2ui5_cl_util.abap_copy(ls_get.S_UI5.GAV);
-    this.ui5_build_timestamp = z2ui5_cl_util.abap_copy(ls_get.S_UI5.BUILD_TIMESTAMP);
+    this.device_touch = z2ui5_cl_util.abap_tab_assign(this.device_touch, z2ui5_cl_util.abap_copy(ls_get.S_DEVICE.SUPPORT.TOUCH));
+    this.device_pointer = z2ui5_cl_util.abap_tab_assign(this.device_pointer, z2ui5_cl_util.abap_copy(ls_get.S_DEVICE.SUPPORT.POINTER));
+    this.device_retina = z2ui5_cl_util.abap_tab_assign(this.device_retina, z2ui5_cl_util.abap_copy(ls_get.S_DEVICE.SUPPORT.RETINA));
+    this.ui5_version = z2ui5_cl_util.abap_tab_assign(this.ui5_version, z2ui5_cl_util.abap_copy(ls_get.S_UI5.VERSION));
+    this.ui5_theme = z2ui5_cl_util.abap_tab_assign(this.ui5_theme, z2ui5_cl_util.abap_copy(ls_get.S_UI5.THEME));
+    this.ui5_gav = z2ui5_cl_util.abap_tab_assign(this.ui5_gav, z2ui5_cl_util.abap_copy(ls_get.S_UI5.GAV));
+    this.ui5_build_timestamp = z2ui5_cl_util.abap_tab_assign(this.ui5_build_timestamp, z2ui5_cl_util.abap_copy(ls_get.S_UI5.BUILD_TIMESTAMP));
   }
 
   view_display() {
@@ -96,7 +93,7 @@ class z2ui5_cl_demo_app_122 extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init()) {
       this.read_frontend_info();
       this.view_display();
@@ -105,3 +102,8 @@ class z2ui5_cl_demo_app_122 extends z2ui5_if_app {
 }
 
 module.exports = z2ui5_cl_demo_app_122;
+
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_types = require("abap2UI5/z2ui5_if_types");
+

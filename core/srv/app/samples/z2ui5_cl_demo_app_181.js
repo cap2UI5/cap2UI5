@@ -1,11 +1,9 @@
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_181 extends z2ui5_if_app {
   mv_url = ``;
-  mt_cities = null;
-  mt_products = null;
+  mt_cities = [];
+  mt_products = [];
   client = null;
 
   on_event() {
@@ -20,8 +18,8 @@ class z2ui5_cl_demo_app_181 extends z2ui5_if_app {
       .page({ title: `Cards Demo`, class: `sapUiContentPadding`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
     page.header_content()
       .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.f.Card/sample/sap.f.sample.Card` });
-    this.mt_cities = [{ text: `Berlin`, key: `BR` }, { text: `London`, key: `LN` }, { text: `Madrid`, key: `MD` }, { text: `Prague`, key: `PR` }, { text: `Paris`, key: `PS` }, { text: `Sofia`, key: `SF` }, { text: `Vienna`, key: `VN` }];
-    this.mt_products = [{ title: `Notebook HT`, subtitle: `ID23452256-D44`, revenue: `27.25K EUR`, status: `success`, status_schema: `Success` }, { title: `Notebook XT`, subtitle: `ID27852256-D47`, revenue: `7.35K EUR`, status: `exceeded`, status_schema: `Error` }, { title: `Notebook ST`, subtitle: `ID123555587-I05`, revenue: `22.89K EUR`, status: `warning`, status_schema: `Warning` }];
+    this.mt_cities = z2ui5_cl_util.abap_tab_assign(this.mt_cities, [{ text: `Berlin`, key: `BR` }, { text: `London`, key: `LN` }, { text: `Madrid`, key: `MD` }, { text: `Prague`, key: `PR` }, { text: `Paris`, key: `PS` }, { text: `Sofia`, key: `SF` }, { text: `Vienna`, key: `VN` }]);
+    this.mt_products = z2ui5_cl_util.abap_tab_assign(this.mt_products, [{ title: `Notebook HT`, subtitle: `ID23452256-D44`, revenue: `27.25K EUR`, status: `success`, status_schema: `Success` }, { title: `Notebook XT`, subtitle: `ID27852256-D47`, revenue: `7.35K EUR`, status: `exceeded`, status_schema: `Error` }, { title: `Notebook ST`, subtitle: `ID123555587-I05`, revenue: `22.89K EUR`, status: `warning`, status_schema: `Warning` }]);
     const card_1 = page.card({ width: `300px`, class: `sapUiMediumMargin` })
       .header(`f`)
       .card_header({ title: `Buy bus ticket on-line`, subtitle: `Buy a single-ride ticket for a date`, iconsrc: `sap-icon://bus-public-transport` })
@@ -60,7 +58,7 @@ class z2ui5_cl_demo_app_181 extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init()) {
       this.view_display();
     }
@@ -69,3 +67,7 @@ class z2ui5_cl_demo_app_181 extends z2ui5_if_app {
 }
 
 module.exports = z2ui5_cl_demo_app_181;
+
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+

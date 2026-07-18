@@ -1,5 +1,3 @@
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_098 extends z2ui5_if_app {
@@ -56,9 +54,9 @@ class z2ui5_cl_demo_app_098 extends z2ui5_if_app {
     let sy_subrc = 0;
     let lt_sel;
     let ls_sel;
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init()) {
-      this.t_tab = [{ title: `row_01`, info: `completed`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `row_02`, info: `incompleted`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `row_03`, info: `working`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `row_04`, info: `working`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `row_05`, info: `completed`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `row_06`, info: `completed`, descr: `this is a description`, icon: `sap-icon://account` }];
+      this.t_tab = z2ui5_cl_util.abap_tab_assign(this.t_tab, [{ title: `row_01`, info: `completed`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `row_02`, info: `incompleted`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `row_03`, info: `working`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `row_04`, info: `working`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `row_05`, info: `completed`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `row_06`, info: `completed`, descr: `this is a description`, icon: `sap-icon://account` }]);
       this.mv_layout = `OneColumn`;
       this.view_display_master();
       this.view_display_detail();
@@ -87,7 +85,7 @@ class z2ui5_cl_demo_app_098 extends z2ui5_if_app {
           if (sy_subrc === 0) ls_sel = _t[_i];
         }
         if (!this.t_tab2.some((row) => row.title === ls_sel.title)) {
-          this.t_tab2.push(ls_sel);
+          this.t_tab2.push(z2ui5_cl_util.abap_copy(ls_sel));
         }
         this.mv_layout = `TwoColumnsMidExpanded`;
         client.nest_view_model_update();
@@ -99,3 +97,7 @@ class z2ui5_cl_demo_app_098 extends z2ui5_if_app {
 }
 
 module.exports = z2ui5_cl_demo_app_098;
+
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+

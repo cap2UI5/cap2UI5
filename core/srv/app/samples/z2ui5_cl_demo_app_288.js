@@ -1,5 +1,3 @@
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_288 extends z2ui5_if_app {
@@ -69,17 +67,17 @@ class z2ui5_cl_demo_app_288 extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init()) {
       this.view_display({ client: client });
       this.selected_product = `HT-1001`;
       this.selected_product2 = `HT-1001`;
       this.selected_product3 = `HT-1001`;
-      this.lt_product_collection = [{ product_id: `HT-1000`, name: `Notebook Basic 15` }, { product_id: `HT-1001`, name: `Notebook Basic 17` }, { product_id: `HT-1002`, name: `Notebook Basic 18` }, { product_id: `HT-1003`, name: `Notebook Basic 19` }, { product_id: `HT-1007`, name: `ITelO Vault` }];
+      this.lt_product_collection = z2ui5_cl_util.abap_tab_assign(this.lt_product_collection, [{ product_id: `HT-1000`, name: `Notebook Basic 15` }, { product_id: `HT-1001`, name: `Notebook Basic 17` }, { product_id: `HT-1002`, name: `Notebook Basic 18` }, { product_id: `HT-1003`, name: `Notebook Basic 19` }, { product_id: `HT-1007`, name: `ITelO Vault` }]);
       this.lt_product_collection.sort((a, b) => ((a.name > b.name ? 1 : a.name < b.name ? -1 : 0)));
-      this.lt_product_collection2 = [{ product_id: `HT-1000`, name: `Notebook Basic 15` }, { product_id: `HT-1001`, name: `Notebook Basic 17` }, { product_id: `HT-1002`, name: `Notebook Basic 18` }, { product_id: `HT-1003`, name: `Notebook Basic 19` }, { product_id: `HT-1007`, name: `ITelO Vault` }];
+      this.lt_product_collection2 = z2ui5_cl_util.abap_tab_assign(this.lt_product_collection2, [{ product_id: `HT-1000`, name: `Notebook Basic 15` }, { product_id: `HT-1001`, name: `Notebook Basic 17` }, { product_id: `HT-1002`, name: `Notebook Basic 18` }, { product_id: `HT-1003`, name: `Notebook Basic 19` }, { product_id: `HT-1007`, name: `ITelO Vault` }]);
       this.lt_product_collection2.sort((a, b) => ((a.name > b.name ? 1 : a.name < b.name ? -1 : 0)));
-      this.lt_product_collection3 = [{ product_id: `HT-1000`, name: `Notebook Basic 15` }, { product_id: `HT-1001`, name: `Notebook Basic 17` }, { product_id: `HT-1002`, name: `Notebook Basic 18` }, { product_id: `HT-1003`, name: `Notebook Basic 19` }, { product_id: `HT-1007`, name: `ITelO Vault` }];
+      this.lt_product_collection3 = z2ui5_cl_util.abap_tab_assign(this.lt_product_collection3, [{ product_id: `HT-1000`, name: `Notebook Basic 15` }, { product_id: `HT-1001`, name: `Notebook Basic 17` }, { product_id: `HT-1002`, name: `Notebook Basic 18` }, { product_id: `HT-1003`, name: `Notebook Basic 19` }, { product_id: `HT-1007`, name: `ITelO Vault` }]);
       this.lt_product_collection3.sort((a, b) => ((a.name > b.name ? 1 : a.name < b.name ? -1 : 0)));
       this.editable = true;
       this.enabled = true;
@@ -89,3 +87,7 @@ class z2ui5_cl_demo_app_288 extends z2ui5_if_app {
 }
 
 module.exports = z2ui5_cl_demo_app_288;
+
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+

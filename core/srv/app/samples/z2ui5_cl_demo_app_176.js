@@ -1,4 +1,3 @@
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_176 extends z2ui5_if_app {
@@ -14,8 +13,8 @@ class z2ui5_cl_demo_app_176 extends z2ui5_if_app {
 
   nest_view({ i_client } = {}) {
     i_client._bind(this.mt_layout);
-    this.mt_data = [{ name: `Theo`, date: `01.01.2000`, age: `5` }, { name: `Lore`, date: `01.01.2000`, age: `1` }];
-    this.mt_layout = [{ fname: `NAME`, merge: `false`, visible: `true`, binding: `{NAME}` }, { fname: `DATE`, merge: `false`, visible: `true`, binding: `{DATE}` }, { fname: `AGE`, merge: `false`, visible: `false`, binding: `{AGE}` }];
+    this.mt_data = z2ui5_cl_util.abap_tab_assign(this.mt_data, [{ name: `Theo`, date: `01.01.2000`, age: `5` }, { name: `Lore`, date: `01.01.2000`, age: `1` }]);
+    this.mt_layout = z2ui5_cl_util.abap_tab_assign(this.mt_layout, [{ fname: `NAME`, merge: `false`, visible: `true`, binding: `{NAME}` }, { fname: `DATE`, merge: `false`, visible: `true`, binding: `{DATE}` }, { fname: `AGE`, merge: `false`, visible: `false`, binding: `{AGE}` }]);
     const lo_view_nested = z2ui5_cl_xml_view.factory();
     lo_view_nested.shell()
       .page(`Nested View`)
@@ -41,3 +40,7 @@ class z2ui5_cl_demo_app_176 extends z2ui5_if_app {
 }
 
 module.exports = z2ui5_cl_demo_app_176;
+
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+

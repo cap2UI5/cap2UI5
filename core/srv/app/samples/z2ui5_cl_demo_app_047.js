@@ -1,5 +1,3 @@
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_047 extends z2ui5_if_app {
@@ -17,11 +15,11 @@ class z2ui5_cl_demo_app_047 extends z2ui5_if_app {
     let sy_datum = "";
     let sy_uzeit = "";
     if (client.check_on_init()) {
-      this.date = z2ui5_cl_util.abap_copy(sy_datum);
-      this.time = z2ui5_cl_util.abap_copy(sy_uzeit);
+      this.date = z2ui5_cl_util.abap_tab_assign(this.date, z2ui5_cl_util.abap_copy(sy_datum));
+      this.time = z2ui5_cl_util.abap_tab_assign(this.time, z2ui5_cl_util.abap_copy(sy_uzeit));
       this.dec1 = - z2ui5_cl_util.abap_div(1, 3);
       this.dec2 = z2ui5_cl_util.abap_div(2, 3);
-      this.mt_tab = [{ date: sy_datum, time: sy_uzeit }];
+      this.mt_tab = z2ui5_cl_util.abap_tab_assign(this.mt_tab, [{ date: sy_datum, time: sy_uzeit }]);
       client._bind_edit(this.mt_tab);
     }
     switch (client.get().EVENT) {
@@ -61,3 +59,7 @@ class z2ui5_cl_demo_app_047 extends z2ui5_if_app {
 }
 
 module.exports = z2ui5_cl_demo_app_047;
+
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+

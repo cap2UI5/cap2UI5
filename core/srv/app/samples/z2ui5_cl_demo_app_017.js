@@ -1,5 +1,3 @@
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_017 extends z2ui5_if_app {
@@ -123,7 +121,7 @@ class z2ui5_cl_demo_app_017 extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_event(`BUTTON_MSG_BOX`)) {
       client.message_box_display(`this is a message box with a custom text`, `success`);
     }
@@ -132,3 +130,6 @@ class z2ui5_cl_demo_app_017 extends z2ui5_if_app {
 }
 
 module.exports = z2ui5_cl_demo_app_017;
+
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+

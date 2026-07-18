@@ -188,18 +188,166 @@ class z2ui5_cl_core_srv_bind {
   // ============================================================
 
   constructor(app) {
-    this.mo_app    = app;             // wraps the user app
+    this.mo_app    = app;             // the owning z2ui5_cl_core_app
     this.mr_attri  = null;            // current attr being bound
     this.ms_config = {};
     this.mv_type   = ``;
   }
 
   /**
-   * Top-level binding entry. Mirrors abap main(val, type, config).
-   * Accepts an optional `client` so we can find/register on aBind. The abap
-   * impl reads off mo_app->mt_attri instead.
+   * Top-level binding entry — 1:1 with abap main(val, type, config):
+   * resolves the attribute through the instance srv_model (main_attri_search
+   * over mo_app->mt_attri), follows name_ref onto the canonical attribute,
+   * validates re-binds, records the bind metadata and returns the client
+   * path (`{/NAME}` / `{/XX/NAME}`). The transpiled tests pass the abap
+   * named-args form ({ val, type, config }); the legacy JS form
+   * (client, val, type, config) keeps routing through the static wire path.
    */
-  main(client, val, type, config = {}) {
+  main(a, b, c, d) {
+    if (!(a !== null && typeof a === `object` && b === undefined && `type` in a && `val` in a)) {
+      return this._main_legacy(a, b, c, d);
+    }
+    const { val, type, config = {} } = a;
+
+    // config-tab bound and filled → cell-level binding
+    if (Array.isArray(config.tab) && config.tab.length > 0) {
+      return this.main_cell({ val, type, config });
+    }
+
+    this.ms_config = config || {};
+    this.mv_type   = type;
+
+    const Model = require(`./z2ui5_cl_core_srv_model`);
+    const lo_model = new Model({ attri: this.mo_app.mt_attri, app: this.mo_app.mo_app });
+    this.mr_attri = lo_model.main_attri_search(val);
+
+    if (this.mr_attri.name_ref) {
+      const rows = Array.isArray(this.mo_app.mt_attri) ? this.mo_app.mt_attri : this.mo_app.mt_attri.value;
+      const hit = rows.find((r) => r.name === this.mr_attri.name_ref);
+      if (!hit) throw new z2ui5_cx_util_error(`ITAB_LINE_NOT_FOUND - ${this.mr_attri.name_ref}`);
+      this.mr_attri = hit;
+    }
+
+    if (this.mr_attri.bind_type) {
+      this._check_raise_existing();
+    } else {
+      this._check_raise_new();
+      this._update_model_attri();
+    }
+    let result = this.mr_attri.name_client;
+
+    if (result === `/${z2ui5_if_core_types.cs_ui5.two_way_model}`) {
+      throw new z2ui5_cx_util_error(
+        `<p>Name of variable not allowed - XX is a reserved word - use another name for your attribute`
+      );
+    }
+
+    if (this.ms_config.switch_default_model === true) result = `http>${result}`;
+    if (!this.ms_config.path_only) result = `{${result}}`;
+    return result;
+  }
+
+  /** abap main_cell — binds the table (path only), then the cell inside it. */
+  main_cell(a, b, c, d) {
+    if (!(a !== null && typeof a === `object` && b === undefined && `type` in a && `val` in a)) {
+      return this._main_legacy(a, b, c, d);
+    }
+    const { val, type, config = {} } = a;
+    this.ms_config = config;
+
+    const lo_bind = new z2ui5_cl_core_srv_bind(this.mo_app);
+    let result = lo_bind.main({ val: config.tab, type, config: { path_only: true } });
+
+    result = this._bind_tab_cell(result, val);
+
+    if (!this.ms_config.path_only) result = `{${result}}`;
+    return result;
+  }
+
+  /** abap bind_tab_cell — locate the cell by reference identity in the row. */
+  _bind_tab_cell(iv_name, iv_val) {
+    const tab = this.ms_config.tab;
+    const idx = (this.ms_config.tab_index || 1) - 1;
+    const row = Array.isArray(tab) ? tab[idx] : null;
+    if (row && typeof row === `object`) {
+      for (const comp of Object.keys(row)) {
+        if (Object.is(row[comp], iv_val)) {
+          return `${iv_name}/${idx}/${comp.toUpperCase()}`;
+        }
+      }
+    }
+    throw new z2ui5_cx_util_error(
+      `BINDING_ERROR_TAB_CELL_LEVEL - No class attribute for binding found - Please check if the bound values are public attributes of your class`
+    );
+  }
+
+  /** abap check_raise_existing — re-bind must match type/mappers/filters. */
+  _check_raise_existing() {
+    if (this.mr_attri.bind_type !== this.mv_type) {
+      throw new z2ui5_cx_util_error(
+        `<p>Binding Error - Two different binding types for same attribute used (${this.mr_attri.name}).`
+      );
+    }
+    const clsname = (o) => o?.constructor?.name ?? ``;
+    if (this.mr_attri.custom_mapper && this.ms_config.custom_mapper
+        && clsname(this.mr_attri.custom_mapper) !== clsname(this.ms_config.custom_mapper)) {
+      throw new z2ui5_cx_util_error(
+        `<p>Binding Error - Two different mappers used for the same attribute (${this.mr_attri.name}).`
+      );
+    }
+    if (this.mr_attri.custom_mapper_back && this.ms_config.custom_mapper_back
+        && clsname(this.mr_attri.custom_mapper_back) !== clsname(this.ms_config.custom_mapper_back)) {
+      throw new z2ui5_cx_util_error(
+        `<p>Binding Error - Two different mappers back used for the same attribute (${this.mr_attri.name}).`
+      );
+    }
+    if (this.mr_attri.custom_filter && this.ms_config.custom_filter
+        && clsname(this.mr_attri.custom_filter) !== clsname(this.ms_config.custom_filter)) {
+      throw new z2ui5_cx_util_error(
+        `<p>Binding Error - Two different filters used for the same attribute (${this.mr_attri.name}).`
+      );
+    }
+  }
+
+  /** abap check_raise_new — back-travelling mappers/filters must serialize. */
+  _check_raise_new() {
+    if (this.mr_attri.custom_filter_back && !z2ui5_cl_util.rtti_check_serializable(this.mr_attri.custom_filter_back)) {
+      throw new z2ui5_cx_util_error(
+        `<p>custom_filter_back used but it is not serializable - please use if_serializable_object`
+      );
+    }
+    if (this.mr_attri.custom_mapper_back && !z2ui5_cl_util.rtti_check_serializable(this.mr_attri.custom_mapper_back)) {
+      throw new z2ui5_cx_util_error(
+        `<p>custom_mapper_back used but it is not serializable - please use if_serializable_object`
+      );
+    }
+  }
+
+  /** abap get_client_name — `MS_STRUC-S_02-INPUT` → `/MS_STRUC/S_02/INPUT`. */
+  _get_client_name() {
+    const n = String(this.mr_attri.name || ``).replace(/-/g, `/`).replace(/>/g, ``);
+    const prefix = this.mv_type === z2ui5_if_core_types.cs_bind_type.two_way
+      ? `/${z2ui5_if_core_types.cs_ui5.two_way_model}`
+      : ``;
+    return `${prefix}/${n}`;
+  }
+
+  /** abap update_model_attri — record bind metadata on the attribute row. */
+  _update_model_attri() {
+    this.mr_attri.bind_type          = this.mv_type;
+    this.mr_attri.custom_filter      = this.ms_config.custom_filter ?? null;
+    this.mr_attri.custom_filter_back = this.ms_config.custom_filter_back ?? null;
+    this.mr_attri.custom_mapper      = this.ms_config.custom_mapper ?? null;
+    this.mr_attri.custom_mapper_back = this.ms_config.custom_mapper_back ?? null;
+    this.mr_attri.view               = this.ms_config.view || `MAIN`;
+    this.mr_attri.name_client        = this._get_client_name();
+  }
+
+  /**
+   * Legacy JS entry (client, val, type, config) — routes through the static
+   * wire path (aBind) used by the JS framework's client facade.
+   */
+  _main_legacy(client, val, type, config = {}) {
     this.ms_config = config;
     this.mv_type   = type;
 
@@ -233,14 +381,6 @@ class z2ui5_cl_core_srv_bind {
       result = result.replace(/^\{/, `{http>`);
     }
     return result;
-  }
-
-  /**
-   * Cell-level binding. abap parity — kept as a thin wrapper over the shared
-   * static implementation (tab/tab_index route in _main).
-   */
-  main_cell(client, val, type, config = {}) {
-    return this.main(client, val, type, config);
   }
 
   // ============================================================

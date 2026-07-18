@@ -1,5 +1,3 @@
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_289 extends z2ui5_if_app {
@@ -54,13 +52,17 @@ class z2ui5_cl_demo_app_289 extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init()) {
       this.view_display({ client: client });
-      this.lt_a_data = [{ product: `Power Projector 4713`, type: `Locked` }, { product: `Power Projector 4713`, type: `LockedBy`, additionalinfo: `John Doe` }, { product: `Power Projector 4713`, type: `LockedBy` }, { product: `Gladiator MX`, type: `Draft` }, { product: `Hurricane GX`, type: `Unsaved` }, { product: `Hurricane GX`, type: `UnsavedBy`, additionalinfo: `John Doe` }, { product: `Hurricane GX`, type: `UnsavedBy` }, { product: `Hurricane GX`, type: `Unsaved` }, { product: `Webcam`, type: `Favorite` }, { product: `Deskjet Super Highspeed`, type: `Flagged` }];
+      this.lt_a_data = z2ui5_cl_util.abap_tab_assign(this.lt_a_data, [{ product: `Power Projector 4713`, type: `Locked` }, { product: `Power Projector 4713`, type: `LockedBy`, additionalinfo: `John Doe` }, { product: `Power Projector 4713`, type: `LockedBy` }, { product: `Gladiator MX`, type: `Draft` }, { product: `Hurricane GX`, type: `Unsaved` }, { product: `Hurricane GX`, type: `UnsavedBy`, additionalinfo: `John Doe` }, { product: `Hurricane GX`, type: `UnsavedBy` }, { product: `Hurricane GX`, type: `Unsaved` }, { product: `Webcam`, type: `Favorite` }, { product: `Deskjet Super Highspeed`, type: `Flagged` }]);
     }
     this.on_event({ client: client });
   }
 }
 
 module.exports = z2ui5_cl_demo_app_289;
+
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+

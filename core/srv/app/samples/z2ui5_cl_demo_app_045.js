@@ -1,4 +1,3 @@
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_045 extends z2ui5_if_app {
@@ -9,7 +8,7 @@ class z2ui5_cl_demo_app_045 extends z2ui5_if_app {
     let ls_row;
     for (let sy_index = 1; sy_index <= 1000; sy_index++) {
       ls_row = { count: sy_index, value: `red`, info: (sy_index < 50 ? `completed` : `uncompleted`), descr: `this is a description`, checkbox: true };
-      this.t_tab.push(ls_row);
+      this.t_tab.push(z2ui5_cl_util.abap_copy(ls_row));
     }
   }
 
@@ -71,3 +70,7 @@ class z2ui5_cl_demo_app_045 extends z2ui5_if_app {
 }
 
 module.exports = z2ui5_cl_demo_app_045;
+
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+

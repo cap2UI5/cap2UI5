@@ -1,5 +1,3 @@
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_369 extends z2ui5_if_app {
@@ -7,9 +5,9 @@ class z2ui5_cl_demo_app_369 extends z2ui5_if_app {
   client = null;
 
   async main(client) {
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init()) {
-      this.t_products = [{ productname: `table`, measure: 100, unit: `KG`, state_measure: `Warning`, price: `1000.50`, waers: `EUR`, state_price: `Success` }, { productname: `chair`, measure: 123, unit: `KG`, state_measure: `Warning`, price: `2000.55`, waers: `USD`, state_price: `Error` }, { productname: `sofa`, measure: 700, unit: `KG`, state_measure: `Warning`, price: `3000.11`, waers: `CNY`, state_price: `Success` }, { productname: `computer`, measure: 200, unit: `KG`, state_measure: `Success`, price: `4000.88`, waers: `USD`, state_price: `Success` }, { productname: `printer`, measure: 90, unit: `KG`, state_measure: `Warning`, price: `5000.47`, waers: `EUR`, state_price: `Error` }, { productname: `table2`, measure: 600, unit: `KG`, state_measure: `Information`, price: `6000.33`, waers: `GBP`, state_price: `Success` }];
+      this.t_products = z2ui5_cl_util.abap_tab_assign(this.t_products, [{ productname: `table`, measure: 100, unit: `KG`, state_measure: `Warning`, price: `1000.50`, waers: `EUR`, state_price: `Success` }, { productname: `chair`, measure: 123, unit: `KG`, state_measure: `Warning`, price: `2000.55`, waers: `USD`, state_price: `Error` }, { productname: `sofa`, measure: 700, unit: `KG`, state_measure: `Warning`, price: `3000.11`, waers: `CNY`, state_price: `Success` }, { productname: `computer`, measure: 200, unit: `KG`, state_measure: `Success`, price: `4000.88`, waers: `USD`, state_price: `Success` }, { productname: `printer`, measure: 90, unit: `KG`, state_measure: `Warning`, price: `5000.47`, waers: `EUR`, state_price: `Error` }, { productname: `table2`, measure: 600, unit: `KG`, state_measure: `Information`, price: `6000.33`, waers: `GBP`, state_price: `Success` }]);
       this.view_display();
     } else {
       this.on_event();
@@ -60,3 +58,7 @@ class z2ui5_cl_demo_app_369 extends z2ui5_if_app {
 }
 
 module.exports = z2ui5_cl_demo_app_369;
+
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+

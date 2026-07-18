@@ -1,5 +1,3 @@
-const z2ui5_if_ajson_filter = require("abap2UI5/z2ui5_if_ajson_filter");
-const z2ui5_if_ajson_types = require("abap2UI5/z2ui5_if_ajson_types");
 
 class z2ui5_cl_a2ui5_json_fltr {
   static create_no_empty_values() {
@@ -8,7 +6,8 @@ class z2ui5_cl_a2ui5_json_fltr {
     return result;
   }
 
-  keep_node() {
+  keep_node({ is_node, iv_visit = z2ui5_if_ajson_filter.visit_type.value } = {}) {
+    let rv_keep = false;
     rv_keep = true;
     switch (iv_visit) {
       case z2ui5_if_ajson_filter.visit_type.value:
@@ -28,7 +27,12 @@ class z2ui5_cl_a2ui5_json_fltr {
         rv_keep = (is_node.children !== 0);
         break;
     }
+    return rv_keep;
   }
 }
 
 module.exports = z2ui5_cl_a2ui5_json_fltr;
+
+const z2ui5_if_ajson_filter = require("abap2UI5/z2ui5_if_ajson_filter");
+const z2ui5_if_ajson_types = require("abap2UI5/z2ui5_if_ajson_types");
+

@@ -1,5 +1,3 @@
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_381 extends z2ui5_if_app {
@@ -15,7 +13,7 @@ class z2ui5_cl_demo_app_381 extends z2ui5_if_app {
   autoclose = false;
 
   async main(client) {
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init()) {
       this.on_init();
       this.view_display();
@@ -86,9 +84,13 @@ class z2ui5_cl_demo_app_381 extends z2ui5_if_app {
 
   get_positions() {
     let result = [];
-    result = [`begin top`, `begin center`, `begin bottom`, `left top`, `left center`, `left bottom`, `center top`, `center center`, `center bottom`, `right top`, `right center`, `right bottom`, `end top`, `end center`, `end bottom`];
+    result = z2ui5_cl_util.abap_tab_assign(result, [`begin top`, `begin center`, `begin bottom`, `left top`, `left center`, `left bottom`, `center top`, `center center`, `center bottom`, `right top`, `right center`, `right bottom`, `end top`, `end center`, `end bottom`]);
     return result;
   }
 }
 
 module.exports = z2ui5_cl_demo_app_381;
+
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+

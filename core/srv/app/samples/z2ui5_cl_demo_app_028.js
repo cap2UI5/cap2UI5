@@ -1,7 +1,4 @@
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
-const z2ui5_if_client = require("abap2UI5/z2ui5_if_client");
 
 class z2ui5_cl_demo_app_028 extends z2ui5_if_app {
   t_tab = [];
@@ -9,7 +6,7 @@ class z2ui5_cl_demo_app_028 extends z2ui5_if_app {
   client = null;
 
   async main(client) {
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init()) {
       this.on_init();
       this.view_display();
@@ -20,13 +17,13 @@ class z2ui5_cl_demo_app_028 extends z2ui5_if_app {
 
   on_init() {
     this.counter = 1;
-    this.t_tab = [{ title: `entry${this.counter}`, info: `completed`, descr: `this is a description`, icon: `sap-icon://account` }];
+    this.t_tab = z2ui5_cl_util.abap_tab_assign(this.t_tab, [{ title: `entry${this.counter}`, info: `completed`, descr: `this is a description`, icon: `sap-icon://account` }]);
     this.start_timer();
   }
 
   on_event() {
     this.counter = this.counter + 1;
-    this.t_tab.push({ title: `entry${this.counter}`, info: `completed`, descr: `this is a description`, icon: `sap-icon://account` });
+    this.t_tab.push(z2ui5_cl_util.abap_copy({ title: `entry${this.counter}`, info: `completed`, descr: `this is a description`, icon: `sap-icon://account`, value: ``, checkbox: false }));
     if (this.counter < 3) {
       this.start_timer();
     } else {
@@ -36,7 +33,7 @@ class z2ui5_cl_demo_app_028 extends z2ui5_if_app {
   }
 
   start_timer() {
-    this.client.follow_up_action({ val: z2ui5_if_client.cs_event.start_timer, t_arg: [`TIMER_FINISHED`, `2000`] });
+    this.client.follow_up_action(z2ui5_if_client.cs_event.start_timer, [`TIMER_FINISHED`, `2000`]);
   }
 
   view_display() {
@@ -50,3 +47,8 @@ class z2ui5_cl_demo_app_028 extends z2ui5_if_app {
 }
 
 module.exports = z2ui5_cl_demo_app_028;
+
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_client = require("abap2UI5/z2ui5_if_client");
+

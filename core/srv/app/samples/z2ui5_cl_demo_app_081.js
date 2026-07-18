@@ -1,5 +1,3 @@
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_081 extends z2ui5_if_app {
@@ -56,7 +54,7 @@ class z2ui5_cl_demo_app_081 extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init()) {
       this.on_init();
       this.view_display();
@@ -93,8 +91,12 @@ class z2ui5_cl_demo_app_081 extends z2ui5_if_app {
     this.mv_placement = `Left`;
     this.product = `tomato`;
     this.quantity = `500`;
-    this.mt_tab = [{ id: `1`, name: `name1` }, { id: `2`, name: `name2` }, { id: `3`, name: `name3` }, { id: `4`, name: `name4` }];
+    this.mt_tab = z2ui5_cl_util.abap_tab_assign(this.mt_tab, [{ id: `1`, name: `name1` }, { id: `2`, name: `name2` }, { id: `3`, name: `name3` }, { id: `4`, name: `name4` }]);
   }
 }
 
 module.exports = z2ui5_cl_demo_app_081;
+
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+

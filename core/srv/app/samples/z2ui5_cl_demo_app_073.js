@@ -1,8 +1,4 @@
-const z2ui5_cl_a2ui5_context = require("abap2UI5/z2ui5_cl_a2ui5_context");
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
-const z2ui5_if_client = require("abap2UI5/z2ui5_if_client");
 
 class z2ui5_cl_demo_app_073 extends z2ui5_if_app {
   client = null;
@@ -15,7 +11,7 @@ class z2ui5_cl_demo_app_073 extends z2ui5_if_app {
   async main(client) {
     let ls_config;
     let result;
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init()) {
       this.view_display();
     }
@@ -23,10 +19,15 @@ class z2ui5_cl_demo_app_073 extends z2ui5_if_app {
       case `BUTTON_OPEN_NEW_TAB`:
         ls_config = client.get().S_CONFIG;
         result = z2ui5_cl_a2ui5_context.app_get_url({ classname: `z2ui5_cl_demo_app_073`, origin: ls_config.ORIGIN, pathname: ls_config.PATHNAME, search: ls_config.SEARCH, hash: ls_config.HASH });
-        client.follow_up_action({ val: z2ui5_if_client.cs_event.open_new_tab, t_arg: [result] });
+        client.follow_up_action(z2ui5_if_client.cs_event.open_new_tab, [result]);
         break;
     }
   }
 }
 
 module.exports = z2ui5_cl_demo_app_073;
+
+const z2ui5_cl_a2ui5_context = require("abap2UI5/z2ui5_cl_a2ui5_context");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_client = require("abap2UI5/z2ui5_if_client");
+

@@ -1,4 +1,3 @@
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_105 extends z2ui5_if_app {
@@ -7,8 +6,10 @@ class z2ui5_cl_demo_app_105 extends z2ui5_if_app {
   mr_data = null;
   client = null;
 
-  view_display({ xml } = {}) {
+  view_display(_args = {}) {
+    let { xml } = _args;
     this.mo_view_parent.input({ value: this.client._bind_edit(this.mv_class_1), placeholder: `Input From Class 1` });
+    Object.assign(_args, { xml });
   }
 
   on_event() {
@@ -18,7 +19,7 @@ class z2ui5_cl_demo_app_105 extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init()) {
       this.view_display();
     } else {
@@ -28,3 +29,4 @@ class z2ui5_cl_demo_app_105 extends z2ui5_if_app {
 }
 
 module.exports = z2ui5_cl_demo_app_105;
+

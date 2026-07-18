@@ -1,5 +1,3 @@
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_140 extends z2ui5_if_app {
@@ -9,18 +7,20 @@ class z2ui5_cl_demo_app_140 extends z2ui5_if_app {
   client = null;
 
   on_event() {
+    let x;
     try {
       if (this.client.check_on_event(`FILTERBAR`)) {
         this.client.view_model_update();
       }
-    } catch (x) {
+    } catch (_caught1) {
+      x = _caught1;
       this.client.message_box_display(x.get_text(), `error`);
     }
   }
 
   on_init() {
-    this.gt_multi = [{ key: `A01`, text: `T1` }, { key: `A02`, text: `T2` }, { key: `A03`, text: `T3` }, { key: `A04`, text: `T4` }, { key: `A05`, text: `T5` }];
-    this.gt_sel_multi2 = [`A01`];
+    this.gt_multi = z2ui5_cl_util.abap_tab_assign(this.gt_multi, [{ key: `A01`, text: `T1` }, { key: `A02`, text: `T2` }, { key: `A03`, text: `T3` }, { key: `A04`, text: `T4` }, { key: `A05`, text: `T5` }]);
+    this.gt_sel_multi2 = z2ui5_cl_util.abap_tab_assign(this.gt_sel_multi2, [`A01`]);
   }
 
   view_display() {
@@ -37,7 +37,7 @@ class z2ui5_cl_demo_app_140 extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init()) {
       this.on_init();
     }
@@ -47,3 +47,7 @@ class z2ui5_cl_demo_app_140 extends z2ui5_if_app {
 }
 
 module.exports = z2ui5_cl_demo_app_140;
+
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+

@@ -1,7 +1,4 @@
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
-const z2ui5_if_client = require("abap2UI5/z2ui5_if_client");
 
 class z2ui5_cl_demo_app_363 extends z2ui5_if_app {
   field_01 = ``;
@@ -10,7 +7,7 @@ class z2ui5_cl_demo_app_363 extends z2ui5_if_app {
   client = null;
 
   async main(client) {
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init()) {
       this.view_display();
     } else if (client.check_on_event()) {
@@ -47,7 +44,7 @@ class z2ui5_cl_demo_app_363 extends z2ui5_if_app {
         return;
         break;
     }
-    this.client.follow_up_action({ val: z2ui5_if_client.cs_event.scroll_into_view, t_arg: [target, behavior, block] });
+    this.client.follow_up_action(z2ui5_if_client.cs_event.scroll_into_view, [target, behavior, block]);
   }
 
   view_display() {
@@ -81,3 +78,7 @@ class z2ui5_cl_demo_app_363 extends z2ui5_if_app {
 }
 
 module.exports = z2ui5_cl_demo_app_363;
+
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_client = require("abap2UI5/z2ui5_if_client");
+

@@ -1,7 +1,4 @@
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
-const z2ui5_if_client = require("abap2UI5/z2ui5_if_client");
 
 class z2ui5_cl_demo_app_189 extends z2ui5_if_app {
   one = ``;
@@ -12,10 +9,10 @@ class z2ui5_cl_demo_app_189 extends z2ui5_if_app {
   dispatch() {
     switch (this.client.get().EVENT) {
       case `one_enter`:
-        this.client.follow_up_action({ val: z2ui5_if_client.cs_event.set_focus, t_arg: [`IdTwo`] });
+        this.client.follow_up_action(z2ui5_if_client.cs_event.set_focus, [`IdTwo`]);
         break;
       case `two_enter`:
-        this.client.follow_up_action({ val: z2ui5_if_client.cs_event.set_focus, t_arg: [`IdThree`] });
+        this.client.follow_up_action(z2ui5_if_client.cs_event.set_focus, [`IdThree`]);
         break;
     }
     this.client.view_model_update();
@@ -37,13 +34,17 @@ class z2ui5_cl_demo_app_189 extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init()) {
       this.render();
-      client.follow_up_action({ val: z2ui5_if_client.cs_event.set_focus, t_arg: [`IdOne`] });
+      client.follow_up_action(z2ui5_if_client.cs_event.set_focus, [`IdOne`]);
     }
     this.dispatch();
   }
 }
 
 module.exports = z2ui5_cl_demo_app_189;
+
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_client = require("abap2UI5/z2ui5_if_client");
+

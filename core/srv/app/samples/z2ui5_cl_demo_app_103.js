@@ -1,6 +1,3 @@
-const z2ui5_cl_sample_context = require("./z2ui5_cl_sample_context");
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_103 extends z2ui5_if_app {
@@ -9,7 +6,7 @@ class z2ui5_cl_demo_app_103 extends z2ui5_if_app {
   client = null;
 
   async main(client) {
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init()) {
       this.on_init();
     } else if (client.check_on_event()) {
@@ -18,8 +15,8 @@ class z2ui5_cl_demo_app_103 extends z2ui5_if_app {
   }
 
   on_init() {
-    this.t_products = [{ name: `Notebook Basic 15`, product_id: `HT-1000`, quantity: `10` }, { name: `Notebook Basic 17`, product_id: `HT-1001`, quantity: `20` }, { name: `Notebook Basic 18`, product_id: `HT-1002`, quantity: `10` }, { name: `Notebook Basic 19`, product_id: `HT-1003`, quantity: `15` }, { name: `ITelO Vault`, product_id: `HT-1007`, quantity: `15` }, { name: `Notebook Professional 15`, product_id: `HT-1010`, quantity: `16` }, { name: `Notebook Professional 17`, product_id: `HT-1011`, quantity: `17` }, { name: `ITelO Vault Net`, product_id: `HT-1020`, quantity: `14` }, { name: `ITelO Vault SAT`, product_id: `HT-1021`, quantity: `50` }, { name: `Comfort Easy`, product_id: `HT-1022`, quantity: `30` }, { name: `Comfort Senior`, product_id: `HT-1023`, quantity: `24` }, { name: `Ergo Screen E-I`, product_id: `HT-1030`, quantity: `14` }, { name: `Ergo Screen E-II`, product_id: `HT-1031`, quantity: `24` }, { name: `Ergo Screen E-III`, product_id: `HT-1032`, quantity: `50` }, { name: `Flat Basic`, product_id: `HT-1035`, quantity: `23` }, { name: `Flat Future`, product_id: `HT-1036`, quantity: `22` }];
-    this.t_products_sorted = z2ui5_cl_util.abap_copy(this.t_products);
+    this.t_products = z2ui5_cl_util.abap_tab_assign(this.t_products, [{ name: `Notebook Basic 15`, product_id: `HT-1000`, quantity: `10` }, { name: `Notebook Basic 17`, product_id: `HT-1001`, quantity: `20` }, { name: `Notebook Basic 18`, product_id: `HT-1002`, quantity: `10` }, { name: `Notebook Basic 19`, product_id: `HT-1003`, quantity: `15` }, { name: `ITelO Vault`, product_id: `HT-1007`, quantity: `15` }, { name: `Notebook Professional 15`, product_id: `HT-1010`, quantity: `16` }, { name: `Notebook Professional 17`, product_id: `HT-1011`, quantity: `17` }, { name: `ITelO Vault Net`, product_id: `HT-1020`, quantity: `14` }, { name: `ITelO Vault SAT`, product_id: `HT-1021`, quantity: `50` }, { name: `Comfort Easy`, product_id: `HT-1022`, quantity: `30` }, { name: `Comfort Senior`, product_id: `HT-1023`, quantity: `24` }, { name: `Ergo Screen E-I`, product_id: `HT-1030`, quantity: `14` }, { name: `Ergo Screen E-II`, product_id: `HT-1031`, quantity: `24` }, { name: `Ergo Screen E-III`, product_id: `HT-1032`, quantity: `50` }, { name: `Flat Basic`, product_id: `HT-1035`, quantity: `23` }, { name: `Flat Future`, product_id: `HT-1036`, quantity: `22` }]);
+    this.t_products_sorted = z2ui5_cl_util.abap_tab_assign(this.t_products_sorted, z2ui5_cl_util.abap_copy(this.t_products));
     this.t_products_sorted.sort((a, b) => ((a.name > b.name ? 1 : a.name < b.name ? -1 : 0)));
     this.view_display();
   }
@@ -98,3 +95,8 @@ class z2ui5_cl_demo_app_103 extends z2ui5_if_app {
 }
 
 module.exports = z2ui5_cl_demo_app_103;
+
+const z2ui5_cl_sample_context = require("./z2ui5_cl_sample_context");
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+

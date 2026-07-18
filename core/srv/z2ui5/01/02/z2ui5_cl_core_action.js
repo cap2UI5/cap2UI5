@@ -25,17 +25,190 @@ const z2ui5_cl_util = require("../../00/03/z2ui5_cl_util");
 class z2ui5_cl_core_action {
 
   constructor(val) {
+    // named-args form ({ val }) from transpiled callers, positional from JS
+    if (val !== null && typeof val === `object` && `val` in val && !(`mo_action` in val)) val = val.val;
+    const z2ui5_cl_core_app = require(`./z2ui5_cl_core_app`);
+    const z2ui5_if_core_types = require(`./z2ui5_if_core_types`);
     this.mo_http_post = val;
-    this.mo_app = {                  // mirrors abap NEW z2ui5_cl_core_app
-      mo_app: null,
-      ms_draft: { id: ``, id_prev: ``, id_prev_app: ``, id_prev_app_stack: `` },
-    };
-    this.ms_actual = { event: ``, t_event_arg: [], view: ``, check_on_navigated: false, r_data: null };
-    this.ms_next   = { o_app_call: null, o_app_leave: null, s_set: {}, r_data: null };
+    this.mo_app = new z2ui5_cl_core_app(); // abap NEW z2ui5_cl_core_app( )
+    this.ms_actual = z2ui5_if_core_types.ty_s_actual();
+    this.ms_next   = z2ui5_if_core_types.ty_s_next();
 
     // JS-only: rehydrated nav stack so client.check_app_prev_stack() works.
     this._navStack = [];
     this._navPrev  = null;
+  }
+
+  // ============================================================
+  //  INSTANCE API — 1:1 with the ABAP class (METHODS factory_*)
+  // ============================================================
+
+  /** abap factory_system_startup. */
+  factory_system_startup() {
+    const result = new z2ui5_cl_core_action(this.mo_http_post);
+    const StartupApp = require(`../../02/z2ui5_cl_app_startup`);
+    result.mo_app.ms_draft.id = z2ui5_cl_util.uuid_get_c32();
+    result.ms_actual.check_on_navigated = true;
+    result.mo_app.mo_app = typeof StartupApp.factory === `function` ? StartupApp.factory() : new StartupApp();
+    result.mo_app.mo_app.id_draft = result.mo_app.ms_draft.id;
+    return result;
+  }
+
+  /** abap factory_first_start — instantiate s_control-app_start (or restore
+   *  the bookmarked draft), raise z2ui5_cx_a2ui5_error on unknown classes. */
+  factory_first_start() {
+    const req = this.mo_http_post?.ms_request || {};
+    let result = new z2ui5_cl_core_action(this.mo_http_post);
+
+    const startDraft = req?.s_control?.app_start_draft || ``;
+    if (startDraft) {
+      const z2ui5_cl_core_app = require(`./z2ui5_cl_core_app`);
+      try {
+        const lo_app = z2ui5_cl_core_app.db_load(startDraft);
+        if (!lo_app || typeof lo_app.then === `function`) throw new Error(`NO_DRAFT_ENTRY_OF_PREVIOUS_REQUEST_FOUND`);
+        result.mo_app = lo_app;
+        result.ms_actual.check_on_navigated = true;
+        result.ms_next.s_set.set_app_state_active = true;
+        result.mo_app.ms_draft.id_prev_app_stack = ``;
+        result.mo_app.ms_draft.id = z2ui5_cl_util.uuid_get_c32();
+        return result;
+      } catch {
+        // expired or invalid bookmark draft — fresh app start + toast
+        result.ms_next.s_set.s_msg_toast.text =
+          `Bookmarked app state expired or could not be restored - starting with a fresh app`;
+      }
+    }
+
+    result.mo_app.ms_draft.id = z2ui5_cl_util.uuid_get_c32();
+
+    const startName = req?.s_control?.app_start || ``;
+    try {
+      const Cls = z2ui5_cl_util.rtti_get_class(String(startName).toLowerCase());
+      if (!Cls) throw new Error(`class not found`);
+      const li_app = new Cls();
+      result.mo_app.mo_app = li_app;
+      li_app.id_draft = result.mo_app.ms_draft.id;
+      result.ms_actual.check_on_navigated = true;
+      return result;
+    } catch (x) {
+      const Model = require(`./z2ui5_cl_core_srv_model`);
+      const err = Model._cx(`App with name ${startName} not found...`);
+      // cx get_text walks the previous chain via get_text() — only attach
+      // ABAP-shaped exceptions
+      if (typeof x?.get_text === `function`) err.previous = x;
+      throw err;
+    }
+  }
+
+  /** abap factory_by_frontend — continue the draft addressed by s_front-id. */
+  factory_by_frontend() {
+    const z2ui5_cl_core_app = require(`./z2ui5_cl_core_app`);
+    const req = this.mo_http_post?.ms_request || {};
+    const result = new z2ui5_cl_core_action(this.mo_http_post);
+
+    if (this.mo_http_post?.mo_action?.mo_app?.mo_app) {
+      result.mo_app = this.mo_http_post.mo_action.mo_app;
+    } else {
+      const loaded = z2ui5_cl_core_app.db_load(req?.s_front?.id);
+      if (loaded && typeof loaded.then !== `function`) result.mo_app = loaded;
+    }
+
+    result.mo_app.ms_draft.id      = z2ui5_cl_util.uuid_get_c32();
+    result.mo_app.ms_draft.id_prev = req?.s_front?.id || ``;
+    result.ms_actual.view          = req?.s_front?.view || ``;
+
+    if (req?.o_model && typeof req.o_model.is_empty === `function` && req.o_model.is_empty() !== true) {
+      result.mo_app.model_json_parse(req?.s_front?.view || ``, req.o_model);
+    }
+
+    result.ms_actual.event       = req?.s_front?.event || ``;
+    result.ms_actual.t_event_arg = req?.s_front?.t_event_arg || [];
+    return result;
+  }
+
+  /** abap factory_stack_call — forward navigation. */
+  factory_stack_call() {
+    const result = this.prepare_app_stack(this.ms_next.o_app_call);
+    result.mo_app.ms_draft.id_prev_app_stack = this.mo_app.ms_draft.id;
+    return result;
+  }
+
+  /** abap factory_stack_leave — back navigation. */
+  factory_stack_leave() {
+    const result = this.prepare_app_stack(this.ms_next.o_app_leave);
+    const DraftCls = require(`../01/z2ui5_cl_core_srv_draft`);
+    const lo_draft = new DraftCls();
+
+    // new app (never persisted)? keep the current chain
+    if (lo_draft.check_exists(this.ms_next.o_app_leave?.id_draft) === false) {
+      result.mo_app.ms_draft.id_prev_app_stack = this.mo_app.ms_draft.id_prev_app_stack;
+      return result;
+    }
+    // already existing app? re-derive from the draft chain
+    if (this.mo_app.ms_draft.id_prev_app_stack) {
+      try {
+        const ls_draft = lo_draft.read_info(this.mo_app.ms_draft.id_prev_app_stack);
+        result.mo_app.ms_draft.id_prev_app_stack = ls_draft.id_prev_app_stack;
+      } catch { /* chain stays initial */ }
+    }
+    return result;
+  }
+
+  /** abap prepare_app_stack (protected) — shared nav-switch bookkeeping. */
+  prepare_app_stack(val) {
+    const z2ui5_cl_core_app = require(`./z2ui5_cl_core_app`);
+    this.mo_app.db_save();
+
+    if (val && !val.id_draft) val.id_draft = z2ui5_cl_util.uuid_get_c32();
+
+    const result = new z2ui5_cl_core_action(this.mo_http_post);
+    try {
+      const loaded = z2ui5_cl_core_app.db_load(val?.id_draft);
+      if (loaded && typeof loaded.then !== `function` && loaded.mo_app) result.mo_app = loaded;
+      else result.mo_app.mo_app = val;
+    } catch {
+      result.mo_app.mo_app = val;
+    }
+
+    result.mo_app.ms_draft.id          = val?.id_draft || ``;
+    result.mo_app.ms_draft.id_prev     = this.mo_app.ms_draft.id;
+    result.mo_app.ms_draft.id_prev_app = this.mo_app.ms_draft.id;
+    result.ms_actual.check_on_navigated = true;
+    result.ms_next.s_set = JSON.parse(JSON.stringify({ ...this.ms_next.s_set, s_follow_up_action: { custom_js: [...(this.ms_next.s_set.s_follow_up_action?.custom_js || [])] } }));
+
+    result.reset_view_update_flags();
+
+    if (this.ms_next.next_event) {
+      result.ms_actual.event = this.ms_next.next_event;
+    } else if ((this.ms_next.s_set.s_follow_up_action?.custom_js || []).length > 0) {
+      // backward compatibility: derive the event from a legacy
+      // follow_up_action( _event( ) ) snippet (deprecated mechanism)
+      const lv_action = this.ms_next.s_set.s_follow_up_action.custom_js[0];
+      const m = String(lv_action).split(`.eB(['`)[1];
+      result.ms_actual.event = m ? m.split(`']`)[0] : ``;
+    }
+    result.ms_actual.r_data = this.ms_next.r_data;
+
+    // clean frontend state for the next app — no leaking messages/actions
+    const z2ui5_if_core_types = require(`./z2ui5_if_core_types`);
+    const initial = z2ui5_if_core_types.ty_s_next_frontend();
+    result.ms_next.s_set.s_msg_box          = initial.s_msg_box;
+    result.ms_next.s_set.s_msg_toast        = initial.s_msg_toast;
+    result.ms_next.s_set.s_follow_up_action = initial.s_follow_up_action;
+
+    // always destroy an open popup on navigation (see ABAP comment)
+    result.ms_next.s_set.s_popup = { ...initial.s_popup, check_destroy: true };
+    return result;
+  }
+
+  /** abap reset_view_update_flags — clear CHECK_UPDATE_MODEL on all slots. */
+  reset_view_update_flags() {
+    const z2ui5_if_core_types = require(`./z2ui5_if_core_types`);
+    for (const slot of z2ui5_if_core_types.cs_view_slot_list.split(`,`)) {
+      const s = this.ms_next.s_set[slot.toLowerCase()];
+      if (!s) throw new Error(`ASSERT failed - view slot ${slot} missing`);
+      s.check_update_model = false;
+    }
   }
 
   // ============================================================

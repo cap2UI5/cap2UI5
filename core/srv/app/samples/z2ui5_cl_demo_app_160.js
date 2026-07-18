@@ -1,6 +1,3 @@
-const z2ui5_cl_sample_context = require("./z2ui5_cl_sample_context");
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_160 extends z2ui5_if_app {
@@ -8,7 +5,7 @@ class z2ui5_cl_demo_app_160 extends z2ui5_if_app {
   client = null;
 
   async main(client) {
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init()) {
       this.model_init();
       this.view_display();
@@ -20,7 +17,7 @@ class z2ui5_cl_demo_app_160 extends z2ui5_if_app {
   model_init() {
     this.mt_output = {};
     for (let sy_index = 1; sy_index <= 10; sy_index++) {
-      this.mt_output.push({ index: sy_index, set_sk: `Test`, matnr: `1234567`, description: `Test`, pl_01: 0, pl_02: 0 });
+      this.mt_output.push(z2ui5_cl_util.abap_copy({ index: sy_index, set_sk: `Test`, matnr: `1234567`, description: `Test`, pl_01: 0, pl_02: 0, is_total: 0, pl_total: 0, per_cent_total: 0, is_01_prev: 0, per_cent_01: 0, is_02_prev: 0, per_cent_02: 0, is_03_prev: 0, pl_03: 0, per_cent_03: 0, is_q01_prev: 0, pl_q01: 0, per_cent_q01: 0, is_q02_prev: 0, pl_q02: 0, per_cent_q02: 0, is_q03_prev: 0, pl_q03: 0, per_cent_q03: 0, is_q04_prev: 0, pl_q04: 0, per_cent_q04: 0 }));
     }
   }
 
@@ -62,3 +59,8 @@ class z2ui5_cl_demo_app_160 extends z2ui5_if_app {
 }
 
 module.exports = z2ui5_cl_demo_app_160;
+
+const z2ui5_cl_sample_context = require("./z2ui5_cl_sample_context");
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+

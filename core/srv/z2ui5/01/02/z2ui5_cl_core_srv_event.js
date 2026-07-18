@@ -10,6 +10,64 @@
  */
 class z2ui5_cl_core_srv_event {
 
+  // ============================================================
+  //  INSTANCE API — 1:1 with the ABAP class (METHODS get_event /
+  //  get_event_client / get_t_arg). The transpiled callers pass named args
+  //  ({ val, t_arg, s_cnt }) or the single preferred parameter positionally.
+  //  Output format matches ABAP exactly (`, ` separators).
+  // ============================================================
+
+  /** ABAP METHOD get_event — `.eB(['VAL'[,false,true]], 'arg1', …)` */
+  get_event(a) {
+    const { val = ``, t_arg = [], s_cnt = {} } =
+      a !== null && typeof a === `object` && !Array.isArray(a) ? a : { val: a ?? `` };
+    let result = `.eB(['${val}'`;
+    if (s_cnt?.check_allow_multi_req === true) result = `${result},false,true`;
+    return `${result}]${this.get_t_arg(t_arg)}`;
+  }
+
+  /**
+   * ABAP METHOD get_event_client — `.eF('VAL', 'arg1', …)`. NavContainer
+   * navigation remaps *_nav_container_to onto the generic CONTROL_BY_ID
+   * client call: `<container>, <SLOT>, to, <target>`.
+   */
+  get_event_client(a) {
+    const { val = ``, t_arg = [] } =
+      a !== null && typeof a === `object` && !Array.isArray(a) ? a : { val: a ?? `` };
+    let lv_val = String(val);
+    let lt_arg = Array.isArray(t_arg) ? t_arg : t_arg ? [t_arg] : [];
+
+    const cs_event = require(`../../02/z2ui5_if_client`).cs_event;
+    const lv_slot =
+      lv_val === cs_event.nav_container_to         ? `MAIN`
+      : lv_val === cs_event.nest_nav_container_to    ? `NEST`
+      : lv_val === cs_event.nest2_nav_container_to   ? `NEST2`
+      : lv_val === cs_event.popup_nav_container_to   ? `POPUP`
+      : lv_val === cs_event.popover_nav_container_to ? `POPOVER`
+      : ``;
+    if (lv_slot) {
+      lt_arg = [lt_arg[0] ?? ``, lv_slot, `to`, lt_arg[1] ?? ``];
+      lv_val = `CONTROL_BY_ID`;
+    }
+
+    return `.eF('${lv_val}'${this.get_t_arg(lt_arg)}`;
+  }
+
+  /**
+   * ABAP METHOD get_t_arg — `, 'x'` per non-empty arg; `$…`/`{…}`/`.eB(…`
+   * args pass through unquoted. Closes the argument list.
+   */
+  get_t_arg(val) {
+    let result = ``;
+    for (const a of Array.isArray(val) ? val : []) {
+      const lv = String(a ?? ``);
+      if (!lv) continue;
+      const quoted = lv[0] !== `$` && lv[0] !== `{` && !lv.startsWith(`.eB(`) ? `'${lv}'` : lv;
+      result = `${result}, ${quoted}`;
+    }
+    return `${result})`;
+  }
+
   /**
    * Returns the press="..." string for a backend roundtrip event.
    * Mirrors abap z2ui5_cl_core_srv_event=>get_event(val, t_arg, s_ctrl, r_data).

@@ -1,8 +1,4 @@
-const z2ui5_cl_pop_to_confirm = require("abap2UI5/z2ui5_cl_pop_to_confirm");
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
-const z2ui5_if_client = require("abap2UI5/z2ui5_if_client");
 
 class z2ui5_cl_demo_app_279 extends z2ui5_if_app {
   text_input = ``;
@@ -19,7 +15,7 @@ class z2ui5_cl_demo_app_279 extends z2ui5_if_app {
     box.button({ text: `Reset`, press: this.client._event(`reset`), class: `sapUiSmallMarginBegin`, visible: this.client._bind(this.dirty) });
     page._z2ui5().dirty(this.client._bind(this.dirty));
     this.client.view_display(page.stringify());
-    this.client.follow_up_action({ val: z2ui5_if_client.cs_event.set_focus, t_arg: [`input`] });
+    this.client.follow_up_action(z2ui5_if_client.cs_event.set_focus, [`input`]);
   }
 
   on_event() {
@@ -46,7 +42,7 @@ class z2ui5_cl_demo_app_279 extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (((client.get().CHECK_ON_NAVIGATED) === true || (client.get().CHECK_ON_NAVIGATED) === `X`)) {
       this.on_navigation();
     }
@@ -74,3 +70,8 @@ class z2ui5_cl_demo_app_279 extends z2ui5_if_app {
 }
 
 module.exports = z2ui5_cl_demo_app_279;
+
+const z2ui5_cl_pop_to_confirm = require("abap2UI5/z2ui5_cl_pop_to_confirm");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_client = require("abap2UI5/z2ui5_if_client");
+

@@ -1,5 +1,3 @@
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_143 extends z2ui5_if_app {
@@ -7,18 +5,20 @@ class z2ui5_cl_demo_app_143 extends z2ui5_if_app {
   client = null;
 
   on_event() {
+    let x;
     try {
       if (this.client.check_on_event(`ROW_ACTION_ITEM_ADD`)) {
         this.client.message_toast_display(`Something`);
         this.client.view_model_update();
       }
-    } catch (x) {
+    } catch (_caught1) {
+      x = _caught1;
       this.client.message_box_display(x.get_text(), `error`);
     }
   }
 
   on_init() {
-    this.gt_data = [{ field1: `21`, field2: `T1`, field3: `TEXT1` }, { field1: `22`, field2: `T1`, field3: `TEXT1` }, { field1: `23`, field2: `T2`, field3: `TEXT1` }, { field1: `24`, field2: `T2`, field3: `TEXT2` }, { field1: `25`, field2: `T3`, field3: `TEXT2` }];
+    this.gt_data = z2ui5_cl_util.abap_tab_assign(this.gt_data, [{ field1: `21`, field2: `T1`, field3: `TEXT1` }, { field1: `22`, field2: `T1`, field3: `TEXT1` }, { field1: `23`, field2: `T2`, field3: `TEXT1` }, { field1: `24`, field2: `T2`, field3: `TEXT2` }, { field1: `25`, field2: `T3`, field3: `TEXT2` }]);
   }
 
   view_display() {
@@ -60,7 +60,7 @@ class z2ui5_cl_demo_app_143 extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init()) {
       this.on_init();
     }
@@ -70,3 +70,7 @@ class z2ui5_cl_demo_app_143 extends z2ui5_if_app {
 }
 
 module.exports = z2ui5_cl_demo_app_143;
+
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+

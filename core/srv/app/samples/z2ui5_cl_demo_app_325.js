@@ -1,6 +1,4 @@
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
-const z2ui5_if_client = require("abap2UI5/z2ui5_if_client");
 
 class z2ui5_cl_demo_app_325 extends z2ui5_if_app {
   input = ``;
@@ -42,11 +40,11 @@ class z2ui5_cl_demo_app_325 extends z2ui5_if_app {
     }
     switch (client.get().EVENT) {
       case `COPY_INPUT`:
-        client.follow_up_action({ val: z2ui5_if_client.cs_event.clipboard_copy, t_arg: [this.input] });
+        client.follow_up_action(z2ui5_if_client.cs_event.clipboard_copy, [this.input]);
         client.message_toast_display(`input field copied: ${this.input}`);
         break;
       case `COPY_TEXT_AREA`:
-        client.follow_up_action({ val: z2ui5_if_client.cs_event.clipboard_copy, t_arg: [this.text] });
+        client.follow_up_action(z2ui5_if_client.cs_event.clipboard_copy, [this.text]);
         client.message_toast_display(`text area copied: ${this.text}`);
         break;
     }
@@ -54,3 +52,7 @@ class z2ui5_cl_demo_app_325 extends z2ui5_if_app {
 }
 
 module.exports = z2ui5_cl_demo_app_325;
+
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_client = require("abap2UI5/z2ui5_if_client");
+

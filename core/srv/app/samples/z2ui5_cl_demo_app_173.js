@@ -1,5 +1,3 @@
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_173 extends z2ui5_if_app {
@@ -38,11 +36,11 @@ class z2ui5_cl_demo_app_173 extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init()) {
       client._bind(this.mt_layout);
-      this.mt_data = [{ name: `Theo`, date: `01.01.2000`, age: `5` }, { name: `Lore`, date: `01.01.2000`, age: `1` }];
-      this.mt_layout = [{ fname: `NAME`, merge: `false`, visible: `true` }, { fname: `DATE`, merge: `false`, visible: `true` }, { fname: `AGE`, merge: `false`, visible: `false` }];
+      this.mt_data = z2ui5_cl_util.abap_tab_assign(this.mt_data, [{ name: `Theo`, date: `01.01.2000`, age: `5` }, { name: `Lore`, date: `01.01.2000`, age: `1` }]);
+      this.mt_layout = z2ui5_cl_util.abap_tab_assign(this.mt_layout, [{ fname: `NAME`, merge: `false`, visible: `true` }, { fname: `DATE`, merge: `false`, visible: `true` }, { fname: `AGE`, merge: `false`, visible: `false` }]);
       this.view_display();
     }
     switch (client.get().EVENT) {
@@ -54,3 +52,7 @@ class z2ui5_cl_demo_app_173 extends z2ui5_if_app {
 }
 
 module.exports = z2ui5_cl_demo_app_173;
+
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+

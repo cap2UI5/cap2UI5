@@ -1,12 +1,10 @@
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_445 extends z2ui5_if_app {
   client = null;
 
   async main(client) {
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init()) {
       this.view_display();
     } else {
@@ -32,7 +30,7 @@ class z2ui5_cl_demo_app_445 extends z2ui5_if_app {
       .object_status({ text: `{= \${device>/support/touch} ? 'Yes' : 'No' }`, state: `{= \${device>/support/touch} ? 'Success' : 'None' }` });
     form.label(`Browser`).text(`{device>/browser/name} {device>/browser/version}`);
     form.label(`Operating system`).text(`{device>/os/name} {device>/os/version}`);
-    result = z2ui5_cl_util.abap_copy(form);
+    result = z2ui5_cl_util.abap_tab_assign(result, z2ui5_cl_util.abap_copy(form));
     return result;
   }
 
@@ -67,3 +65,7 @@ class z2ui5_cl_demo_app_445 extends z2ui5_if_app {
 }
 
 module.exports = z2ui5_cl_demo_app_445;
+
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+

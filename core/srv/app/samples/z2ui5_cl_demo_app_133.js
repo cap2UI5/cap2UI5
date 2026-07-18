@@ -1,7 +1,4 @@
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
-const z2ui5_if_client = require("abap2UI5/z2ui5_if_client");
 
 class z2ui5_cl_demo_app_133 extends z2ui5_if_app {
   field_01 = ``;
@@ -31,7 +28,7 @@ class z2ui5_cl_demo_app_133 extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init()) {
       this.field_01 = `this is a text`;
       this.field_02 = `this is another text`;
@@ -43,7 +40,7 @@ class z2ui5_cl_demo_app_133 extends z2ui5_if_app {
     switch (client.get().EVENT) {
       case `BUTTON01`:
       case `BUTTON02`:
-        client.follow_up_action({ val: z2ui5_if_client.cs_event.set_focus, t_arg: [client.get().EVENT, this.selstart, this.selend] });
+        client.follow_up_action(z2ui5_if_client.cs_event.set_focus, [client.get().EVENT, this.selstart, this.selend]);
         client.message_toast_display(`focus changed`);
         break;
     }
@@ -51,3 +48,7 @@ class z2ui5_cl_demo_app_133 extends z2ui5_if_app {
 }
 
 module.exports = z2ui5_cl_demo_app_133;
+
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_client = require("abap2UI5/z2ui5_if_client");
+

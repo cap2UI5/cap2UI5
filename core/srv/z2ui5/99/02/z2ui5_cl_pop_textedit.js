@@ -1,21 +1,19 @@
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_pop_textedit extends z2ui5_if_app {
   mv_stretch_active = false;
   mv_title = ``;
   mv_check_editable = false;
-  ms_result = {};
+  ms_result = { text: ``, check_confirmed: false };
   client = null;
 
   static factory({ i_stretch_active = true, i_textarea, i_title = `Editor`, i_check_editable = false } = {}) {
     let r_result = null;
     r_result = new z2ui5_cl_pop_textedit();
-    r_result.mv_stretch_active = z2ui5_cl_util.abap_copy(i_stretch_active);
-    r_result.ms_result.text = z2ui5_cl_util.abap_copy(i_textarea);
-    r_result.mv_title = z2ui5_cl_util.abap_copy(i_title);
-    r_result.mv_check_editable = z2ui5_cl_util.abap_copy(i_check_editable);
+    r_result.mv_stretch_active = z2ui5_cl_util.abap_tab_assign(r_result.mv_stretch_active, z2ui5_cl_util.abap_copy(i_stretch_active));
+    r_result.ms_result.text = z2ui5_cl_util.abap_tab_assign(r_result.ms_result.text, z2ui5_cl_util.abap_copy(i_textarea));
+    r_result.mv_title = z2ui5_cl_util.abap_tab_assign(r_result.mv_title, z2ui5_cl_util.abap_copy(i_title));
+    r_result.mv_check_editable = z2ui5_cl_util.abap_tab_assign(r_result.mv_check_editable, z2ui5_cl_util.abap_copy(i_check_editable));
     return r_result;
   }
 
@@ -32,7 +30,7 @@ class z2ui5_cl_pop_textedit extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init()) {
       this.display();
       return;
@@ -52,14 +50,18 @@ class z2ui5_cl_pop_textedit extends z2ui5_if_app {
 
   result() {
     let result = {};
-    result = z2ui5_cl_util.abap_copy(this.ms_result);
+    result = z2ui5_cl_util.abap_tab_assign(result, z2ui5_cl_util.abap_copy(this.ms_result));
     return result;
   }
 }
+
+module.exports = z2ui5_cl_pop_textedit;
+
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 
 // abap PREFERRED PARAMETER call style — see z2ui5_pop_preferred_param.js
 require("./z2ui5_pop_preferred_param")(z2ui5_cl_pop_textedit, {
   factory: { preferred: `i_textarea`, params: [`i_stretch_active`, `i_textarea`, `i_title`, `i_check_editable`] },
 });
 
-module.exports = z2ui5_cl_pop_textedit;

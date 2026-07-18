@@ -67,6 +67,33 @@ class z2ui5_cl_core_client {
   oReq = {};
   aBind = [];
 
+  // ABAP mode — when constructed over a core_action (transpiled callers:
+  // `NEW z2ui5_cl_core_client( action = … )`), the z2ui5_if_client methods
+  // below write into mo_action->ms_next / read ms_actual, exactly like the
+  // ABAP class. Without an action the legacy JS wire behavior applies.
+  mo_action = null;
+  mo_srv_bind = null;
+  mo_srv_event = null;
+
+  constructor(arg) {
+    const action =
+      arg !== null && typeof arg === `object`
+        ? (`action` in arg ? arg.action : arg.ms_next && arg.mo_app !== undefined ? arg : null)
+        : null;
+    if (action) {
+      const Bind = require(`./z2ui5_cl_core_srv_bind`);
+      const Event = require(`./z2ui5_cl_core_srv_event`);
+      this.mo_action = action;
+      this.mo_srv_bind = new Bind(action.mo_app);
+      this.mo_srv_event = new Event();
+    }
+  }
+
+  /** ABAP-mode shortcut onto mo_action->ms_next-s_set. */
+  get _s_set() {
+    return this.mo_action ? this.mo_action.ms_next.s_set : null;
+  }
+
   // Navigation
   _navTarget = null;
   _navStack = [];
@@ -95,6 +122,9 @@ class z2ui5_cl_core_client {
   // --- Lifecycle Check Methods ---
 
   check_on_init() {
+    if (this.mo_action) {
+      return this.get_if_app()?.check_initialized === false;
+    }
     // Only true on the first main() of a fresh app instance. After the handler
     // sets oApp.check_initialized=true (post-main), subsequent loads-from-DB
     // see false here even if EVENT happens to be empty (e.g. nav-loop cleared it).
@@ -104,6 +134,11 @@ class z2ui5_cl_core_client {
   }
 
   check_on_event(val) {
+    if (val !== null && typeof val === `object` && `val` in val) ({ val } = val);
+    if (this.mo_action) {
+      const event = this.mo_action.ms_actual.event || ``;
+      return val ? event === val : event !== ``;
+    }
     const event = this.oReq?.S_FRONT?.EVENT || "";
     if (val === undefined) {
       return event !== "";
@@ -112,16 +147,31 @@ class z2ui5_cl_core_client {
   }
 
   check_on_navigated() {
+    if (this.mo_action) {
+      return this.mo_action.ms_actual.check_on_navigated;
+    }
     return this._check_on_navigated;
   }
 
   check_app_prev_stack() {
+    if (this.mo_action) {
+      return !!this.mo_action.mo_app.ms_draft.id_prev_app_stack;
+    }
     return this._navStack.length > 0;
   }
 
   // --- Main View Display ---
 
   view_display(val, switch_default_model_anno_uri, switch_default_model_path) {
+    if (val !== null && typeof val === `object` && `val` in val) {
+      ({ val, switch_default_model_anno_uri, switch_default_model_path } = val);
+    }
+    if (this.mo_action) {
+      this._s_set.s_view.xml = val ?? ``;
+      this._s_set.s_view.switchdefaultmodelannouri = switch_default_model_anno_uri ?? ``;
+      this._s_set.s_view.switch_default_model_path = switch_default_model_path ?? ``;
+      return;
+    }
     this.S_VIEW = { XML: val };
     if (switch_default_model_path) {
       this.S_VIEW.SWITCH_DEFAULT_MODEL_PATH = switch_default_model_path;
@@ -132,6 +182,10 @@ class z2ui5_cl_core_client {
   }
 
   view_model_update() {
+    if (this.mo_action) {
+      this._s_set.s_view.check_update_model = true;
+      return;
+    }
     if (!this.S_VIEW) {
       this.S_VIEW = {};
     }
@@ -139,12 +193,27 @@ class z2ui5_cl_core_client {
   }
 
   view_destroy() {
+    if (this.mo_action) {
+      this._s_set.s_view.check_destroy = true;
+      return;
+    }
     this.S_VIEW = { CHECK_DESTROY: true };
   }
 
   // --- Nested View (Level 1) ---
 
   nest_view_display(val, id, method_insert, method_destroy) {
+    if (val !== null && typeof val === `object` && `val` in val) {
+      ({ val, id, method_insert, method_destroy } = val);
+    }
+    if (this.mo_action) {
+      const s = this._s_set.s_view_nest;
+      s.xml = val ?? ``;
+      s.id = id ?? ``;
+      s.method_destroy = method_destroy ?? ``;
+      s.method_insert = method_insert ?? ``;
+      return;
+    }
     this.S_VIEW_NEST = {
       XML: val,
       ID: id,
@@ -154,6 +223,10 @@ class z2ui5_cl_core_client {
   }
 
   nest_view_model_update() {
+    if (this.mo_action) {
+      this._s_set.s_view_nest.check_update_model = true;
+      return;
+    }
     if (!this.S_VIEW_NEST) {
       this.S_VIEW_NEST = {};
     }
@@ -161,12 +234,27 @@ class z2ui5_cl_core_client {
   }
 
   nest_view_destroy() {
+    if (this.mo_action) {
+      this._s_set.s_view_nest.check_destroy = true;
+      return;
+    }
     this.S_VIEW_NEST = { CHECK_DESTROY: true };
   }
 
   // --- Nested View (Level 2) ---
 
   nest2_view_display(val, id, method_insert, method_destroy) {
+    if (val !== null && typeof val === `object` && `val` in val) {
+      ({ val, id, method_insert, method_destroy } = val);
+    }
+    if (this.mo_action) {
+      const s = this._s_set.s_view_nest2;
+      s.xml = val ?? ``;
+      s.id = id ?? ``;
+      s.method_destroy = method_destroy ?? ``;
+      s.method_insert = method_insert ?? ``;
+      return;
+    }
     this.S_VIEW_NEST2 = {
       XML: val,
       ID: id,
@@ -176,6 +264,10 @@ class z2ui5_cl_core_client {
   }
 
   nest2_view_model_update() {
+    if (this.mo_action) {
+      this._s_set.s_view_nest2.check_update_model = true;
+      return;
+    }
     if (!this.S_VIEW_NEST2) {
       this.S_VIEW_NEST2 = {};
     }
@@ -183,16 +275,30 @@ class z2ui5_cl_core_client {
   }
 
   nest2_view_destroy() {
+    if (this.mo_action) {
+      this._s_set.s_view_nest2.check_destroy = true;
+      return;
+    }
     this.S_VIEW_NEST2 = { CHECK_DESTROY: true };
   }
 
   // --- Popup ---
 
   popup_display(val) {
+    if (val !== null && typeof val === `object` && `val` in val) ({ val } = val);
+    if (this.mo_action) {
+      this._s_set.s_popup.check_destroy = false;
+      this._s_set.s_popup.xml = val ?? ``;
+      return;
+    }
     this.S_POPUP = { XML: val };
   }
 
   popup_model_update() {
+    if (this.mo_action) {
+      this._s_set.s_popup.check_update_model = true;
+      return;
+    }
     if (!this.S_POPUP) {
       this.S_POPUP = {};
     }
@@ -200,12 +306,26 @@ class z2ui5_cl_core_client {
   }
 
   popup_destroy() {
+    if (this.mo_action) {
+      // ABAP: s_popup = VALUE #( check_destroy = abap_true )
+      this._s_set.s_popup = { xml: ``, id: ``, check_destroy: true, check_update_model: false };
+      return;
+    }
     this.S_POPUP = { CHECK_DESTROY: true };
   }
 
   // --- Popover ---
 
   popover_display(xml, by_id) {
+    if (xml !== null && typeof xml === `object` && (`xml` in xml || `by_id` in xml)) {
+      ({ xml, by_id } = xml);
+    }
+    if (this.mo_action) {
+      this._s_set.s_popover.check_destroy = false;
+      this._s_set.s_popover.xml = xml ?? ``;
+      this._s_set.s_popover.open_by_id = by_id ?? ``;
+      return;
+    }
     this.S_POPOVER = {
       XML: xml,
       OPEN_BY_ID: by_id,
@@ -213,6 +333,10 @@ class z2ui5_cl_core_client {
   }
 
   popover_model_update() {
+    if (this.mo_action) {
+      this._s_set.s_popover.check_update_model = true;
+      return;
+    }
     if (!this.S_POPOVER) {
       this.S_POPOVER = {};
     }
@@ -220,24 +344,48 @@ class z2ui5_cl_core_client {
   }
 
   popover_destroy() {
+    if (this.mo_action) {
+      this._s_set.s_popover.check_destroy = true;
+      return;
+    }
     this.S_POPOVER = { CHECK_DESTROY: true };
   }
 
   // --- State Setters (Phase 1) ---
 
   set_session_stateful(val) {
+    if (this.mo_action) {
+      const li_app = this.get_if_app();
+      if (li_app.check_sticky === val) return;
+      this._s_set.s_stateful.active = val === true ? 1 : 0;
+      li_app.check_sticky = val;
+      this._s_set.s_stateful.switched = this._s_set.s_stateful.switched === false;
+      return;
+    }
     this._session_stateful = !!val;
   }
 
   set_app_state_active(val) {
+    if (this.mo_action) {
+      this._s_set.set_app_state_active = val;
+      return;
+    }
     this._app_state_active = val ? "X" : null;
   }
 
   set_nav_back(val) {
+    if (this.mo_action) {
+      this._s_set.set_nav_back = val;
+      return;
+    }
     this._nav_back = val ? "X" : null;
   }
 
   set_push_state(val) {
+    if (this.mo_action) {
+      this._s_set.set_push_state = val;
+      return;
+    }
     this._push_state = val;
   }
 
@@ -246,7 +394,18 @@ class z2ui5_cl_core_client {
    * Multiple calls accumulate — frontend executes them in order after the response.
    * Prefer the dedicated convenience methods below where available.
    */
-  follow_up_action(val) {
+  follow_up_action(val, t_arg) {
+    if (val !== null && typeof val === `object` && `val` in val) ({ val, t_arg } = val);
+    if (this.mo_action) {
+      // ABAP: a bare event name is routed through get_event_client, raw JS
+      // snippets pass through unchanged
+      let lv_js = val ?? ``;
+      if (lv_js && /^[A-Za-z0-9_]+$/.test(String(lv_js))) {
+        lv_js = this.mo_srv_event.get_event_client({ val: lv_js, t_arg: t_arg ?? [] });
+      }
+      this._s_set.s_follow_up_action.custom_js.push(lv_js);
+      return;
+    }
     if (!val) return;
     this._follow_up_actions.push(val);
   }
@@ -549,8 +708,11 @@ class z2ui5_cl_core_client {
   }
 
   get_event_arg(v) {
+    if (v !== null && typeof v === `object` && `v` in v) ({ v } = v);
     const index = (v || 1) - 1; // ABAP is 1-based
-    const args = this.oReq?.S_FRONT?.T_EVENT_ARG || [];
+    const args = this.mo_action
+      ? this.mo_action.ms_actual.t_event_arg || []
+      : this.oReq?.S_FRONT?.T_EVENT_ARG || [];
     return args[index] || "";
   }
 
@@ -560,6 +722,28 @@ class z2ui5_cl_core_client {
   // text, duration, width, my, at, of, offset, collision, onclose, autoclose,
   // animationtimingfunction, animationduration, closeonbrowsernavigation, class.
   message_toast_display(text, opts = {}) {
+    if (text !== null && typeof text === `object` && `text` in text) {
+      opts = text;
+      text = opts.text;
+    }
+    if (this.mo_action) {
+      const t = this._s_set.s_msg_toast;
+      t.text = text ?? ``;
+      t.class = opts.class ?? ``;
+      t.duration = opts.duration ?? ``;
+      t.width = opts.width ?? ``;
+      t.my = opts.my ?? ``;
+      t.at = opts.at ?? ``;
+      t.of = opts.of ?? ``;
+      t.offset = opts.offset ?? ``;
+      t.collision = opts.collision ?? ``;
+      t.onclose = opts.onclose ?? ``;
+      t.autoclose = opts.autoclose ?? ``;
+      t.animationtimingfunction = opts.animationtimingfunction ?? ``;
+      t.animationduration = opts.animationduration ?? ``;
+      t.closeonbrowsernavigation = opts.closeonbrowsernavigation ?? ``;
+      return;
+    }
     const toast = {
       AUTOCLOSE: opts.autoclose === false ? "" : "X",
       CLOSEONBROWSERNAVIGATION: opts.closeonbrowsernavigation === false ? "" : "X",
@@ -586,6 +770,40 @@ class z2ui5_cl_core_client {
   // initialfocus, textdirection, icon, details, closeonnavigation.
   message_box_display(text, type = "information", title, styleclass, onclose,
     actions, emphasizedaction, initialfocus, textdirection, icon, details, closeonnavigation = true) {
+    let named = null;
+    if (text !== null && typeof text === `object` && `text` in text) {
+      named = text;
+      ({ text, type = `information`, title, styleclass, onclose, actions, emphasizedaction,
+         initialfocus, textdirection, icon, details, closeonnavigation = true } = named);
+    }
+    if (this.mo_action) {
+      // ABAP semantics: `information` maps to MessageBox.show with an
+      // "Information" default title; an initial type falls back to `show`
+      let lv_type = type ?? ``;
+      let lv_title = title ?? ``;
+      if (lv_type === `information`) {
+        lv_type = `show`;
+        if (!lv_title) lv_title = `Information`;
+      }
+      if (!lv_type) lv_type = `show`;
+      this._s_set.s_msg_box = {
+        text: typeof text === `object` ? JSON.stringify(text) : text ?? ``,
+        type: lv_type,
+        title: lv_title,
+        styleclass: styleclass ?? ``,
+        onclose: onclose ?? ``,
+        actions: actions ?? [],
+        emphasizedaction: emphasizedaction ?? ``,
+        initialfocus: initialfocus ?? ``,
+        textdirection: textdirection ?? ``,
+        icon: icon ?? ``,
+        details: details ?? ``,
+        closeonnavigation: named ? (named.closeonnavigation ?? ``) : ``,
+        dependenton: named?.dependenton ?? ``,
+        contentwidth: named?.contentwidth ?? ``,
+      };
+      return;
+    }
     this.S_MSG_BOX = {
       CLOSEONNAVIGATION: closeonnavigation ? "X" : "",
       TEXT: typeof text === "object" ? JSON.stringify(text) : text,
@@ -627,12 +845,38 @@ class z2ui5_cl_core_client {
   }
 
   nav_app_call(appInstance) {
+    if (appInstance !== null && typeof appInstance === `object` && `app` in appInstance) {
+      appInstance = appInstance.app;
+    }
+    if (this.mo_action) {
+      this.mo_action.ms_next.o_app_call = appInstance;
+      return this.nav_app_set_id(appInstance);
+    }
     this._navTarget = appInstance;
     this._navTargetIsLeave = false;
     return this.nav_app_set_id(appInstance);
   }
 
-  nav_app_leave(app) {
+  nav_app_leave(app, event, r_data) {
+    let r_data_supplied = arguments.length >= 3;
+    if (app !== null && typeof app === `object` && (`app` in app || `event` in app || `r_data` in app)) {
+      r_data_supplied = `r_data` in app;
+      ({ app, event, r_data } = app);
+    }
+    if (this.mo_action) {
+      if (app === undefined) {
+        app = this.get_app(this.mo_action.mo_app.ms_draft.id_prev_app_stack);
+      }
+      this.mo_action.ms_next.o_app_leave = app ?? null;
+      this.mo_action.ms_next.next_event = event ?? ``;
+      // IS SUPPLIED (not IS NOT INITIAL) — an intentionally empty return
+      // value still reaches the previous app (abap2UI5#2404)
+      if (r_data_supplied) {
+        const z2ui5_cl_util = require(`../../00/03/z2ui5_cl_util`);
+        this.mo_action.ms_next.r_data = z2ui5_cl_util.abap_copy(r_data);
+      }
+      return this.nav_app_set_id(app);
+    }
     this._navTargetIsLeave = true;
     if (app) {
       this._navTarget = app;
@@ -673,6 +917,14 @@ class z2ui5_cl_core_client {
    * lookup failure so callers can `await client.get_app(id)` defensively.
    */
   get_app(id) {
+    if (id !== null && typeof id === `object` && `id` in id) ({ id } = id);
+    if (this.mo_action) {
+      if (!id) return this.get_if_app();
+      const z2ui5_cl_core_app = require(`./z2ui5_cl_core_app`);
+      const lo_app = z2ui5_cl_core_app.db_load(id);
+      if (lo_app && typeof lo_app.then !== `function`) return lo_app.mo_app;
+      return null;
+    }
     if (!id) return this.oApp;
     // Synchronous paths first — transpiled abap uses the return value
     // directly (`client.get_app( id )->result( )`), so the common lookups
@@ -696,10 +948,14 @@ class z2ui5_cl_core_client {
 
   /** Synchronous helper that returns the in-memory app — abap get_if_app(). */
   get_if_app() {
+    if (this.mo_action) return this.mo_action.mo_app.mo_app;
     return this.oApp;
   }
 
   get_app_prev() {
+    if (this.mo_action) {
+      return this.get_app(this.mo_action.mo_app.ms_draft.id_prev_app);
+    }
     // Prefer _navPrev (the just-left app on a back-navigation) so the
     // navigated-to app can read its result. Fall back to the top of the
     // stack when no back-nav happened (e.g. forward-nav inspecting caller).

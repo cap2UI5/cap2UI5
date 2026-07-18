@@ -1,6 +1,3 @@
-const z2ui5_cl_a2ui5_context = require("abap2UI5/z2ui5_cl_a2ui5_context");
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cx_a2ui5_error = require("abap2UI5/z2ui5_cx_a2ui5_error");
 
 class z2ui5_cl_a2ui5_http {
   mo_server_onprem = null;
@@ -12,10 +9,11 @@ class z2ui5_cl_a2ui5_http {
   static client_create({ destination, url } = {}) {
     let result = null;
     let sy_subrc = 0;
+    let x;
     let lv_classname = ``;
     lv_classname = `CL_HTTP_CLIENT`;
     let lv_destination = ``;
-    lv_destination = z2ui5_cl_util.abap_copy(destination);
+    lv_destination = z2ui5_cl_util.abap_tab_assign(lv_destination, z2ui5_cl_util.abap_copy(destination));
     const lv_url = (url);
     try {
       if (lv_destination && lv_destination !== `NONE`) {
@@ -26,10 +24,11 @@ class z2ui5_cl_a2ui5_http {
       if (sy_subrc !== 0) {
         result = null;
       }
-    } catch (x) {
+    } catch (_caught1) {
+      x = _caught1;
       throw new z2ui5_cx_a2ui5_error({ val: x });
     }
-    if (result != null) {
+    if (result == null) {
       throw new z2ui5_cx_a2ui5_error({ val: `HTTP_CLIENT_CREATE_ERROR - check the destination/url configuration` });
     }
     return result;
@@ -42,34 +41,116 @@ class z2ui5_cl_a2ui5_http {
     let _fs$fs_any = null;
     let lv_method;
     let lv_body;
+    let x;
     let lo_request = null;
     let lo_response = null;
     let lv_message = ``;
     const lo_client = z2ui5_cl_a2ui5_http.client_create({ destination, url });
     try {
-      // TODO(abap2js): ASSIGN lo_client->(`REQUEST`) TO <any>.
+      _fs$fs_any = ((_o, _n) => { if (_o == null) return null; const _k = String(_n).toLowerCase(); return _k in _o ? { o: _o, k: _k } : null; })(lo_client, `REQUEST`);
+      fs_any = _fs$fs_any ? _fs$fs_any.o[_fs$fs_any.k] : null;
+      sy_subrc = _fs$fs_any ? 0 : 4;
       if (!(sy_subrc === 0)) throw new Error(`ASSERT failed`);
-      lo_request = z2ui5_cl_util.abap_copy(fs_any);
+      lo_request = fs_any;
       lv_method = (method);
-      // TODO(abap2js): CALL METHOD lo_request->(`SET_METHOD`) EXPORTING method = lv_method.
+      {
+        const _dynr = (lo_request);
+        const _dynm = _dynr ? _dynr[String(`SET_METHOD`).toLowerCase()] : undefined;
+        if (typeof _dynm !== "function") throw new Error(`CALL METHOD: ${String(`SET_METHOD`)} not found`);
+        {
+          const _dynargs = { method: lv_method };
+          const _dynret = _dynm.call(_dynr, _dynargs);
+        }
+      }
       lv_body = (body);
-      // TODO(abap2js): CALL METHOD lo_request->(`SET_CDATA`) EXPORTING data = lv_body.
-      // TODO(abap2js): CALL METHOD lo_client->(`SEND`) EXCEPTIONS http_communication_failure = 1 http_invalid_state = 2 http_processing_failed = 3 http_invalid_timeout = 4 OTHERS = 5.
+      {
+        const _dynr = (lo_request);
+        const _dynm = _dynr ? _dynr[String(`SET_CDATA`).toLowerCase()] : undefined;
+        if (typeof _dynm !== "function") throw new Error(`CALL METHOD: ${String(`SET_CDATA`)} not found`);
+        {
+          const _dynargs = { data: lv_body };
+          const _dynret = _dynm.call(_dynr, _dynargs);
+        }
+      }
+      {
+        const _dynr = (lo_client);
+        const _dynm = _dynr ? _dynr[String(`SEND`).toLowerCase()] : undefined;
+        sy_subrc = typeof _dynm === "function" ? 0 : 4;
+        if (typeof _dynm === "function") {
+          const _dynargs = {  };
+          const _dynret = _dynm.call(_dynr, _dynargs);
+        }
+      }
       if (sy_subrc === 0) {
-        // TODO(abap2js): CALL METHOD lo_client->(`RECEIVE`) EXCEPTIONS http_communication_failure = 1 http_invalid_state = 2 http_processing_failed = 3 OTHERS = 4.
+        {
+          const _dynr = (lo_client);
+          const _dynm = _dynr ? _dynr[String(`RECEIVE`).toLowerCase()] : undefined;
+          sy_subrc = typeof _dynm === "function" ? 0 : 4;
+          if (typeof _dynm === "function") {
+            const _dynargs = {  };
+            const _dynret = _dynm.call(_dynr, _dynargs);
+          }
+        }
       }
       if (sy_subrc !== 0) {
-        // TODO(abap2js): CALL METHOD lo_client->(`GET_LAST_ERROR`) IMPORTING message = lv_message.
-        // TODO(abap2js): CALL METHOD lo_client->(`CLOSE`) EXCEPTIONS OTHERS = 1.
+        {
+          const _dynr = (lo_client);
+          const _dynm = _dynr ? _dynr[String(`GET_LAST_ERROR`).toLowerCase()] : undefined;
+          if (typeof _dynm !== "function") throw new Error(`CALL METHOD: ${String(`GET_LAST_ERROR`)} not found`);
+          {
+            const _dynargs = { message: lv_message };
+            const _dynret = _dynm.call(_dynr, _dynargs);
+            lv_message = _dynargs.message;
+          }
+        }
+        {
+          const _dynr = (lo_client);
+          const _dynm = _dynr ? _dynr[String(`CLOSE`).toLowerCase()] : undefined;
+          sy_subrc = typeof _dynm === "function" ? 0 : 4;
+          if (typeof _dynm === "function") {
+            const _dynargs = {  };
+            const _dynret = _dynm.call(_dynr, _dynargs);
+          }
+        }
         throw new z2ui5_cx_a2ui5_error({ val: `HTTP_COMMUNICATION_ERROR - ${lv_message}` });
       }
-      // TODO(abap2js): ASSIGN lo_client->(`RESPONSE`) TO <any>.
+      _fs$fs_any = ((_o, _n) => { if (_o == null) return null; const _k = String(_n).toLowerCase(); return _k in _o ? { o: _o, k: _k } : null; })(lo_client, `RESPONSE`);
+      fs_any = _fs$fs_any ? _fs$fs_any.o[_fs$fs_any.k] : null;
+      sy_subrc = _fs$fs_any ? 0 : 4;
       if (!(sy_subrc === 0)) throw new Error(`ASSERT failed`);
-      lo_response = z2ui5_cl_util.abap_copy(fs_any);
-      // TODO(abap2js): CALL METHOD lo_response->(`GET_CDATA`) RECEIVING data = result-body.
-      // TODO(abap2js): CALL METHOD lo_response->(`GET_STATUS`) IMPORTING code = result-status_code reason = result-status_reason.
-      // TODO(abap2js): CALL METHOD lo_client->(`CLOSE`) EXCEPTIONS OTHERS = 1.
-    } catch (x) {
+      lo_response = fs_any;
+      {
+        const _dynr = (lo_response);
+        const _dynm = _dynr ? _dynr[String(`GET_CDATA`).toLowerCase()] : undefined;
+        if (typeof _dynm !== "function") throw new Error(`CALL METHOD: ${String(`GET_CDATA`)} not found`);
+        {
+          const _dynargs = {  };
+          const _dynret = _dynm.call(_dynr, _dynargs);
+          result.body = _dynret !== undefined ? _dynret : _dynargs.data;
+        }
+      }
+      {
+        const _dynr = (lo_response);
+        const _dynm = _dynr ? _dynr[String(`GET_STATUS`).toLowerCase()] : undefined;
+        if (typeof _dynm !== "function") throw new Error(`CALL METHOD: ${String(`GET_STATUS`)} not found`);
+        {
+          const _dynargs = { code: result.status_code, reason: result.status_reason };
+          const _dynret = _dynm.call(_dynr, _dynargs);
+          result.status_code = _dynargs.code;
+          result.status_reason = _dynargs.reason;
+        }
+      }
+      {
+        const _dynr = (lo_client);
+        const _dynm = _dynr ? _dynr[String(`CLOSE`).toLowerCase()] : undefined;
+        sy_subrc = typeof _dynm === "function" ? 0 : 4;
+        if (typeof _dynm === "function") {
+          const _dynargs = {  };
+          const _dynret = _dynm.call(_dynr, _dynargs);
+        }
+      }
+    } catch (_caught1) {
+      x = _caught1;
       throw new z2ui5_cx_a2ui5_error({ val: x });
     }
     return result;
@@ -80,7 +161,15 @@ class z2ui5_cl_a2ui5_http {
     const lv_val = (val);
     if (this.mo_server_onprem != null) {
       object = this.get_response_onprem();
-      // TODO(abap2js): CALL METHOD object->(`DELETE_COOKIE`) EXPORTING name = lv_val.
+      {
+        const _dynr = (object);
+        const _dynm = _dynr ? _dynr[String(`DELETE_COOKIE`).toLowerCase()] : undefined;
+        if (typeof _dynm !== "function") throw new Error(`CALL METHOD: ${String(`DELETE_COOKIE`)} not found`);
+        {
+          const _dynargs = { name: lv_val };
+          const _dynret = _dynm.call(_dynr, _dynargs);
+        }
+      }
     }
   }
 
@@ -90,7 +179,16 @@ class z2ui5_cl_a2ui5_http {
     const lv_val = (val);
     if (this.mo_server_onprem != null) {
       object = this.get_response_onprem();
-      // TODO(abap2js): CALL METHOD object->(`GET_COOKIE`) EXPORTING name = lv_val IMPORTING value = result.
+      {
+        const _dynr = (object);
+        const _dynm = _dynr ? _dynr[String(`GET_COOKIE`).toLowerCase()] : undefined;
+        if (typeof _dynm !== "function") throw new Error(`CALL METHOD: ${String(`GET_COOKIE`)} not found`);
+        {
+          const _dynargs = { name: lv_val, value: result };
+          const _dynret = _dynm.call(_dynr, _dynargs);
+          result = _dynargs.value;
+        }
+      }
     }
     return result;
   }
@@ -101,9 +199,27 @@ class z2ui5_cl_a2ui5_http {
     const lv_val = (val);
     if (this.mo_server_onprem != null) {
       object = this.get_request_onprem();
-      // TODO(abap2js): CALL METHOD object->(`GET_HEADER_FIELD`) EXPORTING name = lv_val RECEIVING value = result.
+      {
+        const _dynr = (object);
+        const _dynm = _dynr ? _dynr[String(`GET_HEADER_FIELD`).toLowerCase()] : undefined;
+        if (typeof _dynm !== "function") throw new Error(`CALL METHOD: ${String(`GET_HEADER_FIELD`)} not found`);
+        {
+          const _dynargs = { name: lv_val };
+          const _dynret = _dynm.call(_dynr, _dynargs);
+          result = _dynret !== undefined ? _dynret : _dynargs.value;
+        }
+      }
     } else {
-      // TODO(abap2js): CALL METHOD mo_request_cloud->(`IF_WEB_HTTP_REQUEST~GET_HEADER_FIELD`) EXPORTING i_name = lv_val RECEIVING r_value = result.
+      {
+        const _dynr = (this.mo_request_cloud);
+        const _dynm = _dynr ? _dynr[String(`IF_WEB_HTTP_REQUEST~GET_HEADER_FIELD`).toLowerCase()] : undefined;
+        if (typeof _dynm !== "function") throw new Error(`CALL METHOD: ${String(`IF_WEB_HTTP_REQUEST~GET_HEADER_FIELD`)} not found`);
+        {
+          const _dynargs = { i_name: lv_val };
+          const _dynret = _dynm.call(_dynr, _dynargs);
+          result = _dynret !== undefined ? _dynret : _dynargs.r_value;
+        }
+      }
     }
     return result;
   }
@@ -114,24 +230,40 @@ class z2ui5_cl_a2ui5_http {
     const lv_v = (v);
     if (this.mo_server_onprem != null) {
       object = this.get_response_onprem();
-      // TODO(abap2js): CALL METHOD object->(`SET_HEADER_FIELD`) EXPORTING name = lv_n value = lv_v.
+      {
+        const _dynr = (object);
+        const _dynm = _dynr ? _dynr[String(`SET_HEADER_FIELD`).toLowerCase()] : undefined;
+        if (typeof _dynm !== "function") throw new Error(`CALL METHOD: ${String(`SET_HEADER_FIELD`)} not found`);
+        {
+          const _dynargs = { name: lv_n, value: lv_v };
+          const _dynret = _dynm.call(_dynr, _dynargs);
+        }
+      }
     } else {
-      // TODO(abap2js): CALL METHOD mo_response_cloud->(`IF_WEB_HTTP_RESPONSE~SET_HEADER_FIELD`) EXPORTING i_name = lv_n i_value = lv_v.
+      {
+        const _dynr = (this.mo_response_cloud);
+        const _dynm = _dynr ? _dynr[String(`IF_WEB_HTTP_RESPONSE~SET_HEADER_FIELD`).toLowerCase()] : undefined;
+        if (typeof _dynm !== "function") throw new Error(`CALL METHOD: ${String(`IF_WEB_HTTP_RESPONSE~SET_HEADER_FIELD`)} not found`);
+        {
+          const _dynargs = { i_name: lv_n, i_value: lv_v };
+          const _dynret = _dynm.call(_dynr, _dynargs);
+        }
+      }
     }
   }
 
   static factory({ server } = {}) {
     let result = null;
     result = new z2ui5_cl_a2ui5_http();
-    result.mo_server_onprem = z2ui5_cl_util.abap_copy(server);
+    result.mo_server_onprem = server;
     return result;
   }
 
   static factory_cloud({ req, res } = {}) {
     let result = null;
     result = new z2ui5_cl_a2ui5_http();
-    result.mo_request_cloud = z2ui5_cl_util.abap_copy(req);
-    result.mo_response_cloud = z2ui5_cl_util.abap_copy(res);
+    result.mo_request_cloud = req;
+    result.mo_response_cloud = res;
     return result;
   }
 
@@ -140,9 +272,27 @@ class z2ui5_cl_a2ui5_http {
     let object;
     if (this.mo_server_onprem != null) {
       object = this.get_request_onprem();
-      // TODO(abap2js): CALL METHOD object->(`GET_CDATA`) RECEIVING data = result.
+      {
+        const _dynr = (object);
+        const _dynm = _dynr ? _dynr[String(`GET_CDATA`).toLowerCase()] : undefined;
+        if (typeof _dynm !== "function") throw new Error(`CALL METHOD: ${String(`GET_CDATA`)} not found`);
+        {
+          const _dynargs = {  };
+          const _dynret = _dynm.call(_dynr, _dynargs);
+          result = _dynret !== undefined ? _dynret : _dynargs.data;
+        }
+      }
     } else {
-      // TODO(abap2js): CALL METHOD mo_request_cloud->(`IF_WEB_HTTP_REQUEST~GET_TEXT`) RECEIVING r_value = result.
+      {
+        const _dynr = (this.mo_request_cloud);
+        const _dynm = _dynr ? _dynr[String(`IF_WEB_HTTP_REQUEST~GET_TEXT`).toLowerCase()] : undefined;
+        if (typeof _dynm !== "function") throw new Error(`CALL METHOD: ${String(`IF_WEB_HTTP_REQUEST~GET_TEXT`)} not found`);
+        {
+          const _dynargs = {  };
+          const _dynret = _dynm.call(_dynr, _dynargs);
+          result = _dynret !== undefined ? _dynret : _dynargs.r_value;
+        }
+      }
     }
     return result;
   }
@@ -152,9 +302,27 @@ class z2ui5_cl_a2ui5_http {
     let object;
     if (this.mo_server_onprem != null) {
       object = this.get_request_onprem();
-      // TODO(abap2js): CALL METHOD object->(`IF_HTTP_REQUEST~GET_METHOD`) RECEIVING method = result.
+      {
+        const _dynr = (object);
+        const _dynm = _dynr ? _dynr[String(`IF_HTTP_REQUEST~GET_METHOD`).toLowerCase()] : undefined;
+        if (typeof _dynm !== "function") throw new Error(`CALL METHOD: ${String(`IF_HTTP_REQUEST~GET_METHOD`)} not found`);
+        {
+          const _dynargs = {  };
+          const _dynret = _dynm.call(_dynr, _dynargs);
+          result = _dynret !== undefined ? _dynret : _dynargs.method;
+        }
+      }
     } else {
-      // TODO(abap2js): CALL METHOD mo_request_cloud->(`IF_WEB_HTTP_REQUEST~GET_METHOD`) RECEIVING r_value = result.
+      {
+        const _dynr = (this.mo_request_cloud);
+        const _dynm = _dynr ? _dynr[String(`IF_WEB_HTTP_REQUEST~GET_METHOD`).toLowerCase()] : undefined;
+        if (typeof _dynm !== "function") throw new Error(`CALL METHOD: ${String(`IF_WEB_HTTP_REQUEST~GET_METHOD`)} not found`);
+        {
+          const _dynargs = {  };
+          const _dynret = _dynm.call(_dynr, _dynargs);
+          result = _dynret !== undefined ? _dynret : _dynargs.r_value;
+        }
+      }
     }
     return result;
   }
@@ -163,9 +331,25 @@ class z2ui5_cl_a2ui5_http {
     let object;
     if (this.mo_server_onprem != null) {
       object = this.get_response_onprem();
-      // TODO(abap2js): CALL METHOD object->(`SET_CDATA`) EXPORTING data = val.
+      {
+        const _dynr = (object);
+        const _dynm = _dynr ? _dynr[String(`SET_CDATA`).toLowerCase()] : undefined;
+        if (typeof _dynm !== "function") throw new Error(`CALL METHOD: ${String(`SET_CDATA`)} not found`);
+        {
+          const _dynargs = { data: val };
+          const _dynret = _dynm.call(_dynr, _dynargs);
+        }
+      }
     } else {
-      // TODO(abap2js): CALL METHOD mo_response_cloud->(`IF_WEB_HTTP_RESPONSE~SET_TEXT`) EXPORTING i_text = val.
+      {
+        const _dynr = (this.mo_response_cloud);
+        const _dynm = _dynr ? _dynr[String(`IF_WEB_HTTP_RESPONSE~SET_TEXT`).toLowerCase()] : undefined;
+        if (typeof _dynm !== "function") throw new Error(`CALL METHOD: ${String(`IF_WEB_HTTP_RESPONSE~SET_TEXT`)} not found`);
+        {
+          const _dynargs = { i_text: val };
+          const _dynret = _dynm.call(_dynr, _dynargs);
+        }
+      }
     }
   }
 
@@ -174,15 +358,39 @@ class z2ui5_cl_a2ui5_http {
     const lv_reason = (reason);
     if (this.mo_server_onprem != null) {
       object = this.get_response_onprem();
-      // TODO(abap2js): CALL METHOD object->(`IF_HTTP_RESPONSE~SET_STATUS`) EXPORTING code = code reason = lv_reason.
+      {
+        const _dynr = (object);
+        const _dynm = _dynr ? _dynr[String(`IF_HTTP_RESPONSE~SET_STATUS`).toLowerCase()] : undefined;
+        if (typeof _dynm !== "function") throw new Error(`CALL METHOD: ${String(`IF_HTTP_RESPONSE~SET_STATUS`)} not found`);
+        {
+          const _dynargs = { code: code, reason: lv_reason };
+          const _dynret = _dynm.call(_dynr, _dynargs);
+        }
+      }
     } else {
-      // TODO(abap2js): CALL METHOD mo_response_cloud->(`IF_WEB_HTTP_RESPONSE~SET_STATUS`) EXPORTING i_code = code i_reason = lv_reason.
+      {
+        const _dynr = (this.mo_response_cloud);
+        const _dynm = _dynr ? _dynr[String(`IF_WEB_HTTP_RESPONSE~SET_STATUS`).toLowerCase()] : undefined;
+        if (typeof _dynm !== "function") throw new Error(`CALL METHOD: ${String(`IF_WEB_HTTP_RESPONSE~SET_STATUS`)} not found`);
+        {
+          const _dynargs = { i_code: code, i_reason: lv_reason };
+          const _dynret = _dynm.call(_dynr, _dynargs);
+        }
+      }
     }
   }
 
   set_session_stateful({ val } = {}) {
     if (this.mo_server_onprem != null) {
-      // TODO(abap2js): CALL METHOD mo_server_onprem->(`SET_SESSION_STATEFUL`) EXPORTING stateful = val.
+      {
+        const _dynr = (this.mo_server_onprem);
+        const _dynm = _dynr ? _dynr[String(`SET_SESSION_STATEFUL`).toLowerCase()] : undefined;
+        if (typeof _dynm !== "function") throw new Error(`CALL METHOD: ${String(`SET_SESSION_STATEFUL`)} not found`);
+        {
+          const _dynargs = { stateful: val };
+          const _dynret = _dynm.call(_dynr, _dynargs);
+        }
+      }
     }
   }
 
@@ -191,12 +399,14 @@ class z2ui5_cl_a2ui5_http {
     let sy_subrc = 0;
     let fs_any = null;
     let _fs$fs_any = null;
-    if (this.mo_request_onprem != null) {
-      // TODO(abap2js): ASSIGN mo_server_onprem->(`REQUEST`) TO <any>.
+    if (this.mo_request_onprem == null) {
+      _fs$fs_any = ((_o, _n) => { if (_o == null) return null; const _k = String(_n).toLowerCase(); return _k in _o ? { o: _o, k: _k } : null; })(this.mo_server_onprem, `REQUEST`);
+      fs_any = _fs$fs_any ? _fs$fs_any.o[_fs$fs_any.k] : null;
+      sy_subrc = _fs$fs_any ? 0 : 4;
       if (!(sy_subrc === 0)) throw new Error(`ASSERT failed`);
-      this.mo_request_onprem = z2ui5_cl_util.abap_copy(fs_any);
+      this.mo_request_onprem = fs_any;
     }
-    result = z2ui5_cl_util.abap_copy(this.mo_request_onprem);
+    result = this.mo_request_onprem;
     return result;
   }
 
@@ -205,12 +415,14 @@ class z2ui5_cl_a2ui5_http {
     let sy_subrc = 0;
     let fs_any = null;
     let _fs$fs_any = null;
-    if (this.mo_response_onprem != null) {
-      // TODO(abap2js): ASSIGN mo_server_onprem->(`RESPONSE`) TO <any>.
+    if (this.mo_response_onprem == null) {
+      _fs$fs_any = ((_o, _n) => { if (_o == null) return null; const _k = String(_n).toLowerCase(); return _k in _o ? { o: _o, k: _k } : null; })(this.mo_server_onprem, `RESPONSE`);
+      fs_any = _fs$fs_any ? _fs$fs_any.o[_fs$fs_any.k] : null;
+      sy_subrc = _fs$fs_any ? 0 : 4;
       if (!(sy_subrc === 0)) throw new Error(`ASSERT failed`);
-      this.mo_response_onprem = z2ui5_cl_util.abap_copy(fs_any);
+      this.mo_response_onprem = fs_any;
     }
-    result = z2ui5_cl_util.abap_copy(this.mo_response_onprem);
+    result = this.mo_response_onprem;
     return result;
   }
 
@@ -225,3 +437,8 @@ class z2ui5_cl_a2ui5_http {
 }
 
 module.exports = z2ui5_cl_a2ui5_http;
+
+const z2ui5_cl_a2ui5_context = require("abap2UI5/z2ui5_cl_a2ui5_context");
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cx_a2ui5_error = require("abap2UI5/z2ui5_cx_a2ui5_error");
+

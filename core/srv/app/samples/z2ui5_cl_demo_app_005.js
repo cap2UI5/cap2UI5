@@ -1,5 +1,3 @@
-const cl_abap_char_utilities = require("abap2UI5/cl_abap_char_utilities");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_005 extends z2ui5_if_app {
@@ -26,3 +24,7 @@ class z2ui5_cl_demo_app_005 extends z2ui5_if_app {
 }
 
 module.exports = z2ui5_cl_demo_app_005;
+
+const cl_abap_char_utilities = require("abap2UI5/cl_abap_char_utilities");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+

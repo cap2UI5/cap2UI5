@@ -1,6 +1,3 @@
-const z2ui5_cl_pop_image_editor = require("abap2UI5/z2ui5_cl_pop_image_editor");
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_306 extends z2ui5_if_app {
@@ -13,7 +10,7 @@ class z2ui5_cl_demo_app_306 extends z2ui5_if_app {
   facing_modes = [];
   device = ``;
   devices = [];
-  selected_picture = {};
+  selected_picture = { time: ``, id: ``, name: ``, data: ``, thumbnail: ``, selected: false };
   client = null;
 
   view_display() {
@@ -46,9 +43,9 @@ class z2ui5_cl_demo_app_306 extends z2ui5_if_app {
 
   async main(client) {
     let sy_uzeit = "";
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init()) {
-      this.facing_modes = [{ key: ``, text: `` }, { key: `environment`, text: `environment` }, { key: `user`, text: `user` }, { key: `left`, text: `left` }, { key: `right`, text: `right` }];
+      this.facing_modes = z2ui5_cl_util.abap_tab_assign(this.facing_modes, [{ key: ``, text: `` }, { key: `environment`, text: `environment` }, { key: `user`, text: `user` }, { key: `left`, text: `left` }, { key: `right`, text: `right` }]);
       this.view_display();
     }
     if (((client.get().CHECK_ON_NAVIGATED) === true || (client.get().CHECK_ON_NAVIGATED) === `X`)) {
@@ -59,14 +56,14 @@ class z2ui5_cl_demo_app_306 extends z2ui5_if_app {
     }
     switch (client.get().EVENT) {
       case `CAPTURE`:
-        this.mt_picture.push({ data: this.mv_picture_base, thumbnail: this.mv_picture_thumb, time: sy_uzeit });
+        this.mt_picture.push(z2ui5_cl_util.abap_copy({ data: this.mv_picture_base, thumbnail: this.mv_picture_thumb, time: sy_uzeit, id: ``, name: ``, selected: false }));
         this.mv_picture_base = {};
         this.mv_picture_thumb = {};
         client.view_model_update();
         break;
       case `DISPLAY`:
         this.selected_picture = this.mt_picture_out.find((row) => row.selected === true);
-        this.mv_pic_display = z2ui5_cl_util.abap_copy(this.mt_picture[(this.selected_picture.id) - 1].data);
+        this.mv_pic_display = z2ui5_cl_util.abap_tab_assign(this.mv_pic_display, z2ui5_cl_util.abap_copy(this.mt_picture[(this.selected_picture.id) - 1].data));
         this.rebuild_output();
         this.view_display();
         return;
@@ -88,7 +85,7 @@ class z2ui5_cl_demo_app_306 extends z2ui5_if_app {
     sy_tabix = 0;
     for (const ls_pic of this.mt_picture) {
       sy_tabix++;
-      this.mt_picture_out.push({ name: `picture ${sy_tabix}`, id: sy_tabix, thumbnail: ls_pic.thumbnail, selected: (sy_tabix === this.selected_picture.id ? true : null) });
+      this.mt_picture_out.push(z2ui5_cl_util.abap_copy({ name: `picture ${sy_tabix}`, id: sy_tabix, thumbnail: ls_pic.thumbnail, selected: (sy_tabix === this.selected_picture.id ? true : null), time: ``, data: `` }));
     }
   }
 
@@ -102,13 +99,13 @@ class z2ui5_cl_demo_app_306 extends z2ui5_if_app {
       lo_prev = this.client.get_app(this.client.get().S_DRAFT.ID_PREV_APP);
       result = (lo_prev).result();
       if ((result.check_confirmed === true || result.check_confirmed === `X`)) {
-        this.mv_pic_display = z2ui5_cl_util.abap_copy(result.image);
+        this.mv_pic_display = z2ui5_cl_util.abap_tab_assign(this.mv_pic_display, z2ui5_cl_util.abap_copy(result.image));
         fs_picture = this.mt_picture[(this.selected_picture.id) - 1];
         _fs$fs_picture = null;
         sy_subrc = 0;
         if (sy_subrc === 0) {
-          fs_picture.data = z2ui5_cl_util.abap_copy(this.mv_pic_display);
-          fs_picture.thumbnail = z2ui5_cl_util.abap_copy(this.mv_pic_display);
+          fs_picture.data = z2ui5_cl_util.abap_tab_assign(fs_picture.data, z2ui5_cl_util.abap_copy(this.mv_pic_display));
+          fs_picture.thumbnail = z2ui5_cl_util.abap_tab_assign(fs_picture.thumbnail, z2ui5_cl_util.abap_copy(this.mv_pic_display));
         }
       }
     } catch (error) {
@@ -117,3 +114,8 @@ class z2ui5_cl_demo_app_306 extends z2ui5_if_app {
 }
 
 module.exports = z2ui5_cl_demo_app_306;
+
+const z2ui5_cl_pop_image_editor = require("abap2UI5/z2ui5_cl_pop_image_editor");
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+

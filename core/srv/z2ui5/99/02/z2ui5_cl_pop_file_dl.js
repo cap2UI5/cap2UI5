@@ -1,6 +1,3 @@
-const z2ui5_cl_a2ui5_context = require("abap2UI5/z2ui5_cl_a2ui5_context");
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_pop_file_dl extends z2ui5_if_app {
@@ -20,13 +17,13 @@ class z2ui5_cl_pop_file_dl extends z2ui5_if_app {
     let r_result = null;
     let lv_size_kb = 0;
     r_result = new z2ui5_cl_pop_file_dl();
-    r_result.title = z2ui5_cl_util.abap_copy(i_title);
-    r_result.question_text = z2ui5_cl_util.abap_copy(i_text);
-    r_result.button_text_confirm = z2ui5_cl_util.abap_copy(i_button_text_confirm);
-    r_result.button_text_cancel = z2ui5_cl_util.abap_copy(i_button_text_cancel);
-    r_result.mv_type = z2ui5_cl_util.abap_copy(i_type);
-    r_result.mv_name = z2ui5_cl_util.abap_copy(i_name);
-    r_result.mv_value = z2ui5_cl_util.abap_copy(i_file);
+    r_result.title = z2ui5_cl_util.abap_tab_assign(r_result.title, z2ui5_cl_util.abap_copy(i_title));
+    r_result.question_text = z2ui5_cl_util.abap_tab_assign(r_result.question_text, z2ui5_cl_util.abap_copy(i_text));
+    r_result.button_text_confirm = z2ui5_cl_util.abap_tab_assign(r_result.button_text_confirm, z2ui5_cl_util.abap_copy(i_button_text_confirm));
+    r_result.button_text_cancel = z2ui5_cl_util.abap_tab_assign(r_result.button_text_cancel, z2ui5_cl_util.abap_copy(i_button_text_cancel));
+    r_result.mv_type = z2ui5_cl_util.abap_tab_assign(r_result.mv_type, z2ui5_cl_util.abap_copy(i_type));
+    r_result.mv_name = z2ui5_cl_util.abap_tab_assign(r_result.mv_name, z2ui5_cl_util.abap_copy(i_name));
+    r_result.mv_value = z2ui5_cl_util.abap_tab_assign(r_result.mv_value, z2ui5_cl_util.abap_copy(i_file));
     lv_size_kb = z2ui5_cl_util.abap_div(i_file.length, 1000);
     r_result.mv_size = (lv_size_kb).trim();
     return r_result;
@@ -34,7 +31,7 @@ class z2ui5_cl_pop_file_dl extends z2ui5_if_app {
 
   result() {
     let result = false;
-    result = z2ui5_cl_util.abap_copy(this.check_confirmed);
+    result = z2ui5_cl_util.abap_tab_assign(result, z2ui5_cl_util.abap_copy(this.check_confirmed));
     return result;
   }
 
@@ -66,7 +63,7 @@ class z2ui5_cl_pop_file_dl extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init()) {
       this.view_display();
       return;
@@ -89,9 +86,14 @@ class z2ui5_cl_pop_file_dl extends z2ui5_if_app {
   }
 }
 
+module.exports = z2ui5_cl_pop_file_dl;
+
+const z2ui5_cl_a2ui5_context = require("abap2UI5/z2ui5_cl_a2ui5_context");
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+
 // abap PREFERRED PARAMETER call style — see z2ui5_pop_preferred_param.js
 require("./z2ui5_pop_preferred_param")(z2ui5_cl_pop_file_dl, {
   factory: { preferred: `i_file`, params: [`i_text`, `i_title`, `i_button_text_confirm`, `i_button_text_cancel`, `i_file`, `i_type`, `i_name`] },
 });
 
-module.exports = z2ui5_cl_pop_file_dl;

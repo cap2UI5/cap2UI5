@@ -1,50 +1,68 @@
 const z2ui5_if_core_types = require("./z2ui5_if_core_types");
+const rtti = require("../../00/00/abap_rtti");
 
 /**
  * z2ui5_cl_core_srv_model — JS port of abap2UI5 z2ui5_cl_core_srv_model.
  *
  * Two layers:
  *
- *   STATIC — used by core_handler / core_app:
+ *   STATIC — used by core_handler / core_app (JS wire fast path):
  *     main_json_to_attri(oApp, xx, requireOwn?)
  *       Apply incoming XX deltas onto the app instance.
  *     main_json_stringify(aBind)
  *       Build the response model from the client's aBind list.
  *
- *   INSTANCE — 1:1 ABAP mirror, used when the framework needs to track an
- *   attribute table separately from aBind (e.g. delta_apply_to_table on a
- *   nested table; dissolve-driven attribute search):
- *
+ *   INSTANCE — 1:1 ABAP mirror over (attri, app):
  *     constructor(attri, app)         — store mt_attri ref + app ref
- *     main_attri_search(val)          — find attr whose value === val
- *     main_attri_db_save_srtti()      — JS no-op (no SRTTI XML)
- *     main_attri_db_load*             — JS no-op (JSON-based persistence)
+ *     main_attri_search(val)          — find attr by reference identity
+ *     main_attri_db_*                 — JS no-ops (JSON persistence, no SRTTI)
  *     main_attri_refresh()            — re-dissolve, preserve bind metadata
- *     main_json_to_attri(view, model) — instance variant (delta routing)
- *     main_json_stringify()           — instance variant (returns string)
+ *     main_json_to_attri(view, model) — ajson delta routing (ABAP signature)
+ *     main_json_stringify()           — serialize bound attrs (ABAP signature)
+ *     attri_create_new / attri_search / attri_get_val_ref
+ *     dissolve / dissolve_run / diss_struc / diss_dref / diss_oref
+ *     attri_update_entry_refs / attri_update_refs_children
+ *     delta_apply_to_table(io_val_front, iv_name)
  *
- *     attri_create_new(name)          — register an attr entry
- *     attri_search(val)               — value-equality lookup
- *     attri_get_val_ref(path)         — resolve `field-> sub-> child` to
- *                                       a {get(), set(v)} accessor
- *     dissolve()                      — iterative dissolution
- *     dissolve_run()                  — single dissolution pass
- *     diss_struc / diss_dref / diss_oref
- *                                     — type-specific decomposition
- *     delta_apply_to_table(delta, name)
- *                                     — apply __delta patch to a table attr
+ * Reference semantics in JS:
+ *   ABAP data references (TYPE REF TO data) have no JS counterpart — a dref
+ *   collapses to its value. The port recovers ABAP's dref classification
+ *   through ALIASING: two attributes can only share object identity
+ *   (Object.is) when at least one of them is a reference in ABAP, and the
+ *   dissolve order (root attributes first, children later) guarantees the
+ *   canonical value attribute is discovered before any reference to it. An
+ *   attribute whose (plain) object value aliases an earlier-discovered
+ *   attribute is therefore treated as a DREF: type_kind 'l', kind 'R',
+ *   children named with `->` (`MO_OBJ->MR_DATA->COMP1`) and a `<name>->*`
+ *   entry for non-struct targets — same names ABAP produces. Scalar drefs
+ *   (REF TO string …) cannot be recovered and stay plain attributes.
  *
- * The dissolve system is conceptually identical to abap but stays simpler
- * because JS has no DREF/OREF distinction — both collapse to "object whose
- * own enumerable keys point at sub-values".
+ *   attri_get_val_ref returns the resolved VALUE (a JS object IS a
+ *   reference; scalars lose ref-ness — inherent JS limit). The framework
+ *   writes through the private _attri_accessor which keeps a set-back.
+ *
+ * type_kind / kind use the real ABAP RTTI letters (via abap_rtti):
+ *   type_kind: 'g' string, 'h' table, 'l' dref, 'r' oref, 'u'/'v' struct, …
+ *   kind:      'E' elem, 'S' struct, 'T' table, 'R' ref
  */
 
 const MAX_DISSOLVE_DEPTH = 5;
 
+const TK = { table: `h`, dref: `l`, oref: `r`, struct1: `u`, struct2: `v` };
+const KD = { elem: `E`, struct: `S`, table: `T`, ref: `R`, class: `C` };
+
+/** plain data object (struct/table) — never a class instance */
+function isPlainData(v) {
+  if (Array.isArray(v)) return true;
+  if (v === null || typeof v !== `object`) return false;
+  const proto = Object.getPrototypeOf(v);
+  return proto === Object.prototype || proto === null;
+}
+
 class z2ui5_cl_core_srv_model {
 
   // ============================================================
-  //  STATIC API (unchanged — used by core_handler)
+  //  STATIC API (JS wire fast path — used by core_handler)
   // ============================================================
 
   /**
@@ -174,6 +192,17 @@ class z2ui5_cl_core_srv_model {
     return val;
   }
 
+  /** ABAP z2ui5_cx_a2ui5_error when available (core tree), else util error. */
+  static _cx(val) {
+    try {
+      const CX = require("../../00/03/z2ui5_cx_a2ui5_error");
+      return new CX({ val });
+    } catch {
+      const CXU = require("../../00/03/z2ui5_cx_util_error");
+      return new CXU(val);
+    }
+  }
+
   // ============================================================
   //  INSTANCE API (1:1 with abap)
   // ============================================================
@@ -191,9 +220,155 @@ class z2ui5_cl_core_srv_model {
     this.mo_app   = app;
   }
 
+  // ----- path resolution -----
+
   /**
-   * Find an attribute whose value === val. Falls back to running dissolve()
-   * to discover new nested attrs, then refresh, then raises.
+   * Resolve `MO_APP->{path}` — path segments split at `->` (reference hop)
+   * and `-` (struct component), `*` dereferences (identity in JS, drefs ARE
+   * their values). Segment matching is case-insensitive (wire names are
+   * UPPERCASE, transpiled JS keys lowercase). Returns a {get, set} accessor;
+   * throws ATTRI_GET_VAL_REF_ERROR when the path does not resolve — same
+   * contract as ABAP's ASSIGN + GET REFERENCE.
+   */
+  _attri_accessor(iv_path) {
+    if (!iv_path) {
+      return { get: () => this.mo_app, set: (v) => { this.mo_app = v; } };
+    }
+    const segs = String(iv_path).split(/->|-(?!>)/);
+    let holder = { v: this.mo_app };
+    let key = `v`;
+    for (const seg of segs) {
+      if (seg === `*`) {
+        // deref — ABAP raises on an unbound reference
+        if (holder[key] === null || holder[key] === undefined) {
+          throw z2ui5_cl_core_srv_model._cx(`ATTRI_GET_VAL_REF_ERROR`);
+        }
+        continue;
+      }
+      const cur = holder[key];
+      if (cur === null || cur === undefined || typeof cur !== `object`) {
+        throw z2ui5_cl_core_srv_model._cx(`ATTRI_GET_VAL_REF_ERROR`);
+      }
+      const mk = z2ui5_cl_core_srv_model._match_key(cur, seg);
+      if (mk === undefined) {
+        throw z2ui5_cl_core_srv_model._cx(`ATTRI_GET_VAL_REF_ERROR`);
+      }
+      holder = cur;
+      key = mk;
+    }
+    return { get: () => holder[key], set: (v) => { holder[key] = v; } };
+  }
+
+  /**
+   * ABAP returns REF TO data; JS objects ARE references, scalars collapse to
+   * their value (inherent JS limit — documented above).
+   */
+  attri_get_val_ref(iv_path) {
+    const path = iv_path && typeof iv_path === `object` ? iv_path.iv_path : iv_path;
+    return this._attri_accessor(path).get();
+  }
+
+  // ----- attri bookkeeping -----
+
+  /** insert with SORTED TABLE … WITH UNIQUE KEY name semantics */
+  _attri_insert(row) {
+    const tab = this.mt_attri.value;
+    let lo = 0;
+    let hi = tab.length;
+    while (lo < hi) {
+      const mid = (lo + hi) >> 1;
+      if (tab[mid].name < row.name) lo = mid + 1;
+      else hi = mid;
+    }
+    if (tab[lo] && tab[lo].name === row.name) return false; // unique key — reject
+    tab.splice(lo, 0, row);
+    return true;
+  }
+
+  /** sorted-by-name view (rows may have been appended out of order) */
+  _attri_sorted() {
+    return [...this.mt_attri.value].sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+  }
+
+  /**
+   * Fresh ty_s_attri row for a path. Mirrors abap attri_create_new —
+   * descriptor from RTTI over the resolved value; alias-classified rows
+   * (see header) become drefs.
+   */
+  attri_create_new(name, opts = {}) {
+    const path = name && typeof name === `object` ? name.name : name;
+    const v = this._attri_accessor(path).get();
+    const d = rtti.describe(v);
+    let type_kind = d.type_kind;
+    let kind = d.kind;
+    if (kind === KD.class) kind = KD.ref; // an instance field ≙ TYPE REF TO cls
+    if (!opts.noAlias && isPlainData(v) && this._alias_exists(path, v)) {
+      type_kind = TK.dref;
+      kind = KD.ref;
+    }
+    return {
+      name: path,
+      name_client: ``,
+      name_parent: ``,
+      name_ref: ``,
+      bind_type: ``,
+      srtti_data: ``,
+      check_dissolved: false,
+      view: ``,
+      custom_filter: null,
+      custom_filter_back: null,
+      custom_mapper: null,
+      custom_mapper_back: null,
+      o_typedescr: d,
+      type_kind,
+      kind,
+    };
+  }
+
+  /**
+   * Does an earlier-discovered attribute (not an ancestor of `name`) hold
+   * the identical object? Then `name` is a reference onto it (ABAP: a dref).
+   */
+  _alias_exists(name, v) {
+    for (const attri of this.mt_attri.value) {
+      if (attri.name === name) continue;
+      if (name.startsWith(`${attri.name}->`) || name.startsWith(`${attri.name}-`)) continue;
+      let other;
+      try { other = this._attri_accessor(attri.name).get(); } catch { continue; }
+      if (Object.is(other, v)) return true;
+    }
+    return false;
+  }
+
+  /**
+   * attri_search — reference-identity lookup over mt_attri with the ABAP
+   * type prefilter. Raises on dref/oref search values.
+   */
+  attri_search(val) {
+    const d = rtti.describe(val);
+    if (d.type_kind === TK.dref || d.type_kind === TK.oref) {
+      throw z2ui5_cl_core_srv_model._cx(
+        `NO DATA REFERENCES FOR BINDING ALLOWED: DEREFERENCE YOUR DATA FIRST`
+      );
+    }
+
+    for (const attri of this._attri_sorted()) {
+      if (attri.name_ref) continue;
+      if (attri.type_kind !== d.type_kind || attri.kind !== d.kind) continue;
+      // absolute-name prefilter (generated names with % are not comparable)
+      const na = attri.o_typedescr?.absolute_name ?? ``;
+      const nv = d.absolute_name ?? ``;
+      if (na !== nv && !na.includes(`%`) && !nv.includes(`%`)) continue;
+      try {
+        if (Object.is(this._attri_accessor(attri.name).get(), val)) return attri;
+      } catch { /* CONTINUE */ }
+    }
+    return null;
+  }
+
+  /**
+   * Find an attribute holding `val`. Falls back to dissolve() (discover new
+   * nested attrs), then refresh, then raises — 1:1 with abap.
    */
   main_attri_search(val) {
     let found = this.attri_search(val);
@@ -207,8 +382,7 @@ class z2ui5_cl_core_srv_model {
     found = this.attri_search(val);
     if (found) return found;
 
-    const z2ui5_cx_util_error = require("../../00/03/z2ui5_cx_util_error");
-    throw new z2ui5_cx_util_error(
+    throw z2ui5_cl_core_srv_model._cx(
       `BINDING_ERROR - No class attribute for binding found - Please check if the bound values are public attributes of your class`
     );
   }
@@ -216,9 +390,10 @@ class z2ui5_cl_core_srv_model {
   /**
    * Persistence hooks — abap uses these to round-trip SRTTI XML through the
    * draft table. JS uses plain JSON, so persistence is the responsibility of
-   * core_srv_draft and these are no-ops kept for API parity.
+   * core_srv_draft and these are no-ops kept for API parity (save runs the
+   * dissolve like abap does before iterating).
    */
-  main_attri_db_save_srtti() { /* JSON persistence — no SRTTI to save */ }
+  main_attri_db_save_srtti() { this.dissolve(); /* JSON persistence — no SRTTI to save */ }
   main_attri_db_load()       { /* JSON persistence — no SRTTI to load */ }
   main_attri_db_load_resolve() { /* idem */ }
   main_attri_db_load_table(_ir_attri) { /* idem */ }
@@ -226,7 +401,7 @@ class z2ui5_cl_core_srv_model {
 
   /** Drop transient attrs, dissolve again, restore bind metadata. */
   main_attri_refresh() {
-    const old = this.mt_attri.value.slice();
+    const old = this.mt_attri.value.filter((a) => a.bind_type);
     this.mt_attri.value.length = 0;
     this.dissolve();
     for (const attri of this.mt_attri.value) {
@@ -239,258 +414,162 @@ class z2ui5_cl_core_srv_model {
     }
   }
 
-  /**
-   * Instance variant of main_json_to_attri — applies delta IF the wire
-   * payload includes `/__delta`, else writes the value back into the path
-   * resolved by `name`. abap signature: (view, model).
-   */
-  main_json_to_attri_instance(view, model) {
-    if (!model || typeof model !== `object`) return;
-    const targetView = this.mt_attri.value.some((a) => a.view === view)
-      ? view
-      : `MAIN`;
-
-    for (const attri of this.mt_attri.value) {
-      if (attri.bind_type !== z2ui5_if_core_types.cs_bind_type.two_way) continue;
-      if (attri.view !== targetView) continue;
-
-      // Locate the slice on the wire model corresponding to this attribute.
-      const slice = z2ui5_cl_core_srv_model._slice_at_path(model, attri.name_client);
-      if (slice === undefined) continue;
-
-      if (slice && typeof slice === `object` && `__delta` in slice) {
-        this.delta_apply_to_table(slice, attri.name);
-        continue;
-      }
-
-      try {
-        const ref = this.attri_get_val_ref(attri.name);
-        ref.set(slice);
-      } catch { /* ignore — abap CONTINUEs on error */ }
-    }
-  }
-
-  /**
-   * Instance variant of main_json_stringify — walks mt_attri, builds the
-   * model object, returns it stringified. Mirrors abap's JSON output.
-   */
-  main_json_stringify_instance() {
-    const result = {};
-    for (const attri of this.mt_attri.value) {
-      if (!attri.bind_type) continue;
-      if (attri.type_kind === `DREF` || attri.type_kind === `OREF`) continue;
-      try {
-        const ref = this.attri_get_val_ref(attri.name);
-        z2ui5_cl_core_srv_model._set_at_path(result, attri.name_client, ref.get());
-      } catch { /* CONTINUE on missing */ }
-    }
-    const out = JSON.stringify(result);
-    return out === `null` ? `{}` : out;
-  }
-
-  // ----- attri helpers -----
-
-  /**
-   * Resolve a path of the form "field" or "parent->child" or
-   * "table-row" into a getter/setter pair on mo_app. Mirrors abap
-   * attri_get_val_ref's `MO_APP->{path}` ASSIGN.
-   */
-  attri_get_val_ref(iv_path) {
-    if (!iv_path) {
-      return {
-        get: () => this.mo_app,
-        set: (v) => { this.mo_app = v; },
-      };
-    }
-    const parts = String(iv_path).split(/->|-/);
-    let parent = this.mo_app;
-    for (let i = 0; i < parts.length - 1; i++) {
-      const p = parts[i];
-      if (parent == null) {
-        const z2ui5_cx_util_error = require("../../00/03/z2ui5_cx_util_error");
-        throw new z2ui5_cx_util_error(`ATTRI_GET_VAL_REF_ERROR`);
-      }
-      parent = parent[p];
-    }
-    const last = parts[parts.length - 1];
-    return {
-      get: () => parent ? parent[last] : undefined,
-      set: (v) => { if (parent) parent[last] = v; },
-    };
-  }
-
-  /**
-   * attri_search — value-equality lookup over mt_attri. JS has no
-   * cl_abap_datadescr; we approximate type_kind via z2ui5_cl_util.rtti_get_type_kind.
-   */
-  attri_search(val) {
-    const z2ui5_cl_util = require("../../00/03/z2ui5_cl_util");
-    const wantedKind = z2ui5_cl_util.rtti_get_type_kind(val);
-
-    if (wantedKind === `DREF` || wantedKind === `OREF`) {
-      const z2ui5_cx_util_error = require("../../00/03/z2ui5_cx_util_error");
-      throw new z2ui5_cx_util_error(
-        `NO DATA REFERENCES FOR BINDING ALLOWED: DEREFERENCE YOUR DATA FIRST`
-      );
-    }
-
-    for (const attri of this.mt_attri.value) {
-      if (attri.name_ref) continue;
-      if (attri.type_kind && attri.type_kind !== wantedKind) continue;
-      try {
-        const ref = this.attri_get_val_ref(attri.name);
-        if (Object.is(ref.get(), val)) return attri;
-      } catch { /* CONTINUE */ }
-    }
-    return null;
-  }
-
-  /** Create a new attribute entry from a path. Mirrors abap attri_create_new. */
-  attri_create_new(name) {
-    const z2ui5_cl_util = require("../../00/03/z2ui5_cl_util");
-    const ref = this.attri_get_val_ref(name);
-    const v   = ref.get();
-    const kind = z2ui5_cl_util.rtti_get_type_kind(v);
-    return {
-      name,
-      type_kind: kind,
-      kind:      kind === `STRUCT` ? `kind_struct`
-              : kind === `TABLE`  ? `kind_table`
-              : `kind_elem`,
-      check_dissolved: false,
-    };
-  }
-
   // ----- dissolve -----
 
   /**
-   * Iterative dissolution. abap caps at MAX_DISSOLVE_DEPTH passes; we mirror
-   * that to bound the cost on cyclic references.
+   * Iterative dissolution — mirrors abap: run passes until nothing is left
+   * undissolved, cap at MAX_DISSOLVE_DEPTH per call (the cap RETURNs without
+   * updating entry refs, exactly like abap), refresh on errors.
    */
   dissolve() {
-    if (this.mt_attri.value.length === 0) {
-      // bootstrap: walk app's own props as the seed
-      const seeds = this.diss_oref({ name: `` });
-      this.mt_attri.value.push(...seeds);
-    }
-
     let depth = 0;
-    while (this._has_undissolved()) {
-      if (++depth >= MAX_DISSOLVE_DEPTH) break;
+    while (this.mt_attri.value.some((a) => !a.check_dissolved) || this.mt_attri.value.length === 0) {
+      depth += 1;
+      if (depth >= MAX_DISSOLVE_DEPTH) return;
       try {
         this.dissolve_run();
       } catch {
         this.main_attri_refresh();
-        return;
       }
     }
     this.attri_update_entry_refs();
   }
 
-  _has_undissolved() {
-    return this.mt_attri.value.some((a) => !a.check_dissolved);
-  }
-
   /** Single dissolution pass — abap dissolve_run. */
   dissolve_run() {
+    if (this.mt_attri.value.length === 0) {
+      for (const seed of this.diss_oref({ name: `` })) this._attri_insert(seed);
+    }
+
     const newEntries = [];
-    for (const attri of this.mt_attri.value) {
+    for (const attri of [...this.mt_attri.value]) {
       if (attri.check_dissolved) continue;
       attri.check_dissolved = true;
 
-      const z2ui5_cl_util = require("../../00/03/z2ui5_cl_util");
-      let val;
-      try {
-        val = this.attri_get_val_ref(attri.name).get();
-      } catch { continue; }
-      const kind = z2ui5_cl_util.rtti_get_type_kind(val);
-
-      if (kind === `STRUCT`) {
-        newEntries.push(...this.diss_struc(attri));
-      } else if (kind === `OREF`) {
-        newEntries.push(...this.diss_oref(attri));
-      } else if (kind === `DREF`) {
-        newEntries.push(...this.diss_dref(attri));
+      if (!attri.o_typedescr) {
+        const entry = this.attri_create_new(attri.name);
+        attri.o_typedescr = entry.o_typedescr;
+        if (!attri.type_kind) attri.type_kind = entry.type_kind;
+        if (!attri.kind) attri.kind = entry.kind;
       }
-      // primitives / arrays stay as leaf attrs
+
+      if (attri.kind === KD.struct) {
+        newEntries.push(...this.diss_struc(attri));
+      } else if (attri.kind === KD.ref) {
+        if (attri.type_kind === TK.oref) newEntries.push(...this.diss_oref(attri));
+        else if (attri.type_kind === TK.dref) newEntries.push(...this.diss_dref(attri));
+      }
+      // elem / table attrs are leaves
     }
-    this.mt_attri.value.push(...newEntries);
+    for (const e of newEntries) this._attri_insert(e);
   }
 
-  /** STRUCT decomposition — walk own enumerable keys. */
+  /**
+   * STRUCT decomposition — children named `<name>-COMP` (or `<name>->COMP`
+   * when the attr is a reference onto a struct). UPPERCASE names, matching
+   * the ABAP wire convention.
+   */
   diss_struc(ir_attri) {
     let val;
-    try { val = this.attri_get_val_ref(ir_attri.name).get(); }
+    try { val = this._attri_accessor(ir_attri.name).get(); }
     catch { return []; }
     if (!val || typeof val !== `object`) return [];
 
-    const prefix = ir_attri.name ? `${ir_attri.name}-` : ``;
+    const sep = ir_attri.kind === KD.ref ? `->` : `-`;
+    const prefix = ir_attri.name ? `${ir_attri.name}${sep}` : ``;
     const out = [];
     for (const k of Object.keys(val)) {
-      const newName = `${prefix}${k}`;
-      const ent = this.attri_create_new(newName);
+      const ent = this.attri_create_new(`${prefix}${k.toUpperCase()}`);
       ent.name_parent = ir_attri.name;
       out.push(ent);
     }
     return out;
   }
 
-  /** DREF decomposition — JS has no DREFs; treat as struct. */
+  /**
+   * DREF decomposition — struct targets dissolve into `->` children; other
+   * targets (tables, elements) get the `<name>->*` deref entry, exactly the
+   * names abap produces.
+   */
   diss_dref(ir_attri) {
-    return this.diss_struc(ir_attri);
+    let val;
+    try { val = this._attri_accessor(ir_attri.name).get(); }
+    catch { return []; }
+    if (val === null || val === undefined) return [];
+
+    if (isPlainData(val) && !Array.isArray(val)) {
+      return this.diss_struc(ir_attri);
+    }
+
+    const ent = this.attri_create_new(ir_attri.name, { noAlias: true });
+    // the deref entry describes the referenced data, not the reference
+    ent.name = `${ir_attri.name}->*`;
+    ent.name_parent = ir_attri.name;
+    return [ent];
   }
 
   /**
-   * OREF decomposition — walks an object's "public" props. Mirrors abap's
-   * RTTI walk filtering visibility=public, is_class=false, is_constant=false,
-   * is_interface=false. JS approximates this with own enumerable property
-   * keys (Object.keys); framework-private fields are filtered by a name
-   * convention (no leading underscore + not in the framework field set).
+   * OREF decomposition — walks the instance's public data attributes.
+   * ABAP filters visibility=public / not class / not constant / not
+   * interface-inherited; JS approximates with own enumerable keys minus the
+   * framework fields (which ABAP sees as interface attributes of
+   * z2ui5_if_app) and underscore-prefixed internals.
    */
   diss_oref(ir_attri) {
     const obj = ir_attri.name
-      ? (() => { try { return this.attri_get_val_ref(ir_attri.name).get(); } catch { return null; } })()
+      ? (() => { try { return this._attri_accessor(ir_attri.name).get(); } catch { return null; } })()
       : this.mo_app;
     if (!obj || typeof obj !== `object`) return [];
 
     const skip = new Set([`id_draft`, `id_app`, `check_initialized`, `check_sticky`]);
+    const prefix = ir_attri.name ? `${ir_attri.name}->` : ``;
     const out = [];
     for (const k of Object.keys(obj)) {
       if (skip.has(k)) continue;
       if (k.startsWith(`_`)) continue;
       try {
-        const newName = ir_attri.name ? `${ir_attri.name}->${k}` : k;
-        const ent = this.attri_create_new(newName);
+        const ent = this.attri_create_new(`${prefix}${k.toUpperCase()}`);
         ent.name_parent = ir_attri.name;
         out.push(ent);
-      } catch { /* skip broken accessors */ }
+      } catch { /* CONTINUE — same as abap's per-attribute CATCH */ }
     }
     return out;
   }
 
   /**
-   * Update name_ref pointers so attrs that reference the same underlying
-   * value share a canonical name. Mirrors abap attri_update_entry_refs.
+   * name_ref canonicalization — 1:1 with abap attri_update_entry_refs:
+   * sorted iteration, WHERE conditions re-evaluated per row, last match
+   * wins for tables, longest-name preference for dref/struct matches.
    */
   attri_update_entry_refs() {
-    for (const attri of this.mt_attri.value) {
+    const sorted = this._attri_sorted();
+    for (const attri of sorted) {
       if (!attri.check_dissolved || attri.name_ref) continue;
-      let val;
-      try { val = this.attri_get_val_ref(attri.name).get(); } catch { continue; }
-      if (val === null || typeof val !== `object`) continue;
 
-      for (const other of this.mt_attri.value) {
-        if (other === attri) continue;
-        if (!other.check_dissolved || other.name_ref) continue;
-        if (other.type_kind !== attri.type_kind) continue;
-        try {
-          const otherVal = this.attri_get_val_ref(other.name).get();
-          if (Object.is(otherVal, val) && other.name.length < attri.name.length) {
-            attri.name_ref = other.name;
-            this.attri_update_refs_children(attri);
-            break;
-          }
-        } catch { /* skip */ }
+      let ref;
+      try { ref = this._attri_accessor(attri.name).get(); } catch { continue; }
+
+      if (attri.type_kind === TK.table) {
+        for (const other of sorted) {
+          if (!other.check_dissolved || other.name === attri.name || other.name_ref) continue;
+          if (other.type_kind !== TK.table) continue;
+          let oref;
+          try { oref = this._attri_accessor(other.name).get(); } catch { continue; }
+          if (!Object.is(oref, ref)) continue;
+          attri.name_ref = other.name; // ABAP loop continues — last match wins
+        }
+      } else if (attri.type_kind === TK.dref) {
+        const val = ref; // deref — identity in JS
+        for (const other of sorted) {
+          if (!other.check_dissolved || other.name === attri.name || other.name_ref) continue;
+          if (other.type_kind !== TK.struct1 && other.type_kind !== TK.struct2) continue;
+          let oref;
+          try { oref = this._attri_accessor(other.name).get(); } catch { continue; }
+          if (!Object.is(oref, val)) continue;
+          if (attri.name_ref && attri.name_ref.length <= other.name.length) continue;
+          attri.name_ref = other.name;
+          this.attri_update_refs_children(attri);
+        }
       }
     }
   }
@@ -505,37 +584,159 @@ class z2ui5_cl_core_srv_model {
     }
   }
 
+  // ----- json → attri / attri → json (instance, ABAP signatures) -----
+
+  /**
+   * Apply an incoming (ajson) model onto the bound two-way attributes of
+   * `view`. Accepts the transpiled named-args form ({view, model}) and the
+   * positional form. `model` is a z2ui5_cl_ajson (or API-compatible object);
+   * plain JS objects route through the static wire path.
+   */
+  main_json_to_attri(a, b) {
+    let view;
+    let model;
+    if (a !== null && typeof a === `object` && b === undefined && (`model` in a || `view` in a)) {
+      ({ view, model } = a);
+    } else {
+      view = a;
+      model = b;
+    }
+    if (!model) return;
+    if (typeof model.slice !== `function`) {
+      // plain wire object — legacy fast path
+      z2ui5_cl_core_srv_model.main_json_to_attri(this.mo_app, model.XX ?? model);
+      return;
+    }
+
+    const lv_view = this.mt_attri.value.some((x) => x.view === view) ? view : `MAIN`;
+
+    for (const lr_attri of this._attri_sorted()) {
+      if (lr_attri.bind_type !== z2ui5_if_core_types.cs_bind_type.two_way) continue;
+      if (lr_attri.view !== lv_view) continue;
+      try {
+        let lo_val_front = model.slice(lr_attri.name_client);
+        if (!lo_val_front || (Array.isArray(lo_val_front.mt_json_tree) && lo_val_front.mt_json_tree.length === 0)) {
+          continue; // slice not bound — nothing arrived for this attribute
+        }
+
+        if (lo_val_front.exists(`/__delta`) === true) {
+          this.delta_apply_to_table(lo_val_front, lr_attri.name);
+          continue;
+        }
+
+        if (lr_attri.custom_mapper_back) lo_val_front = lo_val_front.map(lr_attri.custom_mapper_back);
+        if (lr_attri.custom_filter_back) lo_val_front = lo_val_front.filter(lr_attri.custom_filter_back);
+
+        let acc;
+        try { acc = this._attri_accessor(lr_attri.name); } catch { continue; }
+
+        const args = { iv_corresponding: true, ev_container: acc.get() };
+        lo_val_front.to_abap(args);
+        acc.set(z2ui5_cl_core_srv_model._coerce_like(args.ev_container, acc.get()));
+      } catch (x) {
+        throw z2ui5_cl_core_srv_model._cx(`JSON_PARSING_ERROR: ${x?.get_text?.() ?? x?.message ?? x}`);
+      }
+    }
+  }
+
+  /** ABAP MOVE conversion for scalars — keep the declared (current) JS type. */
+  static _coerce_like(val, prev) {
+    if (typeof prev === `number` && typeof val === `string` && val.trim() !== `` && !Number.isNaN(Number(val))) return Number(val);
+    return val;
+  }
+
+  /**
+   * Serialize the bound attributes into the response model JSON (instance
+   * variant, ABAP signature/behavior: skips unbound and dref/oref rows,
+   * `{}` when nothing is bound). Keys are UPPERCASED wire names.
+   */
+  main_json_stringify() {
+    const result = {};
+    for (const attri of this._attri_sorted()) {
+      if (!attri.bind_type) continue;
+      if (attri.type_kind === TK.dref || attri.type_kind === TK.oref) continue;
+      let acc;
+      try { acc = this._attri_accessor(attri.name); } catch { continue; }
+      z2ui5_cl_core_srv_model._set_at_path(result, attri.name_client, z2ui5_cl_core_srv_model._deep_upper(acc.get()));
+    }
+    const out = JSON.stringify(result);
+    return out === undefined || out === `null` ? `{}` : out;
+  }
+
+  // legacy aliases (pre-ABAP-signature port) — kept for callers in the wild
+  main_json_to_attri_instance(view, model) { return this.main_json_to_attri(view, model); }
+  main_json_stringify_instance() { return this.main_json_stringify(); }
+
   // ----- delta -----
 
   /**
-   * Apply a `__delta` patch from the wire payload onto the table attribute
-   * `iv_name`. Mirrors abap delta_apply_to_table — preserves boolean type
-   * coercion when the wire node was a boolean.
-   *
-   * @param {{__delta: Object<string, Object>}} io_val_front
-   * @param {string} iv_name
+   * Apply a `__delta` patch onto the table attribute `iv_name` — ajson
+   * payloads walk the nodes recursively (nested table deltas, struct
+   * components, whole sub-table replaces); plain wire objects use the
+   * static fast path. Accepts named-args and positional forms.
    */
-  delta_apply_to_table(io_val_front, iv_name) {
-    let ref;
-    try { ref = this.attri_get_val_ref(iv_name); }
-    catch { return; }
-    const tab = ref.get();
+  delta_apply_to_table(a, b) {
+    let io_val_front;
+    let iv_name;
+    if (a !== null && typeof a === `object` && b === undefined && `iv_name` in a) {
+      ({ io_val_front, iv_name } = a);
+    } else {
+      io_val_front = a;
+      iv_name = b;
+    }
+
+    let acc;
+    try { acc = this._attri_accessor(iv_name); } catch { return; }
+    const tab = acc.get();
     if (!Array.isArray(tab)) return;
+
+    if (io_val_front && typeof io_val_front.slice === `function` && Array.isArray(io_val_front.mt_json_tree)) {
+      this._delta_apply_nodes(io_val_front.slice(`/__delta`), tab);
+      return;
+    }
 
     const delta = io_val_front?.__delta;
     if (!delta || typeof delta !== `object`) return;
+    z2ui5_cl_core_srv_model._apply_table_delta(tab, delta);
+  }
 
-    for (const idxStr of Object.keys(delta)) {
-      const idx = Number(idxStr);
-      const row = tab[idx];
+  /** abap delta_apply_nodes — recursive ajson delta walk. */
+  _delta_apply_nodes(io_delta, ct_tab) {
+    for (const idxStr of io_delta.members(`/`)) {
+      const idx = parseInt(idxStr, 10);
+      const row = ct_tab[idx];
       if (!row || typeof row !== `object`) continue;
-      const patch = delta[idxStr];
-      for (const fld of Object.keys(patch || {})) {
-        if (!(fld in row)) continue;
-        const v = patch[fld];
-        // abap branch on get_node_type=boolean — JS already has typed values,
-        // so just assign as-is.
-        row[fld] = v;
+
+      const lo_row = io_delta.slice(`/${idxStr}`);
+      for (const fld of lo_row.members(`/`)) {
+        const key = z2ui5_cl_core_srv_model._match_key(row, fld);
+        if (key === undefined) continue;
+        const p = `/${fld}`;
+        const nodeType = lo_row.get_node_type(p);
+
+        if (nodeType === `bool`) {
+          row[key] = lo_row.get_boolean(p) === true;
+        } else if (nodeType === `object`) {
+          // either a nested table delta (marked by __delta) or a structure
+          // component shipped as a whole value
+          const lo_sub = lo_row.slice(p);
+          if (lo_sub.exists(`/__delta`) === true) {
+            if (Array.isArray(row[key])) this._delta_apply_nodes(lo_sub.slice(`/__delta`), row[key]);
+          } else {
+            const args = { iv_corresponding: true, ev_container: row[key] };
+            lo_sub.to_abap(args);
+            row[key] = args.ev_container;
+          }
+        } else if (nodeType === `array`) {
+          // a whole sub-table value replaced a nested delta on the client
+          const args = { iv_corresponding: true, ev_container: row[key] };
+          lo_row.slice(p).to_abap(args);
+          row[key] = args.ev_container;
+        } else {
+          // numbers go through the raw string — lossless into the target type
+          const s = lo_row.get_string(p);
+          row[key] = typeof row[key] === `number` ? Number(s) : s;
+        }
       }
     }
   }

@@ -1,6 +1,4 @@
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
-const z2ui5_if_client = require("abap2UI5/z2ui5_if_client");
 
 class z2ui5_cl_demo_app_202 extends z2ui5_if_app {
   av_next = `Step22`;
@@ -32,10 +30,10 @@ class z2ui5_cl_demo_app_202 extends z2ui5_if_app {
     }
     switch (client.get().EVENT) {
       case `STEP22`:
-        client.follow_up_action({ val: z2ui5_if_client.cs_event.wizard_set_next_step, t_arg: [`wiz`, `STEP2`, `STEP22`] });
+        client.follow_up_action(z2ui5_if_client.cs_event.wizard_set_next_step, [`wiz`, `STEP2`, `STEP22`]);
         break;
       case `STEP23`:
-        client.follow_up_action({ val: z2ui5_if_client.cs_event.wizard_set_next_step, t_arg: [`wiz`, `STEP2`, `STEP23`] });
+        client.follow_up_action(z2ui5_if_client.cs_event.wizard_set_next_step, [`wiz`, `STEP2`, `STEP23`]);
         break;
     }
     client.view_model_update();
@@ -43,3 +41,7 @@ class z2ui5_cl_demo_app_202 extends z2ui5_if_app {
 }
 
 module.exports = z2ui5_cl_demo_app_202;
+
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_client = require("abap2UI5/z2ui5_if_client");
+

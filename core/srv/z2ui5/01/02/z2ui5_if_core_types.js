@@ -24,6 +24,107 @@ const z2ui5_if_core_types = Object.freeze({
     two_way: "TWO_WAY",
   }),
 
+  /** The view slots reset_view_update_flags walks (ABAP cs_view_slot_list). */
+  cs_view_slot_list: "S_VIEW,S_VIEW_NEST,S_VIEW_NEST2,S_POPUP,S_POPOVER",
+
+  // ---------------------------------------------------------------
+  // Typed INITIAL values — ABAP structures start with every component
+  // present; the hand-ports build their state from these factories so
+  // the transpiled tests can address any component without guards.
+  // ---------------------------------------------------------------
+
+  /** ty_s_next_frontend — the S_SET protocol struct sent to the frontend. */
+  ty_s_next_frontend() {
+    return {
+      s_view:      { xml: ``, switchdefaultmodelannouri: ``, switch_default_model_path: ``, check_destroy: false, check_update_model: false },
+      s_view_nest: { xml: ``, id: ``, method_insert: ``, method_destroy: ``, check_destroy: false, check_update_model: false },
+      s_view_nest2:{ xml: ``, id: ``, method_insert: ``, method_destroy: ``, check_destroy: false, check_update_model: false },
+      s_popup:     { xml: ``, id: ``, check_destroy: false, check_update_model: false },
+      s_popover:   { xml: ``, id: ``, open_by_id: ``, check_destroy: false, check_update_model: false },
+      s_msg_box:   { type: ``, text: ``, title: ``, styleclass: ``, onclose: ``, actions: [], emphasizedaction: ``,
+                     initialfocus: ``, textdirection: ``, icon: ``, details: ``, closeonnavigation: ``, dependenton: ``, contentwidth: `` },
+      s_msg_toast: { class: ``, text: ``, duration: ``, width: ``, my: ``, at: ``, of: ``, offset: ``, collision: ``,
+                     onclose: ``, autoclose: ``, animationtimingfunction: ``, animationduration: ``, closeonbrowsernavigation: `` },
+      s_follow_up_action: { custom_js: [] },
+      set_app_state_active: false,
+      set_push_state: ``,
+      set_nav_back: false,
+      s_stateful: { active: 0, switched: false },
+    };
+  },
+
+  /** ty_s_next — per-roundtrip nav/frontend queue on the action object. */
+  ty_s_next() {
+    return {
+      o_app_call: null,
+      o_app_leave: null,
+      next_event: ``,
+      s_set: z2ui5_if_core_types.ty_s_next_frontend(),
+      r_data: null,
+    };
+  },
+
+  /** ty_s_draft — draft id chain. */
+  ty_s_draft() {
+    return { id: ``, id_prev: ``, id_prev_app: ``, id_prev_app_stack: ``, app: null };
+  },
+
+  /** ty_s_actual — what the current roundtrip is reacting to. */
+  ty_s_actual() {
+    return {
+      event: ``,
+      t_event_arg: [],
+      check_on_navigated: false,
+      view: ``,
+      s_draft: z2ui5_if_core_types.ty_s_draft(),
+      s_config: { origin: ``, pathname: ``, search: `` },
+      r_data: null,
+    };
+  },
+
+  /** ty_s_request — the parsed incoming request (ABAP-shaped, lowercase). */
+  ty_s_request() {
+    return {
+      o_model: null,
+      s_front: {
+        id: ``,
+        view: ``,
+        t_event_arg: [],
+        event: ``,
+        o_comp_data: null,
+        origin: ``,
+        pathname: ``,
+        search: ``,
+        hash: ``,
+        s_device: {
+          system: ``, orientation: ``,
+          browser: { name: ``, version: `` },
+          os: { name: ``, version: `` },
+          resize: { width: 0, height: 0 },
+          support: { touch: false, pointer: false, retina: false },
+        },
+        s_focus: { id: ``, selection_start: 0, selection_end: 0 },
+        s_scroll: {
+          main:    { id: ``, x: 0, y: 0 },
+          nest:    { id: ``, x: 0, y: 0 },
+          nest2:   { id: ``, x: 0, y: 0 },
+          popup:   { id: ``, x: 0, y: 0 },
+          popover: { id: ``, x: 0, y: 0 },
+        },
+        s_ui5: { version: ``, build_timestamp: ``, gav: ``, theme: `` },
+      },
+      s_control: { check_launchpad: false, app_start: ``, app_start_draft: `` },
+    };
+  },
+
+  /** ty_s_response — S_FRONT params + serialized MODEL. */
+  ty_s_response() {
+    return {
+      s_front: { params: z2ui5_if_core_types.ty_s_next_frontend(), id: ``, app_start: ``, app: `` },
+      model: ``,
+    };
+  },
+
   // ---------------------------------------------------------------
   // Type "shapes" — purely documentation. Use as JSDoc @typedef refs.
   // ---------------------------------------------------------------

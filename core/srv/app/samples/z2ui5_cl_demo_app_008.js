@@ -1,7 +1,3 @@
-const cl_abap_char_utilities = require("abap2UI5/cl_abap_char_utilities");
-const z2ui5_cl_sample_context = require("./z2ui5_cl_sample_context");
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_008 extends z2ui5_if_app {
@@ -10,7 +6,7 @@ class z2ui5_cl_demo_app_008 extends z2ui5_if_app {
   strip_type = ``;
 
   async main(client) {
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init()) {
       this.view_display();
     } else if (client.check_on_event()) {
@@ -22,6 +18,7 @@ class z2ui5_cl_demo_app_008 extends z2ui5_if_app {
     let ls_msg_sy;
     let ls_msg_bapiret;
     let lv_val;
+    let lx;
     switch (this.client.get().EVENT) {
       case `BUTTON_MESSAGE_BOX_CONFIRM`:
         this.client.message_box_display(`Approve purchase order 12345?`, `confirm`);
@@ -70,7 +67,8 @@ class z2ui5_cl_demo_app_008 extends z2ui5_if_app {
       case `BUTTON_MESSAGE_BOX_CX_ROOT`:
         try {
           lv_val = z2ui5_cl_util.abap_div(1, 0);
-        } catch (lx) {
+        } catch (_caught1) {
+          lx = _caught1;
           this.client.message_box_display(lx);
         }
         break;
@@ -123,3 +121,9 @@ class z2ui5_cl_demo_app_008 extends z2ui5_if_app {
 }
 
 module.exports = z2ui5_cl_demo_app_008;
+
+const cl_abap_char_utilities = require("abap2UI5/cl_abap_char_utilities");
+const z2ui5_cl_sample_context = require("./z2ui5_cl_sample_context");
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+

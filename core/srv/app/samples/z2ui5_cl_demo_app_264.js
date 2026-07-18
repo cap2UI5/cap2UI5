@@ -1,10 +1,8 @@
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_264 extends z2ui5_if_app {
   lt_a_data = [];
-  ls_a_data = {};
+  ls_a_data = { label: ``, value_state: `` };
   s_text = ``;
   client = null;
 
@@ -38,11 +36,11 @@ class z2ui5_cl_demo_app_264 extends z2ui5_if_app {
 
   async main(client) {
     let sy_tabix = 0;
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init()) {
       this.view_display({ client: client });
       this.s_text = `StepInput with valueState `;
-      this.lt_a_data = [{ value_state: `None` }, { value_state: `Information` }, { value_state: `Success` }, { value_state: `Warning` }, { value_state: `Error` }];
+      this.lt_a_data = z2ui5_cl_util.abap_tab_assign(this.lt_a_data, [{ value_state: `None` }, { value_state: `Information` }, { value_state: `Success` }, { value_state: `Warning` }, { value_state: `Error` }]);
       sy_tabix = 0;
       for (const fs_fs_a_data of this.lt_a_data) {
         sy_tabix++;
@@ -54,3 +52,7 @@ class z2ui5_cl_demo_app_264 extends z2ui5_if_app {
 }
 
 module.exports = z2ui5_cl_demo_app_264;
+
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+

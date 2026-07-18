@@ -1,5 +1,3 @@
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_070 extends z2ui5_if_app {
@@ -14,12 +12,12 @@ class z2ui5_cl_demo_app_070 extends z2ui5_if_app {
     sy_tabix = 0;
     for (const fs_ls_table of this.mt_table) {
       sy_tabix++;
-      fs_ls_table.selkz = z2ui5_cl_util.abap_copy(iv_selkz);
+      fs_ls_table.selkz = z2ui5_cl_util.abap_tab_assign(fs_ls_table.selkz, z2ui5_cl_util.abap_copy(iv_selkz));
     }
   }
 
   async main(client) {
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init()) {
       this.on_init();
     } else {
@@ -97,7 +95,7 @@ class z2ui5_cl_demo_app_070 extends z2ui5_if_app {
   }
 
   on_init() {
-    this.mt_mapping = [{ n: `EQ`, v: `={LOW}` }, { n: `LT`, v: `<{LOW}` }, { n: `LE`, v: `<={LOW}` }, { n: `GT`, v: `>{LOW}` }, { n: `GE`, v: `>={LOW}` }, { n: `CP`, v: `*{LOW}*` }, { n: `BT`, v: `{LOW}...{HIGH}` }, { n: `NE`, v: `!(={LOW})` }, { n: `!<leer>`, v: `!(<leer>)` }, { n: `<leer>`, v: `<leer>` }];
+    this.mt_mapping = z2ui5_cl_util.abap_tab_assign(this.mt_mapping, [{ n: `EQ`, v: `={LOW}` }, { n: `LT`, v: `<{LOW}` }, { n: `LE`, v: `<={LOW}` }, { n: `GT`, v: `>{LOW}` }, { n: `GE`, v: `>={LOW}` }, { n: `CP`, v: `*{LOW}*` }, { n: `BT`, v: `{LOW}...{HIGH}` }, { n: `NE`, v: `!(={LOW})` }, { n: `!<leer>`, v: `!(<leer>)` }, { n: `<leer>`, v: `<leer>` }]);
     const view = z2ui5_cl_xml_view.factory();
     const page1 = view.shell()
       .page({ id: `page_main`, title: `abap2UI5 - sap.ui.table.Table Features`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack(), class: `sapUiContentPadding` });
@@ -170,7 +168,7 @@ class z2ui5_cl_demo_app_070 extends z2ui5_if_app {
   }
 
   set_data() {
-    this.mt_table = [{ selkz: false, row_id: `1`, product: `table`, create_date: `01.01.2023`, create_by: `Olaf`, storage_location: `AREA_001`, quantity: 400, meins: `ST`, price: `1000.50`, waers: `EUR`, process: `10`, process_state: `None` }, { selkz: false, row_id: `2`, product: `chair`, create_date: `01.01.2022`, create_by: `Karlo`, storage_location: `AREA_001`, quantity: 123, meins: `ST`, price: `2000.55`, waers: `USD`, process: `20`, process_state: `Warning` }, { selkz: false, row_id: `3`, product: `sofa`, create_date: `01.05.2021`, create_by: `Elin`, storage_location: `AREA_002`, quantity: 700, meins: `ST`, price: `3000.11`, waers: `CNY`, process: `30`, process_state: `Success` }, { selkz: false, row_id: `4`, product: `computer`, create_date: `27.01.2023`, create_by: `Theo`, storage_location: `AREA_002`, quantity: 200, meins: `ST`, price: `4000.88`, waers: `USD`, process: `40`, process_state: `Information` }, { selkz: false, row_id: `5`, product: `printer`, create_date: `01.01.2023`, create_by: `Renate`, storage_location: `AREA_003`, quantity: 90, meins: `ST`, price: `5000.47`, waers: `EUR`, process: `70`, process_state: `Warning` }, { selkz: false, row_id: `6`, product: `table2`, create_date: `01.01.2023`, create_by: `Angela`, storage_location: `AREA_003`, quantity: 110, meins: `ST`, price: `6000.33`, waers: `GBP`, process: `90`, process_state: `Error` }];
+    this.mt_table = z2ui5_cl_util.abap_tab_assign(this.mt_table, [{ selkz: false, row_id: `1`, product: `table`, create_date: `01.01.2023`, create_by: `Olaf`, storage_location: `AREA_001`, quantity: 400, meins: `ST`, price: `1000.50`, waers: `EUR`, process: `10`, process_state: `None` }, { selkz: false, row_id: `2`, product: `chair`, create_date: `01.01.2022`, create_by: `Karlo`, storage_location: `AREA_001`, quantity: 123, meins: `ST`, price: `2000.55`, waers: `USD`, process: `20`, process_state: `Warning` }, { selkz: false, row_id: `3`, product: `sofa`, create_date: `01.05.2021`, create_by: `Elin`, storage_location: `AREA_002`, quantity: 700, meins: `ST`, price: `3000.11`, waers: `CNY`, process: `30`, process_state: `Success` }, { selkz: false, row_id: `4`, product: `computer`, create_date: `27.01.2023`, create_by: `Theo`, storage_location: `AREA_002`, quantity: 200, meins: `ST`, price: `4000.88`, waers: `USD`, process: `40`, process_state: `Information` }, { selkz: false, row_id: `5`, product: `printer`, create_date: `01.01.2023`, create_by: `Renate`, storage_location: `AREA_003`, quantity: 90, meins: `ST`, price: `5000.47`, waers: `EUR`, process: `70`, process_state: `Warning` }, { selkz: false, row_id: `6`, product: `table2`, create_date: `01.01.2023`, create_by: `Angela`, storage_location: `AREA_003`, quantity: 110, meins: `ST`, price: `6000.33`, waers: `GBP`, process: `90`, process_state: `Error` }]);
   }
 
   set_search() {
@@ -205,3 +203,7 @@ class z2ui5_cl_demo_app_070 extends z2ui5_if_app {
 }
 
 module.exports = z2ui5_cl_demo_app_070;
+
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+

@@ -75,13 +75,14 @@ class z2ui5_cl_core_app {
     }
   }
 
-  async db_save() {
+  /** abap db_save — persist through the (synchronous) draft table. */
+  db_save() {
     if (this.mo_app) {
       this.mo_app.id_draft = this.ms_draft.id;
       this.mo_app.check_initialized = true;
     }
     const blob = this.all_xml_stringify();
-    return DB.create({ draft: this.ms_draft, model_xml: blob });
+    new DB().create({ draft: this.ms_draft, model_xml: blob });
   }
 
   // ============================================================
@@ -99,17 +100,37 @@ class z2ui5_cl_core_app {
     return r;
   }
 
-  static async db_load(id) {
+  /**
+   * abap db_load — buffer first, then the synchronous draft table (ABAP
+   * semantics; the transpiled tests read the result synchronously). Falls
+   * back to the async platform store when the id is not in the table —
+   * callers that await get either form transparently.
+   */
+  static db_load(id) {
     if (z2ui5_cl_core_app._mt_buffer.has(id)) {
       return z2ui5_cl_core_app._mt_buffer.get(id);
     }
-    const oApp = await DB.loadApp(id);
-    if (!oApp) return null;
-    const r = new z2ui5_cl_core_app();
-    r.mo_app = oApp;
-    r.ms_draft.id = id;
-    z2ui5_cl_core_app._mt_buffer.set(id, r);
-    return r;
+    try {
+      const ls_db = new DB().read_draft(id);
+      const r = z2ui5_cl_core_app.all_xml_parse(ls_db.data);
+      r.ms_draft.id = String(id ?? ``);
+      z2ui5_cl_core_app._mt_buffer.set(id, r);
+      return r;
+    } catch { /* not in the draft table — try the async platform store */ }
+    return (async () => {
+      const oApp = await DB.loadApp(id);
+      if (!oApp) return null;
+      const r = new z2ui5_cl_core_app();
+      r.mo_app = oApp;
+      r.ms_draft.id = id;
+      z2ui5_cl_core_app._mt_buffer.set(id, r);
+      return r;
+    })();
+  }
+
+  /** ABAP CLASS-DATA mt_buffer view — { id, app } rows. */
+  static get mt_buffer() {
+    return [...z2ui5_cl_core_app._mt_buffer.entries()].map(([id, app]) => ({ id, app }));
   }
 
   static async db_load_by_app(app) {

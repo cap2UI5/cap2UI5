@@ -166,6 +166,89 @@ class z2ui5_cl_core_srv_draft {
     }
     return null;
   }
+
+  // ============================================================
+  //  INSTANCE API — 1:1 with the ABAP class over the draft table
+  //  z2ui5_t_01. The JS mirror of the table is an in-process Map (the
+  //  platform draft STORE above serves the JS framework's async path;
+  //  ABAP's synchronous DB semantics are modelled here).
+  // ============================================================
+
+  static c_seconds_per_hour = 3600;
+  static c_min_exp_time_in_hours = 1;
+  static _mt_db = new Map(); // id → { id, id_prev, id_prev_app, id_prev_app_stack, timestampl, data }
+
+  /** abap create — MODIFY z2ui5_t_01 (insert-or-overwrite by id). */
+  create(a, b) {
+    const { draft, model_xml } =
+      a !== null && typeof a === `object` && `draft` in a ? a : { draft: a, model_xml: b };
+    if (!draft || !draft.id) throw new Error(`ASSERT failed - draft id is initial`);
+    z2ui5_cl_core_srv_draft._mt_db.set(String(draft.id), {
+      id: draft.id,
+      id_prev: draft.id_prev ?? ``,
+      id_prev_app: draft.id_prev_app ?? ``,
+      id_prev_app_stack: draft.id_prev_app_stack ?? ``,
+      timestampl: Date.now(),
+      data: String(model_xml ?? ``),
+    });
+  }
+
+  /** abap read (protected) — raises when the id is unknown. */
+  read(a, b) {
+    const { id, check_load_app = true } =
+      a !== null && typeof a === `object` && `id` in a ? a : { id: a, check_load_app: b };
+    const row = z2ui5_cl_core_srv_draft._mt_db.get(String(id ?? ``));
+    if (!row) {
+      const CXU = require(`../../00/03/z2ui5_cx_util_error`);
+      throw new CXU(`NO_DRAFT_ENTRY_OF_PREVIOUS_REQUEST_FOUND`);
+    }
+    if (check_load_app === false) {
+      const { id: rid, id_prev, id_prev_app, id_prev_app_stack } = row;
+      return { id: rid, id_prev, id_prev_app, id_prev_app_stack, timestampl: 0, data: `` };
+    }
+    return { ...row };
+  }
+
+  /** abap read_draft — full row incl. serialized model. */
+  read_draft(id) {
+    return this.read(id);
+  }
+
+  /** abap read_info — ty_s_draft (ids only). */
+  read_info(id) {
+    const row = this.read({ id, check_load_app: false });
+    return {
+      id: row.id,
+      id_prev: row.id_prev,
+      id_prev_app: row.id_prev_app,
+      id_prev_app_stack: row.id_prev_app_stack,
+    };
+  }
+
+  /** abap check_exists. */
+  check_exists(id) {
+    return z2ui5_cl_core_srv_draft._mt_db.has(String(id ?? ``));
+  }
+
+  /** abap count_entries. */
+  count_entries() {
+    return z2ui5_cl_core_srv_draft._mt_db.size;
+  }
+
+  /** abap cleanup — drop entries older than the configured expiry. */
+  cleanup() {
+    let hours = z2ui5_cl_core_srv_draft.c_min_exp_time_in_hours;
+    try {
+      const z2ui5_cl_exit = require(`../../02/z2ui5_cl_exit`);
+      const cfg = {};
+      z2ui5_cl_exit.get_instance().set_config_http_post({ cs_config: cfg });
+      if (Number(cfg.draft_exp_time_in_hours) > hours) hours = Number(cfg.draft_exp_time_in_hours);
+    } catch { /* exit not configured — minimum expiry */ }
+    const cutoff = Date.now() - hours * z2ui5_cl_core_srv_draft.c_seconds_per_hour * 1000;
+    for (const [id, row] of z2ui5_cl_core_srv_draft._mt_db) {
+      if (row.timestampl < cutoff) z2ui5_cl_core_srv_draft._mt_db.delete(id);
+    }
+  }
 }
 
 module.exports = z2ui5_cl_core_srv_draft;

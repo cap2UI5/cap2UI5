@@ -1,5 +1,3 @@
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_104 extends z2ui5_if_app {
@@ -20,10 +18,20 @@ class z2ui5_cl_demo_app_104 extends z2ui5_if_app {
     let fs_fs = null;
     let _fs$fs_fs = null;
     if (this.mo_app_sub != null) {
-      // TODO(abap2js): ASSIGN mo_app_sub->(`MO_VIEW_PARENT`) TO FIELD-SYMBOL(<fs>).
-      fs_fs = z2ui5_cl_util.abap_copy(this.mo_grid_sub);
+      _fs$fs_fs = ((_o, _n) => { if (_o == null) return null; const _k = String(_n).toLowerCase(); return _k in _o ? { o: _o, k: _k } : null; })(this.mo_app_sub, `MO_VIEW_PARENT`);
+      fs_fs = _fs$fs_fs ? _fs$fs_fs.o[_fs$fs_fs.k] : null;
+      sy_subrc = _fs$fs_fs ? 0 : 4;
+      fs_fs = this.mo_grid_sub;
       if (_fs$fs_fs) _fs$fs_fs.o[_fs$fs_fs.k] = fs_fs;
-      // TODO(abap2js): CALL METHOD mo_app_sub->(`Z2UI5_IF_APP~MAIN`) EXPORTING client = client.
+      {
+        const _dynr = (this.mo_app_sub);
+        const _dynm = _dynr ? _dynr[String(`Z2UI5_IF_APP~MAIN`).toLowerCase()] : undefined;
+        if (typeof _dynm !== "function") throw new Error(`CALL METHOD: ${String(`Z2UI5_IF_APP~MAIN`)} not found`);
+        {
+          const _dynargs = { client: this.client };
+          const _dynret = _dynm.call(_dynr, _dynargs);
+        }
+      }
     }
   }
 
@@ -33,10 +41,20 @@ class z2ui5_cl_demo_app_104 extends z2ui5_if_app {
     let _fs$fs_fs = null;
     this.classname = this.classname.toUpperCase();
     this.mo_app_sub = (() => { const _n = String(this.classname); const _c = z2ui5_cl_util.rtti_get_class(_n.toLowerCase()); if (!_c) throw new Error(`CREATE OBJECT: class ${_n} not found`); return new _c(); })();
-    // TODO(abap2js): ASSIGN mo_app_sub->(`MO_VIEW_PARENT`) TO FIELD-SYMBOL(<fs>).
-    fs_fs = z2ui5_cl_util.abap_copy(this.mo_grid_sub);
+    _fs$fs_fs = ((_o, _n) => { if (_o == null) return null; const _k = String(_n).toLowerCase(); return _k in _o ? { o: _o, k: _k } : null; })(this.mo_app_sub, `MO_VIEW_PARENT`);
+    fs_fs = _fs$fs_fs ? _fs$fs_fs.o[_fs$fs_fs.k] : null;
+    sy_subrc = _fs$fs_fs ? 0 : 4;
+    fs_fs = this.mo_grid_sub;
     if (_fs$fs_fs) _fs$fs_fs.o[_fs$fs_fs.k] = fs_fs;
-    // TODO(abap2js): CALL METHOD mo_app_sub->(`Z2UI5_IF_APP~MAIN`) EXPORTING client = client.
+    {
+      const _dynr = (this.mo_app_sub);
+      const _dynm = _dynr ? _dynr[String(`Z2UI5_IF_APP~MAIN`).toLowerCase()] : undefined;
+      if (typeof _dynm !== "function") throw new Error(`CALL METHOD: ${String(`Z2UI5_IF_APP~MAIN`)} not found`);
+      {
+        const _dynargs = { client: this.client };
+        const _dynret = _dynm.call(_dynr, _dynargs);
+      }
+    }
   }
 
   view_display_detail() {
@@ -60,9 +78,9 @@ class z2ui5_cl_demo_app_104 extends z2ui5_if_app {
     let sy_subrc = 0;
     let lt_sel;
     let ls_sel;
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init()) {
-      this.t_tab = [{ title: `Class 1`, info: `z2ui5_cl_demo_app_105`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `Class 2`, info: `z2ui5_cl_demo_app_112`, descr: `this is a description`, icon: `sap-icon://account` }];
+      this.t_tab = z2ui5_cl_util.abap_tab_assign(this.t_tab, [{ title: `Class 1`, info: `z2ui5_cl_demo_app_105`, descr: `this is a description`, icon: `sap-icon://account` }, { title: `Class 2`, info: `z2ui5_cl_demo_app_112`, descr: `this is a description`, icon: `sap-icon://account` }]);
       this.mv_layout = `OneColumn`;
       this.view_display_master();
       this.view_display_detail();
@@ -78,11 +96,11 @@ class z2ui5_cl_demo_app_104 extends z2ui5_if_app {
           sy_subrc = _i >= 0 && _i < _t.length ? 0 : 4;
           if (sy_subrc === 0) ls_sel = _t[_i];
         }
-        this.t_tab2.push(ls_sel);
+        this.t_tab2.push(z2ui5_cl_util.abap_copy(ls_sel));
         if (this.classname) {
           this.view_display_master();
         }
-        this.classname = z2ui5_cl_util.abap_copy(ls_sel.info);
+        this.classname = z2ui5_cl_util.abap_tab_assign(this.classname, z2ui5_cl_util.abap_copy(ls_sel.info));
         this.mv_layout = `TwoColumnsMidExpanded`;
         client.view_model_update();
         this.view_display_detail();
@@ -95,3 +113,7 @@ class z2ui5_cl_demo_app_104 extends z2ui5_if_app {
 }
 
 module.exports = z2ui5_cl_demo_app_104;
+
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+

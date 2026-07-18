@@ -1,5 +1,3 @@
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_061 extends z2ui5_if_app {
@@ -13,7 +11,9 @@ class z2ui5_cl_demo_app_061 extends z2ui5_if_app {
     const view = z2ui5_cl_xml_view.factory();
     const page = view.shell()
       .page({ title: `abap2UI5 - RTTI created Table`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
-    // TODO(abap2js): ASSIGN t_tab->* TO <tab>.
+    fs_tab = this.t_tab;
+    _fs$fs_tab = { o: this, k: `t_tab` };
+    sy_subrc = 0;
     const tab = page.table({ items: this.client._bind_edit(fs_tab), mode: `MultiSelect` })
       .header_toolbar()
       .overflow_toolbar()
@@ -45,16 +45,22 @@ class z2ui5_cl_demo_app_061 extends z2ui5_if_app {
     let sy_subrc = 0;
     let fs_tab = null;
     let _fs$fs_tab = null;
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init()) {
-      // TODO(abap2js): CREATE DATA t_tab TYPE STANDARD TABLE OF (`Z2UI5_T_01`).
-      // TODO(abap2js): ASSIGN t_tab->* TO <tab>.
-      fs_tab.push({ id: `this is an uuid`, timestampl: `2023234243`, id_prev: `previous` });
-      fs_tab.push({ id: `this is an uuid`, timestampl: `2023234243`, id_prev: `previous` });
-      fs_tab.push({ id: `this is an uuid`, timestampl: `2023234243`, id_prev: `previous` });
+      this.t_tab = [];
+      fs_tab = this.t_tab;
+      _fs$fs_tab = { o: this, k: `t_tab` };
+      sy_subrc = 0;
+      fs_tab.push(z2ui5_cl_util.abap_copy({ id: `this is an uuid`, timestampl: `2023234243`, id_prev: `previous` }));
+      fs_tab.push(z2ui5_cl_util.abap_copy({ id: `this is an uuid`, timestampl: `2023234243`, id_prev: `previous` }));
+      fs_tab.push(z2ui5_cl_util.abap_copy({ id: `this is an uuid`, timestampl: `2023234243`, id_prev: `previous` }));
     }
     this.set_view();
   }
 }
 
 module.exports = z2ui5_cl_demo_app_061;
+
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+

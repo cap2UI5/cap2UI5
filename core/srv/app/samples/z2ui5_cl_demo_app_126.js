@@ -1,8 +1,3 @@
-const cl_abap_datadescr = require("abap2UI5/cl_abap_datadescr");
-const cl_abap_structdescr = require("abap2UI5/cl_abap_structdescr");
-const cl_abap_tabledescr = require("abap2UI5/cl_abap_tabledescr");
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_126 extends z2ui5_if_app {
@@ -31,7 +26,7 @@ class z2ui5_cl_demo_app_126 extends z2ui5_if_app {
         for (const com of comp) {
           sy_tabix++;
           if (!(com.as_include === true || com.as_include === `X`)) {
-            result.push(com);
+            result.push(z2ui5_cl_util.abap_copy(com));
           }
         }
       } catch (error) {
@@ -59,12 +54,16 @@ class z2ui5_cl_demo_app_126 extends z2ui5_if_app {
       // TODO(abap2js): CREATE DATA mt_table_del TYPE HANDLE new_table_desc.
       // TODO(abap2js): CREATE DATA mt_table_tmp TYPE HANDLE new_table_desc.
       // TODO(abap2js): CREATE DATA ms_table_row TYPE HANDLE new_struct_desc.
-      // TODO(abap2js): ASSIGN mt_table->* TO <table>.
+      fs_table = this.mt_table;
+      _fs$fs_table = { o: this, k: `mt_table` };
+      sy_subrc = 0;
       // TODO(abap2js): SELECT * FROM z2ui5_t_01 INTO CORRESPONDING FIELDS OF TABLE @<table> UP TO 3 ROWS.
     } catch (error) {
     }
-    // TODO(abap2js): ASSIGN mt_table_tmp->* TO <table_tmp>.
-    fs_table_tmp = z2ui5_cl_util.abap_copy(fs_table);
+    fs_table_tmp = this.mt_table_tmp;
+    _fs$fs_table_tmp = { o: this, k: `mt_table_tmp` };
+    sy_subrc = 0;
+    fs_table_tmp = z2ui5_cl_util.abap_tab_assign(fs_table_tmp, z2ui5_cl_util.abap_copy(fs_table));
     if (_fs$fs_table_tmp) _fs$fs_table_tmp.o[_fs$fs_table_tmp.k] = fs_table_tmp;
   }
 
@@ -90,11 +89,11 @@ class z2ui5_cl_demo_app_126 extends z2ui5_if_app {
   }
 
   set_app_data({ data } = {}) {
-    this.mv_perc = z2ui5_cl_util.abap_copy(data);
+    this.mv_perc = z2ui5_cl_util.abap_tab_assign(this.mv_perc, z2ui5_cl_util.abap_copy(data));
   }
 
   async main(client) {
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init()) {
       this.on_init();
     }
@@ -102,3 +101,10 @@ class z2ui5_cl_demo_app_126 extends z2ui5_if_app {
 }
 
 module.exports = z2ui5_cl_demo_app_126;
+
+const cl_abap_datadescr = require("abap2UI5/cl_abap_datadescr");
+const cl_abap_structdescr = require("abap2UI5/cl_abap_structdescr");
+const cl_abap_tabledescr = require("abap2UI5/cl_abap_tabledescr");
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+

@@ -1,18 +1,15 @@
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
-const z2ui5_if_client = require("abap2UI5/z2ui5_if_client");
 
 class z2ui5_cl_demo_app_352 extends z2ui5_if_app {
   input = ``;
   client = null;
 
   async main(client) {
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init()) {
       this.view_display();
-      client.follow_up_action({ val: z2ui5_if_client.cs_event.set_focus, t_arg: [`ZINPUT`] });
-      client.follow_up_action({ val: z2ui5_if_client.cs_event.keyboard_set_mode, t_arg: [`ZINPUT`, `numeric`] });
+      client.follow_up_action(z2ui5_if_client.cs_event.set_focus, [`ZINPUT`]);
+      client.follow_up_action(z2ui5_if_client.cs_event.keyboard_set_mode, [`ZINPUT`, `numeric`]);
     }
     this.on_event();
   }
@@ -31,9 +28,13 @@ class z2ui5_cl_demo_app_352 extends z2ui5_if_app {
 
   on_event() {
     if (this.client.check_on_event(`CALL_KEYBOARD`)) {
-      this.client.follow_up_action({ val: z2ui5_if_client.cs_event.keyboard_set_mode, t_arg: [`ZINPUT`, `none`] });
+      this.client.follow_up_action(z2ui5_if_client.cs_event.keyboard_set_mode, [`ZINPUT`, `none`]);
     }
   }
 }
 
 module.exports = z2ui5_cl_demo_app_352;
+
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_client = require("abap2UI5/z2ui5_if_client");
+

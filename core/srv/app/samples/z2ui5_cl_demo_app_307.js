@@ -1,14 +1,11 @@
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
-const z2ui5_if_client = require("abap2UI5/z2ui5_if_client");
 
 class z2ui5_cl_demo_app_307 extends z2ui5_if_app {
-  items = null;
+  items = [];
   client = null;
 
   async main(client) {
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init()) {
       this.initialization();
       this.view_display({ client: client });
@@ -17,7 +14,7 @@ class z2ui5_cl_demo_app_307 extends z2ui5_if_app {
   }
 
   initialization() {
-    this.items = [{ title: `Box title 1`, subtitle: `Subtitle 1`, counter: 5, highlight: `Error`, unread: true, type: `Active` }, { title: `Box title 2`, subtitle: `Subtitle 2`, counter: 15, highlight: `Warning`, type: `Active` }, { title: `Box title 3`, subtitle: `Subtitle 3`, counter: 15734, highlight: `None`, type: `Inactive`, busy: true }, { title: `Box title 4`, subtitle: `Subtitle 4`, counter: 2, highlight: `None`, type: `Inactive` }, { title: `Box title 5`, subtitle: `Subtitle 5`, counter: 1, highlight: `Warning`, type: `Inactive` }, { title: `Box title 6 Box title Box title Box title Box title Box title`, subtitle: `Subtitle 6`, counter: 5, highlight: `None`, type: `Active` }, { title: `Very long Box title that should wrap 7`, subtitle: `This is a long subtitle 7`, counter: 5, highlight: `Error`, type: `DetailAndActive` }, { title: `Box title B 8`, subtitle: `Subtitle 8`, counter: 0, highlight: `None`, type: `Navigation` }, { title: `Box title B 9 Box title B  Box title B 9 Box title B 9Box title B 9title B 9 Box title B 9Box title B`, subtitle: `Subtitle 9`, highlight: `Success`, type: `Inactive` }, { title: `Box title B 10`, subtitle: `Subtitle 10`, highlight: `None`, type: `Active` }, { title: `Box title B 11`, subtitle: `Subtitle 11`, highlight: `None`, type: `Active` }, { title: `Box title B 12`, subtitle: `Subtitle 12`, highlight: `Information`, type: `Inactive` }, { title: `Box title 13`, subtitle: `Subtitle 13`, counter: 5, highlight: `None`, type: `Navigation` }, { title: `Box title 14`, subtitle: `Subtitle 14`, highlight: `Success`, type: `DetailAndActive` }, { title: `Box title 15`, subtitle: `Subtitle 15`, highlight: `None`, type: `Inactive` }, { title: `Box title 16`, subtitle: `Subtitle 16`, counter: 37412578, highlight: `None`, type: `Navigation` }, { title: `Box title 17`, subtitle: `Subtitle 17`, highlight: `Information`, type: `Inactive` }, { title: `Box title 18`, subtitle: `Subtitle 18`, highlight: `None`, type: `Inactive` }, { title: `Very long Box title that should wrap 19`, subtitle: `This is a long subtitle 19`, highlight: `None`, type: `Inactive` }, { title: `Box title B 20`, subtitle: `Subtitle 20`, counter: 1, busy: true, highlight: `Success`, type: `Inactive` }, { title: `Box title B 21`, subtitle: `Subtitle 21`, highlight: `None`, type: `Navigation` }, { title: `Box title B 22`, subtitle: `Subtitle 22`, counter: 5, highlight: `None`, unread: true, type: `Inactive` }, { title: `Box title B 23`, subtitle: `Subtitle 23`, counter: 3, highlight: `None`, unread: true, type: `Inactive` }, { title: `Box title B 24`, subtitle: `Subtitle 24`, counter: 5, highlight: `Error`, type: `Inactive` }, { title: `Box title B 21`, subtitle: `Subtitle 21`, highlight: `None`, type: `Inactive` }, { title: `Box title B 22`, subtitle: `Subtitle 22`, highlight: `None`, unread: true, type: `Navigation` }, { title: `Box title B 23`, subtitle: `Subtitle 23`, highlight: `None`, type: `Navigation` }];
+    this.items = z2ui5_cl_util.abap_tab_assign(this.items, [{ title: `Box title 1`, subtitle: `Subtitle 1`, counter: 5, highlight: `Error`, unread: true, type: `Active` }, { title: `Box title 2`, subtitle: `Subtitle 2`, counter: 15, highlight: `Warning`, type: `Active` }, { title: `Box title 3`, subtitle: `Subtitle 3`, counter: 15734, highlight: `None`, type: `Inactive`, busy: true }, { title: `Box title 4`, subtitle: `Subtitle 4`, counter: 2, highlight: `None`, type: `Inactive` }, { title: `Box title 5`, subtitle: `Subtitle 5`, counter: 1, highlight: `Warning`, type: `Inactive` }, { title: `Box title 6 Box title Box title Box title Box title Box title`, subtitle: `Subtitle 6`, counter: 5, highlight: `None`, type: `Active` }, { title: `Very long Box title that should wrap 7`, subtitle: `This is a long subtitle 7`, counter: 5, highlight: `Error`, type: `DetailAndActive` }, { title: `Box title B 8`, subtitle: `Subtitle 8`, counter: 0, highlight: `None`, type: `Navigation` }, { title: `Box title B 9 Box title B  Box title B 9 Box title B 9Box title B 9title B 9 Box title B 9Box title B`, subtitle: `Subtitle 9`, highlight: `Success`, type: `Inactive` }, { title: `Box title B 10`, subtitle: `Subtitle 10`, highlight: `None`, type: `Active` }, { title: `Box title B 11`, subtitle: `Subtitle 11`, highlight: `None`, type: `Active` }, { title: `Box title B 12`, subtitle: `Subtitle 12`, highlight: `Information`, type: `Inactive` }, { title: `Box title 13`, subtitle: `Subtitle 13`, counter: 5, highlight: `None`, type: `Navigation` }, { title: `Box title 14`, subtitle: `Subtitle 14`, highlight: `Success`, type: `DetailAndActive` }, { title: `Box title 15`, subtitle: `Subtitle 15`, highlight: `None`, type: `Inactive` }, { title: `Box title 16`, subtitle: `Subtitle 16`, counter: 37412578, highlight: `None`, type: `Navigation` }, { title: `Box title 17`, subtitle: `Subtitle 17`, highlight: `Information`, type: `Inactive` }, { title: `Box title 18`, subtitle: `Subtitle 18`, highlight: `None`, type: `Inactive` }, { title: `Very long Box title that should wrap 19`, subtitle: `This is a long subtitle 19`, highlight: `None`, type: `Inactive` }, { title: `Box title B 20`, subtitle: `Subtitle 20`, counter: 1, busy: true, highlight: `Success`, type: `Inactive` }, { title: `Box title B 21`, subtitle: `Subtitle 21`, highlight: `None`, type: `Navigation` }, { title: `Box title B 22`, subtitle: `Subtitle 22`, counter: 5, highlight: `None`, unread: true, type: `Inactive` }, { title: `Box title B 23`, subtitle: `Subtitle 23`, counter: 3, highlight: `None`, unread: true, type: `Inactive` }, { title: `Box title B 24`, subtitle: `Subtitle 24`, counter: 5, highlight: `Error`, type: `Inactive` }, { title: `Box title B 21`, subtitle: `Subtitle 21`, highlight: `None`, type: `Inactive` }, { title: `Box title B 22`, subtitle: `Subtitle 22`, highlight: `None`, unread: true, type: `Navigation` }, { title: `Box title B 23`, subtitle: `Subtitle 23`, highlight: `None`, type: `Navigation` }]);
   }
 
   view_display({ client } = {}) {
@@ -49,7 +46,7 @@ class z2ui5_cl_demo_app_307 extends z2ui5_if_app {
       .title({ text: `{TITLE}`, wrapping: true })
       .label({ text: `{SUBTITLE}`, wrapping: true });
     client.view_display(view.stringify());
-    client.follow_up_action({ val: z2ui5_if_client.cs_event.set_title, t_arg: [`Grid List with Drag and Drop`] });
+    client.follow_up_action(z2ui5_if_client.cs_event.set_title, [`Grid List with Drag and Drop`]);
   }
 
   on_event({ client } = {}) {
@@ -73,9 +70,9 @@ class z2ui5_cl_demo_app_307 extends z2ui5_if_app {
         drop_position = drop_position - 1;
       }
       if (insert_position === `Before`) {
-        this.items.splice((drop_position) - 1, 0, item);
+        this.items.splice((drop_position) - 1, 0, z2ui5_cl_util.abap_copy(item));
       } else {
-        this.items.splice((drop_position + 1) - 1, 0, item);
+        this.items.splice((drop_position + 1) - 1, 0, z2ui5_cl_util.abap_copy(item));
       }
     }
     client.view_model_update();
@@ -83,3 +80,8 @@ class z2ui5_cl_demo_app_307 extends z2ui5_if_app {
 }
 
 module.exports = z2ui5_cl_demo_app_307;
+
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_client = require("abap2UI5/z2ui5_if_client");
+

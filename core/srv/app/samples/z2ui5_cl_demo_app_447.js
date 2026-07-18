@@ -1,5 +1,3 @@
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_447 extends z2ui5_if_app {
@@ -7,10 +5,10 @@ class z2ui5_cl_demo_app_447 extends z2ui5_if_app {
   client = null;
 
   async main(client) {
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init()) {
       for (let sy_index = 1; sy_index <= 30; sy_index++) {
-        this.mt_row.push({ index: sy_index, text: `Row number ${sy_index}` });
+        this.mt_row.push(z2ui5_cl_util.abap_copy({ index: sy_index, text: `Row number ${sy_index}` }));
       }
       this.view_display();
     } else {
@@ -47,3 +45,7 @@ class z2ui5_cl_demo_app_447 extends z2ui5_if_app {
 }
 
 module.exports = z2ui5_cl_demo_app_447;
+
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+

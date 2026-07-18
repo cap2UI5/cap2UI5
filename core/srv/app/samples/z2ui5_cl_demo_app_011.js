@@ -1,5 +1,3 @@
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_011 extends z2ui5_if_app {
@@ -50,27 +48,31 @@ class z2ui5_cl_demo_app_011 extends z2ui5_if_app {
 
   async main(client) {
     let sy_tabix = 0;
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init()) {
       this.check_editable_active = false;
-      this.t_tab = [{ title: `entry 01`, value: `red`, info: `completed`, descr: `this is a description`, checkbox: true }, { title: `entry 02`, value: `blue`, info: `completed`, descr: `this is a description`, checkbox: true }, { title: `entry 03`, value: `green`, info: `completed`, descr: `this is a description`, checkbox: true }, { title: `entry 04`, value: `orange`, info: `completed`, descr: ``, checkbox: true }, { title: `entry 05`, value: `grey`, info: `completed`, descr: `this is a description`, checkbox: true }, { }];
+      this.t_tab = z2ui5_cl_util.abap_tab_assign(this.t_tab, [{ title: `entry 01`, value: `red`, info: `completed`, descr: `this is a description`, checkbox: true }, { title: `entry 02`, value: `blue`, info: `completed`, descr: `this is a description`, checkbox: true }, { title: `entry 03`, value: `green`, info: `completed`, descr: `this is a description`, checkbox: true }, { title: `entry 04`, value: `orange`, info: `completed`, descr: ``, checkbox: true }, { title: `entry 05`, value: `grey`, info: `completed`, descr: `this is a description`, checkbox: true }, { }]);
       this.view_display();
     } else if (client.check_on_event(`BUTTON_EDIT`)) {
       this.check_editable_active = (!(this.check_editable_active === true || this.check_editable_active === `X`));
       sy_tabix = 0;
       for (const lr_tab of this.t_tab) {
         sy_tabix++;
-        lr_tab.editable = z2ui5_cl_util.abap_copy(this.check_editable_active);
+        lr_tab.editable = z2ui5_cl_util.abap_tab_assign(lr_tab.editable, z2ui5_cl_util.abap_copy(this.check_editable_active));
       }
       client.view_model_update();
     } else if (client.check_on_event(`BUTTON_DELETE`)) {
       for (let _i = this.t_tab.length - 1; _i >= 0; _i--) { const row = this.t_tab[_i]; if ((row.selkz === true || row.selkz === `X`)) this.t_tab.splice(_i, 1); }
       client.view_model_update();
     } else if (client.check_on_event(`BUTTON_ADD`)) {
-      this.t_tab.push({});
+      this.t_tab.push(z2ui5_cl_util.abap_copy({}));
       client.view_model_update();
     }
   }
 }
 
 module.exports = z2ui5_cl_demo_app_011;
+
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+

@@ -16,7 +16,8 @@ const z2ui5_cl_util_http = require("abap2UI5/z2ui5_cl_util_http");
  *   /resources             → the local UI5 runtime
  *
  * plus the two platform ports of this app:
- *   draft store            → the CDS entity cap2ui5.z2ui5_t_01 (db/schema.cds)
+ *   draft store            → the CDS entity cap2ui5.z2ui5_t_01 (db/schema.cds),
+ *                            expired rows cleaned hourly (srv/draft-retention.js)
  *   app discovery          → this project's srv/app/ (custom apps)
  */
 
@@ -37,6 +38,10 @@ engine.set_store({
 // core package, so they must be registered (the bundled samples inside the
 // package are found without registration).
 engine.register_app_dir(require("path").join(__dirname, "app"));
+
+// Retention: the store above is append-only, so expired draft chains are
+// pruned on a timer once the database is connected.
+cds.on("served", () => require("./draft-retention").start());
 
 cds.on("bootstrap", (app) => {
   // Serve the local UI5 runtime at /resources (must be registered before the

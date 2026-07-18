@@ -75,6 +75,21 @@ class z2ui5_cl_exit {
    * `unsafe-inline` / `unsafe-eval` — same value as the ABAP impl.
    */
   set_config_http_get(is_context, cs_config = {}) {
+    // transpiled out-param convention: one merged args object whose
+    // cs_config is mutated in place (and synced back onto the object)
+    let _args = null;
+    if (is_context !== null && typeof is_context === `object` && cs_config !== null
+        && typeof cs_config === `object` && Object.keys(cs_config).length === 0 && `cs_config` in is_context) {
+      _args = is_context;
+      cs_config = _args.cs_config ?? {};
+      is_context = _args.is_context;
+    }
+    cs_config = this._config_http_get(is_context, cs_config);
+    if (_args) _args.cs_config = cs_config;
+    return cs_config;
+  }
+
+  _config_http_get(is_context, cs_config = {}) {
     cs_config.title = `abap2UI5`;
     cs_config.theme = `sap_horizon`;
     // Local UI5 runtime served by the CAP server at /resources (openui5-dist
@@ -124,6 +139,19 @@ class z2ui5_cl_exit {
    * override, then guards against a non-positive override.
    */
   set_config_http_post(is_context, cs_config = {}) {
+    let _args = null;
+    if (is_context !== null && typeof is_context === `object` && cs_config !== null
+        && typeof cs_config === `object` && Object.keys(cs_config).length === 0 && `cs_config` in is_context) {
+      _args = is_context;
+      cs_config = _args.cs_config ?? {};
+      is_context = _args.is_context;
+    }
+    cs_config = this._config_http_post(is_context, cs_config);
+    if (_args) _args.cs_config = cs_config;
+    return cs_config;
+  }
+
+  _config_http_post(is_context, cs_config = {}) {
     cs_config.draft_exp_time_in_hours = 4;
 
     if (z2ui5_cl_exit._gi_user_exit) {

@@ -1,6 +1,3 @@
-const z2ui5_cl_a2ui5_context = require("abap2UI5/z2ui5_cl_a2ui5_context");
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_pop_messages extends z2ui5_if_app {
@@ -15,9 +12,9 @@ class z2ui5_cl_pop_messages extends z2ui5_if_app {
     sy_tabix = 0;
     for (const lr_row of z2ui5_cl_a2ui5_context.msg_get_t(i_messages)) {
       sy_tabix++;
-      r_result.mt_msg.push({ type: z2ui5_cl_a2ui5_context.ui5_get_msg_type(lr_row.type), title: lr_row.text, subtitle: `${lr_row.id} ${lr_row.no}` });
+      r_result.mt_msg.push(z2ui5_cl_util.abap_copy({ type: z2ui5_cl_a2ui5_context.ui5_get_msg_type(lr_row.type), title: lr_row.text, subtitle: `${lr_row.id} ${lr_row.no}` }));
     }
-    r_result.title = z2ui5_cl_util.abap_copy(i_title);
+    r_result.title = z2ui5_cl_util.abap_tab_assign(r_result.title, z2ui5_cl_util.abap_copy(i_title));
     return r_result;
   }
 
@@ -31,7 +28,7 @@ class z2ui5_cl_pop_messages extends z2ui5_if_app {
   }
 
   async main(client) {
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init()) {
       this.view_display();
       return;
@@ -43,9 +40,14 @@ class z2ui5_cl_pop_messages extends z2ui5_if_app {
   }
 }
 
+module.exports = z2ui5_cl_pop_messages;
+
+const z2ui5_cl_a2ui5_context = require("abap2UI5/z2ui5_cl_a2ui5_context");
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+
 // abap PREFERRED PARAMETER call style — see z2ui5_pop_preferred_param.js
 require("./z2ui5_pop_preferred_param")(z2ui5_cl_pop_messages, {
   factory: { preferred: `i_messages`, params: [`i_messages`, `i_title`] },
 });
 
-module.exports = z2ui5_cl_pop_messages;

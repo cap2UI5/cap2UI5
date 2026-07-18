@@ -1,6 +1,3 @@
-const z2ui5_cl_sample_context = require("./z2ui5_cl_sample_context");
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_demo_app_074 extends z2ui5_if_app {
@@ -10,7 +7,7 @@ class z2ui5_cl_demo_app_074 extends z2ui5_if_app {
   client = null;
 
   async main(client) {
-    this.client = z2ui5_cl_util.abap_copy(client);
+    this.client = client;
     if (client.check_on_init() || client.check_on_navigated()) {
       this.view_display();
     } else {
@@ -21,6 +18,7 @@ class z2ui5_cl_demo_app_074 extends z2ui5_if_app {
   on_event() {
     let raw;
     let content;
+    let error;
     try {
       switch (this.client.get().EVENT) {
         case `START`:
@@ -38,7 +36,8 @@ class z2ui5_cl_demo_app_074 extends z2ui5_if_app {
           this.view_display();
           break;
       }
-    } catch (error) {
+    } catch (_caught1) {
+      error = _caught1;
       this.client.message_box_display(error.get_text(), `error`);
     }
   }
@@ -56,7 +55,9 @@ class z2ui5_cl_demo_app_074 extends z2ui5_if_app {
     const page = view.shell()
       .page({ title: `abap2UI5 - Upload a File`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
     if (this.table) {
-      // TODO(abap2js): ASSIGN table->* TO <table>.
+      fs_table = this.table;
+      _fs$fs_table = { o: this, k: `table` };
+      sy_subrc = 0;
       tab = page.table(this.client._bind_edit(fs_table))
         .header_toolbar()
         .overflow_toolbar()
@@ -83,3 +84,7 @@ class z2ui5_cl_demo_app_074 extends z2ui5_if_app {
 }
 
 module.exports = z2ui5_cl_demo_app_074;
+
+const z2ui5_cl_sample_context = require("./z2ui5_cl_sample_context");
+const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+
