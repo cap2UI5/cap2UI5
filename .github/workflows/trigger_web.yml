@@ -5,13 +5,14 @@ name: trigger web
 # deploy key registered on builder-cap2UI5-web with write access (private
 # half: secret ACTION_KEY_WEB here) — that push starts builder-cap2UI5-web's
 # "build web" workflow, which mirrors this repo and redeploys the site.
-# Same pattern as abap2UI5's trigger_cap. Manual only (workflow_dispatch):
-# run it whenever a rebuild of the browser site should be kicked off — e.g.
-# after builder-cap2UI5 published a new app build here. If the sha is
-# unchanged since the last trigger, nothing is pushed and
-# builder-cap2UI5-web does not rebuild.
+# Same pattern as abap2UI5's trigger_cap. Runs on every push to main (i.e.
+# every publish from builder-cap2UI5 — the Pages site follows the app
+# automatically) and manually. If the sha is unchanged since the last
+# trigger, nothing is pushed and builder-cap2UI5-web does not rebuild.
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
