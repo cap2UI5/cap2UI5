@@ -1,0 +1,50 @@
+name: deploy check
+
+# BTP deployability gate: build the full MTA archive with the Cloud MTA
+# Build Tool (mbt, a devDependency) so a broken mta.yaml or a broken
+# `cds build --production` is caught on every PR and push to main instead
+# of at deploy time.
+#
+# Notes:
+# - mbt needs GNU make (it generates Makefile.mta and runs make); make is
+#   preinstalled on ubuntu-latest.
+# - The npm `mbt` package downloads its Go binary from GitHub releases in
+#   a postinstall step. If that download fails, the npm wrapper silently
+#   exits 0 on every invocation — hence the explicit check that the .mtar
+#   was actually produced.
+# - This workflow could not be verified end-to-end in the authoring
+#   environment: its egress policy blocked the mbt binary download from
+#   github.com releases (403), so only the inner `cds build --production`
+#   step was verified locally (it passes, with two harmless Edm.Double
+#   key warnings from the imported Northwind model). Known caveat for the
+#   first runs: mta.yaml's html5 module (path app/z2ui5) runs
+#   `npm install && npm run build:cf`, but app/z2ui5 currently ships
+#   without a package.json — if mbt fails there, that is a real
+#   deployability gap in the generated app, which is exactly what this
+#   gate is meant to surface (fix belongs in builder-cap2UI5:src/).
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      # one install covers the app AND the vendored core (its deps are part
+      # of the app lock, placed under core/node_modules/) — and fetches the
+      # mbt binary via the package's postinstall
+      - run: npm ci
+      - run: npx mbt build --mtar archive
+      # guard against the mbt npm wrapper exiting 0 without the Go binary
+      - name: verify mtar was produced
+        run: test -f mta_archives/archive.mtar
