@@ -23,7 +23,9 @@ class z2ui5_cl_demo_app_143 extends z2ui5_if_app {
 
   view_display() {
     const view = z2ui5_cl_xml_view.factory();
-    const page1 = view.page({ id: `page_main`, title: `Table Filters Reset after view Update`, class: `sapUiContentPadding`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    const page1 = view.shell()
+      .page({ id: `page_main`, title: `Table Filters Reset after view Update`, class: `sapUiContentPadding`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    page1.message_strip({ text: `This sample uses the abap2UI5 uitableext custom control so the active sap.ui.table column ` + `filters are preserved across a view model update instead of being reset.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     const page = page1.dynamic_page({ headerexpanded: true, headerpinned: true });
     page1._z2ui5().uitableext(`Table1`);
     const header_title = page.title({ ns: `f` }).get().dynamic_page_title();

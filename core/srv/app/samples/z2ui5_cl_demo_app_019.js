@@ -10,6 +10,7 @@ class z2ui5_cl_demo_app_019 extends z2ui5_if_app {
     const view = z2ui5_cl_xml_view.factory();
     const page = view.shell()
       .page({ title: `abap2UI5 - Table with different Selection Modes`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    page.message_strip({ text: `A SegmentedButton switches the table's selection mode (None, Single, Multi) at ` + `runtime; a second table below collects the rows selected in the first.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     page.segmented_button({ selected_key: this.client._bind_edit(this.sel_mode), selection_change: this.client._event(`BUTTON_SEGMENT_CHANGE`) })
       .get()
       .items()

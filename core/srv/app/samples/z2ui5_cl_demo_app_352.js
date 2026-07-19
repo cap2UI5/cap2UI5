@@ -18,6 +18,7 @@ class z2ui5_cl_demo_app_352 extends z2ui5_if_app {
     const view = z2ui5_cl_xml_view.factory();
     const page = view.shell()
       .page({ title: `abap2UI5 - Softkeyboard on/off`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    page.message_strip({ text: `Set the on-screen soft keyboard mode (numeric or off) via the keyboard_set_mode follow-up action, and ` + `focus the input on load.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     page.simple_form({ editable: true })
       .content(`form`)
       .title(`Keyboard on/off`)

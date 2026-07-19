@@ -118,9 +118,7 @@ class z2ui5_cl_core_srv_bind {
     const idx = (opts.tab_index || 1) - 1;
     const row = tab[idx];
     if (!row || typeof row !== `object`) {
-      throw new z2ui5_cx_util_error(
-        `BINDING_ERROR_TAB_CELL_LEVEL - No class attribute for binding found - Please check if the bound values are public attributes of your class`
-      );
+      throw new z2ui5_cx_util_error(`BINDING_ERROR_TAB_CELL_LEVEL - Row index out of range`);
     }
     for (const colName of Object.keys(row)) {
       if (Object.is(row[colName], val) || row[colName] === val) {
@@ -223,8 +221,15 @@ class z2ui5_cl_core_srv_bind {
 
     if (this.mr_attri.name_ref) {
       const rows = Array.isArray(this.mo_app.mt_attri) ? this.mo_app.mt_attri : this.mo_app.mt_attri.value;
+      // name_ref may be a synthetic child name that no longer maps to a row
+      // (e.g. dissolve stopped at max depth); raise the binding error rather
+      // than dumping while rendering the field
       const hit = rows.find((r) => r.name === this.mr_attri.name_ref);
-      if (!hit) throw new z2ui5_cx_util_error(`ITAB_LINE_NOT_FOUND - ${this.mr_attri.name_ref}`);
+      if (!hit) {
+        throw new z2ui5_cx_util_error(
+          `Binding Error - referenced attribute '${this.mr_attri.name_ref}' not found`
+        );
+      }
       this.mr_attri = hit;
     }
 
@@ -269,11 +274,14 @@ class z2ui5_cl_core_srv_bind {
     const tab = this.ms_config.tab;
     const idx = (this.ms_config.tab_index || 1) - 1;
     const row = Array.isArray(tab) ? tab[idx] : null;
-    if (row && typeof row === `object`) {
-      for (const comp of Object.keys(row)) {
-        if (Object.is(row[comp], iv_val)) {
-          return `${iv_name}/${idx}/${comp.toUpperCase()}`;
-        }
+    // an out-of-range tab_index must raise the intended binding error, not
+    // fall through to a lookup on a missing row
+    if (!row || typeof row !== `object`) {
+      throw new z2ui5_cx_util_error(`BINDING_ERROR_TAB_CELL_LEVEL - Row index out of range`);
+    }
+    for (const comp of Object.keys(row)) {
+      if (Object.is(row[comp], iv_val)) {
+        return `${iv_name}/${idx}/${comp.toUpperCase()}`;
       }
     }
     throw new z2ui5_cx_util_error(
@@ -409,9 +417,7 @@ class z2ui5_cl_core_srv_bind {
     const idx = (ms_config.tab_index || 1) - 1;
     const row = tab[idx];
     if (!row || typeof row !== `object`) {
-      throw new z2ui5_cx_util_error(
-        `BINDING_ERROR_TAB_CELL_LEVEL - No class attribute for binding found - Please check if the bound values are public attributes of your class`
-      );
+      throw new z2ui5_cx_util_error(`BINDING_ERROR_TAB_CELL_LEVEL - Row index out of range`);
     }
     for (const colName of Object.keys(row)) {
       const cell = row[colName];

@@ -26,6 +26,7 @@ class z2ui5_cl_demo_app_163 extends z2ui5_if_app {
     let view = z2ui5_cl_xml_view.factory();
     view = view.shell()
       .page({ id: `page_main`, title: `abap2UI5 - Menu`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    view.message_strip({ text: `This sample opens a Menu as a popover anchored to a button; choosing an ` + `item shows the selected action in a MessageToast.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     const vbox = view.vbox();
     vbox.button({ text: `Open Menu`, press: this.client._event(`OPEN_MENU`), id: `menuButton`, class: `sapUiSmallMargin` });
     this.client.view_display(view.stringify());

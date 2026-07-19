@@ -33,10 +33,10 @@ class z2ui5_cl_demo_app_027 extends z2ui5_if_app {
     bind_input51 = this.client._bind(this.input51, { path: true });
     bind_input52 = this.client._bind(this.input52, { path: true });
     const view = z2ui5_cl_xml_view.factory();
-    const form = view.shell()
-      .page({ title: `abap2UI5 - Binding Syntax`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() })
-      .simple_form({ title: `Binding Syntax`, editable: true })
-      .content(`form`);
+    const page = view.shell()
+      .page({ title: `abap2UI5 - Binding Syntax`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    page.message_strip({ text: `Advanced binding syntax: expression binding, typed bindings, conditional enabling ` + `with RegExp checks, and composite (parts) bindings.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
+    const form = page.simple_form({ title: `Binding Syntax`, editable: true }).content(`form`);
     form.title(`Expression Binding`)
       .label(`Documentation`)
       .link({ text: `Expression Binding`, href: `https://sapui5.hana.ondemand.com/sdk/#/topic/daf6852a04b44d118963968a1239d2c0` })

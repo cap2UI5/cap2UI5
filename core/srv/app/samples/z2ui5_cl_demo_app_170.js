@@ -7,7 +7,7 @@ class z2ui5_cl_demo_app_170 extends z2ui5_if_app {
   simple_popup1() {
     const popup = z2ui5_cl_xml_view.factory_popup();
     const dialog = popup.dialog({ stretch: true, afterclose: this.client._event(`BTN_OK_1ND`) }).content();
-    const content = dialog.icon_tab_bar({ selectedkey: this.client._bind_edit(this.mv_selected_key), select: this.client._event_client(`POPUP_NAV_CONTAINER_TO`, [`NavCon`, `\${$parameters>/selectedKey}`]), headermode: `Inline`, expanded: true, expandable: false })
+    const content = dialog.icon_tab_bar({ selectedkey: this.client._bind_edit(this.mv_selected_key), select: this.client._event_client(this.client.cs_event.control_by_id, [`NavCon`, `POPUP`, `to`, `\${$parameters>/selectedKey}`]), headermode: `Inline`, expanded: true, expandable: false })
       .items()
       .icon_tab_filter({ key: `page1`, text: `Home` })
       .get_parent()
@@ -55,9 +55,10 @@ class z2ui5_cl_demo_app_170 extends z2ui5_if_app {
 
   view_display() {
     const view = z2ui5_cl_xml_view.factory();
-    view.shell()
-      .page({ title: `abap2UI5 - Popup To Popup`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() })
-      .button({ text: `Open Popup...`, press: this.client._event(`POPUP`) });
+    const page = view.shell()
+      .page({ title: `abap2UI5 - Popup To Popup`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    page.message_strip({ text: `Press the button to open a dialog; from there a second popup can be opened and navigated ` + `back to the first, demonstrating popup-to-popup navigation.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
+    page.button({ text: `Open Popup...`, press: this.client._event(`POPUP`) });
     this.client.view_display(view.stringify());
   }
 

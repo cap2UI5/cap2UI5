@@ -33,6 +33,7 @@ class z2ui5_cl_demo_app_047 extends z2ui5_if_app {
     const page = z2ui5_cl_xml_view.factory()
       .shell()
       .page({ title: `abap2UI5 - Integer and Decimals`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
+    page.message_strip({ text: `Numeric and date/time binding: integer and decimal fields use automatic type ` + `conversion, buttons calculate the sums, and a growing table lists the values.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     page.simple_form({ title: `Integer and Decimals`, editable: true })
       .content(`form`)
       .title(`Input`)

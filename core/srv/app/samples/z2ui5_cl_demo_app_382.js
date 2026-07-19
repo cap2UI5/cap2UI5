@@ -37,6 +37,7 @@ class z2ui5_cl_demo_app_382 extends z2ui5_if_app {
     const page = z2ui5_cl_xml_view.factory()
       .shell()
       .page({ title: `abap2UI5 - Sample: Message Box`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    page.message_strip({ text: `This sample demonstrates MessageBox: open confirm, information, success, ` + `warning, error, or a custom dialog with your own actions.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     page.header_content()
       .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.MessageBox/sample/sap.m.sample.MessageBox` });
     page.panel({ headertext: `Message Box Configuration` })
@@ -50,7 +51,6 @@ class z2ui5_cl_demo_app_382 extends z2ui5_if_app {
       .text_area({ value: this.client._bind_edit(this.details), rows: `3` });
     page.footer()
       .overflow_toolbar()
-      .button({ text: `Back`, icon: `sap-icon://nav-back`, press: this.client._event_nav_app_leave() })
       .text(`Open Message Box:`)
       .toolbar_spacer()
       .button({ text: `Confirm`, press: this.client._event(`confirm`) })

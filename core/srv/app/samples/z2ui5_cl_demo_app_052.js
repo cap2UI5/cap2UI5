@@ -31,6 +31,7 @@ class z2ui5_cl_demo_app_052 extends z2ui5_if_app {
     const view = z2ui5_cl_xml_view.factory();
     let page = view.shell()
       .page({ id: `page_main`, title: `abap2UI5 - List Report Features`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    page.message_strip({ text: `List report layout: a dynamic page with a table whose product links open a popover ` + `showing details for the selected row.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     page = page.dynamic_page({ headerexpanded: true });
     const cont = page.content(`f`);
     const tab = cont.table({ id: `tab`, items: this.client._bind_edit(this.mt_table) });

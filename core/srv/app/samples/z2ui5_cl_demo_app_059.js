@@ -33,6 +33,7 @@ class z2ui5_cl_demo_app_059 extends z2ui5_if_app {
     const view = z2ui5_cl_xml_view.factory();
     const page1 = view.shell()
       .page({ id: `page_main`, title: `abap2UI5 - Search Field with Backend Live Change`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    page1.message_strip({ text: `The search field's livechange event sends every keystroke to the backend (multiple ` + `parallel requests allowed) to live-filter the table as the user types.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     const lo_box = page1.vbox()
       .text(`Search`)
       .search_field({ width: `17.5rem`, livechange: this.client._event(`BUTTON_SEARCH`, [`\${$source>/value}`], { check_allow_multi_req: true }) });

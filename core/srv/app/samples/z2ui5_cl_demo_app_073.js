@@ -5,7 +5,13 @@ class z2ui5_cl_demo_app_073 extends z2ui5_if_app {
 
   view_display() {
     const view = z2ui5_cl_xml_view.factory();
-    this.client.view_display(view.shell().page({ title: `abap2UI5 - Open New Tab`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() }).simple_form({ title: `Form Title`, editable: true }).content(`form`).button({ text: `open new tab`, press: this.client._event(`BUTTON_OPEN_NEW_TAB`) }).stringify());
+    const page = view.shell()
+      .page({ title: `abap2UI5 - Open New Tab`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    page.message_strip({ text: `Press the button to open the app's own URL in a new browser tab: the backend builds the ` + `URL and the open_new_tab front-end action launches it.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
+    page.simple_form({ title: `Form Title`, editable: true })
+      .content(`form`)
+      .button({ text: `open new tab`, press: this.client._event(`BUTTON_OPEN_NEW_TAB`) });
+    this.client.view_display(view.stringify());
   }
 
   async main(client) {

@@ -99,6 +99,7 @@ class z2ui5_cl_demo_app_070 extends z2ui5_if_app {
     const view = z2ui5_cl_xml_view.factory();
     const page1 = view.shell()
       .page({ id: `page_main`, title: `abap2UI5 - sap.ui.table.Table Features`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack(), class: `sapUiContentPadding` });
+    page1.message_strip({ text: `A full sap.ui.table.Table inside a DynamicPage: fixed column, row-action buttons, ` + `progress-indicator and currency cells, plus backend-driven search, sort and filter events.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     const page = page1.dynamic_page({ headerexpanded: true });
     const header_title = page.title({ ns: `f` }).get().dynamic_page_title();
     header_title.heading(`f`).hbox().title(`Search Field`);

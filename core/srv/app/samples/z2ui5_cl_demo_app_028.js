@@ -40,6 +40,7 @@ class z2ui5_cl_demo_app_028 extends z2ui5_if_app {
     const view = z2ui5_cl_xml_view.factory();
     const page = view.shell()
       .page({ title: `abap2UI5 - CL_GUI_TIMER - Monitor`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    page.message_strip({ text: `The list refreshes itself automatically: a client-side timer (follow_up_action) fires ` + `every 2 seconds, appending a new entry on the server until three rows exist.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     page.list({ headertext: `Data auto refresh (2 sec)`, items: this.client._bind(this.t_tab) })
       .standard_list_item({ title: `{TITLE}`, description: `{DESCR}`, icon: `{ICON}`, info: `{INFO}` });
     this.client.view_display(view.stringify());

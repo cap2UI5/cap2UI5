@@ -48,6 +48,7 @@ class z2ui5_cl_demo_app_004 extends z2ui5_if_app {
     const view = z2ui5_cl_xml_view.factory();
     const page = view.shell()
       .page({ title: `abap2UI5 - Controller`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    page.message_strip({ text: `Controller basics: the buttons trigger a server roundtrip, restart the app, ` + `switch to a second view, or raise an uncaught error.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     page.grid(`L6 M12 S12`)
       .content(`layout`)
       .simple_form({ title: `Controller`, editable: true })

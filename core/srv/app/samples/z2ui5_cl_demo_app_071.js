@@ -27,7 +27,23 @@ class z2ui5_cl_demo_app_071 extends z2ui5_if_app {
       this.t_combo.push(z2ui5_cl_util.abap_copy({ key: sy_index, text: sy_index }));
     }
     const view = z2ui5_cl_xml_view.factory();
-    client.view_display(view.shell().page({ title: `abap2UI5 - First Example`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() }).simple_form({ title: `Form Title`, editable: true }).content(`form`).title(`Input`).label(`Link`).label(`setSizeLimit`).input({ value: client._bind_edit(this.mv_set_size_limit) }).button({ text: `update size limit`, press: client._event(`UPDATE`) }).label(`Number of Entries`).input({ value: client._bind_edit(this.mv_combo_number) }).button({ text: `update number entries`, press: client._event(`UPDATE_MODEL`) }).label(`demo`).combobox({ items: client._bind(this.t_combo) }).item({ key: `{KEY}`, text: `{TEXT}` }).get_parent().get_parent().stringify());
+    const page = view.shell()
+      .page({ title: `abap2UI5 - First Example`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
+    page.message_strip({ text: `A ComboBox bound to a large internal table: adjust the model's setSizeLimit to ` + `control how many of the entries the control actually renders.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
+    page.simple_form({ title: `Form Title`, editable: true })
+      .content(`form`)
+      .title(`Input`)
+      .label(`Link`)
+      .label(`setSizeLimit`)
+      .input(client._bind_edit(this.mv_set_size_limit))
+      .button({ text: `update size limit`, press: client._event(`UPDATE`) })
+      .label(`Number of Entries`)
+      .input(client._bind_edit(this.mv_combo_number))
+      .button({ text: `update number entries`, press: client._event(`UPDATE_MODEL`) })
+      .label(`demo`)
+      .combobox({ items: client._bind(this.t_combo) })
+      .item({ key: `{KEY}`, text: `{TEXT}` });
+    client.view_display(view.stringify());
   }
 }
 

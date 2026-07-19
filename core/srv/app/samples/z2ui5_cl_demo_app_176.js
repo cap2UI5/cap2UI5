@@ -8,6 +8,7 @@ class z2ui5_cl_demo_app_176 extends z2ui5_if_app {
     const lo_view = z2ui5_cl_xml_view.factory();
     const page = lo_view.shell()
       .page({ title: `Main View`, id: `test`, navbuttonpress: i_client._event_nav_app_leave(), shownavbutton: i_client.check_app_prev_stack() });
+    page.message_strip({ text: `This sample renders a main view and then embeds a second view into it as ` + `nested content via nest_view_display.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     i_client.view_display(lo_view.stringify());
   }
 

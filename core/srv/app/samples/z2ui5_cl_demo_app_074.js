@@ -54,6 +54,7 @@ class z2ui5_cl_demo_app_074 extends z2ui5_if_app {
     const view = z2ui5_cl_xml_view.factory();
     const page = view.shell()
       .page({ title: `abap2UI5 - Upload a File`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    page.message_strip({ text: `The file_uploader custom control returns the picked file as a base64 data URL; the backend ` + `strips the prefix, decodes the payload and shows the file content in a message box.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     if (this.table) {
       fs_table = this.table;
       _fs$fs_table = { o: this, k: `table` };

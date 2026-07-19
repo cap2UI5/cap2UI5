@@ -11,7 +11,8 @@ class z2ui5_cl_demo_app_316 extends z2ui5_if_app {
     this.email = { email: `email@email.com`, subject: `subject`, body: `body`, new_window: `true` };
     const page = z2ui5_cl_xml_view.factory()
       .shell()
-      .page({ title: `abap2UI5 - Sample: URL Helper`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
+      .page({ title: `abap2UI5 - Browser - Open Telephone, Email etc.`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
+    page.message_strip({ text: `The URL helper triggers native browser actions from ABAP: open e-mail, telephone and SMS links, or ` + `redirect the browser to a URL.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     const layout = page.vertical_layout({ class: `sapUiContentPadding`, width: `100%` });
     const email_form = layout.simple_form(`Trigger E-Mail`);
     email_form.label({ text: `E-Mail`, labelfor: `inputEmail` });

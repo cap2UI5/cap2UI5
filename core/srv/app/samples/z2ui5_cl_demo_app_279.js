@@ -9,6 +9,7 @@ class z2ui5_cl_demo_app_279 extends z2ui5_if_app {
     const page = z2ui5_cl_xml_view.factory()
       .shell()
       .page({ title: `abap2UI5 - data loss protection`, navbuttonpress: this.client._event(`BACK`), shownavbutton: this.client.check_app_prev_stack() });
+    page.message_strip({ text: `Unsaved input marks the page dirty via a custom control; navigating back then opens a confirmation ` + `popup instead of leaving and losing the data.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     const box = page.flex_box({ direction: `Row`, alignitems: `Start`, class: `sapUiTinyMargin` });
     box.input({ id: `input`, value: this.client._bind_edit(this.text_input), submit: this.client._event(`submit`), width: `40rem`, placeholder: `Enter data, submit and navigate back to trigger data loss protection` });
     box.info_label({ text: `dirty`, colorscheme: `8`, icon: `sap-icon://message-success`, class: `sapUiSmallMarginBegin sapUiTinyMarginTop`, visible: this.client._bind(this.dirty) });

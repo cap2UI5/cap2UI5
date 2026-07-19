@@ -129,7 +129,7 @@ class z2ui5_cl_app_startup extends z2ui5_if_app {
         this.client.popup_destroy();
         break;
       case E.OPEN_DEBUG:
-        this.client.message_box_display("Press CTRL+F12 to open the debugging tools");
+        this.client.message_box_display("Press CTRL+F12 to open the developer tools");
         break;
       case E.OPEN_INFO:
         this.view_display_popup();
@@ -174,7 +174,7 @@ class z2ui5_cl_app_startup extends z2ui5_if_app {
     // --- Header toolbar ---
     const header = page.headerContent();
     header.ToolbarSpacer();
-    header.Button({ text: "Debugging Tools", icon: "sap-icon://enablement", press: c._event(E.OPEN_DEBUG) });
+    header.Button({ text: "Developer Tools", icon: "sap-icon://enablement", press: c._event(E.OPEN_DEBUG) });
     header.Button({ text: "System",          icon: "sap-icon://information", press: c._event(E.OPEN_INFO) });
     if (z2ui5_cl_util.rtti_check_class_exists("z2ui5_cl_app_icf_config")) {
       header.Button({ text: "Config", icon: "sap-icon://settings", press: c._event(E.SET_CONFIG) });
@@ -250,14 +250,12 @@ class z2ui5_cl_app_startup extends z2ui5_if_app {
     });
 
     // ===== What's next? =====
-    // Mirrors upstream render_whats_next: prefer the starter sample
-    // z2ui5_cl_sample_app_001, fall back to the demo_app_000 gallery.
+    // Mirrors upstream render_whats_next: jump into the getting-started
+    // gallery z2ui5_cl_demo_app_g00 when the samples are installed.
     content.cc("Toolbar", { ns: "m" }).Title({ text: "What's next?" }).get_parent();
-    const samplesClass = z2ui5_cl_util.rtti_check_class_exists("z2ui5_cl_sample_app_001")
-      ? "z2ui5_cl_sample_app_001"
-      : z2ui5_cl_util.rtti_check_class_exists("z2ui5_cl_demo_app_000")
-        ? "z2ui5_cl_demo_app_000"
-        : "";
+    const samplesClass = z2ui5_cl_util.rtti_check_class_exists("z2ui5_cl_demo_app_g00")
+      ? "z2ui5_cl_demo_app_g00"
+      : "";
     if (samplesClass) {
       const cfg = c.get().S_CONFIG || {};
       const samplesUrl = z2ui5_cl_util.app_get_url({

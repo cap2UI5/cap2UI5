@@ -47,6 +47,12 @@ const cs_event = Object.freeze({
   z2ui5:                     `Z2UI5`,
   wizard_set_next_step:      `WIZARD_SET_NEXT_STEP`,
   play_audio:                `PLAY_AUDIO`,
+  // whitelisted control/binding calls — frontend events with positional
+  // t_arg, dispatched via follow_up_action or _event_client (see the
+  // follow_up_action docs in the ABAP interface)
+  control_by_id:             `CONTROL_BY_ID`,
+  control_global:            `CONTROL_GLOBAL`,
+  binding_call:              `BINDING_CALL`,
 });
 
 const cs_view = Object.freeze({

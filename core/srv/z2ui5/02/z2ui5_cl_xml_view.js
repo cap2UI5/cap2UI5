@@ -2924,6 +2924,24 @@ class z2ui5_cl_xml_view {
     });
   }
 
+  /** abap METHOD rows — generic aggregation (PlanningCalendar, tables). */
+  rows(args = {}) {
+    return this._container({
+      name: "rows",
+      ns: this._aggNs(args),
+      aProp: [],
+    });
+  }
+
+  /** abap METHOD appointments — generic aggregation (PlanningCalendarRow). */
+  appointments(args = {}) {
+    return this._container({
+      name: "appointments",
+      ns: this._aggNs(args),
+      aProp: [],
+    });
+  }
+
   interact_donut_chart({ selectionchanged, errormessage, errormessagetitle, showerror, displayedsegments, press, segments, selectionenabled } = {}) {
     return this._container({
       name: "InteractiveDonutChart",

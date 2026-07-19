@@ -30,6 +30,7 @@ class z2ui5_cl_demo_app_053 extends z2ui5_if_app {
     const view = z2ui5_cl_xml_view.factory();
     const page = view.shell()
       .page({ id: `page_main`, title: `abap2UI5 - Search with Enter`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    page.message_strip({ text: `A search field triggers a backend filter on Enter or via the Go button; the matching ` + `rows are computed server-side and the table is refreshed.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     const vbox = page.vbox();
     vbox.hbox()
       .search_field({ value: this.client._bind_edit(this.mv_search_value), search: this.client._event(`BUTTON_SEARCH`), change: this.client._event(`BUTTON_SEARCH`), width: `17.5rem`, id: `SEARCH` })

@@ -14,6 +14,7 @@ class z2ui5_cl_demo_app_067 extends z2ui5_if_app {
     const page = z2ui5_cl_xml_view.factory()
       .shell()
       .page({ title: `abap2UI5 - Currency Format`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
+    page.message_strip({ text: `Formats amounts with the sap.ui.model.type.Currency type and its format options, ` + `and shows how to strip the leading zeros from a numeric field.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     page.simple_form({ title: `Currency`, editable: true })
       .content(`form`)
       .title(`Input`)

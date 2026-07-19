@@ -182,7 +182,17 @@ class z2ui5_cl_core_srv_draft {
   create(a, b) {
     const { draft, model_xml } =
       a !== null && typeof a === `object` && `draft` in a ? a : { draft: a, model_xml: b };
-    if (!draft || !draft.id) throw new Error(`ASSERT failed - draft id is initial`);
+    if (!draft || !draft.id) {
+      // raise a catchable error instead of an assert — same as upstream
+      let err;
+      try {
+        const CX = require(`../../00/03/z2ui5_cx_a2ui5_error`);
+        err = new CX({ val: `Internal error - cannot persist a draft without an id` });
+      } catch {
+        err = new Error(`Internal error - cannot persist a draft without an id`);
+      }
+      throw err;
+    }
     z2ui5_cl_core_srv_draft._mt_db.set(String(draft.id), {
       id: draft.id,
       id_prev: draft.id_prev ?? ``,

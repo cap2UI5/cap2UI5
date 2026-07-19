@@ -19,10 +19,10 @@ class z2ui5_cl_demo_app_447 extends z2ui5_if_app {
   on_event() {
     switch (this.client.get().EVENT) {
       case `FOCUS`:
-        this.client.control_call_by_id({ id: `nameInput`, method: `focus` });
+        this.client.follow_up_action(z2ui5_if_client.cs_event.control_by_id, [`nameInput`, ``, `focus`]);
         break;
       case `SCROLL`:
-        this.client.control_call_by_id({ id: `bigTable`, method: `scrollToIndex`, params: [`25`] });
+        this.client.follow_up_action(z2ui5_if_client.cs_event.control_by_id, [`bigTable`, ``, `scrollToIndex`, `25`]);
         break;
     }
     this.view_display();
@@ -31,8 +31,8 @@ class z2ui5_cl_demo_app_447 extends z2ui5_if_app {
   view_display() {
     const view = z2ui5_cl_xml_view.factory();
     const page = view.shell()
-      .page({ title: `abap2UI5 - Action - control_call_by_id`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
-    page.message_strip({ text: `The backend calls a whitelisted method on a control resolved by id, after the ` + `response renders: focus() on the input, scrollToIndex() on the table.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
+      .page({ title: `abap2UI5 - Action - CONTROL_BY_ID`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    page.message_strip({ text: `The backend calls a whitelisted method on a control resolved by id via ` + `follow_up_action( cs_event-control_by_id ), after the response renders: ` + `focus() on the input, scrollToIndex() on the table.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     page.vbox(`sapUiSmallMargin`)
       .input({ id: `nameInput`, placeholder: `this input can be focused from the backend` })
       .button({ text: `focus( ) the input`, icon: `sap-icon://edit`, press: this.client._event(`FOCUS`), class: `sapUiTinyMarginTop` })
@@ -48,4 +48,5 @@ module.exports = z2ui5_cl_demo_app_447;
 
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_client = require("abap2UI5/z2ui5_if_client");
 
