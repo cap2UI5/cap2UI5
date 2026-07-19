@@ -250,11 +250,18 @@ class z2ui5_cl_app_startup extends z2ui5_if_app {
     });
 
     // ===== What's next? =====
+    // Mirrors upstream render_whats_next: prefer the starter sample
+    // z2ui5_cl_sample_app_001, fall back to the demo_app_000 gallery.
     content.cc("Toolbar", { ns: "m" }).Title({ text: "What's next?" }).get_parent();
-    if (z2ui5_cl_util.rtti_check_class_exists("z2ui5_cl_demo_app_000")) {
+    const samplesClass = z2ui5_cl_util.rtti_check_class_exists("z2ui5_cl_sample_app_001")
+      ? "z2ui5_cl_sample_app_001"
+      : z2ui5_cl_util.rtti_check_class_exists("z2ui5_cl_demo_app_000")
+        ? "z2ui5_cl_demo_app_000"
+        : "";
+    if (samplesClass) {
       const cfg = c.get().S_CONFIG || {};
       const samplesUrl = z2ui5_cl_util.app_get_url({
-        classname: "z2ui5_cl_demo_app_000",
+        classname: samplesClass,
         origin:   cfg.ORIGIN || "",
         pathname: cfg.PATHNAME || "",
         search:   cfg.SEARCH || "",
@@ -269,9 +276,9 @@ class z2ui5_cl_app_startup extends z2ui5_if_app {
     } else {
       content.Label({ text: "Install the sample repository" });
       content.Link({
-        text: "And explore more than 200 sample apps...",
+        text: "And explore more than 250 sample apps...",
         target: "_blank",
-        href: "https://github.com/abap2UI5/abap2UI5-samples",
+        href: "https://github.com/abap2UI5/samples",
       });
     }
 

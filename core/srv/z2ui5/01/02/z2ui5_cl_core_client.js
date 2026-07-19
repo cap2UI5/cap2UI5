@@ -407,7 +407,17 @@ class z2ui5_cl_core_client {
       return;
     }
     if (!val) return;
-    this._follow_up_actions.push(val);
+    // Runtime path (no mo_action): same ABAP semantics — a bare CS_EVENT
+    // name plus t_arg is formatted through get_event_client into
+    // ".eF('ACTION', 'arg1', …)"; raw JS snippets pass through unchanged.
+    // Without this, follow_up_action(cs_event.scroll_to, [id, y, x])
+    // dropped its arguments and pushed a bare "SCROLL_TO" the frontend
+    // cannot execute (broken scroll restore in the samples).
+    let js = val;
+    if (/^[A-Za-z0-9_]+$/.test(String(js))) {
+      js = z2ui5_cl_core_srv_event.get_event_client(js, t_arg ?? []);
+    }
+    this._follow_up_actions.push(js);
   }
 
   /**
