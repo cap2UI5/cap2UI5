@@ -61,15 +61,25 @@ cds.on("bootstrap", (app) => {
   );
 
   app.get("/rest/root/z2ui5", (req, res) => {
-    const reqInfo = z2ui5_cl_util_http.factory_cloud(req, res).get_req_info();
-    const { html, headers } = engine.bootstrap_html(reqInfo);
+    // The engine call renders arbitrary app HTML — never let a failure
+    // escape as an unhandled express error (raw stack trace to the client).
+    try {
+      const reqInfo = z2ui5_cl_util_http.factory_cloud(req, res).get_req_info();
+      const { html, headers } = engine.bootstrap_html(reqInfo);
 
-    // Apply ABAP's t_security_header (cache-control, X-Frame-Options, …).
-    for (const h of headers) {
-      res.set(h.n, h.v);
+      // Apply ABAP's t_security_header (cache-control, X-Frame-Options, …).
+      for (const h of headers) {
+        res.set(h.n, h.v);
+      }
+      res.set("Content-Type", "text/html; charset=utf-8");
+      res.status(200).send(html);
+    } catch (e) {
+      console.error("GET /rest/root/z2ui5 bootstrap failed:", e);
+      res
+        .status(500)
+        .set("Content-Type", "text/plain; charset=utf-8")
+        .send(`z2ui5 bootstrap failed: ${e.message}`);
     }
-    res.set("Content-Type", "text/html; charset=utf-8");
-    res.status(200).send(html);
   });
 
   app.head("/rest/root/z2ui5", (_req, res) => {

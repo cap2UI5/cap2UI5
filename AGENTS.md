@@ -27,7 +27,7 @@ Guidance for AI agents and contributors. Read before making any change.
   (BTP deployment).
 - `core/` — the **vendored** platform-neutral core package (npm name
   `abap2UI5`, linked via `"abap2UI5": "file:./core"`): engine, framework
-  classes (`core/srv/z2ui5/`), ~185 bundled samples
+  classes (`core/srv/z2ui5/`), ~180 bundled samples
   (`core/srv/app/samples/`), the z2ui5 webapp source. Its dependency tree is
   part of the app lock (under `core/node_modules/`), so **one** `npm ci` at
   the root installs everything.
@@ -45,7 +45,7 @@ npm test               # jest: starter integration test + view builder test
 builder-abap2UI5-js (nightly sync from upstream abap2UI5, rebuilds the core)
 → `trigger_cap` → builder-cap2UI5 `update_cap` (rebuild + jest gate +
 publish **here** via deploy key `ACTION_KEY_APP`) → `trigger_web` here
-(manual) kicks
+(on every push to main, i.e. every publish; also manual) kicks
 [builder-cap2UI5-web](https://github.com/cap2UI5/builder-cap2UI5-web), which
 bundles this repo into the static site
 [web-cap2UI5-build](https://github.com/cap2UI5/web-cap2UI5-build)

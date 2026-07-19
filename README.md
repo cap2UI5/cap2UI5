@@ -71,7 +71,7 @@ roundtrips — reduced to the minimum:
 The base is hand-maintained in
 [builder-cap2UI5's `src/`](https://github.com/cap2UI5/builder-cap2UI5/tree/main/src)
 and published 1:1 into this repository. The framework itself — the engine, the
-transpiled classes, the z2ui5 frontend and the ~190 bundled samples — lives in
+transpiled classes, the z2ui5 frontend and the ~180 bundled samples — lives in
 the platform-neutral **core package** ([`core/`](core/), vendored here and
 linked as the npm dependency `abap2UI5` via `file:./core`) and is generated
 by the sync pipeline in
@@ -143,6 +143,19 @@ real server via `cds.test()` and asserts all three layers end-to-end
 (starter page + bootstrap HTML, roundtrip returning view XML, draft row
 persisted per roundtrip), and [`test/z2ui5_cl_xml_view.test.js`](test/z2ui5_cl_xml_view.test.js)
 covers the view builder.
+
+## Security note (demo setup — no authentication)
+
+This project deliberately ships **without authentication**: `xs-security.json`
+declares no scopes, attributes or role templates, and `package.json` sets
+`cds.requires.[production].auth: false`, so every endpoint (the z2ui5
+roundtrip, the OData admin service and the draft table) is open. That is
+intentional for the demo/sample character of this repository. For a real
+BTP deployment, configure authentication before going productive: define
+scopes and role templates in `xs-security.json`, remove the
+`[production].auth: false` override and wire the CAP services to XSUAA
+(`kind: xsuaa`) — see the
+[CAP authorization guide](https://cap.cloud.sap/docs/guides/security/authorization).
 
 ## Transpiling from ABAP
 
@@ -219,10 +232,27 @@ class z2ui5_cl_app_read_odata extends z2ui5_if_app {
 
   async main(client) {
     if (client.check_on_init()) {
-      const northwind = await cds.connect.to(`northwind`);
-      this.customers = await northwind.run(
-        SELECT.from(`Customers`).columns(`CompanyName`, `ContactName`).limit(20)
-      );
+      // The remote demo service may be unreachable (offline, proxy, service
+      // down) — show the error in the UI instead of breaking the app init.
+      try {
+        const northwind = await cds.connect.to(`northwind`);
+        this.customers = await northwind.run(
+          SELECT.from(`Customers`).columns(`CompanyName`, `ContactName`).limit(20)
+        );
+      } catch (e) {
+        const view = z2ui5_cl_xml_view.factory();
+        view.shell()
+          .page(`abap2UI5 - Table with Data Fetched via Remote OData`)
+          .message_strip({
+            text: `Remote Northwind service not reachable: ${e.message}`,
+            type: `Error`,
+            showicon: true,
+            class: `sapUiSmallMargin`,
+          });
+        client.view_display(view.stringify());
+        client.message_box_display(`Remote Northwind service not reachable: ${e.message}`, `error`);
+        return;
+      }
 
       const view = z2ui5_cl_xml_view.factory();
       const tab = view.shell()
