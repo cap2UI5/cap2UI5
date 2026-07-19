@@ -144,8 +144,13 @@ class z2ui5_cl_core_action {
       result.mo_app.ms_draft.id_prev_app_stack = this.mo_app.ms_draft.id_prev_app_stack;
       return result;
     }
-    // already existing app? re-derive from the draft chain
-    if (this.mo_app.ms_draft.id_prev_app_stack) {
+    // already existing app? re-derive from the draft chain. Guard the
+    // ancestor stack draft with check_exists too — in a long-lived session
+    // the ancestor may have been purged by cleanup() while the leave target
+    // still exists, and read_info would raise NO_DRAFT_ENTRY and break
+    // back-navigation
+    if (this.mo_app.ms_draft.id_prev_app_stack
+        && lo_draft.check_exists(this.mo_app.ms_draft.id_prev_app_stack) === true) {
       try {
         const ls_draft = lo_draft.read_info(this.mo_app.ms_draft.id_prev_app_stack);
         result.mo_app.ms_draft.id_prev_app_stack = ls_draft.id_prev_app_stack;
@@ -206,7 +211,7 @@ class z2ui5_cl_core_action {
     const z2ui5_if_core_types = require(`./z2ui5_if_core_types`);
     for (const slot of z2ui5_if_core_types.cs_view_slot_list.split(`,`)) {
       const s = this.ms_next.s_set[slot.toLowerCase()];
-      if (!s) throw new Error(`ASSERT failed - view slot ${slot} missing`);
+      if (!s) throw new Error(`Internal error - view slot '${slot}' not found in s_set`);
       s.check_update_model = false;
     }
   }

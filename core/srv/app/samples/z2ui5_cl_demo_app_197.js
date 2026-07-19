@@ -11,6 +11,7 @@ class z2ui5_cl_demo_app_197 extends z2ui5_if_app {
   view_display() {
     const view = z2ui5_cl_xml_view.factory().shell();
     const page = view.page({ id: `page_main`, title: `abap2UI5 - List Report Features`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    page.message_strip({ text: `This sample shows a list-report table with a FacetFilter: selecting products ` + `filters the rows, and Reset restores the full list.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     const facet = page.facet_filter({ id: `idFacetFilter`, type: `Light`, showpersonalization: true, showreset: true, reset: this.client._event(`RESET`) })
       .facet_filter_list({ title: `Products`, mode: `MultiSelect`, items: this.client._bind(this.mt_table_products), listclose: this.client._event(`FILTER`, [`$event.mParameters.selectedItems`]) })
       .facet_filter_item({ text: `{PRODUCT}` });

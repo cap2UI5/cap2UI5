@@ -43,6 +43,7 @@ class z2ui5_cl_demo_app_381 extends z2ui5_if_app {
     const page = z2ui5_cl_xml_view.factory()
       .shell()
       .page({ title: `abap2UI5 - Sample: Message Toast`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    page.message_strip({ text: `This sample demonstrates MessageToast: configure the text, duration, position ` + `and animation, then show a short, non-blocking toast notification.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     page.header_content()
       .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.MessageToast/sample/sap.m.sample.MessageToast` });
     const form = page.panel({ headertext: `Message Toast Configuration` })
@@ -76,9 +77,6 @@ class z2ui5_cl_demo_app_381 extends z2ui5_if_app {
       .label(`autoClose`)
       .checkbox(this.client._bind_edit(this.autoclose));
     form.button({ text: `Show Message Toast`, type: `Emphasized`, press: this.client._event(`SHOW`) });
-    page.footer()
-      .overflow_toolbar()
-      .button({ text: `Back`, icon: `sap-icon://nav-back`, press: this.client._event_nav_app_leave() });
     this.client.view_display(page.stringify());
   }
 

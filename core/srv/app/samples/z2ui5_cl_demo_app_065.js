@@ -12,6 +12,7 @@ class z2ui5_cl_demo_app_065 extends z2ui5_if_app {
       .header_content()
       .link()
       .get_parent();
+    page.message_strip({ text: `A main view with a nested view inside: the buttons re-render everything, only the ` + `main view, only the nested view, or refresh just the nested view's model.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     page.content()
       .button({ text: `Rerender all`, press: client._event(`ALL`) })
       .button({ text: `Rerender Main without nest`, press: client._event(`MAIN`) })

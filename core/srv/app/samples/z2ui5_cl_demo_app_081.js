@@ -32,9 +32,10 @@ class z2ui5_cl_demo_app_081 extends z2ui5_if_app {
 
   view_display() {
     const view = z2ui5_cl_xml_view.factory();
-    view.shell()
-      .page({ title: `abap2UI5 - Popover with List`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() })
-      .simple_form(`Popover`)
+    const page = view.shell()
+      .page({ title: `abap2UI5 - Popover with List`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    page.message_strip({ text: `Opens a Popover anchored to a button, showing a selectable list inside it; the ` + `segmented button chooses on which side the popover appears.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
+    page.simple_form(`Popover`)
       .content(`form`)
       .title(`Input`)
       .label(`Link`)

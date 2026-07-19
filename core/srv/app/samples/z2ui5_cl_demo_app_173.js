@@ -10,6 +10,7 @@ class z2ui5_cl_demo_app_173 extends z2ui5_if_app {
     let view = z2ui5_cl_xml_view.factory();
     view = view.shell()
       .page({ id: `page_main`, class: `sapUiContentPadding`, title: `abap2UI5 - Sample Templating I`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    view.message_strip({ text: `This sample builds table columns and cells dynamically from a layout table ` + `using template repeat, plus a template if/then/else that re-renders on a switch.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     view.table(this.client._bind_edit(this.mt_data))
       .columns()
       .template_repeat({ list: `{template>/XX/MT_LAYOUT}`, var: `L0` })

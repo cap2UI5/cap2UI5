@@ -703,7 +703,10 @@ class z2ui5_cl_core_srv_model {
   /** abap delta_apply_nodes — recursive ajson delta walk. */
   _delta_apply_nodes(io_delta, ct_tab) {
     for (const idxStr of io_delta.members(`/`)) {
+      // the delta key is a client-supplied row index; a garbled
+      // (non-numeric) key must skip that row, not abort the request
       const idx = parseInt(idxStr, 10);
+      if (!Number.isInteger(idx)) continue;
       const row = ct_tab[idx];
       if (!row || typeof row !== `object`) continue;
 
@@ -711,33 +714,53 @@ class z2ui5_cl_core_srv_model {
       for (const fld of lo_row.members(`/`)) {
         const key = z2ui5_cl_core_srv_model._match_key(row, fld);
         if (key === undefined) continue;
-        const p = `/${fld}`;
-        const nodeType = lo_row.get_node_type(p);
+        this._delta_apply_field(lo_row, `/${fld}`, row, key);
+      }
+    }
+  }
 
-        if (nodeType === `bool`) {
-          row[key] = lo_row.get_boolean(p) === true;
-        } else if (nodeType === `object`) {
-          // either a nested table delta (marked by __delta) or a structure
-          // component shipped as a whole value
-          const lo_sub = lo_row.slice(p);
-          if (lo_sub.exists(`/__delta`) === true) {
-            if (Array.isArray(row[key])) this._delta_apply_nodes(lo_sub.slice(`/__delta`), row[key]);
-          } else {
-            const args = { iv_corresponding: true, ev_container: row[key] };
-            lo_sub.to_abap(args);
-            row[key] = args.ev_container;
-          }
-        } else if (nodeType === `array`) {
-          // a whole sub-table value replaced a nested delta on the client
-          const args = { iv_corresponding: true, ev_container: row[key] };
-          lo_row.slice(p).to_abap(args);
-          row[key] = args.ev_container;
+  /**
+   * abap delta_apply_field — apply one delta field value into the referenced
+   * row component. A single malformed cell (e.g. text into a numeric target)
+   * is skipped here so it cannot abort the whole model batch.
+   */
+  _delta_apply_field(lo_row, p, row, key) {
+    try {
+      const nodeType = lo_row.get_node_type(p);
+
+      if (nodeType === `bool`) {
+        row[key] = lo_row.get_boolean(p) === true;
+      } else if (nodeType === `object`) {
+        // either a nested table delta (marked by __delta) or a structure
+        // component shipped as a whole value
+        const lo_sub = lo_row.slice(p);
+        if (lo_sub.exists(`/__delta`) === true) {
+          if (Array.isArray(row[key])) this._delta_apply_nodes(lo_sub.slice(`/__delta`), row[key]);
         } else {
-          // numbers go through the raw string — lossless into the target type
-          const s = lo_row.get_string(p);
-          row[key] = typeof row[key] === `number` ? Number(s) : s;
+          const args = { iv_corresponding: true, ev_container: row[key] };
+          lo_sub.to_abap(args);
+          row[key] = args.ev_container;
+        }
+      } else if (nodeType === `array`) {
+        // a whole sub-table value replaced a nested delta on the client
+        const args = { iv_corresponding: true, ev_container: row[key] };
+        lo_row.slice(p).to_abap(args);
+        row[key] = args.ev_container;
+      } else {
+        // numbers go through the raw string — lossless into the target type
+        const s = lo_row.get_string(p);
+        if (typeof row[key] === `number`) {
+          const n = Number(s);
+          // text sent into a numeric target — skip just this cell
+          if (Number.isNaN(n)) return;
+          row[key] = n;
+        } else {
+          row[key] = s;
         }
       }
+    } catch {
+      // a single malformed cell must not discard every other edit in this
+      // batch — skip just it
     }
   }
 

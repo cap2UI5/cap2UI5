@@ -13,7 +13,8 @@ class z2ui5_cl_demo_app_078 extends z2ui5_if_app {
     if (client.check_on_init()) {
       view = z2ui5_cl_xml_view.factory();
       view = view.shell()
-        .page({ id: `page_main`, title: `abap2UI5 - Select-Options`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
+        .page({ id: `page_main`, title: `abap2UI5 - Multi Input (Select-Options)`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
+      view.message_strip({ text: `The multiinput_ext custom control extends a sap.m.MultiInput so that added and removed ` + `tokens are reported back to ABAP, where the token table and the linked list are updated.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
       view._z2ui5()
         .multiinput_ext({ addedtokens: client._bind_edit(this.mt_tokens_added), removedtokens: client._bind_edit(this.mt_tokens_removed), change: client._event(`UPDATE_BACKEND`), multiinputid: `test` });
       view.multi_input({ id: `test`, tokens: client._bind_edit(this.mt_token), showclearicon: true })

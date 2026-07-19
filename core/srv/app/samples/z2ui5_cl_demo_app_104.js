@@ -67,6 +67,7 @@ class z2ui5_cl_demo_app_104 extends z2ui5_if_app {
     const page = z2ui5_cl_xml_view.factory()
       .shell()
       .page({ title: `abap2UI5 - Master Detail Page with Nested View`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    page.message_strip({ text: `Selecting a list row instantiates another abap2UI5 app by its class name and ` + `embeds that app's own view into the detail column.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     const col_layout = page.flexible_column_layout({ layout: this.client._bind_edit(this.mv_layout), id: `test` });
     const lr_master = col_layout.begin_column_pages();
     const lr_list = lr_master.list({ headertext: `List Output`, items: this.client._bind_edit(this.t_tab, { view: this.client.cs_view.main }), mode: `SingleSelectMaster`, selectionchange: this.client._event(`SELCHANGE`) })

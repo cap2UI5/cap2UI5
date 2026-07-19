@@ -45,6 +45,7 @@ class z2ui5_cl_demo_app_452 extends z2ui5_if_app {
     const view = z2ui5_cl_xml_view.factory();
     const page = view.shell()
       .page({ title: `abap2UI5 - Sample: Message View with Grouping`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    page.message_strip({ text: `This sample demonstrates the MessageView control listing grouped messages by ` + `severity; the same messages also appear in a dialog and a MessagePopover.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     page.header_content()
       .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.MessageView/sample/sap.m.sample.MessageViewWithGrouping` });
     page.message_view({ items: this.client._bind(this.t_msg), groupitems: true })

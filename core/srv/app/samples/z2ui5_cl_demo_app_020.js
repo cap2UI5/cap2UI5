@@ -29,7 +29,16 @@ class z2ui5_cl_demo_app_020 extends z2ui5_if_app {
         return;
         break;
     }
-    client.popup_display(z2ui5_cl_xml_view.factory_popup().dialog(`abap2UI5 - Popup to decide`).vbox().text(this.text).get_parent().buttons().button({ text: this.cancel_text, press: client._event(this.cancel_event) }).button({ text: this.confirm_text, press: client._event(this.confirm_event), type: `Emphasized` }).stringify());
+    const popup = z2ui5_cl_xml_view.factory_popup();
+    const dialog = popup.dialog(`abap2UI5 - Popup to decide`);
+    dialog.message_strip({ text: `A reusable decision popup opened as a sub-app: its text, button labels and events ` + `are passed in by the caller, and the pressed event is sent back.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
+    dialog.vbox()
+      .text(this.text)
+      .get_parent()
+      .buttons()
+      .button({ text: this.cancel_text, press: client._event(this.cancel_event) })
+      .button({ text: this.confirm_text, press: client._event(this.confirm_event), type: `Emphasized` });
+    client.popup_display(popup.stringify());
   }
 }
 

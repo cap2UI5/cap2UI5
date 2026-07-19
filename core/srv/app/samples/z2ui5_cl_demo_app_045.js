@@ -29,10 +29,11 @@ class z2ui5_cl_demo_app_045 extends z2ui5_if_app {
     }
     const page = z2ui5_cl_xml_view.factory()
       .shell()
-      .page({ title: `abap2UI5 - Scroll Container with Table and Toolbar`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() })
+      .page({ title: `abap2UI5 - Table - Backend Filter`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() })
       .header_content()
       .link()
       .get_parent();
+    page.message_strip({ text: `A growing, scrollable table filtered on the backend: entering a value in the form and ` + `pressing filter deletes the non-matching rows server-side before re-rendering.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     page.simple_form({ title: `Form Title`, editable: true })
       .content(`form`)
       .title(`Filter`)

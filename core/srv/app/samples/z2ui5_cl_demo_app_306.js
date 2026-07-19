@@ -17,6 +17,7 @@ class z2ui5_cl_demo_app_306 extends z2ui5_if_app {
     const view = z2ui5_cl_xml_view.factory();
     const cont = view.shell();
     const page = cont.page({ title: `abap2UI5 - Device Camera Picture`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    page.message_strip({ text: `Capture photos from the device camera custom control; pick the facing mode and camera, then edit a ` + `captured picture in the popup image editor.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     page.vbox(`sapUiSmallMargin`)
       .label({ text: `facingMode: `, labelfor: `ComboFacingMode` })
       .combobox({ id: `ComboFacingMode`, selectedkey: this.client._bind_edit(this.facing_mode), items: `{path:'${this.client._bind_edit(this.facing_modes, { path: true })}', sorter: { path: 'TEXT' } }` })

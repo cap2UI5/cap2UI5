@@ -8,6 +8,7 @@ class z2ui5_cl_demo_app_167 extends z2ui5_if_app {
     const view = z2ui5_cl_xml_view.factory();
     const page = view.shell()
       .page({ title: `abap2UI5 - Event with add Information and t_arg`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    page.message_strip({ text: `This sample shows how to pass extra arguments to an event via t_arg - fixed ` + `values, model values, or client-side expressions - and read them in the backend.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     page.link({ text: `More Infos..`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/topic/b0fb4de7364f4bcbb053a99aa645affe` });
     page.button({ text: `EVENT_FIX_VAL`, press: this.client._event(`EVENT_FIX_VAL`, [`FIX_VAL`]) });
     page.input(this.client._bind_edit(this.mv_value));

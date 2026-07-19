@@ -48,12 +48,10 @@ class z2ui5_cl_demo_app_017 extends z2ui5_if_app {
       .get_parent();
     const sections = page.sections();
     sections.object_page_section({ titleuppercase: false, id: `goalsSectionSS1`, title: `2014 Goals Plan` })
-      .heading(`uxap`)
-      .message_strip(`this is a message strip`)
-      .get_parent()
       .sub_sections()
       .object_page_sub_section({ id: `goalssubSectionSS1`, title: `goals1` })
       .blocks()
+      .message_strip(`this is a message strip`)
       .vbox()
       .label(`goals1`)
       .label(`goals1`)
@@ -80,8 +78,6 @@ class z2ui5_cl_demo_app_017 extends z2ui5_if_app {
       .label(`goals2`)
       .label(`goals2`);
     sections.object_page_section({ titleuppercase: false, id: `PersonalSection`, title: `Personal` })
-      .heading(`uxap`)
-      .get_parent()
       .sub_sections()
       .object_page_sub_section({ id: `personalSectionSS1`, title: `Connect` })
       .blocks()
@@ -94,8 +90,6 @@ class z2ui5_cl_demo_app_017 extends z2ui5_if_app {
       .label(`Hello! I am an abap2UI5 developer`)
       .label(`San Jose, USA`);
     sections.object_page_section({ titleuppercase: false, id: `employmentSection`, title: `Employment` })
-      .heading(`uxap`)
-      .get_parent()
       .sub_sections()
       .object_page_sub_section({ id: `empSectionSS1`, title: `Job information` })
       .blocks()

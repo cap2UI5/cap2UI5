@@ -22,7 +22,8 @@ class z2ui5_cl_demo_app_189 extends z2ui5_if_app {
     const page = z2ui5_cl_xml_view.factory()
       .shell()
       .page({ title: `abap2UI5 - Focus II`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
-    page.simple_form()
+    page.message_strip({ text: `Pressing Enter in an input field jumps the cursor to the next one via the set_focus follow-up action.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
+    page.simple_form({ editable: true })
       .content(`form`)
       .label(`One (Press Enter)`)
       .input({ id: `IdOne`, value: this.client._bind_edit(this.one), submit: this.client._event(`one_enter`) })

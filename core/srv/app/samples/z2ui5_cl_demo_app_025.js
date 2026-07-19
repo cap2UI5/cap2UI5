@@ -30,9 +30,6 @@ class z2ui5_cl_demo_app_025 extends z2ui5_if_app {
       case `BUTTON_RESTART`:
         this.client.nav_app_call(new z2ui5_cl_demo_app_025());
         break;
-      case `BUTTON_CHANGE_APP`:
-        this.client.nav_app_call(new z2ui5_cl_demo_app_001());
-        break;
       case `BUTTON_READ_PREVIOUS`:
         app_024 = (this.client.get_app(this.client.get().S_DRAFT.ID_PREV_APP));
         this.input_previous = z2ui5_cl_util.abap_tab_assign(this.input_previous, z2ui5_cl_util.abap_copy(app_024.input2));
@@ -53,6 +50,7 @@ class z2ui5_cl_demo_app_025 extends z2ui5_if_app {
     const view = z2ui5_cl_xml_view.factory();
     const page = view.shell()
       .page({ title: `abap2UI5 - flow logic - APP 02`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    page.message_strip({ text: `The second app in the app-to-app flow: it reads the caller's data, returns to it ` + `optionally raising an event, and switches between two views.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     switch (this.show_view) {
       case `MAIN`:
       case ``:
@@ -86,7 +84,6 @@ class z2ui5_cl_demo_app_025 extends z2ui5_if_app {
 
 module.exports = z2ui5_cl_demo_app_025;
 
-const z2ui5_cl_demo_app_001 = require("./z2ui5_cl_demo_app_001");
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 

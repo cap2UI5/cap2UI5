@@ -9,9 +9,10 @@ class z2ui5_cl_demo_app_133 extends z2ui5_if_app {
 
   view_display() {
     const view = z2ui5_cl_xml_view.factory();
-    view.shell()
-      .page({ title: `abap2UI5 - Focus`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() })
-      .simple_form({ title: `Focus & Cursor`, editable: true })
+    const page = view.shell()
+      .page({ title: `abap2UI5 - Focus`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    page.message_strip({ text: `Pressing a button runs the set_focus front-end action, which moves keyboard focus to the ` + `target input and selects the text between the given start and end positions.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
+    page.simple_form({ title: `Focus & Cursor`, editable: true })
       .content(`form`)
       .title(`Input`)
       .label(`Sel_Start`)

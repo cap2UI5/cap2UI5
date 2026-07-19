@@ -56,6 +56,7 @@ class z2ui5_cl_demo_app_012 extends z2ui5_if_app {
     const view = z2ui5_cl_xml_view.factory();
     const page = view.shell()
       .page({ title: `abap2UI5 - Popups`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    page.message_strip({ text: `Shows different ways to open a popup - inside the same app or as a sub-app - ` + `and how the background view is kept, destroyed or re-rendered.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     const grid = page.grid(`L7 M12 S12`)
       .content(`layout`)
       .simple_form(`Popup in same App`)

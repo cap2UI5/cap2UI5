@@ -50,9 +50,10 @@ class z2ui5_cl_demo_app_024 extends z2ui5_if_app {
 
   view_display() {
     const view = z2ui5_cl_xml_view.factory();
-    view.shell()
-      .page({ title: `abap2UI5 - flow logic - APP 01`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() })
-      .grid(`L6 M12 S12`)
+    const page = view.shell()
+      .page({ title: `abap2UI5 - flow logic - APP 01`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    page.message_strip({ text: `App-to-app navigation: calls a second app in different ways - open a view, raise ` + `an event or pass data - and reads the input it returns.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
+    page.grid(`L6 M12 S12`)
       .content(`layout`)
       .simple_form(`Controller`)
       .content(`form`)

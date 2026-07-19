@@ -10,6 +10,7 @@ class z2ui5_cl_demo_app_144 extends z2ui5_if_app {
     const view = z2ui5_cl_xml_view.factory();
     const page = view.shell()
       .page({ title: `abap2UI5 - Binding Cell Level`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    page.message_strip({ text: `This sample demonstrates cell-level binding: each input is bound to one ` + `cell of an internal table via tab_index, so edits target exactly that row and field.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     sy_tabix = 0;
     for (const lr_row of this.t_tab) {
       sy_tabix++;

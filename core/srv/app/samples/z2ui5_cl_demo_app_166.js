@@ -9,6 +9,7 @@ class z2ui5_cl_demo_app_166 extends z2ui5_if_app {
     const view = z2ui5_cl_xml_view.factory();
     const page = view.shell()
       .page({ title: `abap2UI5 - Binding Structure Level`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
+    page.message_strip({ text: `This sample demonstrates structure-level binding: each input is bound to a ` + `field of a flat structure, including fields pulled in via INCLUDE.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     page.input(this.client._bind_edit(this.ms_struc.title, { name: `ms_struc-title` }));
     page.input(this.client._bind_edit(this.ms_struc.value, { name: `ms_struc-value` }));
     page.input(this.client._bind_edit(this.ms_struc.value2, { name: `ms_struc-value2` }));
