@@ -25,7 +25,7 @@ jobs:
       group: trigger-web
       cancel-in-progress: false
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           ref: ${{ github.ref_name }}
       - name: push trigger commit to builder-cap2UI5-web
