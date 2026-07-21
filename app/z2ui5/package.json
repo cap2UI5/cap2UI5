@@ -1,0 +1,12 @@
+{
+  "name": "z2ui5",
+  "version": "1.0.0",
+  "private": true,
+  "description": "abap2UI5 UI5 frontend — html5 module built and deployed to the SAP BTP HTML5 application repository by the mta.yaml `abap2UI5` module",
+  "scripts": {
+    "build:cf": "ui5 build --clean-dest --dest dist && node -e \"require('fs').copyFileSync('xs-app.json','dist/xs-app.json')\""
+  },
+  "devDependencies": {
+    "@ui5/cli": "^4.0.0"
+  }
+}

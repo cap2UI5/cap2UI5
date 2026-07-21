@@ -1,0 +1,8 @@
+specVersion: "3.0"
+metadata:
+  name: z2ui5
+type: application
+# The UI5 runtime is loaded at request time from the `ui5` destination
+# (https://ui5.sap.com, see mta.yaml + xs-app.json), so the build only
+# bundles the app's own code (Component-preload) — no framework libraries
+# are resolved or self-contained here.
