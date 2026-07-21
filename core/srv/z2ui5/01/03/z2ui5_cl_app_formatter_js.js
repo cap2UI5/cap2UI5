@@ -27,7 +27,7 @@ class z2ui5_cl_app_formatter_js {
 ` + `// z2ui5.Util: the implementations live here, Util.js re-exports them as` + `
 ` + `// the stable legacy alias. Their names and behavior are a public contract` + `
 ` + `// - do not rename or change them.` + `
-` + `sap.ui.define([], () => {` + `
+` + `sap.ui.define(["sap/ui/core/IconPool"], (IconPool) => {` + `
 ` + `  "use strict";` + `
 ` + `` + `
 ` + `  // Splits an 8-character ABAP date string "YYYYMMDD" into the [year, month,` + `
@@ -134,6 +134,25 @@ class z2ui5_cl_app_formatter_js {
 ` + `      if (status === "Shipped") return "Success";` + `
 ` + `      if (status === "Failed Shipping") return "Error";` + `
 ` + `      return "None";` + `
+` + `    },` + `
+` + `` + `
+` + `    // Replace %%icon:sap-icon://<name>%% placeholders in a formatted-text` + `
+` + `    // string with the inline-icon markup MessageStrip formatted text expects` + `
+` + `    // (mirrors sap.m.MessageStripUtilities.getInlineIcon). The glyph is` + `
+` + `    // resolved from the icon font via IconPool - CSP-clean, no code` + `
+` + `    // generation. Plain text passes through unchanged; an unknown icon name` + `
+` + `    // is dropped. Used as a whole-string formatter on a MessageStrip text` + `
+` + `    // binding (sap.m.sample.MessageStripWithEnableFormattedText).` + `
+` + `    expandInlineIcons(text) {` + `
+` + `      if (!text) return "";` + `
+` + `      return String(text).replace(` + `
+` + `        /%%icon:(sap-icon:\\/\\/[^%]+)%%/g,` + `
+` + `        (match, uri) => {` + `
+` + `          const info = IconPool.getIconInfo(uri);` + `
+` + `          if (!info) return "";` + `
+` + `          return \`<span class="sapMMsgStripInlineIcon" style="font-family:'\${info.fontFamily}'">\${info.content}</span>\`;` + `
+` + `        },` + `
+` + `      );` + `
 ` + `    },` + `
 ` + `  };` + `
 ` + `});` + `
