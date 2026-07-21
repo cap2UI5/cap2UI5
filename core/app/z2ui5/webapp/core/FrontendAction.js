@@ -70,18 +70,26 @@ sap.ui.define(
     // anything"). Scope: imperative methods that have no binding equivalent.
     // ------------------------------------------------------------------
 
-    // control method -> kinds of its positional args.
+    // control method -> kinds of its positional args. Args beyond the
+    // declared kinds are dropped; trailing args the caller did not send are
+    // not passed at all (so `open()` stays a true no-arg call).
     const CONTROL_METHODS = {
-      to: ["controlId"],
+      to: ["controlId", "string"], // target page + optional transitionName
       back: [],
       focus: [],
       scrollToIndex: ["int"],
       scrollTo: ["int", "int"],
-      open: [],
+      open: ["string"], // optional page key (ViewSettingsDialog); PDFViewer/Dialog ignore it
       close: [],
       setExpanded: ["bool"],
       discardProgress: ["controlId"],
       setNextStep: ["controlId"],
+      goToStep: ["controlId", "bool"], // Wizard: target step + focus flag
+      openBy: ["domRef"], // DatePicker/TimePicker/Menu... anchored open
+      toggleBy: ["domRef"], // sap.m.Menu/Popover: open anchored if closed, close if open
+      setActivePage: ["controlId"], // sap.m.Carousel
+      expandToLevel: ["int"], // sap.m.Tree / sap.ui.table.TreeTable: expand to N levels
+      collapseAll: [], // sap.m.Tree / sap.ui.table.TreeTable: collapse every node
     };
 
     // global object -> lazy getter + its allowed methods (with arg kinds).
@@ -127,6 +135,15 @@ sap.ui.define(
             (view && ViewSlots.byId(view.toUpperCase(), raw)) ||
             ViewSlots.resolveById(raw)
           );
+        case "domRef": {
+          // anchor argument for openBy-style methods: resolve the control id
+          // and hand over its DOM element (fallback: the control itself -
+          // every sap.m openBy accepts a control OR a DOM element)
+          const control =
+            (view && ViewSlots.byId(view.toUpperCase(), raw)) ||
+            ViewSlots.resolveById(raw);
+          return control?.getDomRef?.() ?? control;
+        }
         case "object":
           try {
             return JSON.parse(raw);
@@ -139,7 +156,11 @@ sap.ui.define(
     }
 
     function castArgs(kinds, rawArgs, view) {
-      return kinds.map((kind, i) => castArg(kind, rawArgs[i], view));
+      // only cast args the caller actually sent - padding missing trailing
+      // args would turn open() into open(undefined) and ints into NaN
+      return kinds
+        .slice(0, rawArgs.length)
+        .map((kind, i) => castArg(kind, rawArgs[i], view));
     }
 
     // args: [_, id, view, method, ...params]
@@ -153,6 +174,25 @@ sap.ui.define(
       const control = view
         ? ViewSlots.byId(view.toUpperCase(), id)
         : ViewSlots.resolveById(id);
+      // toggleBy is not a real control method: open the control anchored to
+      // the domRef if it is closed, close it if it is already open (mirrors
+      // openBy for a press-to-toggle button). The popup's open state lives
+      // client-side, so the decision stays here rather than round-tripping.
+      if (method === "toggleBy") {
+        if (!control || typeof control.openBy !== "function") {
+          Lib.logError(
+            `CONTROL_BY_ID: 'toggleBy' not callable on control '${id}'`,
+          );
+          return;
+        }
+        const anchor = castArgs(kinds, args.slice(4), view)[0];
+        if (control.isOpen?.()) {
+          control.close();
+        } else {
+          control.openBy(anchor);
+        }
+        return;
+      }
       if (!control || typeof control[method] !== "function") {
         Lib.logError(
           `CONTROL_BY_ID: '${method}' not callable on control '${id}'`,
@@ -216,8 +256,64 @@ sap.ui.define(
     // The backend arg serializer keeps empty args between filled ones as ''
     // placeholders but trims trailing empties, so all optionals sit at the
     // end and may arrive as undefined.
+    // Compound form of the filter payload: ONE param carrying a JSON array
+    // of groups, each group an array of [path, operator, value1, value2?]
+    // rows - OR inside a group, AND across groups (the FacetFilter /
+    // ViewSettingsDialog multi-facet shape). Data only: paths, whitelisted
+    // operators and values - never code. An empty groups array clears.
+    function buildFilterGroups(binding, json) {
+      let groups;
+      try {
+        groups = JSON.parse(json);
+      } catch {
+        Lib.logError("BINDING_CALL: malformed filter groups JSON");
+        return;
+      }
+      if (!Array.isArray(groups)) {
+        Lib.logError("BINDING_CALL: filter groups must be an array");
+        return;
+      }
+      groups = groups.filter((g) => Array.isArray(g) && g.length);
+      if (!groups.length) {
+        binding.filter([]);
+        return;
+      }
+      const outer = [];
+      for (const group of groups) {
+        const inner = [];
+        for (const row of group) {
+          const [path, operator, value1, value2] = Array.isArray(row)
+            ? row
+            : [];
+          if (typeof path !== "string" || !FILTER_OPERATORS.has(operator)) {
+            Lib.logError(
+              `BINDING_CALL: bad filter row (path '${path}' / operator '${operator}')`,
+            );
+            return;
+          }
+          inner.push(
+            new Filter(path, FilterOperator[operator], value1, value2),
+          );
+        }
+        outer.push(new Filter(inner, false)); // OR inside the group
+      }
+      binding.filter([new Filter(outer, true)]); // AND across the groups
+    }
+
     const BINDING_METHODS = {
-      filter(binding, [path, operator, value1, value2]) {
+      filter(binding, params) {
+        const [path, operator, value1, value2] = params;
+        // A single param that starts with '[' is the compound groups JSON -
+        // a model path can never start with '[', so the sniff is
+        // unambiguous and the positional single-filter form stays as-is.
+        if (
+          params.length === 1 &&
+          typeof path === "string" &&
+          path.trimStart().startsWith("[")
+        ) {
+          buildFilterGroups(binding, path);
+          return;
+        }
         // No filter values at all -> clear the filter (the demo kit search
         // pattern: an emptied search field). A one-sided range (empty
         // value1 but a set value2, e.g. BT with only an upper bound) is a
