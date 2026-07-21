@@ -14,17 +14,21 @@ name: deploy check
 #   actually producing the module.
 #
 # Why NOT a full `npx mbt build` of the MTA archive:
-#   mta.yaml's html5 module `abap2UI5` (path app/z2ui5) builds with
-#   `npm install && npm run build:cf`, but the *generated* app/z2ui5 ships
-#   only a webapp/ folder — no package.json and no `build:cf` script — so
-#   that module's build can never succeed here. The scaffolding for it is
-#   owned upstream (builder-cap2UI5:src/), not in this repo: everything
-#   outside .github/ is a generated artifact, wiped and rewritten on every
-#   publish, so it cannot be fixed here. Running the full `mbt build` in
-#   this repo therefore only ever fails on that upstream gap, which this
-#   repo cannot close. The full-archive / html5 deployability gate belongs
-#   in builder-cap2UI5; this workflow gates the CAP production build that
-#   this repo actually owns.
+#   The whole app under app/z2ui5 (and mta.yaml itself) is a generated
+#   artifact — everything outside .github/ is wiped and rewritten on every
+#   publish, so it cannot be fixed here; its source lives in
+#   builder-cap2UI5:src/. A full `mbt build` also builds the html5 module
+#   `abap2UI5` (path app/z2ui5) via `npm install && npm run build:cf`, so
+#   gating it here would couple this repo's CI to that generated frontend
+#   build. That html5-module deployability is instead gated at its source:
+#   builder-cap2UI5 ships app/z2ui5's package.json / ui5.yaml / xs-app.json
+#   and its assemble step is covered by the builder's own tests. This
+#   workflow gates the CAP production build that maps to this repo's own
+#   server module.
+#
+#   (History: app/z2ui5 previously shipped without that scaffolding, so a
+#   full `mbt build` here failed with `Missing script: "build:cf"` — the
+#   original reason this gate was narrowed. That gap is now fixed upstream.)
 
 on:
   pull_request:
