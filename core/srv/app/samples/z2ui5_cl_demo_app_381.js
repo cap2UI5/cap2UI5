@@ -50,13 +50,13 @@ class z2ui5_cl_demo_app_381 extends z2ui5_if_app {
       .simple_form({ title: `Settings`, editable: true })
       .content(`form`);
     form.label(`Message`)
-      .input(this.client._bind_edit(this.message))
+      .input(this.client._bind(this.message))
       .label(`Duration (ms)`)
-      .input({ value: this.client._bind_edit(this.duration), type: `Number` })
+      .input({ value: this.client._bind(this.duration), type: `Number` })
       .label(`Width`)
-      .input(this.client._bind_edit(this.width));
-    const select_my = form.label(`my`).select({ selectedkey: this.client._bind_edit(this.my) });
-    const select_at = form.label(`at`).select({ selectedkey: this.client._bind_edit(this.at) });
+      .input(this.client._bind(this.width));
+    const select_my = form.label(`my`).select({ selectedkey: this.client._bind(this.my) });
+    const select_at = form.label(`at`).select({ selectedkey: this.client._bind(this.at) });
     sy_tabix = 0;
     for (const position of this.get_positions()) {
       sy_tabix++;
@@ -64,18 +64,18 @@ class z2ui5_cl_demo_app_381 extends z2ui5_if_app {
       select_at.item({ key: position, text: position });
     }
     form.label(`offset`);
-    form.input(this.client._bind_edit(this.offset));
+    form.input(this.client._bind(this.offset));
     const select_animation = form.label(`animationTimingFunction`)
-      .select({ selectedkey: this.client._bind_edit(this.animation_timing) });
+      .select({ selectedkey: this.client._bind(this.animation_timing) });
     select_animation.item({ key: `ease`, text: `ease` })
       .item({ key: `linear`, text: `linear` })
       .item({ key: `ease-in`, text: `ease-in` })
       .item({ key: `ease-out`, text: `ease-out` })
       .item({ key: `ease-in-out`, text: `ease-in-out` });
     form.label(`animationDuration (ms)`)
-      .input({ value: this.client._bind_edit(this.animation_duration), type: `Number` })
+      .input({ value: this.client._bind(this.animation_duration), type: `Number` })
       .label(`autoClose`)
-      .checkbox(this.client._bind_edit(this.autoclose));
+      .checkbox(this.client._bind(this.autoclose));
     form.button({ text: `Show Message Toast`, type: `Emphasized`, press: this.client._event(`SHOW`) });
     this.client.view_display(page.stringify());
   }

@@ -11,7 +11,7 @@ class z2ui5_cl_demo_app_173 extends z2ui5_if_app {
     view = view.shell()
       .page({ id: `page_main`, class: `sapUiContentPadding`, title: `abap2UI5 - Sample Templating I`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
     view.message_strip({ text: `This sample builds table columns and cells dynamically from a layout table ` + `using template repeat, plus a template if/then/else that re-renders on a switch.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
-    view.table(this.client._bind_edit(this.mt_data))
+    view.table(this.client._bind(this.mt_data))
       .columns()
       .template_repeat({ list: `{template>/XX/MT_LAYOUT}`, var: `L0` })
       .column({ mergeduplicates: `{L0>MERGE}`, visible: `{L0>VISIBLE}` })
@@ -25,7 +25,7 @@ class z2ui5_cl_demo_app_173 extends z2ui5_if_app {
       .template_repeat({ list: `{template>/XX/MT_LAYOUT}`, var: `L1` })
       .object_identifier({ text: `{= '{' + \${L1>FNAME} + '}' }` });
     view.label(`IF Template (with re-rendering)`);
-    view.switch({ state: this.client._bind_edit(this.mv_flag), change: this.client._event(`CHANGE_FLAG`) });
+    view.switch({ state: this.client._bind(this.mv_flag), change: this.client._event(`CHANGE_FLAG`) });
     view = view.vbox();
     view.template_if(`{template>/XX/MV_FLAG}`)
       .template_then()

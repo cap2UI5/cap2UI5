@@ -81,18 +81,18 @@ class z2ui5_cl_demo_app_009 extends z2ui5_if_app {
     page.message_strip({ text: `Four value-help patterns: inline suggestions, numeric-only input, a value-help popup with a selectable table, ` + `and a custom popup with a city search. Fill the fields, then Clear resets the view and Send simulates a submit.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     const form = page.grid(`L7 M7 S7`).content(`layout`).simple_form(`Input with Value Help`).content(`form`);
     form.label(`Input with suggestion items`)
-      .input({ value: this.client._bind_edit(this.s_screen.color_01, { name: `s_screen-color_01` }), placeholder: `fill in your favorite colour`, suggestionitems: this.client._bind(this.t_suggestion), showsuggestion: true })
+      .input({ value: this.client._bind(this.s_screen.color_01, { name: `s_screen-color_01` }), placeholder: `fill in your favorite colour`, suggestionitems: this.client._bind(this.t_suggestion), showsuggestion: true })
       .get()
       .suggestion_items()
       .get()
       .list_item({ text: `{VALUE}`, additionaltext: `{DESCR}` });
     form.label(`Input only numbers allowed`)
-      .input({ value: this.client._bind_edit(this.s_screen.quantity, { name: `s_screen-quantity` }), type: `Number`, placeholder: `quantity` });
+      .input({ value: this.client._bind(this.s_screen.quantity, { name: `s_screen-quantity` }), type: `Number`, placeholder: `quantity` });
     form.label(`Input with value`)
-      .input({ value: this.client._bind_edit(this.s_screen.color_02, { name: `s_screen-color_02` }), placeholder: `fill in your favorite colour`, showvaluehelp: true, valuehelprequest: this.client._event(`POPUP_TABLE_VALUE`) });
+      .input({ value: this.client._bind(this.s_screen.color_02, { name: `s_screen-color_02` }), placeholder: `fill in your favorite colour`, showvaluehelp: true, valuehelprequest: this.client._event(`POPUP_TABLE_VALUE`) });
     form.label(`Custom value Popup`)
-      .input({ value: this.client._bind_edit(this.s_screen.name, { name: `s_screen-name` }), placeholder: `name`, showvaluehelp: true, valuehelprequest: this.client._event(`POPUP_TABLE_VALUE_CUSTOM`) })
-      .input({ value: this.client._bind_edit(this.s_screen.lastname, { name: `s_screen-lastname` }), placeholder: `lastname`, showvaluehelp: true, valuehelprequest: this.client._event(`POPUP_TABLE_VALUE_CUSTOM`) });
+      .input({ value: this.client._bind(this.s_screen.name, { name: `s_screen-name` }), placeholder: `name`, showvaluehelp: true, valuehelprequest: this.client._event(`POPUP_TABLE_VALUE_CUSTOM`) })
+      .input({ value: this.client._bind(this.s_screen.lastname, { name: `s_screen-lastname` }), placeholder: `lastname`, showvaluehelp: true, valuehelprequest: this.client._event(`POPUP_TABLE_VALUE_CUSTOM`) });
     page.footer()
       .overflow_toolbar()
       .toolbar_spacer()
@@ -104,7 +104,7 @@ class z2ui5_cl_demo_app_009 extends z2ui5_if_app {
   popup_value_suggestion() {
     const popup = z2ui5_cl_xml_view.factory_popup();
     const dialog = popup.dialog(`abap2UI5 - Value Help`);
-    const tab = dialog.table({ mode: `SingleSelectLeft`, items: this.client._bind_edit(this.t_suggestion_sel) });
+    const tab = dialog.table({ mode: `SingleSelectLeft`, items: this.client._bind(this.t_suggestion_sel) });
     tab.columns().column(`20rem`).text(`Color`).get_parent().column().text(`Description`).get_parent();
     tab.items().column_list_item({ selected: `{SELKZ}` }).cells().text(`{VALUE}`).text(`{DESCR}`);
     dialog.buttons()
@@ -117,7 +117,7 @@ class z2ui5_cl_demo_app_009 extends z2ui5_if_app {
     const dialog = popup.dialog(`abap2UI5 - Value Help`);
     dialog.simple_form()
       .label(`Location`)
-      .input({ value: this.client._bind_edit(this.s_screen.city, { name: `s_screen-city` }), suggestionitems: this.client._bind(this.t_cities), showsuggestion: true })
+      .input({ value: this.client._bind(this.s_screen.city, { name: `s_screen-city` }), suggestionitems: this.client._bind(this.t_cities), showsuggestion: true })
       .get()
       .suggestion_items()
       .get()
@@ -125,7 +125,7 @@ class z2ui5_cl_demo_app_009 extends z2ui5_if_app {
       .get_parent()
       .get_parent()
       .button({ text: `search...`, press: this.client._event(`SEARCH`) });
-    const tab = dialog.table({ headertext: `Employees`, mode: `SingleSelectLeft`, items: this.client._bind_edit(this.t_employees_sel) });
+    const tab = dialog.table({ headertext: `Employees`, mode: `SingleSelectLeft`, items: this.client._bind(this.t_employees_sel) });
     tab.columns()
       .column(`10rem`)
       .text(`City`)

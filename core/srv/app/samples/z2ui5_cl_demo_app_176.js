@@ -19,7 +19,7 @@ class z2ui5_cl_demo_app_176 extends z2ui5_if_app {
     const lo_view_nested = z2ui5_cl_xml_view.factory();
     lo_view_nested.shell()
       .page(`Nested View`)
-      .table(i_client._bind_edit(this.mt_data))
+      .table(i_client._bind(this.mt_data))
       .columns()
       .template_repeat({ list: `{template>/XX/MT_LAYOUT}`, var: `LO` })
       .column({ mergeduplicates: `{LO>MERGE}`, visible: `{LO>VISIBLE}` })

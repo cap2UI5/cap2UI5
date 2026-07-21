@@ -64,7 +64,7 @@ class z2ui5_cl_demo_app_025 extends z2ui5_if_app {
           .input(this.input_previous)
           .button({ text: `read`, press: this.client._event(`BUTTON_READ_PREVIOUS`) })
           .label(`Call previous app and show data of this app`)
-          .input(this.client._bind_edit(this.input))
+          .input(this.client._bind(this.input))
           .button({ text: `back`, press: this.client._event(`BACK_WITH_EVENT`) });
         break;
       case `SECOND`:

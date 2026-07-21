@@ -25,7 +25,7 @@ class z2ui5_cl_demo_app_325 extends z2ui5_if_app {
         .object_page_sub_section({ id: `id_input`, title: `Input field` })
         .blocks()
         .vbox()
-        .input({ value: client._bind_edit(this.input), width: `50%` })
+        .input({ value: client._bind(this.input), width: `50%` })
         .button({ text: `Copy input`, type: `Emphasized`, press: client._event(`COPY_INPUT`) });
       sections.object_page_section({ titleuppercase: false, id: `id_sec2`, title: `...` })
         .sub_sections()
@@ -33,7 +33,7 @@ class z2ui5_cl_demo_app_325 extends z2ui5_if_app {
         .blocks()
         .vbox()
         .button({ text: `Copy text area`, type: `Emphasized`, press: client._event(`COPY_TEXT_AREA`) })
-        .text_area({ valueliveupdate: true, editable: true, value: client._bind_edit(this.text), growing: true, growingmaxlines: `50`, width: `100%`, rows: `15`, id: `text_id` });
+        .text_area({ valueliveupdate: true, editable: true, value: client._bind(this.text), growing: true, growingmaxlines: `50`, width: `100%`, rows: `15`, id: `text_id` });
       client.view_display(view.stringify());
     }
     switch (client.get().EVENT) {

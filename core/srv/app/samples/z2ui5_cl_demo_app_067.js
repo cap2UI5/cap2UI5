@@ -21,20 +21,20 @@ class z2ui5_cl_demo_app_067 extends z2ui5_if_app {
       .label(`Documentation`)
       .link({ text: `https://sapui5.hana.ondemand.com/#/entity/sap.ui.model.type.Currency`, href: `https://sapui5.hana.ondemand.com/#/entity/sap.ui.model.type.Currency` })
       .label(`One field`)
-      .input(`{ parts: [ '${client._bind_edit(this.amount, { path: true })}', '${client._bind_edit(this.currency, { path: true })}'],  type: 'sap.ui.model.type.Currency' }`)
+      .input(`{ parts: [ '${client._bind(this.amount, { path: true })}', '${client._bind(this.currency, { path: true })}'],  type: 'sap.ui.model.type.Currency' }`)
       .label(`Two field`)
-      .input(`{ parts: [ '${client._bind_edit(this.amount, { path: true })}', '${client._bind_edit(this.currency, { path: true })}'],  type: 'sap.ui.model.type.Currency' , formatOptions: {showMeasure: false}  }`)
-      .input(`{ parts: [ '${client._bind_edit(this.amount, { path: true })}', '${client._bind_edit(this.currency, { path: true })}'],  type: 'sap.ui.model.type.Currency' , formatOptions: {showNumber: false} }`)
+      .input(`{ parts: [ '${client._bind(this.amount, { path: true })}', '${client._bind(this.currency, { path: true })}'],  type: 'sap.ui.model.type.Currency' , formatOptions: {showMeasure: false}  }`)
+      .input(`{ parts: [ '${client._bind(this.amount, { path: true })}', '${client._bind(this.currency, { path: true })}'],  type: 'sap.ui.model.type.Currency' , formatOptions: {showNumber: false} }`)
       .label(`Default`)
-      .text(`{ parts: [ '${client._bind_edit(this.amount, { path: true })}', '${client._bind_edit(this.currency, { path: true })}'],  type: 'sap.ui.model.type.Currency' }`)
+      .text(`{ parts: [ '${client._bind(this.amount, { path: true })}', '${client._bind(this.currency, { path: true })}'],  type: 'sap.ui.model.type.Currency' }`)
       .label(`preserveDecimals:false`)
-      .text(`{ parts: [ '${client._bind_edit(this.amount, { path: true })}', '` + client._bind_edit(this.currency, { path: true }) + `'],  type: 'sap.ui.model.type.Currency' , formatOptions: { preserveDecimals : false } }`)
+      .text(`{ parts: [ '${client._bind(this.amount, { path: true })}', '` + client._bind(this.currency, { path: true }) + `'],  type: 'sap.ui.model.type.Currency' , formatOptions: { preserveDecimals : false } }`)
       .label(`currencyCode:false`)
-      .text(`{ parts: [ '${client._bind_edit(this.amount, { path: true })}', '` + client._bind_edit(this.currency, { path: true }) + `'],  type: 'sap.ui.model.type.Currency' , formatOptions: { currencyCode : false } }`)
+      .text(`{ parts: [ '${client._bind(this.amount, { path: true })}', '` + client._bind(this.currency, { path: true }) + `'],  type: 'sap.ui.model.type.Currency' , formatOptions: { currencyCode : false } }`)
       .label(`style:'short'`)
-      .text(`{ parts: [ '${client._bind_edit(this.amount, { path: true })}', '${client._bind_edit(this.currency, { path: true })}'],  type: 'sap.ui.model.type.Currency' , formatOptions: { style : 'short' } }`)
+      .text(`{ parts: [ '${client._bind(this.amount, { path: true })}', '${client._bind(this.currency, { path: true })}'],  type: 'sap.ui.model.type.Currency' , formatOptions: { style : 'short' } }`)
       .label(`style:'long'`)
-      .text(`{ parts: [ '${client._bind_edit(this.amount, { path: true })}', '${client._bind_edit(this.currency, { path: true })}'],  type: 'sap.ui.model.type.Currency' , formatOptions: {   style : 'long' } }`)
+      .text(`{ parts: [ '${client._bind(this.amount, { path: true })}', '${client._bind(this.currency, { path: true })}'],  type: 'sap.ui.model.type.Currency' , formatOptions: {   style : 'long' } }`)
       .label(`event`)
       .button({ text: `send`, press: client._event(`BUTTON`) });
     page.simple_form({ title: `No Zeros`, editable: true })
@@ -43,9 +43,9 @@ class z2ui5_cl_demo_app_067 extends z2ui5_if_app {
       .label(`Documentation`)
       .link({ text: `https://sapui5.hana.ondemand.com/sdk/#/api/sap.ui.model.odata.type.String%23methods/formatValue`, href: `https://sapui5.hana.ondemand.com/sdk/#/api/sap.ui.model.odata.type.String%23methods/formatValue` })
       .label(`Numeric`)
-      .input(client._bind_edit(this.numeric))
+      .input(client._bind(this.numeric))
       .label(`Without leading Zeros`)
-      .text(`{path : '${client._bind_edit(this.numeric, { path: true })}', type : 'sap.ui.model.odata.type.String', constraints : {  isDigitSequence : true } }`);
+      .text(`{path : '${client._bind(this.numeric, { path: true })}', type : 'sap.ui.model.odata.type.String', constraints : {  isDigitSequence : true } }`);
     client.view_display(page.stringify());
   }
 }

@@ -27,7 +27,7 @@ class z2ui5_cl_demo_app_368 extends z2ui5_if_app {
       .button({ id: `button_hint_id`, icon: `sap-icon://hint`, tooltip: `Sample information`, press: this.client._event(`CLICK_HINT_ICON`) });
     page.header_content()
       .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.IconTabBar/sample/sap.m.sample.IconTabBar` });
-    const items = page.icon_tab_bar({ class: `sapUiResponsiveContentPadding`, selectedkey: this.client._bind_edit(this.selectedkey), select: this.client._event(`TAB_SELECT`) })
+    const items = page.icon_tab_bar({ class: `sapUiResponsiveContentPadding`, selectedkey: this.client._bind(this.selectedkey), select: this.client._event(`TAB_SELECT`) })
       .items();
     items.icon_tab_filter({ count: this.client._bind(this.cnt_total), text: `Products`, key: `ALL`, showall: true });
     items.icon_tab_separator();

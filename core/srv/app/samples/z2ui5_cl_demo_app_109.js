@@ -35,7 +35,7 @@ class z2ui5_cl_demo_app_109 extends z2ui5_if_app {
       .content(`form`)
       .title(`QuickView Popover`)
       .label(`placement`)
-      .segmented_button(this.client._bind_edit(this.mv_placement))
+      .segmented_button(this.client._bind(this.mv_placement))
       .items()
       .segmented_button_item({ key: `Left`, icon: `sap-icon://add-favorite`, text: `Left` })
       .segmented_button_item({ key: `Top`, icon: `sap-icon://accept`, text: `Top` })

@@ -28,7 +28,7 @@ class z2ui5_cl_demo_app_462 extends z2ui5_if_app {
   popup_display() {
     const popup = z2ui5_cl_xml_view.factory_popup();
     const dialog = popup.dialog(`abap2UI5 - Tree in a dialog`);
-    dialog.tree({ id: `treePopup`, headertext: `Documents`, items: this.client._bind_edit(this.t_nodes) })
+    dialog.tree({ id: `treePopup`, headertext: `Documents`, items: this.client._bind(this.t_nodes) })
       .standard_tree_item({ title: `{TEXT}` });
     dialog._z2ui5().tree(`treePopup`);
     dialog.buttons().button({ text: `Close`, press: this.client._event(`CLOSE_POPUP`) });

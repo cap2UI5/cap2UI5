@@ -71,7 +71,7 @@ class z2ui5_cl_demo_app_461 extends z2ui5_if_app {
     const page = view.shell()
       .page({ title: `abap2UI5 - Tree - drag and drop`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
     page.message_strip({ text: `Drag a file onto another folder: the drop event ships the binding context ` + `paths of both tree items, ABAP moves the node inside the nested table and ` + `redraws the view - the z2ui5.cc.Tree companion keeps the expanded nodes open.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
-    const tree = page.tree({ id: `tree1`, headertext: `Folders`, items: this.client._bind_edit(this.t_nodes) });
+    const tree = page.tree({ id: `tree1`, headertext: `Folders`, items: this.client._bind(this.t_nodes) });
     tree.drag_drop_config(``)
       ._generic({ name: `DragDropInfo`, ns: `dnd`, t_prop: [{ n: `sourceAggregation`, v: `items` }, { n: `targetAggregation`, v: `items` }, { n: `dropPosition`, v: `On` }, { n: `drop`, v: this.client._event(`MOVE_NODE`, [`\${$parameters>/draggedControl}.getBindingContext().getPath()`, `\${$parameters>/droppedControl}.getBindingContext().getPath()`]) }] });
     tree.standard_tree_item({ title: `{TEXT}` });

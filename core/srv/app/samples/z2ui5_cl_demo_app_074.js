@@ -59,7 +59,7 @@ class z2ui5_cl_demo_app_074 extends z2ui5_if_app {
       fs_table = this.table;
       _fs$fs_table = { o: this, k: `table` };
       sy_subrc = 0;
-      tab = page.table(this.client._bind_edit(fs_table))
+      tab = page.table(this.client._bind(fs_table))
         .header_toolbar()
         .overflow_toolbar()
         .title(`CSV Content`)
@@ -79,7 +79,7 @@ class z2ui5_cl_demo_app_074 extends z2ui5_if_app {
     page.footer()
       .overflow_toolbar()
       ._z2ui5()
-      .file_uploader({ value: this.client._bind_edit(this.file), path: this.client._bind_edit(this.filepath), placeholder: `filepath here...`, upload: this.client._event(`UPLOAD`) });
+      .file_uploader({ value: this.client._bind(this.file), path: this.client._bind(this.filepath), placeholder: `filepath here...`, upload: this.client._event(`UPLOAD`) });
     this.client.view_display(view.stringify());
   }
 }

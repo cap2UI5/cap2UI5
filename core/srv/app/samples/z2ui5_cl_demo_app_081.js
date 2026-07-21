@@ -25,7 +25,7 @@ class z2ui5_cl_demo_app_081 extends z2ui5_if_app {
   popover_list_display({ id } = {}) {
     const view = z2ui5_cl_xml_view.factory_popup();
     view.popover({ title: `Popover Title`, placement: this.mv_placement })
-      .list({ items: this.client._bind_edit(this.mt_tab), selectionchange: this.client._event(`SEL_CHANGE`), mode: `SingleSelectMaster` })
+      .list({ items: this.client._bind(this.mt_tab), selectionchange: this.client._event(`SEL_CHANGE`), mode: `SingleSelectMaster` })
       .standard_list_item({ title: `{ID}`, description: `{NAME}`, selected: `{SELECTED}` });
     this.client.popover_display(view.stringify(), id);
   }
@@ -41,7 +41,7 @@ class z2ui5_cl_demo_app_081 extends z2ui5_if_app {
       .label(`Link`)
       .link({ text: `Documentation UI5 Popover Control`, href: `https://openui5.hana.ondemand.com/entity/sap.m.Popover` })
       .label(`placement`)
-      .segmented_button(this.client._bind_edit(this.mv_placement))
+      .segmented_button(this.client._bind(this.mv_placement))
       .items()
       .segmented_button_item({ key: `Left`, icon: `sap-icon://add-favorite`, text: `Left` })
       .segmented_button_item({ key: `Top`, icon: `sap-icon://accept`, text: `Top` })

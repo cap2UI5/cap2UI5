@@ -15,7 +15,7 @@ class z2ui5_cl_demo_app_061 extends z2ui5_if_app {
     _fs$fs_tab = { o: this, k: `t_tab` };
     sy_subrc = 0;
     page.message_strip({ text: `A table typed dynamically at runtime via RTTI from a DDIC table type, with editable ` + `multi-select rows bound directly to the dynamically created data.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
-    const tab = page.table({ items: this.client._bind_edit(fs_tab), mode: `MultiSelect` })
+    const tab = page.table({ items: this.client._bind(fs_tab), mode: `MultiSelect` })
       .header_toolbar()
       .overflow_toolbar()
       .title(`Dynamic typed table`)

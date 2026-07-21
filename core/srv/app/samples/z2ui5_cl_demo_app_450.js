@@ -18,7 +18,7 @@ class z2ui5_cl_demo_app_450 extends z2ui5_if_app {
     const page = view.shell()
       .page({ title: `abap2UI5 - Formatter - weightState via core:require`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
     page.message_strip({ text: `The Weight column's state is formatted client-side by ` + `Formatter.weightState from z2ui5/model/formatter, wired via core:require.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
-    const tab = page.table({ id: `productTable`, items: this.client._bind_edit(this.t_products) });
+    const tab = page.table({ id: `productTable`, items: this.client._bind(this.t_products) });
     tab.columns().column().text(`Product`).get_parent().column().text(`Weight`).get_parent();
     tab.items()
       .column_list_item()

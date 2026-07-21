@@ -41,9 +41,9 @@ class z2ui5_cl_demo_app_114 extends z2ui5_if_app {
       .page({ title: `Feed Input`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
     page.flex_box({ justifycontent: `Start`, class: `sapUiSmallMarginEnd`, alignitems: `Center` })
       .icon({ src: `sap-icon://person-placeholder`, class: `sapUiSmallMarginEnd` })
-      .text_area({ value: this.client._bind_edit(this.mv_value), rows: `4`, cols: `120`, class: `sapUiSmallMarginEnd`, placeholder: `Post something here...`, editable: true, enabled: true })
+      .text_area({ value: this.client._bind(this.mv_value), rows: `4`, cols: `120`, class: `sapUiSmallMarginEnd`, placeholder: `Post something here...`, editable: true, enabled: true })
       .button({ icon: `sap-icon://paper-plane`, press: this.client._event(`POST`), iconfirst: true });
-    page.list({ items: this.client._bind_edit(this.mt_feed), showseparators: `Inner` })
+    page.list({ items: this.client._bind(this.mt_feed), showseparators: `Inner` })
       .feed_list_item({ sender: `{AUTHOR}`, senderpress: this.client._event(`SENDER_PRESS`), iconpress: this.client._event(`ICON_PRESS`), icondensityaware: false, showicon: false, info: `Reply`, text: `{TEXT}`, convertlinkstoanchortags: `All` });
     this.client.view_display(lo_view.stringify());
   }

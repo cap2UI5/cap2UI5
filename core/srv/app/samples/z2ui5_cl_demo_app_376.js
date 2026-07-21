@@ -28,11 +28,11 @@ class z2ui5_cl_demo_app_376 extends z2ui5_if_app {
       .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.TimePicker` });
     const vbox = page.vbox(`sapUiSmallMargin`);
     vbox.label(`Default with seconds:`);
-    vbox.time_picker({ value: this.client._bind_edit(this.time_default), valueformat: `HH:mm:ss`, displayformat: `HH:mm:ss`, width: `12rem`, change: this.client._event(`CHANGE`) });
+    vbox.time_picker({ value: this.client._bind(this.time_default), valueformat: `HH:mm:ss`, displayformat: `HH:mm:ss`, width: `12rem`, change: this.client._event(`CHANGE`) });
     vbox.label({ text: `Display format HH:mm (24 hours):`, class: `sapUiSmallMarginTop` });
-    vbox.time_picker({ value: this.client._bind_edit(this.time_short), valueformat: `HH:mm:ss`, displayformat: `HH:mm`, width: `12rem`, change: this.client._event(`CHANGE`) });
+    vbox.time_picker({ value: this.client._bind(this.time_short), valueformat: `HH:mm:ss`, displayformat: `HH:mm`, width: `12rem`, change: this.client._event(`CHANGE`) });
     vbox.label({ text: `Minutes in steps of 15:`, class: `sapUiSmallMarginTop` });
-    vbox.time_picker({ value: this.client._bind_edit(this.time_steps), valueformat: `HH:mm:ss`, displayformat: `HH:mm`, minutesstep: `15`, width: `12rem`, change: this.client._event(`CHANGE`) });
+    vbox.time_picker({ value: this.client._bind(this.time_steps), valueformat: `HH:mm:ss`, displayformat: `HH:mm`, minutesstep: `15`, width: `12rem`, change: this.client._event(`CHANGE`) });
     this.client.view_display(page.stringify());
   }
 

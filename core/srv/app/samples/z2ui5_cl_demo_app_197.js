@@ -15,7 +15,7 @@ class z2ui5_cl_demo_app_197 extends z2ui5_if_app {
     const facet = page.facet_filter({ id: `idFacetFilter`, type: `Light`, showpersonalization: true, showreset: true, reset: this.client._event(`RESET`) })
       .facet_filter_list({ title: `Products`, mode: `MultiSelect`, items: this.client._bind(this.mt_table_products), listclose: this.client._event(`FILTER`, [`$event.mParameters.selectedItems`]) })
       .facet_filter_item({ text: `{PRODUCT}` });
-    const tab = page.table({ id: `tab`, items: this.client._bind_edit(this.mt_table) });
+    const tab = page.table({ id: `tab`, items: this.client._bind(this.mt_table) });
     const lo_columns = tab.columns();
     lo_columns.column().text(`Product`);
     lo_columns.column().text(`Date`);

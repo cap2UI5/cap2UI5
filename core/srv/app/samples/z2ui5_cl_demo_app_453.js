@@ -18,7 +18,7 @@ class z2ui5_cl_demo_app_453 extends z2ui5_if_app {
     const page = view.shell()
       .page({ title: `abap2UI5 - Formatter - demo kit pack`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
     page.message_strip({ text: `Every column except Product is formatted client-side by a function of the ` + `curated module z2ui5/model/formatter - the demo kit pack, wired via core:require.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
-    const tab = page.table({ id: `productTable`, items: this.client._bind_edit(this.t_products) });
+    const tab = page.table({ id: `productTable`, items: this.client._bind(this.t_products) });
     tab.columns()
       .column()
       .text(`Product`)

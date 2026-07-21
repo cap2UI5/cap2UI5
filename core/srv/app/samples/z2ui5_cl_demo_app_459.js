@@ -51,7 +51,7 @@ class z2ui5_cl_demo_app_459 extends z2ui5_if_app {
     const page = view.shell()
       .page({ title: `abap2UI5 - Drag and Drop - Table reorder`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
     page.message_strip({ text: `Drag a row and drop it between two others: the dnd:DragDropInfo drop event ` + `sends the dragged/drop indexes and the drop position to the backend, ABAP ` + `reorders the table, view_model_update refreshes the list.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
-    const tab = page.table({ id: `reorderTable`, items: this.client._bind_edit(this.t_products) });
+    const tab = page.table({ id: `reorderTable`, items: this.client._bind(this.t_products) });
     tab.drag_drop_config(``)
       ._generic({ name: `DragDropInfo`, ns: `dnd`, t_prop: [{ n: `sourceAggregation`, v: `items` }, { n: `targetAggregation`, v: `items` }, { n: `dropPosition`, v: `Between` }, { n: `drop`, v: this.client._event(`REORDER`, [`\${$parameters>/draggedControl/oParent}.indexOfItem(\${$parameters>/draggedControl})`, `\${$parameters>/droppedControl/oParent}.indexOfItem(\${$parameters>/droppedControl})`, `\${$parameters>/dropPosition}`]) }] });
     tab.columns().column().text(`Product`).get_parent().column().text(`Category`).get_parent();

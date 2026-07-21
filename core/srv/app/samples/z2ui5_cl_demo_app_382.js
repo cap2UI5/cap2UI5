@@ -44,11 +44,11 @@ class z2ui5_cl_demo_app_382 extends z2ui5_if_app {
       .simple_form({ title: `Settings`, editable: true })
       .content(`form`)
       .label(`Title`)
-      .input(this.client._bind_edit(this.title))
+      .input(this.client._bind(this.title))
       .label(`Message`)
-      .input(this.client._bind_edit(this.message))
+      .input(this.client._bind(this.message))
       .label(`Details`)
-      .text_area({ value: this.client._bind_edit(this.details), rows: `3` });
+      .text_area({ value: this.client._bind(this.details), rows: `3` });
     page.footer()
       .overflow_toolbar()
       .text(`Open Message Box:`)

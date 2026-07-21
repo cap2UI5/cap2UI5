@@ -15,7 +15,7 @@ class z2ui5_cl_demo_app_297 extends z2ui5_if_app {
       .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.Select/sample/sap.m.sample.SelectWithIcons` });
     page_01.page({ showheader: false, class: `sapUiContentPadding` })
       .content()
-      .select({ forceselection: false, selectedkey: client._bind_edit(this.selected_product), items: client._bind(this.lt_product_collection) })
+      .select({ forceselection: false, selectedkey: client._bind(this.selected_product), items: client._bind(this.lt_product_collection) })
       .item()
       .list_item({ key: `{PRODUCT_ID}`, text: `{NAME}`, icon: `{ICON}` })
       .get_parent()

@@ -16,14 +16,14 @@ class z2ui5_cl_demo_app_133 extends z2ui5_if_app {
       .content(`form`)
       .title(`Input`)
       .label(`Sel_Start`)
-      .input(this.client._bind_edit(this.selstart))
+      .input(this.client._bind(this.selstart))
       .label(`Sel_End`)
-      .input(this.client._bind_edit(this.selend))
+      .input(this.client._bind(this.selend))
       .label(`field_01`)
-      .input({ value: this.client._bind_edit(this.field_01), id: `BUTTON01` })
+      .input({ value: this.client._bind(this.field_01), id: `BUTTON01` })
       .button({ text: `focus here`, press: this.client._event(`BUTTON01`) })
       .label(`field_02`)
-      .input({ value: this.client._bind_edit(this.field_02), id: `BUTTON02` })
+      .input({ value: this.client._bind(this.field_02), id: `BUTTON02` })
       .button({ text: `focus here`, press: this.client._event(`BUTTON02`) });
     this.client.view_display(view.stringify());
   }

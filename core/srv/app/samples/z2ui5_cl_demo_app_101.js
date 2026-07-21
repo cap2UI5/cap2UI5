@@ -45,7 +45,7 @@ class z2ui5_cl_demo_app_101 extends z2ui5_if_app {
       .page({ title: `abap2UI5 - Sample: Feed`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
     page.header_content()
       .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.FeedListItem/sample/sap.m.sample.Feed` });
-    page.feed_input({ post: this.client._event(`POST`), icon: base_url + `test-resources/sap/m/images/dronning_victoria.jpg`, value: this.client._bind_edit(this.value), class: `sapUiSmallMarginTopBottom` });
+    page.feed_input({ post: this.client._event(`POST`), icon: base_url + `test-resources/sap/m/images/dronning_victoria.jpg`, value: this.client._bind(this.value), class: `sapUiSmallMarginTopBottom` });
     page.list({ showseparators: `Inner`, items: this.client._bind(this.t_feed) })
       .feed_list_item({ sender: `{AUTHOR}`, icon: `{AUTHORPIC}`, senderpress: this.client._event(`SENDER_PRESS`, [`\${$source>/sender}`]), iconpress: this.client._event(`ICON_PRESS`, [`\${$source>/sender}`]), info: `{TYPE}`, timestamp: `{DATE}`, text: `{TEXT}`, convertlinkstoanchortags: `All` });
     this.client.view_display(view.stringify());

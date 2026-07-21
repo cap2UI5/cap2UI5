@@ -64,10 +64,10 @@ class z2ui5_cl_demo_app_024 extends z2ui5_if_app {
       .label(`Demo`)
       .button({ text: `call new app (set Event)`, press: this.client._event(`CALL_NEW_APP_EVENT`) })
       .label(`Demo`)
-      .input(this.client._bind_edit(this.input))
+      .input(this.client._bind(this.input))
       .button({ text: `call new app (set data)`, press: this.client._event(`CALL_NEW_APP_READ`) })
       .label(`some data, you can read in the next app`)
-      .input(this.client._bind_edit(this.input2));
+      .input(this.client._bind(this.input2));
     this.client.view_display(view.stringify());
   }
 }

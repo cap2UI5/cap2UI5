@@ -44,7 +44,7 @@ class z2ui5_cl_demo_app_006 extends z2ui5_if_app {
       .page({ title: `abap2UI5 - Scroll Container with Table and Toolbar`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
     page.message_strip({ text: `A large table (10,000 rows) is rendered inside a ScrollContainer using growing / ` + `scroll-to-load, with a sticky header toolbar offering sort buttons and a segmented button.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     const tab = page.scroll_container({ height: `70%`, vertical: true })
-      .table({ growing: true, growingthreshold: `20`, growingscrolltoload: true, items: this.client._bind_edit(this.t_tab), sticky: `ColumnHeaders,HeaderToolbar` });
+      .table({ growing: true, growingthreshold: `20`, growingscrolltoload: true, items: this.client._bind(this.t_tab), sticky: `ColumnHeaders,HeaderToolbar` });
     tab.header_toolbar()
       .toolbar()
       .title(`title of the table`)

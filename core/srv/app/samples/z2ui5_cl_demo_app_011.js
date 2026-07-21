@@ -10,7 +10,7 @@ class z2ui5_cl_demo_app_011 extends z2ui5_if_app {
     const page = view.shell()
       .page({ title: `abap2UI5 - Tables and editable`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack(), id: `test2` });
     page.message_strip({ text: `A MultiSelect table whose input cells switch between display and edit mode via the ` + `toolbar, which also adds new rows and deletes the currently selected ones.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
-    const tab = page.table({ items: `{path: '${this.client._bind_edit(this.t_tab, { path: true })}', templateShareable: false}`, mode: `MultiSelect` })
+    const tab = page.table({ items: `{path: '${this.client._bind(this.t_tab, { path: true })}', templateShareable: false}`, mode: `MultiSelect` })
       .header_toolbar()
       .overflow_toolbar()
       .title(`title of the table`)

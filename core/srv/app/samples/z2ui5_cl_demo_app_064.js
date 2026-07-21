@@ -65,7 +65,7 @@ class z2ui5_cl_demo_app_064 extends z2ui5_if_app {
     page1.message_strip({ text: `A ProgressIndicator driven from the backend: pressing Load runs a WAIT-delayed server ` + `step and re-arms a client timer (follow_up_action), advancing the bar in 25% steps until it completes.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     layout = page1.vertical_layout({ class: `sapuicontentpadding`, width: `100%` });
     layout.vbox()
-      .progress_indicator({ percentvalue: this.client._bind_edit(this.mv_percent), displayvalue: this.client._bind_edit(this.screen.display_value, { name: `screen-display_value` }), showvalue: true, state: `Success` });
+      .progress_indicator({ percentvalue: this.client._bind(this.mv_percent), displayvalue: this.client._bind(this.screen.display_value, { name: `screen-display_value` }), showvalue: true, state: `Success` });
     layout.button({ text: `Load`, press: this.client._event(`LOAD`), enabled: this.client._bind(this.mv_check_enabled) });
     this.client.view_display(view.stringify());
   }

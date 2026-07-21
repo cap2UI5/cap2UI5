@@ -13,9 +13,9 @@ class z2ui5_cl_demo_app_051 extends z2ui5_if_app {
     layout.label({ text: `Input mandatory`, labelfor: `input1` });
     layout.input({ id: `input1`, required: true });
     layout.label({ text: `Input bold`, labelfor: `input2`, design: `Bold` });
-    layout.input({ id: `input2`, value: client._bind_edit(this.screen.input2, { name: `screen-input2` }) });
+    layout.input({ id: `input2`, value: client._bind(this.screen.input2, { name: `screen-input2` }) });
     layout.label({ text: `Input normal`, labelfor: `input3` });
-    layout.input({ id: `input3`, value: client._bind_edit(this.screen.input3, { name: `screen-input3` }) });
+    layout.input({ id: `input3`, value: client._bind(this.screen.input3, { name: `screen-input3` }) });
     client.view_display(page.stringify());
   }
 

@@ -34,7 +34,7 @@ class z2ui5_cl_demo_app_052 extends z2ui5_if_app {
     page.message_strip({ text: `List report layout: a dynamic page with a table whose product links open a popover ` + `showing details for the selected row.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     page = page.dynamic_page({ headerexpanded: true });
     const cont = page.content(`f`);
-    const tab = cont.table({ id: `tab`, items: this.client._bind_edit(this.mt_table) });
+    const tab = cont.table({ id: `tab`, items: this.client._bind(this.mt_table) });
     const lo_columns = tab.columns();
     lo_columns.column().text(`Product`);
     lo_columns.column().text(`Date`);

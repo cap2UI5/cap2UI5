@@ -18,11 +18,11 @@ class z2ui5_cl_demo_app_287 extends z2ui5_if_app {
       .toolbar()
       .title(`Wrapping texts`)
       .toolbar_spacer()
-      .toggle_button({ text: `Toggle Wrapping`, pressed: client._bind_edit(this.wrapping) })
+      .toggle_button({ text: `Toggle Wrapping`, pressed: client._bind(this.wrapping) })
       .get_parent()
       .get_parent()
       .items()
-      .standard_list_item({ title: `{TITLE}`, description: `{DESC}`, icon: `{ICON}`, iconinset: false, highlight: `{HIGHLIGHT}`, info: `{INFO}`, infostate: `{HIGHLIGHT}`, type: `Detail`, wrapping: client._bind_edit(this.wrapping), wrapcharlimit: `{WRAPCHARLIMIT}` });
+      .standard_list_item({ title: `{TITLE}`, description: `{DESC}`, icon: `{ICON}`, iconinset: false, highlight: `{HIGHLIGHT}`, info: `{INFO}`, infostate: `{HIGHLIGHT}`, type: `Detail`, wrapping: client._bind(this.wrapping), wrapcharlimit: `{WRAPCHARLIMIT}` });
     client.view_display(page.stringify());
   }
 

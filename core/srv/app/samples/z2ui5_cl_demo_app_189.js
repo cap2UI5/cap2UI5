@@ -26,11 +26,11 @@ class z2ui5_cl_demo_app_189 extends z2ui5_if_app {
     page.simple_form({ editable: true })
       .content(`form`)
       .label(`One (Press Enter)`)
-      .input({ id: `IdOne`, value: this.client._bind_edit(this.one), submit: this.client._event(`one_enter`) })
+      .input({ id: `IdOne`, value: this.client._bind(this.one), submit: this.client._event(`one_enter`) })
       .label(`Two`)
-      .input({ id: `IdTwo`, value: this.client._bind_edit(this.two), submit: this.client._event(`two_enter`) })
+      .input({ id: `IdTwo`, value: this.client._bind(this.two), submit: this.client._event(`two_enter`) })
       .label(`Three`)
-      .input({ id: `IdThree`, value: this.client._bind_edit(this.three) });
+      .input({ id: `IdThree`, value: this.client._bind(this.three) });
     this.client.view_display(page.stringify());
   }
 

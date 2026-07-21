@@ -18,7 +18,7 @@ class z2ui5_cl_demo_app_005 extends z2ui5_if_app {
     grid.simple_form({ title: `More Controls`, editable: true })
       .content(`form`)
       .label(`Range Slider`)
-      .range_slider({ max: `100`, min: `0`, step: `10`, startvalue: `10`, endvalue: `20`, showtickmarks: true, labelinterval: `2`, width: `80%`, class: `sapUiTinyMargin`, value: client._bind_edit(this.value1), value2: client._bind_edit(this.value2), change: client._event(`SLIDER_CHANGE`) });
+      .range_slider({ max: `100`, min: `0`, step: `10`, startvalue: `10`, endvalue: `20`, showtickmarks: true, labelinterval: `2`, width: `80%`, class: `sapUiTinyMargin`, value: client._bind(this.value1), value2: client._bind(this.value2), change: client._event(`SLIDER_CHANGE`) });
     client.view_display(view.stringify());
   }
 }

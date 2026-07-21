@@ -29,21 +29,21 @@ class z2ui5_cl_demo_app_120 extends z2ui5_if_app {
       .page({ title: `abap2UI5 - Geolocation`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
     page.message_strip({ text: `The geolocation custom control reads the device position from the browser and binds ` + `longitude, latitude, altitude, accuracy and speed into the read-only form below.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     page._z2ui5()
-      .geolocation({ finished: this.client._event(`GEOLOCATION_LOADED`), error: this.client._event(`GEOLOCATION_ERROR`, [`\${$parameters>/code}`, `\${$parameters>/message}`]), longitude: this.client._bind_edit(this.longitude), latitude: this.client._bind_edit(this.latitude), altitude: this.client._bind_edit(this.altitude), altitudeaccuracy: this.client._bind_edit(this.altitudeaccuracy), accuracy: this.client._bind_edit(this.accuracy), speed: this.client._bind_edit(this.speed) })
+      .geolocation({ finished: this.client._event(`GEOLOCATION_LOADED`), error: this.client._event(`GEOLOCATION_ERROR`, [`\${$parameters>/code}`, `\${$parameters>/message}`]), longitude: this.client._bind(this.longitude), latitude: this.client._bind(this.latitude), altitude: this.client._bind(this.altitude), altitudeaccuracy: this.client._bind(this.altitudeaccuracy), accuracy: this.client._bind(this.accuracy), speed: this.client._bind(this.speed) })
       .simple_form({ title: `Geolocation`, editable: false })
       .content(`form`)
       .label(`Longitude`)
-      .input({ value: this.client._bind_edit(this.longitude), editable: false })
+      .input({ value: this.client._bind(this.longitude), editable: false })
       .label(`Latitude`)
-      .input({ value: this.client._bind_edit(this.latitude), editable: false })
+      .input({ value: this.client._bind(this.latitude), editable: false })
       .label(`Altitude`)
-      .input({ value: this.client._bind_edit(this.altitude), editable: false })
+      .input({ value: this.client._bind(this.altitude), editable: false })
       .label(`Accuracy`)
-      .input({ value: this.client._bind_edit(this.accuracy), editable: false })
+      .input({ value: this.client._bind(this.accuracy), editable: false })
       .label(`AltitudeAccuracy`)
-      .input({ value: this.client._bind_edit(this.altitudeaccuracy), editable: false })
+      .input({ value: this.client._bind(this.altitudeaccuracy), editable: false })
       .label(`Speed`)
-      .input({ value: this.client._bind_edit(this.speed), editable: false });
+      .input({ value: this.client._bind(this.speed), editable: false });
     this.client.view_display(view.stringify());
   }
 }

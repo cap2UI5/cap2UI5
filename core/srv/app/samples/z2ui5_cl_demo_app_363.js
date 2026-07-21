@@ -54,19 +54,19 @@ class z2ui5_cl_demo_app_363 extends z2ui5_if_app {
     page.message_strip({ text: `Use the toolbar to scroll to a control by id, or press Validate - if the middle field is empty it scrolls to it automatically.`, type: `Information` });
     const form = page.simple_form({ editable: true, title: `Long form` }).content(`form`);
     form.label(`Top field (id = top_input)`);
-    form.input({ id: `top_input`, value: this.client._bind_edit(this.field_01) });
+    form.input({ id: `top_input`, value: this.client._bind(this.field_01) });
     for (let sy_index = 1; sy_index <= 25; sy_index++) {
       form.label(`spacer`);
       form.text(` spacer line ${sy_index}`);
     }
     form.label(`Middle field - required (id = middle_input)`);
-    form.input({ id: `middle_input`, value: this.client._bind_edit(this.field_02) });
+    form.input({ id: `middle_input`, value: this.client._bind(this.field_02) });
     for (let sy_index = 1; sy_index <= 25; sy_index++) {
       form.label(`spacer`);
       form.text(` spacer line ${sy_index}`);
     }
     form.label(`Bottom field (id = bottom_input)`);
-    form.input({ id: `bottom_input`, value: this.client._bind_edit(this.field_03) });
+    form.input({ id: `bottom_input`, value: this.client._bind(this.field_03) });
     page.footer()
       .overflow_toolbar()
       .button({ text: `Jump to Top`, press: this.client._event(`JUMP_TOP`) })

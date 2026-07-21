@@ -20,7 +20,7 @@ class z2ui5_cl_demo_app_047 extends z2ui5_if_app {
       this.dec1 = - z2ui5_cl_util.abap_div(1, 3);
       this.dec2 = z2ui5_cl_util.abap_div(2, 3);
       this.mt_tab = z2ui5_cl_util.abap_tab_assign(this.mt_tab, [{ date: sy_datum, time: sy_uzeit }]);
-      client._bind_edit(this.mt_tab);
+      client._bind(this.mt_tab);
     }
     switch (client.get().EVENT) {
       case `BUTTON_INT`:
@@ -38,21 +38,21 @@ class z2ui5_cl_demo_app_047 extends z2ui5_if_app {
       .content(`form`)
       .title(`Input`)
       .label(`integer`)
-      .input(client._bind_edit(this.int1))
-      .input(client._bind_edit(this.int2))
-      .input({ enabled: false, value: client._bind_edit(this.int_sum) })
+      .input(client._bind(this.int1))
+      .input(client._bind(this.int2))
+      .input({ enabled: false, value: client._bind(this.int_sum) })
       .button({ text: `calc sum`, press: client._event(`BUTTON_INT`) })
       .label(`decimals`)
-      .input(client._bind_edit(this.dec1))
-      .input(client._bind_edit(this.dec2))
-      .input({ enabled: false, value: client._bind_edit(this.dec_sum) })
+      .input(client._bind(this.dec1))
+      .input(client._bind(this.dec2))
+      .input({ enabled: false, value: client._bind(this.dec_sum) })
       .button({ text: `calc sum`, press: client._event(`BUTTON_DEC`) })
       .label(`date`)
-      .input(client._bind_edit(this.date))
+      .input(client._bind(this.date))
       .label(`time`)
-      .input(client._bind_edit(this.time));
+      .input(client._bind(this.time));
     const tab = page.scroll_container({ height: `70%`, vertical: true })
-      .table({ growing: true, growingthreshold: `20`, growingscrolltoload: true, items: client._bind_edit(this.mt_tab), sticky: `ColumnHeaders,HeaderToolbar` });
+      .table({ growing: true, growingthreshold: `20`, growingscrolltoload: true, items: client._bind(this.mt_tab), sticky: `ColumnHeaders,HeaderToolbar` });
     tab.columns().column().text(`Date`).get_parent().column().text(`Time`).get_parent();
     tab.items().column_list_item().cells().text(`{DATE}`).text(`{TIME}`);
     client.view_display(page.stringify());

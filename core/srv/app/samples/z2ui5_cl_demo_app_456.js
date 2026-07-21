@@ -20,7 +20,7 @@ class z2ui5_cl_demo_app_456 extends z2ui5_if_app {
     const page = view.shell()
       .page({ title: `abap2UI5 - Formatter - Date objects for the PlanningCalendar`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
     page.message_strip({ text: `The model carries plain ISO strings; Formatter.DateCreateObject turns them into ` + `the real JS Date objects the object-typed calendar properties require - only at ` + `the bindings that need them.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
-    page.planning_calendar({ id: `PC1`, class: `sapUiSmallMargin`, startdate: `{ path: '${this.client._bind_edit(this.start_date, { path: true })}', ` + `formatter: 'Formatter.DateCreateObject' }`, rows: this.client._bind_edit(this.t_people) })
+    page.planning_calendar({ id: `PC1`, class: `sapUiSmallMargin`, startdate: `{ path: '${this.client._bind(this.start_date, { path: true })}', ` + `formatter: 'Formatter.DateCreateObject' }`, rows: this.client._bind(this.t_people) })
       .rows()
       .planning_calendar_row({ title: `{NAME}`, appointments: `{path: 'T_APPOINTMENTS', templateShareable: true}` })
       .appointments()

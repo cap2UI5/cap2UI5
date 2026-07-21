@@ -26,11 +26,11 @@ class z2ui5_cl_demo_app_377 extends z2ui5_if_app {
       .link({ text: `UI5 Demo Kit`, target: `_blank`, href: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.DateTimePicker` });
     const vbox = page.vbox(`sapUiSmallMargin`);
     vbox.label(`Default:`);
-    vbox.date_time_picker(this.client._bind_edit(this.datetime_default));
+    vbox.date_time_picker(this.client._bind(this.datetime_default));
     vbox.label({ text: `With placeholder:`, class: `sapUiSmallMarginTop` });
     vbox.date_time_picker({ placeholder: `Enter delivery date and time` });
     vbox.label({ text: `Value state Warning:`, class: `sapUiSmallMarginTop` });
-    vbox.date_time_picker({ value: this.client._bind_edit(this.datetime_state), valuestate: `Warning` });
+    vbox.date_time_picker({ value: this.client._bind(this.datetime_state), valuestate: `Warning` });
     vbox.label({ text: `Disabled:`, class: `sapUiSmallMarginTop` });
     vbox.date_time_picker({ value: this.client._bind(this.datetime_default), enabled: false });
     this.client.view_display(page.stringify());

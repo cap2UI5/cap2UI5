@@ -29,7 +29,7 @@ class z2ui5_cl_demo_app_140 extends z2ui5_if_app {
       .page({ title: `abap2UI5 - Multi Combo Box`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() })
       .simple_form({ title: `Form Title`, editable: true })
       .content(`form`)
-      .multi_combobox({ name: `MultiComboBox`, selectedkeys: this.client._bind_edit(this.gt_sel_multi2), items: this.client._bind_edit(this.gt_multi) })
+      .multi_combobox({ name: `MultiComboBox`, selectedkeys: this.client._bind(this.gt_sel_multi2), items: this.client._bind(this.gt_multi) })
       .item({ key: `{KEY}`, text: `{TEXT}` })
       .get_parent()
       .button({ text: `post`, press: this.client._event(`BUTTON_POST`) });

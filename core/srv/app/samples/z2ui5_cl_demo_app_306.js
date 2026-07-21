@@ -20,18 +20,18 @@ class z2ui5_cl_demo_app_306 extends z2ui5_if_app {
     page.message_strip({ text: `Capture photos from the device camera custom control; pick the facing mode and camera, then edit a ` + `captured picture in the popup image editor.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     page.vbox(`sapUiSmallMargin`)
       .label({ text: `facingMode: `, labelfor: `ComboFacingMode` })
-      .combobox({ id: `ComboFacingMode`, selectedkey: this.client._bind_edit(this.facing_mode), items: `{path:'${this.client._bind_edit(this.facing_modes, { path: true })}', sorter: { path: 'TEXT' } }` })
+      .combobox({ id: `ComboFacingMode`, selectedkey: this.client._bind(this.facing_mode), items: `{path:'${this.client._bind(this.facing_modes, { path: true })}', sorter: { path: 'TEXT' } }` })
       .get()
       .item({ key: `{KEY}`, text: `{TEXT}` });
     page.vbox(`sapUiSmallMargin`)
       .label({ text: `device: `, labelfor: `ComboDevice` })
       ._z2ui5()
-      .camera_selector({ id: `ComboDevice`, selectedkey: this.client._bind_edit(this.device), items: `{path:'${this.client._bind_edit(this.devices, { path: true })}', sorter: { path: 'TEXT' } }` })
+      .camera_selector({ id: `ComboDevice`, selectedkey: this.client._bind(this.device), items: `{path:'${this.client._bind(this.devices, { path: true })}', sorter: { path: 'TEXT' } }` })
       .get()
       .item({ key: `{KEY}`, text: `{TEXT}` });
     page._z2ui5()
-      .camera_picture({ value: this.client._bind_edit(this.mv_picture_base), thumbnail: this.client._bind_edit(this.mv_picture_thumb), onphoto: this.client._event(`CAPTURE`), facingmode: this.client._bind_edit(this.facing_mode), deviceid: this.client._bind_edit(this.device) });
-    const lo_list = page.list({ headertext: `List Output`, items: this.client._bind_edit(this.mt_picture_out), mode: `SingleSelectMaster`, selectionchange: this.client._event(`DISPLAY`) });
+      .camera_picture({ value: this.client._bind(this.mv_picture_base), thumbnail: this.client._bind(this.mv_picture_thumb), onphoto: this.client._event(`CAPTURE`), facingmode: this.client._bind(this.facing_mode), deviceid: this.client._bind(this.device) });
+    const lo_list = page.list({ headertext: `List Output`, items: this.client._bind(this.mt_picture_out), mode: `SingleSelectMaster`, selectionchange: this.client._event(`DISPLAY`) });
     const lo_item = lo_list._generic({ name: `CustomListItem`, t_prop: [{ n: `selected`, v: `{SELECTED}` }] });
     const lo_hbox = lo_item.hbox({ alignitems: `Center` });
     lo_hbox.image({ src: `{THUMBNAIL}`, height: `80px` });

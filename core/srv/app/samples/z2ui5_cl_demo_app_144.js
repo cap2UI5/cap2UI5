@@ -15,10 +15,10 @@ class z2ui5_cl_demo_app_144 extends z2ui5_if_app {
     for (const lr_row of this.t_tab) {
       sy_tabix++;
       lv_tabix = z2ui5_cl_util.abap_copy(sy_tabix);
-      page.input(this.client._bind_edit(lr_row.title, { tab: this.t_tab, tab_index: lv_tabix }));
-      page.input(this.client._bind_edit(lr_row.value, { tab: this.t_tab, tab_index: lv_tabix }));
+      page.input(this.client._bind(lr_row.title, { tab: this.t_tab, tab_index: lv_tabix }));
+      page.input(this.client._bind(lr_row.value, { tab: this.t_tab, tab_index: lv_tabix }));
     }
-    const tab = page.table({ items: this.client._bind_edit(this.t_tab), mode: `MultiSelect` })
+    const tab = page.table({ items: this.client._bind(this.t_tab), mode: `MultiSelect` })
       .header_toolbar()
       .overflow_toolbar()
       .title(`title of the table`)
@@ -37,10 +37,10 @@ class z2ui5_cl_demo_app_144 extends z2ui5_if_app {
       .cells()
       .input(`{TITLE}`)
       .input(`{VALUE}`);
-    page.input(this.client._bind_edit(this.t_tab[(1) - 1].title, { tab: this.t_tab, tab_index: 1 }));
-    page.input(this.client._bind_edit(this.t_tab[(1) - 1].value, { tab: this.t_tab, tab_index: 1 }));
-    page.input(this.client._bind_edit(this.t_tab[(2) - 1].title, { tab: this.t_tab, tab_index: 2 }));
-    page.input(this.client._bind_edit(this.t_tab[(2) - 1].value, { tab: this.t_tab, tab_index: 2 }));
+    page.input(this.client._bind(this.t_tab[(1) - 1].title, { tab: this.t_tab, tab_index: 1 }));
+    page.input(this.client._bind(this.t_tab[(1) - 1].value, { tab: this.t_tab, tab_index: 1 }));
+    page.input(this.client._bind(this.t_tab[(2) - 1].title, { tab: this.t_tab, tab_index: 2 }));
+    page.input(this.client._bind(this.t_tab[(2) - 1].value, { tab: this.t_tab, tab_index: 2 }));
     this.client.view_display(view.stringify());
   }
 

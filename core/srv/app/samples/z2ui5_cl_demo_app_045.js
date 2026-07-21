@@ -38,7 +38,7 @@ class z2ui5_cl_demo_app_045 extends z2ui5_if_app {
       .content(`form`)
       .title(`Filter`)
       .label(`info`)
-      .input(client._bind_edit(this.mv_info_filter))
+      .input(client._bind(this.mv_info_filter))
       .button({ text: `filter`, press: client._event(`FILTER_INFO`) });
     const tab = page.scroll_container({ height: `70%`, vertical: true })
       .table({ growing: true, growingthreshold: `20`, growingscrolltoload: true, items: client._bind(this.t_tab), sticky: `ColumnHeaders,HeaderToolbar` });

@@ -17,7 +17,7 @@ class z2ui5_cl_demo_app_460 extends z2ui5_if_app {
     const page = view.shell()
       .page({ title: `abap2UI5 - Tree - nested model`, navbuttonpress: this.client._event_nav_app_leave(), shownavbutton: this.client.check_app_prev_stack() });
     page.message_strip({ text: `A nested ABAP table (three levels of NODES) serializes into nested JSON arrays; ` + `sap.m.Tree binds them directly - no flattening, no extra code.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
-    page.tree({ id: `tree1`, headertext: `Files`, items: this.client._bind_edit(this.t_nodes) })
+    page.tree({ id: `tree1`, headertext: `Files`, items: this.client._bind(this.t_nodes) })
       .standard_tree_item({ title: `{TEXT}` });
     this.client.view_display(view.stringify());
   }

@@ -29,7 +29,7 @@ class z2ui5_cl_demo_app_307 extends z2ui5_if_app {
       .title(`Grid List with Drag and Drop`)
       .get_parent()
       .get_parent()
-      .grid_list({ id: `gridList`, headertext: `GridList header`, items: client._bind_edit(this.items) })
+      .grid_list({ id: `gridList`, headertext: `GridList header`, items: client._bind(this.items) })
       .drag_drop_config()
       .drag_info(`items`)
       .grid_drop_info({ targetaggregation: `items`, dropposition: `Between`, droplayout: `Horizontal`, drop: client._event(`onDrop`, [`\${$parameters>/draggedControl/oParent}.indexOfItem(\${$parameters>/draggedControl})`, `\${$parameters>/droppedControl/oParent}.indexOfItem(\${$parameters>/droppedControl})`, `\${$parameters>/dropPosition}`]) })

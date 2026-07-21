@@ -111,7 +111,7 @@ class z2ui5_cl_demo_app_070 extends z2ui5_if_app {
       .flex_box({ alignitems: `Start` });
     lo_box.vbox()
       .text(`Search`)
-      .search_field({ value: this.client._bind_edit(this.mv_search_value), search: this.client._event(`BUTTON_SEARCH`), change: this.client._event(`BUTTON_SEARCH`), width: `17.5rem`, id: `SEARCH` });
+      .search_field({ value: this.client._bind(this.mv_search_value), search: this.client._event(`BUTTON_SEARCH`), change: this.client._event(`BUTTON_SEARCH`), width: `17.5rem`, id: `SEARCH` });
     lo_box.get_parent()
       .hbox({ justifycontent: `End` })
       .button({ text: `Go`, press: this.client._event(`BUTTON_START`), type: `Emphasized` });
@@ -120,7 +120,7 @@ class z2ui5_cl_demo_app_070 extends z2ui5_if_app {
     tab.ui_extension().overflow_toolbar().title(`Products`);
     const lo_columns = tab.ui_columns();
     lo_columns.ui_column(`4rem`)
-      .checkbox({ selected: this.client._bind_edit(this.lv_selkz), enabled: true, select: this.client._event(`SELKZ`) })
+      .checkbox({ selected: this.client._bind(this.lv_selkz), enabled: true, select: this.client._event(`SELKZ`) })
       .ui_template()
       .checkbox(`{SELKZ}`);
     lo_columns.ui_column({ width: `5rem`, sortproperty: `ROW_ID`, filterproperty: `ROW_ID` })

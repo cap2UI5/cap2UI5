@@ -14,7 +14,7 @@ class z2ui5_cl_demo_app_125 extends z2ui5_if_app {
       page.simple_form({ title: `Form Title`, editable: true })
         .content(`form`)
         .label(`title`)
-        .input(client._bind_edit(this.title))
+        .input(client._bind(this.title))
         .button({ text: `Set Title`, press: client._event(`SET_TITLE`) });
       client.view_display(view.stringify());
     } else if (client.check_on_event(`SET_TITLE`)) {

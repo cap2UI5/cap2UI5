@@ -36,7 +36,7 @@ class z2ui5_cl_demo_app_454 extends z2ui5_if_app {
       .hbox({ class: `sapUiTinyMarginTop` })
       .button({ text: `Sort ascending`, icon: `sap-icon://sort-ascending`, press: this.client._event(`SORT_ASC`) })
       .button({ text: `Sort descending`, icon: `sap-icon://sort-descending`, press: this.client._event(`SORT_DESC`), class: `sapUiTinyMarginBegin` });
-    page.list({ id: `productList`, headertext: `Products`, items: this.client._bind_edit(this.t_products), class: `sapUiSmallMargin` })
+    page.list({ id: `productList`, headertext: `Products`, items: this.client._bind(this.t_products), class: `sapUiSmallMargin` })
       .standard_list_item({ title: `{NAME}`, description: `{CATEGORY}` });
     this.client.view_display(view.stringify());
   }

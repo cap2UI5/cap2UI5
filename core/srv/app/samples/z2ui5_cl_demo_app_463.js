@@ -37,7 +37,7 @@ class z2ui5_cl_demo_app_463 extends z2ui5_if_app {
     page.message_strip({ text: `Each node is a CustomTreeItem holding an Input bound two-way to the node text. ` + `Rename any node and press "Show model": the edits have already written back into ` + `the nested ABAP table. The expand state is preserved across the roundtrip.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     page.vbox(`sapUiSmallMargin`)
       .button({ text: `Show model`, icon: `sap-icon://show`, press: this.client._event(`SHOW_MODEL`) });
-    const tree = page.tree({ id: `tree1`, headertext: `Files (editable)`, items: this.client._bind_edit(this.t_nodes) });
+    const tree = page.tree({ id: `tree1`, headertext: `Files (editable)`, items: this.client._bind(this.t_nodes) });
     tree._generic(`CustomTreeItem`).content().input({ value: `{TEXT}`, width: `24rem` });
     page._z2ui5().tree(`tree1`);
     this.client.view_display(view.stringify());

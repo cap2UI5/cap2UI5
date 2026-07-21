@@ -16,11 +16,11 @@ class z2ui5_cl_demo_app_078 extends z2ui5_if_app {
         .page({ id: `page_main`, title: `abap2UI5 - Multi Input (Select-Options)`, navbuttonpress: client._event_nav_app_leave(), shownavbutton: client.check_app_prev_stack() });
       view.message_strip({ text: `The multiinput_ext custom control extends a sap.m.MultiInput so that added and removed ` + `tokens are reported back to ABAP, where the token table and the linked list are updated.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
       view._z2ui5()
-        .multiinput_ext({ addedtokens: client._bind_edit(this.mt_tokens_added), removedtokens: client._bind_edit(this.mt_tokens_removed), change: client._event(`UPDATE_BACKEND`), multiinputid: `test` });
-      view.multi_input({ id: `test`, tokens: client._bind_edit(this.mt_token), showclearicon: true })
+        .multiinput_ext({ addedtokens: client._bind(this.mt_tokens_added), removedtokens: client._bind(this.mt_tokens_removed), change: client._event(`UPDATE_BACKEND`), multiinputid: `test` });
+      view.multi_input({ id: `test`, tokens: client._bind(this.mt_token), showclearicon: true })
         .tokens()
         .token({ key: `{KEY}`, text: `{TEXT}`, visible: `{VISIBLE}`, selected: `{SELKZ}`, editable: `{EDITABLE}` });
-      tab = view.table({ items: client._bind_edit(this.mt_token), mode: `MultiSelect` });
+      tab = view.table({ items: client._bind(this.mt_token), mode: `MultiSelect` });
       tab.columns().column().text(`KEY`).get_parent().column().text(`TEXT`);
       tab.items()
         .column_list_item({ selected: `{SELKZ}` })
