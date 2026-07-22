@@ -17,7 +17,7 @@ class z2ui5_cl_demo_app_448 extends z2ui5_if_app {
     switch (this.client.get().EVENT) {
       case `TOGGLE`:
         this.expanded = (!(this.expanded === true || this.expanded === `X`));
-        this.client.follow_up_action(z2ui5_if_client.cs_event.control_by_id, [`demoPanel`, ``, `setExpanded`, (this.expanded)]);
+        this.client.follow_up_action(z2ui5_if_client.cs_event.control_by_id, [`demoPanel`, `setExpanded`, (this.expanded)]);
         break;
     }
   }

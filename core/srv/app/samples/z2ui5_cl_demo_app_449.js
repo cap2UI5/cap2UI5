@@ -15,7 +15,7 @@ class z2ui5_cl_demo_app_449 extends z2ui5_if_app {
   on_event() {
     switch (this.client.get().EVENT) {
       case `OPEN`:
-        this.client.follow_up_action(z2ui5_if_client.cs_event.control_by_id, [`demoPdf`, ``, `open`]);
+        this.client.follow_up_action(z2ui5_if_client.cs_event.control_by_id, [`demoPdf`, `open`]);
         break;
     }
   }

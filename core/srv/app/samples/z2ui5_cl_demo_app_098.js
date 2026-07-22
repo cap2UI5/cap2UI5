@@ -71,7 +71,6 @@ class z2ui5_cl_demo_app_098 extends z2ui5_if_app {
           this.mv_layout = `ThreeColumnsEndExpanded`;
           this.mv_title = client.get_event_arg();
         }
-        client.nest_view_model_update();
         client.view_model_update();
         this.view_display_detail_detail();
         break;
@@ -89,7 +88,6 @@ class z2ui5_cl_demo_app_098 extends z2ui5_if_app {
           this.t_tab2.push(z2ui5_cl_util.abap_copy(ls_sel));
         }
         this.mv_layout = `TwoColumnsMidExpanded`;
-        client.nest_view_model_update();
         client.view_model_update();
         this.view_display_detail();
         break;

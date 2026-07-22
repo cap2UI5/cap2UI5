@@ -15,7 +15,7 @@ class z2ui5_cl_demo_app_465 extends z2ui5_if_app {
   on_event() {
     switch (this.client.get().EVENT) {
       case `TOGGLE`:
-        this.client.follow_up_action(z2ui5_if_client.cs_event.control_by_id, [`demoPopover`, ``, `toggleBy`, this.client.get_event_arg()]);
+        this.client.follow_up_action(z2ui5_if_client.cs_event.control_by_id, [`demoPopover`, `toggleBy`, this.client.get_event_arg()]);
         break;
     }
   }

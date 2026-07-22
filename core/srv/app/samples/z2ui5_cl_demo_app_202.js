@@ -31,8 +31,8 @@ class z2ui5_cl_demo_app_202 extends z2ui5_if_app {
     switch (client.get().EVENT) {
       case `STEP22`:
       case `STEP23`:
-        client.follow_up_action(z2ui5_if_client.cs_event.control_by_id, [`wiz`, `MAIN`, `discardProgress`, `STEP2`]);
-        client.follow_up_action(z2ui5_if_client.cs_event.control_by_id, [`STEP2`, `MAIN`, `setNextStep`, client.get().EVENT]);
+        client.follow_up_action(z2ui5_if_client.cs_event.control_by_id, [`wiz`, `discardProgress`, `STEP2`]);
+        client.follow_up_action(z2ui5_if_client.cs_event.control_by_id, [`STEP2`, `setNextStep`, client.get().EVENT]);
         break;
     }
     client.view_model_update();

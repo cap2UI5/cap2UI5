@@ -17,7 +17,7 @@ class z2ui5_cl_demo_app_065 extends z2ui5_if_app {
       .button({ text: `Rerender all`, press: client._event(`ALL`) })
       .button({ text: `Rerender Main without nest`, press: client._event(`MAIN`) })
       .button({ text: `Rerender only nested view`, press: client._event(`NEST`) })
-      .button({ text: `Update only nested MODEL (nest_view_model_update)`, press: client._event(`NEST_MODEL`) })
+      .button({ text: `Update only nested MODEL (view_model_update)`, press: client._event(`NEST_MODEL`) })
       .input(client._bind(this.mv_input_main));
     const lo_view_nested = z2ui5_cl_xml_view.factory()
       .page(`Nested View`)
@@ -43,7 +43,7 @@ class z2ui5_cl_demo_app_065 extends z2ui5_if_app {
       case `NEST_MODEL`:
         this.mv_count = this.mv_count + 1;
         this.mv_input_nest = `nest model updated #${this.mv_count}`;
-        client.nest_view_model_update();
+        client.view_model_update();
         break;
     }
   }

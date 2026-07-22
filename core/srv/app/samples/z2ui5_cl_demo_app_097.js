@@ -56,7 +56,7 @@ class z2ui5_cl_demo_app_097 extends z2ui5_if_app {
     switch (client.get().EVENT) {
       case `ROW_DELETE`:
         for (let _i = this.t_tab2.length - 1; _i >= 0; _i--) { const row = this.t_tab2[_i]; if (row.uuid === client.get_event_arg()) this.t_tab2.splice(_i, 1); }
-        client.nest_view_model_update();
+        client.view_model_update();
         break;
       case `SELCHANGE`:
         lt_sel = z2ui5_cl_util.abap_copy(this.t_tab);
@@ -71,7 +71,6 @@ class z2ui5_cl_demo_app_097 extends z2ui5_if_app {
         ls_sel.uuid = z2ui5_cl_sample_context.uuid_get_c32();
         this.t_tab2.push(z2ui5_cl_util.abap_copy(ls_sel));
         this.mv_layout = `TwoColumnsMidExpanded`;
-        client.nest_view_model_update();
         client.view_model_update();
         break;
     }

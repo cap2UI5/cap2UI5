@@ -13,7 +13,7 @@ class z2ui5_cl_demo_app_173 extends z2ui5_if_app {
     view.message_strip({ text: `This sample builds table columns and cells dynamically from a layout table ` + `using template repeat, plus a template if/then/else that re-renders on a switch.`, type: `Information`, showicon: true, class: `sapUiSmallMargin` });
     view.table(this.client._bind(this.mt_data))
       .columns()
-      .template_repeat({ list: `{template>/XX/MT_LAYOUT}`, var: `L0` })
+      .template_repeat({ list: `{template>/MT_LAYOUT}`, var: `L0` })
       .column({ mergeduplicates: `{L0>MERGE}`, visible: `{L0>VISIBLE}` })
       .text(`{L0>FNAME}`)
       .get_parent()
@@ -22,12 +22,12 @@ class z2ui5_cl_demo_app_173 extends z2ui5_if_app {
       .items()
       .column_list_item()
       .cells()
-      .template_repeat({ list: `{template>/XX/MT_LAYOUT}`, var: `L1` })
+      .template_repeat({ list: `{template>/MT_LAYOUT}`, var: `L1` })
       .object_identifier({ text: `{= '{' + \${L1>FNAME} + '}' }` });
     view.label(`IF Template (with re-rendering)`);
     view.switch({ state: this.client._bind(this.mv_flag), change: this.client._event(`CHANGE_FLAG`) });
     view = view.vbox();
-    view.template_if(`{template>/XX/MV_FLAG}`)
+    view.template_if(`{template>/MV_FLAG}`)
       .template_then()
       .icon({ src: `sap-icon://accept`, color: `green` })
       .get_parent()
