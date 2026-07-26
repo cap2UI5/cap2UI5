@@ -1,6 +1,18 @@
 {
-    "scopes": [],
-    "attributes": [],
-    "role-templates": []
-  }
-  
+  "scopes": [
+    {
+      "name": "$XSAPPNAME.User",
+      "description": "Use the z2ui5 application"
+    }
+  ],
+  "attributes": [],
+  "role-templates": [
+    {
+      "name": "User",
+      "description": "z2ui5 application user",
+      "scope-references": [
+        "$XSAPPNAME.User"
+      ]
+    }
+  ]
+}

@@ -436,12 +436,13 @@ class z2ui5_cl_core_handler {
       let lo_ajson = z2ui5_cl_ajson.parse(val);
       const lv_root = lo_ajson.exists(`/value`) === true ? `/value` : ``;
 
-      // /XX model slice → o_model (an ajson holding /XX/…)
-      const xxPath = `/XX`;
-      const lo_model = lo_ajson.slice(`${lv_root}${xxPath}`);
-      const modelArgs = { ev_container: null };
-      const xxVal = lo_model.mt_json_tree.length ? lo_model.to_abap(modelArgs) : null;
-      result.o_model = z2ui5_cl_ajson.parse(JSON.stringify(xxVal !== null ? { XX: xxVal } : {}));
+      // The whole view model is transported under the MODEL container (sliced
+      // to root, so bound paths like /NAME resolve directly). Upstream
+      // request_parse_body: result-o_model = lo_ajson->slice( lv_root && '/MODEL' ).
+      result.o_model = lo_ajson.slice(`${lv_root}/MODEL`);
+      if (!result.o_model.mt_json_tree.length) {
+        result.o_model = z2ui5_cl_ajson.create_empty();
+      }
 
       lo_ajson = lo_ajson.slice(`${lv_root}/S_FRONT`);
 

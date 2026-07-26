@@ -29,7 +29,20 @@ const z2ui5_cl_core_srv_model  = require("./z2ui5_cl_core_srv_model");
 class z2ui5_cl_core_app {
 
   // ---- in-memory buffer (mirrors abap CLASS-DATA mt_buffer) ----
+  // Bounded, unlike the ABAP CLASS-DATA: this buffer caches every loaded draft
+  // by id for the life of the process. The draft TABLE is pruned by retention,
+  // but this heap-side buffer is not, so without a cap it grows unbounded in a
+  // long-running server. Evict the oldest entry (insertion order) when full.
   static _mt_buffer = new Map();   // id → core_app instance
+  static _mt_buffer_max = 1000;
+
+  static _buffer_set(id, r) {
+    z2ui5_cl_core_app._mt_buffer.delete(id);
+    z2ui5_cl_core_app._mt_buffer.set(id, r);
+    while (z2ui5_cl_core_app._mt_buffer.size > z2ui5_cl_core_app._mt_buffer_max) {
+      z2ui5_cl_core_app._mt_buffer.delete(z2ui5_cl_core_app._mt_buffer.keys().next().value);
+    }
+  }
 
   constructor() {
     this.mo_app    = null;
@@ -114,7 +127,7 @@ class z2ui5_cl_core_app {
       const ls_db = new DB().read_draft(id);
       const r = z2ui5_cl_core_app.all_xml_parse(ls_db.data);
       r.ms_draft.id = String(id ?? ``);
-      z2ui5_cl_core_app._mt_buffer.set(id, r);
+      z2ui5_cl_core_app._buffer_set(id, r);
       return r;
     } catch { /* not in the draft table — try the async platform store */ }
     return (async () => {
@@ -123,7 +136,7 @@ class z2ui5_cl_core_app {
       const r = new z2ui5_cl_core_app();
       r.mo_app = oApp;
       r.ms_draft.id = id;
-      z2ui5_cl_core_app._mt_buffer.set(id, r);
+      z2ui5_cl_core_app._buffer_set(id, r);
       return r;
     })();
   }

@@ -1,3 +1,4 @@
+const { AsyncLocalStorage } = require("async_hooks");
 const z2ui5_cl_util = require("../00/03/z2ui5_cl_util");
 const z2ui5_if_exit = require("./z2ui5_if_exit");
 
@@ -20,17 +21,41 @@ const z2ui5_if_exit = require("./z2ui5_if_exit");
  */
 class z2ui5_cl_exit {
 
-  // CLASS-DATA gi_me / gi_user_exit / context  →  static instance state
+  // CLASS-DATA gi_me / gi_user_exit  →  static instance state. gi_me and the
+  // user-exit instance are effectively immutable config (resolved once), so
+  // they stay process-global like the ABAP CLASS-DATA.
   static _gi_me = null;
   static _gi_user_exit = null;
+
+  // The per-request HTTP context, on the other hand, MUST NOT be process
+  // global: roundtrip() is async, so two interleaved requests would otherwise
+  // clobber each other's context (a user exit could read the wrong request's
+  // params). It is isolated per async execution via AsyncLocalStorage; the
+  // static field is only the fallback for synchronous / non-request callers
+  // (e.g. bootstrap_html, direct unit tests).
+  static _als = new AsyncLocalStorage();
   static _context = {};
+
+  /** Run `fn` inside a fresh per-request context (see _als above). */
+  static run_in_request(fn) {
+    return z2ui5_cl_exit._als.run({ context: {} }, fn);
+  }
+
+  /** The active request context — the async-local one if inside a request,
+   *  else the static fallback. */
+  static _get_context() {
+    const store = z2ui5_cl_exit._als.getStore();
+    return store ? store.context : z2ui5_cl_exit._context;
+  }
 
   static init_context(http_info) {
     const ctx = { ...(http_info || {}) };
     const params = http_info?.t_params || [];
     const ent = params.find((p) => p?.n === `app_start`);
     ctx.app_start = ent?.v || ``;
-    z2ui5_cl_exit._context = ctx;
+    const store = z2ui5_cl_exit._als.getStore();
+    if (store) store.context = ctx;
+    else z2ui5_cl_exit._context = ctx;
   }
 
   static get_instance() {
@@ -58,7 +83,11 @@ class z2ui5_cl_exit {
   static get_user_exit_class() {
     try {
       const exits = z2ui5_cl_util.rtti_get_classes_impl_intf(z2ui5_if_exit)
-        .filter((e) => e.classname?.toLowerCase() !== `z2ui5_cl_exit`);
+        .filter((e) => e.classname?.toLowerCase() !== `z2ui5_cl_exit`)
+        // The chosen exit controls the CSP and all security headers, so the
+        // winner must not depend on filesystem walk order when more than one
+        // exists — pick deterministically by name.
+        .sort((a, b) => String(a.classname).localeCompare(String(b.classname)));
       return exits[0]?.classname || ``;
     } catch {
       return ``;
@@ -130,7 +159,7 @@ class z2ui5_cl_exit {
     ];
 
     if (z2ui5_cl_exit._gi_user_exit) {
-      const ctx = is_context ?? z2ui5_cl_exit._context;
+      const ctx = is_context ?? z2ui5_cl_exit._get_context();
       const ret = z2ui5_cl_exit._gi_user_exit.set_config_http_get(ctx, cs_config);
       // ABAP CHANGING semantics — mutation in place is canonical, but accept
       // a returned object too for JS ergonomics.
@@ -160,7 +189,7 @@ class z2ui5_cl_exit {
     cs_config.draft_exp_time_in_hours = 4;
 
     if (z2ui5_cl_exit._gi_user_exit) {
-      const ctx = is_context ?? z2ui5_cl_exit._context;
+      const ctx = is_context ?? z2ui5_cl_exit._get_context();
       const ret = z2ui5_cl_exit._gi_user_exit.set_config_http_post(ctx, cs_config);
       if (ret && typeof ret === "object") cs_config = ret;
     }

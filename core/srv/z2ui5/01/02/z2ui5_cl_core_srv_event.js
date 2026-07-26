@@ -32,12 +32,13 @@ class z2ui5_cl_core_srv_event {
    * client call: `<container>, <SLOT>, to, <target>`.
    */
   get_event_client(a) {
-    const { val = ``, t_arg = [] } =
+    const { val = ``, view, t_arg = [] } =
       a !== null && typeof a === `object` && !Array.isArray(a) ? a : { val: a ?? `` };
     let lv_val = String(val);
-    let lt_arg = Array.isArray(t_arg) ? t_arg : t_arg ? [t_arg] : [];
+    const orig = Array.isArray(t_arg) ? t_arg : t_arg ? [t_arg] : [];
+    let lt_arg = [...orig];
 
-    const cs_event = require(`../../02/z2ui5_if_client`).cs_event;
+    const { cs_event, cs_view } = require(`../../02/z2ui5_if_client`);
     const lv_slot =
       lv_val === cs_event.nav_container_to         ? `MAIN`
       : lv_val === cs_event.nest_nav_container_to    ? `NEST`
@@ -46,8 +47,19 @@ class z2ui5_cl_core_srv_event {
       : lv_val === cs_event.popover_nav_container_to ? `POPOVER`
       : ``;
     if (lv_slot) {
-      lt_arg = [lt_arg[0] ?? ``, lv_slot, `to`, lt_arg[1] ?? ``];
+      // NavContainer navigation reuses the generic control_by_id call:
+      // <container>, <slot>, to, <target>.
+      lt_arg = [orig[0] ?? ``, lv_slot, `to`, orig[1] ?? ``];
       lv_val = cs_event.control_by_id;
+    } else if (lv_val === cs_event.control_by_id) {
+      // The view is passed as its own parameter now (DEFAULT cs_view-main),
+      // injected as the slot at position 2 so the frontend reads
+      // args = id, view, method, … . cs_view-main maps to the empty slot
+      // (the unchanged cross-view resolveById default); a concrete view
+      // scopes the id lookup to that slot.
+      const lv_view = view == null ? cs_view.main : String(view);
+      const lv_view_slot = lv_view === cs_view.main ? `` : lv_view;
+      lt_arg.splice(1, 0, lv_view_slot);
     }
 
     return `.eF('${lv_val}'${this.get_t_arg(lt_arg)}`;
@@ -61,7 +73,7 @@ class z2ui5_cl_core_srv_event {
     let result = ``;
     let pending = ``;
     for (const a of Array.isArray(val) ? val : []) {
-      const lv = String(a ?? ``);
+      let lv = String(a ?? ``);
       if (!lv) {
         // an empty argument between filled ones must keep its position —
         // dropping it would shift every following argument into the wrong
@@ -71,8 +83,17 @@ class z2ui5_cl_core_srv_event {
         pending = `${pending}, ''`;
         continue;
       }
-      const quoted = lv[0] !== `$` && lv[0] !== `{` && !lv.startsWith(`.eB(`) ? `'${lv}'` : lv;
-      result = `${result}${pending}, ${quoted}`;
+      // A bare positional placeholder ({0}, {1?a:b}, …) is a plain string, not
+      // a binding/object literal, so it must still be quoted — the `{`-raw
+      // exception is only for real bindings like {/PATH} or {..}. {0/field}
+      // (relative binding) keeps a `/` after the digits and stays raw.
+      const lv_is_placeholder = /^\{[0-9]+[?}]/.test(lv);
+      if ((lv[0] !== `$` && lv[0] !== `{` && !lv.startsWith(`.eB(`)) || lv_is_placeholder) {
+        // A quoted arg is JS string source; escape only an embedded ' so it
+        // cannot close the '…' wrapper (a backslash escape like \n stays).
+        lv = `'${lv.replace(/'/g, `\\'`)}'`;
+      }
+      result = `${result}${pending}, ${lv}`;
       pending = ``;
     }
     return `${result})`;

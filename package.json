@@ -43,8 +43,19 @@
       "destinations": true,
       "html5-repo": true,
       "workzone": true,
-      "[production]": {
-        "auth": false
+      "auth": {
+        "[production]": "xsuaa",
+        "[development]": {
+          "kind": "mocked",
+          "users": {
+            "alice": {
+              "password": "alice",
+              "roles": [
+                "authenticated-user"
+              ]
+            }
+          }
+        }
       }
     }
   },

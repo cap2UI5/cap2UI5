@@ -51,13 +51,18 @@ class z2ui5_cl_core_srv_draft {
     const parsed = JSON.parse(data);
 
     if (parsed.__className) {
-      // Registry first (covers bundled/browser builds and registered
-      // external apps), file require as fallback.
-      let AppClass = z2ui5_cl_util.rtti_get_class(parsed.__className);
+      // Never trust the persisted __className / __filePath as a require()
+      // target: a draft row is attacker-influenced once the draft table is
+      // reachable, so a crafted __filePath would otherwise load an arbitrary
+      // module. Validate the class name and resolve it strictly by name
+      // through the framework's own folders (registry first, then the
+      // well-known on-disk locations) — __filePath is ignored.
+      if (!z2ui5_cl_util._is_safe_class_name(parsed.__className)) {
+        throw new Error(`Refusing to deserialize draft: unsafe class name`);
+      }
+      const AppClass = z2ui5_cl_core_srv_draft.findAppClass(parsed.__className);
       if (!AppClass) {
-        const modulePath = parsed.__filePath || `../../02/${parsed.__className}`;
-        const resolvedPath = path.resolve(__dirname, modulePath);
-        AppClass = require(resolvedPath);
+        throw new Error(`Draft class not found: ${parsed.__className}`);
       }
       const oApp = new AppClass();
       delete parsed.__className;
@@ -79,6 +84,10 @@ class z2ui5_cl_core_srv_draft {
   static async saveApp(oApp, previousId = null) {
     const generatedId = require("crypto").randomUUID();
 
+    // A persistence failure must NOT be swallowed: returning the generated id
+    // anyway hands the client a draft id that points at a row which was never
+    // written, so the failure only resurfaces one roundtrip later as a
+    // confusing NO_DRAFT_ENTRY_OF_PREVIOUS_REQUEST_FOUND. Surface it now.
     try {
       await this._save({
         id: generatedId,
@@ -87,6 +96,7 @@ class z2ui5_cl_core_srv_draft {
       });
     } catch (e) {
       console.error("DB saveApp error:", e.message);
+      throw e;
     }
 
     return generatedId;

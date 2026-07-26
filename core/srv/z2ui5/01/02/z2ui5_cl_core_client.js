@@ -394,14 +394,15 @@ class z2ui5_cl_core_client {
    * Multiple calls accumulate — frontend executes them in order after the response.
    * Prefer the dedicated convenience methods below where available.
    */
-  follow_up_action(val, t_arg) {
-    if (val !== null && typeof val === `object` && `val` in val) ({ val, t_arg } = val);
+  follow_up_action(val, t_arg, view) {
+    if (val !== null && typeof val === `object` && `val` in val) ({ val, t_arg, view } = val);
     if (this.mo_action) {
-      // ABAP: a bare event name is routed through get_event_client, raw JS
-      // snippets pass through unchanged
+      // ABAP: a bare event name is routed through get_event_client (which now
+      // injects the separate `view` slot for control_by_id), raw JS snippets
+      // pass through unchanged
       let lv_js = val ?? ``;
       if (lv_js && /^[A-Za-z0-9_]+$/.test(String(lv_js))) {
-        lv_js = this.mo_srv_event.get_event_client({ val: lv_js, t_arg: t_arg ?? [] });
+        lv_js = this.mo_srv_event.get_event_client({ val: lv_js, view, t_arg: t_arg ?? [] });
       }
       this._s_set.s_follow_up_action.custom_js.push(lv_js);
       return;

@@ -14,6 +14,11 @@ const cds = require("@sap/cds");
 
 const { GET, POST } = cds.test(path.join(__dirname, ".."));
 
+// The z2ui5 roundtrip action and the AdminService are now restricted to
+// authenticated users (see z2ui5-service.cds). Under the mocked dev auth the
+// requests run as the configured user (package.json cds.requires.auth).
+const AUTH = { auth: { username: "alice", password: "alice" } };
+
 const roundtripBody = {
   value: {
     S_FRONT: {
@@ -37,7 +42,7 @@ describe("minimal starter — frontend / service / database", () => {
   });
 
   test("(2) roundtrip POST returns the startup app, a draft id and view XML", async () => {
-    const { status, data } = await POST("/rest/root/z2ui5", roundtripBody);
+    const { status, data } = await POST("/rest/root/z2ui5", roundtripBody, AUTH);
     expect(status).toBe(200);
     expect(data.S_FRONT.APP).toBe("z2ui5_cl_app_startup");
     expect(data.S_FRONT.ID).toMatch(/^[0-9a-f-]{36}$/);
@@ -45,15 +50,24 @@ describe("minimal starter — frontend / service / database", () => {
   });
 
   test("(3) every roundtrip persists a draft row in cap2ui5.z2ui5_t_01", async () => {
-    const before = Number((await GET("/odata/v4/admin/z2ui5_t_01/$count")).data);
+    const before = Number((await GET("/odata/v4/admin/z2ui5_t_01/$count", AUTH)).data);
 
-    const { data } = await POST("/rest/root/z2ui5", roundtripBody);
+    const { data } = await POST("/rest/root/z2ui5", roundtripBody, AUTH);
 
-    const after = Number((await GET("/odata/v4/admin/z2ui5_t_01/$count")).data);
+    const after = Number((await GET("/odata/v4/admin/z2ui5_t_01/$count", AUTH)).data);
     expect(after).toBe(before + 1);
 
-    const row = await GET(`/odata/v4/admin/z2ui5_t_01(${data.S_FRONT.ID})`);
+    const row = await GET(`/odata/v4/admin/z2ui5_t_01(${data.S_FRONT.ID})`, AUTH);
     expect(row.status).toBe(200);
     expect(row.data.data).toContain("z2ui5_cl_app_startup");
+  });
+
+  test("(4) the roundtrip and the draft table reject unauthenticated access", async () => {
+    await expect(POST("/rest/root/z2ui5", roundtripBody)).rejects.toMatchObject({
+      response: { status: 401 },
+    });
+    await expect(GET("/odata/v4/admin/z2ui5_t_01/$count")).rejects.toMatchObject({
+      response: { status: 401 },
+    });
   });
 });

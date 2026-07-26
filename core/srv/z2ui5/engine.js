@@ -28,41 +28,68 @@ const z2ui5_cl_util           = require("./00/03/z2ui5_cl_util");
 const z2ui5_port              = require("./z2ui5_port");
 const z2ui5_asset             = require("./z2ui5_asset");
 
-// Sticky-handler slot — same semantics as abap CLASS-DATA so_sticky_handler:
+// Sticky-handler store — same intent as abap CLASS-DATA so_sticky_handler:
 // an app that sets check_sticky keeps its handler (and app state) across
-// roundtrips instead of being re-hydrated from the draft store.
-let _sticky_handler = null;
+// roundtrips instead of being re-hydrated from the draft store. A sticky
+// handler holds full app state, so a SINGLE process-global slot would leak
+// one user's state into every other user's request in a multi-user
+// deployment. It is therefore keyed per session (reqInfo.session_id, e.g. the
+// authenticated user/tenant) and bounded. When no session key is supplied
+// (the single-user demo adapters) everything shares one key — the previous
+// behaviour — but the isolation seam is in place for real deployments.
+const STICKY_MAX = 500;
+const _sticky_handlers = new Map();
+
+function _sticky_key(reqInfo) {
+  return reqInfo?.session_id || reqInfo?.tenant || `__global__`;
+}
+
+function _sticky_set(key, handler) {
+  _sticky_handlers.delete(key);
+  if (handler) {
+    _sticky_handlers.set(key, handler);
+    // Bound the store — evict the oldest session (insertion order) when full.
+    while (_sticky_handlers.size > STICKY_MAX) {
+      _sticky_handlers.delete(_sticky_handlers.keys().next().value);
+    }
+  }
+}
 
 /**
  * The z2ui5 roundtrip — mirrors abap _http_post.
  *
  * @param oBody   parsed request body (object) or raw JSON string
- * @param reqInfo optional { method, body, path, t_params:[{n,v}] } — passed to
- *                cl_exit so user exits see the request; omit for defaults.
+ * @param reqInfo optional { method, body, path, t_params:[{n,v}], session_id }
+ *                — passed to cl_exit so user exits see the request; session_id
+ *                (when present) isolates sticky app state per user/tenant.
  * @returns response JSON as string (the exact wire payload)
  */
 async function roundtrip(oBody, reqInfo) {
-  if (reqInfo) z2ui5_cl_exit.init_context(reqInfo);
+  // Isolate the exit's request context per async execution so interleaved
+  // roundtrips can't clobber each other's context.
+  return z2ui5_cl_exit.run_in_request(async () => {
+    if (reqInfo) z2ui5_cl_exit.init_context(reqInfo);
 
-  let oHandler;
-  if (_sticky_handler) {
-    oHandler = _sticky_handler;
-    oHandler.mv_request_json = typeof oBody === `string` ? oBody : JSON.stringify(oBody ?? {});
-  } else {
-    oHandler = new z2ui5_cl_core_handler(oBody);
-  }
+    const stickyKey = _sticky_key(reqInfo);
+    let oHandler = _sticky_handlers.get(stickyKey);
+    if (oHandler) {
+      oHandler.mv_request_json = typeof oBody === `string` ? oBody : JSON.stringify(oBody ?? {});
+    } else {
+      oHandler = new z2ui5_cl_core_handler(oBody);
+    }
 
-  const responseJson = await oHandler.main();
+    const responseJson = await oHandler.main();
 
-  // Refresh the sticky slot from the app's check_sticky flag.
-  try {
-    const li_app = oHandler?.mo_action?.mo_app?.mo_app;
-    _sticky_handler = li_app?.check_sticky === true ? oHandler : null;
-  } catch {
-    _sticky_handler = null;
-  }
+    // Refresh the sticky slot for this session from the app's check_sticky flag.
+    try {
+      const li_app = oHandler?.mo_action?.mo_app?.mo_app;
+      _sticky_set(stickyKey, li_app?.check_sticky === true ? oHandler : null);
+    } catch {
+      _sticky_set(stickyKey, null);
+    }
 
-  return responseJson;
+    return responseJson;
+  });
 }
 
 /**
@@ -119,6 +146,6 @@ module.exports = {
   WEBAPP_DIR: z2ui5_asset.WEBAPP_DIR,
   ui5_resources_dir,
 
-  /** Test-only — clear the sticky-handler slot between test cases. */
-  _reset_sticky: () => { _sticky_handler = null; },
+  /** Test-only — clear the sticky-handler store between test cases. */
+  _reset_sticky: () => { _sticky_handlers.clear(); },
 };

@@ -22,7 +22,9 @@ describe("NorthwindCustomers remote proxy", () => {
       return orig.call(this, name, ...rest);
     };
     try {
-      const res = await GET("/odata/v4/admin/NorthwindCustomers");
+      const res = await GET("/odata/v4/admin/NorthwindCustomers", {
+        auth: { username: "alice", password: "alice" },
+      });
       expect(res.status).toBe(200);
       expect(res.data.value.map((r) => r.CustomerID)).toEqual(["ALFKI", "ANATR"]);
       expect(res.data.value[0].CompanyName).toBe("Alfreds Futterkiste");

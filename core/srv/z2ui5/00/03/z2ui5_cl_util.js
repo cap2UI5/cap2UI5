@@ -569,6 +569,18 @@ class z2ui5_cl_util {
     return `${origin}${pathname}${searchPart}${appPart}${hashPart}`;
   }
 
+  /**
+   * Guard for dynamic class resolution. ABAP class/interface names are
+   * `[A-Z0-9_]` only, so any name carrying a path separator, a dot or any
+   * other character is never a real class — and must never reach
+   * path.join()+require(). Without this a `../` in a client-controlled
+   * `?app_start=` parameter (URL-decoded upstream) would traverse out of the
+   * app folders and require() an arbitrary lowercase .js file on disk.
+   */
+  static _is_safe_class_name(name) {
+    return typeof name === "string" && /^[a-z0-9_]+$/i.test(name);
+  }
+
   /** Returns true if a class file exists in the well-known app folders. */
   static rtti_check_class_exists(className) {
     if (z2ui5_cl_util._registered_classes.has(String(className).toLowerCase())) return true;
@@ -608,6 +620,8 @@ class z2ui5_cl_util {
       const registered = z2ui5_cl_util._registered_classes.get(lower);
       if (registered) {
         intf = registered;
+      } else if (!z2ui5_cl_util._is_safe_class_name(intf)) {
+        return [];
       } else {
         const candidates = [
           path.join(__dirname, "../../02", `${lower}.js`),
@@ -748,6 +762,10 @@ class z2ui5_cl_util {
   }
 
   static _findClassFile(className) {
+    // Reject anything that is not a bare ABAP-style class name before it can
+    // reach path.join()+require() (path-traversal guard, see
+    // _is_safe_class_name).
+    if (!z2ui5_cl_util._is_safe_class_name(className)) return null;
     const file = `${className}.js`;
     for (const dir of z2ui5_cl_util._app_dirs()) {
       const direct = path.join(dir, file);

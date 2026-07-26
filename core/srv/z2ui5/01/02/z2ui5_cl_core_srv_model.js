@@ -311,6 +311,11 @@ class z2ui5_cl_core_srv_model {
       name_client: ``,
       name_parent: ``,
       name_ref: ``,
+      // Upstream ty_s_attri replaced the bind_type/view discriminator with a
+      // single boolean `bind`. Carry both: `bind` mirrors the current upstream
+      // shape (the ABAP-mirror instance methods gate on it), `bind_type`/`view`
+      // stay for the port's own static runtime binding path.
+      bind: false,
       bind_type: ``,
       srtti_data: ``,
       check_dissolved: false,
@@ -401,12 +406,16 @@ class z2ui5_cl_core_srv_model {
 
   /** Drop transient attrs, dissolve again, restore bind metadata. */
   main_attri_refresh() {
-    const old = this.mt_attri.value.filter((a) => a.bind_type);
+    // Preserve rows bound via either the upstream boolean `bind` (the
+    // ABAP-mirror path) or the port's own `bind_type` (the static runtime
+    // binding path), and restore both markers so neither consumer loses state.
+    const old = this.mt_attri.value.filter((a) => a.bind || a.bind_type);
     this.mt_attri.value.length = 0;
     this.dissolve();
     for (const attri of this.mt_attri.value) {
       const prev = old.find((a) => a.name === attri.name);
       if (prev) {
+        attri.bind        = prev.bind;
         attri.bind_type   = prev.bind_type;
         attri.name_client = prev.name_client;
         attri.view        = prev.view;
@@ -595,11 +604,17 @@ class z2ui5_cl_core_srv_model {
   main_json_to_attri(a, b) {
     let view;
     let model;
-    if (a !== null && typeof a === `object` && b === undefined && (`model` in a || `view` in a)) {
-      ({ view, model } = a);
-    } else {
+    if (b !== undefined) {
+      // legacy positional (view, model)
       view = a;
       model = b;
+    } else if (a !== null && typeof a === `object` && (`model` in a || `view` in a)) {
+      // named form { model } / { view, model }
+      ({ view, model } = a);
+    } else {
+      // Upstream dropped the view parameter (it left ty_s_attri): the model
+      // is now passed as the single positional argument.
+      model = a;
     }
     if (!model) return;
     if (typeof model.slice !== `function`) {
@@ -608,11 +623,10 @@ class z2ui5_cl_core_srv_model {
       return;
     }
 
-    const lv_view = this.mt_attri.value.some((x) => x.view === view) ? view : `MAIN`;
-
     for (const lr_attri of this._attri_sorted()) {
-      if (lr_attri.bind_type !== z2ui5_if_core_types.cs_bind_type.two_way) continue;
-      if (lr_attri.view !== lv_view) continue;
+      // Upstream main_json_to_attri now loops WHERE bind = abap_true (no
+      // view/two-way filter — those fields left ty_s_attri).
+      if (!lr_attri.bind) continue;
       try {
         let lo_val_front = model.slice(lr_attri.name_client);
         if (!lo_val_front || (Array.isArray(lo_val_front.mt_json_tree) && lo_val_front.mt_json_tree.length === 0)) {
@@ -653,7 +667,8 @@ class z2ui5_cl_core_srv_model {
   main_json_stringify() {
     const result = {};
     for (const attri of this._attri_sorted()) {
-      if (!attri.bind_type) continue;
+      // Upstream loops WHERE bind = abap_true AND type_kind <> dref/oref.
+      if (!attri.bind) continue;
       if (attri.type_kind === TK.dref || attri.type_kind === TK.oref) continue;
       let acc;
       try { acc = this._attri_accessor(attri.name); } catch { continue; }

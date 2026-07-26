@@ -202,10 +202,20 @@ class z2ui5_cl_core_srv_bind {
    * (client, val, type, config) keeps routing through the static wire path.
    */
   main(a, b, c, d) {
-    if (!(a !== null && typeof a === `object` && b === undefined && `type` in a && `val` in a)) {
+    // Call forms:
+    //   main(value)                     — instance, positional val
+    //   main({ val[, config] })         — instance, named args (config given)
+    //   main(client, val, type, config) — legacy static wire form (b defined)
+    // Upstream removed the one-way/two-way `type` parameter from main, so the
+    // transpiled callers now pass the bound value positionally (or
+    // { val, config } when a config is supplied). The legacy wire form always
+    // passes `val` as `b`, so a defined `b` alone identifies it.
+    if (b !== undefined) {
       return this._main_legacy(a, b, c, d);
     }
-    const { val, type, config = {} } = a;
+    const isNamed = a !== null && typeof a === `object` && !Array.isArray(a)
+      && `val` in a && Object.keys(a).every((k) => k === `val` || k === `config` || k === `type`);
+    const { val, type, config = {} } = isNamed ? a : { val: a };
 
     // config-tab bound and filled → cell-level binding
     if (Array.isArray(config.tab) && config.tab.length > 0) {
@@ -241,11 +251,8 @@ class z2ui5_cl_core_srv_bind {
     }
     let result = this.mr_attri.name_client;
 
-    if (result === `/${z2ui5_if_core_types.cs_ui5.two_way_model}`) {
-      throw new z2ui5_cx_util_error(
-        `<p>Name of variable not allowed - XX is a reserved word - use another name for your attribute`
-      );
-    }
+    // (Upstream removed the reserved-word guard on an attribute literally
+    // named XX — it now binds normally to {/XX}.)
 
     if (this.ms_config.switch_default_model === true) result = `http>${result}`;
     if (!this.ms_config.path_only) result = `{${result}}`;
@@ -254,10 +261,12 @@ class z2ui5_cl_core_srv_bind {
 
   /** abap main_cell — binds the table (path only), then the cell inside it. */
   main_cell(a, b, c, d) {
-    if (!(a !== null && typeof a === `object` && b === undefined && `type` in a && `val` in a)) {
+    if (b !== undefined) {
       return this._main_legacy(a, b, c, d);
     }
-    const { val, type, config = {} } = a;
+    const isNamed = a !== null && typeof a === `object` && !Array.isArray(a)
+      && `val` in a && Object.keys(a).every((k) => k === `val` || k === `config` || k === `type`);
+    const { val, type, config = {} } = isNamed ? a : { val: a };
     this.ms_config = config;
 
     const lo_bind = new z2ui5_cl_core_srv_bind(this.mo_app);
