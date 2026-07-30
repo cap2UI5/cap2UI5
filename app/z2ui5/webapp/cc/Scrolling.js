@@ -1,16 +1,12 @@
 sap.ui.define(
-  [
-    "sap/ui/core/Control",
-    "z2ui5/core/Lib",
-    "z2ui5/core/ViewSlots",
-    "z2ui5/core/AppState",
-  ],
-  (Control, Lib, ViewSlots, AppState) => {
+  ["sap/ui/core/Control", "z2ui5/core/Lib", "z2ui5/core/ViewSlots"],
+  (Control, Lib, ViewSlots) => {
     "use strict";
 
     // Invisible control that saves the scroll positions of the controls
     // listed in `items` into the model before each roundtrip and restores
     // them after the next rendering.
+    // OBSOLETE: replaced by cs_event-scroll_to / cs_event-scroll_into_view - kept for backward compatibility.
     return Control.extend("z2ui5.cc.Scrolling", {
       metadata: {
         properties: {
@@ -48,17 +44,19 @@ sap.ui.define(
         const items = this.getProperty("items");
         if (!items) return;
         try {
-          // Resolve the binding path so we can mark only changed entries
-          // as dirty in xxChangedPaths.
+          // Resolve the binding path so we can mark only changed entries dirty.
           const bindingInfo = this.getBindingInfo("items");
           const bindingPath =
             bindingInfo?.parts?.[0]?.path ?? bindingInfo?.path;
+          // Mark changed entries dirty on THIS control's own model - the same
+          // per-model set View1 ships as the delta - not a shared global set.
+          const changedPaths = this.getModel()?._z2ui5ChangedPaths;
           for (const [index, item] of items.entries()) {
             const scrollTop = this._getScrollTop(item);
             if (item.V !== scrollTop) {
               item.V = scrollTop;
-              if (bindingPath) {
-                AppState.state.xxChangedPaths.add(`${bindingPath}/${index}/V`);
+              if (bindingPath && changedPaths) {
+                changedPaths.add(`${bindingPath}/${index}/V`);
               }
             }
           }
@@ -115,10 +113,7 @@ sap.ui.define(
       renderer: {
         apiVersion: 2,
         render(oRm, oControl) {
-          oRm.openStart("span", oControl);
-          oRm.style("display", "none");
-          oRm.openEnd();
-          oRm.close("span");
+          Lib.renderInvisibleSpan(oRm, oControl);
 
           if (!oControl.getProperty("setUpdate")) return;
           oControl.setProperty("setUpdate", false, true);

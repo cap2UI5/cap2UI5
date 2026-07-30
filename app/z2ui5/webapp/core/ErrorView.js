@@ -85,6 +85,36 @@ sap.ui.define(["z2ui5/core/AppState"], (AppState) => {
       : preview;
   }
 
+  // Copy text to the clipboard, working both in a secure (HTTPS) context and
+  // over plain HTTP - the latter is common for on-premise ABAP systems, where
+  // the async navigator.clipboard API is unavailable. A hidden <textarea> plus
+  // the classic execCommand("copy") works everywhere, so try it first and only
+  // fall back to the async API when it did not copy. Returns nothing - copying
+  // is best-effort and must never throw out of a fatal-error dialog.
+  function copyToClipboard(text) {
+    const value = String(text == null ? "" : text);
+    let copied;
+    const textarea = document.createElement("textarea");
+    textarea.value = value;
+    // Keep it out of view and out of the layout flow while it is selected.
+    textarea.style.cssText =
+      "position:fixed;top:-9999px;left:-9999px;opacity:0;";
+    textarea.setAttribute("readonly", "");
+    document.body.appendChild(textarea);
+    try {
+      textarea.focus();
+      textarea.select();
+      textarea.setSelectionRange(0, value.length);
+      copied = document.execCommand("copy");
+    } catch {
+      copied = false;
+    }
+    textarea.remove();
+    if (!copied && navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(value).catch(() => {});
+    }
+  }
+
   function createContainer() {
     // Always start from a fresh element: reusing a previous overlay would
     // keep its keydown focus-trap listener alive and stack a duplicate on
@@ -174,6 +204,22 @@ sap.ui.define(["z2ui5/core/AppState"], (AppState) => {
         type: "Emphasized",
         press: () => window.location.reload(),
       });
+      // Copy the full error text (not just the shown preview) to the clipboard
+      // so the user can paste it into a ticket or chat. Briefly flip the label
+      // to "Copied" as feedback, then restore it (guarding against a dialog
+      // that was closed in the meantime).
+      const copyButton = new Button({
+        text: "Copy",
+        press: () => {
+          copyToClipboard(details);
+          copyButton.setText("Copied");
+          setTimeout(() => {
+            if (!copyButton.bIsDestroyed) copyButton.setText("Copy");
+          }, 1500);
+        },
+      });
+      // sap.m.Dialog does not allow more than one begin/end button, so use the
+      // `buttons` aggregation to line up Details / Copy / Restart in the footer.
       const dialog = new Dialog({
         title: title || "Application Error",
         type: "Message",
@@ -181,17 +227,20 @@ sap.ui.define(["z2ui5/core/AppState"], (AppState) => {
         icon: "sap-icon://message-error",
         // Escape must not dismiss the fatal-error popup: rejecting the escape
         // promise keeps it open, so the only ways out are the explicit
-        // Details / Restart actions below.
+        // Details / Copy / Restart actions below.
         escapeHandler: (oPromise) => oPromise.reject(),
         content: [new Text({ text: message })],
-        beginButton: new Button({
-          text: "Details",
-          press: () => {
-            dialog.close();
-            openDeveloperTools();
-          },
-        }),
-        endButton: restartButton,
+        buttons: [
+          new Button({
+            text: "Details",
+            press: () => {
+              dialog.close();
+              openDeveloperTools();
+            },
+          }),
+          copyButton,
+          restartButton,
+        ],
         initialFocus: restartButton,
         afterClose: () => {
           if (friendlyDialog === dialog) friendlyDialog = null;
@@ -229,6 +278,33 @@ sap.ui.define(["z2ui5/core/AppState"], (AppState) => {
     }
   }
 
+  // showFriendlyDialog only succeeds when sap.m.Dialog/Button/Text are already
+  // loaded, because it resolves them with the synchronous sap.ui.require (which
+  // returns undefined for a not-yet-loaded module). This kicks off the async
+  // require for those three controls and retries the friendly popup once they
+  // arrive, so a fatal error raised before any Dialog was used - most notably a
+  // popover fragment that fails to render on the first roundtrip - still lands
+  // in the friendly UI5 popup instead of the raw-DOM overlay. Returns true when
+  // the async load was started (the caller must then NOT also show the raw
+  // overlay); false when async loading is unavailable, so the caller falls back
+  // right away. If the modules cannot be loaded (broken core) or still cannot
+  // render, the errback / retry paths show the raw overlay so the error is
+  // never swallowed.
+  function loadFriendlyDialogAsync(title, details, options) {
+    try {
+      const require = sap?.ui?.require;
+      if (typeof require !== "function") return false;
+      require(["sap/m/Dialog", "sap/m/Button", "sap/m/Text"], () => {
+        if (!showFriendlyDialog(title, details)) {
+          showRawOverlay(title, details, options);
+        }
+      }, () => showRawOverlay(title, details, options));
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   // `response` may be a string or an Error object; `title` overrides the
   // default header text; `options.onRetry` adds a Retry action that removes
   // the overlay and re-runs the failed request (offered by Server.readHttp
@@ -251,11 +327,21 @@ sap.ui.define(["z2ui5/core/AppState"], (AppState) => {
       onRetry: typeof options.onRetry === "function" ? options.onRetry : null,
     };
 
-    // Prefer a friendly UI5 dialog ("an unexpected error occurred" + Details
-    // / Restart). Only when UI5 cannot render it (broken core, missing
-    // module) do we fall back to the raw-DOM overlay below.
+    // Prefer a friendly UI5 dialog (the error text + Details / Restart).
     if (showFriendlyDialog(title, errorMessage)) return;
 
+    // Its modules were not loaded yet: load them asynchronously and retry, so
+    // the error still lands in the friendly popup first (see
+    // loadFriendlyDialogAsync). Only when async loading is unavailable do we
+    // fall through to the raw-DOM overlay immediately.
+    if (loadFriendlyDialogAsync(title, errorMessage, options)) return;
+
+    showRawOverlay(title, errorMessage, options);
+  }
+
+  // The raw-DOM fatal overlay - the last-resort error display, built without
+  // UI5 so it still works when the core cannot render the friendly dialog.
+  function showRawOverlay(title, errorMessage, options = {}) {
     const errorContainer = createContainer();
 
     // Announce the overlay to assistive technology: without a dialog role
@@ -311,18 +397,20 @@ sap.ui.define(["z2ui5/core/AppState"], (AppState) => {
     errorContainer.appendChild(headerDiv);
 
     // Keep keyboard focus inside the overlay: Tab cycles through the action
-    // buttons instead of escaping into the broken page behind it.
+    // buttons instead of escaping into the broken page behind it. The button
+    // set is complete here (all appended above), so resolve first/last once
+    // rather than re-querying the DOM on every Tab press.
+    const trapButtons = actionsDiv.querySelectorAll("button");
+    const firstTrap = trapButtons[0];
+    const lastTrap = trapButtons[trapButtons.length - 1];
     errorContainer.addEventListener("keydown", (event) => {
       if (event.key !== "Tab") return;
-      const buttons = actionsDiv.querySelectorAll("button");
-      const first = buttons[0];
-      const last = buttons[buttons.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
+      if (event.shiftKey && document.activeElement === firstTrap) {
         event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
+        lastTrap.focus();
+      } else if (!event.shiftKey && document.activeElement === lastTrap) {
         event.preventDefault();
-        first.focus();
+        firstTrap.focus();
       }
     });
 

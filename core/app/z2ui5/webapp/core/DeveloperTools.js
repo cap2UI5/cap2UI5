@@ -24,9 +24,13 @@ sap.ui.define(
     // hand in the editor.
     const SYSTEM_OPEN_LEVELS = 2;
 
+    // Leading-space matcher, hoisted so the per-line fold loop below does not
+    // recompile it on every row of a large JSON dump.
+    const LEADING_SPACES = /^ */;
+
     // JSON nesting depth of a pretty-printed line, read from its indentation.
     function indentLevel(line, unit) {
-      return Math.floor(/^ */.exec(line)[0].length / unit);
+      return Math.floor(LEADING_SPACES.exec(line)[0].length / unit);
     }
 
     // Fold every foldable block in the ACE edit session that sits at or below
@@ -57,18 +61,29 @@ sap.ui.define(
     // throwing and degrading to a bare "[object Object]".
     function toJson(val) {
       const safe = val === undefined ? null : val;
-      const seen = new WeakSet();
+      // Track the ANCESTOR chain, not every object ever visited: a plain
+      // WeakSet of all seen objects would mislabel a value referenced twice in
+      // sibling branches (common in the live z2ui5 global) as "[Circular]".
+      // `this` inside the replacer is the object the key belongs to, so we can
+      // unwind the stack back to it before testing containment.
+      const ancestors = [];
       try {
         return JSON.stringify(
           safe,
-          (key, value) => {
+          function (key, value) {
             if (typeof value === "object" && value !== null) {
-              if (seen.has(value)) return "[Circular]";
-              seen.add(value);
+              while (
+                ancestors.length > 0 &&
+                ancestors[ancestors.length - 1] !== this
+              ) {
+                ancestors.pop();
+              }
+              if (ancestors.includes(value)) return "[Circular]";
+              ancestors.push(value);
             }
             return value;
           },
-          3,
+          INDENT_UNIT,
         );
       } catch {
         // The developer tools must never crash the host app, so degrade to the
@@ -313,7 +328,9 @@ sap.ui.define(
       // skipped. Every source is guarded (a throwing one can never blank the
       // whole export) and each section is capped, because the SYSTEM global can
       // serialize to several MB - a value that large blanks a sap.m.TextArea.
-      buildExport() {
+      // `abapSource` is the running app's ABAP class source, fetched
+      // asynchronously by onExport (empty when it could not be retrieved).
+      buildExport(abapSource) {
         // Max characters per section; long ones (mainly SYSTEM) are truncated
         // so the popup's TextArea still renders.
         const MAX_SECTION = 100000;
@@ -351,6 +368,10 @@ sap.ui.define(
 
         if (AppState.state.lastError) push("ERROR", text(formatLastError));
         push("LOG", text(formatErrorLog));
+        // The running app's ABAP class source (fetched by onExport). Placed
+        // high up because it is usually the most useful context when sharing
+        // an error - a reader can see the class that produced it.
+        push("ABAP SOURCE", abapSource);
         push(
           "RESPONSE",
           json(() => jsonSources.PLAIN()),
@@ -417,12 +438,36 @@ sap.ui.define(
         return sections.join("\n\n") || "(nothing to export)";
       },
 
+      // Fetch the running app's ABAP class source via the ADT REST endpoint,
+      // so the export can include the class that produced the current state.
+      // Returns the raw source text, or "" when the class name is unknown or
+      // the request fails (the endpoint needs an authenticated, ADT-enabled
+      // session, which is not always available - the export must still work
+      // without it). Never throws: the export must succeed regardless.
+      async fetchAbapSource() {
+        const url = this.getAbapSourceUrl();
+        if (!url) return "";
+        try {
+          const response = await fetch(url, {
+            headers: { Accept: "text/plain" },
+            credentials: "same-origin",
+          });
+          if (!response.ok) return "";
+          return await response.text();
+        } catch {
+          return "";
+        }
+      },
+
       // Show the whole export in a stretched popup with a read-through TextArea
-      // (selectable for manual copy) and a one-click "Copy to Clipboard".
-      onExport() {
+      // (selectable for manual copy) and a one-click "Copy to Clipboard". The
+      // ABAP class source is fetched first (asynchronously) so it can be part
+      // of the exported / copied blob.
+      async onExport() {
         let text;
         try {
-          text = this.buildExport();
+          const abapSource = await this.fetchAbapSource();
+          text = this.buildExport(abapSource);
         } catch (e) {
           text = `(export failed: ${e?.message || e})`;
         }
@@ -495,7 +540,7 @@ sap.ui.define(
       // any failure leaves the tab fully expanded rather than breaking the
       // developer tools.
       foldSystemTab(triesLeft = 10) {
-        let editor = null;
+        let editor;
         try {
           editor = this.getEditorInstance();
         } catch (e) {

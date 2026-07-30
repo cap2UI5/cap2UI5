@@ -323,9 +323,7 @@ class z2ui5_cl_a2ui5_context {
 
   static rtti_get_t_attri_by_include() {
     let result = [];
-    let sy_tabix = 0;
     let x;
-    let incl_comps;
     try {
       // TODO(abap2js): cl_abap_typedescr=>describe_by_name( EXPORTING p_name = type->absolute_name RECEIVING p_descr_ref = DATA(type_desc) EXCEPTIONS type_not_found = 1 ).
     } catch (_caught1) {
@@ -334,18 +332,20 @@ class z2ui5_cl_a2ui5_context {
     }
     const sdescr = (type_desc);
     const comps = sdescr.get_components();
+    result = z2ui5_cl_a2ui5_context.expand_components({ it_comps: comps });
+    return result;
+  }
+
+  static expand_components({ it_comps } = {}) {
+    let result = [];
+    let sy_tabix = 0;
+    let lt_incl;
     sy_tabix = 0;
-    for (const lr_comp of comps) {
+    for (const lr_comp of it_comps) {
       sy_tabix++;
       if ((lr_comp.as_include === true || lr_comp.as_include === `X`)) {
-        incl_comps = z2ui5_cl_a2ui5_context.rtti_get_t_attri_by_include(lr_comp.type);
-        const _sy_tabix_1 = sy_tabix;
-        sy_tabix = 0;
-        for (const lr_incl_comp of incl_comps) {
-          sy_tabix++;
-          result.push(z2ui5_cl_util.abap_copy(lr_incl_comp));
-        }
-        sy_tabix = _sy_tabix_1;
+        lt_incl = z2ui5_cl_a2ui5_context.rtti_get_t_attri_by_include(lr_comp.type);
+        result.push(...lt_incl);
       } else {
         result.push(z2ui5_cl_util.abap_copy(lr_comp));
       }
@@ -362,9 +362,7 @@ class z2ui5_cl_a2ui5_context {
 
   static rtti_get_t_attri_by_any({ val } = {}) {
     let result = [];
-    let sy_tabix = 0;
     let sy_subrc = 0;
-    let lt_attri;
     let lo_struct = null;
     let lo_type = null;
     try {
@@ -403,16 +401,7 @@ class z2ui5_cl_a2ui5_context {
       return result;
     }
     const comps = lo_struct.get_components();
-    sy_tabix = 0;
-    for (const lr_comp of comps) {
-      sy_tabix++;
-      if (!(lr_comp.as_include === true || lr_comp.as_include === `X`)) {
-        result.push(z2ui5_cl_util.abap_copy(lr_comp));
-      } else {
-        lt_attri = z2ui5_cl_a2ui5_context.rtti_get_t_attri_by_include(lr_comp.type);
-        result.push(...lt_attri);
-      }
-    }
+    result = z2ui5_cl_a2ui5_context.expand_components({ it_comps: comps });
     if (lr_cache != null) {
       lr_cache.o_struct = lo_struct;
       lr_cache.t_attri = z2ui5_cl_util.abap_tab_assign(lr_cache.t_attri, z2ui5_cl_util.abap_copy(result));
@@ -651,7 +640,7 @@ class z2ui5_cl_a2ui5_context {
   static msg_get({ val, val2 } = {}) {
     let result = {};
     const lt_msg = z2ui5_cl_a2ui5_context.msg_get_t({ val, val2 });
-    result = z2ui5_cl_util.abap_tab_assign(result, z2ui5_cl_util.abap_copy(lt_msg[(1) - 1]));
+    result = (() => { try { return lt_msg[(1) - 1] ?? null; } catch { return null; } })();
     return result;
   }
 
@@ -1580,92 +1569,70 @@ class z2ui5_cl_a2ui5_context {
 
   static msg_get_rap_element({ val } = {}) {
     let result = ``;
+    const lt_suffix = z2ui5_cl_a2ui5_context.scan_flag_prefix({ val, iv_prefix: `%ELEMENT-` });
+    result = lt_suffix.join(`, `);
+    return result;
+  }
+
+  static get_comp_str({ val, iv_comp } = {}) {
+    let result = ``;
+    let sy_subrc = 0;
+    let fs_comp = null;
+    let _fs$fs_comp = null;
+    _fs$fs_comp = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(val, iv_comp);
+    fs_comp = _fs$fs_comp ? _fs$fs_comp.o[_fs$fs_comp.k] : null;
+    sy_subrc = _fs$fs_comp ? 0 : 4;
+    if (sy_subrc === 0) {
+      result = z2ui5_cl_util.abap_tab_assign(result, z2ui5_cl_util.abap_copy(fs_comp));
+    }
+    return result;
+  }
+
+  static scan_flag_prefix({ val, iv_prefix } = {}) {
+    let result = [];
     let sy_tabix = 0;
     let sy_subrc = 0;
     let fs_flag = null;
     let _fs$fs_flag = null;
+    const lv_len = z2ui5_cl_util.abap_copy(iv_prefix.length);
     const lt_attri = z2ui5_cl_a2ui5_context.rtti_get_t_attri_by_any({ val: val });
     sy_tabix = 0;
     for (const ls_attri of lt_attri) {
       sy_tabix++;
-      if (!(ls_attri.name.length > 9)) continue;
-      if (!(ls_attri.name(9) === `%ELEMENT-`)) continue;
+      if (!(ls_attri.name.length > lv_len)) continue;
+      if (!(ls_attri.name(lv_len) === iv_prefix)) continue;
       _fs$fs_flag = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(val, ls_attri.name);
       fs_flag = _fs$fs_flag ? _fs$fs_flag.o[_fs$fs_flag.k] : null;
       sy_subrc = _fs$fs_flag ? 0 : 4;
       if (!(sy_subrc === 0)) continue;
       if (!(fs_flag)) continue;
-      if (!result) {
-        result = ls_attri.name + 9;
-      } else {
-        result = `${result}, ${ls_attri.name + 9}`;
-      }
+      result.push(z2ui5_cl_util.abap_copy(ls_attri.name + lv_len));
     }
     return result;
   }
 
   static msg_get_rap_state_area({ val } = {}) {
     let result = ``;
-    let sy_subrc = 0;
-    let fs_sa = null;
-    let _fs$fs_sa = null;
-    _fs$fs_sa = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(val, `%STATE_AREA`);
-    fs_sa = _fs$fs_sa ? _fs$fs_sa.o[_fs$fs_sa.k] : null;
-    sy_subrc = _fs$fs_sa ? 0 : 4;
-    if (sy_subrc === 0) {
-      result = z2ui5_cl_util.abap_tab_assign(result, z2ui5_cl_util.abap_copy(fs_sa));
-    }
+    result = z2ui5_cl_a2ui5_context.get_comp_str({ val, iv_comp: `%STATE_AREA` });
     return result;
   }
 
   static msg_get_rap_action({ val } = {}) {
     let result = ``;
-    let sy_tabix = 0;
-    let sy_subrc = 0;
-    let fs_flag = null;
-    let _fs$fs_flag = null;
-    const lt_attri = z2ui5_cl_a2ui5_context.rtti_get_t_attri_by_any({ val: val });
-    sy_tabix = 0;
-    for (const ls_attri of lt_attri) {
-      sy_tabix++;
-      if (!(ls_attri.name.length > 12)) continue;
-      if (!(ls_attri.name(12) === `%OP-%ACTION-`)) continue;
-      _fs$fs_flag = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(val, ls_attri.name);
-      fs_flag = _fs$fs_flag ? _fs$fs_flag.o[_fs$fs_flag.k] : null;
-      sy_subrc = _fs$fs_flag ? 0 : 4;
-      if (!(sy_subrc === 0)) continue;
-      if (!(fs_flag)) continue;
-      result = ls_attri.name + 12;
-      return result;
-    }
+    const lt_suffix = z2ui5_cl_a2ui5_context.scan_flag_prefix({ val, iv_prefix: `%OP-%ACTION-` });
+    result = (() => { try { return lt_suffix[(1) - 1] ?? null; } catch { return null; } })();
     return result;
   }
 
   static msg_get_rap_pid({ val } = {}) {
     let result = ``;
-    let sy_subrc = 0;
-    let fs_pid = null;
-    let _fs$fs_pid = null;
-    _fs$fs_pid = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(val, `%PID`);
-    fs_pid = _fs$fs_pid ? _fs$fs_pid.o[_fs$fs_pid.k] : null;
-    sy_subrc = _fs$fs_pid ? 0 : 4;
-    if (sy_subrc === 0) {
-      result = z2ui5_cl_util.abap_tab_assign(result, z2ui5_cl_util.abap_copy(fs_pid));
-    }
+    result = z2ui5_cl_a2ui5_context.get_comp_str({ val, iv_comp: `%PID` });
     return result;
   }
 
   static msg_get_rap_cid({ val } = {}) {
     let result = ``;
-    let sy_subrc = 0;
-    let fs_cid = null;
-    let _fs$fs_cid = null;
-    _fs$fs_cid = ((_o, _c) => { if (_o == null) return null; const _k = typeof _c === "number" ? Object.keys(_o)[_c - 1] : String(_c).toLowerCase(); return _k != null && _k in _o ? { o: _o, k: _k } : null; })(val, `%CID`);
-    fs_cid = _fs$fs_cid ? _fs$fs_cid.o[_fs$fs_cid.k] : null;
-    sy_subrc = _fs$fs_cid ? 0 : 4;
-    if (sy_subrc === 0) {
-      result = z2ui5_cl_util.abap_tab_assign(result, z2ui5_cl_util.abap_copy(fs_cid));
-    }
+    result = z2ui5_cl_a2ui5_context.get_comp_str({ val, iv_comp: `%CID` });
     return result;
   }
 

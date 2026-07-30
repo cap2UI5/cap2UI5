@@ -11,7 +11,6 @@ sap.ui.define(
     "sap/ui/core/BusyIndicator",
     "sap/m/MessageBox",
     "sap/ui/core/Fragment",
-    "sap/m/BusyDialog",
     "z2ui5/core/Server",
     "sap/ui/model/odata/v2/ODataModel",
     "sap/ui/core/routing/HashChanger",
@@ -27,7 +26,6 @@ sap.ui.define(
     BusyIndicator,
     MessageBox,
     Fragment,
-    BusyDialog,
     Server,
     ODataModel,
     HashChanger,
@@ -41,29 +39,33 @@ sap.ui.define(
     // Helpers reused across calls; kept as module-level singletons.
     const _hashChanger = HashChanger.getInstance();
 
-    // Single reusable BusyDialog flashed when the user clicks while a
-    // roundtrip is already in flight (created lazily, kept for reuse).
-    // The timestamp throttles the flash: rapid clicking during a slow
-    // roundtrip would otherwise run a full open/render/close cycle per
-    // click without adding any feedback.
-    let _busyDialog = null;
-    let _busyFlashUntil = 0;
-
     function applyStoredSizeLimit(viewKey, oModel) {
       if (!oModel) return;
-      const limit = AppState.state.viewSizeLimits[viewKey];
+      // For the root slots (MAIN/NEST/NEST2) this is the max limit across them,
+      // since they share this one model; popup/popover get their own limit.
+      const limit = Lib.effectiveSizeLimit(
+        AppState.state.viewSizeLimits,
+        viewKey,
+      );
       if (limit !== undefined) oModel.setSizeLimit(limit);
     }
 
     return Controller.extend("z2ui5.controller.View1", {
       // ------------------------------------------------------------------
-      // Model change tracking - remembers which /XX/ paths the user edited
+      // Model change tracking - remembers which model paths the user edited
       // so the next roundtrip only ships the delta.
       // ------------------------------------------------------------------
       _trackChanges(oModel) {
         // Mark the model as framework-owned: updateModelIfRequired may only
         // reuse models that carry this change tracker.
         oModel._z2ui5Tracked = true;
+        // Edited paths are tracked PER MODEL, not in one shared set: the main
+        // view and a popup/popover each have their own JSON model, and a
+        // roundtrip ships only the picked model's own edits. A single shared
+        // set would build the delta of one model against another's data (a
+        // path missing there serializes as `undefined` and clears the field
+        // on the backend) and would drop the other model's still-unsent edits.
+        oModel._z2ui5ChangedPaths = new Set();
         oModel.attachPropertyChange((e) => {
           const params = e.getParameters();
           const raw = params.path;
@@ -72,8 +74,8 @@ sap.ui.define(
           // Resolve relative paths against the binding context.
           const changedPath =
             ctx && !raw.startsWith("/") ? `${ctx.getPath()}/${raw}` : raw;
-          if (changedPath.startsWith("/XX/")) {
-            AppState.state.xxChangedPaths.add(changedPath);
+          if (changedPath.startsWith("/")) {
+            oModel._z2ui5ChangedPaths.add(changedPath);
           }
         });
         return oModel;
@@ -161,18 +163,118 @@ sap.ui.define(
       // hash.
       _updateBrowserHistory(PARAMS, ID) {
         try {
+          // Hash-based app routing (UI5 Router style), opt-in per session. The
+          // flag carries the MODE (z2ui5_if_client=>cs_nav_mode): "KEEP" routes
+          // by class + draft id (exact state restored on Back/Forward), "FRESH"
+          // routes by class only (Back/Forward start the app fresh); any other
+          // non-empty value ("DEFAULT") turns routing back OFF (framework
+          // default). An EMPTY value is "no change" so a later roundtrip that
+          // does not re-send the flag keeps routing on with the mode already
+          // chosen (an app that enabled it once in check_on_init stays routed).
+          if (PARAMS.SET_NAV_ROUTING) {
+            const mode = String(PARAMS.SET_NAV_ROUTING).toUpperCase();
+            const on = mode === "KEEP" || mode === "FRESH";
+            AppState.state.navRouting = on;
+            AppState.state.navMode = on ? mode : null;
+          }
+          const state = AppState.state;
+          if (state.navRouting) {
+            const app = state.oResponse?.APP;
+            if (app) {
+              // In FRESH mode the route carries the class only, so every history
+              // entry (Back/Forward/reload/bookmark) starts the app fresh; in
+              // KEEP mode it carries the draft id too, so they restore the exact
+              // preserved state. draftForRoute is what the route (and the echo
+              // guard below) uses - null in FRESH, the app-state ID in KEEP.
+              const draftForRoute = state.navMode === "FRESH" ? null : ID;
+              // Set current app/draft BEFORE touching the hash: the setHash/
+              // replaceHash below re-fires hashChanged, and Server.onHashChange
+              // compares the incoming route's draft id against currentDraftId to
+              // ignore our own echo (no navigation loop). In FRESH mode there is
+              // no draft, so the guard matches on the class instead.
+              state.currentApp = app;
+              state.currentDraftId = draftForRoute;
+              if (state.navFromHash) {
+                // This render is the result of a browser Back/Forward (or manual
+                // hash edit) routed through Server.onHashChange. The hash already
+                // matches this history entry and the browser sits at a non-top
+                // position - rewriting the hash here would drop the forward
+                // entries and break the Forward button. Just adopt the state.
+                state.navFromHash = false;
+              } else if (!PARAMS.SET_PUSH_STATE) {
+                // Reflect the running app in the URL as a bookmarkable route
+                // "/app/<CLASS>" (FRESH) or "/app/<CLASS>/<DRAFTID>" (KEEP). In
+                // KEEP the draft id makes Back/Forward restore the EXACT
+                // preserved state, not a fresh app. A forward navigation done in
+                // the backend (client->nav_app_call, CHECK_NAV_APP_CALL) pushes a
+                // NEW history entry so Back returns to the calling app - the
+                // routing equivalent of a UI5 navTo. A plain roundtrip only
+                // replaces the current (top) entry, advancing it to the app's
+                // latest draft so a later Forward restores the newest state.
+                const route = Lib.routeForApp(app, draftForRoute);
+                if (PARAMS.CHECK_NAV_APP_CALL) {
+                  // repoint the caller's entry first - it borrows the echo
+                  // guard, so restore it to this app before pushing the route
+                  this._repointCallerEntry(PARAMS, draftForRoute);
+                  state.currentApp = app;
+                  state.currentDraftId = draftForRoute;
+                  _hashChanger.setHash(route);
+                } else if (_hashChanger.getHash() !== route) {
+                  _hashChanger.replaceHash(route);
+                }
+              }
+            }
+            // Routing owns the app-state hash; skip the legacy handling below.
+            if (!PARAMS.SET_PUSH_STATE) return;
+          }
+
           if (PARAMS.SET_PUSH_STATE) {
             const hash = _hashChanger.getHash();
             const newUrl = `${window.location.pathname}${window.location.search}#${hash}${PARAMS.SET_PUSH_STATE}`;
             history.pushState(null, "", newUrl);
           }
+          // Keep the leading "/" so the live URL matches the format the copy
+          // link (FrontendAction.evClipboardAppState) writes and the backend
+          // restore path expects: request_app_start_draft reads the state id
+          // via iv_hash+2, i.e. it skips exactly the "#/" prefix. Without the
+          // slash the live hash is "#z2ui5-xapp-state=..." and iv_hash+2 eats
+          // the leading "z", so bookmarking/reloading the live URL never
+          // restores the app state (only the explicitly copied link did).
           const newHash = PARAMS.SET_APP_STATE_ACTIVE
-            ? `z2ui5-xapp-state=${ID || ""}`
+            ? `/z2ui5-xapp-state=${ID || ""}`
             : "";
           _hashChanger.replaceHash(newHash);
         } catch (e) {
           Lib.logError("_updateBrowserHistory: history update failed", e);
         }
+      },
+
+      // Point the CALLING app's history entry at the draft the backend saved
+      // for it during this very nav_app_call (PARAMS.NAV_APP_CALL_PREV_*).
+      // That draft carries every client-side change the user made since the
+      // caller last rendered - two-way bound switches, checkboxes, input - all
+      // of which travelled to the backend with the event that triggered the
+      // navigation. The entry itself still carries the older draft of that
+      // last render, so without this Back restores the caller as it was
+      // RENDERED and silently drops those changes. The entry is still the top
+      // one here (the called app's route is pushed right after), so a
+      // replaceHash updates it in place and leaves the history depth alone.
+      // KEEP mode only - a FRESH route carries no draft and always restarts
+      // the app anyway.
+      _repointCallerEntry(PARAMS, draftForRoute) {
+        const state = AppState.state;
+        const prevApp = PARAMS.NAV_APP_CALL_PREV_APP;
+        const prevDraft = PARAMS.NAV_APP_CALL_PREV_ID;
+        if (!draftForRoute || !prevApp || !prevDraft) return;
+        const prevRoute = Lib.routeForApp(prevApp, prevDraft);
+        if (_hashChanger.getHash() === prevRoute) return;
+        // Server.onHashChange ignores the echo of our own hash writes by
+        // comparing the route's draft id against currentDraftId - adopt the
+        // caller's fresh draft BEFORE replacing, or the write reads as a user
+        // navigation and fires a restore roundtrip. The caller of this method
+        // sets the state back to the called app right afterwards.
+        state.currentDraftId = prevDraft;
+        _hashChanger.replaceHash(prevRoute);
       },
 
       // Execute the follow-up JS snippets stashed by Server.responseSuccess.
@@ -255,19 +357,28 @@ sap.ui.define(
 
       async displayNestedView(xml, slotKey) {
         const paramKey = ViewSlots.paramByKey(slotKey);
-        const oModel = this._createViewModel();
-        applyStoredSizeLimit(slotKey, oModel);
+        // Nested views do NOT create their own model. They are inserted into
+        // the MAIN control tree below and inherit its default JSON model via
+        // UI5 model propagation, so every view binds against the same data with
+        // one change tracker and one refresh per roundtrip - no duplicate
+        // models pointing at the same data. The model passed to the XML
+        // preprocessor here only feeds {template>...} bindings at build time;
+        // it is the MAIN view's JSON model (the named "http" model when
+        // SWITCH_DEFAULT_MODEL_PATH moved OData into the default slot, otherwise
+        // the default model), mirroring displayView's template model.
+        const oMainView = ViewSlots.getView("MAIN");
+        const oTemplateModel =
+          oMainView?.getModel("http") ?? oMainView?.getModel();
         const oView = await XMLView.create({
           definition: xml,
           controller: ViewSlots.getController(slotKey),
-          preprocessors: { xml: { models: { template: oModel } } },
+          preprocessors: { xml: { models: { template: oTemplateModel } } },
         });
 
         if (!Lib.isAlive(AppState.state.oApp)) {
           oView.destroy();
           return;
         }
-        oView.setModel(oModel);
 
         const nestParams = AppState.state.oResponse?.PARAMS?.[paramKey];
         if (!nestParams) {
@@ -339,6 +450,34 @@ sap.ui.define(
       },
 
       // ------------------------------------------------------------------
+      // eBP = "event backend, prevent default": cancels the control's
+      // built-in default for this event and then round-trips exactly like
+      // eB. The backend emits it (instead of eB) for an event registered
+      // with s_ctrl-check_prevent_default, passing $event as the first
+      // argument - preventDefault() only works synchronously inside the
+      // handler, so it cannot be a follow-up action from the response.
+      // Example: sap.tnt NavigationListItem.press, where cancelling the
+      // default suppresses the item selection and leaves the decision to
+      // the backend. The name is part of the protocol - do not rename it.
+      // ------------------------------------------------------------------
+      eBP(oEvent, ...args) {
+        // guard the call: a malformed wire (no $event) must still round-trip
+        if (typeof oEvent?.preventDefault === "function") {
+          oEvent.preventDefault();
+        }
+        this.eB(...args);
+      },
+
+      // Ancestor-text breadcrumb of a control resolved in an event argument,
+      // e.g. `$controller.textPath(${$parameters>/item})` on a menu's
+      // itemSelected -> "Create New Site > Official Store". The parent-chain
+      // walk happens on the live control tree, so no binding path can express
+      // it; the separator defaults to " > ".
+      textPath(oControl, sSeparator) {
+        return Lib.getTextPath(oControl, sSeparator);
+      },
+
+      // ------------------------------------------------------------------
       // eB = "event backend": triggers a backend roundtrip with arguments.
       // The name is part of the protocol - backend-generated view XML binds
       // events to eB/eF - and must not be renamed.
@@ -360,16 +499,15 @@ sap.ui.define(
           return;
         }
 
-        // If a roundtrip is already in flight, briefly show a BusyDialog so
-        // the user gets visual feedback instead of a silent click - at most
-        // once per second, further clicks inside that window are ignored.
+        // A roundtrip is already in flight and this event's keystroke/click is
+        // dropped. Surface the global busy indicator right away (0 delay)
+        // instead of a separate, transient BusyDialog: it is the exact same
+        // overlay the in-flight roundtrip hides on completion, so the user sees
+        // one steady indicator until the response lands - not a modal flashing
+        // in and straight back out over the (1s-delayed) global one. show() is
+        // idempotent, so repeated drops during the same roundtrip are cheap.
         if (AppState.state.isBusy && !ignoreBusy) {
-          if (Date.now() >= _busyFlashUntil) {
-            _busyFlashUntil = Date.now() + 1000;
-            if (!_busyDialog) _busyDialog = new BusyDialog();
-            _busyDialog.open();
-            queueMicrotask(() => _busyDialog.close());
-          }
+          BusyIndicator.show(0);
           return;
         }
 
@@ -387,28 +525,31 @@ sap.ui.define(
         // The request body is built locally and handed explicitly through
         // Server.roundtrip/readHttp. It is mirrored to AppState.state.oBody right
         // away so onBeforeRoundtrip hooks and the developer tools see it.
-        const oBody = { VIEWNAME: "MAIN" };
+        const oBody = {};
         AppState.state.oBody = oBody;
 
         // Decide which view's model holds the data we need to send back. The
         // mapping is: main app controller -> main view, popup controller ->
         // popup view, etc.
-        const oModel = this._pickModelForRoundtrip(useMainModel, oBody);
+        const oModel = this._pickModelForRoundtrip(useMainModel);
 
         Lib.runCallbacks(AppState.state.onBeforeRoundtrip);
 
-        // If the user edited /XX/ paths, send only the delta to keep the
-        // payload small.
-        if (oModel && AppState.state.xxChangedPaths.size > 0) {
+        // If the user edited model paths, send only the delta to keep the
+        // payload small. The edited paths live on the picked model itself
+        // (set in _trackChanges), so onBeforeRoundtrip hooks that mark paths
+        // dirty (e.g. the Scrolling control) must have run above first.
+        const changedPaths = oModel?._z2ui5ChangedPaths;
+        if (oModel && changedPaths?.size > 0) {
           const data = oModel.getData();
-          const xx = data?.XX;
-          if (xx) {
-            oBody.XX = Lib.buildDeltaFromPaths(
-              AppState.state.xxChangedPaths,
-              xx,
-            );
+          if (data) {
+            oBody.MODEL = Lib.buildDeltaFromPaths(changedPaths, data);
           }
         }
+        // Remember which model this request carried so the winning response
+        // clears exactly its edits (Server.readHttp) - a stale response clears
+        // nothing, and edits in other models stay pending for their own send.
+        AppState.state.oSentModel = oModel;
 
         oBody.ID = AppState.state.oResponse?.ID;
         // Arguments travel as raw JSON values - the request body is
@@ -416,32 +557,44 @@ sap.ui.define(
         // turned into JSON strings by the backend when it fills
         // T_EVENT_ARG, so apps keep receiving them as strings; stringifying
         // them here as well would encode (and escape) the payload twice.
-        oBody.ARGUMENTS = args.slice();
+        // `args` is this call's own rest-parameter array (Server.roundtrip
+        // mutates ARGUMENTS via shift), so it can be handed over directly -
+        // no defensive copy needed.
+        oBody.ARGUMENTS = args;
 
         Server.roundtrip(oBody);
         Lib.runCallbacks(AppState.state.onAfterRoundtrip);
       },
 
-      _pickModelForRoundtrip(useMainModel, oBody) {
+      // The framework-owned JSON model on a slot's view: the DEFAULT model
+      // normally, but the NAMED "http" model when SWITCH_DEFAULT_MODEL_PATH put
+      // an OData model in the default slot. Returns undefined when neither model
+      // is ours (marked by _z2ui5Tracked).
+      _resolveTrackedModel(oView) {
+        const isOurs = (m) => (m?._z2ui5Tracked ? m : undefined);
+        return isOurs(oView.getModel()) ?? isOurs(oView.getModel("http"));
+      },
+
+      _pickModelForRoundtrip(useMainModel) {
         // useMainModel forces use of the main view's model even when called
         // from a popup/popover controller.
         const slotKey = useMainModel ? "MAIN" : ViewSlots.keyOfController(this);
         if (!slotKey) return undefined;
 
-        if (slotKey === "MAIN") {
-          const sView = AppState.state.oResponse?.PARAMS?.S_VIEW;
-          if (sView?.SWITCH_DEFAULT_MODEL_PATH) {
-            return ViewSlots.getView("MAIN")?.getModel("http");
-          }
-          return ViewSlots.getView("MAIN")?.getModel();
+        const oView = ViewSlots.getView(slotKey);
+        if (!oView) return undefined;
+
+        // MAIN and its nested views (NEST/NEST2) share one framework-owned
+        // JSON model, so a nested-slot event must resolve the tracked model
+        // (not the propagated OData default, which has no getData()) or the
+        // edit is silently dropped. The data and changedPaths delta are shared
+        // across the root slots, so any of them yields the same model.
+        if (Lib.isRootModelSlot(slotKey)) {
+          return this._resolveTrackedModel(oView);
         }
 
-        // Nested views report their slot as VIEW in S_FRONT so the backend
-        // routes the event to the right app instance.
-        if (slotKey === "NEST" || slotKey === "NEST2") {
-          oBody.VIEWNAME = slotKey;
-        }
-        return ViewSlots.getView(slotKey)?.getModel();
+        // Popup/popover are standalone and return their own (default) model.
+        return oView.getModel();
       },
 
       // Refresh a slot's model when the response signals an update for it
@@ -460,16 +613,18 @@ sap.ui.define(
         // model + setModel() destroys and recreates every binding - measured
         // ~3x slower with all values changed and ~150x slower when little
         // changed (see node/tests-examples/modelUpdate.bench.spec.js).
-        // The framework-owned JSON model is the DEFAULT model normally, but
-        // the NAMED "http" model when SWITCH_DEFAULT_MODEL_PATH placed an
-        // OData model in the default slot - update whichever one is ours and
-        // never overwrite the OData default with a fresh JSON model.
-        const isOurs = (m) => (m?._z2ui5Tracked ? m : undefined);
-        const tracked =
-          isOurs(oView.getModel()) ?? isOurs(oView.getModel("http"));
+        // Never overwrite an OData default (switch mode) with a fresh JSON model.
+        const tracked = this._resolveTrackedModel(oView);
         if (tracked) {
           applyStoredSizeLimit(slotKey, tracked);
-          tracked.setData(AppState.state.oResponse?.OVIEWMODEL);
+          // MAIN and its nested views resolve to the SAME root model here, and
+          // the update loop calls this once per slot. setData replaces the
+          // model's data reference with OVIEWMODEL, so once the first root slot
+          // has swapped it in, the others already hold it - skip the redundant
+          // setData (and its full binding refresh) instead of running it once
+          // per shared slot.
+          const data = AppState.state.oResponse?.OVIEWMODEL;
+          if (tracked.getData() !== data) tracked.setData(data);
           return;
         }
 
@@ -481,7 +636,7 @@ sap.ui.define(
       },
 
       // Replace the main app view with the XML coming from the backend.
-      async displayView(xml, viewModel) {
+      async displayView(xml, viewModel, reqSeq) {
         const oViewModel = this._trackChanges(new JSONModel(viewModel));
 
         const sView = AppState.state.oResponse?.PARAMS?.S_VIEW;
@@ -510,6 +665,16 @@ sap.ui.define(
 
         // Guard against the app being destroyed during the await above.
         if (!Lib.isAlive(AppState.state.oApp)) {
+          oView.destroy();
+          if (switchPath) oModel.destroy();
+          return;
+        }
+
+        // A newer parallel request (check_allow_multi_req) superseded this one
+        // while XMLView.create was awaiting - discard this rebuild instead of
+        // letting an out-of-order resolve overwrite the newer view. Last-write
+        // wins by request order, not by which create() happened to resolve last.
+        if (reqSeq !== undefined && reqSeq !== Server._requestSeq) {
           oView.destroy();
           if (switchPath) oModel.destroy();
           return;

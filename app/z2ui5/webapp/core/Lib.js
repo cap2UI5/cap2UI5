@@ -15,6 +15,44 @@ sap.ui.define(
   (AppState, Element) => {
     "use strict";
 
+    // Hash-based app routing (UI5 Router style). The URL hash names the running
+    // app AND its state as a bookmarkable route "/app/<CLASS>/<DRAFTID>" - the
+    // client-side equivalent of a UI5 route pattern "app/{class}/{state}". The
+    // <CLASS> segment is human-readable; the <DRAFTID> segment is the server
+    // draft that holds the app's state, so the browser Back/Forward buttons
+    // restore the EXACT preserved state (and a reload/bookmark restores it too,
+    // falling back to a fresh start of <CLASS> once the draft has expired).
+    // routeForApp builds it; appOfRoute / draftOfRoute parse the two segments
+    // back out (empty when the hash is not an app route, so non-routing hashes
+    // - e.g. an app's own set_push_state - are ignored by the router).
+    const APP_ROUTE_PREFIX = "/app/";
+
+    function routeForApp(sClass, sDraftId) {
+      const base = `${APP_ROUTE_PREFIX}${sClass}`;
+      return sDraftId ? `${base}/${sDraftId}` : base;
+    }
+
+    function segmentsOfRoute(sHash) {
+      if (!sHash) return null;
+      // Accept an optional leading "#" and "/" so both HashChanger hashes
+      // (no "#") and raw location.hash values resolve to the same route.
+      const clean = sHash.replace(/^#/, "").replace(/^\//, "");
+      const marker = "app/";
+      if (!clean.startsWith(marker)) return null;
+      // Stop at any route/query separator, then split class / draft id.
+      return clean.slice(marker.length).split(/[&?]/)[0].split("/");
+    }
+
+    function appOfRoute(sHash) {
+      const parts = segmentsOfRoute(sHash);
+      return parts ? parts[0] : "";
+    }
+
+    function draftOfRoute(sHash) {
+      const parts = segmentsOfRoute(sHash);
+      return parts && parts.length > 1 ? parts[1] : "";
+    }
+
     // Resolve a control id to its sap.ui.core.Element via the global registry.
     // Element.getElementById arrived in UI5 1.119; older bootstraps fall back
     // to the deprecated sap.ui.getCore().byId. Returns null when the id is
@@ -176,6 +214,28 @@ sap.ui.define(
       control.addEventDelegate(delegate);
     }
 
+    // Join a control's own text with its ancestors' texts, outermost first
+    // ("Create New Site > Official Store"). The walk climbs getParent() and
+    // stops at the first ancestor that has no getText - for a menu item that
+    // is the Menu itself, so the result is exactly the item's breadcrumb
+    // (the `while (oItem instanceof MenuItem)` loop UI5 samples write in a
+    // controller). A control-tree walk cannot be expressed as a binding path,
+    // which is why it lives here and is reachable from an event argument via
+    // the controller's textPath().
+    function getTextPath(control, separator) {
+      const texts = [];
+      let node = control;
+      // the control tree is finite, but never loop forever on a cyclic or
+      // self-referencing parent
+      for (let i = 0; node && i < 100; i++) {
+        if (typeof node.getText !== "function") break;
+        const text = node.getText();
+        if (text) texts.unshift(text);
+        node = typeof node.getParent === "function" ? node.getParent() : null;
+      }
+      return texts.join(separator || " > ");
+    }
+
     // Copy text to the clipboard, preferring the async clipboard API with a
     // fallback to the legacy textarea + execCommand approach.
     function copyToClipboard(textToCopy) {
@@ -329,23 +389,23 @@ sap.ui.define(
     }
 
     // Build the delta object sent to the backend. `paths` is the set of
-    // /XX/... paths that the user edited; `xx` is the full XX model data.
+    // model paths that the user edited; `model` is the full view model data.
     // Table edits become (recursively nested) __delta structures, so a cell
     // edit in a nested/tree table ships only the changed cell instead of
     // the whole outer table.
-    function buildDeltaFromPaths(paths, xx) {
+    function buildDeltaFromPaths(paths, modelData) {
       const delta = {};
       for (const path of paths) {
-        // path looks like "/XX/<attr>" or "/XX/<attr>/<row>/<field>" with
+        // path looks like "/<attr>" or "/<attr>/<row>/<field>" with
         // arbitrarily deep <row>/<subtable> repetitions for nested tables
-        const parts = path.slice(4).split("/");
+        const parts = path.slice(1).split("/");
         const attr = parts[0];
         const steps = parseDeltaSteps(parts.slice(1));
         if (!steps) {
           // Scalar or unrecognized shape -> ship the whole attribute. The
           // full value always wins over any queued delta: both read the
           // same current model data, so it is a superset of every delta.
-          delta[attr] = xx[attr];
+          delta[attr] = modelData[attr];
           continue;
         }
         // A full attribute queued by another path already carries every
@@ -354,7 +414,7 @@ sap.ui.define(
         if (attr in delta && !delta[attr]?.__delta) continue;
         if (!delta[attr]?.__delta) delta[attr] = { __delta: {} };
         let node = delta[attr];
-        let model = xx[attr];
+        let model = modelData[attr];
         for (const { row, field, leaf } of steps) {
           const rows = node.__delta;
           if (!rows[row]) rows[row] = {};
@@ -405,7 +465,48 @@ sap.ui.define(
       return _sanitizeEl.innerHTML;
     }
 
+    // The MAIN view and its two nested views (NEST, NEST2) share ONE JSON
+    // model: the nested views are inserted into the MAIN control tree and
+    // inherit its default model through UI5 model propagation instead of each
+    // creating their own. Popup and popover are opened standalone (outside the
+    // MAIN tree) and keep their own model.
+    const ROOT_MODEL_SLOTS = ["MAIN", "NEST", "NEST2"];
+
+    function isRootModelSlot(slotKey) {
+      return ROOT_MODEL_SLOTS.includes(slotKey);
+    }
+
+    // Effective JSONModel size limit for a slot. Because the root slots share a
+    // single model, a per-view limit collapses onto it - the largest requested
+    // limit across MAIN/NEST/NEST2 wins. Popup/popover keep their own limit.
+    // Returns undefined when nothing is stored, so callers keep the UI5 default.
+    function effectiveSizeLimit(viewSizeLimits, slotKey) {
+      if (!isRootModelSlot(slotKey)) return viewSizeLimits[slotKey];
+      let max;
+      for (const key of ROOT_MODEL_SLOTS) {
+        const limit = viewSizeLimits[key];
+        if (limit !== undefined && (max === undefined || limit > max)) {
+          max = limit;
+        }
+      }
+      return max;
+    }
+
+    // Render the invisible <span> placeholder shared by every marker custom
+    // control (Focus, Timer, Scrolling, Tree, Info, Geolocation, Storage): the
+    // real work happens in onAfterRendering (see the module header), so the
+    // renderer only needs a cheap hidden DOM anchor. apiVersion-2 renderer.
+    function renderInvisibleSpan(oRm, oControl) {
+      oRm.openStart("span", oControl);
+      oRm.style("display", "none");
+      oRm.openEnd();
+      oRm.close("span");
+    }
+
     return {
+      routeForApp,
+      appOfRoute,
+      draftOfRoute,
       logError,
       isDestroyed,
       isAlive,
@@ -415,6 +516,7 @@ sap.ui.define(
       applyTokenUpdate,
       runCallbacks,
       whenRendered,
+      getTextPath,
       copyToClipboard,
       toText,
       deriveSystemType,
@@ -427,6 +529,9 @@ sap.ui.define(
       getElementById,
       getMessaging,
       hasMessagingModule,
+      isRootModelSlot,
+      effectiveSizeLimit,
+      renderInvisibleSpan,
     };
   },
 );

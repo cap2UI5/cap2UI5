@@ -37,9 +37,9 @@ sap.ui.define(
       // single shared slot would let one companion overwrite another's.
       setBackend() {
         try {
-          const binding = this._getTreeBinding();
           const id = this.getProperty("tree_id");
           if (!id) return;
+          const binding = this._getTreeBinding();
           // Only overwrite the snapshot when the binding is actually
           // resolvable - a momentarily missing binding must not wipe a
           // still-valid snapshot for this id.
@@ -97,10 +97,7 @@ sap.ui.define(
       renderer: {
         apiVersion: 2,
         render(oRm, oControl) {
-          oRm.openStart("span", oControl);
-          oRm.style("display", "none");
-          oRm.openEnd();
-          oRm.close("span");
+          Lib.renderInvisibleSpan(oRm, oControl);
         },
       },
     });

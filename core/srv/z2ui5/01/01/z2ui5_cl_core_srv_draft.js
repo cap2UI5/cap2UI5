@@ -179,14 +179,30 @@ class z2ui5_cl_core_srv_draft {
 
   // ============================================================
   //  INSTANCE API — 1:1 with the ABAP class over the draft table
-  //  z2ui5_t_01. The JS mirror of the table is an in-process Map (the
-  //  platform draft STORE above serves the JS framework's async path;
-  //  ABAP's synchronous DB semantics are modelled here).
+  //  z2ui5_t_01, held in z2ui5_port's neutral store (the same store the
+  //  transpiled OpenSQL lowerings target, so transpiled writes and this
+  //  hand-ported class see one table). The platform draft STORE above
+  //  serves the JS framework's async path; ABAP's synchronous DB
+  //  semantics are modelled here.
   // ============================================================
 
   static c_seconds_per_hour = 3600;
   static c_min_exp_time_in_hours = 1;
-  static _mt_db = new Map(); // id → { id, id_prev, id_prev_app, id_prev_app_stack, timestampl, data }
+
+  /** sy-uname equivalent — the platform user this process acts as. */
+  static _uname() {
+    return String(process.env.USER || ``);
+  }
+
+  static _db_row(id) {
+    const z2ui5_port = require(`../../z2ui5_port`);
+    return z2ui5_port.db({
+      op: `select_single`,
+      table: `z2ui5_t_01`,
+      fields: [],
+      where: [{ field: `id`, op: `eq`, value: String(id ?? ``) }],
+    });
+  }
 
   /** abap create — MODIFY z2ui5_t_01 (insert-or-overwrite by id). */
   create(a, b) {
@@ -203,13 +219,19 @@ class z2ui5_cl_core_srv_draft {
       }
       throw err;
     }
-    z2ui5_cl_core_srv_draft._mt_db.set(String(draft.id), {
-      id: draft.id,
-      id_prev: draft.id_prev ?? ``,
-      id_prev_app: draft.id_prev_app ?? ``,
-      id_prev_app_stack: draft.id_prev_app_stack ?? ``,
-      timestampl: Date.now(),
-      data: String(model_xml ?? ``),
+    const z2ui5_port = require(`../../z2ui5_port`);
+    z2ui5_port.db({
+      op: `modify`,
+      table: `z2ui5_t_01`,
+      row: {
+        id: draft.id,
+        id_prev: draft.id_prev ?? ``,
+        id_prev_app: draft.id_prev_app ?? ``,
+        id_prev_app_stack: draft.id_prev_app_stack ?? ``,
+        uname: z2ui5_cl_core_srv_draft._uname(),
+        timestampl: Date.now(),
+        data: String(model_xml ?? ``),
+      },
     });
   }
 
@@ -217,8 +239,13 @@ class z2ui5_cl_core_srv_draft {
   read(a, b) {
     const { id, check_load_app = true } =
       a !== null && typeof a === `object` && `id` in a ? a : { id: a, check_load_app: b };
-    const row = z2ui5_cl_core_srv_draft._mt_db.get(String(id ?? ``));
-    if (!row) {
+    const row = z2ui5_cl_core_srv_draft._db_row(id);
+    // Owner binding: a draft belongs to the user that created it and may only
+    // be restored by that same user (a leaked or guessed draft id cannot load
+    // another user's serialized state). Fail closed with the same exception
+    // as `not found`, so callers degrade identically. Legacy rows with a
+    // blank owner stay readable during the upgrade transition.
+    if (!row || (row.uname && row.uname !== z2ui5_cl_core_srv_draft._uname())) {
       const CXU = require(`../../00/03/z2ui5_cx_util_error`);
       throw new CXU(`NO_DRAFT_ENTRY_OF_PREVIOUS_REQUEST_FOUND`);
     }
@@ -245,14 +272,16 @@ class z2ui5_cl_core_srv_draft {
     };
   }
 
-  /** abap check_exists. */
+  /** abap check_exists — existence is owner-scoped (see read). */
   check_exists(id) {
-    return z2ui5_cl_core_srv_draft._mt_db.has(String(id ?? ``));
+    const row = z2ui5_cl_core_srv_draft._db_row(id);
+    return !!row && (!row.uname || row.uname === z2ui5_cl_core_srv_draft._uname());
   }
 
   /** abap count_entries. */
   count_entries() {
-    return z2ui5_cl_core_srv_draft._mt_db.size;
+    const z2ui5_port = require(`../../z2ui5_port`);
+    return z2ui5_port.db({ op: `select_table`, table: `z2ui5_t_01`, fields: [], where: [] }).length;
   }
 
   /** abap cleanup — drop entries older than the configured expiry. */
@@ -265,8 +294,12 @@ class z2ui5_cl_core_srv_draft {
       if (Number(cfg.draft_exp_time_in_hours) > hours) hours = Number(cfg.draft_exp_time_in_hours);
     } catch { /* exit not configured — minimum expiry */ }
     const cutoff = Date.now() - hours * z2ui5_cl_core_srv_draft.c_seconds_per_hour * 1000;
-    for (const [id, row] of z2ui5_cl_core_srv_draft._mt_db) {
-      if (row.timestampl < cutoff) z2ui5_cl_core_srv_draft._mt_db.delete(id);
+    const z2ui5_port = require(`../../z2ui5_port`);
+    const rows = z2ui5_port.db({ op: `select_table`, table: `z2ui5_t_01`, fields: [`id`, `timestampl`], where: [] });
+    for (const row of rows) {
+      if (row.timestampl < cutoff) {
+        z2ui5_port.db({ op: `delete`, table: `z2ui5_t_01`, where: [{ field: `id`, op: `eq`, value: row.id }] });
+      }
     }
   }
 }

@@ -15,8 +15,15 @@ class z2ui5_cl_app_messagemanager_js {
 ` + `    // A message key that is stable across a round-trip: two rows describing` + `
 ` + `    // the same problem (same text, type and target) map to the same key, so` + `
 ` + `    // reconciling never adds a duplicate or drops a still-wanted message.` + `
+` + `    // Joined with a control char (0x01) that cannot occur in message` + `
+` + `    // text/type/target, so distinct rows never collide into one key. Built` + `
+` + `    // via fromCharCode so the separator stays visible in the source (a raw` + `
+` + `    // control-char literal is invisible and easily mangled by tooling).` + `
+` + `    const KEY_SEP = String.fromCharCode(1);` + `
 ` + `    const keyOf = (o) =>` + `
-` + `      [o.MESSAGE ?? o.message, o.TYPE ?? o.type, o.TARGET ?? o.target].join("");` + `
+` + `      [o.MESSAGE ?? o.message, o.TYPE ?? o.type, o.TARGET ?? o.target].join(` + `
+` + `        KEY_SEP,` + `
+` + `      );` + `
 ` + `` + `
 ` + `    // Invisible companion control that bridges the UI5 message manager to a` + `
 ` + `    // two-way bound ABAP table (\`items\`). The table is the app's OWN messages:` + `
@@ -97,6 +104,11 @@ class z2ui5_cl_app_messagemanager_js {
 ` + `            type: r.TYPE ?? "Error",` + `
 ` + `            target: r.TARGET ?? "",` + `
 ` + `            additionalText: r.ADDITIONALTEXT ?? "",` + `
+` + `            // a free string column the app fills server-side (e.g. a display` + `
+` + `            // group for MessageItem.groupName - sap.ui.core.message.Message has` + `
+` + `            // no groupName slot, so grouping stays a backend decision bound to` + `
+` + `            // {message>code} rather than a frontend expression)` + `
+` + `            code: r.CODE ?? "",` + `
 ` + `            processor: this._processor,` + `
 ` + `          });` + `
 ` + `          this._messaging.addMessages(oMessage);` + `

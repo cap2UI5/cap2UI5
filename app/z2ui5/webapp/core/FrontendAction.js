@@ -9,6 +9,7 @@ sap.ui.define(
     "sap/ui/model/Sorter",
     "sap/m/library",
     "sap/ui/util/Storage",
+    "sap/ui/core/routing/HashChanger",
     "z2ui5/core/Lib",
     "z2ui5/core/ViewSlots",
     "z2ui5/core/AppState",
@@ -23,6 +24,7 @@ sap.ui.define(
     Sorter,
     mobileLibrary,
     Storage,
+    HashChanger,
     Lib,
     ViewSlots,
     AppState,
@@ -39,6 +41,17 @@ sap.ui.define(
     // ------------------------------------------------------------------
 
     const _URLHelper = mobileLibrary.URLHelper;
+
+    // Animation duration (ms) mapped to a "smooth" scroll request; 0 means an
+    // instant jump. Shared by every scroll path in evScrollTo.
+    const SMOOTH_SCROLL_MS = 300;
+
+    // SMART_VARIANT_INIT waits for the smart controls to register themselves at
+    // the SmartVariantManagement - that happens once their OData metadata has
+    // loaded, so the wait has to survive a slow service (5s) but must not run
+    // forever when no smart control is there at all.
+    const SMART_VARIANT_INIT_TRIES = 50;
+    const SMART_VARIANT_INIT_DELAY = 100;
 
     // ------------------------------------------------------------------
     // Launchpad helpers
@@ -76,6 +89,12 @@ sap.ui.define(
     const CONTROL_METHODS = {
       to: ["controlId", "string"], // target page + optional transitionName
       back: [],
+      toDetail: ["controlId"], // sap.m.SplitApp/SplitContainer: show a detail page
+      toMaster: ["controlId"], // sap.m.SplitApp/SplitContainer: show a master page
+      backDetail: [], // sap.m.SplitApp/SplitContainer: back in the detail stack
+      backMaster: [], // sap.m.SplitApp/SplitContainer: back in the master stack
+      setMode: ["string"], // sap.m.SplitApp/SplitContainer: SplitAppMode
+      navigateBack: [], // sap.m.QuickView/QuickViewCard: navigate one page back
       focus: [],
       scrollToIndex: ["int"],
       scrollTo: ["int", "int"],
@@ -85,12 +104,60 @@ sap.ui.define(
       discardProgress: ["controlId"],
       setNextStep: ["controlId"],
       goToStep: ["controlId", "bool"], // Wizard: target step + focus flag
-      openBy: ["domRef"], // DatePicker/TimePicker/Menu... anchored open
-      toggleBy: ["domRef"], // sap.m.Menu/Popover: open anchored if closed, close if open
+      openBy: ["anchor"], // DatePicker/TimePicker/Menu/MessagePopover... anchored open
+      toggleBy: ["anchor"], // sap.m.Menu/MessagePopover: open anchored if closed, close if open
       setActivePage: ["controlId"], // sap.m.Carousel
       expandToLevel: ["int"], // sap.m.Tree / sap.ui.table.TreeTable: expand to N levels
       collapseAll: [], // sap.m.Tree / sap.ui.table.TreeTable: collapse every node
+      setHiddenInPopin: ["object"], // sap.m.Table: hide columns by importance (JSON array of Priority keys)
+      enablePostButton: ["bool"], // sap.m.FeedInput: toggle the Post button independent of `enabled`
+      addStyleClass: ["string"], // sap.ui.core.Control: add a CSS style class
+      removeStyleClass: ["string"], // sap.ui.core.Control: remove a CSS style class
+      toggleStyleClass: ["string"], // sap.ui.core.Control: toggle a CSS style class
+      setAsyncURLHandler: ["string"], // sap.m.MessagePopover: name of a URL_POLICY below
     };
+
+    // sap.m.MessagePopover.setAsyncURLHandler expects a live JS callback that
+    // resolves a promise per message link - a shape no backend payload can
+    // carry, and one round-trip per link would be the wrong ergonomics anyway.
+    // The backend names one of these built-in policies instead, so the
+    // link-gating stays declarative data on the wire (see rule "the frontend is
+    // a thin, data-driven executor").
+    const URL_POLICIES = {
+      ALLOW_ALL: () => true,
+      // the sap.m MessagePopover demo case: in-app links (#/x, /path, ?q=) may
+      // be followed, anything that leaves the app (http:, mailto:, //host) is
+      // disabled in the popover.
+      RELATIVE_ONLY: (url) => !isAbsoluteUrl(url),
+      DENY_ALL: () => false,
+    };
+
+    function isAbsoluteUrl(url) {
+      const s = String(url ?? "").trim();
+      // a scheme ("http:", "mailto:", "javascript:") or a protocol-relative
+      // "//host" - everything else resolves against the app's own origin
+      return /^[a-z][a-z0-9+.-]*:/i.test(s) || s.startsWith("//");
+    }
+
+    // A method LISTED above carries explicit arg kinds (and some, like openBy/
+    // toggleBy, get special handling). A method NOT listed is still callable as
+    // long as it is a public control method that is not framework-hostile - so
+    // ordinary setters/toggles (setVisible, enablePostButton, setLayout, ...) work
+    // without enumerating each one here. The denylist protects abap2UI5's own
+    // invariants: nothing that frees or reparents a tracked control, swaps the
+    // model/binding out from under the framework, tampers with event handlers, or
+    // drives the render lifecycle by hand. (The backend is the trusted driver, so
+    // this is a footgun guard, not a security boundary - and control[method] is
+    // still checked to be a function before the call, so a typo just no-ops.)
+    const CONTROL_METHOD_DENY =
+      /^(_|destroy|bind|unbind|attach|detach|removeAll|addDependent|placeAt|rerender|invalidate|applySettings|clone|setModel|setBindingContext|setParent|setBinding|setAssociation)/;
+    function isSafeControlMethod(method) {
+      return (
+        typeof method === "string" &&
+        method.length > 0 &&
+        !CONTROL_METHOD_DENY.test(method)
+      );
+    }
 
     // global object -> lazy getter + its allowed methods (with arg kinds).
     const GLOBAL_TARGETS = {
@@ -135,15 +202,18 @@ sap.ui.define(
             (view && ViewSlots.byId(view.toUpperCase(), raw)) ||
             ViewSlots.resolveById(raw)
           );
-        case "domRef": {
+        case "anchor":
           // anchor argument for openBy-style methods: resolve the control id
-          // and hand over its DOM element (fallback: the control itself -
-          // every sap.m openBy accepts a control OR a DOM element)
-          const control =
+          // and hand over the CONTROL itself, not its DOM element. Every
+          // sap.m openBy accepts a control, and MessagePopover.openBy
+          // dereferences oControl.getParent() on its argument, so a bare DOM
+          // element throws ("getParent is not a function") and the popup never
+          // opens. DatePicker/TimePicker/Menu accept a control just as well,
+          // so a control is the universally-correct anchor.
+          return (
             (view && ViewSlots.byId(view.toUpperCase(), raw)) ||
-            ViewSlots.resolveById(raw);
-          return control?.getDomRef?.() ?? control;
-        }
+            ViewSlots.resolveById(raw)
+          );
         case "object":
           try {
             return JSON.parse(raw);
@@ -155,7 +225,21 @@ sap.ui.define(
       }
     }
 
+    // Infer the type of an argument for a method with no declared kinds (the
+    // generalized-allowlist path). abap2UI5 sends booleans as the ABAP tokens
+    // 'X'/space, so recognize those; everything else passes through as a string
+    // (UI5 coerces numeric strings for index/number setters). A method that needs
+    // a literal 'X'/'true'/'false' string or a JSON object must be declared in
+    // CONTROL_METHODS with an explicit kind, which overrides this inference.
+    function castArgAuto(raw) {
+      if (raw === "X" || raw === "true") return true;
+      if (raw === "" || raw === " " || raw === "false") return false;
+      return raw;
+    }
+
     function castArgs(kinds, rawArgs, view) {
+      // kinds === null: unlisted-but-allowed method, infer each arg's type
+      if (kinds === null) return rawArgs.map((raw) => castArgAuto(raw));
       // only cast args the caller actually sent - padding missing trailing
       // args would turn open() into open(undefined) and ints into NaN
       return kinds
@@ -163,20 +247,37 @@ sap.ui.define(
         .map((kind, i) => castArg(kind, rawArgs[i], view));
     }
 
+    // Run fn once the openBy/toggleBy anchor is in the DOM. A control anchor
+    // goes through Lib.whenRendered (immediate if already rendered, otherwise
+    // after its next onAfterRendering); anything else (a bare DOM element, or a
+    // missing anchor) runs fn straight away.
+    function whenAnchorRendered(anchor, oController, fn) {
+      if (anchor && typeof anchor.getDomRef === "function") {
+        Lib.whenRendered(anchor, oController, fn);
+      } else {
+        fn();
+      }
+    }
+
     // args: [_, id, view, method, ...params]
     function evControlCallById(oController, args) {
-      const [id, view, method] = [args[1], args[2], args[3]];
-      const kinds = CONTROL_METHODS[method];
+      const [, id, view, method] = args;
+      let kinds = CONTROL_METHODS[method];
       if (!kinds) {
-        Lib.logError(`CONTROL_BY_ID: method '${method}' not allowed`);
-        return;
+        // not explicitly listed: allow any public, non-hostile control method
+        // (kinds = null -> arg types are inferred), else fail closed.
+        if (!isSafeControlMethod(method)) {
+          Lib.logError(`CONTROL_BY_ID: method '${method}' not allowed`);
+          return;
+        }
+        kinds = null;
       }
       const control = view
         ? ViewSlots.byId(view.toUpperCase(), id)
         : ViewSlots.resolveById(id);
       // toggleBy is not a real control method: open the control anchored to
-      // the domRef if it is closed, close it if it is already open (mirrors
-      // openBy for a press-to-toggle button). The popup's open state lives
+      // the anchor control if it is closed, close it if it is already open
+      // (mirrors openBy for a press-to-toggle button). The popup's open state lives
       // client-side, so the decision stays here rather than round-tripping.
       if (method === "toggleBy") {
         if (!control || typeof control.openBy !== "function") {
@@ -186,11 +287,64 @@ sap.ui.define(
           return;
         }
         const anchor = castArgs(kinds, args.slice(4), view)[0];
-        if (control.isOpen?.()) {
-          control.close();
-        } else {
-          control.openBy(anchor);
+        // Defer the open until the anchor is rendered: a Save-style roundtrip
+        // can make the anchor (e.g. a button hidden until there are messages)
+        // visible in the same response, so it may not be in the DOM yet.
+        whenAnchorRendered(anchor, oController, () => {
+          if (control.isOpen?.()) control.close();
+          else control.openBy(anchor);
+        });
+        return;
+      }
+      // setAsyncURLHandler takes a FUNCTION, so the argument names a policy
+      // (see URL_POLICIES) and the client installs the matching built-in
+      // validator - the wire still carries data, never code.
+      if (method === "setAsyncURLHandler") {
+        const policy = String(args[4] ?? "").toUpperCase();
+        const isAllowed = URL_POLICIES[policy];
+        if (!isAllowed) {
+          Lib.logError(
+            `CONTROL_BY_ID: unknown URL policy '${args[4]}' (allowed: ${Object.keys(URL_POLICIES).join(", ")})`,
+          );
+          return;
         }
+        if (!control || typeof control.setAsyncURLHandler !== "function") {
+          Lib.logError(
+            `CONTROL_BY_ID: 'setAsyncURLHandler' not callable on control '${id}'`,
+          );
+          return;
+        }
+        control.setAsyncURLHandler((config) => {
+          // the control hands over { url, id, promise }; the promise's
+          // resolve() decides whether the link stays clickable
+          config?.promise?.resolve({
+            allowed: isAllowed(config.url),
+            id: config.id,
+          });
+        });
+        return;
+      }
+      // openBy is handled BEFORE the generic callable check: a control
+      // without an own openBy (sap.ui.unified.Menu) still supports the
+      // anchored open via its open(bWithKeyboard, opener, my, at, of)
+      // signature - the anchor doubles as opener and dock reference.
+      if (method === "openBy") {
+        if (
+          !control ||
+          (typeof control.openBy !== "function" &&
+            typeof control.open !== "function")
+        ) {
+          Lib.logError(
+            `CONTROL_BY_ID: 'openBy' not callable on control '${id}'`,
+          );
+          return;
+        }
+        const anchor = castArgs(kinds, args.slice(4), view)[0];
+        // Same reason as toggleBy: wait for the anchor to render.
+        whenAnchorRendered(anchor, oController, () => {
+          if (typeof control.openBy === "function") control.openBy(anchor);
+          else control.open(false, anchor, "begin top", "begin bottom", anchor);
+        });
         return;
       }
       if (!control || typeof control[method] !== "function") {
@@ -204,7 +358,7 @@ sap.ui.define(
 
     // args: [_, object, method, ...params]
     function evControlCall(oController, args) {
-      const [name, method] = [args[1], args[2]];
+      const [, name, method] = args;
       const target = GLOBAL_TARGETS[name];
       const kinds = target?.methods[method];
       if (!kinds) {
@@ -216,7 +370,40 @@ sap.ui.define(
         Lib.logError(`CONTROL_GLOBAL: '${name}.${method}' not available`);
         return;
       }
-      obj[method](...castArgs(kinds, args.slice(3)));
+      const raw = args.slice(3);
+      // a single-string method (MessageToast.show, MessageBox.*) may receive
+      // extra positional values: the first arg is then a template and its
+      // {0},{1},... placeholders are replaced by the client-resolved extras, so
+      // a "X has been activated" toast can be composed on the frontend without a
+      // server round-trip. A lone string is passed through unchanged.
+      if (kinds.length === 1 && kinds[0] === "string" && raw.length > 1) {
+        obj[method](formatTemplate(String(raw[0]), raw.slice(1)));
+        return;
+      }
+      obj[method](...castArgs(kinds, raw));
+    }
+
+    // replace placeholders in a template with the positional values (as
+    // strings). Two forms:
+    //   {N}                -> the Nth value verbatim
+    //   {N?trueText:falseText} -> trueText when the Nth value is truthy, else
+    //                         falseText (a boolean event param arrives as
+    //                         "true"/"false", so a toggle can toast
+    //                         "Pressed"/"Unpressed" without a server round-trip;
+    //                         trueText/falseText carry no ":" or "}")
+    // an out-of-range placeholder is left as-is.
+    function formatTemplate(tpl, values) {
+      return tpl.replace(
+        /\{(\d+)(?:\?([^:}]*):([^}]*))?\}/g,
+        (m, i, tText, fText) => {
+          const n = Number(i);
+          if (n >= values.length) return m;
+          const v = String(values[n]);
+          if (tText === undefined) return v;
+          const truthy = v !== "" && !/^(false|0|undefined|null)$/i.test(v);
+          return truthy ? tText : fText;
+        },
+      );
     }
 
     // ------------------------------------------------------------------
@@ -249,8 +436,9 @@ sap.ui.define(
     const isEmpty = (v) => v == null || v === "";
 
     // binding method -> builder that turns the trailing params into the
-    // aggregation-update call. Same declarative-whitelist shape as
-    // CONTROL_METHODS: an unlisted method fails closed at the lookup.
+    // aggregation-update call. A strict whitelist (unlike CONTROL_METHODS,
+    // which now allows any non-denied public control method): an unlisted
+    // binding method fails closed at the lookup.
     //   filter: params = [path, operator, value1, value2?]
     //   sort:   params = [path, descending?, group?] (ABAP bools "X"/"")
     // The backend arg serializer keeps empty args between filled ones as ''
@@ -339,7 +527,7 @@ sap.ui.define(
 
     // args: [_, id, aggregation, method, ...params]
     function evBindingCall(oController, args) {
-      const [id, aggregation, method] = [args[1], args[2], args[3]];
+      const [, id, aggregation, method] = args;
       const build = BINDING_METHODS[method];
       if (!build) {
         Lib.logError(`BINDING_CALL: method '${method}' not allowed`);
@@ -363,6 +551,18 @@ sap.ui.define(
 
     function evHistoryBack() {
       history.back();
+    }
+
+    function evNavToRoute(oController, args) {
+      // Navigate to another app by setting the hash route - the UI5 navTo
+      // equivalent. args[1] is the target app class (or a full "app/<CLASS>"
+      // route). setHash adds a browser history entry, so Back returns to the
+      // current app; the HashChanger listener (Server.onHashChange) then starts
+      // the target app. No-op unless the session enabled routing.
+      const raw = Lib.toText(args[1]);
+      if (!raw) return;
+      const cls = Lib.appOfRoute(raw) || raw;
+      HashChanger.getInstance().setHash(Lib.routeForApp(cls));
     }
 
     function evClipboardCopy(oController, args) {
@@ -407,7 +607,6 @@ sap.ui.define(
       const hasLimit = args[2] !== undefined && args[2] !== "";
       const viewKey = hasLimit ? args[2] : args[1];
       const limit = hasLimit ? Number(args[1]) : NaN;
-      const model = ViewSlots.getView(viewKey)?.getModel();
 
       const isValidLimit = Number.isFinite(limit) && limit > 0;
       if (isValidLimit) {
@@ -415,9 +614,19 @@ sap.ui.define(
       } else {
         delete AppState.state.viewSizeLimits[viewKey];
       }
+
+      // MAIN and the two nested views share one root model via propagation, so
+      // resolve the model through MAIN for those slots and apply the effective
+      // (largest) limit across them; popup/popover keep their own model/limit.
+      const modelKey = Lib.isRootModelSlot(viewKey) ? "MAIN" : viewKey;
+      const model = ViewSlots.getView(modelKey)?.getModel();
       if (model) {
+        const effective = Lib.effectiveSizeLimit(
+          AppState.state.viewSizeLimits,
+          viewKey,
+        );
         // 100 is the UI5 JSONModel default size limit.
-        model.setSizeLimit(isValidLimit ? limit : 100);
+        model.setSizeLimit(effective ?? 100);
         model.refresh(true);
       }
     }
@@ -587,6 +796,300 @@ sap.ui.define(
       if (newWindow) newWindow.opener = null;
     }
 
+    // BIND_ELEMENT: element-bind a whole view slot (popup / popover / main) to
+    // a row of a registered table, so the fragment's relative bindings ({Name},
+    // {ProductPicUrl}, ...) resolve against that row - the abap2UI5 equivalent of
+    // oControl.bindElement(oCtx.getPath()). args = [slot, index, path]; the path
+    // comes from client->_bind( table ) (braces already stripped server-side and
+    // again here defensively), the slot from the follow_up_action view param.
+    function evBindElement(oController, args) {
+      const slot = args[1] || "MAIN";
+      const view = ViewSlots.getView(slot);
+      if (!view) {
+        Lib.logError(`BIND_ELEMENT: no view for slot '${slot}'`);
+        return;
+      }
+      const path = String(args[3] ?? "").replace(/[{}]/g, "");
+      if (!path) {
+        Lib.logError("BIND_ELEMENT: empty binding path");
+        return;
+      }
+      view.bindElement(`${path}/${args[2]}`);
+    }
+
+    // The anchor. setPersControler() is sap.ui.comp's own setter and does
+    // more than assign the field: it also creates the control promise that
+    // initialise() insists on. A page variant never gets that call -
+    // addPersonalizableControl() returns early for isPageVariant() and only
+    // the single-control case reaches setPersControler() - which is exactly
+    // why a controller-less app ends up with no anchor and no promise.
+    function anchorPersoControl(oSVM, target) {
+      if (oSVM._oPersoControl) {
+        // a runtime that anchors the control itself is left alone
+      } else if (typeof oSVM.setPersControler === "function") {
+        oSVM.setPersControler(target);
+      } else {
+        // older runtimes without the setter: the field alone still carries
+        // the write path (saving), which is better than nothing
+        oSVM._oPersoControl = target;
+      }
+    }
+
+    // With the anchor in place the load flow still has to be started once.
+    // A smart control does that itself when it registers - but only then,
+    // and it may already have tried (and aborted) before the anchor existed.
+    // So wait for the control's wrapper and initialise it if nobody has:
+    // a wrapper is required (initialise answers "unknown control" without
+    // one) and an initialised wrapper must be left alone ("already executed").
+    function ensureInitialised(oSVM, target, attempt, fnCallback) {
+      if (Lib.isDestroyed(oSVM)) return;
+      const wrapper = oSVM._getControlWrapper
+        ? oSVM._getControlWrapper(target)
+        : null;
+      if (!wrapper) {
+        if (attempt < SMART_VARIANT_INIT_TRIES) {
+          setTimeout(
+            () => ensureInitialised(oSVM, target, attempt + 1, fnCallback),
+            SMART_VARIANT_INIT_DELAY,
+          );
+        }
+        return;
+      }
+      if (wrapper.bInitialized) return;
+      oSVM.initialise(fnCallback || (() => {}), target);
+    }
+
+    // SMART_VARIANT_INIT: place the anchor sap.ui.comp variant management needs
+    // and that only an app controller would otherwise set - the personalizable
+    // control the SmartVariantManagement works against (_oPersoControl).
+    // args = [_, svmId, controlId?].
+    //
+    // Why an anchor and not a call: SmartVariantManagement.initialise(fn, control)
+    // aborts its load flow when `_oPersoControl` is missing ("no personalizable
+    // component available") and marks that control's wrapper as done - a second
+    // call answers "already executed". The smart controls call initialise on
+    // themselves as soon as their metadata arrives, so an anchor set too late
+    // buys nothing: saving works (it only reads the field) but stored variants
+    // are never loaded. Hence: set the field as EARLY as the control exists, and
+    // leave the initialise call to the smart control, which then finds the
+    // anchor in place. Only when no control id was given does this wait for the
+    // registration list and call initialise itself (nobody else will).
+    function evSmartVariantInit(oController, args) {
+      const [, svmId, controlId] = args;
+      let tries = 0;
+      const run = () => {
+        const oSVM = ViewSlots.resolveById(svmId);
+        const control = controlId ? ViewSlots.resolveById(controlId) : null;
+        if (!oSVM || (controlId && !control)) {
+          // the view may still be building - wait for both controls to exist
+          if (tries++ < SMART_VARIANT_INIT_TRIES) {
+            setTimeout(run, SMART_VARIANT_INIT_DELAY);
+            return;
+          }
+          Lib.logError(
+            `SMART_VARIANT_INIT: '${controlId ? `${svmId}' / '${controlId}` : svmId}' not found`,
+          );
+          return;
+        }
+        if (Lib.isDestroyed(oSVM) || typeof oSVM.initialise !== "function") {
+          Lib.logError(
+            `SMART_VARIANT_INIT: no SmartVariantManagement for id '${svmId}'`,
+          );
+          return;
+        }
+        let target = control;
+        if (!target) {
+          // no control named: fall back to the first one that registered, which
+          // means waiting for that registration (it follows the metadata load)
+          const registered = oSVM.getPersonalizableControls
+            ? oSVM.getPersonalizableControls()
+            : [];
+          if (!registered.length) {
+            if (tries++ < SMART_VARIANT_INIT_TRIES) {
+              setTimeout(run, SMART_VARIANT_INIT_DELAY);
+              return;
+            }
+            Lib.logError(
+              `SMART_VARIANT_INIT: no personalizable control registered at '${svmId}'`,
+            );
+            return;
+          }
+          target = ViewSlots.resolveById(registered[0].getControl());
+          if (!target) return;
+        }
+        anchorPersoControl(oSVM, target);
+        ensureInitialised(oSVM, target, 0);
+      };
+
+      run();
+    }
+
+    // ------------------------------------------------------------------
+    // FILTER_BAR_VARIANT_INIT: wire a CLASSIC sap.ui.comp.filterbar.FilterBar
+    // to a SmartVariantManagement. args = [_, svmId, filterBarId].
+    //
+    // A SmartFilterBar registers itself at the variant management (it knows its
+    // fields from the OData metadata), so SMART_VARIANT_INIT above only has to
+    // place the anchor. A classic FilterBar knows nothing about variants: every
+    // list-report controller hand-writes the same three callbacks
+    // (registerFetchData / registerApplyData / registerGetFiltersWithValues),
+    // adds a PersonalizableInfo and marks the variant dirty on each filter
+    // change. That is boilerplate over the bar's own filter items - data, not
+    // app logic - so the framework owns it and the app needs no JavaScript.
+    // ------------------------------------------------------------------
+
+    // marker so a re-sent action cannot stack a second set of callbacks and
+    // change handlers on the same bar (a rebuilt view reuses the ids, but it
+    // builds NEW control instances, which arrive here unmarked)
+    const FILTER_BAR_WIRED = "_z2ui5FilterBarVariantWired";
+
+    function filterItemControl(item) {
+      return item && typeof item.getControl === "function"
+        ? item.getControl()
+        : null;
+    }
+
+    function filterItemValue(item) {
+      const control = filterItemControl(item);
+      return control && typeof control.getValue === "function"
+        ? control.getValue()
+        : "";
+    }
+
+    // what a variant stores, how it is put back, and which filters count as
+    // "assigned" for the bar's own summary text
+    function registerFilterBarCallbacks(oFilterBar) {
+      oFilterBar.registerFetchData(() =>
+        oFilterBar.getAllFilterItems().map((item) => ({
+          groupName: item.getGroupName(),
+          fieldName: item.getName(),
+          fieldData: filterItemValue(item),
+        })),
+      );
+      oFilterBar.registerApplyData((data) => {
+        (data || []).forEach((entry) => {
+          const control = oFilterBar.determineControlByName(
+            entry.fieldName,
+            entry.groupName,
+          );
+          // setValue, not a model write: the two-way binding abap2UI5 put on
+          // the property carries the restored value back to the backend on the
+          // next roundtrip, so selecting a variant needs none of its own
+          if (control && typeof control.setValue === "function") {
+            control.setValue(entry.fieldData);
+          }
+        });
+      });
+      oFilterBar.registerGetFiltersWithValues(() =>
+        oFilterBar
+          .getFilterGroupItems()
+          .filter((item) => String(filterItemValue(item)).length > 0),
+      );
+    }
+
+    // every filter change makes the current variant dirty (the "*" next to the
+    // variant title) and refreshes the bar's assigned-filters summary
+    function attachFilterBarChange(oSVM, oFilterBar) {
+      oFilterBar.getAllFilterItems().forEach((item) => {
+        const control = filterItemControl(item);
+        if (!control || typeof control.attachChange !== "function") return;
+        control.attachChange((oEvent) => {
+          if (typeof oSVM.currentVariantSetModified === "function") {
+            oSVM.currentVariantSetModified(true);
+          }
+          if (typeof oFilterBar.fireFilterChange === "function") {
+            oFilterBar.fireFilterChange(oEvent);
+          }
+        });
+      });
+    }
+
+    // sap.ui.comp is SAPUI5-only, so PersonalizableInfo must never be a hard
+    // dependency of this file (it 404s on OpenUI5 and would kill the component
+    // load). Resolve it at call time: synchronously when the SmartVariant-
+    // Management already pulled it in, asynchronously otherwise.
+    function withPersonalizableInfo(callback) {
+      const name = "sap/ui/comp/smartvariants/PersonalizableInfo";
+      if (
+        typeof sap === "undefined" ||
+        !sap.ui ||
+        typeof sap.ui.require !== "function"
+      ) {
+        Lib.logError("FILTER_BAR_VARIANT_INIT: sap.ui.require not available");
+        return;
+      }
+      const loaded = sap.ui.require(name);
+      if (loaded) {
+        callback(loaded);
+        return;
+      }
+      sap.ui.require([name], callback, () =>
+        Lib.logError(
+          "FILTER_BAR_VARIANT_INIT: sap.ui.comp.smartvariants not available",
+        ),
+      );
+    }
+
+    function evFilterBarVariantInit(oController, args) {
+      const [, svmId, filterBarId] = args;
+      let tries = 0;
+      const run = () => {
+        const oSVM = ViewSlots.resolveById(svmId);
+        const oFilterBar = ViewSlots.resolveById(filterBarId);
+        if (!oSVM || !oFilterBar) {
+          // the view may still be building - wait for both controls to exist
+          if (tries++ < SMART_VARIANT_INIT_TRIES) {
+            setTimeout(run, SMART_VARIANT_INIT_DELAY);
+            return;
+          }
+          Lib.logError(
+            `FILTER_BAR_VARIANT_INIT: '${svmId}' / '${filterBarId}' not found`,
+          );
+          return;
+        }
+        if (
+          Lib.isDestroyed(oSVM) ||
+          typeof oSVM.addPersonalizableControl !== "function"
+        ) {
+          Lib.logError(
+            `FILTER_BAR_VARIANT_INIT: no SmartVariantManagement for id '${svmId}'`,
+          );
+          return;
+        }
+        if (typeof oFilterBar.registerFetchData !== "function") {
+          Lib.logError(
+            `FILTER_BAR_VARIANT_INIT: no FilterBar for id '${filterBarId}'`,
+          );
+          return;
+        }
+        if (oFilterBar[FILTER_BAR_WIRED]) return;
+        oFilterBar[FILTER_BAR_WIRED] = true;
+
+        registerFilterBarCallbacks(oFilterBar);
+        attachFilterBarChange(oSVM, oFilterBar);
+        withPersonalizableInfo((PersonalizableInfo) => {
+          oSVM.addPersonalizableControl(
+            new PersonalizableInfo({
+              type: "filterBar",
+              keyName: "persistencyKey",
+              dataSource: "",
+              control: oFilterBar,
+            }),
+          );
+          anchorPersoControl(oSVM, oFilterBar);
+          // the load flow ends in registerApplyData, so the bar is clean again
+          // right after it - drop the "*" the restored values would leave
+          ensureInitialised(oSVM, oFilterBar, 0, () => {
+            if (typeof oSVM.currentVariantSetModified === "function") {
+              oSVM.currentVariantSetModified(false);
+            }
+          });
+        });
+      };
+
+      run();
+    }
+
     function evUrlHelper(oController, args) {
       const params = args[2] ?? {};
       const actions = {
@@ -647,6 +1150,104 @@ sap.ui.define(
       }, delay);
     }
 
+    // ------------------------------------------------------------------
+    // KEYBOARD_SHORTCUT: bind a key combination to a NAMED BACKEND EVENT -
+    // the declarative equivalent of a sap.ui.core.CommandExecution shortcut
+    // (which needs a controller method and therefore has no place in a
+    // controller-less app). The backend registers "combo -> event" pairs as
+    // data; the document listener below is installed once and always reads
+    // the CURRENT registry, so an app switch (which resets AppState) starts
+    // from an empty set without touching the listener.
+    // ------------------------------------------------------------------
+
+    // in the order they are emitted into a normalized combo, so registration
+    // and keydown produce the same string for any spelling
+    const SHORTCUT_MODIFIERS = ["ctrl", "shift", "alt", "meta"];
+
+    // spellings apps/UI5 use for the same modifier or key
+    const SHORTCUT_ALIASES = {
+      control: "ctrl",
+      cmd: "meta",
+      command: "meta",
+      option: "alt",
+      esc: "escape",
+      del: "delete",
+      ins: "insert",
+      return: "enter",
+      space: " ",
+    };
+
+    function shortcutToken(part) {
+      const t = part.trim().toLowerCase();
+      return SHORTCUT_ALIASES[t] ?? t;
+    }
+
+    // "Ctrl+Shift+S" / "shift + CTRL + s" -> "ctrl+shift+s". Returns an empty
+    // string when no actual key (only modifiers) is named.
+    function normalizeShortcut(combo) {
+      const parts = String(combo ?? "")
+        .split("+")
+        .map(shortcutToken)
+        .filter((p) => p !== "");
+      const mods = SHORTCUT_MODIFIERS.filter((m) => parts.includes(m));
+      const keys = parts.filter((p) => !SHORTCUT_MODIFIERS.includes(p));
+      if (keys.length === 0) return "";
+      return [...mods, keys[keys.length - 1]].join("+");
+    }
+
+    // the same normalized form for an actual keydown event
+    function shortcutFromEvent(oEvent) {
+      const key = String(oEvent.key ?? "").toLowerCase();
+      // a bare modifier press is not a shortcut
+      if (key === "" || SHORTCUT_MODIFIERS.includes(shortcutToken(key)))
+        return "";
+      const mods = [];
+      if (oEvent.ctrlKey) mods.push("ctrl");
+      if (oEvent.shiftKey) mods.push("shift");
+      if (oEvent.altKey) mods.push("alt");
+      if (oEvent.metaKey) mods.push("meta");
+      return [...mods, key].join("+");
+    }
+
+    let shortcutListener = null;
+
+    function installShortcutListener() {
+      if (shortcutListener || typeof document === "undefined") return;
+      shortcutListener = (oEvent) => {
+        try {
+          const entry = AppState.state.shortcuts[shortcutFromEvent(oEvent)];
+          if (!entry) return;
+          // the browser's own default for the combo (Ctrl+S saves the page,
+          // Ctrl+D bookmarks it) must not fire alongside the app command
+          oEvent.preventDefault();
+          entry.controller.eB([entry.event]);
+        } catch (e) {
+          Lib.logError("KEYBOARD_SHORTCUT: dispatch failed", e);
+        }
+      };
+      document.addEventListener("keydown", shortcutListener);
+    }
+
+    // args: [_, combo, eventName] - an empty event name unregisters the combo
+    function evKeyboardShortcut(oController, args) {
+      const combo = normalizeShortcut(args[1]);
+      if (!combo) {
+        Lib.logError(
+          `KEYBOARD_SHORTCUT: '${args[1]}' names no key to bind (modifiers only?)`,
+        );
+        return;
+      }
+      const shortcuts = AppState.state.shortcuts;
+      if (!args[2]) {
+        delete shortcuts[combo];
+        return;
+      }
+      // re-registering a combo replaces it, so the backend can rebind a
+      // shortcut without unregistering it first
+      shortcuts[combo] = { event: args[2], controller: oController };
+      installShortcutListener();
+    }
+
     function evSetInputMode(oController, args) {
       try {
         const oElement = ViewSlots.byId("MAIN", args[1]);
@@ -667,7 +1268,10 @@ sap.ui.define(
     }
 
     function evSetFocus(oController, args) {
-      const oElement = ViewSlots.byId("MAIN", args[1]);
+      // resolveById (not byId "MAIN") so a fully-qualified control id also
+      // resolves - ids that come from a UI5 Message (getControlIds()) or any
+      // event carry the view prefix and only match via the global registry.
+      const oElement = ViewSlots.resolveById(args[1]);
       if (!oElement) return;
 
       const applyFocus = () => {
@@ -717,7 +1321,7 @@ sap.ui.define(
           const delegate = oElement.getScrollDelegate?.();
           if (delegate?.scrollTo) {
             // ScrollEnablement / iScroll delegate: scrollTo(x, y, time)
-            delegate.scrollTo(x, y, smooth ? 300 : 0);
+            delegate.scrollTo(x, y, smooth ? SMOOTH_SCROLL_MS : 0);
             handled = true;
           }
         } catch {
@@ -730,15 +1334,12 @@ sap.ui.define(
             oElement.getDomRef();
           if (dom?.scrollTo) {
             dom.scrollTo({ top: y, left: x, behavior });
-            handled = true;
           } else if (dom) {
             dom.scrollTop = y;
             dom.scrollLeft = x;
-            handled = true;
           } else if (oElement.scrollTo) {
             // sap.m.Page.scrollTo(y, time) - vertical only
-            oElement.scrollTo(y, smooth ? 300 : 0);
-            handled = true;
+            oElement.scrollTo(y, smooth ? SMOOTH_SCROLL_MS : 0);
           }
         }
       } catch (e) {
@@ -754,7 +1355,9 @@ sap.ui.define(
       // Modern declarative scroll: bring a control into the viewport,
       // regardless of where the surrounding scroll container currently is.
       try {
-        const oElement = ViewSlots.byId("MAIN", args[1]);
+        // resolveById so a fully-qualified control id (e.g. from a UI5
+        // Message's getControlIds()) also resolves, not just a MAIN-local id.
+        const oElement = ViewSlots.resolveById(args[1]);
         if (!oElement) return;
         const dom = oElement.getDomRef();
         if (!dom || !dom.scrollIntoView) return;
@@ -847,6 +1450,7 @@ sap.ui.define(
     const handlers = {
       SET_SIZE_LIMIT: evSetSizeLimit,
       HISTORY_BACK: evHistoryBack,
+      NAV_TO_ROUTE: evNavToRoute,
       CLIPBOARD_COPY: evClipboardCopy,
       CLIPBOARD_APP_STATE: evClipboardAppState,
       SET_ODATA_MODEL: evSetODataModel,
@@ -859,6 +1463,7 @@ sap.ui.define(
       OPEN_NEW_TAB: evOpenNewTab,
       POPUP_CLOSE: () => ViewSlots.destroy("POPUP"),
       POPOVER_CLOSE: () => ViewSlots.destroy("POPOVER"),
+      BIND_ELEMENT: evBindElement,
       URLHELPER: evUrlHelper,
       IMAGE_EDITOR_POPUP_CLOSE: evImageEditorPopupClose,
       SET_TITLE: evSetTitle,
@@ -868,9 +1473,12 @@ sap.ui.define(
       SCROLL_INTO_VIEW: evScrollIntoView,
       START_TIMER: evStartTimer,
       KEYBOARD_SET_MODE: evSetInputMode,
+      KEYBOARD_SHORTCUT: evKeyboardShortcut,
       Z2UI5: evZ2ui5Custom,
       WIZARD_SET_NEXT_STEP: evWizardSetNextStep,
       PLAY_AUDIO: evPlayAudio,
+      SMART_VARIANT_INIT: evSmartVariantInit,
+      FILTER_BAR_VARIANT_INIT: evFilterBarVariantInit,
       CONTROL_BY_ID: evControlCallById,
       CONTROL_GLOBAL: evControlCall,
       BINDING_CALL: evBindingCall,

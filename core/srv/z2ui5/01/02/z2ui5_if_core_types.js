@@ -11,6 +11,9 @@ const z2ui5_if_core_types = Object.freeze({
   /** Wire prefixes used in press="…" handlers + the two-way model namespace. */
   cs_ui5: Object.freeze({
     event_backend_function:  ".eB",
+    // same roundtrip as .eB, but cancels the control's built-in default first
+    // (needs the UI5 $event object, see z2ui5_cl_core_srv_event.get_event)
+    event_backend_prevent:   ".eBP",
     event_frontend_function: ".eF",
     two_way_model:           "XX",
   }),

@@ -5,6 +5,7 @@ sap.ui.define(
   ["sap/ui/core/Control", "z2ui5/core/Lib", "z2ui5/core/AppState"],
   (Control, Lib, AppState) => {
     "use strict";
+    // OBSOLETE: replaced by the frontend event cs_event-set_title_launchpad - kept for backward compatibility.
     return Control.extend("z2ui5.cc.LPTitle", {
       metadata: {
         properties: {
@@ -17,7 +18,9 @@ sap.ui.define(
         },
       },
       setTitle(val) {
-        this.setProperty("title", val);
+        // Empty renderer -> suppress the no-op invalidation; the shell title
+        // is set explicitly below.
+        this.setProperty("title", val, true);
         try {
           const shell = AppState.state.oLaunchpad?.ShellUIService;
           if (!shell?.setTitle) return;
@@ -36,7 +39,7 @@ sap.ui.define(
       },
 
       setApplicationFullWidth(val) {
-        this.setProperty("ApplicationFullWidth", val);
+        this.setProperty("ApplicationFullWidth", val, true);
         try {
           const config = AppState.state.oLaunchpad?.AppConfiguration;
           if (config?.setApplicationFullWidth) {

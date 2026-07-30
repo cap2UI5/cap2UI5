@@ -22,14 +22,40 @@ module.exports = async function service(req) {
   // user exits (set_config_http_get/_post) see path/params/headers. ABAP
   // _main calls init_context unconditionally before dispatching by method.
   let reqInfo;
+  const innerReq = req?.req || req?._?.req || null;
   try {
-    const innerReq = req?.req || req?._?.req || null;
     const innerRes = req?.res || req?._?.res || null;
     if (innerReq && innerRes) {
       reqInfo = z2ui5_cl_util_http.factory_cloud(innerReq, innerRes).get_req_info();
     }
   } catch {
     // CAP didn't expose req/res — exit context stays at defaults. Non-fatal.
+  }
+
+  // CSRF gate (ABAP main( ), POST branch): a CDS action call is always a
+  // POST, the only method that can change state. Opt-in via the exit config
+  // (check_csrf_active, default off — nothing is rejected then).
+  try {
+    const cfg = {};
+    require(`./z2ui5_cl_exit`).get_instance().set_config_http_post({ cs_config: cfg });
+    if (cfg.check_csrf_active === true) {
+      const h = innerReq?.headers || {};
+      const rejected = module.exports._check_csrf_rejected({
+        active: true,
+        origin: h.origin || ``,
+        referer: h.referer || ``,
+        host: h.host || ``,
+      });
+      if (rejected) {
+        return {
+          body: `CSRF validation failed - cross-origin POST rejected`,
+          status_code: 403,
+          status_reason: `Forbidden`,
+        };
+      }
+    }
+  } catch {
+    // exit not configured — csrf stays inactive
   }
 
   let responseJson;
@@ -50,6 +76,37 @@ module.exports = async function service(req) {
 module.exports._reset_sticky = () => engine._reset_sticky();
 
 /**
+ * ABAP CLASS-METHODS _csrf_host_authority — reduce an Origin/Referer/Host
+ * value to its bare host[:port] authority (lower-cased, scheme and
+ * path/query/fragment stripped) for same-origin comparison.
+ */
+module.exports._csrf_host_authority = function _csrf_host_authority(val) {
+  let v = String(val ?? ``).toLowerCase();
+  const pos = v.indexOf(`://`);
+  if (pos >= 0) v = v.slice(pos + 3);
+  return v.split(`/`)[0].split(`?`)[0].split(`#`)[0];
+};
+
+/**
+ * ABAP CLASS-METHODS _check_csrf_rejected — pure and side-effect free so it
+ * is unit-testable without a server mock. Returns true only when csrf is
+ * active AND an Origin/Referer is present AND its host authority differs
+ * from the app's own Host header. Lenient by design: nothing to compare →
+ * allow (do not lock out proxies/old clients that strip these headers).
+ */
+module.exports._check_csrf_rejected = function _check_csrf_rejected(a) {
+  const { active = false, origin = ``, referer = ``, host = `` } = a || {};
+  if (active !== true && active !== `X`) return false;
+
+  // prefer Origin (sent on every cross-origin POST and on same-origin
+  // fetch), fall back to Referer when Origin is absent
+  const source = origin ? origin : referer;
+  if (!source || !host) return false;
+
+  return module.exports._csrf_host_authority(source) !== module.exports._csrf_host_authority(host);
+};
+
+/**
  * ABAP CLASS-METHODS _http_get — build the UI5 bootstrap page from the exit
  * configuration (same skeleton as the ABAP page; the preload mapping is
  * platform-specific and injected only when the generated module exists).
@@ -68,7 +125,7 @@ module.exports._http_get = function _http_get() {
   }
   let preload = ``;
   try {
-    const pre = require("./z2ui5_cl_app_preload");
+    const pre = require("../01/03/z2ui5_cl_app_preload");
     if (typeof pre.get === `function`) preload = pre.get({ styles_css: styles, custom_js: cfg.custom_js || `` });
   } catch { /* optional — the webapp is served statically on JS platforms */ }
 

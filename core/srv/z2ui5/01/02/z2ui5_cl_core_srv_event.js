@@ -17,11 +17,20 @@ class z2ui5_cl_core_srv_event {
   //  Output format matches ABAP exactly (`, ` separators).
   // ============================================================
 
-  /** ABAP METHOD get_event — `.eB(['VAL'[,false,true]], 'arg1', …)` */
+  /**
+   * ABAP METHOD get_event — `.eB(['VAL'[,false,true]], 'arg1', …)`.
+   * With s_cnt.check_prevent_default the event is bound to `.eBP($event,…)`
+   * instead: preventDefault() only works while the control's own handler is
+   * running, so it cannot be a follow-up action from the response — .eBP
+   * cancels the default first and then roundtrips like .eB.
+   */
   get_event(a) {
     const { val = ``, t_arg = [], s_cnt = {} } =
       a !== null && typeof a === `object` && !Array.isArray(a) ? a : { val: a ?? `` };
-    let result = `.eB(['${val}'`;
+    const { cs_ui5 } = require(`./z2ui5_if_core_types`);
+    let result = s_cnt?.check_prevent_default === true
+      ? `${cs_ui5.event_backend_prevent}($event,['${val}'`
+      : `${cs_ui5.event_backend_function}(['${val}'`;
     if (s_cnt?.check_allow_multi_req === true) result = `${result},false,true`;
     return `${result}]${this.get_t_arg(t_arg)}`;
   }

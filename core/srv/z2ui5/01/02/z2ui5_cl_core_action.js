@@ -130,6 +130,23 @@ class z2ui5_cl_core_action {
   factory_stack_call() {
     const result = this.prepare_app_stack(this.ms_next.o_app_call);
     result.mo_app.ms_draft.id_prev_app_stack = this.mo_app.ms_draft.id;
+
+    // forward app navigation — when hash routing is active the frontend
+    // pushes a new route history entry for the called app, so the browser
+    // Back button returns to the calling app
+    result.ms_next.s_set.check_nav_app_call = true;
+
+    // prepare_app_stack just saved the calling app under a NEW draft id that
+    // includes the client changes arriving with this event; the caller's
+    // history entry still points at the draft of its last render. Hand the
+    // fresh draft to the frontend so it repoints that entry before pushing
+    // the called app's route. Only the first hop of a request sets this: in
+    // a chain A -> B -> C the entry to repoint is A's.
+    if (!result.ms_next.s_set.nav_app_call_prev_id) {
+      result.ms_next.s_set.nav_app_call_prev_app =
+        z2ui5_cl_util.rtti_get_classname_by_ref(this.mo_app.mo_app);
+      result.ms_next.s_set.nav_app_call_prev_id = this.mo_app.ms_draft.id;
+    }
     return result;
   }
 

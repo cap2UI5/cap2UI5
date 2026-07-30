@@ -114,10 +114,10 @@ sap.ui.define(
     // can inspect it. Only the response side still crosses an async boundary
     // (the rendering) via the globals oResponse and pendingCustomJs.
     //
-    // Wire format - request (POST body; VIEWNAME/ARGUMENTS are folded into
+    // Wire format - request (POST body; ARGUMENTS is folded into
     // S_FRONT before sending, empty fields are removed):
     //   { "value": {
-    //       "XX": {                        // two-way model delta
+    //       "MODEL": {                     // view model delta
     //         "NAME": "new value",         //   scalar: full attribute
     //         "TAB": { "__delta": { "0": { "COL1": "new cell" } } }
     //       },
@@ -125,7 +125,6 @@ sap.ui.define(
     //         "ID": "<draft id of the previous response>",
     //         "EVENT": "SAVE",             // event name
     //         "T_EVENT_ARG": ["arg1"],     // further event arguments
-    //         "VIEW": "MAIN",              // which view fired it
     //         "ORIGIN": "https://host", "PATHNAME": "/sap/...",
     //         "SEARCH": "?p=1", "HASH": "#...",
     //         "CONFIG": { "S_UI5": {...}, "S_DEVICE": {...},
@@ -146,12 +145,23 @@ sap.ui.define(
     //         "SET_NAV_BACK": ""           // browser/history follow-ups
     //       }
     //     },
-    //     "MODEL": { "XX": {...}, ... }    // full JSON view model, becomes
+    //     "MODEL": { "NAME": ..., ... }    // full JSON view model, becomes
     //   }                                  // the view's binding model
     //
     // Inspect live payloads via the developer tools (Ctrl+F12): "Previous
     // Request" and "Response".
     return {
+      // Monotonic id stamped on every dispatched request (see readHttp). When
+      // parallel requests are allowed (check_allow_multi_req), it lets a
+      // response tell whether a newer request has since gone out, so only the
+      // newest result is committed and stale ones are dropped.
+      _requestSeq: 0,
+
+      // Abort controllers of the requests still in flight. A newly dispatched
+      // request aborts them all - it supersedes them, so there is no point
+      // letting the backend finish work whose response would be dropped anyway.
+      _inflight: new Set(),
+
       endSession() {
         if (!Lib.isValidContextId(AppState.state.contextId)) return;
         // Best-effort notify the backend that the session ends. Errors are
@@ -248,14 +258,48 @@ sap.ui.define(
               break;
             }
           }
-          return {
-            ID: id,
-            SELECTION_START: active.selectionStart || 0,
-            SELECTION_END: active.selectionEnd || 0,
-          };
+          // Read the caret from the actual text field, not from
+          // document.activeElement directly. Clicking an inner part of a
+          // control (e.g. a SearchField's clear "X" button) can leave the
+          // active element a non-text node whose selectionStart is undefined -
+          // reporting that as 0 would later snap the caret to the far left.
+          // When no text field owns a selection, omit SELECTION_* entirely so
+          // the backend restores focus without forcing a caret position.
+          const info = { ID: id };
+          const input = this._focusTextInput(active, ui5El);
+          if (input) {
+            try {
+              const start = input.selectionStart;
+              const end = input.selectionEnd;
+              if (start != null && end != null) {
+                info.SELECTION_START = start;
+                info.SELECTION_END = end;
+              }
+            } catch {
+              // Input types without text selection (number, date, ...) throw
+              // or return null here - restore focus only, no caret.
+            }
+          }
+          return info;
         } catch {
           return undefined;
         }
+      },
+
+      // Resolve the text field that carries the caret for the focused control:
+      // the active element itself when it is already an <input>/<textarea>,
+      // otherwise the control's focus DOM ref (or the first inner text field).
+      // Returns null when the control has no text field (e.g. a button), so the
+      // caller omits the selection instead of reporting a bogus 0.
+      _focusTextInput(active, ui5El) {
+        const isTextInput = (el) =>
+          !!el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA");
+        if (isTextInput(active)) return active;
+        const focusRef = ui5El?.getFocusDomRef?.();
+        if (isTextInput(focusRef)) return focusRef;
+        const root = ui5El?.getDomRef?.();
+        const inner = root?.querySelector?.("input, textarea");
+        return isTextInput(inner) ? inner : null;
       },
 
       // Records which element the user actually scrolled, per view slot.
@@ -290,6 +334,48 @@ sap.ui.define(
             dom: target,
           };
         }
+      },
+
+      // Hash-router handler (registered by Component.js on the HashChanger's
+      // hashChanged event). This is what makes the browser Back/Forward buttons
+      // - and manual URL edits / bookmarks - navigate between apps: a hash of
+      // the form "#/app/<CLASS>/<DRAFTID>" restores that app's draft (its
+      // preserved state), falling back to a fresh start of <CLASS> when the
+      // draft has expired. It is the abap2UI5 equivalent of a UI5 route's
+      // patternMatched handler.
+      onHashChange(sNewHash) {
+        const state = AppState.state;
+
+        // Routing is opt-in per session (client->set_nav_routing); until an app
+        // enabled it, leave the hash entirely to the app (e.g. set_push_state).
+        if (!state.navRouting) return;
+
+        const target = Lib.appOfRoute(sNewHash);
+
+        // Not an app route (empty / some app-owned hash) - ignore.
+        if (!target) return;
+
+        const targetDraft = Lib.draftOfRoute(sNewHash);
+
+        // Ignore the echo of our own hash write after rendering (not a user
+        // navigation), so we do not loop. Match on the draft id when the route
+        // carries one - that is the precise app state - otherwise on the class.
+        if (targetDraft) {
+          if (targetDraft === state.currentDraftId) return;
+        } else if (
+          target.toUpperCase() === String(state.currentApp).toUpperCase()
+        ) {
+          return;
+        }
+
+        // A different app state: restore it. An empty body (no ID) makes the
+        // backend take the first-start path and read the target class + draft
+        // from the hash it receives (request_app_start_route[_draft]). Mark the
+        // roundtrip as browser-initiated so the render does NOT rewrite the hash
+        // (the browser is at a non-top history position - rewriting there would
+        // drop the forward entries and break the Forward button).
+        state.navFromHash = true;
+        this.roundtrip({});
       },
 
       _getScrollInfo() {
@@ -363,7 +449,6 @@ sap.ui.define(
           ORIGIN: window.location.origin,
           PATHNAME: window.location.pathname,
           SEARCH: state.search || window.location.search,
-          VIEW: oBody.VIEWNAME,
           EVENT: eventName,
           HASH: window.location.hash,
         };
@@ -375,14 +460,13 @@ sap.ui.define(
         sFront.T_EVENT_ARG = oBody.ARGUMENTS;
 
         delete oBody.ID;
-        delete oBody.VIEWNAME;
         delete oBody.ARGUMENTS;
 
         // Remove empty / undefined fields so the backend request stays small
         // and these keys are not present in the JSON sent over the wire.
         if (!sFront.T_EVENT_ARG?.length) delete sFront.T_EVENT_ARG;
         if (sFront.SEARCH === "") delete sFront.SEARCH;
-        if (!oBody.XX) delete oBody.XX;
+        if (!oBody.MODEL) delete oBody.MODEL;
 
         this.readHttp(oBody);
       },
@@ -404,16 +488,65 @@ sap.ui.define(
         };
       },
 
+      // Abort every still-in-flight request. Called when a newer request is
+      // dispatched: the older fetches reject with AbortError, which the
+      // isStale guard in readHttp's catch swallows silently.
+      _abortInflight() {
+        for (const controller of this._inflight) controller.abort();
+        this._inflight.clear();
+      },
+
+      // Merge two abort signals into one for fetch: the fetch is aborted when
+      // either fires (the timeout backstop or a superseding request). Uses
+      // AbortSignal.any where available (2024+) and forwards manually on older
+      // browsers, so the abort works everywhere createTimeoutSignal does.
+      _combineSignals(a, b) {
+        if (AbortSignal.any) return AbortSignal.any([a, b]);
+        const controller = new AbortController();
+        const forward = (sig) => {
+          if (sig.aborted) controller.abort(sig.reason);
+          else {
+            sig.addEventListener("abort", () => controller.abort(sig.reason), {
+              once: true,
+            });
+          }
+        };
+        forward(a);
+        forward(b);
+        return controller.signal;
+      },
+
       async readHttp(oBody) {
         const timeoutMs =
           AppState.getGlobal("requestTimeoutMs") || REQUEST_TIMEOUT_MS;
         // The signal guards the fetch and the response body reads below; the
         // finally releases the fallback timer once the roundtrip settled.
-        const { signal, cancel } = this.createTimeoutSignal(timeoutMs);
+        const { signal: timeoutSignal, cancel } =
+          this.createTimeoutSignal(timeoutMs);
         // A network blip or timeout may mean the request never reached the
         // server, so the error overlay offers a retry that re-sends the
         // exact same request body instead of forcing a full app restart.
         const oRetry = { onRetry: () => this.readHttp(oBody) };
+
+        // Stamp this request and treat its response as stale once a newer
+        // request has been dispatched. With parallel requests allowed
+        // (check_allow_multi_req) responses can arrive out of order; only the
+        // newest may commit its result, so a slow older response never
+        // overwrites a newer view, caret or session id. In the default
+        // blocking mode only one request is ever in flight, so this never
+        // fires. The check is repeated before every state mutation because the
+        // body reads below (text/json) each yield the event loop, giving a
+        // newer request the chance to supersede this one mid-parse.
+        const seq = ++this._requestSeq;
+        const isStale = () => seq !== this._requestSeq;
+
+        // Cancel any request still in flight - this one supersedes them - then
+        // register this request's own controller so a later one can cancel it.
+        // The fetch aborts on either the timeout or a superseding request.
+        this._abortInflight();
+        const superseder = new AbortController();
+        this._inflight.add(superseder);
+        const signal = this._combineSignals(timeoutSignal, superseder.signal);
         try {
           // Step 1: send the request.
           let response;
@@ -435,6 +568,9 @@ sap.ui.define(
               signal,
             });
           } catch (e) {
+            // A superseded request that fails is not the user's concern - the
+            // newer request owns the outcome, so swallow it without an overlay.
+            if (isStale()) return;
             if (e.name === "TimeoutError" || e.name === "AbortError") {
               this.responseError(
                 `No backend response within ${timeoutMs / 1000} seconds - request aborted`,
@@ -450,6 +586,9 @@ sap.ui.define(
             }
             return;
           }
+          // A newer request went out while this one was in flight - drop it
+          // whole: no session id adoption, no error overlay, no render.
+          if (isStale()) return;
           // Keep the last valid session id; a response without the header
           // (returns null) must not wipe an established session.
           const contextId = response.headers.get("sap-contextid");
@@ -466,6 +605,7 @@ sap.ui.define(
             } catch {
               text = `HTTP ${response.status}: could not read error body`;
             }
+            if (isStale()) return;
             // An empty error body would render an empty overlay - fall back
             // to the status code so the user sees at least what failed.
             this.responseError(text || `HTTP ${response.status}`);
@@ -477,9 +617,13 @@ sap.ui.define(
           try {
             responseData = await response.json();
           } catch (e) {
+            if (isStale()) return;
             this.responseError(`Invalid JSON response: ${e.message}`);
             return;
           }
+          // Last check before committing: a newer request may have arrived
+          // while the body was being parsed.
+          if (isStale()) return;
           if (!responseData || !responseData.S_FRONT) {
             this.responseError("Invalid response: missing S_FRONT");
             return;
@@ -487,18 +631,32 @@ sap.ui.define(
 
           // Step 4: hand the parsed response to the success handler.
           AppState.state.responseData = responseData;
-          AppState.state.xxChangedPaths = new Set();
-          this.responseSuccess({
-            ID: responseData.S_FRONT.ID,
-            PARAMS: responseData.S_FRONT.PARAMS,
-            OVIEWMODEL: responseData.MODEL,
-          });
+          // This request won (it passed the stale guard above), so the edits
+          // it carried have reached the backend - clear exactly the model it
+          // shipped. A stale response returns before this point and clears
+          // nothing, so a slower older response can never wipe newer edits;
+          // and edits made in a different model stay pending for their own
+          // roundtrip.
+          AppState.state.oSentModel?._z2ui5ChangedPaths?.clear();
+          AppState.state.oSentModel = null;
+          this.responseSuccess(
+            {
+              ID: responseData.S_FRONT.ID,
+              PARAMS: responseData.S_FRONT.PARAMS,
+              OVIEWMODEL: responseData.MODEL,
+              // Class name of the rendered app - used by the hash router to
+              // keep the URL route "#/app/<CLASS>" in sync (View1).
+              APP: responseData.S_FRONT.APP,
+            },
+            seq,
+          );
         } finally {
+          this._inflight.delete(superseder);
           cancel();
         }
       },
 
-      async responseSuccess(response) {
+      async responseSuccess(response, reqSeq) {
         const oController = ViewSlots.getController("MAIN");
         try {
           AppState.state.oResponse = response;
@@ -523,7 +681,11 @@ sap.ui.define(
           // Full view replacement -> destroy & rebuild, nothing more to do.
           if (sView?.XML) {
             ViewSlots.destroy("MAIN");
-            await oController.displayView(sView.XML, response.OVIEWMODEL);
+            await oController.displayView(
+              sView.XML,
+              response.OVIEWMODEL,
+              reqSeq,
+            );
             return;
           }
 

@@ -61,7 +61,11 @@
 //                     the developer tools)
 //   contextId         stateful session id, header transport (Server)
 //   isBusy            roundtrip in flight (View1.eB / Server)
-//   xxChangedPaths    Set of edited /XX/ model paths for the delta (View1)
+//   oSentModel        the JSON model whose edited-path set the in-flight
+//                     request carried; its own _z2ui5ChangedPaths is cleared
+//                     once that request wins (Server), so a stale response
+//                     never clears newer edits and edits made in a DIFFERENT
+//                     model (e.g. a popover) are never shipped against this one
 //   checkNestAfter, checkNestAfter2  nested views rebuilt this roundtrip
 //   search            overrides location.search in S_FRONT; never written
 //                     by the framework itself, set externally (custom JS)
@@ -70,6 +74,9 @@
 // Control / helper state
 //   errors            capped error log, see Lib.logError
 //   timers            single pending backend timer (FrontendAction)
+//   shortcuts         registered keyboard shortcuts, normalized combo ->
+//                     { event, controller } (FrontendAction.KEYBOARD_SHORTCUT);
+//                     an app switch resets it, the document listener stays
 //   lastScrolled      last scrolled element per slot (Server.onScrollCapture)
 //   viewSizeLimits    per-slot model size limits (FrontendAction)
 //   treeStates        tree binding state per tree_id across rebuilds (Tree control)
@@ -107,15 +114,41 @@ sap.ui.define([], () => {
       responseData: null,
       contextId: null,
       isBusy: false,
-      xxChangedPaths: new Set(),
+      oSentModel: null,
       checkNestAfter: false,
       checkNestAfter2: false,
       search: null,
       pendingCustomJs: null,
 
+      // Hash-based app routing (UI5 Router style, opt-in via set_nav_routing).
+      //  navRouting  once the running app enabled routing, the URL hash mirrors
+      //              the current app as a bookmarkable route and browser
+      //              Back/Forward navigate between apps via the hash.
+      //  navMode        routing mode (z2ui5_if_client=>cs_nav_mode): 'KEEP' keeps
+      //                 the app state (draft id in the route '#/app/<CLASS>/
+      //                 <DRAFT>', restored on Back/Forward), 'FRESH' routes by
+      //                 class only ('#/app/<CLASS>', always a fresh start).
+      //  currentApp     class name of the app currently rendered.
+      //  currentDraftId server draft id reflected in the current route - the
+      //                 app-state id in KEEP, null in FRESH. The routing guard
+      //                 compares an incoming hash route's draft id against it so
+      //                 our own hash writes do not re-trigger a navigation, and
+      //                 (KEEP) browser Back/Forward restore the exact draft.
+      //  navFromHash    the pending roundtrip was triggered by a browser
+      //                 Back/Forward (or manual hash edit) via onHashChange, so
+      //                 the resulting render must NOT rewrite the hash: the
+      //                 browser is at a non-top history position and rewriting
+      //                 there drops the forward entries (Forward would break).
+      navRouting: false,
+      navMode: null,
+      currentApp: null,
+      currentDraftId: null,
+      navFromHash: false,
+
       // Control / helper state
       errors: [],
       timers: {},
+      shortcuts: {},
       lastScrolled: {},
       viewSizeLimits: {},
       treeStates: {},
