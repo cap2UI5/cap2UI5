@@ -45,7 +45,7 @@ The server listens on [http://localhost:4004](http://localhost:4004):
 | URL | What you get |
 |---|---|
 | `http://localhost:4004/z2ui5/webapp/index.html` | the app — without a parameter the startup app is shown |
-| `http://localhost:4004/z2ui5/webapp/index.html?app_start=z2ui5_cl_app_hello_world` | start a specific app class via the `app_start` parameter (works for every sample, e.g. `z2ui5_cl_demo_app_001`) |
+| `http://localhost:4004/z2ui5/webapp/index.html?app_start=z2ui5_cl_ui5_app_hi_world` | start a specific app class via the `app_start` parameter (works for every sample, e.g. `z2ui5_cl_smp_app_004`) |
 | `http://localhost:4004/index.html` | the [minimal starter page](#the-minimal-base) — one roundtrip through all three layers |
 | `http://localhost:4004/rest/root/z2ui5` | the roundtrip endpoint the frontend talks to |
 | `http://localhost:4004/odata/v4/admin/z2ui5_t_01` | the draft table (session persistence) via OData |
@@ -71,7 +71,7 @@ roundtrips — reduced to the minimum:
 The base is hand-maintained in
 [builder-cap2UI5's `src/`](https://github.com/cap2UI5/builder-cap2UI5/tree/main/src)
 and published 1:1 into this repository. The framework itself — the engine, the
-transpiled classes, the z2ui5 frontend and the ~180 bundled samples — lives in
+transpiled classes, the z2ui5 frontend and the ~105 bundled samples — lives in
 the platform-neutral **core package** ([`core/`](core/), vendored here and
 linked as the npm dependency `abap2UI5` via `file:./core`) and is generated
 by the sync pipeline in
@@ -178,11 +178,11 @@ bundled samples and the framework classes live in the vendored core package
 #### 1. Hello World
 ###### App
 ```js
-// z2ui5_cl_app_hello_world.js — ships with the core package
+// z2ui5_cl_ui5_app_hi_world.js — ships with the core package
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
-class z2ui5_cl_app_hello_world extends z2ui5_if_app {
+class z2ui5_cl_ui5_app_hi_world extends z2ui5_if_app {
   name = ``;
 
   async main(client) {
@@ -203,7 +203,7 @@ class z2ui5_cl_app_hello_world extends z2ui5_if_app {
   }
 }
 
-module.exports = z2ui5_cl_app_hello_world;
+module.exports = z2ui5_cl_ui5_app_hi_world;
 ```
 ###### Demo
 <img width="500" height="393" alt="image" src="https://github.com/user-attachments/assets/3acd8c43-3733-40b0-a6f9-27ae6beba6e7" />

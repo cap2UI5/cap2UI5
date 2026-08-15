@@ -44,7 +44,7 @@ describe("minimal starter — frontend / service / database", () => {
   test("(2) roundtrip POST returns the startup app, a draft id and view XML", async () => {
     const { status, data } = await POST("/rest/root/z2ui5", roundtripBody, AUTH);
     expect(status).toBe(200);
-    expect(data.S_FRONT.APP).toBe("z2ui5_cl_app_startup");
+    expect(data.S_FRONT.APP).toBe("z2ui5_cl_ui5_app_start");
     expect(data.S_FRONT.ID).toMatch(/^[0-9a-f-]{36}$/);
     expect(data.S_FRONT.PARAMS.S_VIEW.XML).toContain("<mvc:View");
   });
@@ -59,7 +59,7 @@ describe("minimal starter — frontend / service / database", () => {
 
     const row = await GET(`/odata/v4/admin/z2ui5_t_01(${data.S_FRONT.ID})`, AUTH);
     expect(row.status).toBe(200);
-    expect(row.data.data).toContain("z2ui5_cl_app_startup");
+    expect(row.data.data).toContain("z2ui5_cl_ui5_app_start");
   });
 
   test("(4) the roundtrip and the draft table reject unauthenticated access", async () => {

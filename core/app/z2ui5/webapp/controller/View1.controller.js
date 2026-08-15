@@ -1,113 +1,124 @@
 // The central view controller. One instance serves each of the five view
 // slots (main view, two nested views, popup, popover - see
-// core/ViewSlots.js). It builds the request for backend events (eB),
-// dispatches frontend-only events (eF), renders the views and fragments a
-// response asks for, and runs the post-render follow-ups.
+// core/ViewSlots.js). It carries the protocol entry points the backend binds
+// events to (eB, eBP, eF), builds the request for backend events and runs
+// the response's two action phases. The display machinery behind those
+// actions lives in core/actions/Slots.js.
 sap.ui.define(
   [
     "sap/ui/core/mvc/Controller",
-    "sap/ui/core/mvc/XMLView",
-    "sap/ui/model/json/JSONModel",
     "sap/ui/core/BusyIndicator",
     "sap/m/MessageBox",
-    "sap/ui/core/Fragment",
     "z2ui5/core/Server",
-    "sap/ui/model/odata/v2/ODataModel",
-    "sap/ui/core/routing/HashChanger",
     "z2ui5/core/Lib",
     "z2ui5/core/FrontendAction",
+    "z2ui5/core/actions/Slots",
     "z2ui5/core/ViewSlots",
+    "z2ui5/core/Router",
     "z2ui5/core/AppState",
   ],
   (
     Controller,
-    XMLView,
-    JSONModel,
     BusyIndicator,
     MessageBox,
-    Fragment,
     Server,
-    ODataModel,
-    HashChanger,
     Lib,
     FrontendAction,
+    Slots,
     ViewSlots,
+    Router,
     AppState,
   ) => {
     "use strict";
 
-    // Helpers reused across calls; kept as module-level singletons.
-    const _hashChanger = HashChanger.getInstance();
-
-    function applyStoredSizeLimit(viewKey, oModel) {
-      if (!oModel) return;
-      // For the root slots (MAIN/NEST/NEST2) this is the max limit across them,
-      // since they share this one model; popup/popover get their own limit.
-      const limit = Lib.effectiveSizeLimit(
-        AppState.state.viewSizeLimits,
-        viewKey,
-      );
-      if (limit !== undefined) oModel.setSizeLimit(limit);
-    }
-
     return Controller.extend("z2ui5.controller.View1", {
-      // ------------------------------------------------------------------
-      // Model change tracking - remembers which model paths the user edited
-      // so the next roundtrip only ships the delta.
-      // ------------------------------------------------------------------
-      _trackChanges(oModel) {
-        // Mark the model as framework-owned: updateModelIfRequired may only
-        // reuse models that carry this change tracker.
-        oModel._z2ui5Tracked = true;
-        // Edited paths are tracked PER MODEL, not in one shared set: the main
-        // view and a popup/popover each have their own JSON model, and a
-        // roundtrip ships only the picked model's own edits. A single shared
-        // set would build the delta of one model against another's data (a
-        // path missing there serializes as `undefined` and clears the field
-        // on the backend) and would drop the other model's still-unsent edits.
-        oModel._z2ui5ChangedPaths = new Set();
-        oModel.attachPropertyChange((e) => {
-          const params = e.getParameters();
-          const raw = params.path;
-          const ctx = params.context;
-          if (!raw) return;
-          // Resolve relative paths against the binding context.
-          const changedPath =
-            ctx && !raw.startsWith("/") ? `${ctx.getPath()}/${raw}` : raw;
-          if (changedPath.startsWith("/")) {
-            oModel._z2ui5ChangedPaths.add(changedPath);
-          }
-        });
-        return oModel;
-      },
-
       onAfterRendering() {
-        if (AppState.state.oResponse && !AppState.state.oResponse._processed) {
-          this._processAfterRendering();
-        }
+        // _processAfterRendering re-checks _processed itself - only the
+        // null check is load-bearing here
+        if (AppState.state.oResponse) this._processAfterRendering();
       },
 
       // Runs once after each roundtrip's view has been rendered, in two
       // named phases: display pending fragments/views, then update the
-      // browser history/hash.
-      async _processAfterRendering() {
+      // browser history/hash. `reqSeq` is the stamp of the request the
+      // response being processed belongs to (Server.responseSuccess); the
+      // onAfterRendering entry above has none and falls back to the newest.
+      async _processAfterRendering(reqSeq) {
+        // The claim happens BEFORE the try: the MAIN rebuild is a system
+        // action now, so slots render (and re-enter here via their own
+        // onAfterRendering - possibly with a NESTED controller as `this`)
+        // while phase 1 is still awaiting. A losing entry must return here
+        // and never reach the finally, which would hide the busy state and
+        // consume the pending custom JS mid-phase, on the wrong controller.
+        // The record is also pinned for the finally: the shared
+        // AppState.state.oResponse may point at a newer response by then.
+        const oResponse = AppState.state.oResponse;
+        if (!oResponse || oResponse._processed) return;
+        oResponse._processed = true;
         try {
-          const oResponse = AppState.state.oResponse;
-          if (oResponse._processed) return;
-          oResponse._processed = true;
-
-          const PARAMS = oResponse.PARAMS;
-          if (!PARAMS) return;
-
-          await this._displayPendingViews(PARAMS);
+          // An APP SWITCH kills the two standalone slots implicitly: they
+          // live outside the MAIN control tree, so they do not fall with
+          // the page the new app renders - and the switch is visible right
+          // here (the response names its app), so no destroy action travels
+          // for it. BEFORE the system actions, so the new app's own
+          // popup_display still opens afterwards. (A hop to another
+          // instance of the SAME class is invisible here - the backend
+          // queues the teardown for exactly that case.)
+          const state = AppState.state;
+          if (oResponse.APP && state.renderedApp !== oResponse.APP) {
+            if (state.renderedApp) {
+              ViewSlots.destroy("POPUP");
+              ViewSlots.destroy("POPOVER");
+            }
+            // the leaving app's keyboard shortcuts die with it - the new app
+            // registers its own (actions/Shortcuts documents this reset) -
+            // and so do its tree-expansion snapshots, which are keyed by the
+            // LOCAL tree_id and would otherwise leak into a same-named tree
+            // of the next app
+            state.shortcuts = {};
+            state.treeStates = {};
+            state.renderedApp = oResponse.APP;
+          }
+          // No early return on an empty action list: a response without any
+          // action still gets its model push, its hash sync and the
+          // after-render hooks below - with the ROUTER and updateModel
+          // actions derived/gated away, an action-free response is the
+          // COMMON case now, not the exception.
+          if (oResponse.S_ACTION) {
+            // Stamp of the request this response belongs to: every await in
+            // the display phase re-checks it, so a response superseded by a
+            // parallel request (check_allow_multi_req, Back/Forward restore)
+            // never attaches popups/nested views the backend no longer knows.
+            const seq = reqSeq ?? Server._requestSeq;
+            await this._runSystemActions(oResponse, seq);
+          }
           // The app may have been torn down (reset / FLP re-launch) while the
           // pending views loaded; don't mutate history or fire onAfterRendering
           // hooks against a dead app (the custom-JS phase below guards the same
-          // way via isDestroyed).
-          if (Lib.isDestroyed(this)) return;
-          this._updateBrowserHistory(PARAMS, oResponse.ID);
-          if (PARAMS.SET_NAV_BACK) history.back();
-
+          // way via isDestroyed). And a response a PARALLEL request replaced
+          // mid-phase must not push its model or write its ids into the URL -
+          // the push would read the NEWER response's data into this stale
+          // render, and the sync would mix this draft id with the newer app.
+          // The newer response runs its own push and sync.
+          if (Lib.isDestroyed(this) || oResponse !== AppState.state.oResponse) {
+            return;
+          }
+          // A MODEL key in the response IS the model push - run it after the
+          // displays, so a slot built in this same roundtrip is filled before
+          // it is pushed to. This reaches what a fresh build alone does not:
+          // a nested view re-displayed without its MAIN view (it inherits the
+          // MAIN model by UI5 propagation) and a popup left open across a
+          // roundtrip that rebuilt no view (one that DOES rebuild MAIN takes
+          // the standalone slots down with it - see actions/Slots).
+          if (oResponse.MODELPRESENT) Slots.action("updateModel");
+          // Phase 2: ONE history/hash sync per response. A ROUTER action only
+          // travels when the roundtrip carries nav intent - its options were
+          // stashed by the ControlCall hook. The plain response still syncs,
+          // so hash routing and app-state tracking follow every new draft id.
+          Router.sync({
+            ...(oResponse._routerOptions || {}),
+            id: oResponse.ID,
+          });
           Lib.runCallbacks(AppState.state.onAfterRendering);
         } catch (e) {
           Lib.logError("_processAfterRendering: unexpected error", e);
@@ -119,305 +130,44 @@ sap.ui.define(
           // run the follow-up JS snippets the backend asked for. Doing it here
           // - rather than as an early microtask - guarantees render-dependent
           // actions like SET_FOCUS find their target control in the DOM.
-          this._runPendingCustomJs();
+          this._runPendingCustomJs(oResponse);
         }
       },
 
-      // Phase 1: open/destroy the popup, nested views and popover the
-      // response asked for.
-      async _displayPendingViews(PARAMS) {
-        const S_POPUP = PARAMS.S_POPUP;
-        const S_VIEW_NEST = PARAMS.S_VIEW_NEST;
-        const S_VIEW_NEST2 = PARAMS.S_VIEW_NEST2;
-        const S_POPOVER = PARAMS.S_POPOVER;
-
-        if (S_POPUP?.CHECK_DESTROY) this.destroyPopup();
-        if (S_POPOVER?.CHECK_DESTROY) this.destroyPopover();
-        if (S_VIEW_NEST?.CHECK_DESTROY) this.destroyNestView();
-        if (S_VIEW_NEST2?.CHECK_DESTROY) this.destroyNestView2();
-
-        if (S_POPUP?.XML) {
-          this.destroyPopup();
-          await this.displayFragment(S_POPUP.XML);
+      // Phase 1: run the SYSTEM actions - the framework's own view-lifecycle
+      // calls (destroy a slot, display one, push the model into it), in the
+      // order the backend queued them. They run BEFORE anything an app
+      // queued, and one at a time: a display is async, and the next action
+      // may well be about the slot it is still building. The action context
+      // carries the request stamp (so the slot displays can discard a build
+      // a newer parallel request superseded) and the response record (so the
+      // ROUTER action stashes its options on the response they belong to).
+      async _runSystemActions(oResponse, seq) {
+        const systemJs = oResponse?.S_ACTION?.T_SYSTEM;
+        if (!systemJs) return;
+        for (const item of systemJs) {
+          // Stop the whole phase once a newer request superseded this
+          // response - the remaining actions would tear down or overwrite
+          // what the newer response builds (the per-display guards check
+          // the same stamp, but the synchronous teardowns do not).
+          if (Lib.isDestroyed(this) || seq !== Server._requestSeq) return;
+          await FrontendAction.runSystem(item, this, {
+            seq,
+            response: oResponse,
+          });
         }
-
-        if (!AppState.state.checkNestAfter && S_VIEW_NEST?.XML) {
-          this.destroyNestView();
-          await this.displayNestedView(S_VIEW_NEST.XML, "NEST");
-          AppState.state.checkNestAfter = true;
-        }
-
-        if (!AppState.state.checkNestAfter2 && S_VIEW_NEST2?.XML) {
-          this.destroyNestView2();
-          await this.displayNestedView(S_VIEW_NEST2.XML, "NEST2");
-          AppState.state.checkNestAfter2 = true;
-        }
-
-        if (S_POPOVER?.XML) {
-          this.destroyPopover();
-          await this.displayPopover(S_POPOVER.XML, S_POPOVER.OPEN_BY_ID);
-        }
-      },
-
-      // Phase 2: push the backend-requested URL and update the app-state
-      // hash.
-      _updateBrowserHistory(PARAMS, ID) {
-        try {
-          // Hash-based app routing (UI5 Router style), opt-in per session. The
-          // flag carries the MODE (z2ui5_if_client=>cs_nav_mode): "KEEP" routes
-          // by class + draft id (exact state restored on Back/Forward), "FRESH"
-          // routes by class only (Back/Forward start the app fresh); any other
-          // non-empty value ("DEFAULT") turns routing back OFF (framework
-          // default). An EMPTY value is "no change" so a later roundtrip that
-          // does not re-send the flag keeps routing on with the mode already
-          // chosen (an app that enabled it once in check_on_init stays routed).
-          if (PARAMS.SET_NAV_ROUTING) {
-            const mode = String(PARAMS.SET_NAV_ROUTING).toUpperCase();
-            const on = mode === "KEEP" || mode === "FRESH";
-            AppState.state.navRouting = on;
-            AppState.state.navMode = on ? mode : null;
-          }
-          const state = AppState.state;
-          if (state.navRouting) {
-            const app = state.oResponse?.APP;
-            if (app) {
-              // In FRESH mode the route carries the class only, so every history
-              // entry (Back/Forward/reload/bookmark) starts the app fresh; in
-              // KEEP mode it carries the draft id too, so they restore the exact
-              // preserved state. draftForRoute is what the route (and the echo
-              // guard below) uses - null in FRESH, the app-state ID in KEEP.
-              const draftForRoute = state.navMode === "FRESH" ? null : ID;
-              // Set current app/draft BEFORE touching the hash: the setHash/
-              // replaceHash below re-fires hashChanged, and Server.onHashChange
-              // compares the incoming route's draft id against currentDraftId to
-              // ignore our own echo (no navigation loop). In FRESH mode there is
-              // no draft, so the guard matches on the class instead.
-              state.currentApp = app;
-              state.currentDraftId = draftForRoute;
-              if (state.navFromHash) {
-                // This render is the result of a browser Back/Forward (or manual
-                // hash edit) routed through Server.onHashChange. The hash already
-                // matches this history entry and the browser sits at a non-top
-                // position - rewriting the hash here would drop the forward
-                // entries and break the Forward button. Just adopt the state.
-                state.navFromHash = false;
-              } else if (!PARAMS.SET_PUSH_STATE) {
-                // Reflect the running app in the URL as a bookmarkable route
-                // "/app/<CLASS>" (FRESH) or "/app/<CLASS>/<DRAFTID>" (KEEP). In
-                // KEEP the draft id makes Back/Forward restore the EXACT
-                // preserved state, not a fresh app. A forward navigation done in
-                // the backend (client->nav_app_call, CHECK_NAV_APP_CALL) pushes a
-                // NEW history entry so Back returns to the calling app - the
-                // routing equivalent of a UI5 navTo. A plain roundtrip only
-                // replaces the current (top) entry, advancing it to the app's
-                // latest draft so a later Forward restores the newest state.
-                const route = Lib.routeForApp(app, draftForRoute);
-                if (PARAMS.CHECK_NAV_APP_CALL) {
-                  // repoint the caller's entry first - it borrows the echo
-                  // guard, so restore it to this app before pushing the route
-                  this._repointCallerEntry(PARAMS, draftForRoute);
-                  state.currentApp = app;
-                  state.currentDraftId = draftForRoute;
-                  _hashChanger.setHash(route);
-                } else if (_hashChanger.getHash() !== route) {
-                  _hashChanger.replaceHash(route);
-                }
-              }
-            }
-            // Routing owns the app-state hash; skip the legacy handling below.
-            if (!PARAMS.SET_PUSH_STATE) return;
-          }
-
-          if (PARAMS.SET_PUSH_STATE) {
-            const hash = _hashChanger.getHash();
-            const newUrl = `${window.location.pathname}${window.location.search}#${hash}${PARAMS.SET_PUSH_STATE}`;
-            history.pushState(null, "", newUrl);
-          }
-          // Keep the leading "/" so the live URL matches the format the copy
-          // link (FrontendAction.evClipboardAppState) writes and the backend
-          // restore path expects: request_app_start_draft reads the state id
-          // via iv_hash+2, i.e. it skips exactly the "#/" prefix. Without the
-          // slash the live hash is "#z2ui5-xapp-state=..." and iv_hash+2 eats
-          // the leading "z", so bookmarking/reloading the live URL never
-          // restores the app state (only the explicitly copied link did).
-          const newHash = PARAMS.SET_APP_STATE_ACTIVE
-            ? `/z2ui5-xapp-state=${ID || ""}`
-            : "";
-          _hashChanger.replaceHash(newHash);
-        } catch (e) {
-          Lib.logError("_updateBrowserHistory: history update failed", e);
-        }
-      },
-
-      // Point the CALLING app's history entry at the draft the backend saved
-      // for it during this very nav_app_call (PARAMS.NAV_APP_CALL_PREV_*).
-      // That draft carries every client-side change the user made since the
-      // caller last rendered - two-way bound switches, checkboxes, input - all
-      // of which travelled to the backend with the event that triggered the
-      // navigation. The entry itself still carries the older draft of that
-      // last render, so without this Back restores the caller as it was
-      // RENDERED and silently drops those changes. The entry is still the top
-      // one here (the called app's route is pushed right after), so a
-      // replaceHash updates it in place and leaves the history depth alone.
-      // KEEP mode only - a FRESH route carries no draft and always restarts
-      // the app anyway.
-      _repointCallerEntry(PARAMS, draftForRoute) {
-        const state = AppState.state;
-        const prevApp = PARAMS.NAV_APP_CALL_PREV_APP;
-        const prevDraft = PARAMS.NAV_APP_CALL_PREV_ID;
-        if (!draftForRoute || !prevApp || !prevDraft) return;
-        const prevRoute = Lib.routeForApp(prevApp, prevDraft);
-        if (_hashChanger.getHash() === prevRoute) return;
-        // Server.onHashChange ignores the echo of our own hash writes by
-        // comparing the route's draft id against currentDraftId - adopt the
-        // caller's fresh draft BEFORE replacing, or the write reads as a user
-        // navigation and fires a restore roundtrip. The caller of this method
-        // sets the state back to the called app right afterwards.
-        state.currentDraftId = prevDraft;
-        _hashChanger.replaceHash(prevRoute);
       },
 
       // Execute the follow-up JS snippets stashed by Server.responseSuccess.
       // Runs once per roundtrip, after the view has rendered.
-      _runPendingCustomJs() {
-        const customJs = AppState.state.pendingCustomJs;
-        AppState.state.pendingCustomJs = null;
+      _runPendingCustomJs(oResponse) {
+        const customJs = oResponse?._pendingCustomJs;
+        if (oResponse) oResponse._pendingCustomJs = null;
         if (!customJs) return;
         if (Lib.isDestroyed(this)) return;
         for (const item of customJs) {
-          Server._runCustomJs(item, this);
+          FrontendAction.runCustom(item, this);
         }
-      },
-
-      _createViewModel() {
-        const data = AppState.state.oResponse?.OVIEWMODEL;
-        return this._trackChanges(new JSONModel(data));
-      },
-
-      // ------------------------------------------------------------------
-      // Display: popups, popovers, nested views, main view
-      // ------------------------------------------------------------------
-
-      async displayFragment(xml) {
-        const oModel = this._createViewModel();
-        applyStoredSizeLimit("POPUP", oModel);
-        const oFragment = await Fragment.load({
-          definition: xml,
-          controller: ViewSlots.getController("POPUP"),
-          id: "popupId",
-        });
-        // The app might have been torn down while the fragment loaded.
-        if (!Lib.isAlive(AppState.state.oApp)) {
-          oFragment.destroy();
-          return;
-        }
-        oFragment.setModel(oModel);
-        // The shared device + message models are attached inside
-        // ViewSlots.setView (the single funnel), so error paths that
-        // destroy a view without reaching setView never register it.
-        ViewSlots.setView("POPUP", oFragment);
-        oFragment.open();
-      },
-
-      async displayPopover(xml, openById) {
-        // No catch-all here on purpose: a malformed-XML load or render
-        // failure must propagate to _processAfterRendering and surface the
-        // fatal "App Terminated" overlay, exactly like displayFragment and
-        // displayNestedView. The explicit returns below stay graceful - they
-        // handle expected, non-error conditions (app torn down mid-load, or
-        // the openBy anchor not being present), matching the parent-not-found
-        // guard in displayNestedView.
-        const oModel = this._createViewModel();
-        applyStoredSizeLimit("POPOVER", oModel);
-        const oFragment = await Fragment.load({
-          definition: xml,
-          controller: ViewSlots.getController("POPOVER"),
-          id: "popoverId",
-        });
-        if (!Lib.isAlive(AppState.state.oApp)) {
-          oFragment.destroy();
-          return;
-        }
-        oFragment.setModel(oModel);
-
-        // Find the control to attach the popover to: any open slot first,
-        // then the global UI5 control registry as a last resort.
-        const oControl = ViewSlots.resolveById(openById);
-
-        if (!oControl) {
-          Lib.logError(
-            `displayPopover: openBy control '${openById}' not found`,
-          );
-          oFragment.destroy();
-          return;
-        }
-        ViewSlots.setView("POPOVER", oFragment);
-        oFragment.openBy(oControl);
-      },
-
-      async displayNestedView(xml, slotKey) {
-        const paramKey = ViewSlots.paramByKey(slotKey);
-        // Nested views do NOT create their own model. They are inserted into
-        // the MAIN control tree below and inherit its default JSON model via
-        // UI5 model propagation, so every view binds against the same data with
-        // one change tracker and one refresh per roundtrip - no duplicate
-        // models pointing at the same data. The model passed to the XML
-        // preprocessor here only feeds {template>...} bindings at build time;
-        // it is the MAIN view's JSON model (the named "http" model when
-        // SWITCH_DEFAULT_MODEL_PATH moved OData into the default slot, otherwise
-        // the default model), mirroring displayView's template model.
-        const oMainView = ViewSlots.getView("MAIN");
-        const oTemplateModel =
-          oMainView?.getModel("http") ?? oMainView?.getModel();
-        const oView = await XMLView.create({
-          definition: xml,
-          controller: ViewSlots.getController(slotKey),
-          preprocessors: { xml: { models: { template: oTemplateModel } } },
-        });
-
-        if (!Lib.isAlive(AppState.state.oApp)) {
-          oView.destroy();
-          return;
-        }
-
-        const nestParams = AppState.state.oResponse?.PARAMS?.[paramKey];
-        if (!nestParams) {
-          Lib.logError(`displayNestedView: missing PARAMS.${paramKey}`);
-          oView.destroy();
-          return;
-        }
-        const { ID, METHOD_DESTROY, METHOD_INSERT } = nestParams;
-
-        const oParent = ViewSlots.byId("MAIN", ID);
-        if (!oParent) {
-          Lib.logError(
-            `displayNestedView: parent control '${ID}' not found, nested view discarded`,
-          );
-          oView.destroy();
-          return;
-        }
-
-        // METHOD_DESTROY is optional: only call it when the app asked for a
-        // parent teardown method. An empty value used to reach oParent[""]()
-        // and throw on every render (e.g. app 065 passes only method_insert).
-        if (METHOD_DESTROY) {
-          try {
-            oParent[METHOD_DESTROY]();
-          } catch (e) {
-            Lib.logError(
-              `displayNestedView: parent destroy method '${METHOD_DESTROY}' failed`,
-              e,
-            );
-          }
-        }
-        try {
-          oParent[METHOD_INSERT](oView);
-        } catch (e) {
-          Lib.logError("displayNestedView: parent insert method failed", e);
-          oView.destroy();
-          return;
-        }
-        ViewSlots.setView(slotKey, oView);
       },
 
       // Thin wrappers around the shared slot teardown in ViewSlots, kept
@@ -442,8 +192,8 @@ sap.ui.define(
       // eF = "event frontend": handles frontend-only events triggered by
       // the backend response, without a roundtrip. The name is part of the
       // protocol - backend-generated view XML binds events to eB/eF - and
-      // must not be renamed. The individual handlers live in
-      // core/FrontendAction.js.
+      // must not be renamed. The individual handlers live in the domain
+      // modules under core/actions/ (merged in core/FrontendAction.js).
       // ------------------------------------------------------------------
       eF(...args) {
         FrontendAction.execute(this, args);
@@ -459,10 +209,16 @@ sap.ui.define(
       // Example: sap.tnt NavigationListItem.press, where cancelling the
       // default suppresses the item selection and leaves the decision to
       // the backend. The name is part of the protocol - do not rename it.
+      //
+      // The second argument is the veto CONDITION, so the decision can be
+      // made per firing instead of per wire: s_ctrl-check_prevent_default
+      // sends the constant true, s_ctrl-prevent_default_expr sends an
+      // expression UI5 resolves on each firing (e.g. "is this the one column
+      // that must not be resized?"). Everything after it is the eB payload.
       // ------------------------------------------------------------------
-      eBP(oEvent, ...args) {
+      eBP(oEvent, bVeto, ...args) {
         // guard the call: a malformed wire (no $event) must still round-trip
-        if (typeof oEvent?.preventDefault === "function") {
+        if (bVeto && typeof oEvent?.preventDefault === "function") {
           oEvent.preventDefault();
         }
         this.eB(...args);
@@ -482,12 +238,14 @@ sap.ui.define(
       // The name is part of the protocol - backend-generated view XML binds
       // events to eB/eF - and must not be renamed.
       //
-      // args[0] is the event array built by the backend:
+      // args[0] is the event array built by the backend (get_event):
       //   [0] event name
+      //   [1] reserved placeholder, always false
       //   [2] "ignore busy" flag - background events (e.g. timers) skip the
       //       busy guard below
       //   [3] "use main view model" flag - events fired from a popup or
-      //       popover controller that still target the main app's model
+      //       popover controller that still target the main app's model;
+      //       not emitted by the framework today, only by custom JS
       // ------------------------------------------------------------------
       eB(...args) {
         const [, , ignoreBusy, useMainModel] = args[0];
@@ -537,8 +295,8 @@ sap.ui.define(
 
         // If the user edited model paths, send only the delta to keep the
         // payload small. The edited paths live on the picked model itself
-        // (set in _trackChanges), so onBeforeRoundtrip hooks that mark paths
-        // dirty (e.g. the Scrolling control) must have run above first.
+        // (set in Slots.trackChanges), so onBeforeRoundtrip hooks that mark
+        // paths dirty (e.g. the Scrolling control) must have run above first.
         const changedPaths = oModel?._z2ui5ChangedPaths;
         if (oModel && changedPaths?.size > 0) {
           const data = oModel.getData();
@@ -557,22 +315,17 @@ sap.ui.define(
         // turned into JSON strings by the backend when it fills
         // T_EVENT_ARG, so apps keep receiving them as strings; stringifying
         // them here as well would encode (and escape) the payload twice.
-        // `args` is this call's own rest-parameter array (Server.roundtrip
-        // mutates ARGUMENTS via shift), so it can be handed over directly -
-        // no defensive copy needed.
-        oBody.ARGUMENTS = args;
+        // Control-valued arguments are marshalled into plain data first (see
+        // Lib.normalizeEventArgs): a UI5 event parameter is often a control or
+        // an array of controls, and JSON.stringify throws on the circular
+        // parent/aggregation graph of a ManagedObject. Everything else passes
+        // through untouched. normalizeEventArgs returns a fresh array, which
+        // is what Server.roundtrip needs - it mutates ARGUMENTS via shift and
+        // must not reach this call's own rest-parameter array.
+        oBody.ARGUMENTS = Lib.normalizeEventArgs(args);
 
         Server.roundtrip(oBody);
         Lib.runCallbacks(AppState.state.onAfterRoundtrip);
-      },
-
-      // The framework-owned JSON model on a slot's view: the DEFAULT model
-      // normally, but the NAMED "http" model when SWITCH_DEFAULT_MODEL_PATH put
-      // an OData model in the default slot. Returns undefined when neither model
-      // is ours (marked by _z2ui5Tracked).
-      _resolveTrackedModel(oView) {
-        const isOurs = (m) => (m?._z2ui5Tracked ? m : undefined);
-        return isOurs(oView.getModel()) ?? isOurs(oView.getModel("http"));
       },
 
       _pickModelForRoundtrip(useMainModel) {
@@ -590,100 +343,11 @@ sap.ui.define(
         // edit is silently dropped. The data and changedPaths delta are shared
         // across the root slots, so any of them yields the same model.
         if (Lib.isRootModelSlot(slotKey)) {
-          return this._resolveTrackedModel(oView);
+          return Slots.resolveTrackedModel(oView);
         }
 
         // Popup/popover are standalone and return their own (default) model.
         return oView.getModel();
-      },
-
-      // Refresh a slot's model when the response signals an update for it
-      // (CHECK_UPDATE_MODEL - the data-only roundtrip every app triggers
-      // via client->view_model_update( )).
-      updateModelIfRequired(slotKey) {
-        const params = AppState.state.oResponse?.PARAMS;
-        const slotParams = params?.[ViewSlots.paramByKey(slotKey)];
-        if (!slotParams?.CHECK_UPDATE_MODEL) return;
-
-        const oView = ViewSlots.getView(slotKey);
-        if (!oView) return;
-
-        // Reuse the existing model whenever it is ours: setData() keeps the
-        // view's bindings alive and only refreshes what changed, while a new
-        // model + setModel() destroys and recreates every binding - measured
-        // ~3x slower with all values changed and ~150x slower when little
-        // changed (see node/tests-examples/modelUpdate.bench.spec.js).
-        // Never overwrite an OData default (switch mode) with a fresh JSON model.
-        const tracked = this._resolveTrackedModel(oView);
-        if (tracked) {
-          applyStoredSizeLimit(slotKey, tracked);
-          // MAIN and its nested views resolve to the SAME root model here, and
-          // the update loop calls this once per slot. setData replaces the
-          // model's data reference with OVIEWMODEL, so once the first root slot
-          // has swapped it in, the others already hold it - skip the redundant
-          // setData (and its full binding refresh) instead of running it once
-          // per shared slot.
-          const data = AppState.state.oResponse?.OVIEWMODEL;
-          if (tracked.getData() !== data) tracked.setData(data);
-          return;
-        }
-
-        // No framework-owned model on this slot at all: bind a fresh default
-        // JSON model (keeps the previous behavior for that edge case).
-        const oModel = this._createViewModel();
-        applyStoredSizeLimit(slotKey, oModel);
-        oView.setModel(oModel);
-      },
-
-      // Replace the main app view with the XML coming from the backend.
-      async displayView(xml, viewModel, reqSeq) {
-        const oViewModel = this._trackChanges(new JSONModel(viewModel));
-
-        const sView = AppState.state.oResponse?.PARAMS?.S_VIEW;
-        const switchPath = sView?.SWITCH_DEFAULT_MODEL_PATH;
-
-        // When the app wants OData as the default model, build it here and
-        // keep the JSON model as the named "http" model.
-        let oModel;
-        if (switchPath) {
-          oModel = new ODataModel({
-            serviceUrl: switchPath,
-            annotationURI: sView.SWITCHDEFAULTMODELANNOURI || "",
-          });
-        } else {
-          oModel = oViewModel;
-        }
-        applyStoredSizeLimit("MAIN", oModel);
-
-        const oView = await XMLView.create({
-          definition: xml,
-          models: oModel,
-          controller: ViewSlots.getController("MAIN"),
-          id: "mainView",
-          preprocessors: { xml: { models: { template: oViewModel } } },
-        });
-
-        // Guard against the app being destroyed during the await above.
-        if (!Lib.isAlive(AppState.state.oApp)) {
-          oView.destroy();
-          if (switchPath) oModel.destroy();
-          return;
-        }
-
-        // A newer parallel request (check_allow_multi_req) superseded this one
-        // while XMLView.create was awaiting - discard this rebuild instead of
-        // letting an out-of-order resolve overwrite the newer view. Last-write
-        // wins by request order, not by which create() happened to resolve last.
-        if (reqSeq !== undefined && reqSeq !== Server._requestSeq) {
-          oView.destroy();
-          if (switchPath) oModel.destroy();
-          return;
-        }
-
-        ViewSlots.setView("MAIN", oView);
-        if (switchPath) oView.setModel(oViewModel, "http");
-        AppState.state.oApp.removeAllPages();
-        AppState.state.oApp.insertPage(oView);
       },
     });
   },

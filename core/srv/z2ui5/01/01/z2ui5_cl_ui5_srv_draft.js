@@ -1,0 +1,308 @@
+const path = require("path");
+const fs = require("fs");
+const z2ui5_cl_util = require("../../00/03/z2ui5_cl_util");
+
+class z2ui5_cl_ui5_srv_draft {
+
+  // Property names that are transient and must never be persisted —
+  // either they're rebuilt each roundtrip (client ref) or they would create
+  // cycles back into the runtime.
+  static SKIP_PROPS = new Set(["client"]);
+
+  // The draft store. Every platform injects its own via set_store():
+  //   load(id)                    → { id, id_prev, data } | null
+  //   save({ id, id_prev, data }) → void          (both may be async)
+  // The CAP app wires a CDS-backed store (entity cap2ui5.z2ui5_t_01, see
+  // its srv/server.js), the other adapters an in-memory Map or browser
+  // storage. Without injection a volatile in-memory fallback is used and
+  // warned about once — fine for tests, wrong for production.
+  static _custom_store = null;
+  static _fallback_store = null;
+
+  /** Inject the platform's draft store. */
+  static set_store(store) {
+    z2ui5_cl_ui5_srv_draft._custom_store = store;
+  }
+
+  static serialize(oApp) {
+    const filePath = this._findAppFile(oApp.constructor.name);
+    const data = {};
+    for (const prop of Object.getOwnPropertyNames(oApp)) {
+      if (typeof oApp[prop] === "function") continue;
+      if (this.SKIP_PROPS.has(prop)) continue;
+      data[prop] = oApp[prop];
+    }
+    // Cycle-safe stringify — last-line defense against accidental back-refs
+    // from user apps (in addition to the explicit SKIP_PROPS list).
+    const seen = new WeakSet();
+    return JSON.stringify(
+      { __className: oApp.constructor.name, __filePath: filePath, ...data },
+      (_key, val) => {
+        if (typeof val === "object" && val !== null) {
+          if (seen.has(val)) return undefined;
+          seen.add(val);
+        }
+        return val;
+      },
+    );
+  }
+
+  static deserialize(data) {
+    const parsed = JSON.parse(data);
+
+    if (parsed.__className) {
+      // Never trust the persisted __className / __filePath as a require()
+      // target: a draft row is attacker-influenced once the draft table is
+      // reachable, so a crafted __filePath would otherwise load an arbitrary
+      // module. Validate the class name and resolve it strictly by name
+      // through the framework's own folders (registry first, then the
+      // well-known on-disk locations) — __filePath is ignored.
+      if (!z2ui5_cl_util._is_safe_class_name(parsed.__className)) {
+        throw new Error(`Refusing to deserialize draft: unsafe class name`);
+      }
+      const AppClass = z2ui5_cl_ui5_srv_draft.findAppClass(parsed.__className);
+      if (!AppClass) {
+        throw new Error(`Draft class not found: ${parsed.__className}`);
+      }
+      const oApp = new AppClass();
+      delete parsed.__className;
+      delete parsed.__filePath;
+      Object.assign(oApp, parsed);
+      return oApp;
+    }
+    return parsed;
+  }
+
+  static async loadApp(id) {
+    const entry = await this._load(id);
+
+    if (!entry) return null;
+
+    return this.deserialize(entry.data);
+  }
+
+  static async saveApp(oApp, previousId = null) {
+    const generatedId = require("crypto").randomUUID();
+
+    // A persistence failure must NOT be swallowed: returning the generated id
+    // anyway hands the client a draft id that points at a row which was never
+    // written, so the failure only resurfaces one roundtrip later as a
+    // confusing NO_DRAFT_ENTRY_OF_PREVIOUS_REQUEST_FOUND. Surface it now.
+    try {
+      await this._save({
+        id: generatedId,
+        id_prev: previousId || null,
+        data: this.serialize(oApp),
+      });
+    } catch (e) {
+      console.error("DB saveApp error:", e.message);
+      throw e;
+    }
+
+    return generatedId;
+  }
+
+  static async loadPreviousApp(id) {
+    const entry = await this._load(id);
+    if (!entry || !entry.id_prev) return null;
+
+    const prevEntry = await this._load(entry.id_prev);
+    if (!prevEntry) return null;
+
+    return this.deserialize(prevEntry.data);
+  }
+
+  // ---- persistence primitives — injected store, else volatile fallback ----
+
+  static _store() {
+    if (z2ui5_cl_ui5_srv_draft._custom_store) return z2ui5_cl_ui5_srv_draft._custom_store;
+    if (!z2ui5_cl_ui5_srv_draft._fallback_store) {
+      console.warn(
+        "abap2UI5: no draft store injected — using a volatile in-memory store. " +
+        "Call require(\"abap2UI5/engine\").set_store({ load, save }) for durable drafts.",
+      );
+      const drafts = new Map();
+      z2ui5_cl_ui5_srv_draft._fallback_store = {
+        load: (id) => drafts.get(id) || null,
+        save: (entry) => { drafts.set(entry.id, entry); },
+      };
+    }
+    return z2ui5_cl_ui5_srv_draft._fallback_store;
+  }
+
+  static async _load(id) {
+    return (await z2ui5_cl_ui5_srv_draft._store().load(id)) || null;
+  }
+
+  static async _save(entry) {
+    await z2ui5_cl_ui5_srv_draft._store().save(entry);
+  }
+
+  static _findAppFile(className) {
+    const onDisk = this._findAppFileOnDisk(className);
+    if (onDisk) return onDisk;
+    // Registered classes have no file location — deserialize resolves them
+    // through the registry, so no path needs to be persisted.
+    if (z2ui5_cl_util._registered_classes.has(String(className).toLowerCase())) {
+      return null;
+    }
+    return `../../01/04/${className}`;
+  }
+
+  static _findAppFileOnDisk(className) {
+    const searchPaths = [
+      path.join(__dirname, "../../01/04", `${className}.js`), // framework apps
+      path.join(__dirname, "../../02", `${className}.js`),
+      path.join(__dirname, "../../99/02", `${className}.js`),  // pop helpers
+      path.join(__dirname, "../../../app/samples", `${className}.js`),
+    ];
+
+    for (const searchPath of searchPaths) {
+      if (fs.existsSync(searchPath)) {
+        return path.relative(__dirname, searchPath);
+      }
+    }
+
+    return null;
+  }
+
+  static findAppClass(className) {
+    const registered = z2ui5_cl_util.rtti_get_class(className);
+    if (registered) return registered;
+    const filePath = this._findAppFileOnDisk(className);
+    if (!filePath) return null;
+    const resolvedPath = path.resolve(__dirname, filePath);
+    if (fs.existsSync(resolvedPath)) {
+      return require(resolvedPath);
+    }
+    return null;
+  }
+
+  // ============================================================
+  //  INSTANCE API — 1:1 with the ABAP class over the draft table
+  //  z2ui5_t_01, held in z2ui5_port's neutral store (the same store the
+  //  transpiled OpenSQL lowerings target, so transpiled writes and this
+  //  hand-ported class see one table). The platform draft STORE above
+  //  serves the JS framework's async path; ABAP's synchronous DB
+  //  semantics are modelled here.
+  // ============================================================
+
+  static c_seconds_per_hour = 3600;
+  static c_min_exp_time_in_hours = 1;
+
+  /** sy-uname equivalent — the platform user this process acts as. */
+  static _uname() {
+    return String(process.env.USER || ``);
+  }
+
+  static _db_row(id) {
+    const z2ui5_port = require(`../../z2ui5_port`);
+    return z2ui5_port.db({
+      op: `select_single`,
+      table: `z2ui5_t_01`,
+      fields: [],
+      where: [{ field: `id`, op: `eq`, value: String(id ?? ``) }],
+    });
+  }
+
+  /** abap create — MODIFY z2ui5_t_01 (insert-or-overwrite by id). */
+  create(a, b) {
+    const { draft, model_xml } =
+      a !== null && typeof a === `object` && `draft` in a ? a : { draft: a, model_xml: b };
+    if (!draft || !draft.id) {
+      // raise a catchable error instead of an assert — same as upstream
+      let err;
+      try {
+        const CX = require(`../../00/03/z2ui5_cx_ui5_util_error`);
+        err = new CX({ val: `Internal error - cannot persist a draft without an id` });
+      } catch {
+        err = new Error(`Internal error - cannot persist a draft without an id`);
+      }
+      throw err;
+    }
+    const z2ui5_port = require(`../../z2ui5_port`);
+    z2ui5_port.db({
+      op: `modify`,
+      table: `z2ui5_t_01`,
+      row: {
+        id: draft.id,
+        id_prev: draft.id_prev ?? ``,
+        id_prev_app: draft.id_prev_app ?? ``,
+        id_prev_app_stack: draft.id_prev_app_stack ?? ``,
+        uname: z2ui5_cl_ui5_srv_draft._uname(),
+        timestampl: Date.now(),
+        data: String(model_xml ?? ``),
+      },
+    });
+  }
+
+  /** abap read (protected) — raises when the id is unknown. */
+  read(a, b) {
+    const { id, check_load_app = true } =
+      a !== null && typeof a === `object` && `id` in a ? a : { id: a, check_load_app: b };
+    const row = z2ui5_cl_ui5_srv_draft._db_row(id);
+    // Owner binding: a draft belongs to the user that created it and may only
+    // be restored by that same user (a leaked or guessed draft id cannot load
+    // another user's serialized state). Fail closed with the same exception
+    // as `not found`, so callers degrade identically. Legacy rows with a
+    // blank owner stay readable during the upgrade transition.
+    if (!row || (row.uname && row.uname !== z2ui5_cl_ui5_srv_draft._uname())) {
+      const CXU = require(`../../00/03/z2ui5_cx_util_error`);
+      throw new CXU(`NO_DRAFT_ENTRY_OF_PREVIOUS_REQUEST_FOUND`);
+    }
+    if (check_load_app === false) {
+      const { id: rid, id_prev, id_prev_app, id_prev_app_stack } = row;
+      return { id: rid, id_prev, id_prev_app, id_prev_app_stack, timestampl: 0, data: `` };
+    }
+    return { ...row };
+  }
+
+  /** abap read_draft — full row incl. serialized model. */
+  read_draft(id) {
+    return this.read(id);
+  }
+
+  /** abap read_info — ty_s_draft (ids only). */
+  read_info(id) {
+    const row = this.read({ id, check_load_app: false });
+    return {
+      id: row.id,
+      id_prev: row.id_prev,
+      id_prev_app: row.id_prev_app,
+      id_prev_app_stack: row.id_prev_app_stack,
+    };
+  }
+
+  /** abap check_exists — existence is owner-scoped (see read). */
+  check_exists(id) {
+    const row = z2ui5_cl_ui5_srv_draft._db_row(id);
+    return !!row && (!row.uname || row.uname === z2ui5_cl_ui5_srv_draft._uname());
+  }
+
+  /** abap count_entries. */
+  count_entries() {
+    const z2ui5_port = require(`../../z2ui5_port`);
+    return z2ui5_port.db({ op: `select_table`, table: `z2ui5_t_01`, fields: [], where: [] }).length;
+  }
+
+  /** abap cleanup — drop entries older than the configured expiry. */
+  cleanup() {
+    let hours = z2ui5_cl_ui5_srv_draft.c_min_exp_time_in_hours;
+    try {
+      const z2ui5_cl_ui5_user_exit = require(`../04/z2ui5_cl_ui5_user_exit`);
+      const cfg = {};
+      z2ui5_cl_ui5_user_exit.get_instance().set_config_http_post({ cs_config: cfg });
+      if (Number(cfg.draft_exp_time_in_hours) > hours) hours = Number(cfg.draft_exp_time_in_hours);
+    } catch { /* exit not configured — minimum expiry */ }
+    const cutoff = Date.now() - hours * z2ui5_cl_ui5_srv_draft.c_seconds_per_hour * 1000;
+    const z2ui5_port = require(`../../z2ui5_port`);
+    const rows = z2ui5_port.db({ op: `select_table`, table: `z2ui5_t_01`, fields: [`id`, `timestampl`], where: [] });
+    for (const row of rows) {
+      if (row.timestampl < cutoff) {
+        z2ui5_port.db({ op: `delete`, table: `z2ui5_t_01`, where: [{ field: `id`, op: `eq`, value: row.id }] });
+      }
+    }
+  }
+}
+
+module.exports = z2ui5_cl_ui5_srv_draft;

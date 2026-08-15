@@ -9,7 +9,7 @@ class z2ui5_cl_pop_pdf extends z2ui5_if_app {
   button_text_confirm = ``;
   button_text_cancel = ``;
 
-  static factory({ i_title = `PDF Viewer`, i_button_text_confirm = `OK`, i_button_text_cancel = `Cancel`, i_pdf, i_label } = {}) {
+  static factory({ i_title = `PDF Viewer`, i_button_text_confirm = `OK`, i_button_text_cancel = `Cancel`, i_pdf, i_label = `` } = {}) {
     let r_result = null;
     r_result = new z2ui5_cl_pop_pdf();
     r_result.title = z2ui5_cl_util.abap_tab_assign(r_result.title, z2ui5_cl_util.abap_copy(i_title));
@@ -66,7 +66,7 @@ const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 
 // abap PREFERRED PARAMETER call style — see z2ui5_pop_preferred_param.js
-require("./z2ui5_pop_preferred_param")(z2ui5_cl_pop_pdf, {
+require("abap2UI5/z2ui5_pop_preferred_param")(z2ui5_cl_pop_pdf, {
   factory: { preferred: `i_pdf`, params: [`i_title`, `i_button_text_confirm`, `i_button_text_cancel`, `i_pdf`, `i_label`] },
 });
 

@@ -15,7 +15,7 @@ class z2ui5_cl_pop_image_editor extends z2ui5_if_app {
   mv_mode = ``;
   mv_image = ``;
 
-  static factory({ iv_image, iv_title = `Edit Image`, iv_cancel_text = `Cancel`, iv_save_text = `Save`, iv_customshapesrc, iv_keepcropaspectratio, iv_keepresizeaspectratio, iv_scalecroparea, iv_customshapesrctype, iv_enabledbuttons, iv_mode } = {}) {
+  static factory({ iv_image, iv_title = `Edit Image`, iv_cancel_text = `Cancel`, iv_save_text = `Save`, iv_customshapesrc = ``, iv_keepcropaspectratio = ``, iv_keepresizeaspectratio = ``, iv_scalecroparea = ``, iv_customshapesrctype = ``, iv_enabledbuttons = ``, iv_mode = `` } = {}) {
     let r_result = null;
     r_result = new z2ui5_cl_pop_image_editor();
     r_result.mv_image = z2ui5_cl_util.abap_tab_assign(r_result.mv_image, z2ui5_cl_util.abap_copy(iv_image));
@@ -78,7 +78,7 @@ const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 
 // abap PREFERRED PARAMETER call style — see z2ui5_pop_preferred_param.js
-require("./z2ui5_pop_preferred_param")(z2ui5_cl_pop_image_editor, {
+require("abap2UI5/z2ui5_pop_preferred_param")(z2ui5_cl_pop_image_editor, {
   factory: { preferred: `iv_image`, params: [`iv_image`, `iv_title`, `iv_cancel_text`, `iv_save_text`, `iv_customshapesrc`, `iv_keepcropaspectratio`, `iv_keepresizeaspectratio`, `iv_scalecroparea`, `iv_customshapesrctype`, `iv_enabledbuttons`, `iv_mode`] },
 });
 

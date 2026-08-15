@@ -31,7 +31,7 @@ class z2ui5_cl_pop_js_loader extends z2ui5_if_app {
 
   view_display() {
     const popup = z2ui5_cl_xml_view.factory_popup().dialog(`Setup UI...`).content();
-    if (this.js) {
+    if (!z2ui5_cl_util.abap_is_initial(this.js)) {
       popup._z2ui5()
         .timer(this.client._event(`TIMER_FINISHED`))
         ._generic({ ns: `html`, name: `script` })
@@ -70,7 +70,7 @@ const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 
 // abap PREFERRED PARAMETER call style — see z2ui5_pop_preferred_param.js
-require("./z2ui5_pop_preferred_param")(z2ui5_cl_pop_js_loader, {
+require("abap2UI5/z2ui5_pop_preferred_param")(z2ui5_cl_pop_js_loader, {
   factory: { preferred: `i_js`, params: [`i_js`, `i_result`] },
 });
 

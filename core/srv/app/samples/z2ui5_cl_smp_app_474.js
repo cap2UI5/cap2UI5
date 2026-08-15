@@ -1,0 +1,92 @@
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
+
+class z2ui5_cl_smp_app_474 extends z2ui5_if_app {
+  client = null;
+
+  async main(client) {
+    this.client = client;
+    if (client.check_on_init()) {
+      this.view_display();
+    } else if (client.check_on_navigated()) {
+      this.view_display();
+    } else if (client.check_on_event()) {
+      this.on_event();
+    }
+  }
+
+  on_event() {
+    switch (this.client.get_event()) {
+      case `OPEN_RELATIVE_ONLY`:
+        this.popover_open({ policy: `RELATIVE_ONLY` });
+        break;
+      case `OPEN_ALLOW_ALL`:
+        this.popover_open({ policy: `ALLOW_ALL` });
+        break;
+      case `OPEN_DENY_ALL`:
+        this.popover_open({ policy: `DENY_ALL` });
+        break;
+    }
+  }
+
+  popover_open({ policy } = {}) {
+    this.client.follow_up_action(z2ui5_if_client.cs_event.control_by_id, [`msgPopover`, `setAsyncURLHandler`, policy]);
+    this.client.follow_up_action(z2ui5_if_client.cs_event.control_by_id, [`msgPopover`, `openBy`, this.client.get_event_arg()]);
+  }
+
+  view_display() {
+    const view = z2ui5_cl_ui5_view_builder.factory()
+      .ele({ n: `View`, ns: `mvc` })
+      .a({ n: `displayBlock`, v: `true` })
+      .a({ n: `height`, v: `100%` })
+      .a({ n: `xmlns`, v: `sap.m` })
+      .a({ n: `xmlns:mvc`, v: `sap.ui.core.mvc` })
+      .a({ n: `xmlns:core`, v: `sap.ui.core` });
+    const page = view.ele(`Shell`)
+      .ele(`Page`)
+      .a({ n: `title`, v: `abap2UI5 - Message - MessagePopover URL Policy` })
+      .a({ n: `showNavButton`, b: this.client.check_app_prev_stack() })
+      .a({ n: `navButtonPress`, v: this.client._event_nav_app_leave() });
+    page.tag(`MessageStrip`)
+      .a({ n: `text`, v: `Each message below carries an in-app link and an external one. The policy ` + `applied when opening decides which of them the popover keeps clickable - ` + `RELATIVE_ONLY blocks everything that leaves the app, ALLOW_ALL keeps every ` + `link, DENY_ALL blocks all of them. The policy travels as data, the frontend ` + `installs the validator (setAsyncURLHandler).` })
+      .a({ n: `type`, v: `Information` })
+      .a({ n: `showIcon`, b: true })
+      .a({ n: `class`, v: `sapUiSmallMargin` });
+    page.ele(`dependents`)
+      .ele(`MessagePopover`)
+      .a({ n: `id`, v: `msgPopover` })
+      .ele(`MessageItem`)
+      .a({ n: `type`, v: `Error` })
+      .a({ n: `title`, v: `Order cannot be released` })
+      .a({ n: `description`, v: `Check the <a href="#/orders/4711">order details</a> or the ` + `<a href="https://abap2ui5.org">documentation</a>.` })
+      .a({ n: `markupDescription`, b: true })
+      .end()
+      .ele(`MessageItem`)
+      .a({ n: `type`, v: `Warning` })
+      .a({ n: `title`, v: `Delivery date in the past` })
+      .a({ n: `description`, v: `Open the <a href="#/deliveries">delivery list</a> or the ` + `<a href="https://ui5.sap.com">UI5 demo kit</a>.` })
+      .a({ n: `markupDescription`, b: true })
+      .end()
+      .end();
+    page.ele(`HBox`)
+      .a({ n: `class`, v: `sapUiSmallMargin` })
+      .tag(`Button`)
+      .a({ n: `press`, v: this.client._event(`OPEN_RELATIVE_ONLY`, [`$event.oSource.sId`]) })
+      .a({ n: `text`, v: `Open with RELATIVE_ONLY` })
+      .a({ n: `type`, v: `Emphasized` })
+      .tag(`Button`)
+      .a({ n: `press`, v: this.client._event(`OPEN_ALLOW_ALL`, [`$event.oSource.sId`]) })
+      .a({ n: `text`, v: `Open with ALLOW_ALL` })
+      .a({ n: `class`, v: `sapUiTinyMarginBegin` })
+      .tag(`Button`)
+      .a({ n: `press`, v: this.client._event(`OPEN_DENY_ALL`, [`$event.oSource.sId`]) })
+      .a({ n: `text`, v: `Open with DENY_ALL` })
+      .a({ n: `class`, v: `sapUiTinyMarginBegin` });
+    this.client.view_display(view.stringify());
+  }
+}
+
+module.exports = z2ui5_cl_smp_app_474;
+
+const z2ui5_cl_ui5_view_builder = require("abap2UI5/z2ui5_cl_ui5_view_builder");
+const z2ui5_if_client = require("abap2UI5/z2ui5_if_client");
+

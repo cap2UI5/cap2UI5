@@ -20,8 +20,9 @@ sap.ui.define(
             type: "object",
           },
           rangeData: {
+            // no defaultValue: an object default in the metadata is shared
+            // by reference across every instance of the control
             type: "object",
-            defaultValue: [],
           },
           checkInit: {
             type: "boolean",
@@ -115,8 +116,7 @@ sap.ui.define(
           this,
           this.getProperty("multiInputId"),
         );
-        if (!input || this.getProperty("checkInit")) return;
-        this.setProperty("checkInit", true);
+        if (!Lib.claimOnce(this, input)) return;
         try {
           input.attachTokenUpdate(this.onTokenUpdate.bind(this));
           input.attachInnerControlsCreated(

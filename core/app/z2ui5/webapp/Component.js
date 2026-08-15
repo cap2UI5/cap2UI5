@@ -4,24 +4,26 @@ sap.ui.define(
     "z2ui5/model/models",
     "z2ui5/core/Server",
     "sap/ui/VersionInfo",
-    "z2ui5/core/DeveloperTools",
+    "z2ui5/devtools/DevTools",
     "z2ui5/core/Lib",
     "z2ui5/core/AppState",
     "z2ui5/Util",
     "z2ui5/model/formatter",
-    "sap/ui/core/routing/HashChanger",
+    "z2ui5/core/Router",
+    "z2ui5/core/ScrollFocus",
   ],
   (
     UIComponent,
     Models,
     Server,
     VersionInfo,
-    DeveloperTools,
+    DevTools,
     Lib,
     AppState,
     DateUtil,
     Formatter,
-    HashChanger,
+    Router,
+    ScrollFocus,
   ) => {
     "use strict";
 
@@ -38,6 +40,36 @@ sap.ui.define(
         // a fresh oConfig - so the base init() and all helpers can rely on
         // a fully initialized global from here on.
         AppState.initGlobal();
+
+        // Two sibling BSPs carry frontend artefacts the framework itself does
+        // not ship: z2ui5_cci (abap2UI5-addons/custom-controls) and z2ui5_ccc
+        // (abap2UI5/customer-frontend-extension, the customer's own library).
+        // The two roots differ in one letter and are NOT the same BSP - each
+        // matches the ABAP prefix of its repository (z2ui5_cl_cci for the
+        // community controls, z2ui5_cl_ccc for the customer extension).
+        // Both are normally found through their reserved resourceRoot in
+        // manifest.json ("z2ui5_cci": "../z2ui5_cci/", "z2ui5_ccc":
+        // "../z2ui5_ccc/"), a sibling of THIS BSP. In the standalone HTTP
+        // service there is no BSP for them to be a sibling of, so the backend
+        // hands the absolute paths over on the global instead
+        // (z2ui5_cl_http_handler=>_http_get).
+        //
+        // They have to be applied HERE and not in the page: the manifest
+        // registers its own value while the component is being created, which
+        // is after everything the shell can run, so a registration made there
+        // is overwritten again. init() runs after manifest processing.
+        // Absent in BSP and Launchpad mode, where the manifest entries are
+        // right. Neither BSP is loaded from here - nothing is requested until
+        // a view actually names the namespace - so a system that has only one
+        // of them installed (or neither) never pays for the other.
+        const ccResourceRoot = AppState.getGlobal("ccResourceRoot");
+        if (ccResourceRoot) {
+          sap.ui.loader.config({ paths: { z2ui5_cci: ccResourceRoot } });
+        }
+        const cccResourceRoot = AppState.getGlobal("cccResourceRoot");
+        if (cccResourceRoot) {
+          sap.ui.loader.config({ paths: { z2ui5_ccc: cccResourceRoot } });
+        }
 
         UIComponent.prototype.init.call(this);
 
@@ -82,20 +114,14 @@ sap.ui.define(
         this._initVersionInfo();
 
         this._installUnloadListener();
-        this._installDeveloperToolsShortcut();
+        // The developer tools own everything of their own: the Ctrl+F12
+        // shortcut, the dialog instance, the roundtrip recorder and the
+        // "?z2ui5-devtools=" auto open. This call and the exit() below are
+        // the framework's ENTIRE coupling to devtools/ - keep it that
+        // way (see the module header there).
+        DevTools.install();
         this._installScrollListener();
         this._installRouterListener();
-
-        // The stopped router removed with the manifest routing section used
-        // to initialize the HashChanger (and its underlying hasher
-        // singleton) as a side effect. Without that init hasher never
-        // learns the URL's current hash, so the app-state cleanup after
-        // every roundtrip (View1._updateBrowserHistory calling
-        // replaceHash("")) is treated as a change and rewrites the URL to
-        // "...#" - every app start ended with a dangling "#". Initialize it
-        // explicitly; inside the FLP the shell has already done this and
-        // init() is a guarded no-op.
-        HashChanger.getInstance().init();
       },
 
       // ------------------------------------------------------------------
@@ -104,36 +130,24 @@ sap.ui.define(
 
       _installUnloadListener() {
         this._boundUnload = this._onUnload.bind(this);
-        // Safari on iOS does not fire "beforeunload" reliably, so we use
-        // "pagehide" there. iPads on iPadOS 13+ report a Mac user agent
-        // ("desktop site" default) - the touch-point probe catches those,
-        // while real Macs report 0 touch points.
-        const isIos =
-          /iPad|iPhone/.test(navigator.userAgent) ||
-          (navigator.userAgent.includes("Mac") && navigator.maxTouchPoints > 1);
-        this._unloadEvent = isIos ? "pagehide" : "beforeunload";
+        // "pagehide", not "beforeunload": pagehide fires only after the
+        // navigation is committed (any "leave page?" prompt was answered),
+        // so tearing the app down here can neither swallow the cc/Dirty
+        // unsaved-changes prompt (destroying the app mid-beforeunload
+        // removed its window.onbeforeunload handler before the browser
+        // invoked it) nor kill the live session when the user chooses to
+        // stay. It is also the reliable event on iOS Safari, which never
+        // fired beforeunload dependably.
+        this._unloadEvent = "pagehide";
         window.addEventListener(this._unloadEvent, this._boundUnload);
-      },
-
-      _installDeveloperToolsShortcut() {
-        // Ctrl + F12 opens / closes the in-app developer tools.
-        this._boundKeydown = (event) => {
-          if (event.ctrlKey && event.key === "F12") {
-            const state = AppState.state;
-            if (!state.developerTools)
-              state.developerTools = new DeveloperTools();
-            state.developerTools.toggle();
-          }
-        };
-        document.addEventListener("keydown", this._boundKeydown);
       },
 
       _installScrollListener() {
         // Scroll events do not bubble, but they do trigger capture-phase
         // listeners on ancestors - a single document-level listener observes
-        // every scrollable container. Server.onScrollCapture records the
+        // every scrollable container. ScrollFocus.onScrollCapture records the
         // last scrolled element per view slot for the S_SCROLL request info.
-        this._boundScroll = (event) => Server.onScrollCapture(event);
+        this._boundScroll = (event) => ScrollFocus.onScrollCapture(event);
         document.addEventListener("scroll", this._boundScroll, {
           capture: true,
           passive: true,
@@ -141,20 +155,15 @@ sap.ui.define(
       },
 
       _installRouterListener() {
-        // Hash-based app routing (UI5 Router style). The HashChanger is the
-        // same engine the sap.ui.core.routing.Router sits on; listening to its
-        // hashChanged event makes the native browser Back/Forward buttons (and
-        // manual URL edits / bookmarks) drive navigation - a hash of the form
-        // "#/app/<CLASS>" starts that app. Only sessions that opted in via
-        // client->set_nav_routing( ) act on it (Server.onHashChange guards on
-        // AppState.navRouting), so apps that manage their own hash are
-        // unaffected.
-        this._boundHashChanged = (oEvent) =>
-          Server.onHashChange(oEvent.getParameter("newHash"));
-        HashChanger.getInstance().attachEvent(
-          "hashChanged",
-          this._boundHashChanged,
-        );
+        // Hash-based app routing (UI5 Router style), owned by core/Router.js.
+        // It sits on the HashChanger - the same engine
+        // sap.ui.core.routing.Router uses, and inside the FLP the shell's own
+        // one - so the native browser Back/Forward buttons and the launchpad
+        // back button drive navigation. Only apps that opted in via
+        // follow_up_action( cs_event-set_nav_routing ) act on it, so apps that manage their own
+        // hash are unaffected. Server does the actual restore roundtrip; it is
+        // injected here so the router stays free of a Server dependency.
+        Router.init(() => Server.restoreFromRoute());
       },
 
       // ------------------------------------------------------------------
@@ -246,7 +255,10 @@ sap.ui.define(
         return "";
       },
 
-      _onUnload() {
+      _onUnload(event) {
+        // pagehide with persisted = true means the page enters the browser's
+        // back/forward cache and may be shown again - keep the app alive.
+        if (event?.persisted) return;
         // destroy() runs exit(), which removes the unload listener (and every
         // other one) - no need to remove it here too.
         this.destroy();
@@ -258,24 +270,31 @@ sap.ui.define(
 
       exit() {
         window.removeEventListener(this._unloadEvent, this._boundUnload);
-        document.removeEventListener("keydown", this._boundKeydown);
         document.removeEventListener("scroll", this._boundScroll, {
           capture: true,
         });
-        HashChanger.getInstance().detachEvent(
-          "hashChanged",
-          this._boundHashChanged,
-        );
+        Router.exit();
 
-        // The developer tools control is created lazily by the Ctrl+F12
-        // shortcut - destroy it (which also closes its dialog) so a re-launch
-        // (FLP) does not leak the control instance.
-        if (AppState.state.developerTools) {
-          AppState.state.developerTools.destroy();
-          AppState.state.developerTools = null;
-        }
+        // Drops the shortcut, the dialog instance and the recorded history -
+        // all of which are module-scoped and would otherwise outlive the
+        // component on an FLP re-launch.
+        DevTools.exit();
 
         Server.endSession();
+
+        // Global state that would outlive the component (FLP keeps the page
+        // alive): cancel any pending backend timer, empty the shortcut
+        // registry so the module-scoped keydown listener becomes a no-op,
+        // and detach the device model's handlers from the Device singleton.
+        for (const key of Object.keys(AppState.state.timers)) {
+          clearTimeout(AppState.state.timers[key]);
+          delete AppState.state.timers[key];
+        }
+        AppState.state.shortcuts = {};
+        if (AppState.state.oDeviceModel) {
+          AppState.state.oDeviceModel.destroy();
+          AppState.state.oDeviceModel = null;
+        }
 
         // Robust launchpad teardown:
         //  1. Clear the FLP dirty flag so it does not carry over into the

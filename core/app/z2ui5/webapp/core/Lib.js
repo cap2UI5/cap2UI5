@@ -4,54 +4,20 @@
 // here reach it via AppState.state instead of the z2ui5 global.
 //
 // Shared rendering pattern of the custom controls (Timer.js, Focus.js,
-// Scrolling.js, Tree.js, ...): the renderer only *marks* work by setting a
+// Scrolling.js, ...): the renderer only *marks* work by setting a
 // `_pending*` flag on the control instance, and onAfterRendering() consumes
 // the flag and performs the actual DOM work (focus, scrolling, timers, tree
 // state). Renderers must stay cheap and free of visible side effects
 // (rendering API v2); deferring to onAfterRendering also guarantees the
 // control's DOM exists.
+//
+// Nothing hash/route related belongs here: core/Router.js is the one module
+// that knows how a URL hash is split between the FLP shell and the running
+// app, and nothing else may reach for the hash directly.
 sap.ui.define(
   ["z2ui5/core/AppState", "sap/ui/core/Element"],
   (AppState, Element) => {
     "use strict";
-
-    // Hash-based app routing (UI5 Router style). The URL hash names the running
-    // app AND its state as a bookmarkable route "/app/<CLASS>/<DRAFTID>" - the
-    // client-side equivalent of a UI5 route pattern "app/{class}/{state}". The
-    // <CLASS> segment is human-readable; the <DRAFTID> segment is the server
-    // draft that holds the app's state, so the browser Back/Forward buttons
-    // restore the EXACT preserved state (and a reload/bookmark restores it too,
-    // falling back to a fresh start of <CLASS> once the draft has expired).
-    // routeForApp builds it; appOfRoute / draftOfRoute parse the two segments
-    // back out (empty when the hash is not an app route, so non-routing hashes
-    // - e.g. an app's own set_push_state - are ignored by the router).
-    const APP_ROUTE_PREFIX = "/app/";
-
-    function routeForApp(sClass, sDraftId) {
-      const base = `${APP_ROUTE_PREFIX}${sClass}`;
-      return sDraftId ? `${base}/${sDraftId}` : base;
-    }
-
-    function segmentsOfRoute(sHash) {
-      if (!sHash) return null;
-      // Accept an optional leading "#" and "/" so both HashChanger hashes
-      // (no "#") and raw location.hash values resolve to the same route.
-      const clean = sHash.replace(/^#/, "").replace(/^\//, "");
-      const marker = "app/";
-      if (!clean.startsWith(marker)) return null;
-      // Stop at any route/query separator, then split class / draft id.
-      return clean.slice(marker.length).split(/[&?]/)[0].split("/");
-    }
-
-    function appOfRoute(sHash) {
-      const parts = segmentsOfRoute(sHash);
-      return parts ? parts[0] : "";
-    }
-
-    function draftOfRoute(sHash) {
-      const parts = segmentsOfRoute(sHash);
-      return parts && parts.length > 1 ? parts[1] : "";
-    }
 
     // Resolve a control id to its sap.ui.core.Element via the global registry.
     // Element.getElementById arrived in UI5 1.119; older bootstraps fall back
@@ -95,14 +61,25 @@ sap.ui.define(
     // releases (e.g. 1.71) where an async require would 404 and make the
     // ui5loader retry noisily via synchronous XHR. getMessaging()'s
     // MessageManager fallback covers those releases instead.
+    //
+    // An UNREADABLE version means "modern", never "old": the legacy-free
+    // (UI5 2.x) build no longer ships the sap.ui.version global, so probing
+    // it there yields undefined on a 1.142 runtime. Answering "false" for
+    // that case is doubly wrong - legacy-free is the one runtime where
+    // sap/ui/core/Messaging is the ONLY messaging API, because the
+    // sap.ui.getCore().getMessageManager() fallback in getMessaging() is
+    // gone too. The warm-load in Component.init would then be skipped and
+    // getMessaging() would return null for good: no message> model, no
+    // handleValidation. Only a version we can read AND that is older than
+    // 1.118 may switch the warm-load off.
     function hasMessagingModule() {
       /* ui5lint-disable no-globals --
        sap.ui.version is the only way to read the running UI5 version; there
-       is no injected/module equivalent. */
+       is no injected/module equivalent. Absent on the legacy-free build. */
       const rawVersion = String(sap.ui.version || "");
       /* ui5lint-enable no-globals */
       const [major, minor] = rawVersion.split(".").map(Number);
-      if (!Number.isFinite(major) || !Number.isFinite(minor)) return false;
+      if (!Number.isFinite(major) || !Number.isFinite(minor)) return true;
       return major > 1 || (major === 1 && minor >= 118);
     }
 
@@ -124,7 +101,25 @@ sap.ui.define(
 
     // True when the object supports isDestroyed() and reports destroyed.
     function isDestroyed(obj) {
-      return Boolean(obj?.isDestroyed && obj.isDestroyed());
+      if (!obj) return false;
+      // ManagedObject#isDestroyed( ) is @since 1.93 - on the 1.71 floor the
+      // method is absent and the guard would read "alive" for a destroyed
+      // control, so fall back to the flag every release carries
+      if (typeof obj.isDestroyed === "function") return obj.isDestroyed();
+      return Boolean(obj.bIsDestroyed);
+    }
+
+    // A companion control (MultiInputExt, UploadSetExt, ...) resolves its
+    // target after EVERY render - the onAfterRendering hook it registers in
+    // init() fires once per roundtrip - but may attach its handlers only
+    // once, or every roundtrip would add another listener. Returns true
+    // exactly once: the first render at which `target` actually resolved.
+    // The claim is recorded in the control's own `checkInit` property (set
+    // without invalidating, these controls render nothing).
+    function claimOnce(owner, target) {
+      if (!target || owner.getProperty("checkInit")) return false;
+      owner.setProperty("checkInit", true, true);
+      return true;
     }
 
     // True when the object exists and is not destroyed. Used to guard
@@ -283,9 +278,33 @@ sap.ui.define(
       return val == null ? "" : String(val);
     }
 
+    // True for a DOM element that carries a text caret.
+    function isTextInput(el) {
+      return (
+        Boolean(el) && (el.tagName === "INPUT" || el.tagName === "TEXTAREA")
+      );
+    }
+
+    // The caret of a text field as { start, end }, or null when the element
+    // is no text field or carries no selection. Input types without a text
+    // selection (number, date, ...) throw or return null on selectionStart -
+    // reporting that as 0 would later snap the cursor to the far left, so
+    // "no caret" has to stay distinguishable from "caret at 0".
+    function readCaret(el) {
+      if (!isTextInput(el)) return null;
+      try {
+        const start = el.selectionStart;
+        const end = el.selectionEnd;
+        if (start == null || end == null) return null;
+        return { start, end };
+      } catch {
+        return null;
+      }
+    }
+
     // Collapse a UI5 Device `system` flag object into a single label. The
     // order matters - phone/tablet/combi are mutually exclusive with the
-    // desktop fallback. Shared by Server._getDeviceInfo (request payload) and
+    // desktop fallback. Shared by core/Session.js (request payload) and
     // the Info control so both report the same value.
     function deriveSystemType(system) {
       if (!system) return "desktop";
@@ -503,13 +522,76 @@ sap.ui.define(
       oRm.close("span");
     }
 
+    // Event arguments are whatever the UI5 expression grammar produced for
+    // them. Most are strings or numbers, but a UI5 event parameter is quite
+    // often a CONTROL or an ARRAY OF CONTROLS -
+    // ViewSettingsDialog.confirm/filterItems, Menu.itemSelected/item,
+    // SinglePlanningCalendar.selectedDatesChange with its DateRange list. Those
+    // could not travel before: JSON.stringify walks a ManagedObject through its
+    // parent/aggregation graph and throws on the circular reference, so the
+    // whole roundtrip body failed to serialize. The expression grammar has no
+    // loop or lambda either, so an app could not project the array itself and
+    // was left parsing a display string (the localized `filterString`) instead.
+    //
+    // Marshal them into plain data here: one object per control carrying its
+    // control id plus the values of its metadata PROPERTIES. Which properties
+    // exist is asked of the control's own metadata - nothing is interpreted,
+    // renamed or decided, so this stays the thin-executor contract. The
+    // backend receives it as the JSON string every object argument becomes in
+    // T_EVENT_ARG and parses it with ajson.
+    //
+    // Anything that is not a control is handed through untouched, so this is
+    // purely additive for every wire that works today.
+    const MAX_ARG_DEPTH = 4;
+
+    function isManagedObject(value) {
+      return (
+        value !== null &&
+        typeof value === "object" &&
+        typeof value.isA === "function" &&
+        value.isA("sap.ui.base.ManagedObject")
+      );
+    }
+
+    function projectControl(control) {
+      const result = { ID: control.getId() };
+      const properties = control.getMetadata().getAllProperties();
+      for (const name in properties) {
+        try {
+          const value = control.getProperty(name);
+          if (value !== undefined) result[name] = value;
+        } catch {
+          // a property whose getter throws is simply not reported - the
+          // remaining ones still have to reach the backend
+        }
+      }
+      return result;
+    }
+
+    function normalizeEventArg(value, depth) {
+      const level = depth || 0;
+      if (level > MAX_ARG_DEPTH) return value;
+      if (isManagedObject(value)) return projectControl(value);
+      if (Array.isArray(value)) {
+        return value.map((entry) => normalizeEventArg(entry, level + 1));
+      }
+      return value;
+    }
+
+    // Always returns a fresh top-level array: Server.roundtrip shifts
+    // oBody.ARGUMENTS, which must not reach the caller's own rest-parameter
+    // array.
+    function normalizeEventArgs(args) {
+      return args.map((arg) => normalizeEventArg(arg, 0));
+    }
+
     return {
-      routeForApp,
-      appOfRoute,
-      draftOfRoute,
       logError,
       isDestroyed,
       isAlive,
+      claimOnce,
+      isTextInput,
+      readCaret,
       registerCallback,
       unregisterCallback,
       readFileAsDataURL,
@@ -532,6 +614,7 @@ sap.ui.define(
       isRootModelSlot,
       effectiveSizeLimit,
       renderInvisibleSpan,
+      normalizeEventArgs,
     };
   },
 );

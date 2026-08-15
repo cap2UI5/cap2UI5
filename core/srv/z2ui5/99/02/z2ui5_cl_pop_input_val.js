@@ -8,7 +8,7 @@ class z2ui5_cl_pop_input_val extends z2ui5_if_app {
   button_text_confirm = ``;
   button_text_cancel = ``;
 
-  static factory({ text = `Enter New Value`, val, title = `Popup Input Value`, button_text_confirm = `OK`, button_text_cancel = `Cancel` } = {}) {
+  static factory({ text = `Enter New Value`, val = ``, title = `Popup Input Value`, button_text_confirm = `OK`, button_text_cancel = `Cancel` } = {}) {
     let r_result = null;
     r_result = new z2ui5_cl_pop_input_val();
     r_result.title = z2ui5_cl_util.abap_tab_assign(r_result.title, z2ui5_cl_util.abap_copy(title));
@@ -64,7 +64,7 @@ const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 
 // abap PREFERRED PARAMETER call style — see z2ui5_pop_preferred_param.js
-require("./z2ui5_pop_preferred_param")(z2ui5_cl_pop_input_val, {
+require("abap2UI5/z2ui5_pop_preferred_param")(z2ui5_cl_pop_input_val, {
   factory: { preferred: `val`, params: [`text`, `val`, `title`, `button_text_confirm`, `button_text_cancel`] },
 });
 

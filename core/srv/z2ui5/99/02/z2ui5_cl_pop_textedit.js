@@ -7,7 +7,7 @@ class z2ui5_cl_pop_textedit extends z2ui5_if_app {
   ms_result = { text: ``, check_confirmed: false };
   client = null;
 
-  static factory({ i_stretch_active = true, i_textarea, i_title = `Editor`, i_check_editable = false } = {}) {
+  static factory({ i_stretch_active = true, i_textarea = ``, i_title = `Editor`, i_check_editable = false } = {}) {
     let r_result = null;
     r_result = new z2ui5_cl_pop_textedit();
     r_result.mv_stretch_active = z2ui5_cl_util.abap_tab_assign(r_result.mv_stretch_active, z2ui5_cl_util.abap_copy(i_stretch_active));
@@ -61,7 +61,7 @@ const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 
 // abap PREFERRED PARAMETER call style — see z2ui5_pop_preferred_param.js
-require("./z2ui5_pop_preferred_param")(z2ui5_cl_pop_textedit, {
+require("abap2UI5/z2ui5_pop_preferred_param")(z2ui5_cl_pop_textedit, {
   factory: { preferred: `i_textarea`, params: [`i_stretch_active`, `i_textarea`, `i_title`, `i_check_editable`] },
 });
 

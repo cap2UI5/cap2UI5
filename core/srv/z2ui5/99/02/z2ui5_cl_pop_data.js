@@ -52,7 +52,7 @@ class z2ui5_cl_pop_data extends z2ui5_if_app {
 }
 
 // abap PREFERRED PARAMETER call style — see z2ui5_pop_preferred_param.js
-require("./z2ui5_pop_preferred_param")(z2ui5_cl_pop_data, {
+require("abap2UI5/z2ui5_pop_preferred_param")(z2ui5_cl_pop_data, {
   factory: { preferred: `val`, params: [`val`, `title`] },
 });
 

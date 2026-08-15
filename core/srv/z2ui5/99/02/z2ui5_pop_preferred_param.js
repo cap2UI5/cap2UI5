@@ -34,9 +34,12 @@ function isOptionsBag(args, params) {
 
 module.exports = function shim(cls, map) {
   for (const [meth, { preferred, params }] of Object.entries(map)) {
-    const orig = cls[meth];
+    // static factories live on the class, chain methods (view builder
+    // ele/tag/a) on the prototype — wrap wherever the method actually is
+    const owner = typeof cls[meth] === "function" ? cls : cls.prototype;
+    const orig = owner?.[meth];
     if (typeof orig !== "function") continue;
-    cls[meth] = function (args, ...rest) {
+    owner[meth] = function (args, ...rest) {
       if (args !== undefined && !isOptionsBag(args, params)) {
         args = { [preferred]: args };
       }

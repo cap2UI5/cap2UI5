@@ -11,7 +11,7 @@ class z2ui5_cl_pop_file_ul extends z2ui5_if_app {
   button_text_confirm = ``;
   button_text_cancel = ``;
 
-  static factory({ i_text = `Choose the file to upload:`, i_title = `File Upload`, i_button_text_confirm = `OK`, i_button_text_cancel = `Cancel`, i_path } = {}) {
+  static factory({ i_text = `Choose the file to upload:`, i_title = `File Upload`, i_button_text_confirm = `OK`, i_button_text_cancel = `Cancel`, i_path = `` } = {}) {
     let r_result = null;
     r_result = new z2ui5_cl_pop_file_ul();
     r_result.title = z2ui5_cl_util.abap_tab_assign(r_result.title, z2ui5_cl_util.abap_copy(i_title));
@@ -54,8 +54,8 @@ class z2ui5_cl_pop_file_ul extends z2ui5_if_app {
     const lv_event = client.get().EVENT;
     switch (lv_event) {
       case `UPLOAD`:
-        lv_data = z2ui5_cl_a2ui5_context.conv_get_xstring_by_data_uri(this.mv_value);
-        this.ms_result.value = z2ui5_cl_a2ui5_context.conv_get_string_by_xstring(lv_data);
+        lv_data = z2ui5_cl_ui5_util_context.conv_get_xstring_by_data_uri(this.mv_value);
+        this.ms_result.value = z2ui5_cl_ui5_util_context.conv_get_string_by_xstring(lv_data);
         this.check_confirm_enabled = true;
         this.mv_value = ``;
         this.mv_path = ``;
@@ -73,7 +73,7 @@ class z2ui5_cl_pop_file_ul extends z2ui5_if_app {
 
 module.exports = z2ui5_cl_pop_file_ul;
 
-const z2ui5_cl_a2ui5_context = require("abap2UI5/z2ui5_cl_a2ui5_context");
+const z2ui5_cl_ui5_util_context = require("abap2UI5/z2ui5_cl_ui5_util_context");
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 
