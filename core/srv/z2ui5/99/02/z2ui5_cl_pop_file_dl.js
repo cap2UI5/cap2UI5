@@ -13,7 +13,7 @@ class z2ui5_cl_pop_file_dl extends z2ui5_if_app {
   button_text_confirm = ``;
   button_text_cancel = ``;
 
-  static factory({ i_text = `Choose the file to download:`, i_title = `File Download`, i_button_text_confirm = `Download`, i_button_text_cancel = `Cancel`, i_file, i_type = `data:text/csv;base64,`, i_name } = {}) {
+  static factory({ i_text = `Choose the file to download:`, i_title = `File Download`, i_button_text_confirm = `Download`, i_button_text_cancel = `Cancel`, i_file, i_type = `data:text/csv;base64,`, i_name = `` } = {}) {
     let r_result = null;
     let lv_size_kb = 0;
     r_result = new z2ui5_cl_pop_file_dl();
@@ -42,8 +42,8 @@ class z2ui5_cl_pop_file_dl extends z2ui5_if_app {
       .dialog({ title: this.title, afterclose: this.client._event(`BUTTON_CANCEL`) })
       .content();
     if ((this.mv_check_download === true || this.mv_check_download === `X`)) {
-      lv_csv_x = z2ui5_cl_a2ui5_context.conv_get_xstring_by_string(this.mv_value);
-      lv_base64 = z2ui5_cl_a2ui5_context.conv_encode_x_base64(lv_csv_x);
+      lv_csv_x = z2ui5_cl_ui5_util_context.conv_get_xstring_by_string(this.mv_value);
+      lv_base64 = z2ui5_cl_ui5_util_context.conv_encode_x_base64(lv_csv_x);
       popup._generic({ ns: `html`, name: `iframe`, t_prop: [{ n: `src`, v: this.mv_type + lv_base64 }, { n: `hidden`, v: `hidden` }] });
       popup._z2ui5().timer(this.client._event(`CALLBACK_DOWNLOAD`));
     }
@@ -88,12 +88,12 @@ class z2ui5_cl_pop_file_dl extends z2ui5_if_app {
 
 module.exports = z2ui5_cl_pop_file_dl;
 
-const z2ui5_cl_a2ui5_context = require("abap2UI5/z2ui5_cl_a2ui5_context");
+const z2ui5_cl_ui5_util_context = require("abap2UI5/z2ui5_cl_ui5_util_context");
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 
 // abap PREFERRED PARAMETER call style — see z2ui5_pop_preferred_param.js
-require("./z2ui5_pop_preferred_param")(z2ui5_cl_pop_file_dl, {
+require("abap2UI5/z2ui5_pop_preferred_param")(z2ui5_cl_pop_file_dl, {
   factory: { preferred: `i_file`, params: [`i_text`, `i_title`, `i_button_text_confirm`, `i_button_text_cancel`, `i_file`, `i_type`, `i_name`] },
 });
 

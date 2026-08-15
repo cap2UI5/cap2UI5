@@ -2,6 +2,7 @@
 // `favicon` URL (updates the existing <link> tag or creates one).
 sap.ui.define(["sap/ui/core/Control", "z2ui5/core/Lib"], (Control, Lib) => {
   "use strict";
+  // OBSOLETE: replaced by the frontend event cs_event-set_favicon - kept for backward compatibility.
   return Control.extend("z2ui5.cc.Favicon", {
     metadata: {
       properties: {
@@ -15,7 +16,12 @@ sap.ui.define(["sap/ui/core/Control", "z2ui5/core/Lib"], (Control, Lib) => {
       // (updating the <link> tag) is what actually matters.
       this.setProperty("favicon", val, true);
       const href = Lib.toText(val);
-      const existing = document.head.querySelector('link[rel="shortcut icon"]');
+      // Match ANY icon link, not just rel="shortcut icon": a page that
+      // declares the modern rel="icon" (or "icon shortcut") would otherwise
+      // keep its own link and get a second, competing one appended on every
+      // app start - which icon the browser then shows is up to it.
+      // ~= matches one entry of the whitespace-separated rel list.
+      const existing = document.head.querySelector('link[rel~="icon"]');
       if (existing) {
         existing.href = href;
         return;

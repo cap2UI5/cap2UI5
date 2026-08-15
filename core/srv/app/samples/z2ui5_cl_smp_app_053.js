@@ -1,0 +1,93 @@
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
+
+class z2ui5_cl_smp_app_053 extends z2ui5_if_app {
+  mv_search_value = ``;
+  mt_table = [];
+  client = null;
+
+  async main(client) {
+    this.client = client;
+    if (client.check_on_init()) {
+      this.set_data();
+      this.view_display();
+    } else {
+      this.on_event();
+    }
+  }
+
+  on_event() {
+    switch (this.client.get_event()) {
+      case `BUTTON_SEARCH`:
+      case `BUTTON_START`:
+        this.set_data();
+        this.set_search();
+        break;
+    }
+  }
+
+  view_display() {
+    const view = z2ui5_cl_ui5_view_builder.factory()
+      .ele({ n: `View`, ns: `mvc` })
+      .a({ n: `displayBlock`, v: `true` })
+      .a({ n: `height`, v: `100%` })
+      .a({ n: `xmlns`, v: `sap.m` })
+      .a({ n: `xmlns:mvc`, v: `sap.ui.core.mvc` })
+      .a({ n: `xmlns:core`, v: `sap.ui.core` });
+    const page = view.ele(`Shell`)
+      .ele(`Page`)
+      .a({ n: `title`, v: `abap2UI5 - Table - Search in the Backend (SearchField)` })
+      .a({ n: `showNavButton`, b: this.client.check_app_prev_stack() })
+      .a({ n: `navButtonPress`, v: this.client._event_nav_app_leave() })
+      .a({ n: `id`, v: `page_main` });
+    page.tag(`MessageStrip`)
+      .a({ n: `text`, v: `A search field triggers a backend filter on Enter or via the Go button; the matching ` + `rows are computed server-side and the table is refreshed.` })
+      .a({ n: `type`, v: `Information` })
+      .a({ n: `showIcon`, b: true })
+      .a({ n: `class`, v: `sapUiSmallMargin` });
+    const vbox = page.ele(`VBox`);
+    vbox.ele(`HBox`)
+      .tag(`SearchField`)
+      .a({ n: `width`, v: `17.5rem` })
+      .a({ n: `search`, v: this.client._event(`BUTTON_SEARCH`) })
+      .a({ n: `value`, v: this.client._bind(this.mv_search_value) })
+      .a({ n: `id`, v: `SEARCH` })
+      .a({ n: `placeholder`, v: `Search products` })
+      .tag(`Button`)
+      .a({ n: `press`, v: this.client._event(`BUTTON_START`) })
+      .a({ n: `text`, v: `Go` })
+      .a({ n: `type`, v: `Emphasized` });
+    const tab = vbox.ele(`Table`).a({ n: `items`, v: this.client._bind(this.mt_table) });
+    const lo_columns = tab.ele(`columns`);
+    lo_columns.ele(`Column`).tag(`Text`).a({ n: `text`, v: `Product` });
+    lo_columns.ele(`Column`).tag(`Text`).a({ n: `text`, v: `Date` });
+    lo_columns.ele(`Column`).tag(`Text`).a({ n: `text`, v: `Name` });
+    lo_columns.ele(`Column`).tag(`Text`).a({ n: `text`, v: `Location` });
+    lo_columns.ele(`Column`).tag(`Text`).a({ n: `text`, v: `Quantity` });
+    const lo_cells = tab.ele(`items`).ele(`ColumnListItem`);
+    lo_cells.tag(`Text`).a({ n: `text`, v: `{PRODUCT}` });
+    lo_cells.tag(`Text`).a({ n: `text`, v: `{CREATE_DATE}` });
+    lo_cells.tag(`Text`).a({ n: `text`, v: `{CREATE_BY}` });
+    lo_cells.tag(`Text`).a({ n: `text`, v: `{STORAGE_LOCATION}` });
+    lo_cells.tag(`Text`).a({ n: `text`, v: `{QUANTITY}` });
+    this.client.view_display(view.stringify());
+  }
+
+  set_data() {
+    this.mt_table = z2ui5_cl_util.abap_tab_assign(this.mt_table, [{ product: `table`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }, { product: `chair`, create_date: `01.01.2022`, create_by: `James`, storage_location: `AREA_001`, quantity: 123 }, { product: `sofa`, create_date: `01.05.2021`, create_by: `Simone`, storage_location: `AREA_001`, quantity: 700 }, { product: `computer`, create_date: `27.01.2023`, create_by: `Theo`, storage_location: `AREA_001`, quantity: 200 }, { product: `printer`, create_date: `01.01.2023`, create_by: `Hannah`, storage_location: `AREA_001`, quantity: 90 }, { product: `table2`, create_date: `01.01.2023`, create_by: `Julia`, storage_location: `AREA_001`, quantity: 110 }]);
+  }
+
+  set_search() {
+    if (!z2ui5_cl_util.abap_is_initial(this.mv_search_value)) {
+      const _out0 = { val: this.mv_search_value, tab: this.mt_table };
+      z2ui5_cl_smp_context.itab_filter_by_val(_out0);
+      if ("tab" in _out0) this.mt_table = _out0.tab;
+    }
+  }
+}
+
+module.exports = z2ui5_cl_smp_app_053;
+
+const z2ui5_cl_smp_context = require("./z2ui5_cl_smp_context");
+const z2ui5_cl_ui5_view_builder = require("abap2UI5/z2ui5_cl_ui5_view_builder");
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
+

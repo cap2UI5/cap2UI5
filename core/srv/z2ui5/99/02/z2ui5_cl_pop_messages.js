@@ -10,9 +10,9 @@ class z2ui5_cl_pop_messages extends z2ui5_if_app {
     let sy_tabix = 0;
     r_result = new z2ui5_cl_pop_messages();
     sy_tabix = 0;
-    for (const lr_row of z2ui5_cl_a2ui5_context.msg_get_t(i_messages)) {
+    for (const lr_row of z2ui5_cl_ui5_util_context.msg_get_t(i_messages)) {
       sy_tabix++;
-      r_result.mt_msg.push(z2ui5_cl_util.abap_copy({ type: z2ui5_cl_a2ui5_context.ui5_get_msg_type(lr_row.type), title: lr_row.text, subtitle: `${lr_row.id} ${lr_row.no}` }));
+      r_result.mt_msg.push(z2ui5_cl_util.abap_copy({ type: z2ui5_cl_ui5_util_context.ui5_get_msg_type(lr_row.type), title: lr_row.text, subtitle: `${lr_row.id} ${lr_row.no}` }));
     }
     r_result.title = z2ui5_cl_util.abap_tab_assign(r_result.title, z2ui5_cl_util.abap_copy(i_title));
     return r_result;
@@ -42,12 +42,12 @@ class z2ui5_cl_pop_messages extends z2ui5_if_app {
 
 module.exports = z2ui5_cl_pop_messages;
 
-const z2ui5_cl_a2ui5_context = require("abap2UI5/z2ui5_cl_a2ui5_context");
+const z2ui5_cl_ui5_util_context = require("abap2UI5/z2ui5_cl_ui5_util_context");
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 
 // abap PREFERRED PARAMETER call style — see z2ui5_pop_preferred_param.js
-require("./z2ui5_pop_preferred_param")(z2ui5_cl_pop_messages, {
+require("abap2UI5/z2ui5_pop_preferred_param")(z2ui5_cl_pop_messages, {
   factory: { preferred: `i_messages`, params: [`i_messages`, `i_title`] },
 });
 

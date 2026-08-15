@@ -92,7 +92,7 @@ class z2ui5_cl_pop_demo_output extends z2ui5_if_app {
 }
 
 // abap PREFERRED PARAMETER call style — see z2ui5_pop_preferred_param.js
-require("./z2ui5_pop_preferred_param")(z2ui5_cl_pop_demo_output, {
+require("abap2UI5/z2ui5_pop_preferred_param")(z2ui5_cl_pop_demo_output, {
   factory: { preferred: `i_output`, params: [`i_output`, `i_title`, `i_icon`, `i_button_text`, `i_stretch`, `i_as_page`] },
 });
 

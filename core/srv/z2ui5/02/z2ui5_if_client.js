@@ -9,9 +9,9 @@
  *   2. A `METHOD_NAMES` set of every method any conforming client must expose
  *      — used by core_app / tests as a structural check, mirroring the role
  *      that the ABAP `INTERFACES z2ui5_if_client` declaration plays in
- *      z2ui5_cl_core_client.
+ *      z2ui5_cl_ui5_client.
  *
- * The actual implementation lives in z2ui5_cl_core_client.js, exactly as the
+ * The actual implementation lives in z2ui5_cl_ui5_client.js, exactly as the
  * ABAP class implements the interface.
  */
 
@@ -86,6 +86,7 @@ const METHOD_NAMES = Object.freeze([
   `popover_display`,
   `popover_destroy`,
   `get`,
+  `get_event`,
   `get_event_arg`,
   `get_app`,
   `_event_nav_app_leave`,

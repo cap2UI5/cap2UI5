@@ -50,7 +50,7 @@ const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
 
 // abap PREFERRED PARAMETER call style — see z2ui5_pop_preferred_param.js
-require("./z2ui5_pop_preferred_param")(z2ui5_cl_pop_html, {
+require("abap2UI5/z2ui5_pop_preferred_param")(z2ui5_cl_pop_html, {
   factory: { preferred: `i_html`, params: [`i_html`, `i_title`, `i_icon`, `i_button_text`] },
 });
 

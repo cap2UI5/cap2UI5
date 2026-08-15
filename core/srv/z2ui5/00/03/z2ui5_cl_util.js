@@ -435,6 +435,24 @@ class z2ui5_cl_util {
   }
 
   /**
+   * ABAP `IS INITIAL`. A plain `!val` is wrong for the two composite cases:
+   * an empty table is truthy in JS, and a structure whose components are all
+   * initial is initial in ABAP but truthy here. Object references are
+   * initial only when null/undefined (class instances pass through as
+   * bound), which is what `IS BOUND` tests from the other side.
+   */
+  static abap_is_initial(val) {
+    if (val === null || val === undefined) return true;
+    if (Array.isArray(val)) return val.length === 0;
+    if (typeof val === `object`) {
+      const proto = Object.getPrototypeOf(val);
+      if (proto !== Object.prototype && proto !== null) return false; // class instance = bound reference
+      return Object.values(val).every((v) => z2ui5_cl_util.abap_is_initial(v));
+    }
+    return !val;
+  }
+
+  /**
    * ABAP value semantics for assignments — `a = b` copies tables and
    * structures, it never aliases them (JS assignment shares the reference,
    * so a later DELETE on the copy would mutate the original too). Arrays
@@ -726,7 +744,9 @@ class z2ui5_cl_util {
   /** Returns the full ordered list of directories searched for app classes. */
   static _app_dirs() {
     const out = [
-      // 1. Framework built-ins
+      // 1. Framework built-ins (the shipped apps live in 01/04 since the
+      //    2026-08 upstream rename, the popups in 99/02)
+      path.join(__dirname, "../../01/04"),
       path.join(__dirname, "../../02"),
       path.join(__dirname, "../../99/02"),
       // 2. Custom apps (srv/app/); bundled samples under srv/app/samples/

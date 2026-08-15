@@ -27,7 +27,7 @@ Guidance for AI agents and contributors. Read before making any change.
   (BTP deployment).
 - `core/` — the **vendored** platform-neutral core package (npm name
   `abap2UI5`, linked via `"abap2UI5": "file:./core"`): engine, framework
-  classes (`core/srv/z2ui5/`), ~180 bundled samples
+  classes (`core/srv/z2ui5/`), ~105 bundled samples
   (`core/srv/app/samples/`), the z2ui5 webapp source. Its dependency tree is
   part of the app lock (under `core/node_modules/`), so **one** `npm ci` at
   the root installs everything.

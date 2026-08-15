@@ -3,7 +3,7 @@
  *
  * Hook contract for user-defined exits. A class implementing this interface
  * lives outside the core and may be discovered & instantiated by
- * z2ui5_cl_exit.get_user_exit_class.
+ * z2ui5_cl_ui5_user_exit.get_user_exit_class.
  *
  * METHOD_NAMES is used by z2ui5_cl_util.rtti_get_classes_impl_intf to find
  * candidate exit classes — same role as the ABAP interface declaration.

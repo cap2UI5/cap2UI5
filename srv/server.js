@@ -54,7 +54,7 @@ cds.on("bootstrap", (app) => {
   // Serve the local UI5 runtime at /resources (must be registered before the
   // CDS services so it is not shadowed by the OData/REST routing) — the app
   // bootstraps from `/resources/sap-ui-core.js` (see patch-frontend.js /
-  // z2ui5_cl_exit.js) instead of a public CDN, so the whole stack runs
+  // z2ui5_cl_ui5_user_exit.js) instead of a public CDN, so the whole stack runs
   // offline, served from the pinned `openui5-dist` dependency. OpenUI5 ships
   // only the open-source libraries; sample apps that use commercial SAPUI5
   // libs (sap.suite.*, sap.gantt, sap.ui.comp, …) still require the SAPUI5

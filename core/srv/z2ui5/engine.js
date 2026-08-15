@@ -16,14 +16,14 @@
  *   statics    →  engine.WEBAPP_DIR (+ engine.ui5_resources_dir())
  *
  * The CAP project itself is one consumer of this seam (srv/server.js and
- * srv/z2ui5/02/z2ui5_cl_http_handler.js delegate here).
+ * srv/z2ui5/02/z2ui5_cl_ui5_http_handler.js delegate here).
  */
 "use strict";
 
-const z2ui5_cl_core_handler   = require("./01/02/z2ui5_cl_core_handler");
-const z2ui5_cl_core_srv_draft = require("./01/01/z2ui5_cl_core_srv_draft");
-const z2ui5_cl_exit           = require("./02/z2ui5_cl_exit");
-const z2ui5_cl_app_index_html = require("./01/03/z2ui5_cl_app_index_html");
+const z2ui5_cl_ui5_handler   = require("./01/02/z2ui5_cl_ui5_handler");
+const z2ui5_cl_ui5_srv_draft = require("./01/01/z2ui5_cl_ui5_srv_draft");
+const z2ui5_cl_ui5_user_exit           = require("./01/04/z2ui5_cl_ui5_user_exit");
+const z2ui5_cl_ui5f_index_html = require("./01/03/z2ui5_cl_ui5f_index_html");
 const z2ui5_cl_util           = require("./00/03/z2ui5_cl_util");
 const z2ui5_port              = require("./z2ui5_port");
 const z2ui5_asset             = require("./z2ui5_asset");
@@ -67,15 +67,15 @@ function _sticky_set(key, handler) {
 async function roundtrip(oBody, reqInfo) {
   // Isolate the exit's request context per async execution so interleaved
   // roundtrips can't clobber each other's context.
-  return z2ui5_cl_exit.run_in_request(async () => {
-    if (reqInfo) z2ui5_cl_exit.init_context(reqInfo);
+  return z2ui5_cl_ui5_user_exit.run_in_request(async () => {
+    if (reqInfo) z2ui5_cl_ui5_user_exit.init_context(reqInfo);
 
     const stickyKey = _sticky_key(reqInfo);
     let oHandler = _sticky_handlers.get(stickyKey);
     if (oHandler) {
       oHandler.mv_request_json = typeof oBody === `string` ? oBody : JSON.stringify(oBody ?? {});
     } else {
-      oHandler = new z2ui5_cl_core_handler(oBody);
+      oHandler = new z2ui5_cl_ui5_handler(oBody);
     }
 
     const responseJson = await oHandler.main();
@@ -100,10 +100,10 @@ async function roundtrip(oBody, reqInfo) {
  * @returns { html: string, headers: Array<{n,v}> }
  */
 function bootstrap_html(reqInfo) {
-  z2ui5_cl_exit.init_context(reqInfo || { method: `GET`, body: ``, path: ``, t_params: [] });
-  const cfg = z2ui5_cl_exit.get_instance().set_config_http_get(undefined, {});
+  z2ui5_cl_ui5_user_exit.init_context(reqInfo || { method: `GET`, body: ``, path: ``, t_params: [] });
+  const cfg = z2ui5_cl_ui5_user_exit.get_instance().set_config_http_get(undefined, {});
   return {
-    html: z2ui5_cl_app_index_html.get_source(cfg),
+    html: z2ui5_cl_ui5f_index_html.get_source(cfg),
     headers: cfg.t_security_header || [],
   };
 }
@@ -129,7 +129,7 @@ module.exports = {
 
   // ---- ports ----
   /** Draft persistence: { load(id), save({id,id_prev,data}) } (may be async). */
-  set_store: (store) => z2ui5_cl_core_srv_draft.set_store(store),
+  set_store: (store) => z2ui5_cl_ui5_srv_draft.set_store(store),
   /** OpenSQL store behind z2ui5_port.db() (transpiled SELECT/MODIFY/DELETE). */
   set_db_store: (store) => z2ui5_port.set_store(store),
   /** Webapp asset provider: (relPath) → string|null (browser builds). */

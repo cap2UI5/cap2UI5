@@ -8,8 +8,8 @@
  */
 const engine = require("abap2UI5/engine");
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cl_core_srv_draft = require("abap2UI5/z2ui5_cl_core_srv_draft");
-const z2ui5_cl_http_handler = require("abap2UI5/z2ui5_cl_http_handler");
+const z2ui5_cl_ui5_srv_draft = require("abap2UI5/z2ui5_cl_ui5_srv_draft");
+const z2ui5_cl_ui5_http_handler = require("abap2UI5/z2ui5_cl_ui5_http_handler");
 
 describe("abap2UI5 port contract", () => {
   test("engine exposes the platform seam", () => {
@@ -22,7 +22,7 @@ describe("abap2UI5 port contract", () => {
   });
 
   test("draft store injection point and app-class registry exist", () => {
-    expect(typeof z2ui5_cl_core_srv_draft.set_store).toBe("function");
+    expect(typeof z2ui5_cl_ui5_srv_draft.set_store).toBe("function");
     expect(typeof z2ui5_cl_util.register_app_class).toBe("function");
   });
 
@@ -30,11 +30,11 @@ describe("abap2UI5 port contract", () => {
     // minimal roundtrip through the real handler — no CDS involved, the
     // draft store is swapped for an in-memory map for this test
     const mem = new Map();
-    z2ui5_cl_core_srv_draft.set_store({
+    z2ui5_cl_ui5_srv_draft.set_store({
       load: async (id) => mem.get(id),
       save: async (e) => void mem.set(e.id, e),
     });
-    const res = await z2ui5_cl_http_handler({
+    const res = await z2ui5_cl_ui5_http_handler({
       data: {
         value: { S_FRONT: { ORIGIN: "http://localhost", PATHNAME: "/", SEARCH: "", HASH: "" } },
       },

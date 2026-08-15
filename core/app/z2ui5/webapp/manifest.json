@@ -36,14 +36,6 @@
   },
   "sap.ui": {
     "technology": "UI5",
-    "icons": {
-      "icon": "",
-      "favIcon": "",
-      "phone": "",
-      "phone@2": "",
-      "tablet": "",
-      "tablet@2": ""
-    },
     "deviceTypes": {
       "desktop": true,
       "tablet": true,
@@ -73,6 +65,10 @@
       "viewName": "z2ui5.view.App",
       "type": "XML",
       "id": "App"
+    },
+    "resourceRoots": {
+      "z2ui5_cci": "../z2ui5_cci/",
+      "z2ui5_ccc": "../z2ui5_ccc/"
     }
   },
   "sap.cloud": {
