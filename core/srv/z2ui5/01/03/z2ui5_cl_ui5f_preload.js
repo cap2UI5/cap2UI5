@@ -45,14 +45,18 @@ class z2ui5_cl_ui5f_preload {
 ` + `      "z2ui5/core/actions/Variants.js": function(){${z2ui5_cl_ui5f_variants_js.get()}},` + `
 ` + `      "z2ui5/core/actions/ViewOps.js": function(){${z2ui5_cl_ui5f_viewops_js.get()}},` + `
 ` + `      "z2ui5/css/style.css": '${z2ui5_cl_ui5f_preload.escape_js_literal({ val: styles_css })}',` + `
+` + `      "z2ui5/devtools/AbapSource.js": function(){${z2ui5_cl_ui5f_abapsrc_js.get()}},` + `
 ` + `      "z2ui5/devtools/Console.js": function(){${z2ui5_cl_ui5f_console_js.get()}},` + `
 ` + `      "z2ui5/devtools/DevTools.js": function(){${z2ui5_cl_ui5f_devtools_js.get()}},` + `
 ` + `      "z2ui5/devtools/DeveloperTools.fragment.xml": '${z2ui5_cl_ui5f_preload.escape_js_literal({ val: z2ui5_cl_ui5f_dtools_xml.get() })}',` + `
 ` + `      "z2ui5/devtools/DeveloperTools.js": function(){${z2ui5_cl_ui5f_dtools_js.get()}},` + `
+` + `      "z2ui5/devtools/Format.js": function(){${z2ui5_cl_ui5f_dtformat_js.get()}},` + `
 ` + `      "z2ui5/devtools/Inspect.js": function(){${z2ui5_cl_ui5f_inspect_js.get()}},` + `
 ` + `      "z2ui5/devtools/LiveEdit.js": function(){${z2ui5_cl_ui5f_liveedit_js.get()}},` + `
 ` + `      "z2ui5/devtools/Picker.js": function(){${z2ui5_cl_ui5f_picker_js.get()}},` + `
 ` + `      "z2ui5/devtools/Recorder.js": function(){${z2ui5_cl_ui5f_recorder_js.get()}},` + `
+` + `      "z2ui5/devtools/Report.js": function(){${z2ui5_cl_ui5f_report_js.get()}},` + `
+` + `      "z2ui5/devtools/Tabs.js": function(){${z2ui5_cl_ui5f_tabs_js.get()}},` + `
 ` + `      "z2ui5/manifest.json": '${z2ui5_cl_ui5f_preload.escape_js_literal({ val: z2ui5_cl_ui5f_manifest.get() })}',` + `
 ` + `      "z2ui5/model/formatter.js": function(){${z2ui5_cl_ui5f_format_js.get()}},` + `
 ` + `      "z2ui5/model/models.js": function(){${z2ui5_cl_ui5f_models_js.get()}},` + `
@@ -74,6 +78,7 @@ class z2ui5_cl_ui5f_preload {
 module.exports = z2ui5_cl_ui5f_preload;
 
 const z2ui5_cl_ui5_util_context = require("abap2UI5/z2ui5_cl_ui5_util_context");
+const z2ui5_cl_ui5f_abapsrc_js = require("abap2UI5/z2ui5_cl_ui5f_abapsrc_js");
 const z2ui5_cl_ui5f_app_js = require("abap2UI5/z2ui5_cl_ui5f_app_js");
 const z2ui5_cl_ui5f_app_xml = require("abap2UI5/z2ui5_cl_ui5f_app_xml");
 const z2ui5_cl_ui5f_appstate_js = require("abap2UI5/z2ui5_cl_ui5f_appstate_js");
@@ -85,6 +90,7 @@ const z2ui5_cl_ui5f_console_js = require("abap2UI5/z2ui5_cl_ui5f_console_js");
 const z2ui5_cl_ui5f_ctrlcall_js = require("abap2UI5/z2ui5_cl_ui5f_ctrlcall_js");
 const z2ui5_cl_ui5f_devtools_js = require("abap2UI5/z2ui5_cl_ui5f_devtools_js");
 const z2ui5_cl_ui5f_dirty_js = require("abap2UI5/z2ui5_cl_ui5f_dirty_js");
+const z2ui5_cl_ui5f_dtformat_js = require("abap2UI5/z2ui5_cl_ui5f_dtformat_js");
 const z2ui5_cl_ui5f_dtools_js = require("abap2UI5/z2ui5_cl_ui5f_dtools_js");
 const z2ui5_cl_ui5f_dtools_xml = require("abap2UI5/z2ui5_cl_ui5f_dtools_xml");
 const z2ui5_cl_ui5f_errview_js = require("abap2UI5/z2ui5_cl_ui5f_errview_js");
@@ -107,6 +113,7 @@ const z2ui5_cl_ui5f_msgmgr_js = require("abap2UI5/z2ui5_cl_ui5f_msgmgr_js");
 const z2ui5_cl_ui5f_multiinp_js = require("abap2UI5/z2ui5_cl_ui5f_multiinp_js");
 const z2ui5_cl_ui5f_picker_js = require("abap2UI5/z2ui5_cl_ui5f_picker_js");
 const z2ui5_cl_ui5f_recorder_js = require("abap2UI5/z2ui5_cl_ui5f_recorder_js");
+const z2ui5_cl_ui5f_report_js = require("abap2UI5/z2ui5_cl_ui5f_report_js");
 const z2ui5_cl_ui5f_router_js = require("abap2UI5/z2ui5_cl_ui5f_router_js");
 const z2ui5_cl_ui5f_scrfocus_js = require("abap2UI5/z2ui5_cl_ui5f_scrfocus_js");
 const z2ui5_cl_ui5f_scroll_js = require("abap2UI5/z2ui5_cl_ui5f_scroll_js");
@@ -116,6 +123,7 @@ const z2ui5_cl_ui5f_shortcut_js = require("abap2UI5/z2ui5_cl_ui5f_shortcut_js");
 const z2ui5_cl_ui5f_slots_js = require("abap2UI5/z2ui5_cl_ui5f_slots_js");
 const z2ui5_cl_ui5f_smartinp_js = require("abap2UI5/z2ui5_cl_ui5f_smartinp_js");
 const z2ui5_cl_ui5f_storage_js = require("abap2UI5/z2ui5_cl_ui5f_storage_js");
+const z2ui5_cl_ui5f_tabs_js = require("abap2UI5/z2ui5_cl_ui5f_tabs_js");
 const z2ui5_cl_ui5f_timer_js = require("abap2UI5/z2ui5_cl_ui5f_timer_js");
 const z2ui5_cl_ui5f_title_js = require("abap2UI5/z2ui5_cl_ui5f_title_js");
 const z2ui5_cl_ui5f_tree_js = require("abap2UI5/z2ui5_cl_ui5f_tree_js");

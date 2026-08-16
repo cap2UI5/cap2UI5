@@ -30,6 +30,10 @@ class z2ui5_cl_ui5f_picker_js {
 ` + `    let boundClick = null;` + `
 ` + `    let boundKey = null;` + `
 ` + `` + `
+` + `    // The report of the last successful pick, so the Picked Control tab` + `
+` + `    // can be rendered from the registry like every other tab.` + `
+` + `    let lastPickReport = "";` + `
+` + `` + `
 ` + `    function truncate(value, max) {` + `
 ` + `      const text = String(value);` + `
 ` + `      return text.length <= max ? text : \`\${text.slice(0, max)}...\`;` + `
@@ -233,6 +237,11 @@ class z2ui5_cl_ui5f_picker_js {
 ` + `          Lib.logError("DevTools Picker: describe failed", e);` + `
 ` + `          report = "(could not inspect that control)";` + `
 ` + `        }` + `
+` + `        // Kept here rather than on the dialog: the Picked Control tab is` + `
+` + `        // rendered from the tab registry like every other tab, and the` + `
+` + `        // registry must be able to reach a tab's content without the` + `
+` + `        // dialog handing it over.` + `
+` + `        lastPickReport = report;` + `
 ` + `        stop();` + `
 ` + `        if (onDone) onDone(report);` + `
 ` + `      };` + `
@@ -254,6 +263,10 @@ class z2ui5_cl_ui5f_picker_js {
 ` + `      stop,` + `
 ` + `      describe,` + `
 ` + `      isActive: () => active,` + `
+` + `      // The report of the most recent successful pick, "" before the` + `
+` + `      // first one. A cancelled pick (Escape) leaves the previous report` + `
+` + `      // standing - the user did not ask to throw it away.` + `
+` + `      lastReport: () => lastPickReport,` + `
 ` + `      _internals: { collectBindings, collectEvents, renderValue },` + `
 ` + `    };` + `
 ` + `  },` + `
