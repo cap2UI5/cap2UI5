@@ -10,7 +10,7 @@ class z2ui5_cl_smp_app_325 extends z2ui5_if_app {
     let obj_page;
     let header_title;
     let sections;
-    if (client.check_on_init()) {
+    if (client.check_on_navigated()) {
       view = z2ui5_cl_ui5_view_builder.factory()
         .ele({ n: `View`, ns: `mvc` })
         .a({ n: `displayBlock`, v: `true` })

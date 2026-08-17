@@ -11,6 +11,8 @@ class z2ui5_cl_smp_app_071 extends z2ui5_if_app {
     if (client.check_on_init()) {
       this.combo_fill();
       this.view_display();
+    } else if (client.check_on_navigated()) {
+      this.view_display();
     } else if (client.check_on_event(`UPDATE`)) {
       client.follow_up_action(z2ui5_if_client.cs_event.set_size_limit, [(this.set_size_limit), client.cs_view.main]);
       client.message_toast_display(`SizeLimitUpdated`);

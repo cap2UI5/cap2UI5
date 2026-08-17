@@ -8,7 +8,7 @@ class z2ui5_cl_smp_app_492 extends z2ui5_if_app {
     let s_config;
     let view;
     let page;
-    if (client.check_on_init()) {
+    if (client.check_on_navigated()) {
       s_config = client.get().S_CONFIG;
       this.url = s_config.PATHNAME + s_config.SEARCH;
       view = z2ui5_cl_ui5_view_builder.factory()

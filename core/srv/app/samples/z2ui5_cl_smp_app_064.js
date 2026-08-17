@@ -1,28 +1,17 @@
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_smp_app_064 extends z2ui5_if_app {
-  mt_mapping = [];
-  mv_search_value = ``;
-  mt_table = [];
-  lv_selkz = false;
   mv_check_active = false;
   screen = { progress_value: `0`, display_value: `` };
   mv_percent = 0;
   mv_check_enabled = false;
   client = null;
 
-  set_selkz({ iv_selkz } = {}) {
-    let sy_tabix = 0;
-    sy_tabix = 0;
-    for (const fs_ls_table of this.mt_table) {
-      sy_tabix++;
-      fs_ls_table.selkz = z2ui5_cl_util.abap_tab_assign(fs_ls_table.selkz, z2ui5_cl_util.abap_copy(iv_selkz));
-    }
-  }
-
   async main(client) {
     this.client = client;
     if (client.check_on_init()) {
+      this.on_init();
+    } else if (client.check_on_navigated()) {
       this.on_init();
     } else {
       this.on_event();
@@ -30,8 +19,6 @@ class z2ui5_cl_smp_app_064 extends z2ui5_if_app {
   }
 
   on_event() {
-    let lt_arg = [];
-    let ls_arg = ``;
     if (this.client.check_on_event(`LOAD`)) {
       this.mv_percent = this.mv_percent + 25;
       this.mv_check_active = true;
@@ -98,6 +85,5 @@ class z2ui5_cl_smp_app_064 extends z2ui5_if_app {
 module.exports = z2ui5_cl_smp_app_064;
 
 const z2ui5_cl_ui5_view_builder = require("abap2UI5/z2ui5_cl_ui5_view_builder");
-const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_if_client = require("abap2UI5/z2ui5_if_client");
 

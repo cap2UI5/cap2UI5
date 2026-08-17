@@ -22,17 +22,20 @@ class z2ui5_cl_smp_app_488 extends z2ui5_if_app {
     let _fs$fs_s_result = null;
     const ls_get = this.client.get();
     this.returned_event = z2ui5_cl_util.abap_tab_assign(this.returned_event, z2ui5_cl_util.abap_copy(ls_get.EVENT));
-    if (this.returned_event === `DATA_CONFIRMED`) {
-      fs_s_result = ls_get.R_EVENT_DATA;
-      _fs$fs_s_result = { o: ls_get, k: `R_EVENT_DATA` };
-      sy_subrc = 0;
-      if (fs_s_result != null) {
-        this.s_result = z2ui5_cl_util.abap_tab_assign(this.s_result, z2ui5_cl_util.abap_copy(fs_s_result));
-        this.client.message_toast_display(`Returned event ${this.returned_event}, ` + `product ${this.s_result.product}, quantity ${this.s_result.quantity}`);
-      }
-    } else if (this.returned_event === `DATA_CANCELLED`) {
-      this.s_result = {};
-      this.client.message_toast_display(`Returned event DATA_CANCELLED, no data passed`);
+    switch (this.returned_event) {
+      case `DATA_CONFIRMED`:
+        fs_s_result = ls_get.R_EVENT_DATA;
+        _fs$fs_s_result = { o: ls_get, k: `R_EVENT_DATA` };
+        sy_subrc = 0;
+        if (fs_s_result != null) {
+          this.s_result = z2ui5_cl_util.abap_tab_assign(this.s_result, z2ui5_cl_util.abap_copy(fs_s_result));
+          this.client.message_toast_display(`Returned event ${this.returned_event}, ` + `product ${this.s_result.product}, quantity ${this.s_result.quantity}`);
+        }
+        break;
+      case `DATA_CANCELLED`:
+        this.s_result = {};
+        this.client.message_toast_display(`Returned event DATA_CANCELLED, no data passed`);
+        break;
     }
     this.view_display();
   }

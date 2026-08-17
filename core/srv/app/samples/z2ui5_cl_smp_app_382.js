@@ -11,6 +11,8 @@ class z2ui5_cl_smp_app_382 extends z2ui5_if_app {
     if (client.check_on_init()) {
       this.on_init();
       this.view_display();
+    } else if (client.check_on_navigated()) {
+      this.view_display();
     } else if (client.check_on_event()) {
       this.on_event();
     }
@@ -56,7 +58,7 @@ class z2ui5_cl_smp_app_382 extends z2ui5_if_app {
       .tag(`Link`)
       .a({ n: `text`, v: `UI5 Demo Kit` })
       .a({ n: `target`, v: `_blank` })
-      .a({ n: `href`, v: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.MessageBox/sample/sap.m.sample.MessageBox` });
+      .a({ n: `href`, v: `https://sdk.openui5.org/entity/sap.m.MessageBox/sample/sap.m.sample.MessageBox` });
     page.ele(`Panel`)
       .a({ n: `headerText`, v: `Message Box Configuration` })
       .ele({ n: `SimpleForm`, ns: `form` })

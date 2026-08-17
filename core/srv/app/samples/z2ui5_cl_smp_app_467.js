@@ -12,6 +12,8 @@ class z2ui5_cl_smp_app_467 extends z2ui5_if_app {
       this.amount = 42;
       this.t_messages = z2ui5_cl_util.abap_tab_assign(this.t_messages, [{ message: `Please enter a valid name`, type: `Error`, additionaltext: `Name`, target: `/NAME` }, { message: `Draft saved automatically`, type: `Information`, additionaltext: `Autosave` }]);
       this.view_display();
+    } else if (client.check_on_navigated()) {
+      this.view_display();
     }
   }
 

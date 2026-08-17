@@ -9,9 +9,7 @@ class z2ui5_cl_smp_app_161 extends z2ui5_if_app {
       .a({ n: `xmlns`, v: `sap.m` })
       .a({ n: `xmlns:core`, v: `sap.ui.core` });
     const dialog = popup.ele(`Dialog`).a({ n: `afterClose`, v: this.client._event(`BTN_OK_1ND`) }).ele(`content`);
-    const content = dialog.tag(`Button`)
-      .a({ n: `press`, v: this.client._event(`GOTO_2ND`) })
-      .a({ n: `text`, v: `Open 2nd popup` });
+    dialog.tag(`Button`).a({ n: `press`, v: this.client._event(`GOTO_2ND`) }).a({ n: `text`, v: `Open 2nd popup` });
     dialog.end()
       .ele(`buttons`)
       .tag(`Button`)
@@ -27,7 +25,7 @@ class z2ui5_cl_smp_app_161 extends z2ui5_if_app {
       .a({ n: `xmlns`, v: `sap.m` })
       .a({ n: `xmlns:core`, v: `sap.ui.core` });
     const dialog = popup.ele(`Dialog`).a({ n: `afterClose`, v: this.client._event(`BTN_OK_2ND`) }).ele(`content`);
-    const content = dialog.tag(`Label`).a({ n: `text`, v: `this is a second popup` });
+    dialog.tag(`Label`).a({ n: `text`, v: `this is a second popup` });
     dialog.end()
       .ele(`buttons`)
       .tag(`Button`)

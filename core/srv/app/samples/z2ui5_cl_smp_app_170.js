@@ -13,7 +13,7 @@ class z2ui5_cl_smp_app_170 extends z2ui5_if_app {
       .a({ n: `stretch`, b: true })
       .a({ n: `afterClose`, v: this.client._event(`BTN_OK_1ND`) })
       .ele(`content`);
-    const content = dialog.ele(`IconTabBar`)
+    dialog.ele(`IconTabBar`)
       .a({ n: `select`, v: this.client.follow_up_action(this.client.cs_event.control_by_id, [`NavCon`, `to`, `\${$parameters>/selectedKey}`], this.client.cs_view.popup) })
       .a({ n: `expandable`, b: false })
       .a({ n: `expanded`, b: true })
@@ -68,7 +68,7 @@ class z2ui5_cl_smp_app_170 extends z2ui5_if_app {
       .a({ n: `xmlns`, v: `sap.m` })
       .a({ n: `xmlns:core`, v: `sap.ui.core` });
     const dialog = popup.ele(`Dialog`).a({ n: `afterClose`, v: this.client._event(`BTN_OK_2ND`) }).ele(`content`);
-    const content = dialog.tag(`Label`).a({ n: `text`, v: `this is a second popup` });
+    dialog.tag(`Label`).a({ n: `text`, v: `this is a second popup` });
     dialog.end()
       .ele(`buttons`)
       .tag(`Button`)

@@ -32,8 +32,8 @@ class z2ui5_cl_smp_app_255 extends z2ui5_if_app {
       .tag(`Link`)
       .a({ n: `text`, v: `UI5 Demo Kit` })
       .a({ n: `target`, v: `_blank` })
-      .a({ n: `href`, v: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.FlexBox/sample/sap.m.sample.FlexBoxNav` });
-    const layout = page.ele(`VBox`)
+      .a({ n: `href`, v: `https://sdk.openui5.org/entity/sap.m.FlexBox/sample/sap.m.sample.FlexBoxNav` });
+    page.ele(`VBox`)
       .a({ n: `class`, v: `navigationExamples` })
       .ele(`Panel`)
       .a({ n: `headerText`, v: `Variable width` })
@@ -110,6 +110,8 @@ class z2ui5_cl_smp_app_255 extends z2ui5_if_app {
   async main(client) {
     this.client = client;
     if (client.check_on_init()) {
+      this.view_display({ client: client });
+    } else if (client.check_on_navigated()) {
       this.view_display({ client: client });
     }
     this.on_event({ client: client });

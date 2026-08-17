@@ -17,6 +17,8 @@ class z2ui5_cl_smp_app_027 extends z2ui5_if_app {
       this.product = `tomato`;
       this.quantity = `500`;
       this.input41 = `faasdfdfsaVIp`;
+    } else if (client.check_on_navigated()) {
+      this.view_display();
     }
     this.view_display();
   }
@@ -60,7 +62,7 @@ class z2ui5_cl_smp_app_027 extends z2ui5_if_app {
       .a({ n: `text`, v: `Documentation` })
       .tag(`Link`)
       .a({ n: `text`, v: `Expression Binding` })
-      .a({ n: `href`, v: `https://sapui5.hana.ondemand.com/sdk/#/topic/daf6852a04b44d118963968a1239d2c0` })
+      .a({ n: `href`, v: `https://sdk.openui5.org/topic/daf6852a04b44d118963968a1239d2c0` })
       .tag(`Label`)
       .a({ n: `text`, v: `input in uppercase` })
       .tag(`Input`)

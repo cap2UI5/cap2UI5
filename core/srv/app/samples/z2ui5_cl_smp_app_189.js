@@ -64,6 +64,8 @@ class z2ui5_cl_smp_app_189 extends z2ui5_if_app {
     if (client.check_on_init()) {
       this.render();
       client.follow_up_action(z2ui5_if_client.cs_event.set_focus, [`IdOne`]);
+    } else if (client.check_on_navigated()) {
+      this.render();
     }
     this.dispatch();
   }

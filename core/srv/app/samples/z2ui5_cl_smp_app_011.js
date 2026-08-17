@@ -99,6 +99,8 @@ class z2ui5_cl_smp_app_011 extends z2ui5_if_app {
       this.check_editable_active = false;
       this.t_tab = z2ui5_cl_util.abap_tab_assign(this.t_tab, [{ title: `entry 01`, value: `red`, info: `completed`, descr: `this is a description`, checkbox: true }, { title: `entry 02`, value: `blue`, info: `completed`, descr: `this is a description`, checkbox: true }, { title: `entry 03`, value: `green`, info: `completed`, descr: `this is a description`, checkbox: true }, { title: `entry 04`, value: `orange`, info: `completed`, descr: ``, checkbox: true }, { title: `entry 05`, value: `grey`, info: `completed`, descr: `this is a description`, checkbox: true }, { }]);
       this.view_display();
+    } else if (client.check_on_navigated()) {
+      this.view_display();
     } else if (client.check_on_event(`BUTTON_EDIT`)) {
       this.check_editable_active = (!(this.check_editable_active === true || this.check_editable_active === `X`));
       sy_tabix = 0;

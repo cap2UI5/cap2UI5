@@ -5,8 +5,6 @@ class z2ui5_cl_smp_app_098 extends z2ui5_if_app {
   t_tab2 = [];
   mv_layout = ``;
   mv_title = ``;
-  mv_check_enabled_01 = true;
-  mv_check_enabled_02 = false;
   client = null;
 
   view_display_detail() {
@@ -133,6 +131,8 @@ class z2ui5_cl_smp_app_098 extends z2ui5_if_app {
       this.mv_layout = `OneColumn`;
       this.view_display_master();
       this.view_display_detail();
+    } else if (client.check_on_navigated()) {
+      this.view_display_master();
     }
     switch (client.get_event()) {
       case `NN_VIEW`:
@@ -155,7 +155,7 @@ class z2ui5_cl_smp_app_098 extends z2ui5_if_app {
           sy_subrc = _i >= 0 && _i < _t.length ? 0 : 4;
           if (sy_subrc === 0) ls_sel = _t[_i];
         }
-        if (!this.t_tab2.some((row) => row.title === ls_sel.title)) {
+        if (sy_subrc === 0 && !this.t_tab2.some((row) => row.title === ls_sel.title)) {
           this.t_tab2.push(z2ui5_cl_util.abap_copy(ls_sel));
         }
         this.mv_layout = `TwoColumnsMidExpanded`;

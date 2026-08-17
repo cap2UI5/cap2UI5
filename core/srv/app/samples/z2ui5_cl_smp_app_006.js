@@ -3,13 +3,14 @@ const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 class z2ui5_cl_smp_app_006 extends z2ui5_if_app {
   t_tab = [];
   client = null;
-  check_ui5 = false;
   key = ``;
 
   async main(client) {
     this.client = client;
     if (client.check_on_init()) {
       this.on_init();
+    } else if (client.check_on_navigated()) {
+      this.view_display();
     } else if (client.check_on_event()) {
       this.on_event();
     }
@@ -90,9 +91,11 @@ class z2ui5_cl_smp_app_006 extends z2ui5_if_app {
       .tag(`Button`)
       .a({ n: `press`, v: this.client._event(`SORT_DESCENDING`) })
       .a({ n: `icon`, v: `sap-icon://sort-descending` })
+      .a({ n: `tooltip`, v: `Sort descending` })
       .tag(`Button`)
       .a({ n: `press`, v: this.client._event(`SORT_ASCENDING`) })
-      .a({ n: `icon`, v: `sap-icon://sort-ascending` });
+      .a({ n: `icon`, v: `sap-icon://sort-ascending` })
+      .a({ n: `tooltip`, v: `Sort ascending` });
     tab.ele(`columns`)
       .ele(`Column`)
       .tag(`Text`)

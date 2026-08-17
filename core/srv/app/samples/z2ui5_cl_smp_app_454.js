@@ -9,6 +9,8 @@ class z2ui5_cl_smp_app_454 extends z2ui5_if_app {
     if (client.check_on_init()) {
       this.t_products = z2ui5_cl_util.abap_tab_assign(this.t_products, [{ name: `Notebook Basic 15`, category: `Laptops` }, { name: `Notebook Basic 17`, category: `Laptops` }, { name: `Ergo Screen E-I`, category: `Screens` }, { name: `Flat Basic`, category: `Screens` }, { name: `Comfort Easy`, category: `PDAs` }, { name: `ITelO Vault`, category: `PDAs` }]);
       this.view_display();
+    } else if (client.check_on_navigated()) {
+      this.view_display();
     } else {
       this.on_event();
     }

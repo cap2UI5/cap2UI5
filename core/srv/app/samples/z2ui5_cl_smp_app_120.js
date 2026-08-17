@@ -7,7 +7,6 @@ class z2ui5_cl_smp_app_120 extends z2ui5_if_app {
   speed = ``;
   altitudeaccuracy = ``;
   accuracy = ``;
-  mt_spot = [];
   client = null;
 
   async main(client) {
@@ -15,11 +14,11 @@ class z2ui5_cl_smp_app_120 extends z2ui5_if_app {
     if (client.check_on_init()) {
       this.view_display();
       return;
+    } else if (client.check_on_navigated()) {
+      this.view_display();
     }
-    switch (client.get_event()) {
-      case `GEOLOCATION_ERROR`:
-        client.message_box_display(`Location unavailable (${client.get_event_arg(1)}): ${client.get_event_arg(2)}`, `error`);
-        break;
+    if (client.get_event() === `GEOLOCATION_ERROR`) {
+      client.message_box_display(`Location unavailable (${client.get_event_arg(1)}): ${client.get_event_arg(2)}`, `error`);
     }
   }
 

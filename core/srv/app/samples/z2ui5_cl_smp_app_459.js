@@ -9,6 +9,8 @@ class z2ui5_cl_smp_app_459 extends z2ui5_if_app {
     if (client.check_on_init()) {
       this.t_products = z2ui5_cl_util.abap_tab_assign(this.t_products, [{ name: `Notebook Basic 15`, category: `Laptops` }, { name: `Notebook Basic 17`, category: `Laptops` }, { name: `Ergo Screen E-I`, category: `Screens` }, { name: `Flat Basic`, category: `Screens` }, { name: `Comfort Easy`, category: `PDAs` }, { name: `ITelO Vault`, category: `PDAs` }]);
       this.view_display();
+    } else if (client.check_on_navigated()) {
+      this.view_display();
     } else {
       this.on_event();
     }
@@ -19,29 +21,27 @@ class z2ui5_cl_smp_app_459 extends z2ui5_if_app {
     let lv_to;
     let lv_pos;
     let ls_row;
-    switch (this.client.get_event()) {
-      case `REORDER`:
-        try {
-          lv_from = (this.client.get_event_arg()) + 1;
-          lv_to = (this.client.get_event_arg(2)) + 1;
-          lv_pos = this.client.get_event_arg(3);
-          ls_row = z2ui5_cl_util.abap_copy(this.t_products[(lv_from) - 1]);
-        } catch (error) {
-          return;
-        }
-        if (lv_from === lv_to) {
-          return;
-        }
-        // TODO(abap2js): DELETE t_products INDEX lv_from.
-        if (lv_from < lv_to) {
-          lv_to = lv_to - 1;
-        }
-        if (lv_pos === `Before`) {
-          this.t_products.splice((lv_to) - 1, 0, z2ui5_cl_util.abap_copy(ls_row));
-        } else {
-          this.t_products.splice((lv_to + 1) - 1, 0, z2ui5_cl_util.abap_copy(ls_row));
-        }
-        break;
+    if (this.client.get_event() === `REORDER`) {
+      try {
+        lv_from = (this.client.get_event_arg()) + 1;
+        lv_to = (this.client.get_event_arg(2)) + 1;
+        lv_pos = this.client.get_event_arg(3);
+        ls_row = z2ui5_cl_util.abap_copy(this.t_products[(lv_from) - 1]);
+      } catch (error) {
+        return;
+      }
+      if (lv_from === lv_to) {
+        return;
+      }
+      // TODO(abap2js): DELETE t_products INDEX lv_from.
+      if (lv_from < lv_to) {
+        lv_to = lv_to - 1;
+      }
+      if (lv_pos === `Before`) {
+        this.t_products.splice((lv_to) - 1, 0, z2ui5_cl_util.abap_copy(ls_row));
+      } else {
+        this.t_products.splice((lv_to + 1) - 1, 0, z2ui5_cl_util.abap_copy(ls_row));
+      }
     }
   }
 

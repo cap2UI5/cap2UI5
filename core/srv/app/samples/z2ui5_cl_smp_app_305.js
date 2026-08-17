@@ -65,6 +65,8 @@ class z2ui5_cl_smp_app_305 extends z2ui5_if_app {
     if (client.check_on_init()) {
       this.t_tab = z2ui5_cl_util.abap_tab_assign(this.t_tab, [{ title: `entry 01`, value: `red` }, { title: `entry 02`, value: `blue` }, { title: `entry 03`, value: `green` }, { title: `entry 04`, value: `yellow` }, { title: `entry 05`, value: `orange` }, { title: `entry 06`, value: `grey` }]);
       this.set_view();
+    } else if (client.check_on_navigated()) {
+      this.set_view();
     }
   }
 }

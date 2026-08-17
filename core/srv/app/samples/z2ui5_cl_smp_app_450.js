@@ -13,6 +13,8 @@ class z2ui5_cl_smp_app_450 extends z2ui5_if_app {
       this.tims = `134501`;
       this.dats_initial = `00000000`;
       this.view_display();
+    } else if (client.check_on_navigated()) {
+      this.view_display();
     }
   }
 

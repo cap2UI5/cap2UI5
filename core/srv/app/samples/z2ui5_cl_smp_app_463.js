@@ -9,6 +9,8 @@ class z2ui5_cl_smp_app_463 extends z2ui5_if_app {
     if (client.check_on_init()) {
       this.t_nodes = z2ui5_cl_util.abap_tab_assign(this.t_nodes, [{ text: `Documents`, nodes: [{ text: `Projects`, nodes: [{ text: `Roadmap.docx` }, { text: `Budget.xlsx` }] }, { text: `Reports`, nodes: [{ text: `Q1.pdf` }] }] }, { text: `Pictures`, nodes: [{ text: `Vacation`, nodes: [{ text: `Beach.jpg` }] }] }]);
       this.view_display();
+    } else if (client.check_on_navigated()) {
+      this.view_display();
     } else {
       this.on_event();
     }
@@ -17,16 +19,14 @@ class z2ui5_cl_smp_app_463 extends z2ui5_if_app {
   on_event() {
     let sy_tabix = 0;
     let lv_roots;
-    switch (this.client.get_event()) {
-      case `SHOW_MODEL`:
-        lv_roots = ``;
-        sy_tabix = 0;
-        for (const ls_node of this.t_nodes) {
-          sy_tabix++;
-          lv_roots = `${lv_roots}${(sy_tabix > 1 ? `, ` : null)}${ls_node.text}`;
-        }
-        this.client.message_toast_display(`Root nodes now: ${lv_roots}`);
-        break;
+    if (this.client.get_event() === `SHOW_MODEL`) {
+      lv_roots = ``;
+      sy_tabix = 0;
+      for (const ls_node of this.t_nodes) {
+        sy_tabix++;
+        lv_roots = `${lv_roots}${(sy_tabix > 1 ? `, ` : null)}${ls_node.text}`;
+      }
+      this.client.message_toast_display(`Root nodes now: ${lv_roots}`);
     }
   }
 

@@ -9,6 +9,8 @@ class z2ui5_cl_smp_app_466 extends z2ui5_if_app {
     if (client.check_on_init()) {
       this.status_text = `<strong>Deployment successful!</strong> %%icon:sap-icon://message-success%% All services ` + `%%icon:sap-icon://sys-enter-2%% are running. <em>Check status</em> ` + `%%icon:sap-icon://stethoscope%%`;
       this.view_display();
+    } else if (client.check_on_navigated()) {
+      this.view_display();
     }
   }
 

@@ -11,6 +11,8 @@ class z2ui5_cl_smp_app_456 extends z2ui5_if_app {
       this.start_date = `2026-07-20T07:00:00`;
       this.t_people = z2ui5_cl_util.abap_tab_assign(this.t_people, [{ name: `Anna Miller`, t_appointments: [{ start_at: `2026-07-20T08:00:00`, end_at: `2026-07-20T09:00:00`, title: `Team meeting`, type: `Type01` }, { start_at: `2026-07-20T11:00:00`, end_at: `2026-07-20T12:30:00`, title: `Customer call`, type: `Type08` }] }, { name: `Tom Schmidt`, t_appointments: [{ start_at: `2026-07-20T09:30:00`, end_at: `2026-07-20T10:30:00`, title: `Code review`, type: `Type06` }] }]);
       this.view_display();
+    } else if (client.check_on_navigated()) {
+      this.view_display();
     }
   }
 

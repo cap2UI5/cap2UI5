@@ -8,6 +8,12 @@ class z2ui5_cl_smp_app_004 extends z2ui5_if_app {
     this.client = client;
     if (client.check_on_init()) {
       this.on_init();
+    } else if (client.check_on_navigated()) {
+      if (this.view_main === `SECOND`) {
+        this.view_second_display();
+      } else {
+        this.view_main_display();
+      }
     } else if (client.check_on_event()) {
       this.on_event();
     }
@@ -39,6 +45,7 @@ class z2ui5_cl_smp_app_004 extends z2ui5_if_app {
         break;
       case `BUTTON_ERROR`:
         dummy = z2ui5_cl_util.abap_div(1, 0);
+        this.client.message_box_display(`${dummy}`);
         break;
     }
   }

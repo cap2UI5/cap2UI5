@@ -1,7 +1,6 @@
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_smp_app_078 extends z2ui5_if_app {
-  mv_value = ``;
   mt_token = [];
   mt_tokens_added = [];
   mt_tokens_removed = [];
@@ -10,7 +9,7 @@ class z2ui5_cl_smp_app_078 extends z2ui5_if_app {
     let sy_tabix = 0;
     let view;
     let tab;
-    if (client.check_on_init()) {
+    if (client.check_on_navigated()) {
       view = z2ui5_cl_ui5_view_builder.factory()
         .ele({ n: `View`, ns: `mvc` })
         .a({ n: `displayBlock`, v: `true` })
@@ -66,21 +65,19 @@ class z2ui5_cl_smp_app_078 extends z2ui5_if_app {
         .a({ n: `value`, v: `{TEXT}` });
       client.view_display(view.stringify());
     }
-    switch (client.get_event()) {
-      case `UPDATE_BACKEND`:
-        sy_tabix = 0;
-        for (const ls_token of this.mt_tokens_removed) {
-          sy_tabix++;
-          for (let _i = this.mt_token.length - 1; _i >= 0; _i--) { const row = this.mt_token[_i]; if (row.key === ls_token.key) this.mt_token.splice(_i, 1); }
-        }
-        sy_tabix = 0;
-        for (const ls_token of this.mt_tokens_added) {
-          sy_tabix++;
-          this.mt_token.push(z2ui5_cl_util.abap_copy({ key: ls_token.key, text: ls_token.text, visible: true, editable: true, selkz: false }));
-        }
-        this.mt_tokens_removed = {};
-        this.mt_tokens_added = {};
-        break;
+    if (client.get_event() === `UPDATE_BACKEND`) {
+      sy_tabix = 0;
+      for (const ls_token of this.mt_tokens_removed) {
+        sy_tabix++;
+        for (let _i = this.mt_token.length - 1; _i >= 0; _i--) { const row = this.mt_token[_i]; if (row.key === ls_token.key) this.mt_token.splice(_i, 1); }
+      }
+      sy_tabix = 0;
+      for (const ls_token of this.mt_tokens_added) {
+        sy_tabix++;
+        this.mt_token.push(z2ui5_cl_util.abap_copy({ key: ls_token.key, text: ls_token.text, visible: true, editable: true, selkz: false }));
+      }
+      this.mt_tokens_removed = {};
+      this.mt_tokens_added = {};
     }
   }
 }

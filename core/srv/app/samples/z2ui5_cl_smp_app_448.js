@@ -8,17 +8,17 @@ class z2ui5_cl_smp_app_448 extends z2ui5_if_app {
     this.client = client;
     if (client.check_on_init()) {
       this.view_display();
+    } else if (client.check_on_navigated()) {
+      this.view_display();
     } else {
       this.on_event();
     }
   }
 
   on_event() {
-    switch (this.client.get_event()) {
-      case `TOGGLE`:
-        this.expanded = (!(this.expanded === true || this.expanded === `X`));
-        this.client.follow_up_action(z2ui5_if_client.cs_event.control_by_id, [`demoPanel`, `setExpanded`, (this.expanded)]);
-        break;
+    if (this.client.get_event() === `TOGGLE`) {
+      this.expanded = (!(this.expanded === true || this.expanded === `X`));
+      this.client.follow_up_action(z2ui5_if_client.cs_event.control_by_id, [`demoPanel`, `setExpanded`, (this.expanded)]);
     }
   }
 

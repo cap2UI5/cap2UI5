@@ -44,9 +44,9 @@ class z2ui5_cl_smp_app_000 extends z2ui5_if_app {
 
   app_call({ classname } = {}) {
     let error;
+    let li_app = null;
     const name = classname.toUpperCase();
     try {
-      let li_app = null;
       li_app = (() => { const _n = String(name); const _c = z2ui5_cl_util.rtti_get_class(_n.toLowerCase()); if (!_c) throw new Error(`CREATE OBJECT: class ${_n} not found`); return new _c(); })();
       this.s_scroll = z2ui5_cl_util.struct_lower_keys(({ ...this.client.get().S_SCROLL.MAIN }));
       this.client.nav_app_call(li_app);
@@ -324,7 +324,7 @@ class z2ui5_cl_smp_app_000 extends z2ui5_if_app {
     let result = 0;
     let char;
     let off = 0;
-    while (off < header.length) {
+    while (header.length > off) {
       char = header.substr(off, 1);
       result = result + ([...String(char)].some(($c) => String(`MW`).includes($c)) ? 95 : [...String(char)].some(($c) => String(`mw`).includes($c)) ? 80 : [...String(char)].some(($c) => String(`ijltfrI. -`).includes($c)) ? 35 : [...String(char)].some(($c) => String(`ABCDEFGHJKLNOPQRSTUVXYZ`).includes($c)) ? 75 : 55);
       off = off + 1;

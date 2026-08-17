@@ -7,6 +7,8 @@ class z2ui5_cl_smp_app_008 extends z2ui5_if_app {
     this.client = client;
     if (client.check_on_init()) {
       this.view_display();
+    } else if (client.check_on_navigated()) {
+      this.view_display();
     } else if (client.check_on_event()) {
       this.on_event();
     }
@@ -29,6 +31,7 @@ class z2ui5_cl_smp_app_008 extends z2ui5_if_app {
       case `BUTTON_MESSAGE_BOX_CX_ROOT`:
         try {
           lv_val = z2ui5_cl_util.abap_div(1, 0);
+          this.client.message_box_display(`${lv_val}`);
         } catch (_caught1) {
           lx = _caught1;
           this.client.message_box_display(lx);

@@ -3,11 +3,9 @@ const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 class z2ui5_cl_smp_app_105 extends z2ui5_if_app {
   view_parent = null;
   mv_class_1 = ``;
-  mr_data = null;
   client = null;
 
-  view_display(_args = {}) {
-    let { xml } = _args;
+  view_display() {
     this.view_parent.tag(`MessageStrip`)
       .a({ n: `text`, v: `SUB-APP CLASS 1 (z2ui5_cl_smp_app_105): a green FORM - it has no page of ` + `its own, its controls are injected into the detail column of the calling ` + `parent app through a shared view reference.` })
       .a({ n: `type`, v: `Success` })
@@ -34,7 +32,6 @@ class z2ui5_cl_smp_app_105 extends z2ui5_if_app {
       .a({ n: `press`, v: this.client._event(`MESSAGE_SUB`) })
       .a({ n: `text`, v: `raise event in sub-app 1` })
       .a({ n: `icon`, v: `sap-icon://form` });
-    Object.assign(_args, { xml });
   }
 
   on_event() {

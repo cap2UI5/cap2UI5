@@ -10,6 +10,8 @@ class z2ui5_cl_smp_app_028 extends z2ui5_if_app {
     if (client.check_on_init()) {
       this.on_init();
       this.view_display();
+    } else if (client.check_on_navigated()) {
+      this.view_display();
     } else if (client.check_on_event(`TIMER_FINISHED`)) {
       this.on_event();
     }

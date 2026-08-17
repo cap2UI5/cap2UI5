@@ -9,6 +9,8 @@ class z2ui5_cl_smp_app_460 extends z2ui5_if_app {
     if (client.check_on_init()) {
       this.t_nodes = z2ui5_cl_util.abap_tab_assign(this.t_nodes, [{ text: `Documents`, nodes: [{ text: `Projects`, nodes: [{ text: `Roadmap.docx` }, { text: `Budget.xlsx` }] }, { text: `Reports`, nodes: [{ text: `Q1.pdf` }, { text: `Q2.pdf` }] }] }, { text: `Pictures`, nodes: [{ text: `Vacation`, nodes: [{ text: `Beach.jpg` }] }] }, { text: `Music` }]);
       this.view_display();
+    } else if (client.check_on_navigated()) {
+      this.view_display();
     }
   }
 

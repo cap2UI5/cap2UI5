@@ -51,6 +51,8 @@ class z2ui5_cl_smp_app_166 extends z2ui5_if_app {
       this.ms_struc2.incl_value = `val01_incl`;
       this.ms_struc2.incl_value2 = `val02_incl`;
       this.set_view();
+    } else if (client.check_on_navigated()) {
+      this.set_view();
     }
   }
 }

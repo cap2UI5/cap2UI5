@@ -10,28 +10,19 @@ class z2ui5_cl_smp_app_088 extends z2ui5_if_app {
     if (client.check_on_init()) {
       this.mv_page = `page1`;
       this.view_display();
+    } else if (client.check_on_navigated()) {
+      this.view_display();
     } else {
       this.on_event();
     }
   }
 
   on_event() {
-    switch (this.client.get_event()) {
-      default:
-        this.mv_page = this.client.get_event();
-        this.view_display();
-        break;
-    }
+    this.mv_page = this.client.get_event();
+    this.view_display();
   }
 
   view_display() {
-    const view = z2ui5_cl_ui5_view_builder.factory()
-      .ele({ n: `View`, ns: `mvc` })
-      .a({ n: `displayBlock`, v: `true` })
-      .a({ n: `height`, v: `100%` })
-      .a({ n: `xmlns`, v: `sap.m` })
-      .a({ n: `xmlns:mvc`, v: `sap.ui.core.mvc` })
-      .a({ n: `xmlns:core`, v: `sap.ui.core` });
     const page = z2ui5_cl_ui5_view_builder.factory()
       .ele({ n: `View`, ns: `mvc` })
       .a({ n: `displayBlock`, v: `true` })
@@ -52,7 +43,7 @@ class z2ui5_cl_smp_app_088 extends z2ui5_if_app {
       .a({ n: `class`, v: `sapUiSmallMargin` });
     page.ele(`IconTabHeader`)
       .a({ n: `selectedKey`, v: this.client._bind(this.mv_selected_key) })
-      .a({ n: `select`, v: this.client.follow_up_action(this.client.cs_event.control_by_id, [`NavCon`, `to`, `\${$parameters>/selectedKey}`]) })
+      .a({ n: `select`, v: this.client.follow_up_action(this.client.cs_event.control_by_id, [`NavCon`, `to`, `\${$parameters>/key}`]) })
       .a({ n: `mode`, v: `Inline` })
       .ele(`items`)
       .ele(`IconTabFilter`)

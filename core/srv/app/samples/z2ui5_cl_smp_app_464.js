@@ -7,6 +7,8 @@ class z2ui5_cl_smp_app_464 extends z2ui5_if_app {
     this.client = client;
     if (client.check_on_init()) {
       this.view_display();
+    } else if (client.check_on_navigated()) {
+      this.view_display();
     } else {
       this.on_event();
     }
@@ -22,6 +24,7 @@ class z2ui5_cl_smp_app_464 extends z2ui5_if_app {
       case `DIVIDE_BY_ZERO`:
         lv_zero = 0;
         lv_result = z2ui5_cl_util.abap_div(1, lv_zero);
+        this.client.message_box_display(`${lv_result}`);
         break;
       case `ASSERT`:
         if (!(1 === 0)) throw new Error(`ASSERT failed`);

@@ -13,6 +13,8 @@ class z2ui5_cl_smp_app_026 extends z2ui5_if_app {
       this.product = `tomato`;
       this.quantity = `500`;
       this.view_display();
+    } else if (client.check_on_navigated()) {
+      this.view_display();
     } else if (client.check_on_event(`POPOVER`)) {
       this.popover_display({ id: `TEST` });
     } else if (client.check_on_event(`BUTTON_CONFIRM`)) {
@@ -81,7 +83,7 @@ class z2ui5_cl_smp_app_026 extends z2ui5_if_app {
       .a({ n: `text`, v: `Link` })
       .tag(`Link`)
       .a({ n: `text`, v: `Documentation UI5 Popover Control` })
-      .a({ n: `href`, v: `https://openui5.hana.ondemand.com/entity/sap.m.Popover` })
+      .a({ n: `href`, v: `https://sdk.openui5.org/entity/sap.m.Popover` })
       .tag(`Label`)
       .a({ n: `text`, v: `placement` })
       .ele(`SegmentedButton`)

@@ -14,6 +14,8 @@ class z2ui5_cl_smp_app_025 extends z2ui5_if_app {
       if (this.event_backend === `NEW_APP_EVENT`) {
         client.message_box_display(`new app called and event NEW_APP_EVENT raised`);
       }
+    } else if (client.check_on_navigated()) {
+      this.view_display();
     } else if (client.check_on_event()) {
       this.on_event();
     }

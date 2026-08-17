@@ -166,7 +166,7 @@ class z2ui5_cl_smp_context {
           continue;
         }
         if (!((($v, $r) => !$r || !$r.length || $r.some(($x) => ($x.option === `BT` ? $v >= $x.low && $v <= $x.high : $x.option === `NE` ? $v !== $x.low : $x.option === `CP` ? String($v).includes(String($x.low).replace(/\*/g, "")) : $v === $x.low)))(fs_field, ls_filter.t_range))) {
-          // TODO(abap2js): DELETE val.
+          // TODO(abap2js): DELETE val INDEX sy-tabix.
           break;
         }
       }
@@ -298,7 +298,7 @@ class z2ui5_cl_smp_context {
             break;
           }
         } else {
-          if (lv_index > fields.length) {
+          if (fields.length < lv_index) {
             break;
           }
           lv_name = z2ui5_cl_util.abap_copy(fields[(lv_index) - 1]);
@@ -317,16 +317,14 @@ class z2ui5_cl_smp_context {
             lv_check_found = true;
             break;
           }
-        } else {
-          if (this.find({ val: lv_value, sub: lv_search }) >= 0) {
-            lv_check_found = true;
-            break;
-          }
+        } else if (this.find({ val: lv_value, sub: lv_search }) >= 0) {
+          lv_check_found = true;
+          break;
         }
         lv_index = lv_index + 1;
       }
       if (!(lv_check_found === true || lv_check_found === `X`)) {
-        // TODO(abap2js): DELETE tab.
+        // TODO(abap2js): DELETE tab INDEX sy-tabix.
       }
     }
     Object.assign(_args, { tab });
@@ -346,6 +344,7 @@ class z2ui5_cl_smp_context {
     let lv_field_val;
     let lt_lines = [];
     let lv_line = ``;
+    let lr_row = null;
     fs_tab = val;
     _fs$fs_tab = null;
     sy_subrc = 0;
@@ -358,7 +357,6 @@ class z2ui5_cl_smp_context {
       lv_line = `${lv_line}${lr_comp.name};`;
     }
     lt_lines.push(z2ui5_cl_util.abap_copy(lv_line));
-    let lr_row = null;
     sy_tabix = 0;
     for (const lr_row of fs_tab) {
       sy_tabix++;
@@ -630,8 +628,9 @@ class z2ui5_cl_smp_context {
     let fs_variable = null;
     let _fs$fs_variable = null;
     let srtti = null;
-    // TODO(abap2js): CALL TRANSFORMATION id SOURCE XML rtti_data RESULT srtti = srtti.
     let rtti_type = null;
+    let lo_datadescr = null;
+    // TODO(abap2js): CALL TRANSFORMATION id SOURCE XML rtti_data RESULT srtti = srtti.
     {
       const _dynr = (srtti);
       const _dynm = _dynr ? _dynr[String(`GET_RTTI`).toLowerCase()] : undefined;
@@ -642,7 +641,6 @@ class z2ui5_cl_smp_context {
         rtti_type = _dynret !== undefined ? _dynret : _dynargs.rtti;
       }
     }
-    let lo_datadescr = null;
     lo_datadescr = z2ui5_cl_util.abap_cast(rtti_type);
     // TODO(abap2js): CREATE DATA result TYPE HANDLE lo_datadescr.
     fs_variable = result;
@@ -656,8 +654,8 @@ class z2ui5_cl_smp_context {
     let result = ``;
     let lv_classname;
     let lv_text;
+    let srtti = null;
     if ((z2ui5_cl_smp_context.rtti_check_class_exists({ val: `ZCL_SRTTI_TYPEDESCR` }) === true || z2ui5_cl_smp_context.rtti_check_class_exists({ val: `ZCL_SRTTI_TYPEDESCR` }) === `X`)) {
-      let srtti = null;
       lv_classname = `ZCL_SRTTI_TYPEDESCR`;
       // TODO(abap2js): CALL METHOD (lv_classname)=>(`CREATE_BY_DATA_OBJECT`) EXPORTING data_object = data RECEIVING srtti = srtti.
       // TODO(abap2js): CALL TRANSFORMATION id SOURCE srtti = srtti dobj = data RESULT XML result.
@@ -734,7 +732,7 @@ class z2ui5_cl_smp_context {
     Object.assign(_args, { tab });
   }
 
-  static msg_get_t() {
+  static msg_get_t({ val, val2 } = {}) {
     let result = [];
     result = z2ui5_cl_smp_context.msg_get_internal({ val: val });
     if (z2ui5_cl_util.abap_is_initial(result) && !z2ui5_cl_util.abap_is_initial(val2)) {
@@ -743,7 +741,7 @@ class z2ui5_cl_smp_context {
     return result;
   }
 
-  static msg_get() {
+  static msg_get({ val, val2 } = {}) {
     let result = {};
     const lt_msg = z2ui5_cl_smp_context.msg_get_t({ val, val2 });
     result = z2ui5_cl_util.abap_tab_assign(result, z2ui5_cl_util.abap_copy(lt_msg[(1) - 1]));
@@ -753,7 +751,7 @@ class z2ui5_cl_smp_context {
   static msg_get_by_msg({ id, no, v1, v2, v3, v4 } = {}) {
     let result = {};
     const ls_msg = { id: id, no: no, v1: v1, v2: v2, v3: v3, v4: v4 };
-    result = z2ui5_cl_smp_context.msg_get(ls_msg);
+    result = z2ui5_cl_smp_context.msg_get({ val: ls_msg });
     return result;
   }
 
@@ -1166,6 +1164,8 @@ class z2ui5_cl_smp_context {
     let lt_attri_o;
     let lv_name;
     let lt_tab2;
+    let obj = null;
+    let lr_tab = null;
     try {
       lx = (val);
       ls_result = { type: `E`, text: lx.get_text() };
@@ -1185,10 +1185,8 @@ class z2ui5_cl_smp_context {
       }
       result.push(z2ui5_cl_util.abap_copy(ls_result));
     } catch (error) {
-      let obj = null;
       obj = val;
       try {
-        let lr_tab = null;
         // TODO(abap2js): CREATE DATA lr_tab TYPE (`if_bali_log=>ty_item_table`).
         fs_tab2 = lr_tab;
         _fs$fs_tab2 = null;
@@ -1382,7 +1380,7 @@ class z2ui5_cl_smp_context {
         if (z2ui5_cl_smp_context.rtti_get_type_kind({ val: fs_row }) === cl_abap_datadescr.typekind_oref) {
           if (!z2ui5_cl_util.abap_is_initial(fs_row)) {
             try {
-              result.push(...z2ui5_cl_smp_context.msg_get_t(fs_row).map((_r) => z2ui5_cl_util.abap_copy(_r)));
+              result.push(...z2ui5_cl_smp_context.msg_get_t({ val: fs_row }).map((_r) => z2ui5_cl_util.abap_copy(_r)));
             } catch (error) {
             }
           }
@@ -1407,6 +1405,7 @@ class z2ui5_cl_smp_context {
     let _fs$fs_cause = null;
     let lt_one;
     let lv_text;
+    let lv_cause = 0;
     messages = null;
     is_row = false;
     const lt_meta = z2ui5_cl_smp_context.msg_get_rap_meta({ val: val });
@@ -1417,7 +1416,7 @@ class z2ui5_cl_smp_context {
       is_row = true;
       if (!z2ui5_cl_util.abap_is_initial(fs_msg)) {
         try {
-          lt_one = z2ui5_cl_smp_context.msg_get_t(fs_msg);
+          lt_one = z2ui5_cl_smp_context.msg_get_t({ val: fs_msg });
           sy_tabix = 0;
           for (const symbol of lt_one) {
             sy_tabix++;
@@ -1437,7 +1436,6 @@ class z2ui5_cl_smp_context {
       fs_cause = _fs$fs_cause ? _fs$fs_cause.o[_fs$fs_cause.k] : null;
       sy_subrc = _fs$fs_cause ? 0 : 4;
       if (sy_subrc === 0) {
-        let lv_cause = 0;
         lv_cause = z2ui5_cl_util.abap_tab_assign(lv_cause, z2ui5_cl_util.abap_copy(fs_cause));
         lv_text = z2ui5_cl_smp_context.msg_get_rap_fail_text({ cause: lv_cause });
         if (!z2ui5_cl_util.abap_is_initial(entity_name)) {
@@ -1563,6 +1561,7 @@ class z2ui5_cl_smp_context {
     let _fs$fs_comp = null;
     let lv_sub_kind;
     let lv_sub;
+    let lv_str = ``;
     const lv_kind = z2ui5_cl_smp_context.rtti_get_type_kind({ val: val });
     if (lv_kind !== cl_abap_datadescr.typekind_struct1 && lv_kind !== cl_abap_datadescr.typekind_struct2) {
       return result;
@@ -1586,7 +1585,6 @@ class z2ui5_cl_smp_context {
         }
       } else if (!z2ui5_cl_util.abap_is_initial(fs_comp)) {
         try {
-          let lv_str = ``;
           lv_str = z2ui5_cl_util.abap_tab_assign(lv_str, z2ui5_cl_util.abap_copy(fs_comp));
           if (!z2ui5_cl_util.abap_is_initial(result)) {
             result = `${result}, `;

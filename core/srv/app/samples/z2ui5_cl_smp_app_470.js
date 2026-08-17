@@ -9,16 +9,16 @@ class z2ui5_cl_smp_app_470 extends z2ui5_if_app {
     if (client.check_on_init()) {
       this.t_product = z2ui5_cl_util.abap_tab_assign(this.t_product, [{ name: `Notebook 15"`, category: `Hardware`, price: `1299`, t_item: [{ name: `SSD 1 TB`, qty: 1, unit: `pc` }, { name: `RAM 16 GB`, qty: 2, unit: `pc` }, { name: `Charger 90W`, qty: 1, unit: `pc` }] }, { name: `Wireless Mouse`, category: `Accessories`, price: `39`, t_item: [{ name: `AA Battery`, qty: 2, unit: `pc` }] }, { name: `USB-C Dock`, category: `Accessories`, price: `189`, t_item: [{ name: `Power Supply`, qty: 1, unit: `pc` }, { name: `Cable 1 m`, qty: 1, unit: `pc` }, { name: `Quick Guide`, qty: 1, unit: `pc` }] }]);
       this.view_display();
+    } else if (client.check_on_navigated()) {
+      this.view_display();
     } else if (client.check_on_event()) {
       this.on_event();
     }
   }
 
   on_event() {
-    switch (this.client.get_event()) {
-      case `SHOW`:
-        this.popup_components({ index: this.client.get_event_arg() });
-        break;
+    if (this.client.get_event() === `SHOW`) {
+      this.popup_components({ index: this.client.get_event_arg() });
     }
   }
 

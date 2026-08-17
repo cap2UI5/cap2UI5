@@ -9,6 +9,8 @@ class z2ui5_cl_smp_app_462 extends z2ui5_if_app {
     if (client.check_on_init()) {
       this.t_nodes = z2ui5_cl_util.abap_tab_assign(this.t_nodes, [{ text: `Sales`, nodes: [{ text: `Orders`, nodes: [{ text: `4711 - Notebook Basic` }, { text: `4712 - Ergo Screen` }] }, { text: `Quotations`, nodes: [{ text: `Q-001 - ITelO Vault` }] }] }, { text: `Purchasing`, nodes: [{ text: `Suppliers`, nodes: [{ text: `Very Best Screens` }] }] }]);
       this.view_display();
+    } else if (client.check_on_navigated()) {
+      this.view_display();
     } else {
       this.on_event();
     }

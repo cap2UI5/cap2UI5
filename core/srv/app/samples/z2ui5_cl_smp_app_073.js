@@ -38,13 +38,13 @@ class z2ui5_cl_smp_app_073 extends z2ui5_if_app {
     this.client = client;
     if (client.check_on_init()) {
       this.view_display();
+    } else if (client.check_on_navigated()) {
+      this.view_display();
     }
-    switch (client.get_event()) {
-      case `BUTTON_OPEN_NEW_TAB`:
-        ls_config = client.get().S_CONFIG;
-        result = z2ui5_cl_smp_context.app_get_url({ classname: `z2ui5_cl_smp_app_073`, origin: ls_config.ORIGIN, pathname: ls_config.PATHNAME, search: ls_config.SEARCH, hash: ls_config.HASH });
-        client.follow_up_action(z2ui5_if_client.cs_event.open_new_tab, [result]);
-        break;
+    if (client.get_event() === `BUTTON_OPEN_NEW_TAB`) {
+      ls_config = client.get().S_CONFIG;
+      result = z2ui5_cl_smp_context.app_get_url({ classname: `z2ui5_cl_smp_app_073`, origin: ls_config.ORIGIN, pathname: ls_config.PATHNAME, search: ls_config.SEARCH, hash: ls_config.HASH });
+      client.follow_up_action(z2ui5_if_client.cs_event.open_new_tab, [result]);
     }
   }
 }

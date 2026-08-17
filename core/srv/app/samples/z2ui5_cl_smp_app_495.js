@@ -7,20 +7,20 @@ class z2ui5_cl_smp_app_495 extends z2ui5_if_app {
   async main(client) {
     this.client = client;
     if (client.check_on_init()) {
-      this.log({ val: `check_on_init( ) - the very first call, nothing exists yet` });
+      this.log_step({ val: `check_on_init( ) - the very first call, nothing exists yet` });
       this.view_display();
     } else if (client.check_on_navigated()) {
-      this.log({ val: `check_on_navigated( ) - the sub-app returned, re-display the view` });
+      this.log_step({ val: `check_on_navigated( ) - the sub-app returned, re-display the view` });
       this.view_display();
     } else if (client.check_on_event(`LOG`)) {
-      this.log({ val: `check_on_event( ) - a button was pressed, the view stays as it is` });
+      this.log_step({ val: `check_on_event( ) - a button was pressed, the view stays as it is` });
     } else if (client.check_on_event(`CALL`)) {
-      this.log({ val: `check_on_event( ) - calling Basics I as a sub-app` });
+      this.log_step({ val: `check_on_event( ) - calling Basics I as a sub-app` });
       client.nav_app_call(new z2ui5_cl_smp_app_493());
     }
   }
 
-  log({ val } = {}) {
+  log_step({ val } = {}) {
     this.t_log.push(z2ui5_cl_util.abap_copy({ no: `${this.t_log.length + 1}`, check: val }));
   }
 

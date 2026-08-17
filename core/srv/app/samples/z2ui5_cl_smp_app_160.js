@@ -9,6 +9,8 @@ class z2ui5_cl_smp_app_160 extends z2ui5_if_app {
     if (client.check_on_init()) {
       this.model_init();
       this.view_display();
+    } else if (client.check_on_navigated()) {
+      this.view_display();
     } else {
       this.on_event();
     }

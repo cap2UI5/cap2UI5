@@ -114,6 +114,8 @@ class z2ui5_cl_smp_app_019 extends z2ui5_if_app {
     if (client.check_on_init()) {
       this.sel_mode = `None`;
       this.t_tab = z2ui5_cl_util.abap_tab_assign(this.t_tab, [{ descr: `this is a description`, title: `title_01`, value: `value_01` }, { descr: `this is a description`, title: `title_02`, value: `value_02` }, { descr: `this is a description`, title: `title_03`, value: `value_03` }, { descr: `this is a description`, title: `title_04`, value: `value_04` }, { descr: `this is a description`, title: `title_05`, value: `value_05` }]);
+    } else if (client.check_on_navigated()) {
+      this.view_display();
     } else if (client.check_on_event(`BUTTON_SEGMENT_CHANGE`)) {
       client.message_toast_display(`Selection Mode changed`);
     } else if (client.check_on_event(`BUTTON_READ_SEL`)) {

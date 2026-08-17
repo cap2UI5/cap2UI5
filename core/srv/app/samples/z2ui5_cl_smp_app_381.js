@@ -17,6 +17,8 @@ class z2ui5_cl_smp_app_381 extends z2ui5_if_app {
     if (client.check_on_init()) {
       this.on_init();
       this.view_display();
+    } else if (client.check_on_navigated()) {
+      this.view_display();
     } else if (client.check_on_event(`SHOW`)) {
       this.show_toast();
     }
@@ -62,7 +64,7 @@ class z2ui5_cl_smp_app_381 extends z2ui5_if_app {
       .tag(`Link`)
       .a({ n: `text`, v: `UI5 Demo Kit` })
       .a({ n: `target`, v: `_blank` })
-      .a({ n: `href`, v: `https://sapui5.hana.ondemand.com/sdk/#/entity/sap.m.MessageToast/sample/sap.m.sample.MessageToast` });
+      .a({ n: `href`, v: `https://sdk.openui5.org/entity/sap.m.MessageToast/sample/sap.m.sample.MessageToast` });
     const form = page.ele(`Panel`)
       .a({ n: `headerText`, v: `Message Toast Configuration` })
       .ele({ n: `SimpleForm`, ns: `form` })

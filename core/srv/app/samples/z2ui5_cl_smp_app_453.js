@@ -10,6 +10,8 @@ class z2ui5_cl_smp_app_453 extends z2ui5_if_app {
       this.t_products = z2ui5_cl_util.abap_tab_assign(this.t_products, [{ name: `Comfort Easy`, weight: 650, price: `249.99`, currency: `EUR`, width: 30, depth: 21, height: 3, dim_unit: `cm`, status: `Available`, delivery: `Shipped` }, { name: `Notebook Basic 15`, weight: 1500, price: `956`, currency: `EUR`, width: 40, depth: 28, height: 0, dim_unit: `cm`, status: `Out of Stock`, delivery: `Failed Shipping` }, { name: `Ergo Screen E-I`, weight: 2100, price: `230.5`, currency: `EUR`, width: 54, depth: 46, height: 8, dim_unit: `cm`, status: `Discontinued`, delivery: `Pending` }]);
       this.products_prepare();
       this.view_display();
+    } else if (client.check_on_navigated()) {
+      this.view_display();
     }
   }
 

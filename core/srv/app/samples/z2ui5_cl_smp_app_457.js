@@ -9,6 +9,8 @@ class z2ui5_cl_smp_app_457 extends z2ui5_if_app {
     if (client.check_on_init()) {
       this.date_iso = `2026-07-20`;
       this.view_display();
+    } else if (client.check_on_navigated()) {
+      this.view_display();
     }
   }
 

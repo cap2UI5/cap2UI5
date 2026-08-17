@@ -1,8 +1,6 @@
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_smp_app_202 extends z2ui5_if_app {
-  av_next = `Step22`;
-
   view_display({ client } = {}) {
     let lr_view = z2ui5_cl_ui5_view_builder.factory()
       .ele({ n: `View`, ns: `mvc` })
@@ -55,6 +53,8 @@ class z2ui5_cl_smp_app_202 extends z2ui5_if_app {
     if (client.check_on_init()) {
       this.view_display({ client: client });
       return;
+    } else if (client.check_on_navigated()) {
+      this.view_display({ client: client });
     }
     switch (client.get_event()) {
       case `STEP22`:

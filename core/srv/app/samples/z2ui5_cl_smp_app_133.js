@@ -68,6 +68,8 @@ class z2ui5_cl_smp_app_133 extends z2ui5_if_app {
       this.selend = `7`;
       this.view_display();
       return;
+    } else if (client.check_on_navigated()) {
+      this.view_display();
     }
     switch (client.get_event()) {
       case `BUTTON01`:

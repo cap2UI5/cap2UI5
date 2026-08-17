@@ -10,6 +10,8 @@ class z2ui5_cl_smp_app_352 extends z2ui5_if_app {
       this.view_display();
       client.follow_up_action(z2ui5_if_client.cs_event.set_focus, [`ZINPUT`]);
       client.follow_up_action(z2ui5_if_client.cs_event.keyboard_set_mode, [`ZINPUT`, `numeric`]);
+    } else if (client.check_on_navigated()) {
+      this.view_display();
     }
     this.on_event();
   }

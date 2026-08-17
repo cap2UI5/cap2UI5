@@ -20,6 +20,8 @@ class z2ui5_cl_smp_app_070 extends z2ui5_if_app {
     this.client = client;
     if (client.check_on_init()) {
       this.on_init();
+    } else if (client.check_on_navigated()) {
+      this.on_init();
     } else {
       this.on_event();
     }
@@ -295,7 +297,7 @@ class z2ui5_cl_smp_app_070 extends z2ui5_if_app {
           lv_index = lv_index + 1;
         }
         if (!String(lv_row).toLowerCase().includes(String(this.mv_search_value).toLowerCase())) {
-          // TODO(abap2js): DELETE mt_table.
+          // TODO(abap2js): DELETE mt_table INDEX sy-tabix.
         }
       }
     }

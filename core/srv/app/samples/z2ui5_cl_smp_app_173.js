@@ -75,11 +75,11 @@ class z2ui5_cl_smp_app_173 extends z2ui5_if_app {
       this.mt_data = z2ui5_cl_util.abap_tab_assign(this.mt_data, [{ name: `Theo`, date: `01.01.2000`, age: `5` }, { name: `Lore`, date: `01.01.2000`, age: `1` }]);
       this.mt_layout = z2ui5_cl_util.abap_tab_assign(this.mt_layout, [{ fname: `NAME`, merge: `false`, visible: `true` }, { fname: `DATE`, merge: `false`, visible: `true` }, { fname: `AGE`, merge: `false`, visible: `false` }]);
       this.view_display();
+    } else if (client.check_on_navigated()) {
+      this.view_display();
     }
-    switch (client.get_event()) {
-      case `CHANGE_FLAG`:
-        this.view_display();
-        break;
+    if (client.get_event() === `CHANGE_FLAG`) {
+      this.view_display();
     }
   }
 }

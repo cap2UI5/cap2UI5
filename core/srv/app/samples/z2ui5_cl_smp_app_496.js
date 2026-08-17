@@ -14,6 +14,8 @@ class z2ui5_cl_smp_app_496 extends z2ui5_if_app {
       this.text = `change me and press Send`;
       this.tabs_init();
       this.view_display();
+    } else if (client.check_on_navigated()) {
+      this.view_display();
     } else if (client.check_on_event(z2ui5_cl_smp_app_496.cs_event.ping)) {
       this.roundtrips = this.roundtrips + 1;
     } else if (client.check_on_event(z2ui5_cl_smp_app_496.cs_event.where)) {

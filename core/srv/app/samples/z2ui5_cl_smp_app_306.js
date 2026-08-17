@@ -18,6 +18,8 @@ class z2ui5_cl_smp_app_306 extends z2ui5_if_app {
     if (client.check_on_init()) {
       this.facing_modes = z2ui5_cl_util.abap_tab_assign(this.facing_modes, [{ key: ``, text: `` }, { key: `environment`, text: `environment` }, { key: `user`, text: `user` }, { key: `left`, text: `left` }, { key: `right`, text: `right` }]);
       this.view_display();
+    } else if (client.check_on_navigated()) {
+      this.view_display();
     } else if (client.check_on_event()) {
       this.on_event();
     }
@@ -114,7 +116,7 @@ class z2ui5_cl_smp_app_306 extends z2ui5_if_app {
     sy_tabix = 0;
     for (const ls_pic of this.mt_picture) {
       sy_tabix++;
-      this.mt_picture_out.push(z2ui5_cl_util.abap_copy({ name: `picture ${sy_tabix}`, id: sy_tabix, thumbnail: ls_pic.thumbnail, selected: (sy_tabix === this.selected_picture.id ? true : null), time: ``, data: `` }));
+      this.mt_picture_out.push(z2ui5_cl_util.abap_copy({ name: `picture ${sy_tabix}`, id: sy_tabix, thumbnail: ls_pic.thumbnail, selected: (sy_tabix === this.selected_picture.id), time: ``, data: `` }));
     }
   }
 }

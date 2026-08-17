@@ -25,7 +25,7 @@ class z2ui5_cl_smp_app_167 extends z2ui5_if_app {
     page.tag(`Link`)
       .a({ n: `text`, v: `More information...` })
       .a({ n: `target`, v: `_blank` })
-      .a({ n: `href`, v: `https://sapui5.hana.ondemand.com/sdk/#/topic/b0fb4de7364f4bcbb053a99aa645affe` });
+      .a({ n: `href`, v: `https://sdk.openui5.org/topic/b0fb4de7364f4bcbb053a99aa645affe` });
     page.tag(`Button`)
       .a({ n: `press`, v: this.client._event(`EVENT_FIX_VAL`, [`FIX_VAL`]) })
       .a({ n: `text`, v: `EVENT_FIX_VAL` });
@@ -49,6 +49,8 @@ class z2ui5_cl_smp_app_167 extends z2ui5_if_app {
     this.client = client;
     if (client.check_on_init()) {
       this.mv_value = `my value`;
+      this.set_view();
+    } else if (client.check_on_navigated()) {
       this.set_view();
     }
     switch (client.get_event()) {

@@ -9,10 +9,8 @@ class z2ui5_cl_smp_app_050 extends z2ui5_if_app {
       this.product = `tomato`;
       this.quantity = `500`;
     }
-    switch (client.get_event()) {
-      case `BUTTON_POST`:
-        client.message_toast_display(`${this.product} ${this.quantity} - send to the server`);
-        break;
+    if (client.get_event() === `BUTTON_POST`) {
+      client.message_toast_display(`${this.product} ${this.quantity} - send to the server`);
     }
     const view = z2ui5_cl_ui5_view_builder.factory()
       .ele({ n: `View`, ns: `mvc` })

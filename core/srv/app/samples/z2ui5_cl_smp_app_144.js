@@ -31,9 +31,8 @@ class z2ui5_cl_smp_app_144 extends z2ui5_if_app {
       page.tag(`Input`).a({ n: `value`, v: this.client._bind(lr_row.title, { tab: this.t_tab, tab_index: lv_tabix }) });
       page.tag(`Input`).a({ n: `value`, v: this.client._bind(lr_row.value, { tab: this.t_tab, tab_index: lv_tabix }) });
     }
-    const tab = page.ele(`Table`)
+    page.ele(`Table`)
       .a({ n: `items`, v: this.client._bind(this.t_tab) })
-      .a({ n: `mode`, v: `MultiSelect` })
       .ele(`headerToolbar`)
       .ele(`OverflowToolbar`)
       .tag(`Title`)
@@ -52,7 +51,6 @@ class z2ui5_cl_smp_app_144 extends z2ui5_if_app {
       .end()
       .ele(`items`)
       .ele(`ColumnListItem`)
-      .a({ n: `selected`, v: `{SELKZ}` })
       .ele(`cells`)
       .tag(`Input`)
       .a({ n: `value`, v: `{TITLE}` })
@@ -75,6 +73,8 @@ class z2ui5_cl_smp_app_144 extends z2ui5_if_app {
       for (let sy_index = 1; sy_index <= 1; sy_index++) {
         this.t_tab = z2ui5_cl_util.abap_tab_assign(this.t_tab, [...(this.t_tab ?? []),{ title: `entry 01`, value: `red` }, { title: `entry 02`, value: `blue` }]);
       }
+      this.set_view();
+    } else if (client.check_on_navigated()) {
       this.set_view();
     }
   }

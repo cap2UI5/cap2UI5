@@ -17,6 +17,9 @@ class z2ui5_cl_smp_app_104 extends z2ui5_if_app {
       _fs$fs_fs = ((_o, _n) => { if (_o == null) return null; const _k = String(_n).toLowerCase(); return _k in _o ? { o: _o, k: _k } : null; })(this.app_sub, `VIEW_PARENT`);
       fs_fs = _fs$fs_fs ? _fs$fs_fs.o[_fs$fs_fs.k] : null;
       sy_subrc = _fs$fs_fs ? 0 : 4;
+      if (sy_subrc !== 0) {
+        return;
+      }
       fs_fs = this.grid_sub;
       if (_fs$fs_fs) _fs$fs_fs.o[_fs$fs_fs.k] = fs_fs;
       {
@@ -40,6 +43,9 @@ class z2ui5_cl_smp_app_104 extends z2ui5_if_app {
     _fs$fs_fs = ((_o, _n) => { if (_o == null) return null; const _k = String(_n).toLowerCase(); return _k in _o ? { o: _o, k: _k } : null; })(this.app_sub, `VIEW_PARENT`);
     fs_fs = _fs$fs_fs ? _fs$fs_fs.o[_fs$fs_fs.k] : null;
     sy_subrc = _fs$fs_fs ? 0 : 4;
+    if (sy_subrc !== 0) {
+      return;
+    }
     fs_fs = this.grid_sub;
     if (_fs$fs_fs) _fs$fs_fs.o[_fs$fs_fs.k] = fs_fs;
     {
@@ -128,6 +134,8 @@ class z2ui5_cl_smp_app_104 extends z2ui5_if_app {
       this.layout = `OneColumn`;
       this.view_display_master();
       this.view_display_detail();
+    } else if (client.check_on_navigated()) {
+      this.view_display_master();
     } else if (client.check_on_event(`SELCHANGE`)) {
       t_sel = z2ui5_cl_util.abap_copy(this.t_tab);
       for (let _i = t_sel.length - 1; _i >= 0; _i--) { const row = t_sel[_i]; if (!(row.selected === true || row.selected === `X`)) t_sel.splice(_i, 1); }
@@ -137,6 +145,9 @@ class z2ui5_cl_smp_app_104 extends z2ui5_if_app {
         const _i = (1) - 1;
         sy_subrc = _i >= 0 && _i < _t.length ? 0 : 4;
         if (sy_subrc === 0) s_sel = _t[_i];
+      }
+      if (sy_subrc !== 0) {
+        return;
       }
       if (!z2ui5_cl_util.abap_is_initial(this.classname)) {
         this.view_display_master();

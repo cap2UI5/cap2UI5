@@ -10,6 +10,8 @@ class z2ui5_cl_smp_app_059 extends z2ui5_if_app {
     if (client.check_on_init()) {
       this.set_data();
       this.view_display();
+    } else if (client.check_on_navigated()) {
+      this.view_display();
     } else if (client.check_on_event()) {
       this.on_event();
     }
