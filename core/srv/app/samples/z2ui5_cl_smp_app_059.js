@@ -27,7 +27,7 @@ class z2ui5_cl_smp_app_059 extends z2ui5_if_app {
   }
 
   set_data() {
-    this.mt_table = {};
+    this.mt_table = z2ui5_cl_util.abap_tab_assign(this.mt_table, []);
     for (let sy_index = 1; sy_index <= 1000; sy_index++) {
       this.mt_table.push(...[{ product: `table`, create_date: `01.01.2023`, create_by: `Peter`, storage_location: `AREA_001`, quantity: 400 }, { product: `chair`, create_date: `01.01.2022`, create_by: `James`, storage_location: `AREA_001`, quantity: 123 }, { product: `sofa`, create_date: `01.05.2021`, create_by: `Simone`, storage_location: `AREA_001`, quantity: 700 }, { product: `computer`, create_date: `27.01.2023`, create_by: `Theo`, storage_location: `AREA_001`, quantity: 200 }, { product: `printer`, create_date: `01.01.2023`, create_by: `Hannah`, storage_location: `AREA_001`, quantity: 90 }, { product: `table2`, create_date: `01.01.2023`, create_by: `Julia`, storage_location: `AREA_001`, quantity: 110 }].map((_r) => z2ui5_cl_util.abap_copy(_r)));
     }

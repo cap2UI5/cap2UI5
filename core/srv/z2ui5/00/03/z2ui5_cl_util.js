@@ -744,11 +744,12 @@ class z2ui5_cl_util {
   /** Returns the full ordered list of directories searched for app classes. */
   static _app_dirs() {
     const out = [
-      // 1. Framework built-ins (the shipped apps live in 01/04 since the
-      //    2026-08 upstream rename, the popups in 99/02)
+      // 1. Framework built-ins — the shipped apps (start page, hello world,
+      //    the error dialog and value help) live in 01/04 since the 2026-08
+      //    upstream rename; 02 holds the public API. There is no 99 any more:
+      //    upstream's frozen package is not carried here (see AGENTS.md).
       path.join(__dirname, "../../01/04"),
       path.join(__dirname, "../../02"),
-      path.join(__dirname, "../../99/02"),
       // 2. Custom apps (srv/app/); bundled samples under srv/app/samples/
       //    are covered by the recursive walk of this same folder.
       path.join(__dirname, "../../../app"),
@@ -781,20 +782,45 @@ class z2ui5_cl_util {
     return out;
   }
 
+  // Resolved class name → absolute file path (or null for "searched, not
+  // found"). Without this every miss costs a full recursive walk of EVERY app
+  // directory — including the ~100 bundled samples — and the class name comes
+  // straight off the wire (`?app_start=`), so unresolvable names are
+  // attacker-repeatable. Misses are cached too, which is what actually caps
+  // that cost.
+  //
+  // Keyed by search path + class name, not by class name alone: the search
+  // path is not fixed at startup (register_app_dir, and Z2UI5_APP_DIRS is read
+  // fresh on every lookup), and a cache that ignored it would answer for the
+  // wrong directory set — including handing back a stale miss after a
+  // directory was added.
+  static _class_file_cache = new Map();
+
   static _findClassFile(className) {
     // Reject anything that is not a bare ABAP-style class name before it can
     // reach path.join()+require() (path-traversal guard, see
     // _is_safe_class_name).
     if (!z2ui5_cl_util._is_safe_class_name(className)) return null;
+
+    const dirs = z2ui5_cl_util._app_dirs();
+    const key = `${dirs.join(path.delimiter)} ${className}`;
+    const cached = z2ui5_cl_util._class_file_cache.get(key);
+    // A cached hit is only trusted while the file is still there — a stale
+    // absolute path would otherwise survive a moved/deleted app in long
+    // running dev servers. Cached misses need no such check.
+    if (cached !== undefined && (cached === null || fs.existsSync(cached))) return cached;
+
     const file = `${className}.js`;
-    for (const dir of z2ui5_cl_util._app_dirs()) {
+    let found = null;
+    for (const dir of dirs) {
       const direct = path.join(dir, file);
-      if (fs.existsSync(direct)) return direct;
+      if (fs.existsSync(direct)) { found = direct; break; }
       if (!fs.existsSync(dir)) continue;
       const hit = z2ui5_cl_util._walkClassFiles(dir).find((p) => path.basename(p) === file);
-      if (hit) return hit;
+      if (hit) { found = hit; break; }
     }
-    return null;
+    z2ui5_cl_util._class_file_cache.set(key, found);
+    return found;
   }
 }
 

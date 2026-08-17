@@ -16,7 +16,7 @@ Guidance for AI agents and contributors. Read before making any change.
 |---|---|
 | the app skeleton (`srv/server.js`, `z2ui5-service.*`, `db/`, `mta.yaml`, `test/`, README, devcontainer, this file) | [builder-cap2UI5](https://github.com/cap2UI5/builder-cap2UI5) → `src/` |
 | the framework / core package (`core/` — engine, `core/srv/z2ui5/`, bundled samples, webapp) | [builder-abap2UI5-js](https://github.com/cap2UI5/builder-abap2UI5-js) → `src/` (or its transpiler pipelines) |
-| this repo's CI (`.github/workflows/test.yml`, `trigger_web.yml`) | here — `.github/` is the only repo-owned folder |
+| this repo's CI (`.github/workflows/` — `test.yml`, `trigger_web.yml`, `deploy-check.yml` — and `.github/dependabot.yml`) | here — `.github/` is the only repo-owned folder |
 | your own apps (as a **user** of cap2UI5) | `srv/app/` or any folder registered via `Z2UI5_APP_DIRS` / `require("abap2UI5/register-apps")(dir)` — note `srv/app/` is overwritten on every publish, so external folders are safer for real projects |
 
 ## Layout

@@ -9,6 +9,7 @@
     "node": ">=22"
   },
   "dependencies": {
+    "@cap-js/hana": "^2",
     "@sap/cds": "^10",
     "abap2UI5": "file:./core",
     "express": "^5"
@@ -33,6 +34,10 @@
   },
   "cds": {
     "requires": {
+      "db": {
+        "[production]": "hana",
+        "[development]": "sqlite"
+      },
       "northwind": {
         "kind": "odata-v2",
         "model": "srv/external/northwind",
@@ -50,6 +55,12 @@
           "users": {
             "alice": {
               "password": "alice",
+              "roles": [
+                "authenticated-user"
+              ]
+            },
+            "bob": {
+              "password": "bob",
               "roles": [
                 "authenticated-user"
               ]

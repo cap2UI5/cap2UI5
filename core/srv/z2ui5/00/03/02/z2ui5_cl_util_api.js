@@ -40,7 +40,7 @@ class z2ui5_cl_util_api {
     return new Error().stack || ``;
   }
   static context_get_tenant() {
-    return process.env.TENANT || `DEFAULT`;
+    return require(`../../../z2ui5_identity`).get_tenant();
   }
   static context_get_sy() {
     return {};                          // no SY-* in JS
@@ -49,7 +49,10 @@ class z2ui5_cl_util_api {
     return false;
   }
   static context_get_user_tech() {
-    return process.env.USER || process.env.USERNAME || `anonymous`;
+    // sy-uname equivalent — the AUTHENTICATED user when the host injected an
+    // identity provider, not the OS account the server process runs under
+    // (which on Cloud Foundry is `vcap` for everyone).
+    return require(`../../../z2ui5_identity`).get_user();
   }
 
   // ---- source ----

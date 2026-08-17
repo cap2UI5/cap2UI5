@@ -27,21 +27,29 @@ const z2ui5_cl_ui5f_index_html = require("./01/03/z2ui5_cl_ui5f_index_html");
 const z2ui5_cl_util           = require("./00/03/z2ui5_cl_util");
 const z2ui5_port              = require("./z2ui5_port");
 const z2ui5_asset             = require("./z2ui5_asset");
+const z2ui5_identity          = require("./z2ui5_identity");
 
 // Sticky-handler store — same intent as abap CLASS-DATA so_sticky_handler:
 // an app that sets check_sticky keeps its handler (and app state) across
 // roundtrips instead of being re-hydrated from the draft store. A sticky
 // handler holds full app state, so a SINGLE process-global slot would leak
 // one user's state into every other user's request in a multi-user
-// deployment. It is therefore keyed per session (reqInfo.session_id, e.g. the
-// authenticated user/tenant) and bounded. When no session key is supplied
-// (the single-user demo adapters) everything shares one key — the previous
-// behaviour — but the isolation seam is in place for real deployments.
+// deployment. It is therefore keyed per session and bounded.
+//
+// The key comes from the identity port (set_identity) — reqInfo.session_id
+// only overrides it when an adapter computes the key itself. With no identity
+// provider installed (the single-user demo adapters, tests) everything shares
+// one key, which is the historic behaviour and safe there because there is
+// exactly one user. Deployments that serve more than one user MUST install a
+// provider; see z2ui5_identity.
 const STICKY_MAX = 500;
 const _sticky_handlers = new Map();
 
 function _sticky_key(reqInfo) {
-  return reqInfo?.session_id || reqInfo?.tenant || `__global__`;
+  return reqInfo?.session_id
+    || z2ui5_identity.session_key()
+    || reqInfo?.tenant
+    || `__global__`;
 }
 
 function _sticky_set(key, handler) {
@@ -134,6 +142,15 @@ module.exports = {
   set_db_store: (store) => z2ui5_port.set_store(store),
   /** Webapp asset provider: (relPath) → string|null (browser builds). */
   set_assets: (provider) => z2ui5_asset.set_provider(provider),
+  /**
+   * Identity: () → { user, tenant }, read per use from the host's
+   * request context. Drives sy-uname, the draft owner binding and the
+   * per-session isolation of the sticky store. Required for multi-user
+   * deployments — see z2ui5_identity.
+   */
+  set_identity: (provider) => z2ui5_identity.set_provider(provider),
+  /** Session key for an explicit identity — see z2ui5_identity.key_for. */
+  session_key_for: (identity) => z2ui5_identity.key_for(identity),
 
   // ---- app registry ----
   register_app_class: (name, cls) =>
@@ -145,6 +162,15 @@ module.exports = {
   // ---- static assets ----
   WEBAPP_DIR: z2ui5_asset.WEBAPP_DIR,
   ui5_resources_dir,
+
+  /**
+   * Release the sticky handler of one session — the server-side half of the
+   * frontend's `sap-terminate: session` beacon (sent when the tab closes).
+   * Without it a sticky app's full state lingers until STICKY_MAX evicts it.
+   * Pass the same reqInfo the roundtrip used, or nothing to drop the session
+   * identified by the current identity context.
+   */
+  drop_sticky: (reqInfo) => _sticky_handlers.delete(_sticky_key(reqInfo)),
 
   /** Test-only — clear the sticky-handler store between test cases. */
   _reset_sticky: () => { _sticky_handlers.clear(); },

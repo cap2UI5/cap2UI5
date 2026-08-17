@@ -82,6 +82,121 @@ class z2ui5_cl_ui5_handler {
   //  Phase 1 — main_begin
   // ============================================================
 
+  /**
+   * ABAP METHOD launchpad_derive — is this request running inside the Fiori
+   * launchpad? Derived on every roundtrip rather than frozen once, because
+   * the raw request carries pathname/search only on app-start-shaped
+   * requests: a flag frozen from those fields would read false on every
+   * event roundtrip inside the FLP.
+   */
+  launchpad_derive() {
+    if (!this.ms_request) this.ms_request = {};
+    if (!this.ms_request.s_control) this.ms_request.s_control = { check_launchpad: false, app_start: ``, app_start_draft: `` };
+    const s_front = this.ms_request.s_front || {};
+    const search = String(s_front.search ?? ``);
+    const pathname = String(s_front.pathname ?? ``);
+    this.ms_request.s_control.check_launchpad =
+      search.includes(`scenario=LAUNCHPAD`)
+      || pathname.includes(`/ui2/flp`)
+      || pathname.includes(`test/flpSandbox`);
+  }
+
+  /**
+   * ABAP METHOD session_merge — reconcile the session-constant request data
+   * (device, UI5 build, page location) between this request and the draft.
+   *
+   * The frontend sends these blocks only when they change, so an absent field
+   * means "unchanged", never "cleared". Two directions therefore:
+   *
+   *   - a request that CARRIES the block wins and is stored. That is the
+   *     first roundtrip of a page load, and it is also how a draft reopened
+   *     on a different device picks up the new device instead of the one
+   *     that created it.
+   *   - a request that omits it is answered from the draft.
+   *
+   * Two device fields are exempt from "session-constant": orientation and
+   * resize change while the app runs, so when the request carries them they
+   * win and are stored back — the merged record is the only place that
+   * remembers a rotation or a resize.
+   */
+  session_merge() {
+    if (!this.ms_request) this.ms_request = {};
+    if (!this.ms_request.s_front) this.ms_request.s_front = {};
+
+    const app = this.mo_action?.mo_app;
+    if (!app) {
+      // No app yet (a system/startup roundtrip): the launchpad flag still has
+      // to be derived, everything else has nowhere to merge into.
+      this.launchpad_derive();
+      return;
+    }
+    if (!app.ms_session) app.ms_session = require(`./z2ui5_if_ui5_types`).new_session();
+
+    const req = this.ms_request.s_front;
+    const session = app.ms_session;
+
+    // The page location travels on its own cadence — with every
+    // app-start-shaped request and on the first roundtrip of a page load.
+    // The hash is deliberately NOT part of it: it carries live routing state
+    // and stays a per-request field.
+    if (req.origin) {
+      session.origin   = req.origin;
+      session.pathname = req.pathname ?? ``;
+      session.search   = req.search ?? ``;
+    } else {
+      req.origin   = session.origin;
+      req.pathname = session.pathname;
+      req.search   = session.search;
+    }
+
+    // …and only now, from the MERGED location.
+    this.launchpad_derive();
+
+    const s_device = req.s_device || {};
+    const s_ui5    = req.s_ui5 || {};
+
+    if (s_device.system || s_ui5.version) {
+      // Keep the location trio just merged above, and keep the nav_mode_sent
+      // latch: a wiped latch would cost a redundant router sync.
+      app.ms_session = {
+        s_ui5:         { ...s_ui5 },
+        s_device:      { ...s_device },
+        comp_data:     session.comp_data,
+        origin:        session.origin,
+        pathname:      session.pathname,
+        search:        session.search,
+        nav_mode_sent: session.nav_mode_sent,
+      };
+      if (req.o_comp_data) {
+        try {
+          app.ms_session.comp_data = req.o_comp_data.stringify();
+        } catch {
+          // a component-data blob that will not serialize is not worth
+          // failing the roundtrip over
+        }
+      }
+      return;
+    }
+
+    // Answered from the draft — except the two fields that legitimately
+    // changed since the last send.
+    const merged = { ...(session.s_device || {}) };
+    if (s_device.orientation) merged.orientation = s_device.orientation;
+    if (Number(s_device.resize?.width) > 0) merged.resize = { ...s_device.resize };
+
+    session.s_device = merged;
+    req.s_device = merged;
+    req.s_ui5    = session.s_ui5;
+
+    if (session.comp_data) {
+      try {
+        req.o_comp_data = require(`../../00/01/z2ui5_cl_ajson`).parse(session.comp_data);
+      } catch {
+        // stored blob no longer parses — leave the request's own value alone
+      }
+    }
+  }
+
   async main_begin_js() {
     const Action = require("./z2ui5_cl_ui5_action");
 
@@ -163,9 +278,9 @@ class z2ui5_cl_ui5_handler {
       // pop_error popup. The popup is rendered on the next iteration of the
       // nav-loop and the user gets a "OK" button to dismiss + recover.
       const z2ui5_cx_util_error = require("../../00/03/z2ui5_cx_util_error");
-      const z2ui5_cl_pop_error  = require("../../99/02/z2ui5_cl_pop_error");
+      const z2ui5_cl_ui5_app_error = require("../04/z2ui5_cl_ui5_app_error");
       const wrapped = new z2ui5_cx_util_error(`UNCAUGHT EXCEPTION - Please Restart App:`, lx);
-      oClient.nav_app_leave(z2ui5_cl_pop_error.factory({ x_root: wrapped }));
+      oClient.nav_app_leave(z2ui5_cl_ui5_app_error.factory({ x_root: wrapped }));
     }
 
     // Persist client state back onto mo_action so the loop iteration can read it.
@@ -551,6 +666,95 @@ class z2ui5_cl_ui5_handler {
     }
   }
 
+  /**
+   * ABAP METHOD hash_get_app_part — reduce a browser hash to the part that
+   * belongs to the running app.
+   *
+   * Inside the Fiori launchpad the shell owns everything before `&/`
+   * (`#<SemanticObject>-<action>&/<app hash>`); standalone the whole hash is
+   * the app hash. This mirrors Router.splitHash in the frontend and is the
+   * one place the backend knows about the shell hash — without it every
+   * launchpad hash looks like "no route", and Back, reload and bookmarks all
+   * fall back to `?app_start=`.
+   */
+  hash_get_app_part(iv_hash) {
+    let result = String(iv_hash ?? ``);
+    if (!result) return ``;
+    if (result[0] === `#`) {
+      result = result.slice(1);
+      if (!result) return ``;
+    }
+    // An app hash starts with '/', a shell hash never does. Checking this
+    // first matters: an app hash may itself contain '&/' in a parameter, and
+    // splitting on that would truncate it.
+    if (result[0] === `/`) return result;
+
+    const off = result.indexOf(`&/`);
+    if (off < 0) return result;
+    return result.slice(off + 2);
+  }
+
+  /**
+   * Shared prologue for the two route parsers: the route remainder after
+   * `app/`, or empty when the hash carries no app route (a normal boot, an
+   * app-owned hash, or an `app/` occurring mid-hash).
+   */
+  _parse_app_route_rest(iv_hash) {
+    // Leading slashes are optional AND may stack: the launchpad convention
+    // writes the app hash without one (`&/app/X`), our own routes carry one
+    // (`#/app/X`), and URLs written through the UI5 HashChanger before navTo
+    // stripped its slash carry two (`#//app/X`). Those live on in bookmarks
+    // and browser history, so strip them all.
+    const lv_hash = this.hash_get_app_part(iv_hash).replace(/^\/+/, ``);
+    if (!lv_hash.startsWith(`app/`)) return ``;
+    return lv_hash.slice(4);
+  }
+
+  /** Everything before the first occurrence of `sub` (or the whole value). */
+  _cut_at(val, sub) {
+    const off = String(val ?? ``).indexOf(sub);
+    return off >= 0 ? String(val).slice(0, off) : String(val ?? ``);
+  }
+
+  /**
+   * ABAP METHOD request_app_start_route — the app class from a hash route
+   * `#/app/<CLASS>` (UI5 Router style). Empty when the hash carries no app
+   * route, so a normal boot or an app that manages its own hash falls
+   * through to the `?app_start=` query.
+   */
+  request_app_start_route(iv_hash) {
+    try {
+      let lv_rest = this._parse_app_route_rest(iv_hash);
+      if (!lv_rest) return ``;
+      // the class token ends at the next route / query separator
+      lv_rest = this._cut_at(lv_rest, `/`);
+      lv_rest = this._cut_at(lv_rest, `&`);
+      lv_rest = this._cut_at(lv_rest, `?`);
+      return lv_rest.trim().toUpperCase();
+    } catch {
+      return ``;
+    }
+  }
+
+  /**
+   * ABAP METHOD request_app_start_route_draft — the draft id (app state) from
+   * `#/app/<CLASS>/<DRAFTID>`. Empty when the route carries no draft segment
+   * (fresh navigation, a bookmark without state), so the app starts fresh.
+   */
+  request_app_start_route_draft(iv_hash) {
+    try {
+      let lv_rest = this._parse_app_route_rest(iv_hash);
+      if (!lv_rest) return ``;
+      lv_rest = this._cut_at(lv_rest, `&`);
+      lv_rest = this._cut_at(lv_rest, `?`);
+      const off = lv_rest.indexOf(`/`);
+      if (off < 0) return ``;
+      return this._cut_at(lv_rest.slice(off + 1), `/`).trim().toUpperCase();
+    } catch {
+      return ``;
+    }
+  }
+
   _url_param(name, url) {
     const q = String(url ?? ``).replace(/^[^?]*\?/, ``).replace(/^\?/, ``);
     for (const pair of q.split(`&`)) {
@@ -642,21 +846,37 @@ class z2ui5_cl_ui5_handler {
       this.mo_action = this.mo_action.factory_stack_call();
       return false;
     }
-    this.main_end_abap();
+    this.main_end();
     return true;
   }
 
-  /** abap main_end — build ms_response + serialize + persist the draft. */
-  main_end_abap() {
+  /**
+   * ABAP METHOD main_end — build ms_response, serialize it, persist the draft.
+   *
+   * (Named main_end_abap here until 2026-08; upstream calls it main_end and
+   * so do its tests.)
+   */
+  main_end() {
     const types = require("./z2ui5_if_ui5_types");
     this.ms_response = types.ty_s_response();
     this.ms_response.s_front.params = this.mo_action.ms_next.s_set;
     this.ms_response.s_front.id     = this.mo_action.mo_app.ms_draft.id;
     this.ms_response.s_front.app    = String(this.mo_action.mo_app.mo_app?.constructor?.name ?? ``).toUpperCase();
 
-    this.ms_response.model = this.check_view_update_needed()
-      ? this.mo_action.mo_app.model_json_stringify()
-      : `{}`;
+    // The model of this roundtrip. A slot that shipped new XML always needs
+    // the model with it.
+    if (this.check_view_update_needed()) {
+      this.ms_response.model = this.mo_action.mo_app.model_json_stringify();
+    } else if (this.mv_model_before_taken === true) {
+      // Automatic model update: main() neither displayed nor asked for a
+      // push, so send the model only when main() itself changed it — exactly
+      // what an explicit view_model_update() would do. An unchanged model
+      // still answers `{}`.
+      const lv_model_now = this.mo_action.mo_app.model_json_stringify();
+      this.ms_response.model = lv_model_now !== this.mv_model_before ? lv_model_now : `{}`;
+    } else {
+      this.ms_response.model = `{}`;
+    }
 
     if (this.ms_response.s_front.params.s_popup.xml) {
       this.ms_response.s_front.params.s_popup.check_update_model = false;

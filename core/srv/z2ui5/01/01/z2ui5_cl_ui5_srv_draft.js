@@ -153,7 +153,6 @@ class z2ui5_cl_ui5_srv_draft {
     const searchPaths = [
       path.join(__dirname, "../../01/04", `${className}.js`), // framework apps
       path.join(__dirname, "../../02", `${className}.js`),
-      path.join(__dirname, "../../99/02", `${className}.js`),  // pop helpers
       path.join(__dirname, "../../../app/samples", `${className}.js`),
     ];
 
@@ -190,9 +189,10 @@ class z2ui5_cl_ui5_srv_draft {
   static c_seconds_per_hour = 3600;
   static c_min_exp_time_in_hours = 1;
 
-  /** sy-uname equivalent — the platform user this process acts as. */
+  /** sy-uname equivalent — the authenticated user (identity port), else the
+   *  process owner. This is what binds a draft row to its owner. */
   static _uname() {
-    return String(process.env.USER || ``);
+    return String(require(`../../z2ui5_identity`).get_user() || ``);
   }
 
   static _db_row(id) {
@@ -279,8 +279,28 @@ class z2ui5_cl_ui5_srv_draft {
     return !!row && (!row.uname || row.uname === z2ui5_cl_ui5_srv_draft._uname());
   }
 
-  /** abap count_entries. */
+  /**
+   * abap count_entries — how many drafts belong to THIS user.
+   *
+   * Owner-scoped like read()/check_exists(); a blank owner is a legacy row
+   * from before the column existed and stays visible during the upgrade.
+   */
   count_entries() {
+    const z2ui5_port = require(`../../z2ui5_port`);
+    const uname = z2ui5_cl_ui5_srv_draft._uname();
+    const rows = z2ui5_port.db({ op: `select_table`, table: `z2ui5_t_01`, fields: [], where: [] });
+    return rows.filter((r) => !r.uname || r.uname === uname).length;
+  }
+
+  /**
+   * abap count_entries_total — the size of the draft table itself, every
+   * owner included. What the start page shows next to the own count, and what
+   * says whether cleanup() is keeping up.
+   *
+   * Deliberately NOT owner-scoped, and deliberately only a count: everything
+   * that reads draft CONTENT stays owner-bound (see read()).
+   */
+  count_entries_total() {
     const z2ui5_port = require(`../../z2ui5_port`);
     return z2ui5_port.db({ op: `select_table`, table: `z2ui5_t_01`, fields: [], where: [] }).length;
   }

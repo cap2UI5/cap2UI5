@@ -1,6 +1,8 @@
 // TODO(abap2js): unresolved reference cl_abap_typedescr — add require manually
 // TODO(abap2js): unresolved reference cl_abap_unit_assert — add require manually
 const z2ui5_cl_srt_typedescr = require("abap2UI5/z2ui5_cl_srt_typedescr");
+const cl_abap_typedescr = require("abap2UI5/cl_abap_typedescr");
+const cl_abap_unit_assert = require("abap2UI5/cl_abap_unit_assert");
 
 class z2ui5_cl_srt_aunit {
   static serialize_deserialize({ variable } = {}) {
