@@ -153,7 +153,6 @@ class z2ui5_cl_ui5_srv_draft {
     const searchPaths = [
       path.join(__dirname, "../../01/04", `${className}.js`), // framework apps
       path.join(__dirname, "../../02", `${className}.js`),
-      path.join(__dirname, "../../99/02", `${className}.js`),  // pop helpers
       path.join(__dirname, "../../../app/samples", `${className}.js`),
     ];
 

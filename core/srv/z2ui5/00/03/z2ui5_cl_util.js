@@ -744,11 +744,12 @@ class z2ui5_cl_util {
   /** Returns the full ordered list of directories searched for app classes. */
   static _app_dirs() {
     const out = [
-      // 1. Framework built-ins (the shipped apps live in 01/04 since the
-      //    2026-08 upstream rename, the popups in 99/02)
+      // 1. Framework built-ins — the shipped apps (start page, hello world,
+      //    the error dialog and value help) live in 01/04 since the 2026-08
+      //    upstream rename; 02 holds the public API. There is no 99 any more:
+      //    upstream's frozen package is not carried here (see AGENTS.md).
       path.join(__dirname, "../../01/04"),
       path.join(__dirname, "../../02"),
-      path.join(__dirname, "../../99/02"),
       // 2. Custom apps (srv/app/); bundled samples under srv/app/samples/
       //    are covered by the recursive walk of this same folder.
       path.join(__dirname, "../../../app"),
