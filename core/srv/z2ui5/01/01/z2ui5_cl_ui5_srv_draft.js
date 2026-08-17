@@ -190,9 +190,10 @@ class z2ui5_cl_ui5_srv_draft {
   static c_seconds_per_hour = 3600;
   static c_min_exp_time_in_hours = 1;
 
-  /** sy-uname equivalent — the platform user this process acts as. */
+  /** sy-uname equivalent — the authenticated user (identity port), else the
+   *  process owner. This is what binds a draft row to its owner. */
   static _uname() {
-    return String(process.env.USER || ``);
+    return String(require(`../../z2ui5_identity`).get_user() || ``);
   }
 
   static _db_row(id) {

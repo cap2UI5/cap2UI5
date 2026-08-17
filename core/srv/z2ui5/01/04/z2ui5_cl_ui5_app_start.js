@@ -11,15 +11,30 @@ const z2ui5_cl_util = require("../../00/03/z2ui5_cl_util");
  */
 class z2ui5_cl_ui5_app_start extends z2ui5_if_app {
 
-  // --- cs_event constants (mirrors abap CS_EVENT struct) ---
+  // --- cs_event: the PUBLIC event contract, 1:1 with the abap CONSTANTS
+  //     block. Lowercase, because that is the ABAP name and what transpiled
+  //     callers (and the upstream unit tests) address. ---
+  static cs_event = Object.freeze({
+    button_check:  "BUTTON_CHECK",
+    button_change: "BUTTON_CHANGE",
+    set_config:    "SET_CONFIG",
+  });
+
+  // Private events of the start page — abap keeps these out of cs_event on
+  // purpose (what a start page does with its own popup is not contract).
+  static c_event_system = "OPEN_SYSTEM";
+  static c_event_close  = "CLOSE_POPUP";
+
+  // Internal superset used by this file's view + dispatcher. The three
+  // contract events are derived from cs_event so the two can never drift.
   static CS_EVENT = Object.freeze({
     BUTTON_CHECK:  "BUTTON_CHECK",
     BUTTON_CHANGE: "BUTTON_CHANGE",
+    SET_CONFIG:    "SET_CONFIG",
     VALUE_HELP:    "VALUE_HELP",
     OPEN_DEBUG:    "OPEN_DEBUG",
-    OPEN_INFO:     "OPEN_INFO",
-    SET_CONFIG:    "SET_CONFIG",
-    CLOSE:         "CLOSE",
+    OPEN_INFO:     "OPEN_SYSTEM",
+    CLOSE:         "CLOSE_POPUP",
   });
 
   // --- ms_home struct ---
@@ -32,6 +47,7 @@ class z2ui5_cl_ui5_app_start extends z2ui5_if_app {
     class_value_state:      "None",  // sap.ui.core.ValueState enum — empty string would throw
     class_value_state_text: "",
     class_editable:         true,
+    link_enabled:           false,
   };
 
   mv_ui5_version = "";
@@ -47,11 +63,17 @@ class z2ui5_cl_ui5_app_start extends z2ui5_if_app {
     this.ms_home.btn_event_id = z2ui5_cl_ui5_app_start.CS_EVENT.BUTTON_CHECK;
     this.ms_home.btn_icon     = "sap-icon://validate";
     this.ms_home.class_editable = true;
+    this.ms_home.link_enabled   = false;
+    // Drop the previous check's outcome, otherwise the re-opened input still
+    // shows the old value state and a stale step-5 link. The value state
+    // resets to `None` rather than empty — the bound property must stay a
+    // valid ValueState.
     this.ms_home.class_value_state      = "None";
+    this.ms_home.url                    = "";
     this.ms_home.class_value_state_text = "";
   }
 
-  z2ui5_on_init() {
+  on_init() {
     this.reset_button_state();
     this.ms_home.classname = "z2ui5_cl_ui5_app_hi_world";
   }
@@ -71,6 +93,7 @@ class z2ui5_cl_ui5_app_start extends z2ui5_if_app {
       this.ms_home.btn_icon       = "sap-icon://edit";
       this.ms_home.class_value_state = "Success";
       this.ms_home.class_editable = false;
+      this.ms_home.link_enabled   = true;
 
       const cfg = this.client.get().S_CONFIG || {};
       this.ms_home.url = z2ui5_cl_util.app_get_url({
@@ -91,7 +114,7 @@ class z2ui5_cl_ui5_app_start extends z2ui5_if_app {
     this.client = client;
 
     if (client.check_on_init()) {
-      this.z2ui5_on_init();
+      this.on_init();
       this.view_display_start();
       return;
     }

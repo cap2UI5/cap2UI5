@@ -144,18 +144,41 @@ real server via `cds.test()` and asserts all three layers end-to-end
 persisted per roundtrip), and [`test/z2ui5_cl_xml_view.test.js`](test/z2ui5_cl_xml_view.test.js)
 covers the view builder.
 
-## Security note (demo setup — no authentication)
+## Security model
 
-This project deliberately ships **without authentication**: `xs-security.json`
-declares no scopes, attributes or role templates, and `package.json` sets
-`cds.requires.[production].auth: false`, so every endpoint (the z2ui5
-roundtrip, the OData admin service and the draft table) is open. That is
-intentional for the demo/sample character of this repository. For a real
-BTP deployment, configure authentication before going productive: define
-scopes and role templates in `xs-security.json`, remove the
-`[production].auth: false` override and wire the CAP services to XSUAA
-(`kind: xsuaa`) — see the
-[CAP authorization guide](https://cap.cloud.sap/docs/guides/security/authorization).
+**Authenticated by default.** Both services carry
+`@(requires: 'authenticated-user')` ([`srv/z2ui5-service.cds`](srv/z2ui5-service.cds)),
+`package.json` binds `cds.requires.auth` to `xsuaa` in the production profile
+and to mocked users in development, and [`xs-security.json`](xs-security.json)
+declares the `$XSAPPNAME.User` scope with a matching role template.
+
+What is authenticated, and what is not:
+
+| Endpoint | Access |
+|---|---|
+| `POST /rest/root/z2ui5` (the roundtrip) | authenticated |
+| `/odata/v4/admin/*` (draft table, Northwind) | authenticated |
+| `GET/HEAD /rest/root/z2ui5` (bootstrap shell, CSRF ack) | public |
+| `/resources/*` (UI5 runtime), `/health` | public |
+
+The GET/HEAD routes are public on purpose: they serve the static UI5 bootstrap
+shell and carry no user data, which keeps the offline/dev flow working. In BTP
+the approuter authenticates before the frontend reaches them anyway.
+
+**Isolation between users.** A draft row holds the complete serialized state
+of a session, so it is bound to its owner in two independent places: the OData
+projection is read-only and filtered (`where: 'owner = $user'`), and the draft
+store filters on the owner again when loading — a draft id travels in request
+bodies, logs and browser history, so it is not treated as a secret. Retained
+sticky app state is keyed per session through the framework's identity port
+(`engine.set_identity` in [`srv/server.js`](srv/server.js)).
+[`test/isolation.test.js`](test/isolation.test.js) holds the regression net for
+all of it.
+
+**Before going productive**, review two things this repository leaves at demo
+level: the services require `authenticated-user` rather than the declared
+`User` scope (so every subaccount user passes, whether or not the role is
+assigned), and the CSRF gate in the framework's user exit is off by default.
 
 ## Transpiling from ABAP
 

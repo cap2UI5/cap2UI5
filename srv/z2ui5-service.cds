@@ -10,6 +10,26 @@ using northwind from './external/northwind.csn';
  */
 @(requires: 'authenticated-user')
 service AdminService {
+    /**
+     * Own drafts only, read-only.
+     *
+     * `authenticated-user` alone is not enough here: a draft row carries the
+     * complete serialized state of someone's session, so an unfiltered
+     * projection lets every authenticated user read every other user's
+     * application data — and hands them the draft ids, which is all the
+     * runtime needs to restore a session.
+     *
+     * Read-only because nothing legitimately writes drafts through OData;
+     * the runtime writes them through the draft store. A writable projection
+     * would let a client plant a row whose `data` is deserialized into a
+     * live application object on the next roundtrip.
+     */
+    @readonly
+    @(restrict: [{
+        grant: 'READ',
+        to   : 'authenticated-user',
+        where: 'owner = $user'
+    }])
     entity z2ui5_t_01 as projection on cap2ui5.z2ui5_t_01;
 
     entity NorthwindCustomers as

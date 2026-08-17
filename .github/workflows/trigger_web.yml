@@ -32,7 +32,10 @@ jobs:
         env:
           ACTION_KEY_WEB: ${{ secrets.ACTION_KEY_WEB }}
         run: |
-          if [ -z "$ACTION_KEY_WEB" ]; then
+          # Fail the step on the first error rather than pushing a trigger
+          # commit derived from a half-completed clone.
+          set -euo pipefail
+          if [ -z "${ACTION_KEY_WEB:-}" ]; then
             echo "::warning::secret ACTION_KEY_WEB not set — skipping web trigger"
             exit 0
           fi

@@ -9,6 +9,7 @@ modules:
   requires:
   - name: abap2UI5-destination
   - name: abap2UI5-auth
+  - name: abap2UI5-db
   provides:
   - name: srv-api
     properties:
@@ -19,6 +20,17 @@ modules:
     readiness-health-check-type: http
   build-parameters:
     builder: npm
+# The HDI container deployer. The z2ui5 runtime writes a draft row on EVERY
+# roundtrip (db/schema.cds → cap2ui5.z2ui5_t_01), so without a database bound
+# to the srv module the deployed app fails on the first user interaction —
+# `cds build --production` alone only proves the model compiles.
+- name: abap2UI5-db-deployer
+  type: hdb
+  path: gen/db
+  parameters:
+    buildpack: nodejs_buildpack
+  requires:
+  - name: abap2UI5-db
 - name: abap2UI5-app-deployer
   type: com.sap.application.content
   path: .
@@ -105,6 +117,11 @@ resources:
   parameters:
     service: html5-apps-repo
     service-plan: app-host
+- name: abap2UI5-db
+  type: com.sap.xs.hdi-container
+  parameters:
+    service: hana
+    service-plan: hdi-shared
 - name: abap2UI5-auth
   type: org.cloudfoundry.managed-service
   parameters:

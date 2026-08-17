@@ -9,9 +9,12 @@ name: deploy check
 #   wiring or a broken `cds build --production` is caught on every PR and
 #   push to main instead of at deploy time. (Two harmless Edm.Double key
 #   warnings from the imported Northwind model are expected.)
-# - The build output for the deployable server module (gen/srv) is then
+# - The build outputs both deployed modules declare in mta.yaml — the server
+#   module (gen/srv) and the HDI database artifacts (gen/db) — are then
 #   asserted to exist, guarding against `cds build` exiting 0 without
-#   actually producing the module.
+#   actually producing them. gen/db matters because the z2ui5 runtime writes
+#   a draft row on every roundtrip: a deployment whose database module is
+#   missing compiles fine and then fails on the first user interaction.
 #
 # Why NOT a full `npx mbt build` of the MTA archive:
 #   The whole app under app/z2ui5 (and mta.yaml itself) is a generated
@@ -46,12 +49,18 @@ jobs:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
       - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
-          node-version: 22
+          # the app's own declared runtime
+          node-version-file: .nvmrc
       # one install covers the app AND the vendored core (its deps are part
       # of the app lock, placed under core/node_modules/)
       - run: npm ci
       # the real gate: production CAP build (db + srv), as BTP would run it
       - run: npx cds build --production
-      # guard against cds build exiting 0 without producing the server module
-      - name: verify server module was built
-        run: test -f gen/srv/srv/server.js && test -f gen/srv/package.json
+      # guard against cds build exiting 0 without producing the deployed modules
+      - name: verify deployed modules were built
+        run: |
+          set -euo pipefail
+          test -f gen/srv/srv/server.js
+          test -f gen/srv/package.json
+          # mta.yaml's abap2UI5-db-deployer module deploys this path
+          test -d gen/db/src

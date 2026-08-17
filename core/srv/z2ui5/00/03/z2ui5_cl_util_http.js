@@ -10,9 +10,13 @@
  * response objects are Express-style, and CAP's middleware has already
  * parsed body / cookies before this class touches them.
  *
- * ty_s_http_req shape — same field names as the abap TYPES block:
- *   { method, body, path, t_params: [{n, v}, ...] }
+ * ty_s_http_req shape — the abap TYPES block plus the two identity fields
+ * the JS runtime needs to isolate per-session server state (ABAP gets those
+ * from sy-uname / the session, which have no ambient equivalent here):
+ *   { method, body, path, t_params: [{n, v}, ...], session_id, tenant }
  */
+const z2ui5_identity = require("../../z2ui5_identity");
+
 class z2ui5_cl_util_http {
 
   constructor() {
@@ -37,16 +41,25 @@ class z2ui5_cl_util_http {
   // ---- Request side ----
 
   /**
-   * @returns {{ method:string, body:string, path:string, t_params:Array<{n:string,v:string}>}}
+   * @returns {{ method:string, body:string, path:string,
+   *            t_params:Array<{n:string,v:string}>,
+   *            session_id:(string|null), tenant:string }}
+   *
+   * session_id/tenant come from the identity port, so every adapter that
+   * builds its reqInfo through this class gets per-session isolation without
+   * having to know about the host's auth layer. session_id is null when no
+   * identity provider is installed (single-user adapters).
    */
   get_req_info() {
     const url = this._req_url();
     const t_params = z2ui5_cl_util_http.url_param_get_tab(url);
     return {
-      body:     this.get_cdata(),
-      method:   this.get_method(),
-      path:     this._req_path(),
+      body:       this.get_cdata(),
+      method:     this.get_method(),
+      path:       this._req_path(),
       t_params,
+      session_id: z2ui5_identity.session_key(),
+      tenant:     z2ui5_identity.get_tenant(),
     };
   }
 

@@ -21,16 +21,37 @@ const z2ui5_cl_util_http = require("abap2UI5/z2ui5_cl_util_http");
  *   app discovery          → this project's srv/app/ (custom apps)
  */
 
+// Identity: who the framework is acting for. The core package is platform
+// neutral and has no ambient sy-uname, so CAP's request-scoped user is
+// injected as a provider. It is read PER USE (cds.context is async-local),
+// which is what makes one installed provider correct under concurrency.
+//
+// This drives three things: sy-uname in apps, the draft owner binding below,
+// and the per-session isolation of the engine's sticky handler store.
+engine.set_identity(() => ({
+  user: cds.context?.user?.id,
+  tenant: cds.context?.tenant,
+}));
+
 // Draft persistence: the CDS-backed store. The core package is platform
 // neutral and only knows the injected contract load(id)/save(entry).
+//
+// Every row is stamped with its owner and only ever loaded back for that same
+// owner. The draft id is a UUID, but unguessability is not an access control:
+// ids travel in request bodies, logs and browser history, and the OData
+// projection would otherwise hand them out wholesale. The service projection
+// enforces the same rule (srv/z2ui5-service.cds) — this path does not go
+// through the service, so it has to check for itself.
+const draftOwner = () => cds.context?.user?.id || "anonymous";
+
 engine.set_store({
   load: async (id) => {
     const { z2ui5_t_01 } = cds.entities("cap2ui5");
-    return SELECT.one.from(z2ui5_t_01).where({ id });
+    return SELECT.one.from(z2ui5_t_01).where({ id, owner: draftOwner() });
   },
   save: async (entry) => {
     const { z2ui5_t_01 } = cds.entities("cap2ui5");
-    await INSERT.into(z2ui5_t_01).entries(entry);
+    await INSERT.into(z2ui5_t_01).entries({ ...entry, owner: draftOwner() });
   },
 });
 
@@ -61,9 +82,20 @@ cds.on("bootstrap", (app) => {
   // CDN. The trailing handler answers a plain 404 for files the dist doesn't
   // ship (e.g. locale message bundles UI5 probes for and then falls back on)
   // instead of letting the miss bubble up as a logged error.
+  // engine.ui5_resources_dir() returns null when openui5-dist cannot be
+  // resolved. express.static(null) throws "root path required" — a message
+  // that points at express rather than at the missing dependency, from a
+  // stack deep inside the bootstrap. Say what is actually wrong instead.
+  const ui5Resources = engine.ui5_resources_dir();
+  if (!ui5Resources) {
+    throw new Error(
+      "openui5-dist could not be resolved — the local UI5 runtime served at " +
+      "/resources is missing. Run `npm ci` (or `npm install`) in the app root.",
+    );
+  }
   app.use(
     "/resources",
-    express.static(engine.ui5_resources_dir(), { maxAge: "1h" }),
+    express.static(ui5Resources, { maxAge: "1h" }),
     (_req, res) => res.status(404).end(),
   );
 
@@ -96,7 +128,28 @@ cds.on("bootstrap", (app) => {
     }
   });
 
-  app.head("/rest/root/z2ui5", (_req, res) => {
+  // HEAD serves two clients: the CSRF prefetch, and the beacon the webapp
+  // sends on tab close (`sap-terminate: session`, see webapp/core/Server.js).
+  // The beacon is the only signal that a session is over, so it is where a
+  // sticky app's retained state gets released — otherwise it lingers until
+  // the store evicts it under pressure.
+  app.head("/rest/root/z2ui5", (req, res) => {
+    if (String(req.get("sap-terminate") || "").toLowerCase() === "session") {
+      // This route is registered on the bootstrap express app, i.e. ahead of
+      // the CDS middleware chain — cds.context is not established here, so the
+      // identity provider above cannot answer and the key has to be derived
+      // from whatever the request itself carries. When that is nobody we drop
+      // NOTHING: releasing a key we guessed would evict a stranger's session.
+      const user = req.user?.id || cds.context?.user?.id;
+      const session_id = engine.session_key_for({ user, tenant: cds.context?.tenant });
+      if (session_id) {
+        try {
+          engine.drop_sticky({ session_id });
+        } catch (e) {
+          console.error("sticky release failed:", e);
+        }
+      }
+    }
     res.set("X-CSRF-Token", "disabled");
     res.status(200).end();
   });
