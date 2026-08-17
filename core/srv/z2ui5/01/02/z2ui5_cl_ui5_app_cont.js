@@ -48,6 +48,10 @@ class z2ui5_cl_ui5_app_cont {
     this.mo_app    = null;
     this.ms_draft  = { id: ``, id_prev: ``, id_prev_app: ``, id_prev_app_stack: `` };
     this.mt_attri  = { value: [] };
+    // Session-constant request data (device, UI5 build, page location). It
+    // lives on the wrapper, and therefore in the draft, so a roundtrip that
+    // does not carry it can be answered from what the session already knew.
+    this.ms_session = require(`./z2ui5_if_ui5_types`).new_session();
   }
 
   // ============================================================

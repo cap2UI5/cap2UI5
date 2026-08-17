@@ -21,6 +21,17 @@ const z2ui5_if_ui5_types = Object.freeze({
   /** Sentinel event the framework intercepts to call nav_app_leave on the client. */
   cs_event_nav_app_leave: "___ZZZ_NAL",
 
+  /** The generic view-slot call (ABAP cs_slot_action): the single frontend
+   *  entry point for showing, tearing down or refreshing a slot. Closing a
+   *  popup is the same teardown the framework queues for popup_destroy( ),
+   *  so both go through here rather than through a second handler. */
+  cs_slot_action: Object.freeze({
+    target:       "VIEW_SLOTS",
+    display:      "display",
+    destroy:      "destroy",
+    update_model: "updateModel",
+  }),
+
   /** Discriminator stored on aBind entries; read by srv_model when assembling MODEL/XX. */
   cs_bind_type: Object.freeze({
     one_way: "ONE_WAY",
@@ -117,6 +128,33 @@ const z2ui5_if_ui5_types = Object.freeze({
         s_ui5: { version: ``, build_timestamp: ``, gav: ``, theme: `` },
       },
       s_control: { check_launchpad: false, app_start: ``, app_start_draft: `` },
+    };
+  },
+
+  /**
+   * ABAP ty_s_session — the parts of a request that are constant for a whole
+   * browser session (device, UI5 build, page location) and therefore stored
+   * with the app's draft instead of being re-sent on every roundtrip. The
+   * frontend only sends them when they change, so an absent field means
+   * "unchanged", never "cleared" (see z2ui5_cl_ui5_handler.session_merge).
+   */
+  new_session() {
+    return {
+      s_ui5:    { version: ``, build_timestamp: ``, gav: ``, theme: `` },
+      s_device: {
+        system: ``, orientation: ``,
+        browser: { name: ``, version: `` },
+        os: { name: ``, version: `` },
+        resize: { width: 0, height: 0 },
+        support: { touch: false, pointer: false, retina: false },
+      },
+      comp_data:     ``,
+      origin:        ``,
+      pathname:      ``,
+      search:        ``,
+      // the routing mode last SENT to the frontend for this app — a plain
+      // event roundtrip repeats no mode (see main_end)
+      nav_mode_sent: ``,
     };
   },
 

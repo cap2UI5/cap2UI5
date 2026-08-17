@@ -17,7 +17,7 @@ class z2ui5_cl_smp_app_160 extends z2ui5_if_app {
   }
 
   model_init() {
-    this.mt_output = {};
+    this.mt_output = z2ui5_cl_util.abap_tab_assign(this.mt_output, []);
     for (let sy_index = 1; sy_index <= 10; sy_index++) {
       this.mt_output.push(z2ui5_cl_util.abap_copy({ index: sy_index, set_sk: `Test`, matnr: `1234567`, description: `Test`, pl_01: 0, pl_02: 0, is_total: 0, pl_total: 0, per_cent_total: 0, is_01_prev: 0, per_cent_01: 0, is_02_prev: 0, per_cent_02: 0, is_03_prev: 0, pl_03: 0, per_cent_03: 0, is_q01_prev: 0, pl_q01: 0, per_cent_q01: 0, is_q02_prev: 0, pl_q02: 0, per_cent_q02: 0, is_q03_prev: 0, pl_q03: 0, per_cent_q03: 0, is_q04_prev: 0, pl_q04: 0, per_cent_q04: 0 }));
     }

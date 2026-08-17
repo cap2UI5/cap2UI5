@@ -23,7 +23,7 @@ class z2ui5_cl_smp_app_071 extends z2ui5_if_app {
   }
 
   combo_fill() {
-    this.t_combo = {};
+    this.t_combo = z2ui5_cl_util.abap_tab_assign(this.t_combo, []);
     for (let sy_index = 1; sy_index <= this.combo_number; sy_index++) {
       this.t_combo.push(z2ui5_cl_util.abap_copy({ key: sy_index, text: sy_index }));
     }

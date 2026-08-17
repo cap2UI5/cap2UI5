@@ -36,42 +36,119 @@ class z2ui5_cl_ui5_srv_event {
   }
 
   /**
-   * ABAP METHOD get_event_client — `.eF('VAL', 'arg1', …)`. NavContainer
-   * navigation remaps *_nav_container_to onto the generic CONTROL_BY_ID
-   * client call: `<container>, <SLOT>, to, <target>`.
+   * ABAP METHOD map_client_event — the event/argument rewriting both client
+   * formats share, in one place.
+   *
+   * Several public cs_event constants are conveniences that the frontend does
+   * not implement as their own handlers: they are rewritten here onto the two
+   * generic dispatchers (CONTROL_BY_ID, CONTROL_GLOBAL) so the frontend has
+   * one code path per shape instead of one per constant. The constants
+   * themselves stay unchanged — an app still writes
+   * `_event_client(cs_event.popup_close)`.
+   *
+   * @returns {{val: string, t_arg: string[]}}
    */
-  get_event_client(a) {
-    const { val = ``, view, t_arg = [] } =
-      a !== null && typeof a === `object` && !Array.isArray(a) ? a : { val: a ?? `` };
+  static map_client_event({ val = ``, view, t_arg = [] } = {}) {
     let lv_val = String(val);
     const orig = Array.isArray(t_arg) ? t_arg : t_arg ? [t_arg] : [];
     let lt_arg = [...orig];
 
     const { cs_event, cs_view } = require(`../../02/z2ui5_if_client`);
+    const { cs_slot_action } = require(`./z2ui5_if_ui5_types`);
+
     const lv_slot =
-      lv_val === cs_event.nav_container_to         ? `MAIN`
-      : lv_val === cs_event.nest_nav_container_to    ? `NEST`
-      : lv_val === cs_event.nest2_nav_container_to   ? `NEST2`
-      : lv_val === cs_event.popup_nav_container_to   ? `POPUP`
-      : lv_val === cs_event.popover_nav_container_to ? `POPOVER`
+      lv_val === cs_event.nav_container_to           ? cs_view.main
+      : lv_val === cs_event.nest_nav_container_to    ? cs_view.nested
+      : lv_val === cs_event.nest2_nav_container_to   ? cs_view.nested2
+      : lv_val === cs_event.popup_nav_container_to   ? cs_view.popup
+      : lv_val === cs_event.popover_nav_container_to ? cs_view.popover
       : ``;
+
     if (lv_slot) {
       // NavContainer navigation reuses the generic control_by_id call:
       // <container>, <slot>, to, <target>.
       lt_arg = [orig[0] ?? ``, lv_slot, `to`, orig[1] ?? ``];
       lv_val = cs_event.control_by_id;
+    } else if (lv_val === cs_event.popup_close || lv_val === cs_event.popover_close) {
+      // Closing a popup IS tearing its slot down — the same call the
+      // framework queues for popup_destroy() or an app switch. Formatting it
+      // as the one VIEW_SLOTS call keeps a single teardown path in the
+      // frontend rather than a second handler that does the same thing.
+      lt_arg = [
+        cs_slot_action.target,
+        cs_slot_action.destroy,
+        lv_val === cs_event.popup_close ? cs_view.popup : cs_view.popover,
+      ];
+      lv_val = cs_event.control_global;
     } else if (lv_val === cs_event.control_by_id) {
-      // The view is passed as its own parameter now (DEFAULT cs_view-main),
-      // injected as the slot at position 2 so the frontend reads
-      // args = id, view, method, … . cs_view-main maps to the empty slot
-      // (the unchanged cross-view resolveById default); a concrete view
-      // scopes the id lookup to that slot.
+      // The view is its own parameter (DEFAULT cs_view-main), injected as the
+      // slot at position 2 so the frontend reads args = id, view, method, … .
+      // cs_view-main maps to the empty slot (the unchanged cross-view
+      // resolveById default); a concrete view scopes the lookup to that slot.
       const lv_view = view == null ? cs_view.main : String(view);
-      const lv_view_slot = lv_view === cs_view.main ? `` : lv_view;
-      lt_arg.splice(1, 0, lv_view_slot);
+      lt_arg.splice(1, 0, lv_view === cs_view.main ? `` : lv_view);
+    } else if (lv_val === cs_event.bind_element) {
+      // Element-bind a whole view slot to a table row: args = slot, index,
+      // path. The path comes from client->_bind( table ), which returns it
+      // wrapped in braces ({/MT_TAB}) — invalid as a raw JS argument, so it
+      // is stripped to a plain path that get_t_arg then quotes.
+      const lv_bind_path = String(orig[1] ?? ``).replace(/[{}]/g, ``);
+      lt_arg = [String(view ?? ``), orig[0] ?? ``, lv_bind_path];
     }
 
-    return `.eF('${lv_val}'${this.get_t_arg(lt_arg)}`;
+    return { val: lv_val, t_arg: lt_arg };
+  }
+
+  /**
+   * ABAP METHOD get_event_client — `.eF('VAL', 'arg1', …)`, the form that goes
+   * into view XML (where UI5 itself parses the handler expression).
+   */
+  get_event_client(a) {
+    const args = a !== null && typeof a === `object` && !Array.isArray(a) ? a : { val: a ?? `` };
+    const ev = z2ui5_cl_ui5_srv_event.map_client_event(args);
+    return `.eF('${ev.val}'${this.get_t_arg(ev.t_arg)}`;
+  }
+
+  /**
+   * ABAP METHOD get_event_client_json — the same action serialized as DATA,
+   * a JSON array ["EVENT", arg1, …], instead of an executable .eF() snippet.
+   *
+   * This is the form used for framework follow-up actions, which the frontend
+   * dispatches directly (FrontendAction.runCustom/runSystem). Nothing builds
+   * or parses JS source on this path: the backend owns the whole
+   * serialization, including the escaping.
+   */
+  get_event_client_json(a) {
+    const args = a !== null && typeof a === `object` && !Array.isArray(a) ? a : { val: a ?? `` };
+    const ev = z2ui5_cl_ui5_srv_event.map_client_event(args);
+
+    // Same contract as get_t_arg: an empty argument between filled ones keeps
+    // its position, trailing empties are dropped — the frontend only casts
+    // the arguments it was sent, so a trailing `` would turn open() into
+    // open('').
+    const t_arg = [...ev.t_arg];
+    while (t_arg.length && !String(t_arg[t_arg.length - 1] ?? ``)) t_arg.pop();
+
+    const out = [String(ev.val)];
+    for (const arg of t_arg) {
+      const lv = String(arg ?? ``);
+      // A JSON object/array argument (the STORE_DATA payload, compound filter
+      // groups, …) is embedded as real JSON so the frontend receives a
+      // ready-to-use object — the counterpart of the raw (unquoted) branch in
+      // get_t_arg. Values that only look like JSON ({0} message placeholders,
+      // {/PATH} bindings) fail to parse and stay plain strings.
+      if (lv && (lv[0] === `{` || lv[0] === `[`)) {
+        try {
+          out.push(JSON.parse(lv));
+          continue;
+        } catch {
+          // not JSON after all — fall through and keep it a string
+        }
+      }
+      out.push(lv);
+    }
+
+    return JSON.stringify(out);
   }
 
   /**

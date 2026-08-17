@@ -42,7 +42,7 @@ class z2ui5_cl_smp_app_471 extends z2ui5_if_app {
         this.view_display();
         break;
       case `CLEAR`:
-        this.t_log = {};
+        this.t_log = z2ui5_cl_util.abap_tab_assign(this.t_log, []);
         break;
     }
   }

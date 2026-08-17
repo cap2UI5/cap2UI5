@@ -53,6 +53,20 @@ const cs_event = Object.freeze({
   control_by_id:             `CONTROL_BY_ID`,
   control_global:            `CONTROL_GLOBAL`,
   binding_call:              `BINDING_CALL`,
+  // element-bind a whole view slot to one table row: args = slot, index, path
+  bind_element:              `BIND_ELEMENT`,
+
+  // Upstream constants the port had not carried over. They are part of the
+  // public contract an app writes against, so a missing one is a silently
+  // undefined event name at the call site — the conformance test below the
+  // port now checks the whole set against the upstream interface.
+  set_favicon:               `SET_FAVICON`,
+  keyboard_shortcut:         `KEYBOARD_SHORTCUT`,
+  smart_variant_init:        `SMART_VARIANT_INIT`,
+  filter_bar_variant_init:   `FILTER_BAR_VARIANT_INIT`,
+  set_app_state_active:      `SET_APP_STATE_ACTIVE`,
+  set_push_state:            `SET_PUSH_STATE`,
+  set_nav_routing:           `SET_NAV_ROUTING`,
 });
 
 const cs_view = Object.freeze({

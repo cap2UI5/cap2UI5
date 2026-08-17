@@ -2,6 +2,7 @@
 const z2ui5_cl_srt_complexdescr = require("abap2UI5/z2ui5_cl_srt_complexdescr");
 const z2ui5_cl_srt_typedescr = require("abap2UI5/z2ui5_cl_srt_typedescr");
 const z2ui5_cx_srt = require("abap2UI5/z2ui5_cx_srt");
+const cl_abap_tabledescr = require("abap2UI5/cl_abap_tabledescr");
 
 class z2ui5_cl_srt_tabledescr extends z2ui5_cl_srt_complexdescr {
   key = null;

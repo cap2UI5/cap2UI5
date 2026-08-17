@@ -76,8 +76,8 @@ class z2ui5_cl_smp_app_078 extends z2ui5_if_app {
         sy_tabix++;
         this.mt_token.push(z2ui5_cl_util.abap_copy({ key: ls_token.key, text: ls_token.text, visible: true, editable: true, selkz: false }));
       }
-      this.mt_tokens_removed = {};
-      this.mt_tokens_added = {};
+      this.mt_tokens_removed = z2ui5_cl_util.abap_tab_assign(this.mt_tokens_removed, []);
+      this.mt_tokens_added = z2ui5_cl_util.abap_tab_assign(this.mt_tokens_added, []);
     }
   }
 }

@@ -18,6 +18,15 @@ class z2ui5_cl_ui5f_models_js {
   static get_source() {
     return z2ui5_asset.read(z2ui5_cl_ui5f_models_js.ASSET_PATH);
   }
+
+  /**
+   * ABAP METHOD get — the upstream name for this asset's source.
+   * Transpiled callers address it this way; get_source() is the
+   * hand-port's own older name and stays for existing JS callers.
+   */
+  static get(...args) {
+    return z2ui5_cl_ui5f_models_js.get_source(...args);
+  }
 }
 
 module.exports = z2ui5_cl_ui5f_models_js;

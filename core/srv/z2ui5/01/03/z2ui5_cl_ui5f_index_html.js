@@ -79,6 +79,15 @@ ${csp}
       return { title: `cap2UI5`, theme: `sap_horizon` };
     }
   }
+
+  /**
+   * ABAP METHOD get — the upstream name for this asset's source.
+   * Transpiled callers address it this way; get_source() is the
+   * hand-port's own older name and stays for existing JS callers.
+   */
+  static get(...args) {
+    return z2ui5_cl_ui5f_index_html.get_source(...args);
+  }
 }
 
 module.exports = z2ui5_cl_ui5f_index_html;

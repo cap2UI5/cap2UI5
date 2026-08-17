@@ -1,6 +1,8 @@
 // TODO(abap2js): unresolved reference cl_abap_refdescr — add require manually
 // TODO(abap2js): unresolved reference cl_abap_typedescr — add require manually
 const z2ui5_cl_srt_datadescr = require("abap2UI5/z2ui5_cl_srt_datadescr");
+const cl_abap_refdescr = require("abap2UI5/cl_abap_refdescr");
+const cl_abap_typedescr = require("abap2UI5/cl_abap_typedescr");
 
 class z2ui5_cl_srt_refdescr extends z2ui5_cl_srt_datadescr {
   referenced_type = null;

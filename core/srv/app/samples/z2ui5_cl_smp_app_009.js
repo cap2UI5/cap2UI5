@@ -34,7 +34,7 @@ class z2ui5_cl_smp_app_009 extends z2ui5_if_app {
         this.popup_value_suggestion();
         break;
       case `POPUP_TABLE_VALUE_CUSTOM`:
-        this.t_employees_sel = {};
+        this.t_employees_sel = z2ui5_cl_util.abap_tab_assign(this.t_employees_sel, []);
         this.popup_value_employee();
         break;
       case `SEARCH`:

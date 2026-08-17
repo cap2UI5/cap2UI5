@@ -112,7 +112,7 @@ class z2ui5_cl_smp_app_306 extends z2ui5_if_app {
 
   rebuild_output() {
     let sy_tabix = 0;
-    this.mt_picture_out = {};
+    this.mt_picture_out = z2ui5_cl_util.abap_tab_assign(this.mt_picture_out, []);
     sy_tabix = 0;
     for (const ls_pic of this.mt_picture) {
       sy_tabix++;
