@@ -1,5 +1,6 @@
 const z2ui5_if_app = require("../../02/z2ui5_if_app");
 const z2ui5_cl_util = require("../../00/03/z2ui5_cl_util");
+const z2ui5_cl_ui5_view_builder = require("../../02/z2ui5_cl_ui5_view_builder");
 
 /**
  * 1:1 port of abap2UI5 z2ui5_cl_ui5_app_start.
@@ -121,9 +122,9 @@ class z2ui5_cl_ui5_app_start extends z2ui5_if_app {
 
     if (client.get().CHECK_ON_NAVIGATED) {
       try {
-        const z2ui5_cl_pop_to_select = require("../../99/02/z2ui5_cl_pop_to_select");
+        const z2ui5_cl_ui5_app_select = require("./z2ui5_cl_ui5_app_select");
         const prev = client.get_app_prev();
-        if (prev instanceof z2ui5_cl_pop_to_select) {
+        if (prev instanceof z2ui5_cl_ui5_app_select) {
           const r = prev.result();
           if (r.check_confirmed && r.row) {
             this.ms_home.classname = r.row.KEY || r.row.TEXT || "";
@@ -166,13 +167,13 @@ class z2ui5_cl_ui5_app_start extends z2ui5_if_app {
         this.view_display_start();
         break;
       case E.VALUE_HELP: {
-        const z2ui5_cl_pop_to_select = require("../../99/02/z2ui5_cl_pop_to_select");
+        const z2ui5_cl_ui5_app_select = require("./z2ui5_cl_ui5_app_select");
         const apps = z2ui5_cl_util.rtti_get_classes_impl_intf(z2ui5_if_app);
         if (!apps.length) {
           this.client.message_box_display("No apps found that implement z2ui5_if_app", "error");
           return;
         }
-        this.client.nav_app_call(z2ui5_cl_pop_to_select.factory({ i_tab: apps, i_title: "Select an App" }));
+        this.client.nav_app_call(z2ui5_cl_ui5_app_select.factory({ i_tab: apps, i_title: "Select an App" }));
         break;
       }
       default:
@@ -181,223 +182,247 @@ class z2ui5_cl_ui5_app_start extends z2ui5_if_app {
     }
   }
 
+  /** The namespaces both views need. SimpleForm/content live in
+   *  sap.ui.layout.form and Title in sap.ui.core — an unprefixed element
+   *  would resolve into the default sap.m namespace, where those names do
+   *  not exist, and the view would fail to LOAD rather than to render. */
+  _view_namespaces(root) {
+    return root
+      .a({ n: `xmlns`, v: `sap.m` })
+      .a({ n: `xmlns:core`, v: `sap.ui.core` })
+      .a({ n: `xmlns:form`, v: `sap.ui.layout.form` })
+      .a({ n: `xmlns:z2ui5`, v: `z2ui5.cc` });
+  }
+
+  /** The SimpleForm both views share, returning its content aggregation. */
+  _simple_form(parent) {
+    return parent
+      .ele({ n: `SimpleForm`, ns: `form` })
+      .a({ n: `editable`, b: true })
+      .a({ n: `layout`, v: `ResponsiveGridLayout` })
+      .a({ n: `labelSpanXL`, v: `4` })
+      .a({ n: `labelSpanL`, v: `3` })
+      .a({ n: `labelSpanM`, v: `4` })
+      .a({ n: `labelSpanS`, v: `12` })
+      // adjustLabelSpan is deliberately NOT set: the builder this view was
+      // written against silently dropped it, so the page has always rendered
+      // with UI5's default (true). Emitting the value the old source asked
+      // for would be a layout change smuggled in under a refactor.
+      .a({ n: `emptySpanXL`, v: `0` })
+      .a({ n: `emptySpanL`, v: `4` })
+      .a({ n: `emptySpanM`, v: `0` })
+      .a({ n: `emptySpanS`, v: `0` })
+      .a({ n: `columnsXL`, v: `1` })
+      .a({ n: `columnsL`, v: `1` })
+      .a({ n: `columnsM`, v: `1` })
+      .a({ n: `singleContainerFullSize`, b: false })
+      .ele({ n: `content`, ns: `form` });
+  }
+
+  /** A section heading inside the form — <Toolbar><Title/></Toolbar>. */
+  _section(content, text) {
+    content.ele({ n: `Toolbar` }).tag({ n: `Title` }).a({ n: `text`, v: text });
+  }
+
   view_display_start() {
-    const Z2UI5_CL_XML_VIEW = require("../../02/z2ui5_cl_xml_view");
-    const view = new Z2UI5_CL_XML_VIEW();
     const E = z2ui5_cl_ui5_app_start.CS_EVENT;
     const c = this.client;
 
+    const view = this._view_namespaces(
+      z2ui5_cl_ui5_view_builder.factory()
+        .ele({ n: `View`, ns: `mvc` })
+        .a({ n: `xmlns:mvc`, v: `sap.ui.core.mvc` })
+        // both were emitted by the previous builder — the page is a
+        // full-height app shell, not flow content
+        .a({ n: `displayBlock`, v: `true` })
+        .a({ n: `height`, v: `100%` }),
+    );
+
     const page = view
-      .Shell()
-      .Page({
-        title: "abap2UI5 - Developing UI5 Apps Purely in ABAP",
-        showNavButton: false,
-      });
+      .ele({ n: `Shell` })
+      .ele({ n: `Page` })
+      .a({ n: `title`, v: `abap2UI5 - Developing UI5 Apps Purely in ABAP` })
+      .a({ n: `showNavButton`, b: false });
 
     // --- Header toolbar ---
-    const header = page.headerContent();
-    header.ToolbarSpacer();
-    header.Button({ text: "Developer Tools", icon: "sap-icon://enablement", press: c._event(E.OPEN_DEBUG) });
-    header.Button({ text: "System",          icon: "sap-icon://information", press: c._event(E.OPEN_INFO) });
-    if (z2ui5_cl_util.rtti_check_class_exists("z2ui5_cl_app_icf_config")) {
-      header.Button({ text: "Config", icon: "sap-icon://settings", press: c._event(E.SET_CONFIG) });
+    const header = page.ele({ n: `headerContent` });
+    header.tag({ n: `ToolbarSpacer` });
+    header.tag({ n: `Button` })
+      .a({ n: `text`, v: `Developer Tools` })
+      .a({ n: `icon`, v: `sap-icon://enablement` })
+      .a({ n: `press`, v: c._event(E.OPEN_DEBUG) });
+    header.tag({ n: `Button` })
+      .a({ n: `text`, v: `System` })
+      .a({ n: `icon`, v: `sap-icon://information` })
+      .a({ n: `press`, v: c._event(E.OPEN_INFO) });
+    if (z2ui5_cl_util.rtti_check_class_exists(`z2ui5_cl_app_icf_config`)) {
+      header.tag({ n: `Button` })
+        .a({ n: `text`, v: `Config` })
+        .a({ n: `icon`, v: `sap-icon://settings` })
+        .a({ n: `press`, v: c._event(E.SET_CONFIG) });
     }
 
-    // --- SimpleForm with all sections ---
-    const form = page.SimpleForm({
-      editable: true,
-      layout: "ResponsiveGridLayout",
-      labelSpanXL: "4",
-      labelSpanL: "3",
-      labelSpanM: "4",
-      labelSpanS: "12",
-      adjustLabelSpan: false,
-      emptySpanXL: "0",
-      emptySpanL: "4",
-      emptySpanM: "0",
-      emptySpanS: "0",
-      columnsXL: "1",
-      columnsL: "1",
-      columnsM: "1",
-      singleContainerFullSize: false,
-    });
-    const content = form.content();
+    const content = this._simple_form(page.end());
 
     // ===== Quickstart =====
-    content.cc("Toolbar", { ns: "m" }).Title({ text: "Quickstart" }).get_parent();
-    content
-      .Label({ text: "Step 1" }).Text({ text: "Create a new class in your ABAP system" })
-      .Label({ text: "Step 2" }).Text({ text: "Add the interface: Z2UI5_IF_APP" })
-      .Label({ text: "Step 3" }).Text({ text: "Define the view, implement behavior" })
-      .Label({})
-      .Link({
-        text: "(Example)",
-        target: "_blank",
-        href: "https://github.com/abap2UI5/abap2UI5/blob/main/src/01/04/z2ui5_cl_ui5_app_hi_world.clas.abap",
-      })
-      .Label({ text: "Step 4" });
+    this._section(content, `Quickstart`);
+    const step = (label, text) => {
+      content.tag({ n: `Label` }).a({ n: `text`, v: label });
+      content.tag({ n: `Text` }).a({ n: `text`, v: text });
+    };
+    step(`Step 1`, `Create a new class in your ABAP system`);
+    step(`Step 2`, `Add the interface: Z2UI5_IF_APP`);
+    step(`Step 3`, `Define the view, implement behavior`);
+    content.tag({ n: `Label` });
+    content.tag({ n: `Link` })
+      .a({ n: `text`, v: `(Example)` })
+      .a({ n: `href`, v: `https://github.com/abap2UI5/abap2UI5/blob/main/src/01/04/z2ui5_cl_ui5_app_hi_world.clas.abap` })
+      .a({ n: `target`, v: `_blank` });
+    content.tag({ n: `Label` }).a({ n: `text`, v: `Step 4` });
 
     if (this.ms_home.class_editable) {
-      content.Input({
-        placeholder: "fill in the class name and press 'check'",
-        enabled: c._bind(this.ms_home.class_editable, { name: `ms_home-class_editable` }),
-        value: c._bind_edit(this.ms_home.classname, { name: `ms_home-classname` }),
-        valueState: c._bind(this.ms_home.class_value_state, { name: `ms_home-class_value_state` }),
-        valueStateText: c._bind(this.ms_home.class_value_state_text, { name: `ms_home-class_value_state_text` }),
-        submit: c._event(this.ms_home.btn_event_id),
-        valueHelpRequest: c._event(E.VALUE_HELP),
-        showValueHelp: true,
-        width: "70%",
-      });
+      content.tag({ n: `Input` })
+        .a({ n: `value`, v: c._bind_edit(this.ms_home.classname, { name: `ms_home-classname` }) })
+        .a({ n: `placeholder`, v: `fill in the class name and press 'check'` })
+        .a({ n: `enabled`, v: c._bind(this.ms_home.class_editable, { name: `ms_home-class_editable` }) })
+        .a({ n: `width`, v: `70%` })
+        .a({ n: `submit`, v: c._event(this.ms_home.btn_event_id) })
+        .a({ n: `valueState`, v: c._bind(this.ms_home.class_value_state, { name: `ms_home-class_value_state` }) })
+        .a({ n: `valueStateText`, v: c._bind(this.ms_home.class_value_state_text, { name: `ms_home-class_value_state_text` }) })
+        .a({ n: `showValueHelp`, b: true })
+        .a({ n: `valueHelpRequest`, v: c._event(E.VALUE_HELP) });
     } else {
-      content.Text({ text: this.ms_home.classname });
+      content.tag({ n: `Text` }).a({ n: `text`, v: this.ms_home.classname });
     }
 
-    content.Label({});
-    content.Button({
-      press: c._event(this.ms_home.btn_event_id),
-      text: c._bind(this.ms_home.btn_text, { name: `ms_home-btn_text` }),
-      icon: c._bind(this.ms_home.btn_icon, { name: `ms_home-btn_icon` }),
-      width: "70%",
-    });
+    content.tag({ n: `Label` });
+    content.tag({ n: `Button` })
+      .a({ n: `text`, v: c._bind(this.ms_home.btn_text, { name: `ms_home-btn_text` }) })
+      .a({ n: `press`, v: c._event(this.ms_home.btn_event_id) })
+      .a({ n: `icon`, v: c._bind(this.ms_home.btn_icon, { name: `ms_home-btn_icon` }) })
+      .a({ n: `width`, v: `70%` });
 
-    content.Label({ text: "Step 5" });
-    // UI5 expression binding requires `${...}` (with $-prefix) to dereference a model path.
-    // First `$` is a literal in the template literal, second `${...}` is JS interpolation.
+    content.tag({ n: `Label` }).a({ n: `text`, v: `Step 5` });
+    // UI5 expression binding needs `${...}` to dereference a model path; the
+    // first `$` is literal, the second is JS interpolation.
     const bindEditable = c._bind(this.ms_home.class_editable, { name: `ms_home-class_editable` });
-    content.Link({
-      text: "Link to the Application",
-      target: "_blank",
-      href: c._bind(this.ms_home.url, { name: `ms_home-url` }),
-      enabled: `{= $${bindEditable} === false }`,
-    });
+    content.tag({ n: `Link` })
+      .a({ n: `text`, v: `Link to the Application` })
+      .a({ n: `href`, v: c._bind(this.ms_home.url, { name: `ms_home-url` }) })
+      .a({ n: `target`, v: `_blank` })
+      .a({ n: `enabled`, v: `{= $${bindEditable} === false }` });
 
     // ===== What's next? =====
-    // Mirrors upstream render_whats_next/render_samples: jump into the
-    // getting-started gallery when the samples are installed. The samples
-    // repository renamed its overview app in 2026-08
+    // Jump into the getting-started gallery when the samples are installed.
+    // The samples repository renamed its overview app in 2026-08
     // (z2ui5_cl_demo_app_g00 -> z2ui5_cl_smp_app_000), so the old name stays
     // as a fallback for installations that predate the rename.
-    content.cc("Toolbar", { ns: "m" }).Title({ text: "What's next?" }).get_parent();
-    const samplesClass = ["z2ui5_cl_smp_app_000", "z2ui5_cl_demo_app_g00"].find((c) =>
-      z2ui5_cl_util.rtti_check_class_exists(c)) ?? "";
+    this._section(content, `What's next?`);
+    const samplesClass = [`z2ui5_cl_smp_app_000`, `z2ui5_cl_demo_app_g00`]
+      .find((n) => z2ui5_cl_util.rtti_check_class_exists(n)) ?? ``;
     if (samplesClass) {
       const cfg = c.get().S_CONFIG || {};
       const samplesUrl = z2ui5_cl_util.app_get_url({
         classname: samplesClass,
-        origin:   cfg.ORIGIN || "",
-        pathname: cfg.PATHNAME || "",
-        search:   cfg.SEARCH || "",
-        hash:     cfg.HASH || "",
+        origin:   cfg.ORIGIN || ``,
+        pathname: cfg.PATHNAME || ``,
+        search:   cfg.SEARCH || ``,
+        hash:     cfg.HASH || ``,
       });
-      content.Label({ text: "Start Developing" });
-      content.Button({
-        text: "Explore Code Samples",
-        press: c._event_client(c.cs_event.OPEN_NEW_TAB, [samplesUrl]),
-        width: "70%",
-      });
+      content.tag({ n: `Label` }).a({ n: `text`, v: `Start Developing` });
+      content.tag({ n: `Button` })
+        .a({ n: `text`, v: `Explore Code Samples` })
+        .a({ n: `press`, v: c._event_client(c.cs_event.OPEN_NEW_TAB, [samplesUrl]) })
+        .a({ n: `width`, v: `70%` });
     } else {
-      content.Label({ text: "Install the sample repository" });
-      content.Link({
-        text: "And explore more than 250 sample apps...",
-        target: "_blank",
-        href: "https://github.com/abap2UI5/samples",
-      });
+      content.tag({ n: `Label` }).a({ n: `text`, v: `Install the sample repository` });
+      content.tag({ n: `Link` })
+        .a({ n: `text`, v: `And explore more than 250 sample apps...` })
+        .a({ n: `href`, v: `https://github.com/abap2UI5/samples` })
+        .a({ n: `target`, v: `_blank` });
     }
 
     // ===== Contribution =====
-    content.cc("Toolbar", { ns: "m" }).Title({ text: "Contribution" }).get_parent();
-    content.Label({ text: "Open an issue" });
-    content.Link({
-      text: "You have problems, comments or wishes?",
-      target: "_blank",
-      href: "https://github.com/abap2UI5/abap2UI5/issues",
-    });
-    content.Label({ text: "Open a Pull Request" });
-    content.Link({
-      text: "You added a new feature or fixed a bug?",
-      target: "_blank",
-      href: "https://github.com/abap2UI5/abap2UI5/pulls",
-    });
+    this._section(content, `Contribution`);
+    content.tag({ n: `Label` }).a({ n: `text`, v: `Open an issue` });
+    content.tag({ n: `Link` })
+      .a({ n: `text`, v: `You have problems, comments or wishes?` })
+      .a({ n: `href`, v: `https://github.com/abap2UI5/abap2UI5/issues` })
+      .a({ n: `target`, v: `_blank` });
+    content.tag({ n: `Label` }).a({ n: `text`, v: `Open a Pull Request` });
+    content.tag({ n: `Link` })
+      .a({ n: `text`, v: `You added a new feature or fixed a bug?` })
+      .a({ n: `href`, v: `https://github.com/abap2UI5/abap2UI5/pulls` })
+      .a({ n: `target`, v: `_blank` });
 
     // ===== Documentation =====
-    content.cc("Toolbar", { ns: "m" }).Title({ text: "Documentation" }).get_parent();
-    content.Label({});
-    content.Link({ text: "abap2UI5.org", target: "_blank", href: "https://abap2UI5.org" });
+    this._section(content, `Documentation`);
+    content.tag({ n: `Label` });
+    content.tag({ n: `Link` })
+      .a({ n: `text`, v: `abap2UI5.org` })
+      .a({ n: `href`, v: `https://abap2UI5.org` })
+      .a({ n: `target`, v: `_blank` });
 
     c.view_display(view.stringify());
   }
 
   view_display_popup() {
-    const Z2UI5_CL_XML_VIEW = require("../../02/z2ui5_cl_xml_view");
-    const view = Z2UI5_CL_XML_VIEW.factory_popup();
     const E = z2ui5_cl_ui5_app_start.CS_EVENT;
     const c = this.client;
 
-    const dialog = view.Dialog({
-      title: "abap2UI5 - System Information",
-      afterClose: c._event(E.CLOSE),
-      contentWidth: "30em",
-    });
+    // A popup is a fragment, not a view — the frontend inserts it into an
+    // existing view hierarchy.
+    const view = this._view_namespaces(
+      z2ui5_cl_ui5_view_builder.factory().ele({ n: `FragmentDefinition`, ns: `core` }),
+    );
 
-    const dContent = dialog.content();
+    const dialog = view
+      .ele({ n: `Dialog` })
+      .a({ n: `title`, v: `abap2UI5 - System Information` })
+      .a({ n: `contentWidth`, v: `30em` })
+      .a({ n: `afterClose`, v: c._event(E.CLOSE) });
 
-    // z2ui5.Info custom control populates ui5_version frontend-side via setProperty.
-    // Use _bind (one-way path /mv_ui5_version) on BOTH Info and the Text below — same
-    // path, so when Info's TwoWay-default JSONModel binding writes back, the Text
-    // re-renders. abap2UI5 uses the same pattern. Using _bind_edit here would write
-    // to /XX/mv_ui5_version, leaving the Text's /mv_ui5_version untouched.
-    dContent._z2ui5().info_frontend({ ui5_version: c._bind(this.mv_ui5_version) });
+    const dContent = dialog.ele({ n: `content` });
 
-    const form = dContent.SimpleForm({
-      editable: true,
-      layout: "ResponsiveGridLayout",
-      labelSpanXL: "4",
-      labelSpanL: "3",
-      labelSpanM: "4",
-      labelSpanS: "12",
-      adjustLabelSpan: false,
-      emptySpanXL: "0",
-      emptySpanL: "4",
-      emptySpanM: "0",
-      emptySpanS: "0",
-      columnsXL: "1",
-      columnsL: "1",
-      columnsM: "1",
-      singleContainerFullSize: false,
-    });
-    const fContent = form.content();
+    // The z2ui5.Info custom control fills ui5_version frontend-side via
+    // setProperty. _bind (one-way, path /mv_ui5_version) on BOTH this and the
+    // Text below — same path, so when Info's two-way-default JSONModel
+    // binding writes back, the Text re-renders. _bind_edit would write to
+    // /XX/mv_ui5_version and leave the Text's path untouched.
+    dContent.tag({ n: `Info`, ns: `z2ui5` }).a({ n: `ui5_version`, v: c._bind(this.mv_ui5_version) });
 
-    // Frontend section
-    fContent.cc("Toolbar", { ns: "m" }).Title({ text: "Frontend" }).get_parent();
-    fContent.Label({ text: "UI5 Version" }).Text({ text: c._bind(this.mv_ui5_version) });
-    fContent.Label({ text: "Launchpad active" }).CheckBox({
-      enabled: false,
-      selected: !!c.get().CHECK_LAUNCHPAD_ACTIVE,
-    });
+    const fContent = this._simple_form(dContent);
 
-    // Backend section
-    fContent.cc("Toolbar", { ns: "m" }).Title({ text: "Backend" }).get_parent();
-    fContent.Label({ text: "ABAP for Cloud" }).CheckBox({
-      enabled: false,
-      selected: z2ui5_cl_util.context_check_abap_cloud(),
-    });
-    fContent.Label({ text: "Backend Implementation" }).Text({ text: "CAP Node.js (cap2UI5)" });
+    this._section(fContent, `Frontend`);
+    fContent.tag({ n: `Label` }).a({ n: `text`, v: `UI5 Version` });
+    fContent.tag({ n: `Text` }).a({ n: `text`, v: c._bind(this.mv_ui5_version) });
+    fContent.tag({ n: `Label` }).a({ n: `text`, v: `Launchpad active` });
+    fContent.tag({ n: `CheckBox` })
+      .a({ n: `selected`, b: !!c.get().CHECK_LAUNCHPAD_ACTIVE })
+      .a({ n: `enabled`, b: false });
 
-    // abap2UI5 section
-    fContent.cc("Toolbar", { ns: "m" }).Title({ text: "abap2UI5" }).get_parent();
-    fContent.Label({ text: "Protocol Mirror" }).Text({ text: "wire-format compatible" });
-    fContent.Label({ text: "Source" }).Link({
-      text: "github.com/abap2UI5/abap2UI5",
-      target: "_blank",
-      href: "https://github.com/abap2UI5/abap2UI5",
-    });
+    this._section(fContent, `Backend`);
+    fContent.tag({ n: `Label` }).a({ n: `text`, v: `ABAP for Cloud` });
+    fContent.tag({ n: `CheckBox` })
+      .a({ n: `selected`, b: z2ui5_cl_util.context_check_abap_cloud() })
+      .a({ n: `enabled`, b: false });
+    fContent.tag({ n: `Label` }).a({ n: `text`, v: `Backend Implementation` });
+    fContent.tag({ n: `Text` }).a({ n: `text`, v: `CAP Node.js (cap2UI5)` });
 
-    dialog.endButton().Button({
-      text: "Close",
-      press: c._event(E.CLOSE),
-      type: "Emphasized",
-    });
+    this._section(fContent, `abap2UI5`);
+    fContent.tag({ n: `Label` }).a({ n: `text`, v: `Protocol Mirror` });
+    fContent.tag({ n: `Text` }).a({ n: `text`, v: `wire-format compatible` });
+    fContent.tag({ n: `Label` }).a({ n: `text`, v: `Source` });
+    fContent.tag({ n: `Link` })
+      .a({ n: `text`, v: `github.com/abap2UI5/abap2UI5` })
+      .a({ n: `href`, v: `https://github.com/abap2UI5/abap2UI5` })
+      .a({ n: `target`, v: `_blank` });
+
+    dialog.ele({ n: `endButton` })
+      .tag({ n: `Button` })
+      .a({ n: `text`, v: `Close` })
+      .a({ n: `press`, v: c._event(E.CLOSE) })
+      .a({ n: `type`, v: `Emphasized` });
 
     c.popup_display(view.stringify());
   }

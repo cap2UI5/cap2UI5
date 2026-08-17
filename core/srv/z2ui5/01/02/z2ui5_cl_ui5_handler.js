@@ -278,9 +278,9 @@ class z2ui5_cl_ui5_handler {
       // pop_error popup. The popup is rendered on the next iteration of the
       // nav-loop and the user gets a "OK" button to dismiss + recover.
       const z2ui5_cx_util_error = require("../../00/03/z2ui5_cx_util_error");
-      const z2ui5_cl_pop_error  = require("../../99/02/z2ui5_cl_pop_error");
+      const z2ui5_cl_ui5_app_error = require("../04/z2ui5_cl_ui5_app_error");
       const wrapped = new z2ui5_cx_util_error(`UNCAUGHT EXCEPTION - Please Restart App:`, lx);
-      oClient.nav_app_leave(z2ui5_cl_pop_error.factory({ x_root: wrapped }));
+      oClient.nav_app_leave(z2ui5_cl_ui5_app_error.factory({ x_root: wrapped }));
     }
 
     // Persist client state back onto mo_action so the loop iteration can read it.

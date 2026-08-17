@@ -114,8 +114,8 @@ module.exports = z2ui5_cl_ui5_view_builder;
 const z2ui5_cl_ui5_util_context = require("abap2UI5/z2ui5_cl_ui5_util_context");
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 
-// abap PREFERRED PARAMETER call style — see z2ui5_pop_preferred_param.js
-require("abap2UI5/z2ui5_pop_preferred_param")(z2ui5_cl_ui5_view_builder, {
+// abap PREFERRED PARAMETER call style — see z2ui5_preferred_param.js
+require("abap2UI5/z2ui5_preferred_param")(z2ui5_cl_ui5_view_builder, {
   ele: { preferred: `n`, params: [`n`, `ns`] },
   tag: { preferred: `n`, params: [`n`, `ns`] },
   a: { preferred: `n`, params: [`n`, `v`, `b`] },
