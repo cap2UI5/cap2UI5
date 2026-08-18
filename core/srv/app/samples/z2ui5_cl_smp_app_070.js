@@ -278,11 +278,14 @@ class z2ui5_cl_smp_app_070 extends z2ui5_if_app {
     let sy_subrc = 0;
     let fs_field = null;
     let _fs$fs_field = null;
+    let lt_all;
     let lv_row;
     let lv_index;
     if (!z2ui5_cl_util.abap_is_initial(this.mv_search_value)) {
+      lt_all = z2ui5_cl_util.abap_copy(this.mt_table);
+      this.mt_table = [];
       sy_tabix = 0;
-      for (const lr_row of this.mt_table) {
+      for (const lr_row of lt_all) {
         sy_tabix++;
         lv_row = ``;
         lv_index = 1;
@@ -296,8 +299,8 @@ class z2ui5_cl_smp_app_070 extends z2ui5_if_app {
           lv_row = lv_row + fs_field;
           lv_index = lv_index + 1;
         }
-        if (!String(lv_row).toLowerCase().includes(String(this.mv_search_value).toLowerCase())) {
-          // TODO(abap2js): DELETE mt_table INDEX sy-tabix.
+        if (String(lv_row).toLowerCase().includes(String(this.mv_search_value).toLowerCase())) {
+          this.mt_table.push(z2ui5_cl_util.abap_copy(lr_row));
         }
       }
     }

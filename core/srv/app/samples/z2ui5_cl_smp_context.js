@@ -149,12 +149,26 @@ class z2ui5_cl_smp_context {
     let { filter, val } = _args;
     let sy_tabix = 0;
     let sy_subrc = 0;
+    let fs_rows = null;
+    let _fs$fs_rows = null;
     let fs_field = null;
     let _fs$fs_field = null;
+    let fs_row = null;
+    let _fs$fs_row = null;
     let ref = null;
+    let keep = false;
+    let rows = null;
+    rows = z2ui5_cl_util.abap_initial_like(val);
+    fs_rows = rows;
+    _fs$fs_rows = null;
+    sy_subrc = 0;
+    fs_rows = z2ui5_cl_util.abap_tab_assign(fs_rows, z2ui5_cl_util.abap_copy(val));
+    if (_fs$fs_rows) _fs$fs_rows.o[_fs$fs_rows.k] = fs_rows;
+    val = null;
     sy_tabix = 0;
-    for (const ref of val) {
+    for (const ref of fs_rows) {
       sy_tabix++;
+      keep = true;
       const _sy_tabix_1 = sy_tabix;
       sy_tabix = 0;
       for (const ls_filter of filter) {
@@ -166,11 +180,17 @@ class z2ui5_cl_smp_context {
           continue;
         }
         if (!((($v, $r) => !$r || !$r.length || $r.some(($x) => ($x.option === `BT` ? $v >= $x.low && $v <= $x.high : $x.option === `NE` ? $v !== $x.low : $x.option === `CP` ? String($v).includes(String($x.low).replace(/\*/g, "")) : $v === $x.low)))(fs_field, ls_filter.t_range))) {
-          // TODO(abap2js): DELETE val INDEX sy-tabix.
+          keep = false;
           break;
         }
       }
       sy_tabix = _sy_tabix_1;
+      if ((keep === true || keep === `X`)) {
+        fs_row = ref;
+        _fs$fs_row = null;
+        sy_subrc = 0;
+        val.push(z2ui5_cl_util.abap_copy(fs_row));
+      }
     }
     Object.assign(_args, { val });
   }
@@ -273,19 +293,29 @@ class z2ui5_cl_smp_context {
     let { val, fields = [], ignore_case = false, tab } = _args;
     let sy_tabix = 0;
     let sy_subrc = 0;
+    let fs_rows = null;
+    let _fs$fs_rows = null;
     let fs_field = null;
     let _fs$fs_field = null;
     let lv_check_found;
     let lv_index;
     let lv_name;
     let lv_value;
+    let rows = null;
     if (z2ui5_cl_util.abap_is_initial(val)) {
       Object.assign(_args, { tab });
       return;
     }
     const lv_search = ((ignore_case === true || ignore_case === `X`) ? val.toUpperCase() : val);
+    rows = z2ui5_cl_util.abap_initial_like(tab);
+    fs_rows = rows;
+    _fs$fs_rows = null;
+    sy_subrc = 0;
+    fs_rows = z2ui5_cl_util.abap_tab_assign(fs_rows, z2ui5_cl_util.abap_copy(tab));
+    if (_fs$fs_rows) _fs$fs_rows.o[_fs$fs_rows.k] = fs_rows;
+    tab = null;
     sy_tabix = 0;
-    for (const fs_row of tab) {
+    for (const fs_row of fs_rows) {
       sy_tabix++;
       lv_check_found = false;
       lv_index = 1;
@@ -323,8 +353,8 @@ class z2ui5_cl_smp_context {
         }
         lv_index = lv_index + 1;
       }
-      if (!(lv_check_found === true || lv_check_found === `X`)) {
-        // TODO(abap2js): DELETE tab INDEX sy-tabix.
+      if ((lv_check_found === true || lv_check_found === `X`)) {
+        tab.push(z2ui5_cl_util.abap_copy(fs_row));
       }
     }
     Object.assign(_args, { tab });

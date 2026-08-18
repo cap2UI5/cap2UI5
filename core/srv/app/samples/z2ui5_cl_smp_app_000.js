@@ -3,7 +3,7 @@ const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 class z2ui5_cl_smp_app_000 extends z2ui5_if_app {
   static cs_color = { active: `#0064D9`, inactive: `Neutral` };
   static cs_event = { search: `SEARCH`, nav: `NAV_APP`, install: `INSTALL` };
-  static cs_class = { samples: `z2ui5_cl_smp_app_000`, controls: `z2ui5_cl_smpc_app_overview`, controls_old: `z2ui5_cl_dmo_app_overview`, stack: `z2ui5_cl_smps_app_00`, stack_old: `z2ui5_cl_smpe_app_00` };
+  static cs_class = { samples: `z2ui5_cl_smp_app_000`, controls: `z2ui5_cl_smpc_app_000`, controls_old: `z2ui5_cl_smpc_app_overview`, stack: `z2ui5_cl_smps_app_000`, stack_old: `z2ui5_cl_smps_app_00` };
   static cs_url = { docs: `https://abap2UI5.org`, samples: `https://github.com/abap2UI5/samples`, controls: `https://github.com/abap2UI5/samples-controls`, stack: `https://github.com/abap2UI5/samples-stack` };
 
   search = ``;
