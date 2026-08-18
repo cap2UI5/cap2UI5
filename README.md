@@ -16,6 +16,8 @@ Bringing the [abap2UI5](https://github.com/abap2UI5/abap2UI5) concept to CAP/Nod
 > [builder-cap2UI5](https://github.com/cap2UI5/builder-cap2UI5) for how the
 > pipeline works. Review and test before relying on it.
 
+📖 **Documentation:** [cap2UI5/docs](https://github.com/cap2UI5/docs)
+
 #### Features
 * XML View Generation - Create UI5 views programmatically in your backend
 * Data Binding & Exchange - Seamless two-way data binding between frontend and backend
@@ -141,7 +143,8 @@ npm test
 runs the jest suite: [`test/starter.test.js`](test/starter.test.js) boots the
 real server via `cds.test()` and asserts all three layers end-to-end
 (starter page + bootstrap HTML, roundtrip returning view XML, draft row
-persisted per roundtrip), and [`test/z2ui5_cl_xml_view.test.js`](test/z2ui5_cl_xml_view.test.js)
+persisted per roundtrip), and
+[`test/view-builder-namespaces.test.js`](test/view-builder-namespaces.test.js)
 covers the view builder.
 
 ## Security model
@@ -202,7 +205,7 @@ bundled samples and the framework classes live in the vendored core package
 ###### App
 ```js
 // z2ui5_cl_ui5_app_hi_world.js — ships with the core package
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_cl_ui5_view_builder = require("abap2UI5/z2ui5_cl_ui5_view_builder");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_ui5_app_hi_world extends z2ui5_if_app {
@@ -210,15 +213,36 @@ class z2ui5_cl_ui5_app_hi_world extends z2ui5_if_app {
 
   async main(client) {
     if (client.check_on_init()) {
-      const view = z2ui5_cl_xml_view.factory()
-        .shell()
-        .page(`abap2UI5 - Hello World`)
-        .simple_form({ editable: true })
-        .content(`form`)
-        .title({ ns: `core`, text: `Enter a value and send it to the server...` })
-        .label(`Name`)
-        .input(client._bind_edit(this.name))
-        .button({ text: `Send`, press: client._event(`BUTTON_POST`) });
+      const view = z2ui5_cl_ui5_view_builder.factory()
+        .ele({ n: `View`, ns: `mvc` })
+        .a({ n: `xmlns`, v: `sap.m` })
+        .a({ n: `xmlns:mvc`, v: `sap.ui.core.mvc` })
+        .a({ n: `xmlns:core`, v: `sap.ui.core` })
+        // SimpleForm and its content aggregation live in sap.ui.layout.form,
+        // not in the default sap.m namespace — an unprefixed <SimpleForm>
+        // resolves to sap.m.SimpleForm, which does not exist, and the view
+        // fails to LOAD rather than to render.
+        .a({ n: `xmlns:form`, v: `sap.ui.layout.form` });
+
+      const form = view
+        .ele({ n: `Shell` })
+        .ele({ n: `Page` })
+        .a({ n: `title`, v: `abap2UI5 - Hello World` })
+        .ele({ n: `SimpleForm`, ns: `form` })
+        .a({ n: `editable`, b: true })
+        .ele({ n: `content`, ns: `form` });
+
+      form
+        .tag({ n: `Title`, ns: `core` })
+        .a({ n: `text`, v: `Enter a value and send it to the server...` })
+        .tag({ n: `Label` })
+        .a({ n: `text`, v: `Name` })
+        .tag({ n: `Input` })
+        .a({ n: `value`, v: client._bind_edit(this.name) })
+        .tag({ n: `Button` })
+        .a({ n: `text`, v: `Send` })
+        .a({ n: `press`, v: client._event(`BUTTON_POST`) });
+
       client.view_display(view.stringify());
     } else if (client.check_on_event(`BUTTON_POST`)) {
       client.message_box_display(`Your name is ${this.name}`);
@@ -228,6 +252,12 @@ class z2ui5_cl_ui5_app_hi_world extends z2ui5_if_app {
 
 module.exports = z2ui5_cl_ui5_app_hi_world;
 ```
+
+The view builder writes raw XML: `ele()` opens an element and descends into
+it, `tag()` adds a leaf and stays put, `a()` sets an attribute on whatever
+was last opened, and `end()` climbs back to the parent. Nothing is mapped
+for you — every element names its namespace and every attribute is spelled
+exactly as UI5 expects it (`showIcon`, not `showicon`).
 ###### Demo
 <img width="500" height="393" alt="image" src="https://github.com/user-attachments/assets/3acd8c43-3733-40b0-a6f9-27ae6beba6e7" />
 
@@ -247,11 +277,21 @@ module.exports = z2ui5_cl_ui5_app_hi_world;
 ```js
 // srv/app/z2ui5_cl_app_read_odata.js — ships with the project
 const cds = require("@sap/cds");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_cl_ui5_view_builder = require("abap2UI5/z2ui5_cl_ui5_view_builder");
 const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 
 class z2ui5_cl_app_read_odata extends z2ui5_if_app {
   customers = [];
+
+  // Table, Column, ColumnListItem, Text and Input all live in sap.m, so they
+  // ride the default namespace declared on the root.
+  _view() {
+    return z2ui5_cl_ui5_view_builder
+      .factory()
+      .ele({ n: `View`, ns: `mvc` })
+      .a({ n: `xmlns`, v: `sap.m` })
+      .a({ n: `xmlns:mvc`, v: `sap.ui.core.mvc` });
+  }
 
   async main(client) {
     if (client.check_on_init()) {
@@ -263,32 +303,44 @@ class z2ui5_cl_app_read_odata extends z2ui5_if_app {
           SELECT.from(`Customers`).columns(`CompanyName`, `ContactName`).limit(20)
         );
       } catch (e) {
-        const view = z2ui5_cl_xml_view.factory();
-        view.shell()
-          .page(`abap2UI5 - Table with Data Fetched via Remote OData`)
-          .message_strip({
-            text: `Remote Northwind service not reachable: ${e.message}`,
-            type: `Error`,
-            showicon: true,
-            class: `sapUiSmallMargin`,
-          });
+        const view = this._view();
+        view
+          .ele({ n: `Shell` })
+          .ele({ n: `Page` })
+          .a({ n: `title`, v: `abap2UI5 - Table with Data Fetched via Remote OData` })
+          .tag({ n: `MessageStrip` })
+          .a({ n: `text`, v: `Remote Northwind service not reachable: ${e.message}` })
+          .a({ n: `type`, v: `Error` })
+          .a({ n: `showIcon`, b: true })
+          .a({ n: `class`, v: `sapUiSmallMargin` });
         client.view_display(view.stringify());
         client.message_box_display(`Remote Northwind service not reachable: ${e.message}`, `error`);
         return;
       }
 
-      const view = z2ui5_cl_xml_view.factory();
-      const tab = view.shell()
-        .page(`abap2UI5 - Table with Data Fetched via Remote OData`)
-        .table({ items: client._bind_edit(this.customers) });
-      tab.columns()
-        .column().text(`CompanyName`).get_parent()
-        .column().text(`ContactName`);
-      tab.items()
-        .column_list_item()
-        .cells()
-        .input({ value: `{COMPANYNAME}`, enabled: true })
-        .input({ value: `{CONTACTNAME}`, enabled: true });
+      const view = this._view();
+      const tab = view
+        .ele({ n: `Shell` })
+        .ele({ n: `Page` })
+        .a({ n: `title`, v: `abap2UI5 - Table with Data Fetched via Remote OData` })
+        .ele({ n: `Table` })
+        .a({ n: `items`, v: client._bind_edit(this.customers) });
+
+      const columns = tab.ele({ n: `columns` });
+      columns.ele({ n: `Column` }).tag({ n: `Text` }).a({ n: `text`, v: `CompanyName` });
+      columns.ele({ n: `Column` }).tag({ n: `Text` }).a({ n: `text`, v: `ContactName` });
+
+      tab
+        .ele({ n: `items` })
+        .ele({ n: `ColumnListItem` })
+        .ele({ n: `cells` })
+        .tag({ n: `Input` })
+        .a({ n: `value`, v: `{COMPANYNAME}` })
+        .a({ n: `enabled`, b: true })
+        .tag({ n: `Input` })
+        .a({ n: `value`, v: `{CONTACTNAME}` })
+        .a({ n: `enabled`, b: true });
+
       client.view_display(view.stringify());
     }
   }

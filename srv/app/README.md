@@ -22,15 +22,25 @@ exports (the RTTI lookup is name-based):
 
 ```js
 // srv/app/z2ui5_cl_app_my_app.js
-const z2ui5_if_app      = require("abap2UI5/z2ui5_if_app");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
+const z2ui5_cl_ui5_view_builder = require("abap2UI5/z2ui5_cl_ui5_view_builder");
 
 class z2ui5_cl_app_my_app extends z2ui5_if_app {
   async main(client) {
     if (client.check_on_init()) {
-      const view = z2ui5_cl_xml_view.factory()
-        .Page({ title: "My App" })
-        .Button({ text: "Hello" });
+      const view = z2ui5_cl_ui5_view_builder
+        .factory()
+        .ele({ n: `View`, ns: `mvc` })
+        .a({ n: `xmlns`, v: `sap.m` })
+        .a({ n: `xmlns:mvc`, v: `sap.ui.core.mvc` });
+
+      view
+        .ele({ n: `Shell` })
+        .ele({ n: `Page` })
+        .a({ n: `title`, v: `My App` })
+        .tag({ n: `Button` })
+        .a({ n: `text`, v: `Hello` });
+
       client.view_display(view.stringify());
     }
   }
