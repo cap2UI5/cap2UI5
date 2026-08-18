@@ -1053,14 +1053,16 @@ class z2ui5_cl_ui5f_inspect_js {
 ` + `      "",` + `
 ` + `      "  Without one named, they reopen where you left off.",` + `
 ` + `      "",` + `
-` + `      "The five tabs, and what each is for",` + `
-` + `      "-----------------------------------",` + `
+` + `      "The six tabs, and what each is for",` + `
+` + `      "----------------------------------",` + `
 ` + `      "  Overview      which app, which roundtrip, is anything broken - and",` + `
 ` + `      "                where to go next. The landing tab",` + `
 ` + `      "  Problems      what went wrong",` + `
 ` + `      "  Roundtrips    what went over the wire",` + `
 ` + `      "  View & Data   what the screen is made of, and what fills it",` + `
 ` + `      "  System        what the app is running on, and its ABAP class",` + `
+` + `      "  Search        one term across EVERY other tab at once - answers",` + `
+` + `      "                'where does /CUSTOMER appear?' without opening each",` + `
 ` + `      "",` + `
 ` + `      "Problems",` + `
 ` + `      "--------",` + `
@@ -1118,8 +1120,6 @@ class z2ui5_cl_ui5f_inspect_js {
 ` + `      "",` + `
 ` + `      "Always available",` + `
 ` + `      "----------------",` + `
-` + `      "  Search field     one term across EVERY tab at once - answers 'where",` + `
-` + `      "                   does /CUSTOMER appear?' without opening each one",` + `
 ` + `      "  Copy             put the current view's content on the clipboard",` + `
 ` + `      "  Report a Bug     see below",` + `
 ` + `      "  (i)              this help",` + `

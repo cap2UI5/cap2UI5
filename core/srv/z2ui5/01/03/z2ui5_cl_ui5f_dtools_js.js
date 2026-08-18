@@ -10,13 +10,14 @@ class z2ui5_cl_ui5f_dtools_js {
 ` + `// devtools/AbapSource.js, and the lifecycle (Ctrl+F12, auto open,` + `
 ` + `// teardown) in devtools/DevTools.js.` + `
 ` + `//` + `
-` + `// The structure this renders is five groups, not twenty-two flat tabs:` + `
+` + `// The structure this renders is six groups, not twenty-two flat tabs:` + `
 ` + `//` + `
 ` + `//   Overview     which app, which roundtrip, is anything broken` + `
 ` + `//   Problems     Error / Log` + `
 ` + `//   Roundtrips   History / Request / Response / Actions / the two diffs` + `
 ` + `//   View & Data  slot x aspect, plus the picked control` + `
 ` + `//   System       Environment / Registry / ABAP Source` + `
+` + `//   Search       one term across every other tab at once` + `
 ` + `//` + `
 ` + `// The tab KEYS underneath are unchanged, because they are a` + `
 ` + `// compatibility surface: "?z2ui5-devtools=HISTORY" and the remembered` + `
@@ -137,9 +138,6 @@ class z2ui5_cl_ui5f_dtools_js {
 ` + `` + `
 ` + `        data.selectedTab = key;` + `
 ` + `        data.selectedGroup = tab.group;` + `
-` + `        // Leaving the search result behind is what picking any view` + `
-` + `        // means - the result is not a place you can navigate within.` + `
-` + `        data.searchResult = false;` + `
 ` + `        writeLastTab(key);` + `
 ` + `` + `
 ` + `        // The two selectors of View & Data. The slot list is rebuilt on` + `
@@ -181,6 +179,7 @@ class z2ui5_cl_ui5f_dtools_js {
 ` + `        data.isOverview = tab.group === "OVERVIEW";` + `
 ` + `        data.isRoundtrips = tab.group === "ROUNDTRIPS";` + `
 ` + `        data.isViewData = tab.group === "VIEWDATA";` + `
+` + `        data.isSearch = tab.group === "SEARCH";` + `
 ` + `        data.isErrorView = key === "ERROR";` + `
 ` + `        data.isSourceView = key === "SOURCE";` + `
 ` + `        data.hasRetry =` + `
@@ -191,6 +190,19 @@ class z2ui5_cl_ui5f_dtools_js {
 ` + `        // Refreshed per selection, not only on open: a timer or a late` + `
 ` + `        // rejection can log while the dialog stands open.` + `
 ` + `        data.problemCount = this.problemCount();` + `
+` + `` + `
+` + `        if (tab.kind === "search") {` + `
+` + `          // The result is rendered from the term in the dialog model; a` + `
+` + `          // fresh open shows the "(enter a search term)" prompt.` + `
+` + `          this.displayEditor(oModel, Tabs.search(data.searchTerm), "text");` + `
+` + `          // Set after displayEditor, which derives the templating toggle` + `
+` + `          // from the content - a hit inside a templated view XML carries` + `
+` + `          // the "xmlns:template" that would otherwise offer the toggle` + `
+` + `          // over a list of search hits.` + `
+` + `          data.isTemplating = false;` + `
+` + `          oModel.refresh();` + `
+` + `          return;` + `
+` + `        }` + `
 ` + `` + `
 ` + `        if (tab.kind === "source") {` + `
 ` + `          // The editor-only controls have to be cleared here as well -` + `
@@ -242,20 +254,13 @@ class z2ui5_cl_ui5f_dtools_js {
 ` + `      // Search` + `
 ` + `      // ----------------------------------------------------------------` + `
 ` + `` + `
+` + `      // Enter / the magnifier of the Search tab's field: keep the term` + `
+` + `      // in the model and re-render the tab with the result.` + `
 ` + `      onSearch(oEvent) {` + `
 ` + `        const oSource = oEvent.getSource();` + `
 ` + `        const oModel = oSource.getModel();` + `
-` + `        const data = oModel.getData();` + `
-` + `        data.searchTerm = oSource.getValue();` + `
-` + `        this.displayEditor(oModel, Tabs.search(data.searchTerm), "text");` + `
-` + `        // Set after displayEditor, which derives the per-view flags from` + `
-` + `        // the content - and a hit inside a templated view XML carries the` + `
-` + `        // "xmlns:template" that would otherwise offer a templating toggle` + `
-` + `        // over a list of search hits.` + `
-` + `        data.searchResult = true;` + `
-` + `        data.canApply = false;` + `
-` + `        data.isTemplating = false;` + `
-` + `        oModel.refresh();` + `
+` + `        oModel.getData().searchTerm = oSource.getValue();` + `
+` + `        this.renderTab("SEARCH", oModel);` + `
 ` + `      },` + `
 ` + `` + `
 ` + `      // ----------------------------------------------------------------` + `
@@ -397,13 +402,13 @@ class z2ui5_cl_ui5f_dtools_js {
 ` + `        Recorder.setRecordingPayloads(oSource.getPressed());` + `
 ` + `        const oModel = oSource.getModel();` + `
 ` + `        this.renderTab(oModel.getData().selectedTab, oModel);` + `
-` + `      },` + `
+`;
+    result = result + `      },` + `
 ` + `` + `
 ` + `      // Pop the tools open on the Log as soon as anything logs at error` + `
 ` + `      // level. Off by default - a modal dialog jumping up is the last` + `
 ` + `      // thing a productive user needs - but in a test system it is the` + `
-`;
-    result = result + `      // difference between noticing a broken roundtrip and not. The` + `
+` + `      // difference between noticing a broken roundtrip and not. The` + `
 ` + `      // setting lives in devtools/Console.js, which is where the errors` + `
 ` + `      // are and which both this dialog and the lifecycle facade can reach` + `
 ` + `      // without importing each other.` + `
@@ -552,7 +557,6 @@ class z2ui5_cl_ui5f_dtools_js {
 ` + `            selectedTab: DEFAULT_TAB,` + `
 ` + `            selectedSlot: "MAIN",` + `
 ` + `            searchTerm: "",` + `
-` + `            searchResult: false,` + `
 ` + `            slots: [],` + `
 ` + `            views: [],` + `
 ` + `            showSlotBar: false,` + `
@@ -560,6 +564,7 @@ class z2ui5_cl_ui5f_dtools_js {
 ` + `            isOverview: true,` + `
 ` + `            isRoundtrips: false,` + `
 ` + `            isViewData: false,` + `
+` + `            isSearch: false,` + `
 ` + `            isErrorView: false,` + `
 ` + `            isSourceView: false,` + `
 ` + `            hasRetry: false,` + `
