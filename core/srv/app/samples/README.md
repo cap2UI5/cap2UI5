@@ -19,17 +19,27 @@ Demo apps mirroring the [abap2UI5-samples](https://github.com/abap2UI5/abap2UI5-
 Each sample is a single self-contained `.js` file that:
 
 ```js
-const z2ui5_if_app      = require("abap2UI5/z2ui5_if_app");
-const z2ui5_cl_xml_view = require("abap2UI5/z2ui5_cl_xml_view");
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
+const z2ui5_cl_ui5_view_builder = require("abap2UI5/z2ui5_cl_ui5_view_builder");
 
 class z2ui5_cl_demo_app_NNN extends z2ui5_if_app {
   client = null;
   async main(client) {
     this.client = client;
     if (client.check_on_init()) {
-      const view = z2ui5_cl_xml_view.factory()
-        .Page({ title: "..." })
-        .Button({ text: "Hello" });
+      const view = z2ui5_cl_ui5_view_builder
+        .factory()
+        .ele({ n: `View`, ns: `mvc` })
+        .a({ n: `xmlns`, v: `sap.m` })
+        .a({ n: `xmlns:mvc`, v: `sap.ui.core.mvc` });
+
+      view
+        .ele({ n: `Shell` })
+        .ele({ n: `Page` })
+        .a({ n: `title`, v: `...` })
+        .tag({ n: `Button` })
+        .a({ n: `text`, v: `Hello` });
+
       client.view_display(view.stringify());
     }
   }

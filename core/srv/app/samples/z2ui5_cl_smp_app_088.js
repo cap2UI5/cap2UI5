@@ -32,7 +32,7 @@ class z2ui5_cl_smp_app_088 extends z2ui5_if_app {
       .a({ n: `xmlns:core`, v: `sap.ui.core` })
       .ele(`Shell`)
       .ele(`Page`)
-      .a({ n: `title`, v: `abap2UI5 - Control - Switch NavContainer Page by ID` })
+      .a({ n: `title`, v: `abap2UI5 - Control Behaviour - Switch NavContainer Page by ID` })
       .a({ n: `showNavButton`, b: this.client.check_app_prev_stack() })
       .a({ n: `navButtonPress`, v: this.client._event_nav_app_leave() })
       .ele(`content`);

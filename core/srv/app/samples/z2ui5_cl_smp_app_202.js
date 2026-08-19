@@ -11,7 +11,7 @@ class z2ui5_cl_smp_app_202 extends z2ui5_if_app {
       .a({ n: `xmlns:core`, v: `sap.ui.core` });
     lr_view = lr_view.ele(`Shell`)
       .ele(`Page`)
-      .a({ n: `title`, v: `abap2UI5 - Control - Wizard with Steps` })
+      .a({ n: `title`, v: `abap2UI5 - Control Behaviour - Wizard with Steps` })
       .a({ n: `showNavButton`, b: client.check_app_prev_stack() })
       .a({ n: `navButtonPress`, v: client._event_nav_app_leave() })
       .a({ n: `id`, v: `page_main` });
