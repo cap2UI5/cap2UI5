@@ -602,15 +602,15 @@ class z2ui5_cl_ui5_srv_model {
    * plain JS objects route through the static wire path.
    */
   main_json_to_attri(a, b) {
-    let view;
+    let _view;   // accepted for backwards compatibility, deliberately unused
     let model;
     if (b !== undefined) {
       // legacy positional (view, model)
-      view = a;
+      _view = a;
       model = b;
     } else if (a !== null && typeof a === `object` && (`model` in a || `view` in a)) {
       // named form { model } / { view, model }
-      ({ view, model } = a);
+      ({ view: _view, model } = a);
     } else {
       // Upstream dropped the view parameter (it left ty_s_attri): the model
       // is now passed as the single positional argument.

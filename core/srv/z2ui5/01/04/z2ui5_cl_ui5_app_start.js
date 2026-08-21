@@ -85,7 +85,6 @@ class z2ui5_cl_ui5_app_start extends z2ui5_if_app {
       const Cls = z2ui5_cl_util.rtti_get_class(className);
       if (!Cls) throw new Error(`Class '${this.ms_home.classname}' not found`);
       // attempt instantiation — if the class is a valid z2ui5_if_app subclass it succeeds
-      // eslint-disable-next-line no-new
       new Cls();
 
       this.client.message_toast_display("App is ready to start!");

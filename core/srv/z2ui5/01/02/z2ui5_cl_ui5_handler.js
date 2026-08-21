@@ -58,12 +58,10 @@ class z2ui5_cl_ui5_handler {
     }
 
     await this.main_begin_js();
-    /* eslint-disable no-await-in-loop */
     while (true) {
       const done = await this.main_process_js();
       if (done) break;
     }
-    /* eslint-enable no-await-in-loop */
 
     return this.mv_response;
   }
