@@ -25,7 +25,11 @@ class z2ui5_cl_smp_app_160 extends z2ui5_if_app {
 
   on_event() {
     if (this.client.check_on_event(`PL_TOTAL_CHANGE`)) {
-      this.client.message_box_display(`Id of Input via source object: ` + this.client.get_event_arg() + z2ui5_cl_smp_context.cv_char_util_newline + `Id of Input via event.oSource.sId: ` + this.client.get_event_arg(2) + z2ui5_cl_smp_context.cv_char_util_newline + `Value of same row, index: ` + this.client.get_event_arg(3) + z2ui5_cl_smp_context.cv_char_util_newline + `Id of parent (row) via event.oSource.oParent.sId: ` + this.client.get_event_arg(4) + z2ui5_cl_smp_context.cv_char_util_newline + `Attribute of parameters.value: ` + this.client.get_event_arg(5));
+      this.client.message_box_display(`Id of Input via source object: ` + this.client.get_event_arg() + `
+` + `Id of Input via event.oSource.sId: ` + this.client.get_event_arg(2) + `
+` + `Value of same row, index: ` + this.client.get_event_arg(3) + `
+` + `Id of parent (row) via event.oSource.oParent.sId: ` + this.client.get_event_arg(4) + `
+` + `Attribute of parameters.value: ` + this.client.get_event_arg(5));
     }
   }
 
@@ -104,7 +108,6 @@ class z2ui5_cl_smp_app_160 extends z2ui5_if_app {
 
 module.exports = z2ui5_cl_smp_app_160;
 
-const z2ui5_cl_smp_context = require("./z2ui5_cl_smp_context");
 const z2ui5_cl_ui5_view_builder = require("abap2UI5/z2ui5_cl_ui5_view_builder");
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 

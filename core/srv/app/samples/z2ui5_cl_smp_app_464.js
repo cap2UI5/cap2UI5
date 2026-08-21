@@ -5,9 +5,7 @@ class z2ui5_cl_smp_app_464 extends z2ui5_if_app {
 
   async main(client) {
     this.client = client;
-    if (client.check_on_init()) {
-      this.view_display();
-    } else if (client.check_on_navigated()) {
+    if (client.check_on_init() || client.check_on_navigated()) {
       this.view_display();
     } else {
       this.on_event();
@@ -19,12 +17,8 @@ class z2ui5_cl_smp_app_464 extends z2ui5_if_app {
     let lv_result;
     switch (this.client.get_event()) {
       case `RAISE_EXCEPTION`:
-        throw new z2ui5_cx_smp_error({ val: `Intentional error to demonstrate the error popup` });
-        break;
-      case `DIVIDE_BY_ZERO`:
         lv_zero = 0;
         lv_result = z2ui5_cl_util.abap_div(1, lv_zero);
-        this.client.message_box_display(`${lv_result}`);
         break;
       case `ASSERT`:
         if (!(1 === 0)) throw new Error(`ASSERT failed`);
@@ -58,13 +52,8 @@ class z2ui5_cl_smp_app_464 extends z2ui5_if_app {
       .a({ n: `icon`, v: `sap-icon://error` })
       .a({ n: `type`, v: `Reject` })
       .tag(`Button`)
-      .a({ n: `press`, v: this.client._event(`DIVIDE_BY_ZERO`) })
-      .a({ n: `text`, v: `Trigger a runtime dump (divide by zero)` })
-      .a({ n: `icon`, v: `sap-icon://alert` })
-      .a({ n: `class`, v: `sapUiTinyMarginTop` })
-      .tag(`Button`)
       .a({ n: `press`, v: this.client._event(`ASSERT`) })
-      .a({ n: `text`, v: `Trigger an Assert` })
+      .a({ n: `text`, v: `Trigger an Assert Error / Dump` })
       .a({ n: `icon`, v: `sap-icon://alert` })
       .a({ n: `class`, v: `sapUiTinyMarginTop` });
     this.client.view_display(view.stringify());
@@ -75,5 +64,4 @@ module.exports = z2ui5_cl_smp_app_464;
 
 const z2ui5_cl_ui5_view_builder = require("abap2UI5/z2ui5_cl_ui5_view_builder");
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_cx_smp_error = require("./z2ui5_cx_smp_error");
 

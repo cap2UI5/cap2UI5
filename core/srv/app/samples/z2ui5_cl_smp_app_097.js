@@ -4,6 +4,7 @@ class z2ui5_cl_smp_app_097 extends z2ui5_if_app {
   t_tab = [];
   t_tab2 = [];
   mv_layout = ``;
+  mv_row_id = 0;
   client = null;
 
   view_display_detail() {
@@ -128,7 +129,8 @@ class z2ui5_cl_smp_app_097 extends z2ui5_if_app {
           if (sy_subrc === 0) ls_sel = _t[_i];
         }
         if (sy_subrc === 0) {
-          ls_sel.uuid = z2ui5_cl_smp_context.uuid_get_c32();
+          this.mv_row_id = this.mv_row_id + 1;
+          ls_sel.uuid = `${this.mv_row_id}`;
           this.t_tab2.push(z2ui5_cl_util.abap_copy(ls_sel));
         }
         this.mv_layout = `TwoColumnsMidExpanded`;
@@ -139,7 +141,6 @@ class z2ui5_cl_smp_app_097 extends z2ui5_if_app {
 
 module.exports = z2ui5_cl_smp_app_097;
 
-const z2ui5_cl_smp_context = require("./z2ui5_cl_smp_context");
 const z2ui5_cl_ui5_view_builder = require("abap2UI5/z2ui5_cl_ui5_view_builder");
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 

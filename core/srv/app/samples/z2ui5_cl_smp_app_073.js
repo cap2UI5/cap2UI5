@@ -33,8 +33,6 @@ class z2ui5_cl_smp_app_073 extends z2ui5_if_app {
   }
 
   async main(client) {
-    let ls_config;
-    let result;
     this.client = client;
     if (client.check_on_init()) {
       this.view_display();
@@ -42,16 +40,33 @@ class z2ui5_cl_smp_app_073 extends z2ui5_if_app {
       this.view_display();
     }
     if (client.get_event() === `BUTTON_OPEN_NEW_TAB`) {
-      ls_config = client.get().S_CONFIG;
-      result = z2ui5_cl_smp_context.app_get_url({ classname: `z2ui5_cl_smp_app_073`, origin: ls_config.ORIGIN, pathname: ls_config.PATHNAME, search: ls_config.SEARCH, hash: ls_config.HASH });
-      client.follow_up_action(z2ui5_if_client.cs_event.open_new_tab, [result]);
+      client.follow_up_action(z2ui5_if_client.cs_event.open_new_tab, [this.url_own_get()]);
     }
+  }
+
+  url_own_get() {
+    let result = ``;
+    let sy_tabix = 0;
+    let lt_param = [];
+    const ls_config = this.client.get().S_CONFIG;
+    lt_param = (ls_config.SEARCH.startsWith(`?`) ? ls_config.SEARCH.slice((`?`).length) : ls_config.SEARCH).split(`&`);
+    let lv_query = `app_start=z2ui5_cl_smp_app_073`;
+    sy_tabix = 0;
+    for (const lv_param of lt_param) {
+      sy_tabix++;
+      if (z2ui5_cl_util.abap_is_initial(lv_param) || (($v, $s) => { const $i = $v.indexOf($s); return $i < 0 ? `` : $v.slice(0, $i); })(lv_param, `=`).toLowerCase() === `app_start`) {
+        continue;
+      }
+      lv_query = `${lv_query}&${lv_param}`;
+    }
+    result = `${ls_config.ORIGIN}${ls_config.PATHNAME}?${lv_query}`;
+    return result;
   }
 }
 
 module.exports = z2ui5_cl_smp_app_073;
 
-const z2ui5_cl_smp_context = require("./z2ui5_cl_smp_context");
 const z2ui5_cl_ui5_view_builder = require("abap2UI5/z2ui5_cl_ui5_view_builder");
+const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 const z2ui5_if_client = require("abap2UI5/z2ui5_if_client");
 

@@ -21,7 +21,7 @@ class z2ui5_cl_smp_app_008 extends z2ui5_if_app {
     let lx;
     switch (this.client.get_event()) {
       case `BUTTON_MESSAGE_BOX_SY`:
-        ls_msg_sy = z2ui5_cl_smp_context.msg_get_by_msg({ id: `NET`, no: `001` });
+        ls_msg_sy = { msgty: `I`, msgid: `NET`, msgno: `001` };
         this.client.message_box_display(ls_msg_sy);
         break;
       case `BUTTON_MESSAGE_BOX_BAPIRET`:
@@ -85,7 +85,6 @@ class z2ui5_cl_smp_app_008 extends z2ui5_if_app {
 
 module.exports = z2ui5_cl_smp_app_008;
 
-const z2ui5_cl_smp_context = require("./z2ui5_cl_smp_context");
 const z2ui5_cl_ui5_view_builder = require("abap2UI5/z2ui5_cl_ui5_view_builder");
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 

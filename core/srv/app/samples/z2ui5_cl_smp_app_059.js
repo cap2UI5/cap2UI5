@@ -20,9 +20,24 @@ class z2ui5_cl_smp_app_059 extends z2ui5_if_app {
   on_event() {
     if (this.client.check_on_event(`BUTTON_SEARCH`)) {
       this.set_data();
-      const _out0 = { val: this.mv_field, tab: this.mt_table };
-      z2ui5_cl_smp_context.itab_filter_by_val(_out0);
-      if ("tab" in _out0) this.mt_table = _out0.tab;
+      this.set_search();
+    }
+  }
+
+  set_search() {
+    let sy_tabix = 0;
+    const lv_search = this.mv_field.toUpperCase();
+    if (z2ui5_cl_util.abap_is_initial(lv_search)) {
+      return;
+    }
+    const lt_all = z2ui5_cl_util.abap_copy(this.mt_table);
+    this.mt_table = [];
+    sy_tabix = 0;
+    for (const ls_row of lt_all) {
+      sy_tabix++;
+      if (String(ls_row.product.toUpperCase()).toLowerCase().includes(String(lv_search).toLowerCase()) || String(ls_row.create_date.toUpperCase()).toLowerCase().includes(String(lv_search).toLowerCase()) || String(ls_row.create_by.toUpperCase()).toLowerCase().includes(String(lv_search).toLowerCase()) || String(ls_row.storage_location.toUpperCase()).toLowerCase().includes(String(lv_search).toLowerCase()) || String(`${ls_row.quantity}`).toLowerCase().includes(String(lv_search).toLowerCase())) {
+        this.mt_table.push(z2ui5_cl_util.abap_copy(ls_row));
+      }
     }
   }
 
@@ -88,7 +103,6 @@ class z2ui5_cl_smp_app_059 extends z2ui5_if_app {
 
 module.exports = z2ui5_cl_smp_app_059;
 
-const z2ui5_cl_smp_context = require("./z2ui5_cl_smp_context");
 const z2ui5_cl_ui5_view_builder = require("abap2UI5/z2ui5_cl_ui5_view_builder");
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 

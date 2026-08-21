@@ -24,20 +24,27 @@ class z2ui5_cl_smp_app_327 extends z2ui5_if_app {
   }
 
   on_event() {
-    let lx_load;
+    let lv_json;
     switch (this.client.get_event()) {
       case `LOCAL_STORAGE_LOADED`:
-        try {
-          // TODO(abap2js): z2ui5_cl_ajson=>parse( client->get_event_arg( 4 ) )->to_abap_corresponding_only( )->to_abap( IMPORTING ev_container = s_storage-value ).
-        } catch (_caught1) {
-          lx_load = _caught1;
-          this.client.message_box_display(lx_load.get_text());
-        }
+        lv_json = this.client.get_event_arg(4);
+        this.s_storage.value = { field1: this.json_get_value({ json: lv_json, name: `FIELD1` }), field2: this.json_get_value({ json: lv_json, name: `FIELD2` }) };
         break;
       case `GET_STORED_VALUE`:
         this.s_storage.value = z2ui5_cl_util.abap_tab_assign(this.s_storage.value, z2ui5_cl_util.abap_copy(this.s_stored_value));
         break;
     }
+  }
+
+  json_get_value({ json, name } = {}) {
+    let result = ``;
+    const lv_marker = `"${name}":"`;
+    const lv_off = this.find({ val: json, sub: lv_marker, case: false });
+    if (lv_off < 0) {
+      return result;
+    }
+    result = (($v, $s) => { const $i = $v.indexOf($s); return $i < 0 ? `` : $v.slice(0, $i); })(json.substr(lv_off + lv_marker.length), `"`);
+    return result;
   }
 
   view_display() {

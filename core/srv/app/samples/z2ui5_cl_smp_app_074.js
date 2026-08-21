@@ -3,7 +3,9 @@ const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
 class z2ui5_cl_smp_app_074 extends z2ui5_if_app {
   filepath = ``;
   file = ``;
-  table = null;
+  upload_name = ``;
+  upload_size = 0;
+  upload_text = ``;
   client = null;
 
   async main(client) {
@@ -17,7 +19,6 @@ class z2ui5_cl_smp_app_074 extends z2ui5_if_app {
 
   on_event() {
     let raw;
-    let content;
     let error;
     try {
       switch (this.client.get_event()) {
@@ -28,9 +29,11 @@ class z2ui5_cl_smp_app_074 extends z2ui5_if_app {
         case `UPLOAD`:
           let [header, base64] = this.file.split(`;`);
           [header, base64] = base64.split(`,`);
-          raw = z2ui5_cl_smp_context.conv_decode_x_base64(base64);
-          content = z2ui5_cl_smp_context.conv_get_string_by_xstring(raw);
-          this.client.message_box_display(content);
+          raw = this.base64_decode({ val: base64 });
+          this.upload_name = z2ui5_cl_util.abap_tab_assign(this.upload_name, z2ui5_cl_util.abap_copy(this.filepath));
+          this.upload_size = this.xstrlen(raw);
+          this.upload_text = this.xstring_to_string({ val: raw });
+          this.client.message_toast_display(`${this.upload_name} - ${this.upload_size} bytes received`);
           this.file = {};
           this.filepath = {};
           this.view_display();
@@ -42,15 +45,55 @@ class z2ui5_cl_smp_app_074 extends z2ui5_if_app {
     }
   }
 
+  base64_decode({ val } = {}) {
+    let result = null;
+    let lv_class = ``;
+    try {
+      lv_class = `CL_WEB_HTTP_UTILITY`;
+      // TODO(abap2js): CALL METHOD (lv_class)=>(`DECODE_X_BASE64`) EXPORTING encoded = val RECEIVING decoded = result.
+    } catch (error) {
+      lv_class = `CL_HTTP_UTILITY`;
+      // TODO(abap2js): CALL METHOD (lv_class)=>(`DECODE_X_BASE64`) EXPORTING encoded = val RECEIVING decoded = result.
+    }
+    return result;
+  }
+
+  xstring_to_string({ val } = {}) {
+    let result = ``;
+    let lo_conv = null;
+    let lv_class = ``;
+    try {
+      lv_class = `CL_ABAP_CONV_CODEPAGE`;
+      // TODO(abap2js): CALL METHOD (lv_class)=>create_in RECEIVING instance = lo_conv.
+      {
+        const _dynr = (lo_conv);
+        const _dynm = _dynr ? _dynr[String(`IF_ABAP_CONV_IN~CONVERT`).toLowerCase()] : undefined;
+        if (typeof _dynm !== "function") throw new Error(`CALL METHOD: ${String(`IF_ABAP_CONV_IN~CONVERT`)} not found`);
+        {
+          const _dynargs = { source: val };
+          const _dynret = _dynm.call(_dynr, _dynargs);
+          result = _dynret !== undefined ? _dynret : _dynargs.result;
+        }
+      }
+    } catch (error) {
+      lv_class = `CL_ABAP_CONV_IN_CE`;
+      // TODO(abap2js): CALL METHOD (lv_class)=>create EXPORTING encoding = `UTF-8` RECEIVING conv = lo_conv.
+      {
+        const _dynr = (lo_conv);
+        const _dynm = _dynr ? _dynr[String(`CONVERT`).toLowerCase()] : undefined;
+        if (typeof _dynm !== "function") throw new Error(`CALL METHOD: ${String(`CONVERT`)} not found`);
+        {
+          const _dynargs = { input: val, data: result };
+          const _dynret = _dynm.call(_dynr, _dynargs);
+          result = _dynargs.data;
+        }
+      }
+    }
+    return result;
+  }
+
   view_display() {
-    let sy_tabix = 0;
-    let sy_subrc = 0;
-    let fs_table = null;
-    let _fs$fs_table = null;
-    let tab;
-    let fields;
-    let columns;
-    let cells;
+    let box;
     const view = z2ui5_cl_ui5_view_builder.factory()
       .ele({ n: `View`, ns: `mvc` })
       .a({ n: `displayBlock`, v: `true` })
@@ -65,32 +108,27 @@ class z2ui5_cl_smp_app_074 extends z2ui5_if_app {
       .a({ n: `showNavButton`, b: this.client.check_app_prev_stack() })
       .a({ n: `navButtonPress`, v: this.client._event_nav_app_leave() });
     page.tag(`MessageStrip`)
-      .a({ n: `text`, v: `The file_uploader custom control returns the picked file as a base64 data URL; the backend ` + `strips the prefix, decodes the payload and shows the file content in a message box.` })
+      .a({ n: `text`, v: `The file_uploader custom control returns the picked file as a base64 data URL; the backend ` + `strips the prefix, decodes the payload and reports what arrived - name, size in bytes and content.` })
       .a({ n: `type`, v: `Information` })
       .a({ n: `showIcon`, b: true })
       .a({ n: `class`, v: `sapUiSmallMargin` });
-    if (!z2ui5_cl_util.abap_is_initial(this.table)) {
-      fs_table = this.table;
-      _fs$fs_table = { o: this, k: `table` };
-      sy_subrc = 0;
-      tab = page.ele(`Table`)
-        .a({ n: `items`, v: this.client._bind(fs_table) })
-        .ele(`headerToolbar`)
-        .ele(`OverflowToolbar`)
-        .tag(`Title`)
-        .a({ n: `text`, v: `CSV Content` })
-        .tag(`ToolbarSpacer`)
-        .end()
-        .end();
-      fields = z2ui5_cl_smp_context.rtti_get_t_attri_by_any(fs_table);
-      columns = tab.ele(`columns`);
-      cells = tab.ele(`items`).ele(`ColumnListItem`).ele(`cells`);
-      sy_tabix = 0;
-      for (const field of fields) {
-        sy_tabix++;
-        columns.ele(`Column`).tag(`Text`).a({ n: `text`, v: field.name });
-        cells.tag(`Text`).a({ n: `text`, v: `{${field.name}}` });
-      }
+    if (!z2ui5_cl_util.abap_is_initial(this.upload_name)) {
+      box = page.ele(`Panel`)
+        .a({ n: `headerText`, v: `Received in the backend` })
+        .a({ n: `class`, v: `sapUiSmallMargin` })
+        .ele(`VBox`)
+        .a({ n: `class`, v: `sapUiSmallMargin` });
+      box.tag(`ObjectStatus`).a({ n: `title`, v: `File` }).a({ n: `text`, v: this.upload_name });
+      box.tag(`ObjectStatus`)
+        .a({ n: `title`, v: `Size` })
+        .a({ n: `text`, v: `${this.upload_size} bytes` })
+        .a({ n: `state`, v: `Success` });
+      box.tag(`TextArea`)
+        .a({ n: `value`, v: this.upload_text })
+        .a({ n: `editable`, b: false })
+        .a({ n: `rows`, v: `8` })
+        .a({ n: `width`, v: `100%` })
+        .a({ n: `class`, v: `sapUiSmallMarginTop` });
     }
     page.ele(`footer`)
       .ele(`OverflowToolbar`)
@@ -105,7 +143,6 @@ class z2ui5_cl_smp_app_074 extends z2ui5_if_app {
 
 module.exports = z2ui5_cl_smp_app_074;
 
-const z2ui5_cl_smp_context = require("./z2ui5_cl_smp_context");
 const z2ui5_cl_ui5_view_builder = require("abap2UI5/z2ui5_cl_ui5_view_builder");
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
 
