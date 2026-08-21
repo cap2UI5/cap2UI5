@@ -21,10 +21,17 @@ module.exports = async function service(req) {
   // Derive the exit-context request info from CAP's inner express req so
   // user exits (set_config_http_get/_post) see path/params/headers. ABAP
   // _main calls init_context unconditionally before dispatching by method.
+  // CAP has moved this accessor around across majors, and getting it wrong is
+  // SILENT: reqInfo falls back to defaults (so a user exit sees no request
+  // context at all) and the CSRF gate below compares empty strings, which its
+  // lenient no-headers branch reads as "nothing to compare — allow". A live
+  // probe on CAP 9 found exactly that: the gate was active, correct, and never
+  // saw a header. `req.http.{req,res}` is the current documented pair; the
+  // older spellings stay as fallbacks.
   let reqInfo;
-  const innerReq = req?.req || req?._?.req || null;
+  const innerReq = req?.http?.req || req?.req || req?._?.req || null;
   try {
-    const innerRes = req?.res || req?._?.res || null;
+    const innerRes = req?.http?.res || req?.res || req?._?.res || null;
     if (innerReq && innerRes) {
       reqInfo = z2ui5_cl_util_http.factory_cloud(innerReq, innerRes).get_req_info();
     }
@@ -33,29 +40,35 @@ module.exports = async function service(req) {
   }
 
   // CSRF gate (ABAP main( ), POST branch): a CDS action call is always a
-  // POST, the only method that can change state. Opt-in via the exit config
-  // (check_csrf_active, default off — nothing is rejected then).
+  // POST, the only method that can change state. ON by default since 2026-08
+  // (the shipped exit sets check_csrf_active); an app that fronts the endpoint
+  // with its own protection can still switch it off in its exit.
+  let csrfRejected = false;
   try {
     const cfg = {};
     require(`../01/04/z2ui5_cl_ui5_user_exit`).get_instance().set_config_http_post({ cs_config: cfg });
-    if (cfg.check_csrf_active === true) {
+    if (cfg.check_csrf_active !== false) {
       const h = innerReq?.headers || {};
-      const rejected = module.exports._check_csrf_rejected({
+      csrfRejected = module.exports._check_csrf_rejected({
         active: true,
         origin: h.origin || ``,
         referer: h.referer || ``,
         host: h.host || ``,
       });
-      if (rejected) {
-        return {
-          body: `CSRF validation failed - cross-origin POST rejected`,
-          status_code: 403,
-          status_reason: `Forbidden`,
-        };
-      }
     }
   } catch {
     // exit not configured — csrf stays inactive
+  }
+  if (csrfRejected) {
+    const message = `CSRF validation failed - cross-origin POST rejected`;
+    // Reject THROUGH CDS when it is driving. Returning the rejection as a
+    // value made CDS serialize it as a successful action result: the caller
+    // got HTTP 200 carrying `{status_code: 403}` in the body, so a blocked
+    // request looked like a completed one to every client that checks the
+    // status — which is every client. req.reject produces a real 403.
+    // The plain object stays for the non-CAP adapters, which read status_code.
+    if (typeof req?.reject === `function`) req.reject(403, message);
+    return { body: message, status_code: 403, status_reason: `Forbidden` };
   }
 
   let responseJson;
@@ -89,10 +102,29 @@ module.exports._csrf_host_authority = function _csrf_host_authority(val) {
 
 /**
  * ABAP CLASS-METHODS _check_csrf_rejected — pure and side-effect free so it
- * is unit-testable without a server mock. Returns true only when csrf is
- * active AND an Origin/Referer is present AND its host authority differs
- * from the app's own Host header. Lenient by design: nothing to compare →
- * allow (do not lock out proxies/old clients that strip these headers).
+ * is unit-testable without a server mock. Returns true when the request must
+ * be rejected as cross-site.
+ *
+ * Rejects when an Origin (preferred) or Referer is present and its host
+ * authority differs from the app's own Host. A browser always sends Origin on
+ * a cross-origin POST and cannot be talked out of it, so this catches the case
+ * that matters.
+ *
+ * With NEITHER header present it allows, matching upstream
+ * (ltcl_test_http_handler~test_csrf_no_headers pins this: "lenient: no Origin
+ * and no Referer -> allowed (proxies / old clients)"). A stricter rule was
+ * tried here in 2026-08 — require a JSON content type, on the reasoning that a
+ * cross-site <form> can only send the three simple types — and reverted: it
+ * contradicts that published contract and breaks non-browser callers that post
+ * without either header. The vector it aimed at is already closed one layer up
+ * in this deployment: CDS accepts an action call only as `application/json`,
+ * which a form cannot produce, and the approuter forwards a JWT the attacker's
+ * page cannot obtain. An app that terminates HTTP itself, without those two
+ * properties, should add its own check in the exit.
+ *
+ * What DID change: the gate is now active by default (see
+ * z2ui5_cl_ui5_user_exit._config_http_post). It was opt-in, and nothing opted
+ * in, so every cross-origin POST was accepted.
  */
 module.exports._check_csrf_rejected = function _check_csrf_rejected(a) {
   const { active = false, origin = ``, referer = ``, host = `` } = a || {};
@@ -129,6 +161,18 @@ module.exports._http_get = function _http_get() {
     if (typeof pre.get === `function`) preload = pre.get({ styles_css: styles, custom_js: cfg.custom_js || `` });
   } catch { /* optional — the webapp is served statically on JS platforms */ }
 
+  // Everything the exit supplies is interpolated into markup, and an exit can
+  // derive any of it from the request, so escape at the boundary. `escape_uri`
+  // additionally drops javascript:/vbscript: — an href is a live context, and
+  // an empty result means "not configured", which the callers already handle.
+  const html = require(`../00/03/z2ui5_html`);
+
+  // The tab icon is config, like the title: the exit sets a URI and the page
+  // carries it as <link rel="icon">. An exit that clears the field gets no
+  // <link> at all rather than one pointing nowhere.
+  const faviconUri = html.escape_uri(cfg.favicon);
+  const favicon = faviconUri ? `    <link rel="icon" href="${faviconUri}">\n` : ``;
+
   const body =
     `<!DOCTYPE html>\n` +
     `<html lang="en">\n` +
@@ -136,11 +180,12 @@ module.exports._http_get = function _http_get() {
     `${cfg.content_security_policy || ``}\n` +
     `    <meta charset="UTF-8">\n` +
     `    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n` +
-    `    <title>${cfg.title || `abap2UI5`}</title>\n` +
+    `    <title>${html.escape_text(cfg.title || `abap2UI5`)}</title>\n` +
+    favicon +
     `    <style> html, body, body > div, #container, #container-uiarea { height: 100%; } </style>\n` +
     `    <script>${preload}</script>\n` +
-    `    <script id="sap-ui-bootstrap" src="${cfg.src || `/resources/sap-ui-core.js`}"\n` +
-    `        data-sap-ui-theme="${cfg.theme || `sap_horizon`}"\n` +
+    `    <script id="sap-ui-bootstrap" src="${html.escape_uri(cfg.src || `/resources/sap-ui-core.js`)}"\n` +
+    `        data-sap-ui-theme="${html.escape_attr(cfg.theme || `sap_horizon`)}"\n` +
     `        data-sap-ui-async="true"\n` +
     `        data-sap-ui-bindingSyntax="complex"\n` +
     `        data-sap-ui-resourceroots='{ "z2ui5": "./" }'>\n` +

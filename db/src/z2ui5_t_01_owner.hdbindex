@@ -1,0 +1,8 @@
+-- Owner-filter index.
+--
+-- The AdminService projection restricts every read to `owner = $user`
+-- (srv/z2ui5-service.cds), and the draft store filters on owner again on its
+-- own path (srv/server.js). Single-row loads hit the primary key and were
+-- always fine; anything that lists or counts a user's drafts was a full scan.
+INDEX "CAP2UI5_Z2UI5_T_01_OWNER_IDX"
+  ON "CAP2UI5_Z2UI5_T_01" ("OWNER" ASC)

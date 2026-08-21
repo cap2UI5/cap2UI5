@@ -15,6 +15,25 @@
       "authenticationType": "none"
     },
     {
+      "source": "^/rest/root/z2ui5(.*)$",
+      "target": "/rest/root/z2ui5$1",
+      "destination": "abap2UI5-srv",
+      "authenticationType": "xsuaa",
+      "csrfProtection": false
+    },
+    {
+      "source": "^/odata/(.*)$",
+      "target": "/odata/$1",
+      "destination": "abap2UI5-srv",
+      "authenticationType": "xsuaa"
+    },
+    {
+      "source": "^/health$",
+      "target": "/health",
+      "destination": "abap2UI5-srv",
+      "authenticationType": "none"
+    },
+    {
       "source": "^(.*)$",
       "target": "$1",
       "service": "html5-apps-repo-rt",

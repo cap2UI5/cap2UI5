@@ -369,7 +369,7 @@ class z2ui5_cl_ui5_srv_bind {
     this.mv_type   = type;
 
     const opts = {
-      path: !!config.path_only ? true : config.path,
+      path: config.path_only ? true : config.path,
       tab:                config.tab,
       tab_index:          config.tab_index,
       name:               config.name,

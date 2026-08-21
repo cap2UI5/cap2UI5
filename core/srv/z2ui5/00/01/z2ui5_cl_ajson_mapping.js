@@ -35,12 +35,12 @@ class lcl_mapping_fields {
     }
   }
 
-  to_abap({ iv_path, iv_name } = {}) {
+  to_abap({ iv_path: _iv_path, iv_name } = {}) {
     const hit = this.mt_mapping_fields.find((r) => r.json === iv_name);
     return hit ? hit.abap : "";
   }
 
-  to_json({ iv_path, iv_name } = {}) {
+  to_json({ iv_path: _iv_path, iv_name } = {}) {
     const field = String(iv_name ?? "").toUpperCase();
     const hit = this.mt_mapping_fields.find((r) => r.abap === field);
     return hit ? hit.json : "";

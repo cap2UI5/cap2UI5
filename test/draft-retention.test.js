@@ -1,13 +1,13 @@
 /**
  * Draft retention — expired rows in cap2ui5.z2ui5_t_01 are deleted, fresh
- * ones survive (see srv/draft-retention.js; the store itself is append-only).
+ * ones survive (see abap2UI5/srv/cap/retention.js; the store itself is append-only).
  */
 const path = require("path");
 const cds = require("@sap/cds");
 
 cds.test(path.join(__dirname, ".."));
 
-const { deleteExpiredDrafts } = require("../srv/draft-retention");
+const { deleteExpiredDrafts } = require("abap2UI5/cap-retention");
 
 describe("draft retention", () => {
   test("deletes rows older than the TTL, keeps fresh ones", async () => {

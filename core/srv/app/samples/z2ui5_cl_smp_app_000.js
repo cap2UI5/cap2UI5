@@ -346,7 +346,7 @@ class z2ui5_cl_smp_app_000 extends z2ui5_if_app {
 
   block_base({ group, header } = {}) {
     let result = ``;
-    if (String(group).includes(String(`controls -*`).replace(/\*/g, ""))) {
+    if ((($v, $p) => { let $r = ""; const $s = String($p); for (let $i = 0; $i < $s.length; $i++) { const $c = $s[$i]; if ($c === "#") { $i++; $r += ($s[$i] || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); } else if ($c === "*") { $r += ".*"; } else if ($c === "+") { $r += "."; } else { $r += $c.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); } } return new RegExp("^" + $r + "$", "i").test(String($v)); })(group, `controls -*`)) {
       result = header.substr(0, 1).toUpperCase();
     } else {
       result = this.header_base({ header: header });

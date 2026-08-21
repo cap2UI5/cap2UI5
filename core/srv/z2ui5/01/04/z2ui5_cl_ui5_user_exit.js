@@ -121,6 +121,20 @@ class z2ui5_cl_ui5_user_exit {
   _config_http_get(is_context, cs_config = {}) {
     cs_config.title = `abap2UI5`;
     cs_config.theme = `sap_horizon`;
+
+    // The tab icon, next to the tab title. An SVG data URI rather than a file:
+    // the page is built here and has no static resources of its own, and the
+    // default CSP below already allows `data:`. An app that wants its own icon
+    // sets this field in its exit the way it sets the title — or clears it, and
+    // gets no <link> at all (the browser then falls back to /favicon.ico).
+    cs_config.favicon =
+      `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' ` +
+      `viewBox='0 0 40 40' fill='%23fff' font-family='sans-serif' ` +
+      `font-size='11' font-weight='bold' text-anchor='middle'>` +
+      `<circle cx='20' cy='20' r='20' fill='%23d03c4a'/>` +
+      `<text x='20' y='18'>abap</text>` +
+      `<text x='20' y='31'>2UI5</text></svg>`;
+
     // Local UI5 runtime served by the CAP server at /resources (openui5-dist
     // dependency, see srv/server.js) — keeps the stack offline-capable.
     cs_config.src   = `/resources/sap-ui-core.js`;
@@ -187,6 +201,13 @@ class z2ui5_cl_ui5_user_exit {
 
   _config_http_post(is_context, cs_config = {}) {
     cs_config.draft_exp_time_in_hours = 4;
+
+    // CSRF protection is ON by default (2026-08). It used to be opt-in and
+    // nothing opted in, so the shipped app ran with the gate inert. The check
+    // costs nothing for first-party traffic — the frontend posts JSON from the
+    // same origin — and an app that fronts this endpoint with its own
+    // protection can still set `false` in its own exit.
+    cs_config.check_csrf_active = true;
 
     if (z2ui5_cl_ui5_user_exit._gi_user_exit) {
       const ctx = is_context ?? z2ui5_cl_ui5_user_exit._get_context();

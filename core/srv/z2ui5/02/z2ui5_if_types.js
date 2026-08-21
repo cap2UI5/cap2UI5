@@ -44,6 +44,7 @@ const z2ui5_if_types = Object.freeze({
    * @property {ty_t_name_value} t_add_config
    * @property {string} custom_js
    * @property {ty_t_name_value} t_security_header
+   * @property {string} favicon  tab icon URI; empty means no <link rel="icon">
    */
 
   /**

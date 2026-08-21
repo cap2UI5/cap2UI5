@@ -19,6 +19,62 @@ platform code**. Every platform consumes this one package:
 > hand-edit it; edit `src/` and re-run `npm run build_core` at the
 > [repo root](../).
 
+## Using it in a CAP project
+
+Two `using` lines and an install. The plugin does the rest — identity, the
+draft store, app discovery, the bootstrap routes, the UI5 runtime mount and
+the service implementation — because none of that is project-specific and
+every consumer would otherwise copy the same ~160 lines and keep them in sync
+by hand.
+
+```jsonc
+// package.json
+{ "dependencies": { "abap2UI5": "..." } }
+```
+
+```cds
+// db/schema.cds
+using from 'abap2UI5/z2ui5-model';        // the draft table
+
+// srv/service.cds
+using from 'abap2UI5/z2ui5-service';      // the roundtrip endpoint
+```
+
+```js
+// srv/app/my_app.js — your application
+const z2ui5_if_app = require("abap2UI5/z2ui5_if_app");
+
+class my_app extends z2ui5_if_app {
+  name = "";
+  main(client) {
+    if (client.get_event() === "SEND") client.message_toast_display(`Hi ${this.name}`);
+    client.view_display(/* ...view builder chain... */);
+  }
+}
+module.exports = my_app;
+```
+
+Point the framework at your apps with `Z2UI5_APP_DIRS` (path-separated) or
+`require("abap2UI5/register-apps")(__dirname)`, then `cds watch` and open
+`/rest/root/z2ui5`.
+
+The plugin is opt-outable, whole or piecewise, for a project that wants to
+wire something itself:
+
+```jsonc
+// package.json
+{ "cds": { "z2ui5": { "routes": false } } }   // or "activate": false
+```
+
+`abap2UI5/cap` exports the same `activate(options)` if you prefer to call it
+explicitly — which is what the generated cap2UI5 app does, so the app's own
+test suite exercises exactly the path an external consumer gets.
+
+**TypeScript**: `types/index.d.ts` covers the app interface, the client, the
+view-builder chain, the engine seam and the CAP entry point. The view builder
+is the one that pays for itself — a fluent chain with no completion is a
+guessing game.
+
 ## The seam
 
 The platform surface is tiny — see [`srv/z2ui5/engine.js`](srv/z2ui5/engine.js):

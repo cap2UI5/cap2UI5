@@ -58,12 +58,10 @@ class z2ui5_cl_ui5_handler {
     }
 
     await this.main_begin_js();
-    /* eslint-disable no-await-in-loop */
     while (true) {
       const done = await this.main_process_js();
       if (done) break;
     }
-    /* eslint-enable no-await-in-loop */
 
     return this.mv_response;
   }
@@ -279,7 +277,7 @@ class z2ui5_cl_ui5_handler {
       // nav-loop and the user gets a "OK" button to dismiss + recover.
       const z2ui5_cx_util_error = require("../../00/03/z2ui5_cx_util_error");
       const z2ui5_cl_ui5_app_error = require("../04/z2ui5_cl_ui5_app_error");
-      const wrapped = new z2ui5_cx_util_error(`UNCAUGHT EXCEPTION - Please Restart App:`, lx);
+      const wrapped = new z2ui5_cx_util_error(z2ui5_cl_ui5_handler.UNCAUGHT_EXCEPTION_PREFIX, lx);
       oClient.nav_app_leave(z2ui5_cl_ui5_app_error.factory({ x_root: wrapped }));
     }
 
@@ -891,5 +889,16 @@ class z2ui5_cl_ui5_handler {
     }
   }
 }
+
+/**
+ * The prefix an unhandled app error is wrapped in before it reaches the error
+ * popup. Exported because it is a CONTRACT, not an implementation detail:
+ * scripts/smoke-apps.js decides every sample's verdict by looking for it in
+ * the response. That used to be a copy of the literal in the script, so
+ * rewording the message here would have flipped every "error-popup" verdict to
+ * something else with nothing failing — a gate quietly measuring the wrong
+ * thing. Read it from here instead of copying it.
+ */
+z2ui5_cl_ui5_handler.UNCAUGHT_EXCEPTION_PREFIX = `UNCAUGHT EXCEPTION - Please Restart App:`;
 
 module.exports = z2ui5_cl_ui5_handler;
