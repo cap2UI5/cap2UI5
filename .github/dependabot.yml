@@ -4,3 +4,32 @@ updates:
     directory: /
     schedule:
       interval: weekly
+
+  # npm was missing here until 2026-08, so no runtime dependency of the
+  # deployed app was ever proposed for update -- not @sap/cds, not the pinned
+  # openui5-dist, not anything under core/. The jest suite and the production
+  # cds build gate every PR, so an update that breaks the app is caught before
+  # merge rather than at deploy time.
+  #
+  # Grouped deliberately: @sap/* and @cap-js/* move together and a split PR
+  # per package produces a version skew that fails for reasons unrelated to
+  # either package.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      cap:
+        patterns:
+          - "@sap/*"
+          - "@cap-js/*"
+      dev-dependencies:
+        dependency-type: development
+    ignore:
+      # openui5-dist pins the UI5 runtime the app serves at /resources, and the
+      # framework's own supported-version story is tracked upstream in
+      # abap2UI5 (its floor is 1.71). Bumping it is a deliberate decision with
+      # a compatibility question attached, not a routine dependency update --
+      # see the pin policy in builder-abap2UI5-js:AGENTS.md.
+      - dependency-name: openui5-dist

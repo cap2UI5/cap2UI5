@@ -29,6 +29,15 @@ name: deploy check
 #   workflow gates the CAP production build that maps to this repo's own
 #   server module.
 #
+#   That "gated at its source" claim was aspirational until 2026-08: nothing
+#   tested xs-app.json at all, and it turned out to have no route to the
+#   abap2UI5-srv destination — its catch-all sent every /rest/root/z2ui5
+#   roundtrip to the static HTML5 repository, so the deployed app could not
+#   have worked. It is now genuinely covered, by test/approuter-routes.test.js
+#   in this repo's own jest suite (run by test.yml): the routing contract,
+#   the auth type, and that every destination a route names exists in
+#   mta.yaml. Routing regressions are caught here without an mbt build.
+#
 #   (History: app/z2ui5 previously shipped without that scaffolding, so a
 #   full `mbt build` here failed with `Missing script: "build:cf"` — the
 #   original reason this gate was narrowed. That gap is now fixed upstream.)
