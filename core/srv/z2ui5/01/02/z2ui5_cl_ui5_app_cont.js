@@ -96,7 +96,16 @@ class z2ui5_cl_ui5_app_cont {
   db_save() {
     if (this.mo_app) {
       this.mo_app.id_draft = this.ms_draft.id;
+      // Upstream keeps the lifecycle latch on the WRAPPER (mv_check_initialized
+      // on z2ui5_cl_ui5_app_cont), not on z2ui5_if_app. This port reads it off
+      // the app — the field is excluded from serialization there
+      // (srv_model's skip set, client's _FRAMEWORK_FIELDS) and the client's
+      // check_on_init decision is built around that, so moving it wholesale is
+      // a refactor, not a fix. Stamp both: the app copy stays the one the port
+      // reads, and the container carries upstream's documented field so
+      // anything reading the ABAP contract sees the same answer.
       this.mo_app.check_initialized = true;
+      this.mv_check_initialized = true;
     }
     const blob = this.all_xml_stringify();
     new DB().create({ draft: this.ms_draft, model_xml: blob });

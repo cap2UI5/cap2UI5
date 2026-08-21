@@ -149,11 +149,13 @@ covers the view builder.
 
 ## Security model
 
-**Authenticated by default.** Both services carry
-`@(requires: 'authenticated-user')` ([`srv/z2ui5-service.cds`](srv/z2ui5-service.cds)),
+**Role-restricted by default.** Both services carry
+`@(requires: 'User')` ([`srv/z2ui5-service.cds`](srv/z2ui5-service.cds)),
 `package.json` binds `cds.requires.auth` to `xsuaa` in the production profile
 and to mocked users in development, and [`xs-security.json`](xs-security.json)
-declares the `$XSAPPNAME.User` scope with a matching role template.
+declares the `$XSAPPNAME.User` scope with the matching role template CAP maps
+that name onto. Authentication alone is not enough: a user of the subaccount
+who was never granted the role gets a 403, not a session.
 
 What is authenticated, and what is not:
 
@@ -178,10 +180,35 @@ sticky app state is keyed per session through the framework's identity port
 [`test/isolation.test.js`](test/isolation.test.js) holds the regression net for
 all of it.
 
-**Before going productive**, review two things this repository leaves at demo
-level: the services require `authenticated-user` rather than the declared
-`User` scope (so every subaccount user passes, whether or not the role is
-assigned), and the CSRF gate in the framework's user exit is off by default.
+**Hardening applied here** (each of these was a gap until 2026-08, and each
+has a regression test in [`test/security.test.js`](test/security.test.js)):
+
+- the services require the declared `User` role, not merely
+  `authenticated-user` -- the scope had been declared and never referenced, so
+  every authenticated subaccount user passed regardless of role assignment;
+- the framework's CSRF gate is **on** by default (it was opt-in, and nothing
+  opted in), rejecting a POST whose `Origin`/`Referer` does not match the
+  application host. With neither header present it allows, matching upstream:
+  the cross-site form vector is closed a layer up, since CDS accepts an action
+  call only as `application/json` and the approuter forwards a JWT;
+- the roundtrip and the OData entities answer with `X-Content-Type-Options`,
+  `X-Frame-Options`, `Referrer-Policy` and `Cache-Control: no-store` -- only
+  the bootstrap page carried headers before;
+- the request body is capped explicitly (`Z2UI5_MAX_BODY`, default 2mb) rather
+  than relying on the express default applying by accident;
+- draft retention follows the framework's own expiry instead of disagreeing
+  with it, runs on one instance rather than all of them, and the two columns it
+  and the owner filter scan (`createdAt`, `owner`) are indexed
+  ([`db/src/`](db/src)).
+
+**Before going productive**, two properties are still worth knowing. The
+`GET`/`HEAD` bootstrap routes are public by design (see the table above). And
+retained *sticky* app state lives in the serving process, so it is neither
+shared between instances nor restored after a restart -- scale beyond one
+instance and a sticky session can land on an instance that never saw it. The
+draft chain itself is durable in the database and unaffected; `mta.yaml`
+therefore declares a single instance until session affinity or a shared sticky
+store exists.
 
 ## Transpiling from ABAP
 

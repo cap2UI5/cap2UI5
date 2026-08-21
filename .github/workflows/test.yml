@@ -32,3 +32,28 @@ jobs:
       # part of the app lock, placed under core/node_modules/)
       - run: npm ci
       - run: npm test
+
+  # Vulnerability check on the SHIPPED lock. Nothing audited it anywhere: the
+  # builder audits its own dev dependencies, not the app tree it publishes,
+  # and this repo had no audit at all -- so a known-vulnerable transitive
+  # dependency of the deployed server could sit in the lock indefinitely.
+  #
+  # A separate job on purpose. It is advisory: `continue-on-error` keeps a new
+  # advisory in a transitive dependency from blocking an unrelated PR, while
+  # still showing up as a failed check somebody can act on. Raise it to a hard
+  # gate once the baseline is clean and stays clean.
+  #
+  # (Lint is deliberately NOT here: the app's source is linted where it is
+  # written, in builder-cap2UI5's own eslint run over src/srv and src/test.
+  # Adding eslint to this generated repo would mean shipping a dev dependency
+  # to every consumer to re-check code that was already checked.)
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version-file: .nvmrc
+      - name: npm audit (production dependencies)
+        continue-on-error: true
+        run: npm audit --omit=dev --audit-level=high

@@ -56,13 +56,15 @@
             "alice": {
               "password": "alice",
               "roles": [
-                "authenticated-user"
+                "authenticated-user",
+                "User"
               ]
             },
             "bob": {
               "password": "bob",
               "roles": [
-                "authenticated-user"
+                "authenticated-user",
+                "User"
               ]
             }
           }

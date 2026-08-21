@@ -19,3 +19,9 @@ entity z2ui5_t_01 {
         data      : LargeString;
         createdAt : Timestamp @cds.on.insert: $now;
 }
+
+// Indexes on `createdAt` and `owner` are shipped as HANA design-time
+// artifacts in db/src/*.hdbindex — see the comment in those files for why
+// each one exists. They are deliberately not CDS annotations: CAP has no
+// portable index syntax, and the production database is HANA
+// (package.json → cds.requires.db."[production]").

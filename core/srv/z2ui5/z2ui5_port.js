@@ -25,11 +25,60 @@
  *
  * `sy_subrc` mirrors ABAP: 0 when a row was found/affected, 4 otherwise. The
  * generated code reads it right after each op.
+ *
+ * ON PLATFORMS WITH A REAL DATABASE THIS IS A CACHE, NOT THE TRUTH
+ * ----------------------------------------------------------------
+ * Read this before concluding (as a 2026-08 review did) that the port keeps
+ * two rival draft stores and wires only one. On CAP the app wires an async,
+ * CDS-backed store through `engine.set_store()`, and the two layers compose
+ * deliberately:
+ *
+ *   z2ui5_cl_ui5_app_cont.db_load(id)
+ *     1. process buffer
+ *     2. THIS store, synchronously          ← the fast path
+ *     3. await the async platform store     ← the truth (CDS / HANA)
+ *
+ * The sync ABAP-shaped methods (`create`, `read_draft`, `read_info`,
+ * `check_exists`, `count_entries*`) exist because the transpiled ABAP is
+ * synchronous and cannot await. They answer from this store; a miss is not an
+ * error, it falls through to the real one. That is why back-navigation still
+ * works on a cold process or a second CF instance: `check_exists` answering
+ * false takes the "new app — keep the current chain" branch rather than
+ * breaking.
+ *
+ * What that composition does NOT excuse, and what the bound below fixes: this
+ * store held every draft payload ever written, for the life of the process,
+ * with nothing evicting them. `cleanup()` only ever ran against whatever the
+ * app asked for, so on a long-lived server the cache grew without limit —
+ * duplicating in RAM data the database already had. It is now bounded per
+ * table (oldest-written evicted first), which is safe precisely because a miss
+ * costs a fall-through to the durable store rather than a wrong answer.
+ *
+ * Two properties consumers should know: it is per-process (never shared
+ * between CF instances) and it does not survive a restart. Anything needing
+ * either must go through the async store.
  */
 "use strict";
 
 // primary key per table — MODIFY upserts on it. z2ui5_t_91 is keyed by id.
 const TABLE_KEYS = { z2ui5_t_91: ["id"] };
+
+// Per-table row cap. Draft rows carry a full serialized app in `data`, so an
+// unbounded table is a real leak on a long-running server. Sized like the
+// engine's sticky-handler bound: big enough that an interactive session keeps
+// hitting the fast path, small enough to stay bounded. Override for a process
+// that legitimately needs more (or 0 to disable eviction entirely).
+//
+// Read per call rather than captured at load: a host that sets the variable
+// after requiring the module still gets the bound it asked for, and the value
+// is one env lookup against an array scan that is already O(rows).
+const DEFAULT_MAX_ROWS_PER_TABLE = 500;
+function maxRowsPerTable() {
+  const raw = process.env.Z2UI5_PORT_MAX_ROWS;
+  if (raw === undefined || raw === ``) return DEFAULT_MAX_ROWS_PER_TABLE;
+  const n = Number(raw);
+  return Number.isFinite(n) && n >= 0 ? n : DEFAULT_MAX_ROWS_PER_TABLE;
+}
 
 class InMemoryStore {
   constructor() { this.tables = new Map(); }
@@ -42,8 +91,15 @@ class InMemoryStore {
     const keys = TABLE_KEYS[table] || ["id"];
     const rows = this._rows(table);
     const i = rows.findIndex((r) => keys.every((k) => r[k] === row[k]));
-    if (i >= 0) rows[i] = { ...row };
-    else rows.push({ ...row });
+    if (i >= 0) {
+      rows[i] = { ...row };
+    } else {
+      rows.push({ ...row });
+      // Evict oldest-written first. Insertion order is append order, so the
+      // front of the array is the coldest entry.
+      const cap = maxRowsPerTable();
+      if (cap > 0 && rows.length > cap) rows.splice(0, rows.length - cap);
+    }
   }
   remove(table, where) {
     const rows = this._rows(table);

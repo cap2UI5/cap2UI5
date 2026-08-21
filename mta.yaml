@@ -18,6 +18,18 @@ modules:
     buildpack: nodejs_buildpack
     readiness-health-check-http-endpoint: /health
     readiness-health-check-type: http
+    # ONE instance, deliberately. The draft chain is durable in HANA and
+    # survives anything, but retained *sticky* app state lives in the serving
+    # process (engine's sticky-handler map) and no session affinity is
+    # configured. With N instances a sticky session can land on an instance
+    # that never saw it, and the failure is intermittent and hard to
+    # reproduce -- the worst kind to discover in production.
+    #
+    # Raise this only together with one of: session affinity in front of the
+    # module, or a shared sticky store behind engine.set_store. When you do,
+    # also set Z2UI5_DRAFT_RETENTION_INSTANCE (srv/draft-retention.js) so the
+    # hourly cleanup keeps running on exactly one instance.
+    instances: 1
   build-parameters:
     builder: npm
 # The HDI container deployer. The z2ui5 runtime writes a draft row on EVERY

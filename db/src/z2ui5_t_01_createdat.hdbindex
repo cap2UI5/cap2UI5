@@ -1,0 +1,9 @@
+-- Retention scan index.
+--
+-- srv/draft-retention.js runs `DELETE ... WHERE createdAt < cutoff` once an
+-- hour, forever, against a table that gains one row per roundtrip -- dozens
+-- per minute per active user. Without this index that delete is a full table
+-- scan whose cost grows with the table, so the job that exists to contain the
+-- growth was itself scaling with it.
+INDEX "CAP2UI5_Z2UI5_T_01_CREATEDAT_IDX"
+  ON "CAP2UI5_Z2UI5_T_01" ("CREATEDAT" ASC)
