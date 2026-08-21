@@ -81,7 +81,7 @@ describe("the bootstrap page escapes and configures correctly", () => {
 });
 
 describe("draft retention", () => {
-  const retention = require("../srv/draft-retention");
+  const retention = require("abap2UI5/cap-retention");
 
   afterEach(() => {
     delete process.env.Z2UI5_DRAFT_TTL_HOURS;

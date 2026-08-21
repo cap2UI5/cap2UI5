@@ -27,6 +27,25 @@ Bringing the [abap2UI5](https://github.com/abap2UI5/abap2UI5) concept to CAP/Nod
 * Security
 * Speed
 
+## Using cap2UI5 in your own project
+
+This repository is the **demo**, not the delivery mechanism. It is generated on
+every sync, so it is a place to look, not a place to build. To use the
+framework in a CAP project of your own, install the package and add two lines:
+
+```cds
+using from 'abap2UI5/z2ui5-model';      // db/schema.cds — the draft table
+using from 'abap2UI5/z2ui5-service';    // srv/service.cds — the endpoint
+```
+
+The package's `cds-plugin` does the rest — identity, draft persistence, app
+discovery, the bootstrap routes, the UI5 runtime and the roundtrip
+implementation — so there is no server boilerplate to copy. Point it at your
+apps with `Z2UI5_APP_DIRS`, run `cds watch`, open `/rest/root/z2ui5`.
+
+Everything is opt-outable through `"cds": { "z2ui5": { … } }` in your
+package.json if you want to wire a piece yourself.
+
 ## Getting Started
 
 Prerequisites: Node.js ≥ 22 (see `.nvmrc`). The whole stack runs offline —
@@ -220,13 +239,21 @@ the transpiler and all other dev tooling live in
 All samples demonstrate complete view definition and data exchange handled entirely by the CAP server, using the same and static frontend from abap2UI5.
 
 Each app is a single `.js` file whose basename matches the class name it
-exports (`module.exports`). Put your own apps into `srv/app/` (scanned
-automatically when resolving `?app_start=<class>`, see the
-[custom apps README](srv/app/README.md)) or into any folder registered via
-`Z2UI5_APP_DIRS` / `require("abap2UI5/register-apps")(dir)` — see the
-[discovery API](core/srv/app/samples/README.md#discovery-api). The
-bundled samples and the framework classes live in the vendored core package
-([`core/`](core/)), which is owned by the sync pipeline.
+exports (`module.exports`).
+
+**Where to put your own apps depends on what this repository is to you.**
+This has been ambiguous — the README used to say "put your own apps into
+`srv/app/`" while AGENTS.md said `srv/app/` is overwritten on every publish —
+so, plainly:
+
+| You are… | Put apps in | Why |
+|---|---|---|
+| **using cap2UI5 in your own CAP project** (the supported path) | anywhere in your project | Install the package, add the two `using` lines, and point at your folder with `Z2UI5_APP_DIRS` or `require("abap2UI5/register-apps")(__dirname)`. Nothing here can overwrite it. |
+| exploring this repository, or running the demo | `srv/app/` | Scanned automatically when resolving `?app_start=<class>` (see the [custom apps README](srv/app/README.md)). **Overwritten on every publish** — this repo is a generated artifact, so treat anything you leave here as disposable. |
+| changing the demo app itself | `builder-cap2UI5:src/srv/app/` | That is the source this folder is generated from. |
+
+The bundled samples and the framework classes live in the vendored core package
+([`core/`](core/)), which is owned by the sync pipeline — never edit them.
 
 #### 1. Hello World
 ###### App

@@ -40,30 +40,9 @@ service AdminService {
         }
 }
 
-/**
- * REST-protocol service: the z2ui5 action is the single roundtrip endpoint.
- * Mounted at /rest/root/z2ui5 — frontends POST `{value: <oBody>}`.
- *
- * Requires the `User` role. In the BTP deployment the approuter authenticates
- * via xsuaa and the srv destination forwards the JWT (HTML5.ForwardAuthToken),
- * so the roundtrip runs under the real user; a direct unauthenticated call to
- * the srv route is rejected.
- *
- * `User` rather than `authenticated-user`: xs-security.json has always
- * declared the scope `$XSAPPNAME.User` and a matching role template, and
- * nothing ever referenced it — so the authorization model existed on paper
- * while every authenticated user in the subaccount passed, role collection
- * assigned or not. Naming the role here is what makes assigning it mean
- * something. CAP maps the name onto the `$XSAPPNAME.User` scope; the mocked
- * development users in package.json carry the same role so the local and test
- * flows are unchanged.
- */
-@(requires: 'User')
-@protocol: 'rest'
-service rootService {
-
-    @open
-    type object {};
-    action z2ui5(value : object) returns object;
-
-}
+// The z2ui5 roundtrip service (rootService) is shipped by the package -- see
+// abap2UI5/z2ui5-service.cds -- so this app does not redeclare it. That is the
+// same import an external project writes, which is what keeps the packaged
+// definition exercised by this app's own test suite rather than only in
+// theory. Its implementation is registered by the package's cds-plugin.
+using from 'abap2UI5/z2ui5-service';

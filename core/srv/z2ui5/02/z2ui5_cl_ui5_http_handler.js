@@ -21,10 +21,17 @@ module.exports = async function service(req) {
   // Derive the exit-context request info from CAP's inner express req so
   // user exits (set_config_http_get/_post) see path/params/headers. ABAP
   // _main calls init_context unconditionally before dispatching by method.
+  // CAP has moved this accessor around across majors, and getting it wrong is
+  // SILENT: reqInfo falls back to defaults (so a user exit sees no request
+  // context at all) and the CSRF gate below compares empty strings, which its
+  // lenient no-headers branch reads as "nothing to compare — allow". A live
+  // probe on CAP 9 found exactly that: the gate was active, correct, and never
+  // saw a header. `req.http.{req,res}` is the current documented pair; the
+  // older spellings stay as fallbacks.
   let reqInfo;
-  const innerReq = req?.req || req?._?.req || null;
+  const innerReq = req?.http?.req || req?.req || req?._?.req || null;
   try {
-    const innerRes = req?.res || req?._?.res || null;
+    const innerRes = req?.http?.res || req?.res || req?._?.res || null;
     if (innerReq && innerRes) {
       reqInfo = z2ui5_cl_util_http.factory_cloud(innerReq, innerRes).get_req_info();
     }
@@ -36,27 +43,32 @@ module.exports = async function service(req) {
   // POST, the only method that can change state. ON by default since 2026-08
   // (the shipped exit sets check_csrf_active); an app that fronts the endpoint
   // with its own protection can still switch it off in its exit.
+  let csrfRejected = false;
   try {
     const cfg = {};
     require(`../01/04/z2ui5_cl_ui5_user_exit`).get_instance().set_config_http_post({ cs_config: cfg });
     if (cfg.check_csrf_active !== false) {
       const h = innerReq?.headers || {};
-      const rejected = module.exports._check_csrf_rejected({
+      csrfRejected = module.exports._check_csrf_rejected({
         active: true,
         origin: h.origin || ``,
         referer: h.referer || ``,
         host: h.host || ``,
       });
-      if (rejected) {
-        return {
-          body: `CSRF validation failed - cross-origin POST rejected`,
-          status_code: 403,
-          status_reason: `Forbidden`,
-        };
-      }
     }
   } catch {
     // exit not configured — csrf stays inactive
+  }
+  if (csrfRejected) {
+    const message = `CSRF validation failed - cross-origin POST rejected`;
+    // Reject THROUGH CDS when it is driving. Returning the rejection as a
+    // value made CDS serialize it as a successful action result: the caller
+    // got HTTP 200 carrying `{status_code: 403}` in the body, so a blocked
+    // request looked like a completed one to every client that checks the
+    // status — which is every client. req.reject produces a real 403.
+    // The plain object stays for the non-CAP adapters, which read status_code.
+    if (typeof req?.reject === `function`) req.reject(403, message);
+    return { body: message, status_code: 403, status_reason: `Forbidden` };
   }
 
   let responseJson;
