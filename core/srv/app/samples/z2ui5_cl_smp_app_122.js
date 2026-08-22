@@ -32,10 +32,10 @@ class z2ui5_cl_smp_app_122 extends z2ui5_if_app {
     this.device_orientation = z2ui5_cl_util.abap_tab_assign(this.device_orientation, z2ui5_cl_util.abap_copy(ls_get.S_DEVICE.ORIENTATION));
     this.device_height = (ls_get.S_DEVICE.RESIZE.HEIGHT);
     this.device_width = (ls_get.S_DEVICE.RESIZE.WIDTH);
-    this.device_phone = (ls_get.S_DEVICE.SYSTEM === z2ui5_if_types.cs_device.system.phone);
-    this.device_desktop = (ls_get.S_DEVICE.SYSTEM === z2ui5_if_types.cs_device.system.desktop);
-    this.device_tablet = (ls_get.S_DEVICE.SYSTEM === z2ui5_if_types.cs_device.system.tablet);
-    this.device_combi = (ls_get.S_DEVICE.SYSTEM === z2ui5_if_types.cs_device.system.combi);
+    this.device_phone = (ls_get.S_DEVICE.SYSTEM === z2ui5_if_client.cs_device.system.phone);
+    this.device_desktop = (ls_get.S_DEVICE.SYSTEM === z2ui5_if_client.cs_device.system.desktop);
+    this.device_tablet = (ls_get.S_DEVICE.SYSTEM === z2ui5_if_client.cs_device.system.tablet);
+    this.device_combi = (ls_get.S_DEVICE.SYSTEM === z2ui5_if_client.cs_device.system.combi);
     this.device_touch = z2ui5_cl_util.abap_tab_assign(this.device_touch, z2ui5_cl_util.abap_copy(ls_get.S_DEVICE.SUPPORT.TOUCH));
     this.device_pointer = z2ui5_cl_util.abap_tab_assign(this.device_pointer, z2ui5_cl_util.abap_copy(ls_get.S_DEVICE.SUPPORT.POINTER));
     this.device_retina = z2ui5_cl_util.abap_tab_assign(this.device_retina, z2ui5_cl_util.abap_copy(ls_get.S_DEVICE.SUPPORT.RETINA));
@@ -181,5 +181,5 @@ module.exports = z2ui5_cl_smp_app_122;
 
 const z2ui5_cl_ui5_view_builder = require("abap2UI5/z2ui5_cl_ui5_view_builder");
 const z2ui5_cl_util = require("abap2UI5/z2ui5_cl_util");
-const z2ui5_if_types = require("abap2UI5/z2ui5_if_types");
+const z2ui5_if_client = require("abap2UI5/z2ui5_if_client");
 

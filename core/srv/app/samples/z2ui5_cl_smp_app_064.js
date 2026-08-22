@@ -37,12 +37,10 @@ class z2ui5_cl_smp_app_064 extends z2ui5_if_app {
   }
 
   on_init() {
-    let temp1 = [];
     let view = null;
     let page1 = null;
     let temp5 = false;
     let layout = null;
-    temp1 = {};
     this.mv_check_enabled = true;
     view = z2ui5_cl_ui5_view_builder.factory()
       .ele({ n: `View`, ns: `mvc` })

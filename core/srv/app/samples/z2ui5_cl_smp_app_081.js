@@ -134,7 +134,7 @@ class z2ui5_cl_smp_app_081 extends z2ui5_if_app {
     switch (this.client.get_event()) {
       case `SEL_CHANGE`:
         lt_sel = z2ui5_cl_util.abap_copy(this.mt_tab);
-        for (let _i = lt_sel.length - 1; _i >= 0; _i--) { const row = lt_sel[_i]; if (z2ui5_cl_util.abap_is_initial(row.selected)) lt_sel.splice(_i, 1); }
+        for (let _i = lt_sel.length - 1; _i >= 0; _i--) { const row = lt_sel[_i]; if (!(row.selected === true || row.selected === `X`)) lt_sel.splice(_i, 1); }
         break;
       case `POPOVER_LIST`:
         this.popover_list_display({ id: `TEST` });
