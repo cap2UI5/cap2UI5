@@ -111,7 +111,7 @@ scripts/assemble-runtime.sh /tmp/ref          # or: scripts/assemble-runtime.sh 
 
 npm install
 npm test                                       # ABI gate, auth, books, concurrency  (15 tests)
-npm run cold-test                              # state through SIGKILL, ABAP control included
+npm run cold-test                              # state AND the app stack through SIGKILL, ABAP control included
 npm run bench -- 100                           # ms per roundtrip
 npm run test:browser                           # real Chromium against the framework's own page
 npm start                                      # http://localhost:4004/rest/root/z2ui5?app_start=ZCL_JS_BOOKS
@@ -125,6 +125,7 @@ npm start                                      # http://localhost:4004/rest/root
 | Roundtrip | **14 ms**, sequential, HTTP, SQLite |
 | Drafts | a CDS entity, owner-scoped: alice's draft answers to alice and to nobody else |
 | Restart | process A writes, is SIGKILLed, process B answers correctly |
+| Restart mid-navigation | A is killed **inside a called app**; B, which never built the stack, unwinds it and carries the picked value home — the whole app stack is in the draft, not in memory |
 | Concurrency | three users interleaved in one process, every answer to its owner |
 | Navigation | `navTo` / `navBack` carrying a result, popups and nested views — on the wire and in the browser |
 | Browser | renders in Chromium — the page the framework serves on GET, UI5 booted; MessageBox, table, a `sap.m.Dialog` popup, and a navigation round trip that comes back with the choice |
