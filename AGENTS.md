@@ -24,6 +24,22 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
 
 - **Never change behaviour without a test in `examples/bookshop/test/`.** The
   suite is the gate; there is no other.
+- **A facade method that composes view XML needs a BROWSER test, not only a
+  wire test.** The wire tests play the frontend's part by hand, so they can
+  feed an event argument the real page would never send — which is how
+  `c.event(name, args)` was missing while `nav.test.mjs` was green and the
+  browser was not. When the browser finds such a thing, add the assertion to
+  the wire test as well, so the cheap test fails next time too.
+- **Read `z2ui5_if_client`'s ABAP Doc before wiring one of its methods into the
+  facade.** Several are declared *"obsolete — does NOTHING"*
+  (`view_model_update` and its popup/nest siblings), and the two lifecycle
+  predicates answer different questions than their names suggest:
+  `check_on_init( )` is the first roundtrip of *this instance*,
+  `check_on_navigated( )` is also every return from a navigation or a value
+  help, and it is the one to render in. The facade refuses the first group and
+  renames the second to `isFirstRun` / `isDisplay`; `abi-gate.test.mjs` holds
+  both decisions so a change upstream re-opens them instead of passing
+  silently.
 - **Every new `abap.*` or `z2ui5_*$*` touchpoint in `plugin/lib/` goes into
   `abi-gate.test.mjs`.** The plugin couples to the transpiler's emission
   format (static `ATTRIBUTES`/`METHODS` maps, `constructor_( )`, `~` → `$`),
