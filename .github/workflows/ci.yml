@@ -18,6 +18,15 @@ on:
         description: "@abap2ui5/runtime version to use instead of a build (once upstream publishes)"
         default: ""
 
+# Least privilege for the whole workflow. It matters here more than in most
+# repositories: the job below checks out ANOTHER repository at a mutable branch
+# and runs `npm ci` plus three build scripts from it, which is arbitrary code
+# execution by whoever can push there. On `push: main` and on the schedule that
+# code runs with a real GITHUB_TOKEN, not a fork PR's read-only one - so the
+# token it runs with is the one thing this file can bound.
+permissions:
+  contents: read
+
 jobs:
   ci:
     runs-on: ubuntu-latest
@@ -39,6 +48,9 @@ jobs:
           repository: abap2UI5/abap2UI5
           path: .upstream
           ref: ${{ inputs.upstream_ref || 'claude/happy-turing-qt6ljo' }}
+          # The upstream build runs that repository's own scripts; do not leave
+          # this job's credentials in .upstream/.git/config for them to read.
+          persist-credentials: false
       - if: inputs.runtime_version == ''
         name: build the runtime
         working-directory: .upstream
@@ -49,8 +61,13 @@ jobs:
           npm run auto_transpile
       - if: inputs.runtime_version == ''
         run: scripts/assemble-runtime.sh .upstream
+      # Through the environment, not interpolated into the script text: a `${{ }}`
+      # substitution lands in the shell before the shell parses it, so a value
+      # carrying a quote would be command injection.
       - if: inputs.runtime_version != ''
-        run: scripts/assemble-runtime.sh --package "${{ inputs.runtime_version }}"
+        env:
+          RUNTIME_VERSION: ${{ inputs.runtime_version }}
+        run: scripts/assemble-runtime.sh --package "$RUNTIME_VERSION"
 
       # ---- the gates -------------------------------------------------------
       - run: npm install --no-audit --no-fund

@@ -27,8 +27,23 @@ function notFound() {
 
 /** Whoever CAP says is asking. The contract the interface documents is that a
  *  draft belongs to its creator and reads answer "not found" for anybody else -
- *  identically, so a caller cannot tell a foreign draft from a missing one. */
-const who = () => String(cds.context?.user?.id ?? "anonymous");
+ *  identically, so a caller cannot tell a foreign draft from a missing one.
+ *
+ *  An EMPTY id is refused rather than used. `?? ` catches null and undefined
+ *  but not "", and cds.User permits an empty id - so an auth strategy that
+ *  produced one would have stored owner = "" and, with the old truthiness
+ *  checks below, published that user's drafts to everybody. There is no
+ *  identity to bind a draft to here, so the roundtrip fails loudly instead. */
+const who = () => {
+  const id = cds.context?.user?.id;
+  const s = id === undefined || id === null ? "anonymous" : String(id).trim();
+  if (!s) {
+    throw new Error(
+      "[cap2ui5] the authenticated user has no id - a draft cannot be bound to an owner",
+    );
+  }
+  return s;
+};
 
 class ZCL_CDS_DRAFT_STORE {
   static INTERNAL_TYPE = "CLAS";
@@ -55,10 +70,16 @@ class ZCL_CDS_DRAFT_STORE {
     // uuid, so a guarding SELECT would be a wasted roundtrip per click.
     try {
       await cds.run(INSERT.into(Drafts).entries(row));
-    } catch {
-      const owner = await cds.run(SELECT.one.from(Drafts).columns("owner").where({ id: row.id }));
-      if (owner && owner.owner && owner.owner !== row.owner) throw await notFound();
-      await cds.run(UPDATE(Drafts).set(row).where({ id: row.id }));
+    } catch (e) {
+      // Only a KEY COLLISION may fall through to an update. The catch is blind
+      // to the reason, so the row itself decides: no row means the INSERT failed
+      // for its own reason and that error is the honest one to raise.
+      const existing = await cds.run(SELECT.one.from(Drafts).columns("owner").where({ id: row.id }));
+      if (!existing) throw e;
+      if (existing.owner !== row.owner) throw await notFound();
+      // `owner` in the WHERE as well: between the SELECT and here the row could
+      // have changed hands, and a write must not cross that.
+      await cds.run(UPDATE(Drafts).set(row).where({ id: row.id, owner: row.owner }));
     }
   }
 
@@ -66,7 +87,11 @@ class ZCL_CDS_DRAFT_STORE {
     const { Drafts } = cds.entities("cap2ui5");
     const r = await cds.run(SELECT.one.from(Drafts).where({ id: String(id).trim() }));
     if (!r) throw await notFound();
-    if (r.owner && r.owner !== who()) throw await notFound();   // fail closed, same error
+    // `r.owner !== who()`, not `r.owner && r.owner !== who()`: a row with no
+    // owner belongs to NOBODY, not to everybody. Under the old condition a
+    // Drafts row whose owner was NULL or "" was served to every caller that
+    // presented its id - measured: bob was handed alice's draft.
+    if (r.owner !== who()) throw await notFound();               // fail closed, same error
     return r;
   }
 
@@ -93,7 +118,7 @@ class ZCL_CDS_DRAFT_STORE {
     const { Drafts } = cds.entities("cap2ui5");
     const r = await cds.run(
       SELECT.one.from(Drafts).columns("id", "owner").where({ id: String(INPUT.id.get()).trim() }));
-    const ok = !!r && (!r.owner || r.owner === who());
+    const ok = !!r && r.owner === who();          // an ownerless row is nobody's - see #read
     return new abap.types.Character(1).set(ok ? "X" : " ");
   }
 

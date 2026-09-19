@@ -13,7 +13,10 @@ entity Drafts {
       id_prev         : String(36);
       id_prev_app     : String(36);
       id_prev_app_stk : String(36);
-      owner           : String(120);   // whoever created it; reads are scoped to it
+      owner           : String(120) not null;  // whoever created it; reads are scoped to it
+                                              // not null: an ownerless row is a draft the store
+                                              // cannot scope, and it is now served to nobody
+                                              // rather than, as before, to everybody
       createdAt       : Timestamp;
       data            : LargeString;   // the serialized app state
 }

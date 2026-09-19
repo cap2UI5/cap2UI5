@@ -47,19 +47,27 @@ cds.on("bootstrap", (app) => {
   // "anonymous", a draft created by alice answers to bob, and the owner
   // binding z2ui5_if_ui5_draft_store promises is void. Measured before this
   // line existed: two authenticated roundtrips, both stored as "anonymous".
+  //
+  // guard BEFORE the body parser: it reads cds.context and nothing else, and
+  // behind the parser an unauthenticated caller could make the server buffer
+  // 10 MB per request before the 401 was even decided.
   app.all(
     conf.routes,
     ...cds.middlewares.before.filter(Boolean),
-    express.raw({ type: "*/*", limit: "10mb" }),
     guard,
+    express.raw({ type: "*/*", limit: "10mb" }),
     async (req, res) => {
       try {
         const { cl_express_icf_shim } = await ready;
         if (!req.body || !Buffer.isBuffer(req.body)) req.body = Buffer.alloc(0);
         await cl_express_icf_shim.run({ req, res, class: "ZCL_SICF" });
       } catch (e) {
-        console.error("[cap2ui5] roundtrip failed:", e);
-        if (!res.headersSent) res.status(500).type("text/plain").send(String(e?.message || e));
+        // The detail goes to the log, not to the caller: CDS and driver messages
+        // carry entity names, SQL fragments and deployment paths, none of which
+        // a roundtrip client needs and all of which are free reconnaissance.
+        const ref = cds.context?.id ?? "-";
+        console.error(`[cap2ui5] roundtrip failed (${ref}):`, e);
+        if (!res.headersSent) res.status(500).type("text/plain").send(`roundtrip failed (${ref})`);
       }
     },
   );

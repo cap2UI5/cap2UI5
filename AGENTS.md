@@ -54,6 +54,20 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
   `npm run test:browser`.
 - `no-undef` is an error and stays one: CAP's `SELECT` etc. are imported from
   `cds.ql`, not used as globals.
+- **An authorization check compares PRESENCE, never truthiness.** The draft
+  store's three owner checks read `if (r.owner && r.owner !== who())`, which
+  made a row with a `NULL` or `""` owner readable and writable by everybody
+  instead of by nobody — a security review found it and a proof of concept
+  confirmed it: bob replayed alice's draft id against a blanked row and was
+  served her app state. `&&` in front of a comparison in an access check is
+  the bug: it turns a missing value into a wildcard. The same rule covers
+  the identity side — `?? ` catches `null` and `undefined` but not `""`, and
+  `cds.User` permits an empty id, so `who( )` refuses one rather than storing
+  a draft under an owner it cannot tell from anybody else's.
+- **The guard goes in FRONT of the body parser.** Behind it, an
+  unauthenticated caller makes the server buffer the whole body before the
+  401 is decided. The guard reads `cds.context` and nothing else, so nothing
+  requires it to be later in the chain.
 - The route must stay behind `cds.middlewares.before`. Without it
   `cds.context` does not exist and every draft is `anonymous` — the first
   version of the plugin got that wrong; `auth.test.mjs` is the proof it stays
