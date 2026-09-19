@@ -15,7 +15,7 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
 | path | hand-written? |
 |---|---|
 | `plugin/` | yes — the npm package `cap2ui5` |
-| `examples/bookshop/` | yes — a CAP project using it; **the test suite lives here** because the tests need a project |
+| `examples/bookshop/` | yes — a CAP project using it; **the test suite lives here** because the tests need a project. `srv/catalog-service.cds` is deliberately an ordinary CAP service that knows nothing about cap2UI5: it is what `coexistence.test.mjs` drives to prove the plugin is a guest in the project and not its host. |
 | `runtime/package.json`, `runtime/README.md` | yes — the stand-in's manifest |
 | `runtime/output/`, `runtime/setup/`, `runtime/webapp/` | **no — upstream's transpiled output, never edited, never committed.** `scripts/assemble-runtime.sh` fills them from an upstream build or, once it exists, from the published package (`--package X.Y.Z`). |
 | `docs/adr/` | the decision records, copied from builder-abap2UI5-js where they were made; historical paths in them refer to that repository |

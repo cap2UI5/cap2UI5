@@ -2,7 +2,7 @@
 // abap2UI5 in CAP at all. main( ) is async because the APP does I/O; the
 // framework calls need no await either way.
 const cds = require("@sap/cds");
-const { SELECT } = cds.ql;                 // CAP also installs it as a global; the import is the honest form
+const { SELECT, INSERT } = cds.ql;                 // CAP also installs it as a global; the import is the honest form
 const { defineApp, t } = require("cap2ui5");
 
 defineApp("ZCL_JS_BOOKS", class {
@@ -22,7 +22,20 @@ defineApp("ZCL_JS_BOOKS", class {
         `<items><ColumnListItem><cells><Text text="{TITLE}"/><Text text="{AUTHOR}"/>` +
         `<ObjectNumber number="{PRICE}"/></cells></ColumnListItem></items></Table>` +
         `<Text text="${c.bind("hits")} hits"/>` +
+        `<Button text="Add" press="${c.event("ADD")}"/>` +
         `</Page></Shell></mvc:View>`);
+      return;
+    }
+
+    // The app WRITES the project's own entity, through cds.ql like any CAP
+    // handler - so the plain OData service next door sees the row at once.
+    if (c.eventName === "ADD") {
+      const { Books } = cds.entities("my.bookshop");
+      const max = await SELECT.one.from(Books).columns("max(ID) as m");
+      await INSERT.into(Books).entries({
+        ID: (max?.m ?? 0) + 1, title: this.search, author: "the app", stock: 1, price: 1.0,
+      });
+      c.messageToast(`added ${this.search}`);
       return;
     }
 

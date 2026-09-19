@@ -97,7 +97,7 @@ to decides who gets in — the route runs behind CAP's own middlewares.
 
 ```
 plugin/              the npm package cap2ui5: cds-plugin.js, index.cds, lib/
-examples/bookshop/   a CAP project using it - and the test suite
+examples/bookshop/   a CAP project using it: a plain CAP service, the apps, the test suite
 runtime/             @abap2ui5/runtime: only package.json + README are here, see runtime/README.md
 scripts/             assemble-runtime.sh - fills runtime/ from an upstream build or the package
 docs/adr/            the decisions, with the measurements that made them
@@ -125,6 +125,7 @@ npm start                                      # http://localhost:4004/rest/root
 | Roundtrip | **14 ms**, sequential, HTTP, SQLite |
 | Drafts | a CDS entity, owner-scoped: alice's draft answers to alice and to nobody else |
 | Restart | process A writes, is SIGKILLed, process B answers correctly |
+| **A guest, not a host** | a plain CAP OData service runs beside the apps on the same entities: one authorization for both doors, rows written by an app are there for the OData client and back, and `cap2ui5.Drafts` is not reachable through it (`coexistence.test.mjs`) |
 | Restart mid-navigation | A is killed **inside a called app**; B, which never built the stack, unwinds it and carries the picked value home — the whole app stack is in the draft, not in memory |
 | Concurrency | three users interleaved in one process, every answer to its owner |
 | Navigation | `navTo` / `navBack` carrying a result, popups and nested views — on the wire and in the browser |
