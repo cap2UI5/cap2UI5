@@ -9,7 +9,7 @@ Only `package.json` and this file are committed. The three content directories
 are 20 MB of generated output that any checkout rebuilds; fill them with
 
 ```bash
-../scripts/assemble-runtime.sh <upstream checkout>
+scripts/assemble-runtime.sh <upstream checkout>     # or: --package X.Y.Z
 ```
 
 | directory | copied from upstream | why the plugin needs it |
