@@ -1,24 +1,16 @@
+# Monthly, grouped: one pull request per ecosystem. The runtime's own
+# dependencies (@abaplint/runtime, database-sqlite) are pinned by upstream's
+# package and are not bumped here.
 version: 2
 updates:
-  # GitHub Actions only. The workflows under .github/ are the one thing this
-  # repository owns, so their action pins are the one thing dependabot can
-  # usefully update here.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      toolchain:
+        patterns: ["*"]
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
-
-# There is deliberately NO npm ecosystem here.
-#
-# package.json, package-lock.json and core/ are generated: every publish from
-# builder-cap2UI5 wipes and rewrites everything outside .github/. A dependency
-# bump merged here therefore lives until the next nightly and is then silently
-# reverted -- which is exactly what happened to @cap-js/cds-test, bumped to
-# ^1.0.2 in #67 and back to ^1.0.1 in the publish commit 22bf052 two days
-# later. Worse than useless: the PR is green, the merge looks like an update,
-# and the dependency never moves.
-#
-# App dependencies are updated at their source, in
-# builder-cap2UI5:src/package.json, where dependabot watches the `/src`
-# directory and the same jest suite gates the change before it is published
-# here.
+      interval: monthly

@@ -1,73 +1,45 @@
-# AGENTS.md — cap2UI5 (the deployable CAP app)
+# AGENTS.md — cap2UI5
 
 Guidance for AI agents and contributors. Read before making any change.
 
-> [!IMPORTANT]
-> **This repository is a generated build artifact.** It is published 1:1 by
-> [builder-cap2UI5](https://github.com/cap2UI5/builder-cap2UI5) — every
-> publish wipes and rewrites everything except `.git/` and `.github/`.
-> **Do not hand-edit anything outside `.github/` here** (including this
-> file, the README and the devcontainer — they ship from
-> builder-cap2UI5:`src/`).
+## What this is
 
-## Where changes belong
+abap2UI5 hosted in CAP. **There is no port here**: `plugin/` is ~570 lines of
+hand-written JavaScript that boots upstream's transpiled runtime
+(`@abap2ui5/runtime`), keeps its drafts in a CDS entity and lets apps be plain
+JavaScript classes. Everything the framework does, upstream's ABAP does. The
+decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
 
-| You want to change… | Edit in |
+## Layout, and what is generated
+
+| path | hand-written? |
 |---|---|
-| the app skeleton (`srv/server.js`, `z2ui5-service.*`, `db/`, `mta.yaml`, `test/`, README, devcontainer, this file) | [builder-cap2UI5](https://github.com/cap2UI5/builder-cap2UI5) → `src/` |
-| the framework / core package (`core/` — engine, `core/srv/z2ui5/`, bundled samples, webapp) | [builder-abap2UI5-js](https://github.com/cap2UI5/builder-abap2UI5-js) → `src/` (or its transpiler pipelines) |
-| this repo's CI (`.github/workflows/` — `test.yml`, `trigger_web.yml`, `deploy-check.yml` — and `.github/dependabot.yml`) | here — `.github/` is the only repo-owned folder |
-| your own apps (as a **user** of cap2UI5) | **your own CAP project** — install the package, `using from 'abap2UI5/z2ui5-model'` + `'abap2UI5/z2ui5-service'`, and point at your folder with `Z2UI5_APP_DIRS` / `require("abap2UI5/register-apps")(dir)`. `srv/app/` here works for a quick look but is overwritten on every publish, so nothing you want to keep belongs in it. |
+| `plugin/` | yes — the npm package `cap2ui5` |
+| `examples/bookshop/` | yes — a CAP project using it; **the test suite lives here** because the tests need a project |
+| `runtime/package.json`, `runtime/README.md` | yes — the stand-in's manifest |
+| `runtime/output/`, `runtime/setup/`, `runtime/webapp/` | **no — upstream's transpiled output, never edited, never committed.** `scripts/assemble-runtime.sh` fills them from an upstream build or, once it exists, from the published package (`--package X.Y.Z`). |
+| `docs/adr/` | the decision records, copied from builder-abap2UI5-js where they were made; historical paths in them refer to that repository |
 
-## Layout
+## Rules
 
-- App at the repo root: `app/` (webapp + starter page), `db/` (draft table
-  `cap2ui5.z2ui5_t_01`), `srv/` (service, server wiring, `srv/app/` custom
-  apps, `srv/external/` Northwind model), `test/` (jest), `scripts/`
-  (`vendor-core.js`, the production-build step), `mta.yaml` (BTP deployment).
-- `core/` — the **vendored** platform-neutral core package (npm name
-  `abap2UI5`, linked via `"abap2UI5": "file:./core"`): engine, framework
-  classes (`core/srv/z2ui5/`), ~105 bundled samples
-  (`core/srv/app/samples/`), the z2ui5 webapp source. Its dependency tree is
-  part of the app lock (under `core/node_modules/`), so **one** `npm ci` at
-  the root installs everything.
+- **Never change behaviour without a test in `examples/bookshop/test/`.** The
+  suite is the gate; there is no other.
+- **Every new `abap.*` or `z2ui5_*$*` touchpoint in `plugin/lib/` goes into
+  `abi-gate.test.mjs`.** The plugin couples to the transpiler's emission
+  format (static `ATTRIBUTES`/`METHODS` maps, `constructor_( )`, `~` → `$`),
+  which is not a published contract; that test is where a transpiler bump
+  must fail.
+- `npm test` stays browserless. Browser tests are `*.e2e.mjs`, run by
+  `npm run test:browser`.
+- `no-undef` is an error and stays one: CAP's `SELECT` etc. are imported from
+  `cds.ql`, not used as globals.
+- The route must stay behind `cds.middlewares.before`. Without it
+  `cds.context` does not exist and every draft is `anonymous` — the first
+  version of the plugin got that wrong; `auth.test.mjs` is the proof it stays
+  fixed.
+- Commit messages say why. The history of this project is its evidence.
 
-## Building for deployment
+## Running
 
-`npm run build:production` — **not** a bare `cds build --production`. The
-CDS build stages the server module into `gen/srv` and copies the app's
-`"abap2UI5": "file:./core"` dependency with it, but never the target of that
-specifier; `scripts/vendor-core.js` puts the vendored core there afterwards.
-Without it the pushed module resolved `abap2UI5` to a dangling symlink and
-died at startup with `Cannot find module 'abap2UI5/engine'` — silently,
-because `npm ci` does not check symlink targets and `cds build` exits 0.
-`mta.yaml`'s `before-all` runs the pair, `test/production-build.test.js`
-gates it, and `deploy-check.yml` installs and loads the staged module.
-
-`openui5-dist` — the UI5 runtime `cds watch` serves at `/resources` — is a
-devDependency of this app, not a dependency of the framework: on BTP
-`/resources` is routed to the `ui5` destination, so the deployed server never
-serves it, and the package is 611 MB of deprecated release tooling that
-carried 43 advisories (3 critical). `npm ci --omit=dev` in the staged module
-therefore leaves it out; the vendor step additionally prunes it from the
-staged tree if a core that still declares it comes through the mirror.
-Staged tree today: 19 MB, 0 advisories.
-
-## Run & test
-
-```bash
-npm install
-npx cds watch          # http://localhost:4004/z2ui5/webapp/index.html
-npm test               # jest: starter integration test + view builder test
-```
-
-## Pipeline context
-
-builder-abap2UI5-js (nightly sync from upstream abap2UI5, rebuilds the core)
-→ `trigger_cap` → builder-cap2UI5 `update_cap` (rebuild + jest gate +
-publish **here** via deploy key `ACTION_KEY_APP`) → `trigger_web` here
-(on every push to main, i.e. every publish; also manual) kicks
-[builder-cap2UI5-web](https://github.com/cap2UI5/builder-cap2UI5-web), which
-bundles this repo into the static site
-[web-cap2UI5-build](https://github.com/cap2UI5/web-cap2UI5-build)
-(GitHub Pages: https://cap2ui5.github.io/web-cap2UI5-build/).
+See README.md. `npm run lint && npm test` before every push; `cold-test`,
+`bench` and `test:browser` when the plugin or the runtime changed.

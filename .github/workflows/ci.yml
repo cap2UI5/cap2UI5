@@ -1,0 +1,71 @@
+# Build upstream's runtime from scratch, assemble it, install the workspace,
+# and run everything: lint, the suite (ABI gate, auth, books, concurrency),
+# the cold test, the bench, the browser.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "30 7 * * *"
+  workflow_dispatch:
+    inputs:
+      upstream_ref:
+        description: "abap2UI5/abap2UI5 ref to build the runtime from (ignored when runtime_version is set)"
+        default: "claude/happy-turing-qt6ljo"
+      runtime_version:
+        description: "@abap2ui5/runtime version to use instead of a build (once upstream publishes)"
+        default: ""
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      # ---- upstream's runtime ---------------------------------------------
+      # A SEPARATE checkout: `npm run auto_downport` rewrites src/ in place.
+      # The ref is the branch carrying the four seams UNTIL THEY ARE MERGED;
+      # then it becomes `main`. A personal branch in CI is a debt, and this
+      # comment is its ticket.
+      - if: inputs.runtime_version == ''
+        uses: actions/checkout@v4
+        with:
+          repository: abap2UI5/abap2UI5
+          path: .upstream
+          ref: ${{ inputs.upstream_ref || 'claude/happy-turing-qt6ljo' }}
+      - if: inputs.runtime_version == ''
+        name: build the runtime
+        working-directory: .upstream
+        run: |
+          npm ci
+          npm run deps
+          npm run auto_downport
+          npm run auto_transpile
+      - if: inputs.runtime_version == ''
+        run: scripts/assemble-runtime.sh .upstream
+      - if: inputs.runtime_version != ''
+        run: scripts/assemble-runtime.sh --package "${{ inputs.runtime_version }}"
+
+      # ---- the gates -------------------------------------------------------
+      - run: npm install --no-audit --no-fund
+      - run: npm run lint
+      - run: npm test
+      - run: npm run cold-test
+      - run: npm run bench -- 50
+
+      # ---- the browser -----------------------------------------------------
+      - run: npx playwright install --with-deps chromium
+        working-directory: examples/bookshop
+      - run: npm run test:browser
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screenshots
+          path: examples/bookshop/screenshots
+          if-no-files-found: ignore

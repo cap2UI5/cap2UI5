@@ -1,0 +1,30 @@
+{
+  "name": "cap2ui5-example",
+  "private": true,
+  "description": "An ordinary CAP project that uses cap2ui5. Nothing in here is cap2UI5-specific except the dependency and srv/apps/.",
+  "dependencies": {
+    "@cap-js/sqlite": "^2",
+    "@sap/cds": "^9",
+    "cap2ui5": "*"
+  },
+  "cds": {
+    "requires": {
+      "db": {
+        "kind": "sqlite",
+        "credentials": {
+          "url": "db.sqlite"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "start": "cds-serve",
+    "test": "cds-deploy && node --test test/*.test.mjs",
+    "test:browser": "cds-deploy && node --test test/browser.e2e.mjs",
+    "cold-test": "node cold-test.mjs",
+    "bench": "node bench.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.63.0"
+  }
+}

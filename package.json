@@ -1,83 +1,21 @@
 {
-  "name": "cap2ui5",
-  "version": "1.0.0",
-  "description": "cap2UI5 \u2014 the abap2UI5 concept on CAP/Node.js: the full CAP app built on the platform-neutral abap2UI5 core package. Fully auto-generated (AI + sync pipeline).",
-  "repository": "github:cap2UI5/cap2UI5",
-  "license": "MIT",
+  "name": "cap2ui5-workspace",
   "private": true,
-  "engines": {
-    "node": ">=22"
-  },
-  "dependencies": {
-    "@cap-js/hana": "^3",
-    "@sap/cds": "^10",
-    "abap2UI5": "file:./core",
-    "express": "^5"
+  "description": "cap2UI5 - abap2UI5 as a CAP plugin. plugin/ is the npm package, examples/bookshop a project that uses it, runtime/ the @abap2ui5/runtime stand-in until upstream publishes it.",
+  "workspaces": [
+    "runtime",
+    "plugin",
+    "examples/bookshop"
+  ],
+  "scripts": {
+    "start": "npm --workspace examples/bookshop start",
+    "test": "npm --workspace examples/bookshop test",
+    "test:browser": "npm --workspace examples/bookshop run test:browser",
+    "cold-test": "npm --workspace examples/bookshop run cold-test",
+    "bench": "npm --workspace examples/bookshop run bench",
+    "lint": "eslint ."
   },
   "devDependencies": {
-    "@cap-js/cds-test": "^1.0.2",
-    "@cap-js/cds-types": "^0.19",
-    "@cap-js/sqlite": "^3",
-    "@sap/cds-dk": "^10",
-    "jest": "^30",
-    "mbt": "^1.2.34",
-    "openui5-dist": "1.113.0",
-    "rimraf": "^6"
-  },
-  "scripts": {
-    "start": "cds-serve",
-    "watch": "cds watch",
-    "watch-z2ui5": "cds watch --open z2ui5/webapp/index.html?sap-ui-xx-viewCache=false",
-    "test": "jest",
-    "build:production": "cds build --production && node scripts/vendor-core.js",
-    "undeploy": "cf undeploy cap2UI5 --delete-services --delete-service-keys --delete-service-brokers",
-    "build": "rimraf resources mta_archives && mbt build --mtar archive",
-    "deploy": "cf deploy mta_archives/archive.mtar --retries 1"
-  },
-  "cds": {
-    "requires": {
-      "db": {
-        "[production]": "hana",
-        "[development]": "sqlite"
-      },
-      "northwind": {
-        "kind": "odata-v2",
-        "model": "srv/external/northwind",
-        "credentials": {
-          "url": "https://services.odata.org/V2/Northwind/Northwind.svc/"
-        }
-      },
-      "destinations": true,
-      "html5-repo": true,
-      "workzone": true,
-      "auth": {
-        "[production]": "xsuaa",
-        "[development]": {
-          "kind": "mocked",
-          "users": {
-            "alice": {
-              "password": "alice",
-              "roles": [
-                "authenticated-user",
-                "User"
-              ]
-            },
-            "bob": {
-              "password": "bob",
-              "roles": [
-                "authenticated-user",
-                "User"
-              ]
-            }
-          }
-        }
-      }
-    }
-  },
-  "jest": {
-    "testEnvironment": "node",
-    "testMatch": [
-      "<rootDir>/test/**/*.test.js"
-    ]
+    "eslint": "^9"
   }
 }
