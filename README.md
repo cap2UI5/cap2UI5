@@ -85,8 +85,10 @@ Open `/rest/root/z2ui5?app_start=BOOKS`. The full example is
 > own, to an open popup and a nested view too).
 
 **State:** strings, numbers, booleans, `t.packed(l, d)`, `t.char(n)`, a plain
-object (a structure), `t.table({ …one row… })`. Component names are UPPERCASE
-in the model. ABAP apps transpiled with upstream run unchanged next to yours.
+object (a structure), `t.table({ …one row… })` — and those nest: a structure
+inside a structure, a table inside a structure, up to 8 levels. Component names
+are UPPERCASE in the model. A field that carries no ABAP type (`null`, an empty
+array, a cycle) is reported by its path and left out; the app runs without it. ABAP apps transpiled with upstream run unchanged next to yours.
 
 **Configuration** (`package.json#cds.cap2ui5`): `apps` (`srv/apps`), `routes`,
 `webapp` (mount path of the UI5 shell), `requires` (`authenticated-user`;

@@ -96,7 +96,7 @@ const isPlainObject = (v) => v !== null && typeof v === "object" && Object.getPr
 //   { k: "table",  fields }                                  one row = that structure
 // `make()` builds a fresh box of the shape - what ATTRIBUTES.type() must do on
 // every call, because RTTI and the deserializer construct from it.
-function shapeOf(v) {
+function shapeOf(v, path = []) {
   if (typeof v === "string") return { k: "string", make: () => t.string().set(v) };
   if (typeof v === "boolean") return { k: "bool", make: () => t.bool().set(v ? "X" : " ") };
   if (typeof v === "number") {
@@ -108,17 +108,36 @@ function shapeOf(v) {
     if (v.__shape) return v.__shape;                        // t.struct / t.table
     return { k: "boxed", make: () => v.clone ? v.clone() : v };
   }
-  if (Array.isArray(v)) return v.length && isPlainObject(v[0]) ? tableFor(v[0]).__shape : null;
-  if (isPlainObject(v)) return structFor(v).__shape;
+  if (Array.isArray(v)) return v.length && isPlainObject(v[0]) ? tableFor(v[0], path).__shape : null;
+  if (isPlainObject(v)) return structFor(v, path).__shape;
   return null;
 }
 
-function fieldsOf(obj) {
+/** A structure's components, which may themselves be structures or tables.
+ *  The depth limit is a cycle guard, not a judgement: an object that contains
+ *  itself would otherwise recurse until the stack goes, and the message a
+ *  stack overflow leaves behind names nothing an app author can act on. */
+const MAX_DEPTH = 8;
+function fieldsOf(obj, path = []) {
   const fields = {};
   for (const [k, v] of Object.entries(obj)) {
-    const shape = shapeOf(v);
-    if (!shape || shape.k === "struct" || shape.k === "table") {
-      throw new Error(`cannot type component "${k}": a structure component must be a scalar`);
+    const here = [...path, k];
+    if (here.length > MAX_DEPTH) {
+      // Reported by the PATH, not by a message wrapped once per level: the
+      // path says `order.customer.self.self.…`, which names the cycle, where
+      // nine nested prefixes only said that something went wrong nine times.
+      throw new Error(
+        `${here.join(".")} is nested more than ${MAX_DEPTH} levels deep. ` +
+          `If that is a cycle - an object that contains itself - it cannot be a ` +
+          `model; if it is not, flatten it, because a view cannot bind that deep.`,
+      );
+    }
+    const shape = shapeOf(v, here);
+    if (!shape) {
+      throw new Error(
+        `${here.join(".")} has no ABAP type: null, undefined and an empty array ` +
+          `carry none. Give it a value, or declare it with t.table(…) / t.packed(…).`,
+      );
     }
     fields[k] = { key: k.toLowerCase(), shape };
   }
@@ -129,13 +148,13 @@ const structBox = (fields) =>
     Object.fromEntries(Object.values(fields).map(({ key, shape }) => [key, shape.make()])),
     undefined, undefined, {}, {});
 
-function structFor(obj) {
-  const fields = fieldsOf(obj);
+function structFor(obj, path = []) {
+  const fields = fieldsOf(obj, path);
   const shape = { k: "struct", fields, make: () => structBox(fields) };
   return Object.defineProperty(shape.make(), "__shape", { value: shape });
 }
-function tableFor(row) {
-  const fields = fieldsOf(row);
+function tableFor(row, path = []) {
+  const fields = fieldsOf(row, path);
   const shape = { k: "table", fields,
     make: () => abap.types.TableFactory.construct(structBox(fields), STANDARD_TABLE, "") };
   return Object.defineProperty(shape.make(), "__shape", { value: shape });
@@ -210,8 +229,8 @@ function defineApp(name, cls, opts = {}) {
       for (const [f, v] of Object.entries(this)) {
         if (typeof v === "function") continue;
         let shape;
-        try { shape = shapeOf(v); } catch (e) { undecidable.push(`${f} (${e.message})`); continue; }
-        if (!shape) { undecidable.push(f); continue; }
+        try { shape = shapeOf(v, [f]); } catch (e) { undecidable.push(e.message); continue; }
+        if (!shape) { undecidable.push(`${f} has no ABAP type`); continue; }
         this[f] = isBoxed(v) ? v : shape.make();
         shapes[f] = shape;
         attrs[abapName(f)] = { type: shape.make, visibility: "U", is_constant: " ", is_class: " " };
@@ -224,9 +243,10 @@ function defineApp(name, cls, opts = {}) {
       Object.defineProperty(this, "__shapes", { value: shapes, enumerable: false });
       if (undecidable.length) {
         console.warn(
-          `[defineApp] ${INTERNAL}: cannot type ${undecidable.join(", ")} — ` +
-            `null/undefined and empty arrays carry no ABAP type. Give an initial value, ` +
-            `or declare it with t.table(…) / t.struct(…) / t.packed(…) / t.char(…).`,
+          `[defineApp] ${INTERNAL}: these fields are NOT part of the model —\n  ` +
+            undecidable.join("\n  ") +
+            `\n  Give an initial value, or declare it with t.table(…) / t.struct(…) / ` +
+            `t.packed(…) / t.char(…). The app runs without them.`,
         );
       }
     }

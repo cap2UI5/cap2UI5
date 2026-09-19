@@ -22,6 +22,11 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
 
 ## Rules
 
+- **"Unsupported" must say WHOSE limitation it is.** Nested structures were
+  called a framework limitation in three documents; they were a guard in
+  `defineApp`'s own type derivation, written when only scalars had been tried,
+  and the framework had carried the whole tree all along. Before writing that
+  something cannot be done, try it.
 - **Never change behaviour without a test in `examples/bookshop/test/`.** The
   suite is the gate; there is no other.
 - **A facade method that composes view XML needs a BROWSER test, not only a
