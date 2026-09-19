@@ -11,7 +11,7 @@ defineApp("ZCL_JS_BOOKS", class {
   books  = t.table({ ID: 0, title: "", author: "", price: t.packed(9, 2) });
 
   async main(c) {
-    if (c.isInitial) {
+    if (c.isDisplay) {
       c.view(
         `<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" displayBlock="true" height="100%">` +
         `<Shell><Page title="cap2UI5 - Books">` +
@@ -30,8 +30,7 @@ defineApp("ZCL_JS_BOOKS", class {
       const { Books } = cds.entities("my.bookshop");
       this.books = await SELECT.from(Books).where`title like ${"%" + this.search + "%"}`;
       this.hits = this.books.length;
-      c.messageToast(`${this.hits} found`);
-      c.modelUpdate();
+      c.messageToast(`${this.hits} found`);   // the changed table is pushed on its own
     }
   }
 });

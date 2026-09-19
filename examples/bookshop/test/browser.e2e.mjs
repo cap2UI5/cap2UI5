@@ -67,6 +67,28 @@ test("the JS hello app renders, takes input and answers with a MessageBox", asyn
   assert.deepEqual(errors, [], "page errors");
 });
 
+test("the pick app opens a popup, navigates, and comes back with the choice", async () => {
+  const { page, errors } = await open("ZCL_JS_PICK");
+  await page.getByText("chosen:", { exact: false }).waitFor({ timeout: 60_000 });
+
+  // a popup is a real sap.m.Dialog on screen, and it closes again
+  await page.getByRole("button", { name: "Help" }).click();
+  const dialog = page.locator(".sapMDialog").filter({ hasText: "Choose picks a colour." });
+  await dialog.waitFor({ timeout: 30_000 });
+  await page.screenshot({ path: path.join(SHOTS, "popup.png") });
+  await page.getByRole("button", { name: "Close" }).click();
+  await dialog.waitFor({ state: "hidden", timeout: 30_000 });
+
+  // navigate away, choose, and come back - the caller must have re-rendered
+  await page.getByRole("button", { name: "Choose" }).click();
+  await page.getByRole("button", { name: "red" }).waitFor({ timeout: 30_000 });
+  await page.getByRole("button", { name: "red" }).click();
+  await page.getByText("chosen: red").waitFor({ timeout: 30_000 });
+  await page.getByText("picks: 1").waitFor({ timeout: 10_000 });
+  await page.screenshot({ path: path.join(SHOTS, "pick.png") });
+  assert.deepEqual(errors, [], "page errors");
+});
+
 test("the Books app renders a t.table( ) filled from cds.ql", async () => {
   const { page, errors } = await open("ZCL_JS_BOOKS");
   const search = page.locator(".sapMSFI").first();                // the SearchField's input

@@ -6,15 +6,17 @@ defineApp("ZCL_JS_HELLO", class {
   name = "";
 
   main(c) {
-    if (c.isInitial) {
+    // isDisplay, not isFirstRun: this is the render branch, and it has to run
+    // again whenever the app gets the screen back.
+    if (c.isDisplay) {
       c.view(
         `<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" displayBlock="true" height="100%">` +
         `<Shell><Page title="cap2UI5 - JS app">` +
         `<Input value="${c.bind("name")}"/>` +
         `<Button text="Go" press="${c.event("GO")}"/>` +
         `</Page></Shell></mvc:View>`);
-    } else {
-      c.messageBox(`Hello ${this.name}`);
+      return;
     }
+    if (c.eventName === "GO") c.messageBox(`Hello ${this.name}`);
   }
 });

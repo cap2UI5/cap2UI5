@@ -178,6 +178,17 @@ function plainToRow(row, value, fields) {
   }
 }
 
+/** A defineApp instance's declared fields as plain values. Anything else -
+ *  an ABAP app, or nothing - is handed back as it came, because there is no
+ *  shape to read it by and guessing one would be worse than saying so. */
+function readState(instance) {
+  const shapes = instance?.__shapes;
+  if (!shapes) return instance ?? null;
+  const out = {};
+  for (const [f, shape] of Object.entries(shapes)) out[f] = unwrap(instance[f], shape);
+  return out;
+}
+
 /** `name` -> NAME, `z2ui5_if_app$id_draft` -> Z2UI5_IF_APP~ID_DRAFT. */
 const abapName = (f) => f.toUpperCase().replace(/\$/g, "~");
 const isFrameworkField = (f) => f.includes("$");
@@ -228,9 +239,43 @@ function defineApp(name, cls, opts = {}) {
       const shapes = this.__shapes;
 
       // ---- resolve the queries that CAN be resolved up front ---------------
-      const isInitial =
-        abap.compare.initial(await c.z2ui5_if_client$check_on_navigated({ result: 1 })) === false;
+      //
+      // The two lifecycle predicates are NOT interchangeable, and the wrong one
+      // is the framework's most common app bug (z2ui5_if_client's own ABAP Doc
+      // says so):
+      //
+      //   isFirstRun  check_on_init( )      - the first roundtrip of THIS app
+      //               INSTANCE and only that one. Seed state here.
+      //   isDisplay   check_on_navigated( ) - true on the first roundtrip AND
+      //               every time the app gets the screen back: a called app
+      //               leaving, a value help closing, a bookmark restored.
+      //               RENDER here.
+      //
+      // isFirstRun implies isDisplay, so `if (c.isDisplay) c.view(…)` is the
+      // whole display condition - no `||` with isFirstRun. An app that renders
+      // only on isFirstRun works perfectly until something navigates back into
+      // it, and then leaves the previous screen standing with no error at all.
+      const truthy = async (p) => abap.compare.initial(await p) === false;
+      const isFirstRun = await truthy(c.z2ui5_if_client$check_on_init({ result: 1 }));
+      const isDisplay = await truthy(c.z2ui5_if_client$check_on_navigated({ result: 1 }));
+      const canGoBack = await truthy(c.z2ui5_if_client$check_app_prev_stack({ result: 1 }));
       const eventName = String((await c.z2ui5_if_client$get({ result: 1 })).get().event.get()).trim();
+      // Event arguments are indexed and the app picks by index, which a
+      // synchronous facade cannot resolve on demand - so the first ARG_LIMIT
+      // are fetched up front. The framework's own wires never pass more; an app
+      // that needs a longer list has c.raw.
+      const ARG_LIMIT = 8;
+      const eventArgs = [];
+      for (let i = 1; i <= ARG_LIMIT; i++) {
+        eventArgs.push(String((await c.z2ui5_if_client$get_event_arg({ v: i, result: 1 })).get()));
+      }
+      // The instance on the other side of the last navigation: inside a called
+      // app the caller, and back in the caller after navBack( ) the app that
+      // just returned - which is how a called app's RESULT is read. Unwrapped
+      // to plain values when it is a defineApp app; handed over as the raw
+      // instance when it is an ABAP one, which the app can still read.
+      const prevRef = await c.z2ui5_if_client$get_app_prev({ result: 1 });
+      const prevApp = readState(abap.compare.initial(prevRef) ? null : prevRef.get());
       const paths = {};
       for (const f of Object.keys(shapes)) {
         if (isFrameworkField(f)) continue;
@@ -239,11 +284,26 @@ function defineApp(name, cls, opts = {}) {
 
       // ---- the synchronous surface the app sees ----------------------------
       const TOK = (n) => `\u0000z2ui5:evt:${n}\u0000`;
-      const events = new Set();
+      const events = new Map();               // token key -> { name, args }
       const queue = [];
       const facade = {
-        isInitial,
-        eventName,                               // the event this roundtrip answers; "" on start
+        // -- lifecycle (see the comment above; they are not the same question)
+        isFirstRun,
+        isDisplay,
+        canGoBack,                               // check_app_prev_stack - guard navBack( ) with it
+        prevApp,                                 // the app on the other side of the last navigation
+        eventName,                               // the event this roundtrip answers; "" on a start
+        eventArg(i) {
+          if (!Number.isInteger(i) || i < 1 || i > ARG_LIMIT) {
+            throw new Error(
+              `c.eventArg(${i}): the first ${ARG_LIMIT} arguments are resolved up front; ` +
+                `for more, read them through c.raw.`,
+            );
+          }
+          return eventArgs[i - 1];
+        },
+
+        // -- binding and events
         bind(field) {
           if (!(field in paths)) {
             throw new Error(
@@ -253,13 +313,69 @@ function defineApp(name, cls, opts = {}) {
           }
           return paths[field];
         },
-        event(n) { events.add(String(n)); return TOK(n); },
+        /** The wire string for an event. `args` travel with it and come back
+         *  as c.eventArg(1..n) - which is how two buttons can fire ONE event
+         *  and still be told apart. Without them the handler cannot know which
+         *  control fired: the browser sends only what the wire carries. */
+        event(n, args = []) {
+          const key = JSON.stringify([String(n), args.map(String)]);
+          events.set(key, { name: String(n), args: args.map(String) });
+          return TOK(key);
+        },
+
+        // -- what to put on the screen (recorded, replayed in order after main)
         view(xml) { queue.push(["view", xml]); },
-        modelUpdate() { queue.push(["model"]); },   // push changed state to the view without re-rendering
+        popup(xml) { queue.push(["popup", xml]); },
+        popupClose() { queue.push(["popup_destroy"]); },
+        /** A fragment rendered INTO a control of the main view, which stays as
+         *  it is - only the fragment re-renders on the next call. It shares the
+         *  main view's model, so bind( ) and event( ) work in it as anywhere.
+         *  `into` is the id of the receiving control; `insert`/`clear` are the
+         *  UI5 mutators for its aggregation - addContent/removeAllContent for a
+         *  Page or VBox, addItem/removeAllItems for a List. Without `clear`
+         *  every call adds one more fragment. */
+        nest(into, xml, { insert = "addContent", clear = "removeAllContent" } = {}) {
+          queue.push(["nest", xml, { id: String(into), insert, clear }]);
+        },
+        /** There is ONE nested slot and nest_view_destroy( ) takes no argument:
+         *  it clears that slot, not a named one. */
+        nestClose() { queue.push(["nest_destroy"]); },
         messageBox(text) { queue.push(["box", text]); },
         messageToast(text) { queue.push(["toast", text]); },
+
+        // -- navigation. Both are scheduled for the end of the roundtrip by the
+        //    framework, so they are usually the last thing a branch does.
+        /** Show another app on top of this one; it comes back through navBack( ). */
+        navTo(app) { queue.push(["nav_call", app]); },
+        /** Hand the screen back to whoever called this app. Guard with canGoBack. */
+        navBack(opts) { queue.push(["nav_leave", opts ?? {}]); },
+
         raw: c,                                  // escape hatch, still async
       };
+      // isInitial was this facade's name for check_on_navigated( ), which reads
+      // like check_on_init( ) and is not it. Rather than silently change what a
+      // name means, it is gone and says where to go.
+      Object.defineProperty(facade, "isInitial", {
+        get() {
+          throw new Error(
+            "c.isInitial is gone because the name lied: it was check_on_navigated( ). " +
+              "Use c.isDisplay to RENDER (true on the first roundtrip and on every " +
+              "return from a navigation or a value help) and c.isFirstRun to seed " +
+              "state once (check_on_init( ), the first roundtrip of this instance).",
+          );
+        },
+      });
+      // view_model_update( ) and its popup/nest siblings are documented as
+      // obsolete and do NOTHING - changed bound data is pushed automatically.
+      Object.defineProperty(facade, "modelUpdate", {
+        get() {
+          throw new Error(
+            "c.modelUpdate( ) is gone: z2ui5_if_client=>view_model_update( ) is obsolete " +
+              "and does nothing. Changed bound data is pushed to the view - and to an open " +
+              "popup or nested view - on its own.",
+          );
+        },
+      });
 
       // ---- run the app: no async needed on its side ------------------------
       const plain = new Proxy(this, {
@@ -280,19 +396,65 @@ function defineApp(name, cls, opts = {}) {
 
       // ---- flush: resolve the event tokens, then replay the commands -------
       const wire = {};
-      for (const n of events) {
-        wire[TOK(n)] = (await c.z2ui5_if_client$_event({ val: S(n), result: 1 })).get();
+      for (const [key, { name, args }] of events) {
+        const input = { val: S(name), result: 1 };
+        if (args.length) {
+          const t = abap.types.TableFactory.construct(
+            new abap.types.String({ qualifiedName: "STRING" }), STANDARD_TABLE, "");
+          for (const a of args) t.append(new abap.types.String().set(a));
+          input.t_arg = t;
+        }
+        wire[TOK(key)] = (await c.z2ui5_if_client$_event(input)).get();
       }
       const subst = (s) => {
         let out = String(s);
         for (const [tok, real] of Object.entries(wire)) out = out.split(tok).join(real);
         return out;
       };
-      for (const [kind, arg] of queue) {
+      /** nav_app_call( ) wants a BOUND z2ui5_if_app instance. The app may hand
+       *  over a registered name, a defineApp class, or an instance it built
+       *  itself; an unbound reference raises NAV_APP_TARGET_NOT_BOUND, so a
+       *  name that resolves to nothing is refused here, where the app can see
+       *  which name it was. */
+      const appRef = async (app) => {
+        let instance = app;
+        if (typeof app === "string" || typeof app === "function") {
+          const Cls = typeof app === "function" ? app : abap.Classes[app.toUpperCase()];
+          if (!Cls) {
+            throw new Error(
+              `c.navTo("${app}"): no app of that name is registered. ` +
+                `Known: ${Object.keys(abap.Classes).filter((k) => k.startsWith("Z")).slice(0, 20).join(", ")}…`,
+            );
+          }
+          instance = await new Cls().constructor_();
+        }
+        const ref = new abap.types.ABAPObject({ qualifiedName: "Z2UI5_IF_APP" });
+        ref.set(instance);
+        return ref;
+      };
+
+      for (const [kind, arg, id] of queue) {
         if (kind === "view") await c.z2ui5_if_client$view_display({ val: S(subst(arg)) });
-        else if (kind === "model") await c.z2ui5_if_client$view_model_update();
+        else if (kind === "popup") await c.z2ui5_if_client$popup_display({ val: S(subst(arg)) });
+        else if (kind === "popup_destroy") await c.z2ui5_if_client$popup_destroy();
+        else if (kind === "nest") {
+          await c.z2ui5_if_client$nest_view_display({
+            val: S(subst(arg)), id: S(id.id),
+            method_insert: S(id.insert), method_destroy: S(id.clear),
+          });
+        } else if (kind === "nest_destroy") await c.z2ui5_if_client$nest_view_destroy();
         else if (kind === "box") await c.z2ui5_if_client$message_box_display({ text: S(subst(arg)) });
         else if (kind === "toast") await c.z2ui5_if_client$message_toast_display({ text: S(subst(arg)) });
+        else if (kind === "nav_call") {
+          await c.z2ui5_if_client$nav_app_call({ app: await appRef(arg), result: 1 });
+        } else if (kind === "nav_leave") {
+          const o = arg ?? {};
+          const input = { result: 1 };
+          if (o.app !== undefined) input.app = await appRef(o.app);
+          if (o.event !== undefined) input.event = S(o.event);
+          if (o.data !== undefined) input.r_data = S(typeof o.data === "string" ? o.data : JSON.stringify(o.data));
+          await c.z2ui5_if_client$nav_app_leave(input);
+        }
       }
     }
   }

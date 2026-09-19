@@ -34,9 +34,9 @@ export async function boot(label, { port = 5000 + Math.floor(Math.random() * 200
 }
 
 /** One abap2UI5 roundtrip. No id = app start; with id = the follow-up event. */
-export async function post(url, { app, id = "", event = "", model = {}, user } = {}) {
+export async function post(url, { app, id = "", event = "", model = {}, user, args = [] } = {}) {
   const body = { value: { S_FRONT: {
-    ID: id, APP: app, EVENT: event, T_EVENT_ARG: [],
+    ID: id, APP: app, EVENT: event, T_EVENT_ARG: args,
     ORIGIN: "http://127.0.0.1", PATHNAME: "/rest/root/z2ui5",
     SEARCH: id ? "" : `?app_start=${app}`, HASH: "", CONFIG: {} },
     XX: {}, MODEL: model } };

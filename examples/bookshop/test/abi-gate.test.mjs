@@ -25,10 +25,19 @@ const { defineApp, t } = require("cap2ui5");
 const CLIENT_METHODS = {          // z2ui5_if_client, used by define-app
   _BIND: ["VAL", "RESULT"],
   _EVENT: ["VAL", "RESULT"],
+  CHECK_ON_INIT: ["RESULT"],
   CHECK_ON_NAVIGATED: ["RESULT"],
+  CHECK_APP_PREV_STACK: ["RESULT"],
   GET: ["RESULT"],
+  GET_APP_PREV: ["RESULT"],
+  GET_EVENT_ARG: ["V", "RESULT"],
   VIEW_DISPLAY: ["VAL"],
-  VIEW_MODEL_UPDATE: [],
+  POPUP_DISPLAY: ["VAL"],
+  POPUP_DESTROY: [],
+  NEST_VIEW_DISPLAY: ["VAL", "ID", "METHOD_INSERT", "METHOD_DESTROY"],
+  NEST_VIEW_DESTROY: [],          // takes none: there is one nested slot
+  NAV_APP_CALL: ["APP", "RESULT"],
+  NAV_APP_LEAVE: ["APP", "EVENT", "R_DATA", "RESULT"],
   MESSAGE_BOX_DISPLAY: ["TEXT"],
   MESSAGE_TOAST_DISPLAY: ["TEXT"],
 };
@@ -137,6 +146,19 @@ test("instance conventions: constructor_ and the ~ -> $ method naming", () => {
     assert.equal(typeof Client.prototype[`z2ui5_if_client$${m.toLowerCase()}`], "function", m);
   }
   assert.equal(typeof abap.Classes["Z2UI5_CL_UI5_SRV_DRAFT"].set_instance, "function", "set_instance (Naht 1)");
+});
+
+test("the retired methods are still the obsolete no-ops the facade refuses to call", () => {
+  // view_model_update( ) and its siblings are declared "obsolete - does
+  // NOTHING" in z2ui5_if_client. The facade throws instead of calling them.
+  // If upstream ever gives them behaviour again, this goes red and the
+  // decision is worth re-reading rather than silently keeping the refusal.
+  const M = abap.Classes["Z2UI5_IF_CLIENT"].METHODS;
+  for (const m of ["VIEW_MODEL_UPDATE", "POPUP_MODEL_UPDATE", "NEST_VIEW_MODEL_UPDATE"]) {
+    assert.ok(M[m], `${m} disappeared from the interface`);
+    assert.deepEqual(Object.keys(M[m].parameters ?? {}), [],
+      `${m} grew a parameter - re-read whether it still does nothing`);
+  }
 });
 
 test("the interface methods and parameters the plugin uses exist, by name", () => {

@@ -38,7 +38,7 @@ defineApp("BOOKS", class {
   books  = t.table({ ID: 0, title: "", author: "", price: t.packed(9, 2) });
 
   async main(c) {                       // async only because THIS app does I/O
-    if (c.isInitial) {
+    if (c.isDisplay) {
       c.view(`<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" displayBlock="true" height="100%">
         <Page title="Books">
           <SearchField value="${c.bind("search")}" search="${c.event("SEARCH")}"/>
@@ -52,7 +52,6 @@ defineApp("BOOKS", class {
       this.books = await SELECT.from(Books).where`title like ${"%" + this.search + "%"}`;
       this.hits = this.books.length;
       c.messageToast(`${this.hits} found`);
-      c.modelUpdate();
     }
   }
 });
@@ -61,9 +60,30 @@ defineApp("BOOKS", class {
 Open `/rest/root/z2ui5?app_start=BOOKS`. The full example is
 [`examples/bookshop`](examples/bookshop).
 
-**The app API:** `c.isInitial`, `c.eventName`, `c.bind(field)`,
-`c.event(name)`, `c.view(xml)`, `c.modelUpdate()`, `c.messageBox(text)`,
-`c.messageToast(text)`, `c.raw` (the transpiled `z2ui5_if_client`, async).
+**The app API:**
+
+| | |
+|---|---|
+| lifecycle | `c.isFirstRun` (seed once), `c.isDisplay` (render), `c.canGoBack`, `c.eventName`, `c.eventArg(i)`, `c.prevApp` |
+| binding | `c.bind(field)`, `c.event(name, [args])` |
+| screen | `c.view(xml)`, `c.popup(xml)` / `c.popupClose()`, `c.nest(into, xml, {insert, clear})` / `c.nestClose()`, `c.messageBox(text)`, `c.messageToast(text)` |
+| navigation | `c.navTo(app)`, `c.navBack({event, data, app})` |
+| escape hatch | `c.raw` — the transpiled `z2ui5_if_client`, async |
+
+> **`isDisplay`, not `isFirstRun`, is the render branch.** `isFirstRun` is the
+> first roundtrip of *this app instance* and nothing else; `isDisplay` is also
+> true every time the app gets the screen back — a called app leaving, a value
+> help closing, a bookmark restored. An app that renders only on `isFirstRun`
+> works until something navigates back into it, and then leaves the previous
+> screen standing with no error anywhere. `isFirstRun` implies `isDisplay`, so
+> `if (c.isDisplay)` is the whole condition.
+>
+> Two names are gone and throw an error naming their replacement: `c.isInitial`
+> (it was `check_on_navigated( )` under a name that reads like
+> `check_on_init( )`) and `c.modelUpdate()` (`view_model_update( )` is
+> documented obsolete and does nothing — changed bound data is pushed on its
+> own, to an open popup and a nested view too).
+
 **State:** strings, numbers, booleans, `t.packed(l, d)`, `t.char(n)`, a plain
 object (a structure), `t.table({ …one row… })`. Component names are UPPERCASE
 in the model. ABAP apps transpiled with upstream run unchanged next to yours.
@@ -106,7 +126,8 @@ npm start                                      # http://localhost:4004/rest/root
 | Drafts | a CDS entity, owner-scoped: alice's draft answers to alice and to nobody else |
 | Restart | process A writes, is SIGKILLed, process B answers correctly |
 | Concurrency | three users interleaved in one process, every answer to its owner |
-| Browser | renders in Chromium — the page the framework serves on GET, UI5 booted, MessageBox and table on screen |
+| Navigation | `navTo` / `navBack` carrying a result, popups and nested views — on the wire and in the browser |
+| Browser | renders in Chromium — the page the framework serves on GET, UI5 booted; MessageBox, table, a `sap.m.Dialog` popup, and a navigation round trip that comes back with the choice |
 
 The one hazard of the design: the plugin couples to what the transpiler
 *emits*, not to a published API. `examples/bookshop/test/abi-gate.test.mjs`
