@@ -107,12 +107,12 @@ docs/adr/            the decisions, with the measurements that made them
 
 ```bash
 # once, until @abap2ui5/runtime exists on npm:
-git clone -b claude/happy-turing-qt6ljo https://github.com/abap2UI5/abap2UI5 /tmp/ref
+git clone https://github.com/abap2UI5/abap2UI5 /tmp/ref
 (cd /tmp/ref && npm ci && npm run deps && npm run auto_downport && npm run auto_transpile)
 scripts/assemble-runtime.sh /tmp/ref          # or: scripts/assemble-runtime.sh --package X.Y.Z
 
 npm install
-npm test                                       # ABI gate, auth, books, concurrency  (15 tests)
+npm test                                       # ABI gates, auth, books, concurrency, nesting  (28 tests)
 npm run cold-test                              # state AND the app stack through SIGKILL, ABAP control included
 npm run bench -- 100                           # ms per roundtrip
 npm run test:browser                           # real Chromium against the framework's own page
