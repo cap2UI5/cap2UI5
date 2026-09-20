@@ -3,8 +3,8 @@
   "private": true,
   "description": "An ordinary CAP project that uses cap2ui5. Nothing in here is cap2UI5-specific except the dependency and srv/apps/.",
   "dependencies": {
-    "@cap-js/sqlite": "^2",
-    "@sap/cds": "^9",
+    "@cap-js/sqlite": "^3",
+    "@sap/cds": "^10",
     "cap2ui5": "*"
   },
   "cds": {
