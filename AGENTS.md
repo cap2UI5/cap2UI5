@@ -45,6 +45,15 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
   renames the second to `isFirstRun` / `isDisplay`; `abi-gate.test.mjs` holds
   both decisions so a change upstream re-opens them instead of passing
   silently.
+- **Every `@sap/cds` INTERNAL the plugin stands on goes into
+  `cap-abi.test.mjs`.** `abi-gate.test.mjs` guards what the transpiler emits;
+  this is the other undocumented surface. The one that matters is
+  `cds.middlewares.before`, which is a MIXED array — two of its four entries
+  are `{ factory }` objects, and the plugin gets away with spreading them onto
+  the route only because the auth middleware is a plain function and the
+  objects are inert. Measured across all six auth kinds (`mocked`, `basic`,
+  `dummy`, `jwt`, `xsuaa`, `ias`); `@sap/xssec` is a devDependency of the
+  example so the production three are in the gate and not merely assumed.
 - **Every new `abap.*` or `z2ui5_*$*` touchpoint in `plugin/lib/` goes into
   `abi-gate.test.mjs`.** The plugin couples to the transpiler's emission
   format (static `ATTRIBUTES`/`METHODS` maps, `constructor_( )`, `~` → `$`),

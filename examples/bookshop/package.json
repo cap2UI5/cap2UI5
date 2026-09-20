@@ -25,6 +25,7 @@
     "bench": "node bench.mjs"
   },
   "devDependencies": {
-    "playwright": "^1.63.0"
+    "playwright": "^1.63.0",
+    "@sap/xssec": "^4"
   }
 }
