@@ -16,6 +16,7 @@
     "lint": "eslint ."
   },
   "devDependencies": {
-    "eslint": "^10"
+    "eslint": "^10",
+    "@sap/cds": "^10"
   }
 }
