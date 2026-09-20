@@ -29,6 +29,10 @@ installed, 200 roundtrips send it **no SQL at all** — only `rollback` and
 `endTransaction`, two per roundtrip. It stays because an ABAP app's own Open
 SQL would go there; a CAP-backed `DatabaseClient` for those is a later step.
 
-On the `claude/happy-turing-qt6ljo` branch of upstream, `release.yaml` has the
-`runtime` job that packs exactly this from `node/package.json` — dry run:
-1,307 files, 1.5 MB packed, 16.4 MB unpacked.
+Upstream packs exactly this as two steps at the end of
+`backend-prebuilt.yaml`, from the manifest `node/setup/runtime.package.json`
+— merged in abap2UI5#2772 — so the package rides the build that workflow
+already does for the release tarball. Dry run: 1,307 files, 1.5 MB packed,
+16.4 MB unpacked. It publishes once the organisation sets `NPM_TOKEN`; until
+then the `.tgz` is a workflow artefact and this directory is filled by
+`scripts/assemble-runtime.sh`.

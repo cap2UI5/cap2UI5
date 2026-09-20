@@ -13,7 +13,7 @@ on:
     inputs:
       upstream_ref:
         description: "abap2UI5/abap2UI5 ref to build the runtime from (ignored when runtime_version is set)"
-        default: "claude/happy-turing-qt6ljo"
+        default: "main"
       runtime_version:
         description: "@abap2ui5/runtime version to use instead of a build (once upstream publishes)"
         default: ""
@@ -39,15 +39,19 @@ jobs:
 
       # ---- upstream's runtime ---------------------------------------------
       # A SEPARATE checkout: `npm run auto_downport` rewrites src/ in place.
-      # The ref is the branch carrying the four seams UNTIL THEY ARE MERGED;
-      # then it becomes `main`. A personal branch in CI is a debt, and this
-      # comment is its ticket.
+      #
+      # `main` since abap2UI5#2772 merged (2026-09-20, e75cfd7). It used to be
+      # the personal branch carrying the four seams, and that was a debt this
+      # comment tracked - a debt that came due the moment the PR merged and
+      # GitHub deleted the branch, because the checkout below would then have
+      # resolved to nothing, or worse, to whatever was later pushed under that
+      # name.
       - if: inputs.runtime_version == ''
         uses: actions/checkout@v4
         with:
           repository: abap2UI5/abap2UI5
           path: .upstream
-          ref: ${{ inputs.upstream_ref || 'claude/happy-turing-qt6ljo' }}
+          ref: ${{ inputs.upstream_ref || 'main' }}
           # The upstream build runs that repository's own scripts; do not leave
           # this job's credentials in .upstream/.git/config for them to read.
           persist-credentials: false
