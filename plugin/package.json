@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@abap2ui5/runtime": "*",
-    "express": "^4"
+    "express": "^5"
   },
   "cds": {
     "requires": {

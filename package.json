@@ -16,6 +16,6 @@
     "lint": "eslint ."
   },
   "devDependencies": {
-    "eslint": "^9"
+    "eslint": "^10"
   }
 }
