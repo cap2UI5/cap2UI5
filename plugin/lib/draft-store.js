@@ -45,6 +45,25 @@ const who = () => {
   return s;
 };
 
+/** How long a draft lives, asked of the user exit exactly as the framework's
+ *  own store asks it - so a project that raises draft_exp_time_in_hours keeps
+ *  the ROWS as long as the framework will resume them. Hard-coding 4 here made
+ *  the two disagree: the framework would have restored a 20-hour-old draft that
+ *  this cleanup had already deleted. set_config_http_post clamps <= 0 to the
+ *  default, so there is nothing to validate afterwards. */
+const DEFAULT_EXP_HOURS = 4;
+async function expiryHours() {
+  try {
+    const cfg = abap.Classes["Z2UI5_IF_UI5_EXIT"].METHODS["SET_CONFIG_HTTP_POST"].parameters["CS_CONFIG"].type();
+    const exit = (await abap.Classes["Z2UI5_CL_UI5_USER_EXIT"].get_instance()).get();
+    await exit.z2ui5_if_ui5_exit$set_config_http_post({ cs_config: cfg });
+    const h = Number(cfg.get().draft_exp_time_in_hours.get());
+    return h > 0 ? h : DEFAULT_EXP_HOURS;
+  } catch {
+    return DEFAULT_EXP_HOURS;      // the cleanup keeps running on the default
+  }
+}
+
 class ZCL_CDS_DRAFT_STORE {
   static INTERNAL_TYPE = "CLAS";
   static INTERNAL_NAME = "ZCL_CDS_DRAFT_STORE";
@@ -138,7 +157,7 @@ class ZCL_CDS_DRAFT_STORE {
     // Called once per roundtrip, so it must be cheap and must not raise.
     try {
       const { Drafts } = cds.entities("cap2ui5");
-      const cutoff = new Date(Date.now() - 4 * 3600 * 1000).toISOString();
+      const cutoff = new Date(Date.now() - (await expiryHours()) * 3600 * 1000).toISOString();
       await cds.run(DELETE.from(Drafts).where({ createdAt: { "<": cutoff } }));
     } catch { /* a failed cleanup must never fail the roundtrip */ }
   }

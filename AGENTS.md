@@ -81,6 +81,24 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
   `cds.context` does not exist and every draft is `anonymous` — the first
   version of the plugin got that wrong; `auth.test.mjs` is the proof it stays
   fixed.
+- **Not everything upstream does works here — measure before believing it.**
+  The runtime is real ABAP on open-abap, and where upstream reaches for the
+  ABAP system it finds nothing. The user exit is the case in point: it is
+  *discovered* in ABAP, by asking the class repository which classes implement
+  `Z2UI5_IF_UI5_EXIT` (`SEO_INTERFACE_IMPLEM_GET_ALL`, XCO on cloud). open-abap
+  has neither, the call raises, and the framework's own `CATCH cx_root` reads
+  that as "no exit configured" — so the CSP, the security headers, the
+  bootstrap URL and the draft expiry were silently unreachable, with no error
+  anywhere. `defineExit` binds the exit to the same static
+  `exit_instantiate( )` writes to. Before documenting a framework behaviour,
+  boot the runtime and check it.
+- **A host-side reimplementation of a framework contract follows the shipped
+  one.** The CDS draft store's `cleanup( )` hard-coded four hours while
+  upstream's store asks the user exit for `draft_exp_time_in_hours`; a project
+  raising the expiry got drafts the framework would have resumed and the
+  cleanup had already deleted. When reimplementing an interface, read what the
+  shipped implementation does with each method, not only what the interface
+  declares.
 - Commit messages say why. The history of this project is its evidence.
 
 ## Running

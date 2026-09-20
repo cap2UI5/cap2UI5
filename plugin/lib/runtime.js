@@ -4,6 +4,7 @@ const cds = require("@sap/cds");
 const fs = require("fs");
 const path = require("path");
 const { pathToFileURL } = require("url");
+const { installExit } = require("./define-exit");
 
 /** Where the runtime package is. Resolved from the PROJECT (cds.root), so the
  *  version the project installed wins - the plugin only declares the range. */
@@ -44,6 +45,13 @@ async function boot(rt, conf) {
   console.log("[cap2ui5] drafts live in cap2ui5.Drafts");
 
   await loadApps(path.resolve(cds.root, conf.apps));
+
+  // The user exit AFTER the app modules: a project registers it with
+  // defineExit( ) from a file in the apps directory, so there is nothing to
+  // bind until they have run. See lib/define-exit.js for why the host binds it
+  // instead of the framework discovering it.
+  if (installExit()) console.log("[cap2ui5] user exit installed");
+
   return await import(pathToFileURL(rt.shim).href);
 }
 
