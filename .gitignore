@@ -1,26 +1,15 @@
 node_modules/
-target/
-_out/
-gen/
+package-lock.json
 
-.cdsrc-private.json
-default-*.json
-*.sqlite
-*.db
+# the runtime content is upstream's transpiled output: scripts/assemble-runtime.sh
+runtime/output/
+runtime/setup/
+runtime/webapp/
+.upstream/
 
-# MTA
-mta_archives/
-*_mta_build_tmp
-*.mtar
-resources/
+# the example's database and screenshots
+examples/*/db.sqlite*
+examples/*/screenshots/
 
-# Other
-.DS_Store
-*.orig
 *.log
-
-# @cap-js/cds-typer
-@cds-models
-
-# frontend mirror workdir
-.mirror_tmp/
+.DS_Store

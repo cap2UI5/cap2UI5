@@ -1,0 +1,35 @@
+{
+  "name": "cap2ui5",
+  "version": "0.0.0",
+  "description": "abap2UI5 for CAP: a cds-plugin that hosts the transpiled abap2UI5 runtime, keeps its drafts in a CDS entity and lets apps be written as plain JavaScript classes",
+  "main": "index.js",
+  "files": [
+    "cds-plugin.js",
+    "index.cds",
+    "index.js",
+    "lib"
+  ],
+  "peerDependencies": {
+    "@sap/cds": ">=9"
+  },
+  "dependencies": {
+    "@abap2ui5/runtime": "*",
+    "express": "^4"
+  },
+  "cds": {
+    "requires": {
+      "cap2ui5": {
+        "model": "cap2ui5"
+      }
+    },
+    "cap2ui5": {
+      "apps": "srv/apps",
+      "requires": "authenticated-user",
+      "routes": [
+        "/sap/bc/z2ui5",
+        "/rest/root/z2ui5"
+      ],
+      "webapp": "/z2ui5/webapp"
+    }
+  }
+}
