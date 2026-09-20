@@ -5,7 +5,7 @@
 //     name = "";
 //     books = t.table({ ID: 0, title: "", price: t.packed(9, 2) });
 //     main(c) {                                   // no async, no await
-//       if (c.isInitial) {
+//       if (c.isDisplay) {
 //         c.view(`<Input value="${c.bind("name")}"/>
 //                 <Button press="${c.event("GO")}"/>`);
 //       } else if (c.eventName === "GO") {
@@ -23,13 +23,13 @@
 // for the outside world, and JavaScript's inability to unwrap a promise
 // synchronously is the only obstacle left. It is removed in two ways:
 //
-//   QUERIES  (bind, event, isInitial, eventName) must answer a value the app
-//            uses inline, so they cannot be deferred. `isInitial`, `eventName`
+//   QUERIES  (bind, event, isDisplay, eventName) must answer a value the app
+//            uses inline, so they cannot be deferred. `isDisplay`, `eventName`
 //            and every bind path are resolved BEFORE main( ) and handed over as
 //            plain values. `event` cannot be — its names are invented by the
 //            app — so it returns a PLACEHOLDER token and the real wire string
 //            is substituted in afterwards, once the async call can be awaited.
-//   COMMANDS (view, messageBox, modelUpdate, …) do not answer anything the app
+//   COMMANDS (view, messageBox, messageToast, …) do not answer anything the app
 //            reads, so they are RECORDED synchronously and replayed after
 //            main( ), in order.
 //

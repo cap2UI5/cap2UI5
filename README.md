@@ -70,6 +70,14 @@ Open `/rest/root/z2ui5?app_start=BOOKS`. The full example is
 | navigation | `c.navTo(app)`, `c.navBack({event, data, app})` |
 | escape hatch | `c.raw` — the transpiled `z2ui5_if_client`, async |
 
+**The user exit** — the CSP, the security headers, the UI5 bootstrap URL, the
+theme, the draft expiry, the CSRF gate — is `defineExit({ onPage, onRoundtrip })`,
+one per project, from a file in the apps directory. It is *registered*, not
+discovered: upstream finds the exit by asking the class repository which
+classes implement `z2ui5_if_ui5_exit`, and open-abap has no such repository,
+so under the transpiled runtime that lookup answers nothing. Measured before
+this existed: every value on that list was unreachable from a CAP project.
+
 > **`isDisplay`, not `isFirstRun`, is the render branch.** `isFirstRun` is the
 > first roundtrip of *this app instance* and nothing else; `isDisplay` is also
 > true every time the app gets the screen back — a called app leaving, a value
@@ -112,7 +120,7 @@ git clone https://github.com/abap2UI5/abap2UI5 /tmp/ref
 scripts/assemble-runtime.sh /tmp/ref          # or: scripts/assemble-runtime.sh --package X.Y.Z
 
 npm install
-npm test                                       # ABI gates, auth, books, concurrency, nesting  (28 tests)
+npm test                                       # ABI gates, auth, books, concurrency, nesting, the exit  (36 tests)
 npm run cold-test                              # state AND the app stack through SIGKILL, ABAP control included
 npm run bench -- 100                           # ms per roundtrip
 npm run test:browser                           # real Chromium against the framework's own page
@@ -123,9 +131,9 @@ npm start                                      # http://localhost:4004/rest/root
 
 | | |
 |---|---|
-| Hand-written framework code | **566 lines** (`plugin/`), against 16,874 in the JavaScript port this replaces |
+| Hand-written framework code | **589 lines** of code (`plugin/`, 968 with comments), against 16,874 in the JavaScript port this replaces |
 | Roundtrip | **14 ms**, sequential, HTTP, SQLite |
-| Drafts | a CDS entity, owner-scoped: alice's draft answers to alice and to nobody else |
+| Drafts | a CDS entity, owner-scoped: alice's draft answers to alice and to nobody else, deleted on the clock the user exit sets |
 | Restart | process A writes, is SIGKILLed, process B answers correctly |
 | **A guest, not a host** | a plain CAP OData service runs beside the apps on the same entities: one authorization for both doors, rows written by an app are there for the OData client and back, and `cap2ui5.Drafts` is not reachable through it (`coexistence.test.mjs`) |
 | Restart mid-navigation | A is killed **inside a called app**; B, which never built the stack, unwinds it and carries the picked value home — the whole app stack is in the draft, not in memory |

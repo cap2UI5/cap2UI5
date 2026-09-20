@@ -13,6 +13,9 @@
         "kind": "sqlite",
         "credentials": {
           "url": "db.sqlite"
+        },
+        "client": {
+          "timeout": 5000
         }
       }
     }
