@@ -2,13 +2,39 @@
   "name": "cap2ui5",
   "version": "0.1.0",
   "description": "abap2UI5 for CAP: a cds-plugin that hosts the transpiled abap2UI5 runtime, keeps its drafts in a CDS entity and lets apps be written as plain JavaScript classes",
+  "keywords": [
+    "cap",
+    "cds",
+    "cds-plugin",
+    "sap",
+    "ui5",
+    "sapui5",
+    "abap2ui5",
+    "server-driven-ui",
+    "fiori"
+  ],
+  "homepage": "https://cap2ui5.github.io/docs/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cap2UI5/cap2UI5.git",
+    "directory": "plugin"
+  },
+  "bugs": {
+    "url": "https://github.com/cap2UI5/cap2UI5/issues"
+  },
+  "license": "MIT",
   "main": "index.js",
   "files": [
     "cds-plugin.js",
     "index.cds",
     "index.js",
-    "lib"
+    "lib",
+    "README.md",
+    "LICENSE"
   ],
+  "engines": {
+    "node": ">=20"
+  },
   "peerDependencies": {
     "@sap/cds": ">=9"
   },
