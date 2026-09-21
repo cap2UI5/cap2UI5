@@ -13,6 +13,7 @@
     "test:browser": "npm --workspace examples/bookshop run test:browser",
     "cold-test": "npm --workspace examples/bookshop run cold-test",
     "bench": "npm --workspace examples/bookshop run bench",
+    "consumer-test": "node scripts/consumer-test.mjs",
     "lint": "eslint ."
   },
   "devDependencies": {
