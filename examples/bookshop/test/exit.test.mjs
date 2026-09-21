@@ -24,6 +24,15 @@ after(() => s?.kill());
 const page = (app) => fetch(`${s.url}?app_start=${app}`, { headers: AUTH });
 
 test("the exit is installed, not discovered - and it says so once", async () => {
+  // A request FIRST, deliberately. boot( ) is async - it awaits
+  // initializeABAP( ), the store install and the app modules - and it races
+  // with cds finishing its own startup, so "[cap2ui5] user exit installed"
+  // lands on either side of "server listening" run to run (measured: both
+  // orders). The route awaits that same promise before it answers, so once a
+  // roundtrip has come back, the line is there by construction rather than by
+  // timing. Asserting it straight after boot( ) returns is a flake, and was.
+  const r = await post(s.url, { app: "ZCL_JS_HELLO", user: "alice" });
+  assert.equal(r.status, 200, r.text.slice(0, 200));
   assert.match(s.out(), /\[cap2ui5\] user exit installed/);
 });
 

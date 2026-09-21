@@ -123,6 +123,7 @@ npm install
 npm test                                       # ABI gates, auth, books, concurrency, nesting, the exit  (36 tests)
 npm run cold-test                              # state AND the app stack through SIGKILL, ABAP control included
 npm run bench -- 100                           # ms per roundtrip
+npm run consumer-test                          # pack both packages, install them into a throwaway CAP project, drive a roundtrip
 npm run test:browser                           # real Chromium against the framework's own page
 npm start                                      # http://localhost:4004/rest/root/z2ui5?app_start=ZCL_JS_BOOKS
 ```
@@ -139,6 +140,7 @@ npm start                                      # http://localhost:4004/rest/root
 | Restart mid-navigation | A is killed **inside a called app**; B, which never built the stack, unwinds it and carries the picked value home — the whole app stack is in the draft, not in memory |
 | Concurrency | three users interleaved in one process, every answer to its owner |
 | Navigation | `navTo` / `navBack` carrying a result, popups and nested views — on the wire and in the browser |
+| **As published** | both packages packed, installed into a CAP project that has never heard of this repository, and driven through a roundtrip - the plugin found as a cds-plugin from `node_modules`, `index.cds` in the project's model, the runtime resolved from the project, 401 for an anonymous caller (`scripts/consumer-test.mjs`, 17 checks) |
 | Browser | renders in Chromium — the page the framework serves on GET, UI5 booted; MessageBox, table, a `sap.m.Dialog` popup, and a navigation round trip that comes back with the choice |
 
 The one hazard of the design: the plugin couples to what the transpiler

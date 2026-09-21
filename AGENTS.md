@@ -61,6 +61,15 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
   must fail.
 - `npm test` stays browserless. Browser tests are `*.e2e.mjs`, run by
   `npm run test:browser`.
+- **The workspace cannot prove the PACKAGE.** Every test here runs with
+  `cap2ui5` and `@abap2ui5/runtime` as workspace symlinks, so a missing entry
+  in `files`, a `main` pointing at nothing, or a model contribution that only
+  resolves relatively cannot fail - and all of them fail on `npm i cap2ui5`.
+  `npm run consumer-test` packs both packages as `npm publish` would, installs
+  the tarballs into a throwaway CAP project and drives a roundtrip. Run it
+  before publishing and after anything that touches `files`, `main`,
+  `exports`, `index.cds` or how the runtime is located. It is not in
+  `npm test`: it installs from the network and takes about a minute.
 - `no-undef` is an error and stays one: CAP's `SELECT` etc. are imported from
   `cds.ql`, not used as globals.
 - **An authorization check compares PRESENCE, never truthiness.** The draft
