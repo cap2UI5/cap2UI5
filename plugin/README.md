@@ -6,7 +6,7 @@ project, no `manifest.json`, no second build pipeline.
 
 The framework underneath is not a port: it is abap2UI5's own ABAP, downported
 and transpiled by `@abaplint/transpiler` over open-abap and published by
-abap2UI5 as `@abap2ui5/node`. Its drafts are a CDS entity in your database, under your
+abap2UI5 as `@abap2ui5/node-runtime`. Its drafts are a CDS entity in your database, under your
 authorization; your apps read your entities with `cds.ql`.
 
 > **Pre-release.** The plugin is tested end to end (wire, restart, concurrency,
@@ -19,7 +19,8 @@ npm i cap2ui5
 ```
 
 That is the installation. On the next `cds serve` the roundtrip route
-(`/rest/root/z2ui5`, `/sap/bc/z2ui5`) exists, the UI5 shell is served, and
+(`/rest/root/z2ui5`, `/sap/bc/z2ui5`) exists - its page carries the whole UI5
+frontend - and
 `cds deploy` creates `cap2ui5.Drafts` next to your own entities. Your
 `server.js`, if you have one, is untouched.
 
@@ -88,7 +89,7 @@ Under `cds.cap2ui5` in `package.json`, a `.cdsrc.json`, or a profile:
 | `apps` | `srv/apps` | the directory scanned for app modules |
 | `requires` | `authenticated-user` | who may call; `null` allows anonymous callers |
 | `routes` | `/sap/bc/z2ui5`, `/rest/root/z2ui5` | where the roundtrip answers |
-| `webapp` | `/z2ui5/webapp` | where the UI5 shell is mounted |
+| `webapp` | `/z2ui5/webapp` | where the UI5 frontend is served as files - only when the project installs `@abap2ui5/embed-control` (same version as the runtime), for a launchpad tile or a UI5 app placing `z2ui5.reuse.Container`. The page the route serves needs no files: it embeds the whole component |
 
 The route runs behind CAP's own middlewares, so whatever `cds.requires.auth` is
 configured to decides who gets in.

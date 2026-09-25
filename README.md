@@ -9,7 +9,7 @@ read your entities with `cds.ql`.
 > [!IMPORTANT]
 > **Status: pre-release.** The plugin works and is tested end to end (wire,
 > restart, concurrency, browser). The four abap2UI5 seams it needs shipped in
-> abap2UI5 1.144.1; the runtime package, `@abap2ui5/node`, is published by
+> abap2UI5 1.144.1; the runtime package, `@abap2ui5/node-runtime`, is published by
 > abap2UI5 from its next release on. Until it is on npm, `runtime/` is a
 > stand-in that `scripts/assemble-runtime.sh` fills from an upstream build.
 > The package was drafted upstream as `@abap2ui5/runtime` and renamed before
@@ -107,7 +107,10 @@ are UPPERCASE in the model. A field that carries no ABAP type (`null`, an empty
 array, a cycle) is reported by its path and left out; the app runs without it. ABAP apps transpiled with upstream run unchanged next to yours.
 
 **Configuration** (`package.json#cds.cap2ui5`): `apps` (`srv/apps`), `routes`,
-`webapp` (mount path of the UI5 shell), `requires` (`authenticated-user`;
+`webapp` (where the UI5 frontend is served as files, when the project
+installs `@abap2ui5/embed-control` - for a launchpad tile or a UI5 app that
+embeds an app; the browser itself needs no files, the GET page carries the
+whole component), `requires` (`authenticated-user`;
 `null` allows anonymous callers). Whatever `cds.requires.auth` is configured
 to decides who gets in — the route runs behind CAP's own middlewares.
 
@@ -116,13 +119,13 @@ to decides who gets in — the route runs behind CAP's own middlewares.
 ```
 plugin/              the npm package cap2ui5: cds-plugin.js, index.cds, lib/
 examples/bookshop/   a CAP project using it: a plain CAP service, the apps, the test suite
-runtime/             @abap2ui5/node: only package.json + README are here, see runtime/README.md
+runtime/             @abap2ui5/node-runtime: only package.json + README are here, see runtime/README.md
 scripts/             assemble-runtime.sh - fills runtime/ from an upstream build or the package
 docs/adr/            the decisions, with the measurements that made them
 ```
 
 ```bash
-# once, until @abap2ui5/node exists on npm:
+# once, until @abap2ui5/node-runtime exists on npm:
 git clone https://github.com/abap2UI5/abap2UI5 /tmp/ref
 (cd /tmp/ref && npm ci && npm run deps && npm run auto_downport && npm run auto_transpile)
 scripts/assemble-runtime.sh /tmp/ref          # or: scripts/assemble-runtime.sh --package X.Y.Z

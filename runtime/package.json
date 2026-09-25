@@ -1,13 +1,12 @@
 {
-  "name": "@abap2ui5/node",
+  "name": "@abap2ui5/node-runtime",
   "version": "1.144.0",
-  "description": "STAND-IN for the package abap2UI5 would publish from its release: node/output (the transpiled framework), node/setup (the one hook it imports) and app/webapp (the UI5 shell). Nothing in here is written by cap2UI5 - see README.md",
+  "description": "STAND-IN for the package abap2UI5 publishes from its release: node/output (the transpiled framework, the UI5 frontend embedded in its GET page) and node/setup (the one hook it imports). Nothing in here is written by cap2UI5 - see README.md",
   "private": true,
   "type": "module",
   "files": [
     "output",
-    "setup",
-    "webapp"
+    "setup"
   ],
   "dependencies": {
     "@abaplint/database-sqlite": "^2",

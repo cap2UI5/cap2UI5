@@ -15,7 +15,7 @@ on:
         description: "abap2UI5/abap2UI5 ref to build the runtime from (ignored when runtime_version is set)"
         default: "main"
       runtime_version:
-        description: "@abap2ui5/node version to use instead of a build (published by abap2UI5 from its next release on)"
+        description: "@abap2ui5/node-runtime version to use instead of a build (published by abap2UI5 from its next release on)"
         default: ""
 
 # Least privilege for the whole workflow. It matters here more than in most
@@ -81,7 +81,7 @@ jobs:
       - run: npm run bench -- 50
 
       # Everything above runs inside the npm WORKSPACE, where cap2ui5 and
-      # @abap2ui5/node are symlinks - so a broken `files`, a `main` pointing
+      # @abap2ui5/node-runtime are symlinks - so a broken `files`, a `main` pointing
       # at nothing or a model contribution that only resolves relatively cannot
       # fail there, and all of them fail on `npm i cap2ui5`. This packs both
       # packages as publish would and installs them into a throwaway CAP

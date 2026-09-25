@@ -64,13 +64,13 @@ jobs:
             exit 1
           fi
 
-      # The runtime a consumer will get: the PUBLISHED @abap2ui5/node, at the
+      # The runtime a consumer will get: the PUBLISHED @abap2ui5/node-runtime, at the
       # version plugin/package.json names (or the latest when it names a
       # range). Never a build of upstream main - that is what ci.yml tests,
       # and it is not what `npm i cap2ui5` installs.
-      - name: Fill runtime/ from the published @abap2ui5/node
+      - name: Fill runtime/ from the published @abap2ui5/node-runtime
         run: |
-          SPEC="$(node -p "require('./plugin/package.json').dependencies['@abap2ui5/node']")"
+          SPEC="$(node -p "require('./plugin/package.json').dependencies['@abap2ui5/node-runtime']")"
           case "$SPEC" in
             [0-9]*.[0-9]*.[0-9]*) VERSION="$SPEC" ;;
             *) VERSION=latest ;;

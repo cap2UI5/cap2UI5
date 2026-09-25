@@ -1,7 +1,7 @@
 {
   "name": "cap2ui5-workspace",
   "private": true,
-  "description": "cap2UI5 - abap2UI5 as a CAP plugin. plugin/ is the npm package, examples/bookshop a project that uses it, runtime/ the @abap2ui5/node stand-in until upstream publishes it.",
+  "description": "cap2UI5 - abap2UI5 as a CAP plugin. plugin/ is the npm package, examples/bookshop a project that uses it, runtime/ the @abap2ui5/node-runtime stand-in until upstream publishes it.",
   "workspaces": [
     "runtime",
     "plugin",
