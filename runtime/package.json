@@ -1,5 +1,5 @@
 {
-  "name": "@abap2ui5/runtime",
+  "name": "@abap2ui5/node",
   "version": "1.144.0",
   "description": "STAND-IN for the package abap2UI5 would publish from its release: node/output (the transpiled framework), node/setup (the one hook it imports) and app/webapp (the UI5 shell). Nothing in here is written by cap2UI5 - see README.md",
   "private": true,

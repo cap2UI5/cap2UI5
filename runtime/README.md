@@ -1,4 +1,4 @@
-# `@abap2ui5/runtime` — a stand-in
+# `@abap2ui5/node` — a stand-in
 
 This directory is what abap2UI5 **would publish** if its `release.yaml` gained
 one job: `npm publish` of the transpiled output. It is a stand-in so that the
@@ -29,10 +29,11 @@ installed, 200 roundtrips send it **no SQL at all** — only `rollback` and
 `endTransaction`, two per roundtrip. It stays because an ABAP app's own Open
 SQL would go there; a CAP-backed `DatabaseClient` for those is a later step.
 
-Upstream packs exactly this as two steps at the end of
-`backend-prebuilt.yaml`, from the manifest `node/setup/runtime.package.json`
-— merged in abap2UI5#2772 — so the package rides the build that workflow
-already does for the release tarball. Dry run: 1,307 files, 1.5 MB packed,
-16.4 MB unpacked. It publishes once the organisation sets `NPM_TOKEN`; until
-then the `.tgz` is a workflow artefact and this directory is filled by
-`scripts/assemble-runtime.sh`.
+Upstream packs this as `@abap2ui5/node` (`npm run pack:npm`, manifest
+`node/setup/npm.package.json`) at the end of `backend-prebuilt.yaml`, and
+publishes it by trusted publishing from its next release on. The real package
+carries more than this stand-in - `srv/host.mjs` (an entry point with
+`initialize()` and `createHandler()`) and `downport/` - none of which the
+plugin needs today. Once it is on npm, `scripts/assemble-runtime.sh --package
+X.Y.Z` fills this directory from it, and ADR-008's cutover step 2 deletes the
+stand-in in favour of a plain dependency.

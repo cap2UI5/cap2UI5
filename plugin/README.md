@@ -5,8 +5,8 @@ SAPUI5 apps inside your CAP backend, as plain JavaScript classes — no frontend
 project, no `manifest.json`, no second build pipeline.
 
 The framework underneath is not a port: it is abap2UI5's own ABAP, downported
-and transpiled by `@abaplint/transpiler` over open-abap and published as
-`@abap2ui5/runtime`. Its drafts are a CDS entity in your database, under your
+and transpiled by `@abaplint/transpiler` over open-abap and published by
+abap2UI5 as `@abap2ui5/node`. Its drafts are a CDS entity in your database, under your
 authorization; your apps read your entities with `cds.ql`.
 
 > **Pre-release.** The plugin is tested end to end (wire, restart, concurrency,
@@ -27,9 +27,10 @@ That is the installation. On the next `cds serve` the roundtrip route
 
 ```js
 // srv/apps/books.js
-const cds = require("@sap/cds");
+import cds from "@sap/cds";
+import { defineApp, t } from "cap2ui5";
+
 const { SELECT } = cds.ql;
-const { defineApp, t } = require("cap2ui5");
 
 defineApp("BOOKS", class {
   search = "";
@@ -54,6 +55,10 @@ defineApp("BOOKS", class {
 ```
 
 Open `/rest/root/z2ui5?app_start=BOOKS`.
+
+A project from `cds init` + `cds add nodejs` is an ES module project, hence
+`import`. In a CommonJS project, or in a `.cjs` file, `require("cap2ui5")`
+returns the same names.
 
 | | |
 |---|---|

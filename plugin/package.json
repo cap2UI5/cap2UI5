@@ -39,7 +39,7 @@
     "@sap/cds": ">=9"
   },
   "dependencies": {
-    "@abap2ui5/runtime": "*",
+    "@abap2ui5/node": "*",
     "express": "^5"
   },
   "cds": {

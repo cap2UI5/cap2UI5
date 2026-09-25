@@ -1,4 +1,4 @@
-// Locating and booting @abap2ui5/runtime - the part of the plugin that knows
+// Locating and booting @abap2ui5/node - the part of the plugin that knows
 // the runtime is a package and not a directory.
 const cds = require("@sap/cds");
 const fs = require("fs");
@@ -9,7 +9,7 @@ const { installExit } = require("./define-exit");
 /** Where the runtime package is. Resolved from the PROJECT (cds.root), so the
  *  version the project installed wins - the plugin only declares the range. */
 function locate() {
-  const pkg = require.resolve("@abap2ui5/runtime/package.json", { paths: [cds.root, __dirname] });
+  const pkg = require.resolve("@abap2ui5/node/package.json", { paths: [cds.root, __dirname] });
   const dir = path.dirname(pkg);
   return {
     dir,

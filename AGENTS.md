@@ -6,7 +6,7 @@ Guidance for AI agents and contributors. Read before making any change.
 
 abap2UI5 hosted in CAP. **There is no port here**: `plugin/` is ~570 lines of
 hand-written JavaScript that boots upstream's transpiled runtime
-(`@abap2ui5/runtime`), keeps its drafts in a CDS entity and lets apps be plain
+(`@abap2ui5/node`), keeps its drafts in a CDS entity and lets apps be plain
 JavaScript classes. Everything the framework does, upstream's ABAP does. The
 decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
 
@@ -62,7 +62,7 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
 - `npm test` stays browserless. Browser tests are `*.e2e.mjs`, run by
   `npm run test:browser`.
 - **The workspace cannot prove the PACKAGE.** Every test here runs with
-  `cap2ui5` and `@abap2ui5/runtime` as workspace symlinks, so a missing entry
+  `cap2ui5` and `@abap2ui5/node` as workspace symlinks, so a missing entry
   in `files`, a `main` pointing at nothing, or a model contribution that only
   resolves relatively cannot fail - and all of them fail on `npm i cap2ui5`.
   `npm run consumer-test` packs both packages as `npm publish` would, installs
@@ -109,6 +109,23 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
   shipped implementation does with each method, not only what the interface
   declares.
 - Commit messages say why. The history of this project is its evidence.
+
+## Publishing
+
+A tag `v<version>` publishes `plugin/` as the npm package `cap2ui5`
+(`.github/workflows/release.yml`) by **trusted publishing** - OIDC with
+provenance, no token. The workflow refuses a tag that disagrees with
+`plugin/package.json`, fills `runtime/` from the PUBLISHED `@abap2ui5/node`
+(the version `plugin/package.json` pins, or the latest), and runs lint, the
+suite and `consumer-test` on the tagged commit before it publishes. npm lets a
+package be pointed at a workflow only once the package exists, so the first
+version is published by hand once (`npm login`, then
+`npm publish --workspace plugin --access public`) and the package's Settings →
+Trusted Publisher on npmjs.com is pointed at this repository and
+`release.yml`. Until then the publish step ends in a warning naming that
+bootstrap; once `cap2ui5` exists on the registry, a failed publish is an
+error. Publish only against a published `@abap2ui5/node` - never against the
+stand-in, which no consumer can install.
 
 ## Running
 

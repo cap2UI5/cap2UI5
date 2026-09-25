@@ -1,0 +1,118 @@
+# Publishes plugin/ as the npm package `cap2ui5` when a tag v<version> is
+# pushed. The version is plugin/package.json's - bump it in the pull request
+# that prepares the release; the job refuses a tag that says something else.
+#
+# Trusted publishing (OIDC) is how it publishes: no NPM_TOKEN to leak or
+# rotate, and npm records a provenance attestation tying the tarball to this
+# run and commit. `id-token: write` below mints the token, and the package's
+# Settings -> Trusted Publisher on npmjs.com has to name this repository and
+# this workflow file (`release.yml`).
+#
+# That setting can only be made for a package that ALREADY EXISTS, so the very
+# first version is published by hand, once, after `npm login` - from a
+# checkout whose runtime/ was filled with `scripts/assemble-runtime.sh
+# --package`, so the tests it ran against are the published runtime:
+#
+#     npm publish --workspace plugin --access public
+#
+# (no --provenance there: npm generates an attestation only from a supported
+# CI and aborts anywhere else). Until that has happened, a failed publish here
+# is a warning naming the bootstrap and the run stays green; once `cap2ui5`
+# exists on the registry, a failed publish is an error. A stored NPM_TOKEN
+# still works and takes precedence.
+name: release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  # Everything except the publish: the same gates against the same published
+  # runtime, the tarball listed, no registry write.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write # trusted publishing + provenance
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+
+      # Node 22 ships npm 10.x, which has no OIDC support. PINNED, not
+      # @latest: this is the one job in the repository that holds a publishing
+      # identity. The same pin as abap2UI5's backend-prebuilt.yaml.
+      - name: Use an npm that can publish via OIDC
+        run: npm install -g npm@12.0.2
+
+      # The tag is the version claim; plugin/package.json is what gets
+      # published. A mismatch caught here costs a minute, caught afterwards a
+      # burned version number.
+      - name: The tag and plugin/package.json agree
+        if: github.ref_type == 'tag'
+        run: |
+          PKG="v$(node -p "require('./plugin/package.json').version")"
+          if [ "$PKG" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::tag $GITHUB_REF_NAME does not match plugin/package.json ($PKG)"
+            exit 1
+          fi
+
+      # The runtime a consumer will get: the PUBLISHED @abap2ui5/node, at the
+      # version plugin/package.json names (or the latest when it names a
+      # range). Never a build of upstream main - that is what ci.yml tests,
+      # and it is not what `npm i cap2ui5` installs.
+      - name: Fill runtime/ from the published @abap2ui5/node
+        run: |
+          SPEC="$(node -p "require('./plugin/package.json').dependencies['@abap2ui5/node']")"
+          case "$SPEC" in
+            [0-9]*.[0-9]*.[0-9]*) VERSION="$SPEC" ;;
+            *) VERSION=latest ;;
+          esac
+          scripts/assemble-runtime.sh --package "$VERSION"
+
+      - run: npm install --no-audit --no-fund
+      - run: npm run lint
+      - run: npm test
+      - run: npm run consumer-test
+
+      # what the tarball will contain, in the log, before it is immutable
+      - name: What is in the tarball
+        run: npm pack --dry-run --workspace plugin
+
+      - name: Publish
+        if: github.ref_type == 'tag'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -u
+          NAME="$(node -p "require('./plugin/package.json').name")"
+          VERSION="$(node -p "require('./plugin/package.json').version")"
+          if npm view "$NAME@$VERSION" version >/dev/null 2>&1; then
+            echo "$NAME@$VERSION is already on the registry - nothing to do"
+            exit 0
+          fi
+          if [ -n "${NODE_AUTH_TOKEN:-}" ]; then
+            # by NAME: npm expands the variable when it reads the file, so the
+            # secret itself is never written to disk
+            echo '//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}' >> ~/.npmrc
+          fi
+          if npm publish --workspace plugin --provenance --access public; then
+            echo "published $NAME@$VERSION"
+            exit 0
+          fi
+          if npm view "$NAME" version >/dev/null 2>&1; then
+            echo "::error::$NAME is on the registry, but publishing $VERSION failed - see the npm output above (the Trusted Publisher not pointing at this repository and release.yml?)"
+            exit 1
+          fi
+          echo "::warning::$NAME@$VERSION was NOT published: the package does not exist on the registry yet, and trusted publishing can only be configured for one that does. Bootstrap it once by hand (the header of this workflow), then every tag publishes here."
+
+      - name: Dry run only
+        if: github.ref_type != 'tag'
+        run: echo "Not a tag - everything ran except the publish."

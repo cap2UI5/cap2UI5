@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# Fill runtime/ - the three directories @abap2ui5/runtime contains - from one
+# Fill runtime/ - the three directories @abap2ui5/node contains - from one
 # of two sources:
 #
 #   scripts/assemble-runtime.sh <upstream checkout>
@@ -11,7 +11,7 @@
 #
 #   scripts/assemble-runtime.sh --package [<version>]
 #       the published package, once upstream publishes it: `npm pack
-#       @abap2ui5/runtime@<version>` unpacked into runtime/. The stand-in's
+#       @abap2ui5/node@<version>` unpacked into runtime/. The stand-in's
 #       package.json is replaced by the real one, so the plugin resolves the
 #       same files either way. This is ADR-008 cutover step 2 in one flag.
 set -eu
@@ -21,14 +21,14 @@ RT="$HERE/runtime"
 if [ "${1:-}" = "--package" ]; then
   VERSION=${2:-latest}
   TMP=$(mktemp -d)
-  (cd "$TMP" && npm pack "@abap2ui5/runtime@$VERSION" --silent >/dev/null && tar xzf ./*.tgz)
+  (cd "$TMP" && npm pack "@abap2ui5/node@$VERSION" --silent >/dev/null && tar xzf ./*.tgz)
   rm -rf "$RT/output" "$RT/setup" "$RT/webapp"
   cp -r "$TMP/package/output" "$RT/output"
   cp -r "$TMP/package/setup" "$RT/setup"
   cp -r "$TMP/package/webapp" "$RT/webapp"
   cp "$TMP/package/package.json" "$RT/package.json"
   rm -rf "$TMP"
-  echo "runtime/ assembled from @abap2ui5/runtime@$(node -p "require('$RT/package.json').version") ($(ls "$RT/output" | wc -l) transpiled files)"
+  echo "runtime/ assembled from @abap2ui5/node@$(node -p "require('$RT/package.json').version") ($(ls "$RT/output" | wc -l) transpiled files)"
   exit 0
 fi
 

@@ -8,11 +8,13 @@ read your entities with `cds.ql`.
 
 > [!IMPORTANT]
 > **Status: pre-release.** The plugin works and is tested end to end (wire,
-> restart, concurrency, browser), but it depends on four changes to abap2UI5
-> that are on a branch and not yet merged, and on `@abap2ui5/runtime`, which
-> upstream does not publish yet. Until then `runtime/` is a stand-in that
-> `scripts/assemble-runtime.sh` fills from a build of that branch. See
-> [docs/adr/adr-008-host-not-port.md](docs/adr/adr-008-host-not-port.md).
+> restart, concurrency, browser). The four abap2UI5 seams it needs shipped in
+> abap2UI5 1.144.1; the runtime package, `@abap2ui5/node`, is published by
+> abap2UI5 from its next release on. Until it is on npm, `runtime/` is a
+> stand-in that `scripts/assemble-runtime.sh` fills from an upstream build.
+> The package was drafted upstream as `@abap2ui5/runtime` and renamed before
+> it was ever published; the ADRs keep the old name as the record of their
+> time. See [docs/adr/adr-008-host-not-port.md](docs/adr/adr-008-host-not-port.md).
 
 ## Using it
 
@@ -28,9 +30,10 @@ is untouched.
 An app is a file in `srv/apps/`:
 
 ```js
-const cds = require("@sap/cds");
+import cds from "@sap/cds";
+import { defineApp, t } from "cap2ui5";
+
 const { SELECT } = cds.ql;
-const { defineApp, t } = require("cap2ui5");
 
 defineApp("BOOKS", class {
   search = "";
@@ -56,6 +59,11 @@ defineApp("BOOKS", class {
   }
 });
 ```
+
+`cds init` + `cds add nodejs` create an ES module project (`"type": "module"`),
+so an app file imports. In a CommonJS project - or as a `.cjs` file in an ES
+module one - `require("cap2ui5")` gives the same three names; the plugin loads
+`.js`, `.mjs` and `.cjs` alike.
 
 Open `/rest/root/z2ui5?app_start=BOOKS`. The full example is
 [`examples/bookshop`](examples/bookshop).
@@ -108,13 +116,13 @@ to decides who gets in — the route runs behind CAP's own middlewares.
 ```
 plugin/              the npm package cap2ui5: cds-plugin.js, index.cds, lib/
 examples/bookshop/   a CAP project using it: a plain CAP service, the apps, the test suite
-runtime/             @abap2ui5/runtime: only package.json + README are here, see runtime/README.md
+runtime/             @abap2ui5/node: only package.json + README are here, see runtime/README.md
 scripts/             assemble-runtime.sh - fills runtime/ from an upstream build or the package
 docs/adr/            the decisions, with the measurements that made them
 ```
 
 ```bash
-# once, until @abap2ui5/runtime exists on npm:
+# once, until @abap2ui5/node exists on npm:
 git clone https://github.com/abap2UI5/abap2UI5 /tmp/ref
 (cd /tmp/ref && npm ci && npm run deps && npm run auto_downport && npm run auto_transpile)
 scripts/assemble-runtime.sh /tmp/ref          # or: scripts/assemble-runtime.sh --package X.Y.Z

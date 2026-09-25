@@ -7,7 +7,7 @@
 // The project's own server.js, if it has one, is untouched.
 //
 // The runtime underneath is upstream's own - the real ABAP, downported and
-// transpiled by @abaplint/transpiler, published as @abap2ui5/runtime. There is
+// transpiled by @abaplint/transpiler, published as @abap2ui5/node. There is
 // no port, no transpiler of our own, no hand-maintained framework class.
 const cds = require("@sap/cds");
 const express = require("express");
@@ -18,7 +18,7 @@ cds.on("bootstrap", (app) => {
   const rt = locate();
   const ready = boot(rt, conf);
   ready.catch((e) => console.error("[cap2ui5] runtime failed to boot:", e));
-  console.log(`[cap2ui5] @abap2ui5/runtime ${rt.version} from ${rt.dir}`);
+  console.log(`[cap2ui5] @abap2ui5/node ${rt.version} from ${rt.dir}`);
 
   // The UI5 shell, straight from the runtime package. Not mirrored, not
   // patched, not generated - the same directory upstream ships, from the same
