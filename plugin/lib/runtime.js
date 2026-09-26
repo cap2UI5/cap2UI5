@@ -24,7 +24,7 @@ function locate() {
  *  The browser does not need it: the page the framework answers a GET with
  *  embeds the whole component (every module, view and stylesheet), from the
  *  same commit as the backend. Files are for what loads the component by URL
- *  instead - a launchpad tile, a UI5 app placing z2ui5.reuse.Container
+ *  instead - a launchpad tile, a UI5 app placing z2ui5.embed.Container
  *  against this server. That is @abap2ui5/embed-control, an optional
  *  dependency of the PROJECT: installed, the plugin serves its webapp/ at
  *  cds.cap2ui5.webapp; not installed, there is nothing to serve. */

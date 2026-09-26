@@ -24,7 +24,7 @@ cds.on("bootstrap", (app) => {
   // @abap2ui5/embed-control. The roundtrip route needs none: its GET page
   // embeds the whole component, from the runtime's own commit. Files are for
   // what loads the component by URL (a launchpad tile, a UI5 app placing
-  // z2ui5.reuse.Container), and the frontend's version is then the project's
+  // z2ui5.embed.Container), and the frontend's version is then the project's
   // to keep equal to the runtime's - the wire protocol says so when it is not.
   const fe = locateFrontend();
   if (fe && conf.webapp) {
