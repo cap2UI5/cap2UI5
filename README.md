@@ -65,7 +65,14 @@ so an app file imports. In a CommonJS project - or as a `.cjs` file in an ES
 module one - `require("cap2ui5")` gives the same three names; the plugin loads
 `.js`, `.mjs` and `.cjs` alike.
 
-Open `/rest/root/z2ui5?app_start=BOOKS`. The full example is
+`cds watch` prints the address of every app, and the user to log in as:
+
+```
+[cap2ui5] BOOKS  http://localhost:4004/sap/bc/z2ui5?app_start=BOOKS
+[cap2ui5] development login: alice (empty password)
+```
+
+Only in development; a production profile prints neither. The full example is
 [`examples/bookshop`](examples/bookshop).
 
 **The app API:**

@@ -55,7 +55,14 @@ defineApp("BOOKS", class {
 });
 ```
 
-Open `/rest/root/z2ui5?app_start=BOOKS`.
+`cds watch` prints the address of every app, and the user to log in as:
+
+```
+[cap2ui5] BOOKS  http://localhost:4004/sap/bc/z2ui5?app_start=BOOKS
+[cap2ui5] development login: alice (empty password)
+```
+
+Only in development; a production profile prints neither.
 
 A project from `cds init` + `cds add nodejs` is an ES module project, hence
 `import`. In a CommonJS project, or in a `.cjs` file, `require("cap2ui5")`

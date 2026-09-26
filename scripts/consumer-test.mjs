@@ -156,6 +156,16 @@ defineApp("ZCL_PROBE", class {
       throw Object.assign(new Error("server did not start"), { reported: true });
     }
 
+    // the startup hints (plugin/lib/hints.js) - what a developer reads to find
+    // the first screen; printed once the apps have loaded, so give it a moment
+    for (let i = 0; i < 20 && !/\[cap2ui5\] ZCL_PROBE\s+http/.test(log); i++) await sleep(250);
+    check("the startup log names the app and the address that starts it",
+      /\[cap2ui5\] ZCL_PROBE\s+http:\/\/\S+\?app_start=ZCL_PROBE/.test(log),
+      (log.match(/\[cap2ui5\] ZCL_PROBE.*/) ?? ["no such line"])[0]);
+    check("the startup log names the development login",
+      /\[cap2ui5\] development login: alice \(empty password\)/.test(log),
+      (log.match(/\[cap2ui5\] development login.*/) ?? ["no such line"])[0]);
+
     check("the runtime is resolved from the PROJECT",
       /\[cap2ui5\] @abap2ui5\/node-runtime .* from .*proj[/\\]node_modules/.test(log),
       (log.match(/\[cap2ui5\] @abap2ui5\/node-runtime.*/) ?? [""])[0]);

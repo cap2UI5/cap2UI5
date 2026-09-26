@@ -12,12 +12,33 @@
 const cds = require("@sap/cds");
 const express = require("express");
 const { locate, locateFrontend, boot } = require("./lib/runtime");
+const { definedApps } = require("./lib/define-app");
+const { startupHints } = require("./lib/hints");
 
 cds.on("bootstrap", (app) => {
   const conf = cds.env.cap2ui5;               // defaults from package.json#cds, project overrides
   const rt = locate();
   const ready = boot(rt, conf);
   ready.catch((e) => console.error("[cap2ui5] runtime failed to boot:", e));
+
+  // Where to click, once there is something to click: the server listens
+  // before the apps have loaded (boot is async), so the hints wait for both.
+  // Not in production - there the addresses and a login hint are noise, and
+  // the login hint would name a development user.
+  cds.once("listening", ({ url }) => {
+    ready.then(() => {
+      const lines = startupHints({
+        apps: definedApps(),
+        url,
+        route: [].concat(conf.routes)[0],
+        appsDir: conf.apps,
+        auth: cds.env.requires?.auth,
+        requires: conf.requires,
+        production: cds.env.profiles?.includes("production"),
+      });
+      for (const line of lines) console.log(line);
+    }, () => {});
+  });
   console.log(`[cap2ui5] @abap2ui5/node-runtime ${rt.version} from ${rt.dir}`);
 
   // The UI5 frontend as files - only when the project installed
