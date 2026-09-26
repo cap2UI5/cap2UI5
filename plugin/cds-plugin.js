@@ -11,7 +11,7 @@
 // no port, no transpiler of our own, no hand-maintained framework class.
 const cds = require("@sap/cds");
 const express = require("express");
-const { locate, locateFrontend, boot } = require("./lib/runtime");
+const { locate, boot } = require("./lib/runtime");
 const { definedApps } = require("./lib/define-app");
 const { startupHints } = require("./lib/hints");
 
@@ -41,20 +41,9 @@ cds.on("bootstrap", (app) => {
   });
   console.log(`[cap2ui5] @abap2ui5/node-runtime ${rt.version} from ${rt.dir}`);
 
-  // The UI5 frontend as files - only when the project installed
-  // @abap2ui5/embed-control. The roundtrip route needs none: its GET page
-  // embeds the whole component, from the runtime's own commit. Files are for
-  // what loads the component by URL (a launchpad tile, a UI5 app placing
-  // z2ui5.embed.Container), and the frontend's version is then the project's
-  // to keep equal to the runtime's - the wire protocol says so when it is not.
-  const fe = locateFrontend();
-  if (fe && conf.webapp) {
-    app.use(conf.webapp, express.static(fe.webapp, { maxAge: "1h" }));
-    console.log(`[cap2ui5] @abap2ui5/embed-control ${fe.version} served at ${conf.webapp}`);
-    if (fe.version !== rt.version) {
-      console.warn(`[cap2ui5] @abap2ui5/embed-control ${fe.version} and @abap2ui5/node-runtime ${rt.version} differ - install the same version of both`);
-    }
-  }
+  // No static frontend route: the page the roundtrip route answers a GET
+  // with embeds the whole UI5 component - every module, view and stylesheet,
+  // from the runtime's own commit - so the browser needs no files from here.
 
   // Who may call. Whatever cds.requires.auth is configured to (mocked in
   // development, xsuaa/ias in production) has already run by the time this

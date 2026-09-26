@@ -96,7 +96,6 @@ Under `cds.cap2ui5` in `package.json`, a `.cdsrc.json`, or a profile:
 | `apps` | `srv/apps` | the directory scanned for app modules |
 | `requires` | `authenticated-user` | who may call; `null` allows anonymous callers |
 | `routes` | `/sap/bc/z2ui5`, `/rest/root/z2ui5` | where the roundtrip answers |
-| `webapp` | `/z2ui5/webapp` | where the UI5 frontend is served as files - only when the project installs `@abap2ui5/embed-control` (same version as the runtime), for a launchpad tile or a UI5 app placing `z2ui5.embed.Container`. The page the route serves needs no files: it embeds the whole component |
 
 The route runs behind CAP's own middlewares, so whatever `cds.requires.auth` is
 configured to decides who gets in.

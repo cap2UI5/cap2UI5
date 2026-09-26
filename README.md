@@ -114,10 +114,7 @@ are UPPERCASE in the model. A field that carries no ABAP type (`null`, an empty
 array, a cycle) is reported by its path and left out; the app runs without it. ABAP apps transpiled with upstream run unchanged next to yours.
 
 **Configuration** (`package.json#cds.cap2ui5`): `apps` (`srv/apps`), `routes`,
-`webapp` (where the UI5 frontend is served as files, when the project
-installs `@abap2ui5/embed-control` - for a launchpad tile or a UI5 app that
-embeds an app; the browser itself needs no files, the GET page carries the
-whole component), `requires` (`authenticated-user`;
+`requires` (`authenticated-user`;
 `null` allows anonymous callers). Whatever `cds.requires.auth` is configured
 to decides who gets in — the route runs behind CAP's own middlewares.
 

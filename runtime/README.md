@@ -34,7 +34,6 @@ publishes it by trusted publishing from its next release on. The real package
 carries more than this stand-in - `srv/host.mjs` (an entry point with
 `initialize()` and `createHandler()`) and `downport/` - none of which the
 plugin needs today. Neither carries `webapp/`: the framework's GET page embeds
-the whole UI5 component, so the plugin serves frontend files only when the
-project installs `@abap2ui5/embed-control`. Once it is on npm, `scripts/assemble-runtime.sh --package
+the whole UI5 component, so there are no frontend files to serve. Once it is on npm, `scripts/assemble-runtime.sh --package
 X.Y.Z` fills this directory from it, and ADR-008's cutover step 2 deletes the
 stand-in in favour of a plain dependency.

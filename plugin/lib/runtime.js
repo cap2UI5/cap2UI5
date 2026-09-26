@@ -19,26 +19,6 @@ function locate() {
   };
 }
 
-/** The UI5 frontend as FILES, when the project installed it - or null.
- *
- *  The browser does not need it: the page the framework answers a GET with
- *  embeds the whole component (every module, view and stylesheet), from the
- *  same commit as the backend. Files are for what loads the component by URL
- *  instead - a launchpad tile, a UI5 app placing z2ui5.embed.Container
- *  against this server. That is @abap2ui5/embed-control, an optional
- *  dependency of the PROJECT: installed, the plugin serves its webapp/ at
- *  cds.cap2ui5.webapp; not installed, there is nothing to serve. */
-function locateFrontend() {
-  let pkg;
-  try {
-    pkg = require.resolve("@abap2ui5/embed-control/package.json", { paths: [cds.root] });
-  } catch {
-    return null;
-  }
-  const dir = path.dirname(pkg);
-  return { dir, version: require(pkg).version, webapp: path.join(dir, "webapp") };
-}
-
 /**
  * Boot the ABAP runtime once, install the CDS draft store, load the project's
  * apps. Resolves to upstream's express adapter, which the route then calls.
@@ -83,4 +63,4 @@ async function loadApps(dir) {
   console.log(`[cap2ui5] ${files.length} app module(s) loaded from ${path.relative(cds.root, dir) || "."}`);
 }
 
-module.exports = { locate, locateFrontend, boot };
+module.exports = { locate, boot };

@@ -187,10 +187,9 @@ defineApp("ZCL_PROBE", class {
     check("the GET page carries the UI5 component itself",
       html.includes('"z2ui5/Component.js"'), html.includes('"z2ui5/Component.js"') ? "" : "no z2ui5/Component.js in the page");
 
-    // Frontend FILES are served only when the project installs
-    // @abap2ui5/embed-control; this project does not, so nothing is mounted.
+    // and there is no static frontend route next to it - nothing to serve
     const shell = await fetch(`${url}/z2ui5/webapp/index.html`, { headers: auth });
-    check("no frontend files are served without @abap2ui5/embed-control", shell.status === 404, String(shell.status));
+    check("there is no static frontend route", shell.status === 404, String(shell.status));
 
     const start = await fetch(`${url}/rest/root/z2ui5`, { method: "POST", headers: auth, body: body("", "") });
     const j1 = await start.json();
