@@ -5,8 +5,8 @@ SAPUI5 apps inside your CAP backend, as plain JavaScript classes — no frontend
 project, no `manifest.json`, no second build pipeline.
 
 The framework underneath is not a port: it is abap2UI5's own ABAP, downported
-and transpiled by `@abaplint/transpiler` over open-abap and published as
-`@abap2ui5/runtime`. Its drafts are a CDS entity in your database, under your
+and transpiled by `@abaplint/transpiler` over open-abap and published by
+abap2UI5 as `@abap2ui5/node-runtime`. Its drafts are a CDS entity in your database, under your
 authorization; your apps read your entities with `cds.ql`.
 
 > **Pre-release.** The plugin is tested end to end (wire, restart, concurrency,
@@ -19,7 +19,8 @@ npm i cap2ui5
 ```
 
 That is the installation. On the next `cds serve` the roundtrip route
-(`/rest/root/z2ui5`, `/sap/bc/z2ui5`) exists, the UI5 shell is served, and
+(`/rest/root/z2ui5`, `/sap/bc/z2ui5`) exists - its page carries the whole UI5
+frontend - and
 `cds deploy` creates `cap2ui5.Drafts` next to your own entities. Your
 `server.js`, if you have one, is untouched.
 
@@ -27,9 +28,10 @@ That is the installation. On the next `cds serve` the roundtrip route
 
 ```js
 // srv/apps/books.js
-const cds = require("@sap/cds");
+import cds from "@sap/cds";
+import { defineApp, t } from "cap2ui5";
+
 const { SELECT } = cds.ql;
-const { defineApp, t } = require("cap2ui5");
 
 defineApp("BOOKS", class {
   search = "";
@@ -53,7 +55,18 @@ defineApp("BOOKS", class {
 });
 ```
 
-Open `/rest/root/z2ui5?app_start=BOOKS`.
+`cds watch` prints the address of every app, and the user to log in as:
+
+```
+[cap2ui5] BOOKS  http://localhost:4004/sap/bc/z2ui5?app_start=BOOKS
+[cap2ui5] development login: alice (empty password)
+```
+
+Only in development; a production profile prints neither.
+
+A project from `cds init` + `cds add nodejs` is an ES module project, hence
+`import`. In a CommonJS project, or in a `.cjs` file, `require("cap2ui5")`
+returns the same names.
 
 | | |
 |---|---|
@@ -83,7 +96,6 @@ Under `cds.cap2ui5` in `package.json`, a `.cdsrc.json`, or a profile:
 | `apps` | `srv/apps` | the directory scanned for app modules |
 | `requires` | `authenticated-user` | who may call; `null` allows anonymous callers |
 | `routes` | `/sap/bc/z2ui5`, `/rest/root/z2ui5` | where the roundtrip answers |
-| `webapp` | `/z2ui5/webapp` | where the UI5 shell is mounted |
 
 The route runs behind CAP's own middlewares, so whatever `cds.requires.auth` is
 configured to decides who gets in.

@@ -39,7 +39,7 @@
     "@sap/cds": ">=9"
   },
   "dependencies": {
-    "@abap2ui5/runtime": "*",
+    "@abap2ui5/node-runtime": "*",
     "express": "^5"
   },
   "cds": {
@@ -54,8 +54,7 @@
       "routes": [
         "/sap/bc/z2ui5",
         "/rest/root/z2ui5"
-      ],
-      "webapp": "/z2ui5/webapp"
+      ]
     }
   }
 }

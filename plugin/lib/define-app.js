@@ -213,6 +213,15 @@ const abapName = (f) => f.toUpperCase().replace(/\$/g, "~");
 const isFrameworkField = (f) => f.includes("$");
 
 // --------------------------------------------------------------------- the wrap
+/** The names defineApp( ) registered, in the order it saw them - what the
+ *  startup hints list (lib/hints.js). */
+const defined = [];
+
+/** @returns {string[]} the app names registered so far */
+function definedApps() {
+  return [...defined];
+}
+
 function defineApp(name, cls, opts = {}) {
   const INTERNAL = String(name).toUpperCase();
   const userMain = cls.prototype.main ?? cls.prototype.z2ui5_if_app$main;
@@ -486,7 +495,8 @@ function defineApp(name, cls, opts = {}) {
   App.ATTRIBUTES = {};
   new App();                                     // fills ATTRIBUTES before first use
   abap.Classes[INTERNAL] = App;
+  if (!defined.includes(INTERNAL)) defined.push(INTERNAL);
   return App;
 }
 
-module.exports = { defineApp, t, shapeOf };
+module.exports = { defineApp, definedApps, t, shapeOf };
