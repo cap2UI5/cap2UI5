@@ -1,6 +1,7 @@
-# Build upstream's runtime from scratch, assemble it, install the workspace,
-# and run everything: lint, the suite (ABI gate, auth, books, concurrency),
-# the cold test, the bench, the browser.
+# Build upstream's runtime from scratch once, then install the workspace and
+# run everything on every Node and CAP version the plugin declares: lint, the
+# suite (ABI gates, auth, books, concurrency), the cold test, the bench, the
+# consumer test - and the browser, once.
 name: ci
 
 on:
@@ -28,9 +29,10 @@ permissions:
   contents: read
 
 jobs:
-  ci:
+  # upstream's runtime, built once and handed to every leg of the matrix below
+  runtime:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -72,9 +74,65 @@ jobs:
         env:
           RUNTIME_VERSION: ${{ inputs.runtime_version }}
         run: scripts/assemble-runtime.sh --package "$RUNTIME_VERSION"
+      # package.json too: --package replaces the stand-in's with the published one
+      - uses: actions/upload-artifact@v7
+        with:
+          name: runtime
+          path: |
+            runtime/output
+            runtime/setup
+            runtime/package.json
+          if-no-files-found: error
+          retention-days: 1
+
+  # The plugin declares @sap/cds >=9 and Node >=22, and what it declares is
+  # tested - the way CAP's own plugins test `cds-version: [9, latest]` on the
+  # Node versions CAP supports. `latest` is whatever npm calls latest today, so
+  # the nightly run meets a new cds major before a user does. The workspace
+  # itself pins the current major; a leg on another one sets it before the
+  # install, for the example and for the consumer test alike.
+  ci:
+    needs: runtime
+    name: ci (Node ${{ matrix.node }}, cds ${{ matrix.cds }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { node: 22, cds: latest, sqlite: latest, browser: true }
+          - { node: 24, cds: latest, sqlite: latest }
+          - { node: 22, cds: 9, sqlite: 2 }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - uses: actions/download-artifact@v8
+        with:
+          name: runtime
+          path: runtime
+
+      # ---- the versions under test ------------------------------------------
+      # Through the environment, not interpolated into the script text (see
+      # above). @cap-js/sqlite follows the cds major: 2.x is the one for cds 9.
+      - name: "@sap/cds ${{ matrix.cds }}"
+        env:
+          CDS: ${{ matrix.cds }}
+          SQLITE: ${{ matrix.sqlite }}
+        run: |
+          spec() { [ "$1" = latest ] && echo latest || echo "^$1"; }
+          npm pkg set "devDependencies.@sap/cds=$(spec "$CDS")"
+          npm pkg set "dependencies.@sap/cds=$(spec "$CDS")" \
+                      "dependencies.@cap-js/sqlite=$(spec "$SQLITE")" --workspace examples/bookshop
 
       # ---- the gates -------------------------------------------------------
       - run: npm install --no-audit --no-fund
+      - name: Versions under test
+        run: |
+          node -p "['node ' + process.version,
+            '@sap/cds ' + require('@sap/cds/package.json').version,
+            '@cap-js/sqlite ' + require('@cap-js/sqlite/package.json').version].join(', ')"
       - run: npm run lint
       - run: npm test
       - run: npm run cold-test
@@ -88,12 +146,14 @@ jobs:
       # project. It is the only step that answers "does the PACKAGE work".
       - run: npm run consumer-test
 
-      # ---- the browser -----------------------------------------------------
-      - run: npx playwright install --with-deps chromium
+      # ---- the browser, once -------------------------------------------------
+      - if: matrix.browser
+        run: npx playwright install --with-deps chromium
         working-directory: examples/bookshop
-      - run: npm run test:browser
+      - if: matrix.browser
+        run: npm run test:browser
       - uses: actions/upload-artifact@v7
-        if: always()
+        if: always() && matrix.browser
         with:
           name: screenshots
           path: examples/bookshop/screenshots

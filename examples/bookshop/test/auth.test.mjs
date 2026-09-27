@@ -6,15 +6,13 @@
 // and every draft was stored as "anonymous" - alice's draft answered to bob.
 // cds.middlewares.before on the route is what fixes it; this is the proof.
 import assert from "node:assert/strict";
-import { after, before, test } from "node:test";
+import { test } from "node:test";
 import cds from "@sap/cds";
-import { action, boot, post } from "./server.mjs";
+import { action, boot, post, serve } from "./server.mjs";
 
 const APP = "ZCL_JS_HELLO";
-let s;
+const s = serve();
 let draftId;                       // created by alice below, checked in the database last
-before(async () => { s = await boot("auth"); });
-after(() => s?.kill());
 
 test("without credentials the route asks for a login, with the auth strategy's challenge", async () => {
   const r = await post(s.url, { app: APP });
@@ -84,7 +82,7 @@ test("the stored owner is the CAP user, not 'anonymous'", async () => {
 // were fine; and a LIST of roles let nobody in, because cds.User.is( ) takes
 // one role and answers false for an array.
 test("with a list of roles: one of them lets the user in, a user with none gets 403", async () => {
-  const r = await boot("auth roles", { env: { CDS_CAP2UI5_REQUIRES: JSON.stringify(["admin", "internal-user"]) } });
+  const r = await boot("auth roles", { env: { CDS_REQUIRES_CAP2UI5_ROLES: JSON.stringify(["admin", "internal-user"]) } });
   try {
     const alice = await post(r.url, { app: APP, user: "alice" });            // admin
     assert.equal(alice.status, 200, alice.text.slice(0, 300));
@@ -105,7 +103,7 @@ test("with a list of roles: one of them lets the user in, a user with none gets 
 });
 
 test("'any' - CAP's pseudo role for everybody - lets an anonymous caller in", async () => {
-  const r = await boot("auth any", { env: { CDS_CAP2UI5_REQUIRES: "any" } });
+  const r = await boot("auth any", { env: { CDS_REQUIRES_CAP2UI5_ROLES: "any" } });
   try {
     const anonymous = await post(r.url, { app: APP });
     assert.equal(anonymous.status, 200, anonymous.text.slice(0, 300));

@@ -5,14 +5,12 @@
 // z2ui5_cl_ui5_app_cont is the obvious candidate. This runs three users'
 // roundtrips concurrently, twice, and checks every answer went to its owner.
 import assert from "node:assert/strict";
-import { after, before, test } from "node:test";
-import { action, boot, post } from "./server.mjs";
+import { test } from "node:test";
+import { action, post, serve } from "./server.mjs";
 
 const APP = "ZCL_JS_HELLO";
 const USERS = ["alice", "bob", "carol"];
-let s;
-before(async () => { s = await boot("concurrency"); });
-after(() => s?.kill());
+const s = serve();
 
 test("three users' roundtrips interleaved in one process each get their own answer", async () => {
   for (let round = 0; round < 2; round++) {

@@ -56,7 +56,10 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
   functions. It checks this across all six auth kinds (`mocked`, `basic`,
   `dummy`, `jwt`, `xsuaa`, `ias`). `@sap/xssec` is a devDependency of the
   example, so the production three are covered by the gate and not merely
-  assumed.
+  assumed. The one other assumption is `cds.app._app_links`, which CAP's
+  start page reads to list the apps. It needs a served app, so its gate is
+  the start-page test in `coexistence.test.mjs`; if it breaks, only that list
+  is lost.
 - **Access is decided and answered the way CAP does it for `@requires`.**
   The guard mirrors `check_roles` in CAP's HTTP adapter: one of the roles lets
   the user in, `any` lets everybody in, anonymous users get 401 and
@@ -72,6 +75,14 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
   must fail.
 - `npm test` stays browserless. Browser tests are `*.e2e.mjs`, run by
   `npm run test:browser`.
+- **A test about what the route answers serves the example in-process with
+  `cds.test`** (`serve()` in `test/server.mjs`), the way a CAP project tests
+  itself and the path a consumer's own suite takes through the plugin. **A
+  test about the process boots it as a child** (`boot()`): a start that
+  fails, a restart, a production profile, a setting only the environment can
+  make, or what the log says while the server starts. `cds.test.log()`
+  clears its capture before each test, so startup lines are only visible to
+  a child.
 - **The workspace cannot prove the PACKAGE.** Every test here runs with
   `cap2ui5` and `@abap2ui5/node-runtime` as workspace symlinks, so a missing entry
   in `files`, a `main` pointing at nothing, or a model contribution that only
@@ -122,6 +133,11 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
 - Commit messages say why. The history of this project is its evidence.
 
 ## Publishing
+
+Every change a user of the package would notice gets a line under
+`Unreleased` in `plugin/CHANGELOG.md`, in the same pull request. The PR that
+prepares a release bumps `plugin/package.json` and moves those lines under the
+new version.
 
 A tag `v<version>` publishes `plugin/` as the npm package `cap2ui5`
 (`.github/workflows/release.yml`) by **trusted publishing** - OIDC with

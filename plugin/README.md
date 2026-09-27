@@ -16,7 +16,11 @@ authorization; your apps read your entities with `cds.ql`.
 
 ```bash
 npm i cap2ui5
+cds add cap2ui5      # optional: a first app in srv/apps/hello.js
 ```
+
+Requires Node.js 22 or later and `@sap/cds` 9 or 10 (CI tests both, on
+Node 22 and 24).
 
 That is the installation. On the next `cds serve` the roundtrip route
 (`/rest/root/z2ui5`, `/sap/bc/z2ui5`) exists - its page carries the whole UI5
@@ -58,11 +62,12 @@ defineApp("BOOKS", class {
 `cds watch` prints the address of every app, and the user to log in as:
 
 ```
-[cap2ui5] BOOKS  http://localhost:4004/sap/bc/z2ui5?app_start=BOOKS
-[cap2ui5] development login: alice (empty password)
+[cap2ui5] - BOOKS  http://localhost:4004/sap/bc/z2ui5?app_start=BOOKS
+[cap2ui5] - development login: alice (empty password)
 ```
 
-Only in development; a production profile prints neither.
+Only in development; a production profile prints neither. CAP's start page
+at `/` lists the same addresses under "Web Applications".
 
 A project from `cds init` + `cds add nodejs` is an ES module project, hence
 `import`. In a CommonJS project, or in a `.cjs` file, `require("cap2ui5")`
@@ -87,31 +92,84 @@ levels. Component names are UPPERCASE in the model. The whole instance is
 persisted to `cap2ui5.Drafts` after every roundtrip and rebuilt before the
 next, so state survives a restart.
 
+**Types:** the package ships TypeScript declarations (`index.d.ts`). In a
+JavaScript app, annotate the client for completion and checked field names:
+`/** @param {import("cap2ui5").Client<{ search: string }>} c */`.
+
 ## Configure
 
-Under `cds.cap2ui5` in `package.json`, a `.cdsrc.json`, or a profile:
+Under `cds.requires.cap2ui5` - in `package.json`, a `.cdsrc.json`, a profile or
+`CDS_REQUIRES_CAP2UI5_*` environment variables, like any CAP setting:
+
+```json
+"cds": {
+  "requires": {
+    "cap2ui5": { "roles": ["admin"], "body_parser": { "limit": "20mb" } }
+  }
+}
+```
 
 | key | default | |
 |---|---|---|
 | `apps` | `srv/apps` | the directory scanned for app modules |
-| `requires` | `authenticated-user` | who may call: a role, or a list of roles any one of which lets the user in, as with CAP's `@requires`; `any` or `null` allows anonymous callers |
+| `roles` | `["authenticated-user"]` | who may call: a role, or a list of roles any one of which lets the user in, as with CAP's `@requires`; `any` or `null` allows anonymous callers |
 | `routes` | `/sap/bc/z2ui5`, `/rest/root/z2ui5` | where the roundtrip answers |
+| `body_parser.limit` | CAP's `cds.server.body_parser.limit`, else `10mb` | the largest roundtrip body; a larger one gets 413 |
+
+`"cap2ui5": false` switches the plugin off: no route, and no `cap2ui5.Drafts`
+table in the model.
 
 The route runs behind CAP's own middlewares and answers like a CAP service.
 Whatever `cds.requires.auth` is configured to identifies the user. A caller who
 is not logged in gets 401 with that strategy's login challenge. A user who
 lacks the role gets 403.
 
+0.1.0 read its settings from a top-level `cds.cap2ui5`, with `requires` for the
+roles. Those settings still apply, and the log names the new place.
+
 Everything the *framework* decides about a response — the
 Content-Security-Policy, the security headers, the UI5 bootstrap URL, the
 theme, the draft expiry, the CSRF gate — comes from the user exit,
 `defineExit({ onPage, onRoundtrip })`, one per project.
+
+## In production
+
+- **Who may call:** set `roles` to the roles your identity provider grants
+  (XSUAA scopes, IAS groups). The default, `authenticated-user`, is CAP's own
+  default for production.
+- **Behind the approuter:** route the paths in `routes` to the CAP backend
+  with the approuter's authentication, like the service paths. The approuter
+  protects routes with an X-CSRF-Token by default (`csrfProtection`).
+  `@abap2ui5/node-runtime` 1.145.0, the runtime this version pins, does not
+  fetch that token yet, so set `"csrfProtection": false` on these routes. The
+  framework runs its own CSRF check: it compares `Origin`/`Referer` with the
+  host, and the user exit configures it. The token handshake comes with the
+  abap2UI5 release after 1.145.0
+  ([abap2UI5#2802](https://github.com/abap2UI5/abap2UI5/pull/2802)).
+- **Body size:** a roundtrip carries the app's whole model.
+  `cds.server.body_parser.limit`, CAP's global limit, applies here too;
+  `body_parser.limit` above overrides it for this route.
+- **Logs:** the plugin logs through `cds.log('cap2ui5')`, so production gets
+  JSON records with the request's correlation id. Set the level with
+  `cds.log.levels.cap2ui5`.
+- **Database:** `cap2ui5.Drafts` is part of the model, so `cds deploy` and
+  `cds build --production` create it like any other table (`.hdbtable` for
+  SAP HANA). A draft is deleted after the user exit's
+  `draft_exp_time_in_hours`, 4 hours unless the exit changes it.
+- **Multitenancy (MTX):** not tested yet. The draft store reads and writes
+  through `cds.run`, which follows `cds.context`. The drafts should therefore
+  land in each tenant's database like any other row, but no test proves it.
 
 ## Documentation
 
 **[cap2ui5.github.io/docs](https://cap2ui5.github.io/docs/)** — the guide, the
 API reference, the examples and the architecture, including why the exit is
 registered rather than discovered and where UI5 itself comes from.
+
+## Support
+
+Bugs and questions: [github.com/cap2UI5/cap2UI5/issues](https://github.com/cap2UI5/cap2UI5/issues).
+What changed between versions: [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 

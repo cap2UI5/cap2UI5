@@ -8,10 +8,16 @@ const { installExit } = require("./define-exit");
 
 const LOG = cds.log("cap2ui5");
 
-/** Where the runtime package is. Resolved from the PROJECT (cds.root), so the
- *  version the project installed wins - the plugin only declares the range. */
+/** Where the runtime package is: resolved like any dependency of the plugin,
+ *  so what loads is the version plugin/package.json pins - the one the ABI
+ *  gate (abi-gate.test.mjs) was run against. It used to be looked up in the
+ *  project first, "so the version the project installed wins", while the
+ *  plugin pinned an exact version: a project that also depended on another
+ *  runtime silently replaced the tested one. A project that wants another
+ *  runtime says so the way npm provides for a dependency of a dependency -
+ *  `overrides` - and the log line below names what was loaded. */
 function locate() {
-  const pkg = require.resolve("@abap2ui5/node-runtime/package.json", { paths: [cds.root, __dirname] });
+  const pkg = require.resolve("@abap2ui5/node-runtime/package.json");
   const dir = path.dirname(pkg);
   return {
     dir,

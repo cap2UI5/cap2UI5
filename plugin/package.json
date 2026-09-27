@@ -24,37 +24,40 @@
   },
   "license": "MIT",
   "main": "index.js",
+  "types": "index.d.ts",
   "files": [
     "cds-plugin.js",
     "index.cds",
     "index.js",
+    "index.d.ts",
     "lib",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "peerDependencies": {
     "@sap/cds": ">=9"
   },
   "dependencies": {
     "@abap2ui5/node-runtime": "1.145.0",
-    "express": "^5"
+    "express": "^4.22.1 || ^5"
   },
   "cds": {
     "requires": {
       "cap2ui5": {
-        "model": "cap2ui5"
+        "model": "cap2ui5",
+        "apps": "srv/apps",
+        "roles": [
+          "authenticated-user"
+        ],
+        "routes": [
+          "/sap/bc/z2ui5",
+          "/rest/root/z2ui5"
+        ]
       }
-    },
-    "cap2ui5": {
-      "apps": "srv/apps",
-      "requires": "authenticated-user",
-      "routes": [
-        "/sap/bc/z2ui5",
-        "/rest/root/z2ui5"
-      ]
     }
   }
 }

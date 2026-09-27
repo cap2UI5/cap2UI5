@@ -19,7 +19,7 @@
  *   - the plugin is loaded because it IS a cds-plugin, from node_modules
  *   - `require("cap2ui5")` resolves and exports what the docs say
  *   - index.cds reaches the project's model, so cds deploy makes the table
- *   - the runtime is resolved FROM THE PROJECT, not from the plugin
+ *   - the runtime that loads is the version the plugin pins
  *   - the route answers: bootstrap page, UI5 shell, start, event, and 401
  *     for a caller with no credentials
  *
@@ -74,11 +74,17 @@ try {
   check("both packages pack", tarballs.length === 2, tarballs.join(" "));
 
   // --- a CAP project that has never heard of this repository ----------------
+  // on the CAP versions the example is on - which is what a CI leg that tests
+  // another cds major changes, so the package is checked on that major too
+  const example = JSON.parse(fs.readFileSync(path.join(ROOT, "examples", "bookshop", "package.json"), "utf8"));
   fs.mkdirSync(path.join(proj, "srv", "apps"), { recursive: true });
   fs.writeFileSync(path.join(proj, "package.json"), JSON.stringify({
     name: "cap2ui5-consumer-probe",
     private: true,
-    dependencies: { "@cap-js/sqlite": "^3", "@sap/cds": "^10" },
+    dependencies: {
+      "@cap-js/sqlite": example.dependencies["@cap-js/sqlite"],
+      "@sap/cds": example.dependencies["@sap/cds"],
+    },
     cds: { requires: { db: { kind: "sqlite", credentials: { url: "db.sqlite" },
                             client: { timeout: 5000 } } } },
   }, null, 2));
@@ -110,9 +116,12 @@ defineApp("ZCL_PROBE", class {
     surface.ok ? exported.join(", ") : surface.why);
 
   const pkgDir = path.join(proj, "node_modules", "cap2ui5");
-  for (const f of ["README.md", "LICENSE", "cds-plugin.js", "index.cds", "index.js", "lib"]) {
+  for (const f of ["README.md", "CHANGELOG.md", "LICENSE", "cds-plugin.js", "index.cds", "index.js", "index.d.ts", "lib"]) {
     check(`the package contains ${f}`, fs.existsSync(path.join(pkgDir, f)));
   }
+  const types = JSON.parse(fs.readFileSync(path.join(pkgDir, "package.json"), "utf8")).types;
+  check("its package.json names the type declarations it ships",
+    !!types && fs.existsSync(path.join(pkgDir, types)), String(types));
 
   // --- the model contribution, and the table it makes ----------------------
   const model = probe(`
@@ -166,9 +175,11 @@ defineApp("ZCL_PROBE", class {
       /\[cap2ui5\] - development login: alice \(empty password\)/.test(log),
       (log.match(/\[cap2ui5\] - development login.*/) ?? ["no such line"])[0]);
 
-    check("the runtime is resolved from the PROJECT",
-      /\[cap2ui5\] - @abap2ui5\/node-runtime .* from .*proj[/\\]node_modules/.test(log),
-      (log.match(/\[cap2ui5\] - @abap2ui5\/node-runtime.*/) ?? [""])[0]);
+    const pinned = JSON.parse(fs.readFileSync(path.join(ROOT, "plugin", "package.json"), "utf8"))
+      .dependencies["@abap2ui5/node-runtime"];
+    const [line = "", loaded] = log.match(/\[cap2ui5\] - @abap2ui5\/node-runtime (\S+) from .*proj[/\\]node_modules.*/) ?? [];
+    check("the runtime that loads is the one the plugin pins, installed with it",
+      loaded === pinned, line || `no runtime line (pinned: ${pinned})`);
 
     const url = `http://127.0.0.1:${PORT}`;
     const auth = { Authorization: "Basic " + Buffer.from("alice:").toString("base64"),
