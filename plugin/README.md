@@ -89,18 +89,34 @@ next, so state survives a restart.
 
 ## Configure
 
-Under `cds.cap2ui5` in `package.json`, a `.cdsrc.json`, or a profile:
+Under `cds.requires.cap2ui5` - in `package.json`, a `.cdsrc.json`, a profile or
+`CDS_REQUIRES_CAP2UI5_*` environment variables, like any CAP setting:
+
+```json
+"cds": {
+  "requires": {
+    "cap2ui5": { "roles": ["admin"], "body_parser": { "limit": "20mb" } }
+  }
+}
+```
 
 | key | default | |
 |---|---|---|
 | `apps` | `srv/apps` | the directory scanned for app modules |
-| `requires` | `authenticated-user` | who may call: a role, or a list of roles any one of which lets the user in, as with CAP's `@requires`; `any` or `null` allows anonymous callers |
+| `roles` | `["authenticated-user"]` | who may call: a role, or a list of roles any one of which lets the user in, as with CAP's `@requires`; `any` or `null` allows anonymous callers |
 | `routes` | `/sap/bc/z2ui5`, `/rest/root/z2ui5` | where the roundtrip answers |
+| `body_parser.limit` | CAP's `cds.server.body_parser.limit`, else `10mb` | the largest roundtrip body; a larger one gets 413 |
+
+`"cap2ui5": false` switches the plugin off: no route, and no `cap2ui5.Drafts`
+table in the model.
 
 The route runs behind CAP's own middlewares and answers like a CAP service.
 Whatever `cds.requires.auth` is configured to identifies the user. A caller who
 is not logged in gets 401 with that strategy's login challenge. A user who
 lacks the role gets 403.
+
+0.1.0 read its settings from a top-level `cds.cap2ui5`, with `requires` for the
+roles. Those settings still apply, and the log names the new place.
 
 Everything the *framework* decides about a response — the
 Content-Security-Policy, the security headers, the UI5 bootstrap URL, the

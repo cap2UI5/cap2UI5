@@ -84,7 +84,7 @@ test("the stored owner is the CAP user, not 'anonymous'", async () => {
 // were fine; and a LIST of roles let nobody in, because cds.User.is( ) takes
 // one role and answers false for an array.
 test("with a list of roles: one of them lets the user in, a user with none gets 403", async () => {
-  const r = await boot("auth roles", { env: { CDS_CAP2UI5_REQUIRES: JSON.stringify(["admin", "internal-user"]) } });
+  const r = await boot("auth roles", { env: { CDS_REQUIRES_CAP2UI5_ROLES: JSON.stringify(["admin", "internal-user"]) } });
   try {
     const alice = await post(r.url, { app: APP, user: "alice" });            // admin
     assert.equal(alice.status, 200, alice.text.slice(0, 300));
@@ -105,7 +105,7 @@ test("with a list of roles: one of them lets the user in, a user with none gets 
 });
 
 test("'any' - CAP's pseudo role for everybody - lets an anonymous caller in", async () => {
-  const r = await boot("auth any", { env: { CDS_CAP2UI5_REQUIRES: "any" } });
+  const r = await boot("auth any", { env: { CDS_REQUIRES_CAP2UI5_ROLES: "any" } });
   try {
     const anonymous = await post(r.url, { app: APP });
     assert.equal(anonymous.status, 200, anonymous.text.slice(0, 300));
