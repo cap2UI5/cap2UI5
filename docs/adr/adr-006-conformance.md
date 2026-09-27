@@ -1,5 +1,7 @@
 # ADR-006 — Wire conformance against upstream, as the primary correctness gate
 
+> Moved here on 2026-09-27 from `cap2UI5/builder-abap2UI5-js` @ `d09dd5e`, `docs/adr-006-conformance.md`; otherwise unchanged, so its paths refer to that repository.
+
 **Status:** accepted (2026-09-18).
 **Supersedes nothing.** It adds a gate; it removes none, and in particular it
 does not retire the upstream-units ratchet — see "What this does not replace".
@@ -147,7 +149,12 @@ baseline; the baseline's `tracked` field points here.
 2. **Model shape** — flatten two-way bindings out of `MODEL.XX` to the model
    root, and omit `MODEL` entirely when nothing changed (upstream's absence is
    read as `MODELPRESENT=false`; an unconditional push overwrites edits the user
-   made after the request left).
+   made after the request left). **And publish what was BOUND, not the whole
+   structure**: on the start page upstream's `MS_HOME` carries exactly the eight
+   fields the app binds, while the port also ships `BTN_EVENT_ID`, which is
+   passed to `_event( )` and to nothing else — and binds two fields upstream
+   binds (`classname`, `link_enabled`) less. Whatever an unbound attribute
+   contains is sent to the browser on every roundtrip.
 3. **App name casing** — echo the class name upper-cased. Cheapest of the three
    and the only one with no design question attached.
 4. **View-builder regression** — resolve the dynamic `CONVERT` path, or pin the
@@ -157,6 +164,31 @@ baseline; the baseline's `tracked` field points here.
 5. **`check_on_navigated` divergence** — upstream's predicate covers the initial
    render, this port's does not (changing `hi_world` to match upstream hangs the
    engine; verified). `z2ui5_cl_ui5_client` is on the port-drift list.
+
+## 2026-09-19 — the gate fired on its first CI run, as designed
+
+`conformance.yml` checks out upstream `main` unpinned on purpose: a conformance
+break caused by an upstream change is the signal it exists to raise. On the
+first run after the workflow was added, it raised one.
+
+[abap2UI5#2771](https://github.com/abap2UI5/abap2UI5/pull/2771) stopped the
+model walk from descending into the framework's own client object — a bug of
+its own there: the shipped start app holds its client `PUBLIC`, which put some
+300 rows under `CLIENT->` into every draft of the start page. The effect here is
+that two baseline entries stopped reproducing (`MODEL.CLIENT`, which was
+upstream's whole client graph, and `MODEL.MS_HOME`, the port's flat record with
+no counterpart) and two finer ones appeared in their place
+(`MS_HOME.CLASSNAME`, `MS_HOME.BTN_EVENT_ID`).
+
+Nothing about the port changed. What changed is that upstream's model is no
+longer drowning the comparison: **the two models now agree in shape**, and the
+difference that is left is two fields — which is how the publishing rule in
+worklist item 2 became visible at all. The delisted entry's stated premise, that
+the two start pages "have genuinely diverged in what they expose", was the
+correct reading of the evidence at the time and is no longer true of the model.
+
+The maintenance this costs is the price of an unpinned reference, and it is the
+right price: a pinned one would have hidden both the fix and the finding.
 
 ## Growing the corpus
 

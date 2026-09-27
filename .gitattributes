@@ -1,9 +1,7 @@
-# Normalize line endings to LF for all text files.
-#
-# Ships into the published cap2UI5 app, which vendors the generated core/
-# tree - CONVENTIONS §6 asks every repository carrying a generated tree for
-# this file, and the app repo's content outside .github/ can only come from
-# here.
+# Normalize line endings to LF for all text files: scripts/*.sh runs under
+# `sh`, which a CRLF checkout breaks. The per-extension lines only force a
+# type that auto-detection would already pick; the abap/xml/jsonc ones match
+# nothing here today and are inert.
 * text=auto eol=lf
 *.abap text eol=lf
 *.xml text eol=lf
