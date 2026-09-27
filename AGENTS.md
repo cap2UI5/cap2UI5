@@ -68,6 +68,13 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
   mounts it behind its protocol adapters, so the login challenge and the error
   body are CAP's. `auth.test.mjs` holds that behaviour; the plugin does not
   call `req._login()` or any other internal itself.
+- **`ViewBuilder` renders nothing itself.** It records the app's chain and
+  replays it after `main( )` against the transpiled
+  `z2ui5_cl_ui5_view_builder`, so the view is upstream's, byte for byte, and
+  there is no second copy of the builder to keep in step. The one piece of
+  JavaScript of its own is `escapeLiteral( )`, which a synchronous chain
+  cannot await. `view-builder.test.mjs` pins it to the ABAP method, and the
+  replay to the same chain driven directly against the class.
 - **Every new `abap.*` or `z2ui5_*$*` touchpoint in `plugin/lib/` goes into
   `abi-gate.test.mjs`.** The plugin couples to the transpiler's emission
   format (static `ATTRIBUTES`/`METHODS` maps, `constructor_( )`, `~` → `$`),

@@ -50,6 +50,18 @@ const STORE_METHODS = {           // z2ui5_if_ui5_draft_store, implemented by dr
   COUNT_ENTRIES_TOTAL: ["RESULT"],
   CLEANUP: [],
 };
+// z2ui5_cl_ui5_view_builder, which view-builder replays an app's chain against
+const BUILDER_METHODS = {
+  FACTORY: ["RESULT"],
+  ELE: ["N", "NS", "RESULT"],
+  TAG: ["N", "NS", "RESULT"],
+  A: ["N", "V", "B", "T", "RESULT"],
+  END: ["RESULT"],
+  STRINGIFY: ["RESULT"],
+  ESCAPE_LITERAL: ["VAL", "RESULT"],
+};
+const BUILDER_STATICS = ["factory", "escape_literal"];
+const BUILDER_INSTANCE = ["ele", "tag", "a", "end", "stringify"];
 // structure components draft-store reads or writes
 const DRAFT_FIELDS = ["id", "id_prev", "id_prev_app", "id_prev_app_stack"];
 const READ_DRAFT_FIELDS = [...DRAFT_FIELDS, "uname", "data"];
@@ -172,6 +184,10 @@ test("the interface methods and parameters the plugin uses exist, by name", () =
   };
   check("Z2UI5_IF_CLIENT", CLIENT_METHODS);
   check("Z2UI5_IF_UI5_DRAFT_STORE", STORE_METHODS);
+  check("Z2UI5_CL_UI5_VIEW_BUILDER", BUILDER_METHODS);
+  const VB = abap.Classes["Z2UI5_CL_UI5_VIEW_BUILDER"];
+  for (const m of BUILDER_STATICS) assert.equal(typeof VB[m], "function", `z2ui5_cl_ui5_view_builder=>${m}`);
+  for (const m of BUILDER_INSTANCE) assert.equal(typeof VB.prototype[m], "function", `z2ui5_cl_ui5_view_builder->${m}`);
   const get = abap.Classes["Z2UI5_IF_CLIENT"].METHODS.GET.parameters.RESULT.type().get();
   for (const f of GET_FIELDS) assert.ok(f in get, `z2ui5_if_client=>get( )-${f}`);
 });

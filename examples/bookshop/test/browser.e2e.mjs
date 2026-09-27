@@ -131,3 +131,19 @@ test("c.event( ) survives a view whose attributes were XML-escaped, arguments in
   await page.screenshot({ path: path.join(SHOTS, "escaped.png") });
   assert.deepEqual(errors, [], "page errors");
 });
+
+test("a view built with ViewBuilder renders, keeps literal text literal, and answers its event", async () => {
+  // ZCL_JS_BUILDER builds its view with abap2UI5's own view builder, replayed
+  // against the transpiled class after main( ) - so this is the browser's
+  // word that upstream's rendering and cap2UI5's event placeholders fit.
+  const { page, errors } = await open("ZCL_JS_BUILDER");
+  const input = page.locator("input.sapMInputBaseInner").first();
+  await input.waitFor({ timeout: 60_000 });
+  // a( "text", { t } ): shown as typed, braces and all - not read as a binding
+  await page.getByText("{shown as typed}", { exact: true }).waitFor({ timeout: 10_000 });
+  await input.fill("Ada");
+  await page.getByRole("button", { name: "Go" }).click();
+  await page.locator(".sapMMessageBox, .sapMDialog").filter({ hasText: "Hello Ada" }).waitFor({ timeout: 30_000 });
+  await page.screenshot({ path: path.join(SHOTS, "builder.png") });
+  assert.deepEqual(errors, [], "page errors");
+});

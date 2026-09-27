@@ -73,6 +73,7 @@
 // decimals and nothing to point at.
 const crypto = require("node:crypto");
 const cds = require("@sap/cds");
+const { isBuilder, render } = require("./view-builder");
 
 const LOG = cds.log("cap2ui5");
 
@@ -498,13 +499,18 @@ function defineApp(name, cls, opts = {}) {
         return ref;
       };
 
+      /** A view is XML text or a ViewBuilder chain (lib/view-builder.js),
+       *  which upstream's z2ui5_cl_ui5_view_builder renders here, after main( ).
+       *  Its escaping leaves the event placeholders alone - [A-Za-z0-9_] -
+       *  so subst( ) finds them in the rendered XML as in hand-written text. */
+      const xmlOf = async (v) => subst(isBuilder(v) ? await render(v) : v, { xml: true });
       for (const [kind, arg, id] of queue) {
-        if (kind === "view") await c.z2ui5_if_client$view_display({ val: S(subst(arg, { xml: true })) });
-        else if (kind === "popup") await c.z2ui5_if_client$popup_display({ val: S(subst(arg, { xml: true })) });
+        if (kind === "view") await c.z2ui5_if_client$view_display({ val: S(await xmlOf(arg)) });
+        else if (kind === "popup") await c.z2ui5_if_client$popup_display({ val: S(await xmlOf(arg)) });
         else if (kind === "popup_destroy") await c.z2ui5_if_client$popup_destroy();
         else if (kind === "nest") {
           await c.z2ui5_if_client$nest_view_display({
-            val: S(subst(arg, { xml: true })), id: S(id.id),
+            val: S(await xmlOf(arg)), id: S(id.id),
             method_insert: S(id.insert), method_destroy: S(id.clear),
           });
         } else if (kind === "nest_destroy") await c.z2ui5_if_client$nest_view_destroy();

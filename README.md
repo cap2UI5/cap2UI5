@@ -111,6 +111,10 @@ this existed: every value on that list was unreachable from a CAP project.
 > documented obsolete and does nothing — changed bound data is pushed on its
 > own, to an open popup and a nested view too).
 
+**Views** are XML text, or a chain of `ViewBuilder`, abap2UI5's own
+`z2ui5_cl_ui5_view_builder` with the same verbs (`ele`, `tag`, `a`, `end`),
+rendered by the upstream class, so the view is exactly an ABAP app's.
+
 **State:** strings, numbers, booleans, `t.packed(l, d)`, `t.char(n)`, a plain
 object (a structure), `t.table({ …one row… })` — and those nest: a structure
 inside a structure, a table inside a structure, up to 8 levels. Component names

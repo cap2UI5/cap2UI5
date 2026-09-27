@@ -112,7 +112,7 @@ defineApp("ZCL_PROBE", class {
   const surface = probe(`console.log(JSON.stringify(Object.keys(require("cap2ui5"))))`, proj);
   const exported = surface.ok ? JSON.parse(surface.out) : [];
   check("require(\"cap2ui5\") exports the documented surface",
-    ["defineApp", "defineExit", "t"].every((k) => exported.includes(k)),
+    ["defineApp", "defineExit", "t", "ViewBuilder"].every((k) => exported.includes(k)),
     surface.ok ? exported.join(", ") : surface.why);
 
   const pkgDir = path.join(proj, "node_modules", "cap2ui5");
