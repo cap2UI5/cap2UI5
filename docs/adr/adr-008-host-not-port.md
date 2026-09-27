@@ -88,3 +88,22 @@ removes, and is the fallback only if upstream declines.
    generated trees are deleted in one commit; the repo is archived. *(needs org)*
 
 Steps 2–3 are pull requests; nothing in 1, 4, 5 can be done from one.
+
+## Addendum 2026-09-27 — the records moved; nothing consumes the pipeline repositories
+
+Facts only; the decision above ("archive, do not delete") is unchanged.
+
+- **Moved into this repository on 2026-09-27**, from `cap2UI5/builder-abap2UI5-js`
+  at `d09dd5e`: ADR-001 to ADR-004, the current ADR-006 (which replaced an older
+  copy here that lacked the "publish what was BOUND" paragraph and the
+  2026-09-19 section), and `docs/transpiler-roadmap.md`, which ADR-006 cites.
+  ADR-007 and this ADR were already here. `docs/HANDOFF.md` was not moved:
+  nothing here cites it.
+- **Nothing consumes the pipeline repositories any more.** `cap2ui5` depends on
+  `@abap2ui5/node-runtime` from npm, which abap2UI5 builds and publishes itself;
+  both `cap2ui5@0.1.0` and `@abap2ui5/node-runtime@1.145.0` are on npm since
+  2026-09-27. No workflow, script or package in this repository names
+  `builder-abap2UI5-js`, `builder-cap2UI5`, `builder-cap2UI5-web` or
+  `web-cap2UI5-build`.
+- **State of those repositories on that date:** `builder-abap2UI5-js` still
+  active and being archived; the other three archived.

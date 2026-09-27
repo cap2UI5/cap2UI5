@@ -7,19 +7,22 @@ database, under your authorization. Your apps are plain JavaScript classes that
 read your entities with `cds.ql`.
 
 > [!IMPORTANT]
-> **Status: pre-release.** The plugin works and is tested end to end (wire,
-> restart, concurrency, browser). The four abap2UI5 seams it needs shipped in
-> abap2UI5 1.144.1; the runtime package, `@abap2ui5/node-runtime`, is published by
-> abap2UI5 from its next release on. Until it is on npm, `runtime/` is a
-> stand-in that `scripts/assemble-runtime.sh` fills from an upstream build.
-> The package was drafted upstream as `@abap2ui5/runtime` and renamed before
-> it was ever published; the ADRs keep the old name as the record of their
-> time. See [docs/adr/adr-008-host-not-port.md](docs/adr/adr-008-host-not-port.md).
+> **Status: pre-release, on npm.** The plugin works and is tested end to end
+> (wire, restart, concurrency, browser). The four abap2UI5 seams it needs
+> shipped in abap2UI5 1.144.1. Since 2026-09-27 both packages are on npm:
+> `cap2ui5@0.1.0`, and the runtime it pins, `@abap2ui5/node-runtime@1.145.0`,
+> which abap2UI5 builds and publishes itself. In this repository `runtime/` is
+> still a workspace stand-in for that package, which
+> `scripts/assemble-runtime.sh` fills from the published one or from an
+> upstream build. The package was drafted upstream as `@abap2ui5/runtime` and
+> renamed before it was ever published; the ADRs keep the old name as the
+> record of their time. See
+> [docs/adr/adr-008-host-not-port.md](docs/adr/adr-008-host-not-port.md).
 
 ## Using it
 
 ```bash
-npm i cap2ui5            # once published; today: this workspace, see below
+npm i cap2ui5            # contributing to the plugin itself: the workspace, see below
 ```
 
 That is the installation. On the next `cds serve` the roundtrip route
@@ -125,14 +128,16 @@ plugin/              the npm package cap2ui5: cds-plugin.js, index.cds, lib/
 examples/bookshop/   a CAP project using it: a plain CAP service, the apps, the test suite
 runtime/             @abap2ui5/node-runtime: only package.json + README are here, see runtime/README.md
 scripts/             assemble-runtime.sh - fills runtime/ from an upstream build or the package
-docs/adr/            the decisions, with the measurements that made them
+docs/adr/            the decisions, with the measurements that made them (ADR-001 to -008)
 ```
 
 ```bash
-# once, until @abap2ui5/node-runtime exists on npm:
-git clone https://github.com/abap2UI5/abap2UI5 /tmp/ref
-(cd /tmp/ref && npm ci && npm run deps && npm run auto_downport && npm run auto_transpile)
-scripts/assemble-runtime.sh /tmp/ref          # or: scripts/assemble-runtime.sh --package X.Y.Z
+# once per checkout: fill runtime/ from the published runtime the plugin pins
+scripts/assemble-runtime.sh --package 1.145.0
+# ...or, to try an unreleased upstream, from an upstream build:
+#   git clone https://github.com/abap2UI5/abap2UI5 /tmp/ref
+#   (cd /tmp/ref && npm ci && npm run deps && npm run auto_downport && npm run auto_transpile)
+#   scripts/assemble-runtime.sh /tmp/ref
 
 npm install
 npm test                                       # ABI gates, auth, books, concurrency, nesting, the exit  (36 tests)
