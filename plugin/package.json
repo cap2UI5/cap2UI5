@@ -33,14 +33,14 @@
     "LICENSE"
   ],
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "peerDependencies": {
     "@sap/cds": ">=9"
   },
   "dependencies": {
     "@abap2ui5/node-runtime": "1.145.0",
-    "express": "^5"
+    "express": "^4.22.1 || ^5"
   },
   "cds": {
     "requires": {
