@@ -63,14 +63,29 @@ cds.on("bootstrap", (app) => {
   // with embeds the whole UI5 component - every module, view and stylesheet,
   // from the runtime's own commit - so the browser needs no files from here.
 
-  // Who may call. Whatever cds.requires.auth is configured to (mocked in
-  // development, xsuaa/ias in production) has already run by the time this
-  // executes - see the middleware chain below - so the check is one line, and
-  // a project that wants anonymous access sets cds.cap2ui5.requires to null.
+  // Who may call, decided the way CAP decides it for a service annotated with
+  // @requires (check_roles in CAP's HTTP adapter): any one of the roles lets
+  // the user in, so a list means one of them; an anonymous user is asked to
+  // log in (401); an authenticated user without the role is refused (403).
+  // The auth strategy of cds.requires.auth - mocked in development, xsuaa or
+  // ias in production - has run by then, in the chain below. "any" is CAP's
+  // pseudo role for everybody, anonymous included, and null lets anybody in
+  // as well.
+  //
+  // The guard only decides. CAP's own error middleware, last on the route,
+  // answers - so the login challenge, the status and the error body are the
+  // ones CAP sends for its own services. It used to answer by itself: 401 and
+  // a fresh login challenge to an authenticated user who lacked the role, and
+  // 401 to everybody once requires was a list, because cds.User.is( ) takes
+  // one role, not an array.
+  const roles = [].concat(conf.requires ?? []);
   const guard = (req, res, next) => {
-    if (!conf.requires || cds.context?.user?.is(conf.requires)) return next();
-    if (typeof req._login === "function") return req._login();   // basic auth: challenge
-    return res.sendStatus(401);
+    const user = cds.context?.user;
+    if (!roles.length || roles.some((role) => user?.is(role))) return next();
+    if (!user?.is("authenticated-user")) return next(401);
+    // `code` as CAP's protocol adapters normalize it, so the body reads like theirs
+    const refused = new cds.error(403, `User '${user.id}' is lacking required roles: [${roles}]`);
+    next(Object.assign(refused, { code: "403" }));
   };
 
   // The roundtrip endpoint. cl_express_icf_shim is upstream's own adapter and
@@ -89,6 +104,10 @@ cds.on("bootstrap", (app) => {
   // guard BEFORE the body parser: it reads cds.context and nothing else, and
   // behind the parser an unauthenticated caller could make the server buffer
   // 10 MB per request before the 401 was even decided.
+  //
+  // cds.middlewares.errors( ) LAST, as CAP mounts it behind every protocol
+  // adapter: it answers what the guard and the body parser pass on (401, 403,
+  // 413) in CAP's format. The roundtrip handler answers its own failures.
   app.all(
     conf.routes,
     ...cds.middlewares.before.filter(Boolean),
@@ -108,5 +127,6 @@ cds.on("bootstrap", (app) => {
         if (!res.headersSent) res.status(500).type("text/plain").send(`roundtrip failed (${ref})`);
       }
     },
+    cds.middlewares.errors(),
   );
 });

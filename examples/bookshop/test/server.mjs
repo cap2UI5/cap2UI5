@@ -72,7 +72,7 @@ export async function post(url, { app, id = "", event = "", model = {}, user, ar
   const text = await r.text();
   let json = null;
   try { json = JSON.parse(text); } catch { /* an error page, not a wire envelope */ }
-  return { status: r.status, text, json };
+  return { status: r.status, headers: r.headers, text, json };
 }
 
 /** The first action of a response, for logs and assertions. */

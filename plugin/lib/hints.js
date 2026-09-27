@@ -33,7 +33,7 @@ function loginHint(auth) {
  * @param {string}   o.route      the roundtrip route to show, e.g. /sap/bc/z2ui5
  * @param {string}   o.appsDir    where app modules are read from, e.g. srv/apps
  * @param {object}   [o.auth]     cds.env.requires.auth
- * @param {string|null} [o.requires] cds.cap2ui5.requires - null lets anybody in
+ * @param {string|string[]|null} [o.requires] cds.cap2ui5.requires - null or "any" lets anybody in
  * @param {boolean}  [o.production]
  * @returns {string[]} the lines to print, none in production
  */
@@ -49,7 +49,8 @@ function startupHints({ apps, url, route, appsDir, auth, requires, production = 
       lines.push(`${app.padEnd(width)}  ${base}?app_start=${encodeURIComponent(app)}`);
     }
   }
-  const login = requires ? loginHint(auth) : null;
+  const open = !requires || [].concat(requires).includes("any");  // nobody has to log in
+  const login = open ? null : loginHint(auth);
   if (login) lines.push(`development login: ${login}`);
   return lines;
 }

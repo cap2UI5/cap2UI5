@@ -16,9 +16,12 @@ let draftId;                       // created by alice below, checked in the dat
 before(async () => { s = await boot("auth"); });
 after(() => s?.kill());
 
-test("without credentials the route asks for a login", async () => {
+test("without credentials the route asks for a login, with the auth strategy's challenge", async () => {
   const r = await post(s.url, { app: APP });
   assert.equal(r.status, 401);
+  // CAP's error middleware answers it, so the challenge is the strategy's own -
+  // mocked auth asks for Basic credentials, which is the browser's login dialog
+  assert.match(r.headers.get("www-authenticate") ?? "", /^Basic/);
 });
 
 test("a draft answers to its creator and to nobody else", async () => {
@@ -71,4 +74,42 @@ test("the stored owner is the CAP user, not 'anonymous'", async () => {
   await cds.connect.to("db");
   const rows = await cds.run("SELECT owner FROM cap2ui5_Drafts WHERE id = ?", [draftId]);
   assert.deepEqual(rows.map((r) => r.owner), ["alice"]);
+});
+
+// The route's roles, decided as CAP decides @requires for a service: any one
+// of them lets the user in, an anonymous user is asked to log in, and an
+// authenticated user without the role gets 403 - CAP's answer, in CAP's error
+// format. The guard used to answer 401 and a fresh login challenge to that
+// user, which sends a browser back to the login dialog for credentials that
+// were fine; and a LIST of roles let nobody in, because cds.User.is( ) takes
+// one role and answers false for an array.
+test("with a list of roles: one of them lets the user in, a user with none gets 403", async () => {
+  const r = await boot("auth roles", { env: { CDS_CAP2UI5_REQUIRES: JSON.stringify(["admin", "internal-user"]) } });
+  try {
+    const alice = await post(r.url, { app: APP, user: "alice" });            // admin
+    assert.equal(alice.status, 200, alice.text.slice(0, 300));
+    const yves = await post(r.url, { app: APP, user: "yves" });              // internal-user
+    assert.equal(yves.status, 200, yves.text.slice(0, 300));
+
+    const bob = await post(r.url, { app: APP, user: "bob" });                // neither
+    assert.equal(bob.status, 403, bob.text.slice(0, 300));
+    assert.equal(bob.headers.get("www-authenticate"), null, "bob was sent back to the login dialog");
+    assert.equal(bob.json?.error?.code, "403", bob.text);
+    assert.match(bob.json.error.message, /lacking required roles: \[admin,internal-user\]/);
+
+    const anonymous = await post(r.url, { app: APP });
+    assert.equal(anonymous.status, 401);
+  } finally {
+    r.kill();
+  }
+});
+
+test("'any' - CAP's pseudo role for everybody - lets an anonymous caller in", async () => {
+  const r = await boot("auth any", { env: { CDS_CAP2UI5_REQUIRES: "any" } });
+  try {
+    const anonymous = await post(r.url, { app: APP });
+    assert.equal(anonymous.status, 200, anonymous.text.slice(0, 300));
+  } finally {
+    r.kill();
+  }
 });

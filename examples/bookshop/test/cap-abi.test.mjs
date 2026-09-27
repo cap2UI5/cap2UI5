@@ -1,24 +1,30 @@
 // THE CAP ABI GATE - the plugin's coupling surface to @sap/cds, made explicit.
 //
-// abi-gate.test.mjs guards what the TRANSPILER emits. This file guards the
-// other undocumented surface the plugin stands on: @sap/cds internals that are
-// not part of its published API and can move in a minor release.
+// abi-gate.test.mjs guards what the TRANSPILER emits. This file guards what
+// the plugin assumes about @sap/cds beyond what CAP's documentation states.
 //
-// The one that matters most is `cds.middlewares.before`. cds-plugin.js spreads
-// it onto the roundtrip route, because CAP mounts its middlewares per SERVICE
-// PATH and a route mounted straight on express never gets cds.context - and
-// without cds.context the draft store cannot see a user at all. But that array
-// is MIXED: two of its four entries are `{ factory }` OBJECTS, not functions.
-// The plugin gets away with passing them to app.all only because
+// The assumption that matters most is the SHAPE of `cds.middlewares.before`.
+// The list itself is documented ("cds.middlewares" in CAP's node.js docs):
+// CAP mounts it in front of every protocol adapter, and cds-plugin.js spreads
+// it onto the roundtrip route for the same reason - without it there is no
+// cds.context, and without cds.context the draft store cannot see a user at
+// all. What the docs do not state is what an ENTRY is. Measured: a function,
+// or an ARRAY - trace( ) and ctx_model( ) answer an empty array when they are
+// off - and express flattens arrays among route handlers, so an empty one
+// simply vanishes. (An earlier version of this file called those entries
+// "{ factory } objects": they are arrays that carry a `factory` property,
+// which is how cds.middlewares.add( ) finds them by name.)
 //
-//   (a) the AUTH middleware is a plain function, so it really does run, and
-//   (b) the objects are inert - their factory answers an empty array.
+// So what must hold is:
 //
-// Neither is documented. If a cds release turned auth into a `{ factory }`
-// entry, the spread would hand express an inert object and the route would run
-// with no authentication: the guard answers 401 for everybody then, so the
-// symptom is a DEAD ROUTE rather than a leak - but it must fail HERE, on a
-// named assertion, and not in production on a blank screen.
+//   (a) every entry is a function or an array of functions - what express
+//       accepts as route handlers - and
+//   (b) the AUTH middleware is one of those functions, exactly once.
+//
+// If a cds release broke (b), the spread would mount no authentication and
+// the guard would answer 401 for everybody - a DEAD ROUTE rather than a leak,
+// but it must fail HERE, on a named assertion, and not in production on a
+// blank screen.
 //
 // Measured across every auth kind on 2026-09-20 (cds 9.9.3): mocked, basic,
 // dummy, jwt, xsuaa and ias all put the auth middleware in as a plain function
@@ -63,10 +69,11 @@ function chainFor(kind) {
   const src = `
     const cds = require("@sap/cds");
     const b = cds.middlewares.before || [];
+    const fn = (x) => x.name || "anonymous";
     console.log(JSON.stringify({
-      entries: b.map((x) => typeof x === "function"
-        ? { fn: x.name || "anonymous" }
-        : { keys: Object.keys(x), factoryAnswers: (() => { try { return JSON.stringify(x.factory()); } catch { return "threw"; } })() }),
+      entries: b.map((x) => typeof x === "function" ? { fn: fn(x) }
+        : Array.isArray(x) ? { array: x.map((y) => typeof y === "function" ? { fn: fn(y) } : { other: typeof y }) }
+        : { other: typeof x, keys: Object.keys(x ?? {}) }),
     }));`;
   const out = execFileSync(process.execPath, ["-e", src], {
     cwd: EXAMPLE,
@@ -81,6 +88,9 @@ const DEV_KINDS = ["mocked", "basic", "dummy"];
 const PROD_KINDS = ["jwt", "xsuaa", "ias"];
 const KINDS = has("@sap/xssec") ? [...DEV_KINDS, ...PROD_KINDS] : DEV_KINDS;
 
+/** the entries as express will see them: arrays flattened */
+const flat = (entries) => entries.flatMap((e) => e.array ?? [e]);
+
 test("the auth middleware is a plain FUNCTION in cds.middlewares.before, for every auth kind", (t) => {
   // Say so rather than silently covering half: @sap/xssec is a devDependency
   // of this example precisely so the production three are in the gate, and a
@@ -90,38 +100,44 @@ test("the auth middleware is a plain FUNCTION in cds.middlewares.before, for eve
   }
   for (const kind of KINDS) {
     const { entries } = chainFor(kind);
-    const authFns = entries.filter((e) => e.fn && /auth/i.test(e.fn)).map((e) => e.fn);
+    const authFns = flat(entries).filter((e) => e.fn && /auth/i.test(e.fn)).map((e) => e.fn);
     assert.equal(
       authFns.length, 1,
       `auth kind "${kind}": expected exactly one auth middleware as a plain function in ` +
-        `cds.middlewares.before, found ${JSON.stringify(entries)}. If it has become a ` +
-        `{ factory } entry, cds-plugin.js must call the factory instead of spreading the ` +
-        `array - otherwise the roundtrip route runs with no authentication.`,
+        `cds.middlewares.before, found ${JSON.stringify(entries)}. The roundtrip route mounts ` +
+        `this list as it stands - without the auth function in it, the route runs with no ` +
+        `authentication.`,
     );
   }
 });
 
-test("the non-function entries of the chain are inert, which is why spreading them is safe", () => {
+test("every entry of the chain is a function or an array of functions - what express mounts", () => {
   for (const kind of KINDS) {
     const { entries } = chainFor(kind);
-    for (const e of entries.filter((x) => !x.fn)) {
-      assert.deepEqual(e.keys, ["factory"], `auth kind "${kind}": unexpected entry ${JSON.stringify(e)}`);
-      assert.equal(
-        e.factoryAnswers, "[]",
-        `auth kind "${kind}": a { factory } entry of cds.middlewares.before no longer answers an ` +
-          `empty array. express rejects a non-function handler, so cds-plugin.js can no longer ` +
-          `spread the array as it stands - resolve the factories first.`,
-      );
-    }
+    const odd = flat(entries).filter((e) => !e.fn);
+    assert.deepEqual(
+      odd, [],
+      `auth kind "${kind}": cds.middlewares.before has entries express cannot mount as route ` +
+        `handlers: ${JSON.stringify(entries)}. cds-plugin.js spreads the list onto the route, so ` +
+        `it has to resolve such an entry first.`,
+    );
   }
 });
 
-test("cds.context.user.is( ) - what the route guard decides on - exists", () => {
-  const u = new cds.User({ id: "alice", roles: ["authenticated-user"] });
+test("cds.User.is( ) - what the route guard decides on - answers as the guard reads it", () => {
+  const u = new cds.User({ id: "alice", roles: ["admin"] });
   assert.equal(typeof u.is, "function");
-  assert.equal(u.is("authenticated-user"), true);
+  assert.equal(u.is("admin"), true);
   assert.equal(u.is("no-such-role"), false);
+  // the pseudo roles: every authenticated user is "authenticated-user", which
+  // is how the guard tells a 401 (log in) from a 403 (lacking the role); and
+  // "any" is everybody, the anonymous user included
+  assert.equal(u.is("authenticated-user"), true);
   assert.equal(cds.User.anonymous.is("authenticated-user"), false);
+  assert.equal(cds.User.anonymous.is("any"), true);
+  // ONE role per call - a list answers false, which is why the guard asks
+  // role by role (it once passed the list and let nobody in)
+  assert.equal(u.is(["admin", "support"]), false);
 });
 
 test("cds.User permits an EMPTY id - which is what who( ) in draft-store guards against", () => {
