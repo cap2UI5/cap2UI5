@@ -45,15 +45,26 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
   renames the second to `isFirstRun` / `isDisplay`; `abi-gate.test.mjs` holds
   both decisions so a change upstream re-opens them instead of passing
   silently.
-- **Every `@sap/cds` INTERNAL the plugin stands on goes into
-  `cap-abi.test.mjs`.** `abi-gate.test.mjs` guards what the transpiler emits;
-  this is the other undocumented surface. The one that matters is
-  `cds.middlewares.before`, which is a MIXED array — two of its four entries
-  are `{ factory }` objects, and the plugin gets away with spreading them onto
-  the route only because the auth middleware is a plain function and the
-  objects are inert. Measured across all six auth kinds (`mocked`, `basic`,
-  `dummy`, `jwt`, `xsuaa`, `ias`); `@sap/xssec` is a devDependency of the
-  example so the production three are in the gate and not merely assumed.
+- **Everything the plugin assumes about `@sap/cds` beyond its documentation
+  goes into `cap-abi.test.mjs`.** `abi-gate.test.mjs` guards what the
+  transpiler emits; this is the other surface. The one that matters is the
+  SHAPE of `cds.middlewares.before`. The list is documented; what an entry is,
+  is not. Measured: a function, or an array (`trace` and `ctx_model` answer an
+  empty one when they are off), which express flattens away. The plugin spreads
+  the list onto the route, so the gate asserts that every entry is a function
+  or an array of functions, and that the auth middleware is one of those
+  functions. It checks this across all six auth kinds (`mocked`, `basic`,
+  `dummy`, `jwt`, `xsuaa`, `ias`). `@sap/xssec` is a devDependency of the
+  example, so the production three are covered by the gate and not merely
+  assumed.
+- **Access is decided and answered the way CAP does it for `@requires`.**
+  The guard mirrors `check_roles` in CAP's HTTP adapter: one of the roles lets
+  the user in, `any` lets everybody in, anonymous users get 401 and
+  authenticated users without the role get 403. It only decides. The answer
+  comes from `cds.middlewares.errors()`, mounted last on the route as CAP
+  mounts it behind its protocol adapters, so the login challenge and the error
+  body are CAP's. `auth.test.mjs` holds that behaviour; the plugin does not
+  call `req._login()` or any other internal itself.
 - **Every new `abap.*` or `z2ui5_*$*` touchpoint in `plugin/lib/` goes into
   `abi-gate.test.mjs`.** The plugin couples to the transpiler's emission
   format (static `ATTRIBUTES`/`METHODS` maps, `constructor_( )`, `~` → `$`),

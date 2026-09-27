@@ -94,11 +94,13 @@ Under `cds.cap2ui5` in `package.json`, a `.cdsrc.json`, or a profile:
 | key | default | |
 |---|---|---|
 | `apps` | `srv/apps` | the directory scanned for app modules |
-| `requires` | `authenticated-user` | who may call; `null` allows anonymous callers |
+| `requires` | `authenticated-user` | who may call: a role, or a list of roles any one of which lets the user in, as with CAP's `@requires`; `any` or `null` allows anonymous callers |
 | `routes` | `/sap/bc/z2ui5`, `/rest/root/z2ui5` | where the roundtrip answers |
 
-The route runs behind CAP's own middlewares, so whatever `cds.requires.auth` is
-configured to decides who gets in.
+The route runs behind CAP's own middlewares and answers like a CAP service.
+Whatever `cds.requires.auth` is configured to identifies the user. A caller who
+is not logged in gets 401 with that strategy's login challenge. A user who
+lacks the role gets 403.
 
 Everything the *framework* decides about a response — the
 Content-Security-Policy, the security headers, the UI5 bootstrap URL, the

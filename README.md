@@ -117,9 +117,10 @@ are UPPERCASE in the model. A field that carries no ABAP type (`null`, an empty
 array, a cycle) is reported by its path and left out; the app runs without it. ABAP apps transpiled with upstream run unchanged next to yours.
 
 **Configuration** (`package.json#cds.cap2ui5`): `apps` (`srv/apps`), `routes`,
-`requires` (`authenticated-user`;
-`null` allows anonymous callers). Whatever `cds.requires.auth` is configured
-to decides who gets in — the route runs behind CAP's own middlewares.
+`requires` (`authenticated-user`; a role or a list of roles, as with CAP's
+`@requires`; `any` or `null` allows anonymous callers). The route runs behind
+CAP's own middlewares and answers like a CAP service: 401 with the login
+challenge of `cds.requires.auth`'s strategy, 403 for a user without the role.
 
 ## This repository
 

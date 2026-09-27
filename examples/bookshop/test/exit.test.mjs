@@ -23,17 +23,17 @@ after(() => s?.kill());
 
 const page = (app) => fetch(`${s.url}?app_start=${app}`, { headers: AUTH });
 
-test("the exit is installed, not discovered - and it says so once", async () => {
-  // A request FIRST, deliberately. boot( ) is async - it awaits
-  // initializeABAP( ), the store install and the app modules - and it races
-  // with cds finishing its own startup, so "[cap2ui5] user exit installed"
-  // lands on either side of "server listening" run to run (measured: both
-  // orders). The route awaits that same promise before it answers, so once a
-  // roundtrip has come back, the line is there by construction rather than by
-  // timing. Asserting it straight after boot( ) returns is a flake, and was.
+test("the exit is installed, not discovered - once, and before the server listens", async () => {
+  // The apps and the exit load inside CAP's 'served' phase, which CAP awaits
+  // before it listens - so the line is in the log by the time boot( ) returns,
+  // ahead of "server listening". It used to race with the listen and land on
+  // either side of it run to run (measured: both orders), which is why this
+  // test once had to send a request before it could look.
+  const out = s.out();
+  assert.equal(out.match(/\[cap2ui5\] - user exit installed/g)?.length, 1, out.slice(-1500));
+  assert.ok(out.indexOf("user exit installed") < out.indexOf("server listening"), "the server listened before the exit was bound");
   const r = await post(s.url, { app: "ZCL_JS_HELLO", user: "alice" });
   assert.equal(r.status, 200, r.text.slice(0, 200));
-  assert.match(s.out(), /\[cap2ui5\] user exit installed/);
 });
 
 test("onPage changes what the bootstrap page carries", async () => {

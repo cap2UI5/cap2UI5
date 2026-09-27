@@ -11,20 +11,39 @@
 // no port, no transpiler of our own, no hand-maintained framework class.
 const cds = require("@sap/cds");
 const express = require("express");
-const { locate, boot } = require("./lib/runtime");
+const { locate, boot, loadApps } = require("./lib/runtime");
 const { definedApps } = require("./lib/define-app");
 const { startupHints } = require("./lib/hints");
+
+// One logger, as every CAP module and plugin has: plain `[cap2ui5] - ...` lines
+// in development, and in production the JSON records CAP writes for itself,
+// with the request's correlation_id - so the plugin's lines land in the same
+// log search as everything else instead of as loose text on stdout.
+const LOG = cds.log("cap2ui5");
 
 cds.on("bootstrap", (app) => {
   const conf = cds.env.cap2ui5;               // defaults from package.json#cds, project overrides
   const rt = locate();
-  const ready = boot(rt, conf);
-  ready.catch((e) => console.error("[cap2ui5] runtime failed to boot:", e));
+  LOG.info(`@abap2ui5/node-runtime ${rt.version} from ${rt.dir}`);
 
-  // Where to click, once there is something to click: the server listens
-  // before the apps have loaded (boot is async), so the hints wait for both.
-  // Not in production - there the addresses and a login hint are noise, and
-  // the login hint would name a development user.
+  // The runtime and the draft store boot NOW, alongside CAP loading the model.
+  // The apps load once CAP has served it, as CAP loads a service
+  // implementation, so an app module may use cds.entities( ) while it loads.
+  //
+  // CAP awaits 'served' handlers - and only those - before it listens. So the
+  // server listens once every app can answer, and a runtime or an app module
+  // that fails to load fails the start, as a service implementation that
+  // throws does. It used to be logged while the server listened anyway and
+  // answered every roundtrip with a 500.
+  let served;
+  const ready = Promise.all([boot(rt), new Promise((resolve) => (served = resolve))])
+    .then(async ([shim]) => { await loadApps(conf); return shim; });
+  ready.catch(() => {});                 // it fails the start below; nothing else awaits it yet
+  cds.once("served", () => { served(); return ready; });
+
+  // Where to click, once there is something to click. Not in production -
+  // there the addresses and a login hint are noise, and the login hint would
+  // name a development user.
   cds.once("listening", ({ url }) => {
     ready.then(() => {
       const lines = startupHints({
@@ -36,23 +55,37 @@ cds.on("bootstrap", (app) => {
         requires: conf.requires,
         production: cds.env.profiles?.includes("production"),
       });
-      for (const line of lines) console.log(line);
+      for (const line of lines) LOG.info(line);
     }, () => {});
   });
-  console.log(`[cap2ui5] @abap2ui5/node-runtime ${rt.version} from ${rt.dir}`);
 
   // No static frontend route: the page the roundtrip route answers a GET
   // with embeds the whole UI5 component - every module, view and stylesheet,
   // from the runtime's own commit - so the browser needs no files from here.
 
-  // Who may call. Whatever cds.requires.auth is configured to (mocked in
-  // development, xsuaa/ias in production) has already run by the time this
-  // executes - see the middleware chain below - so the check is one line, and
-  // a project that wants anonymous access sets cds.cap2ui5.requires to null.
+  // Who may call, decided the way CAP decides it for a service annotated with
+  // @requires (check_roles in CAP's HTTP adapter): any one of the roles lets
+  // the user in, so a list means one of them; an anonymous user is asked to
+  // log in (401); an authenticated user without the role is refused (403).
+  // The auth strategy of cds.requires.auth - mocked in development, xsuaa or
+  // ias in production - has run by then, in the chain below. "any" is CAP's
+  // pseudo role for everybody, anonymous included, and null lets anybody in
+  // as well.
+  //
+  // The guard only decides. CAP's own error middleware, last on the route,
+  // answers - so the login challenge, the status and the error body are the
+  // ones CAP sends for its own services. It used to answer by itself: 401 and
+  // a fresh login challenge to an authenticated user who lacked the role, and
+  // 401 to everybody once requires was a list, because cds.User.is( ) takes
+  // one role, not an array.
+  const roles = [].concat(conf.requires ?? []);
   const guard = (req, res, next) => {
-    if (!conf.requires || cds.context?.user?.is(conf.requires)) return next();
-    if (typeof req._login === "function") return req._login();   // basic auth: challenge
-    return res.sendStatus(401);
+    const user = cds.context?.user;
+    if (!roles.length || roles.some((role) => user?.is(role))) return next();
+    if (!user?.is("authenticated-user")) return next(401);
+    // `code` as CAP's protocol adapters normalize it, so the body reads like theirs
+    const refused = new cds.error(403, `User '${user.id}' is lacking required roles: [${roles}]`);
+    next(Object.assign(refused, { code: "403" }));
   };
 
   // The roundtrip endpoint. cl_express_icf_shim is upstream's own adapter and
@@ -71,6 +104,10 @@ cds.on("bootstrap", (app) => {
   // guard BEFORE the body parser: it reads cds.context and nothing else, and
   // behind the parser an unauthenticated caller could make the server buffer
   // 10 MB per request before the 401 was even decided.
+  //
+  // cds.middlewares.errors( ) LAST, as CAP mounts it behind every protocol
+  // adapter: it answers what the guard and the body parser pass on (401, 403,
+  // 413) in CAP's format. The roundtrip handler answers its own failures.
   app.all(
     conf.routes,
     ...cds.middlewares.before.filter(Boolean),
@@ -86,9 +123,10 @@ cds.on("bootstrap", (app) => {
         // carry entity names, SQL fragments and deployment paths, none of which
         // a roundtrip client needs and all of which are free reconnaissance.
         const ref = cds.context?.id ?? "-";
-        console.error(`[cap2ui5] roundtrip failed (${ref}):`, e);
+        LOG.error(`roundtrip failed (${ref}):`, e);
         if (!res.headersSent) res.status(500).type("text/plain").send(`roundtrip failed (${ref})`);
       }
     },
+    cds.middlewares.errors(),
   );
 });

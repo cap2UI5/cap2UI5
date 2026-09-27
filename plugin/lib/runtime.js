@@ -6,6 +6,8 @@ const path = require("path");
 const { pathToFileURL } = require("url");
 const { installExit } = require("./define-exit");
 
+const LOG = cds.log("cap2ui5");
+
 /** Where the runtime package is. Resolved from the PROJECT (cds.root), so the
  *  version the project installed wins - the plugin only declares the range. */
 function locate() {
@@ -20,15 +22,13 @@ function locate() {
 }
 
 /**
- * Boot the ABAP runtime once, install the CDS draft store, load the project's
- * apps. Resolves to upstream's express adapter, which the route then calls.
+ * Boot the ABAP runtime once and install the CDS draft store. Resolves to
+ * upstream's express adapter, which the route then calls.
  *
- * Order matters twice: the store must be installed before the first roundtrip
- * (or the first draft lands in the runtime's private SQLite), and the apps must
- * load AFTER initializeABAP( ), because defineApp boxes their fields with
- * abap.types.* - the global the runtime installs.
+ * The store must be installed before the first roundtrip, or the first draft
+ * lands in the runtime's private SQLite.
  */
-async function boot(rt, conf) {
+async function boot(rt) {
   const { initializeABAP } = await import(pathToFileURL(rt.init).href);
   await initializeABAP();
 
@@ -41,26 +41,34 @@ async function boot(rt, conf) {
   const ref = new abap.types.ABAPObject({ qualifiedName: "Z2UI5_IF_UI5_DRAFT_STORE" });
   ref.set(await new ZCL_CDS_DRAFT_STORE().constructor_());
   await abap.Classes["Z2UI5_CL_UI5_SRV_DRAFT"].set_instance({ store: ref });
-  console.log("[cap2ui5] drafts live in cap2ui5.Drafts");
+  LOG.info("drafts live in cap2ui5.Drafts");
 
-  await loadApps(path.resolve(cds.root, conf.apps));
+  return await import(pathToFileURL(rt.shim).href);
+}
+
+/**
+ * Load the project's apps: every .js/.mjs/.cjs file in the apps directory is
+ * an app module. A project without one simply has no JavaScript apps - the
+ * ABAP ones still run. Then bind the user exit one of them may register.
+ *
+ * Only once boot( ) has finished, because defineApp boxes an app's fields with
+ * abap.types.* - the global the runtime installs. And only once CAP has served
+ * the model, as CAP loads a service implementation: an app module may reach
+ * for cds.entities( ) while it loads.
+ */
+async function loadApps(conf) {
+  const dir = path.resolve(cds.root, conf.apps);
+  if (fs.existsSync(dir)) {
+    const files = fs.readdirSync(dir).filter((f) => /\.(c|m)?js$/.test(f)).sort();
+    for (const f of files) await import(pathToFileURL(path.join(dir, f)).href);
+    LOG.info(`${files.length} app module(s) loaded from ${path.relative(cds.root, dir) || "."}`);
+  }
 
   // The user exit AFTER the app modules: a project registers it with
   // defineExit( ) from a file in the apps directory, so there is nothing to
   // bind until they have run. See lib/define-exit.js for why the host binds it
   // instead of the framework discovering it.
-  if (installExit()) console.log("[cap2ui5] user exit installed");
-
-  return await import(pathToFileURL(rt.shim).href);
+  if (installExit()) LOG.info("user exit installed");
 }
 
-/** Every .js/.mjs/.cjs file in the apps directory is an app module. A project
- *  without one simply has no JavaScript apps - the ABAP ones still run. */
-async function loadApps(dir) {
-  if (!fs.existsSync(dir)) return;
-  const files = fs.readdirSync(dir).filter((f) => /\.(c|m)?js$/.test(f)).sort();
-  for (const f of files) await import(pathToFileURL(path.join(dir, f)).href);
-  console.log(`[cap2ui5] ${files.length} app module(s) loaded from ${path.relative(cds.root, dir) || "."}`);
-}
-
-module.exports = { locate, boot };
+module.exports = { locate, boot, loadApps };

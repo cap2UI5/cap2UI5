@@ -21,7 +21,7 @@ const run = async (app, expect) => {
   const id = r1.json?.S_FRONT?.ID;
   console.log(`  A roundtrip 1  MODEL=${JSON.stringify(r1.json?.MODEL)}  id=${id}`);
   console.log(`                 ${show(r1)}`);
-  if (s.out().includes("[cap2ui5] drafts")) console.log("  store installed: yes");
+  if (s.out().includes("[cap2ui5] - drafts")) console.log("  store installed: yes");
   s.kill("SIGKILL");
   await sleep(2500);
   console.log("  --- process A killed, nothing left in memory ---");

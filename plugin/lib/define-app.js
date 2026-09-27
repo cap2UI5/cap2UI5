@@ -72,6 +72,9 @@
 // t.packed(). Guessing silently produces views with the wrong number of
 // decimals and nothing to point at.
 const crypto = require("node:crypto");
+const cds = require("@sap/cds");
+
+const LOG = cds.log("cap2ui5");
 
 const STANDARD_TABLE = {
   withHeader: false, keyType: "DEFAULT",
@@ -257,8 +260,8 @@ function defineApp(name, cls, opts = {}) {
       App.ATTRIBUTES = attrs;
       Object.defineProperty(this, "__shapes", { value: shapes, enumerable: false });
       if (undecidable.length) {
-        console.warn(
-          `[defineApp] ${INTERNAL}: these fields are NOT part of the model —\n  ` +
+        LOG.warn(
+          `defineApp ${INTERNAL}: these fields are NOT part of the model —\n  ` +
             undecidable.join("\n  ") +
             `\n  Give an initial value, or declare it with t.table(…) / t.struct(…) / ` +
             `t.packed(…) / t.char(…). The app runs without them.`,

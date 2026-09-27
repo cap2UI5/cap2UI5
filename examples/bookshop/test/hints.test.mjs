@@ -3,8 +3,8 @@
 // the first screen needs no documentation. The text is a pure function
 // (plugin/lib/hints.js) and is pinned here case by case; the last test boots
 // the example and reads the log, because the timing is the part a pure test
-// cannot see: the server listens BEFORE the apps have loaded, and a hint
-// printed on "listening" alone would list none of them.
+// cannot see: the hints need the apps, and the apps load in CAP's 'served'
+// phase, after the model - a hint printed any earlier would list none of them.
 import { test, after } from "node:test";
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
@@ -25,9 +25,9 @@ const base = {
 
 test("one line per app with the address that starts it, then the development login", () => {
   assert.deepEqual(startupHints(base), [
-    "[cap2ui5] HELLO      http://localhost:4004/sap/bc/z2ui5?app_start=HELLO",
-    "[cap2ui5] ZCL_BOOKS  http://localhost:4004/sap/bc/z2ui5?app_start=ZCL_BOOKS",
-    "[cap2ui5] development login: alice (empty password)",
+    "HELLO      http://localhost:4004/sap/bc/z2ui5?app_start=HELLO",
+    "ZCL_BOOKS  http://localhost:4004/sap/bc/z2ui5?app_start=ZCL_BOOKS",
+    "development login: alice (empty password)",
   ]);
 });
 
@@ -37,6 +37,9 @@ test("nothing in production", () => {
 
 test("no login line when the route lets anybody in, or the auth kind has no users to name", () => {
   assert.equal(startupHints({ ...base, requires: null }).some((l) => l.includes("login")), false);
+  assert.equal(startupHints({ ...base, requires: "any" }).some((l) => l.includes("login")), false);
+  assert.equal(startupHints({ ...base, requires: ["admin", "any"] }).some((l) => l.includes("login")), false);
+  assert.equal(startupHints({ ...base, requires: ["admin"] }).some((l) => l.includes("login")), true);
   assert.equal(loginHint({ kind: "dummy" }), null);
   assert.equal(loginHint({ kind: "xsuaa" }), null);
   assert.equal(loginHint({ kind: "mocked", users: { "*": true } }), null);
@@ -62,9 +65,9 @@ after(() => s?.kill());
 test("the booted example prints its apps and the login once they have loaded", async () => {
   s = await boot("hints");
   const want = [
-    /\[cap2ui5\] ZCL_JS_HELLO\s+http:\/\/\S+\/sap\/bc\/z2ui5\?app_start=ZCL_JS_HELLO/,
-    /\[cap2ui5\] ZCL_JS_BOOKS\s+http:\/\/\S+\/sap\/bc\/z2ui5\?app_start=ZCL_JS_BOOKS/,
-    /\[cap2ui5\] development login: alice \(empty password\)/,
+    /\[cap2ui5\] - ZCL_JS_HELLO\s+http:\/\/\S+\/sap\/bc\/z2ui5\?app_start=ZCL_JS_HELLO/,
+    /\[cap2ui5\] - ZCL_JS_BOOKS\s+http:\/\/\S+\/sap\/bc\/z2ui5\?app_start=ZCL_JS_BOOKS/,
+    /\[cap2ui5\] - development login: alice \(empty password\)/,
   ];
   for (let i = 0; i < 20 && !want.every((re) => re.test(s.out())); i++) await sleep(250);
   for (const re of want) assert.match(s.out(), re);
