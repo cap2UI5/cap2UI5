@@ -38,7 +38,11 @@
 //
 // The one consequence worth knowing: between c.event("GO") and the flush, the
 // string the app holds is a token, not the wire format. Embedding it in markup
-// is what it is for and works; parsing or comparing it does not.
+// is what it is for and works; parsing or comparing it does not. The token is
+// letters, digits and underscores only, so a view builder that XML-escapes
+// attribute values passes it through unchanged - an earlier token carried the
+// event as JSON between NULs, abap2UI5's own view builder escaped its quotes,
+// the substitution missed, and the raw NULs made the response invalid JSON.
 //
 // STATE
 //
@@ -67,6 +71,8 @@
 // becomes I, a fractional number F, and a decimal amount has to say so with
 // t.packed(). Guessing silently produces views with the wrong number of
 // decimals and nothing to point at.
+const crypto = require("node:crypto");
+
 const STANDARD_TABLE = {
   withHeader: false, keyType: "DEFAULT",
   primaryKey: { isUnique: false, type: "STANDARD", keyFields: [], name: "primary_key" },
@@ -312,8 +318,14 @@ function defineApp(name, cls, opts = {}) {
       }
 
       // ---- the synchronous surface the app sees ----------------------------
-      const TOK = (n) => `\u0000z2ui5:evt:${n}\u0000`;
-      const events = new Map();               // token key -> { name, args }
+      // XML-inert and JSON-safe: [A-Za-z0-9_] only. The nonce is per roundtrip
+      // so a token cannot collide with text the app put there itself; the
+      // closing "_" keeps _1_ from matching inside _10_.
+      const TOK_PREFIX = `z2ui5evt_${crypto.randomBytes(6).toString("hex")}_`;
+      const TOK_RE = new RegExp(`${TOK_PREFIX}(\\d+)_`, "g");
+      const TOK_LEFT = new RegExp(TOK_PREFIX, "i"); // what survives a cut or a case change
+      const events = [];                      // token number -> { name, args }
+      const eventTokens = new Map();          // JSON [name, args] -> token, one per distinct event
       const queue = [];
       const facade = {
         // -- lifecycle (see the comment above; they are not the same question)
@@ -347,9 +359,13 @@ function defineApp(name, cls, opts = {}) {
          *  and still be told apart. Without them the handler cannot know which
          *  control fired: the browser sends only what the wire carries. */
         event(n, args = []) {
-          const key = JSON.stringify([String(n), args.map(String)]);
-          events.set(key, { name: String(n), args: args.map(String) });
-          return TOK(key);
+          const ev = { name: String(n), args: args.map(String) };
+          const key = JSON.stringify([ev.name, ev.args]);
+          if (!eventTokens.has(key)) {
+            events.push(ev);
+            eventTokens.set(key, `${TOK_PREFIX}${events.length - 1}_`);
+          }
+          return eventTokens.get(key);
         },
 
         // -- what to put on the screen (recorded, replayed in order after main)
@@ -424,8 +440,8 @@ function defineApp(name, cls, opts = {}) {
       await userMain.call(plain, facade);        // await: an async main still works
 
       // ---- flush: resolve the event tokens, then replay the commands -------
-      const wire = {};
-      for (const [key, { name, args }] of events) {
+      const wire = [];
+      for (const { name, args } of events) {
         const input = { val: S(name), result: 1 };
         if (args.length) {
           const t = abap.types.TableFactory.construct(
@@ -433,11 +449,28 @@ function defineApp(name, cls, opts = {}) {
           for (const a of args) t.append(new abap.types.String().set(a));
           input.t_arg = t;
         }
-        wire[TOK(key)] = (await c.z2ui5_if_client$_event(input)).get();
+        wire.push((await c.z2ui5_if_client$_event(input)).get());
       }
-      const subst = (s) => {
-        let out = String(s);
-        for (const [tok, real] of Object.entries(wire)) out = out.split(tok).join(real);
+      // In markup the placeholder is an attribute value, so the wire string
+      // that replaces it is escaped as one - what upstream's view builder does
+      // with _event( )'s result (z2ui5_cl_ui5_view_builder=>xml_escape). An
+      // event argument with a quote in it would otherwise end the attribute.
+      const XML_ESC = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "\n": "&#xA;", "\r": "&#xD;", "\t": "&#x9;" };
+      const xmlEscape = (v) => String(v).replace(/[&<>"\n\r\t]/g, (ch) => XML_ESC[ch]);
+      const subst = (s, { xml = false } = {}) => {
+        const out = String(s).replace(TOK_RE, (tok, i) =>
+          wire[i] === undefined ? tok : xml ? xmlEscape(wire[i]) : String(wire[i]));
+        // What is left is a placeholder the app changed after c.event( )
+        // returned it - cut, re-encoded, case-changed. Shipping it would send
+        // the browser a press handler that does nothing, so refuse.
+        const at = out.search(TOK_LEFT);
+        if (at >= 0) {
+          throw new Error(
+            `c.event( ): a placeholder it returned reached the view altered, so it cannot ` +
+              `be replaced by the event's wire string: "${out.slice(at, at + TOK_PREFIX.length + 12)}…". ` +
+              `Embed c.event( )'s result in the markup as it is; do not parse, cut or re-encode it.`,
+          );
+        }
         return out;
       };
       /** nav_app_call( ) wants a BOUND z2ui5_if_app instance. The app may hand
@@ -463,12 +496,12 @@ function defineApp(name, cls, opts = {}) {
       };
 
       for (const [kind, arg, id] of queue) {
-        if (kind === "view") await c.z2ui5_if_client$view_display({ val: S(subst(arg)) });
-        else if (kind === "popup") await c.z2ui5_if_client$popup_display({ val: S(subst(arg)) });
+        if (kind === "view") await c.z2ui5_if_client$view_display({ val: S(subst(arg, { xml: true })) });
+        else if (kind === "popup") await c.z2ui5_if_client$popup_display({ val: S(subst(arg, { xml: true })) });
         else if (kind === "popup_destroy") await c.z2ui5_if_client$popup_destroy();
         else if (kind === "nest") {
           await c.z2ui5_if_client$nest_view_display({
-            val: S(subst(arg)), id: S(id.id),
+            val: S(subst(arg, { xml: true })), id: S(id.id),
             method_insert: S(id.insert), method_destroy: S(id.clear),
           });
         } else if (kind === "nest_destroy") await c.z2ui5_if_client$nest_view_destroy();
