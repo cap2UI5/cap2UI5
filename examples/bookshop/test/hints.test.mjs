@@ -20,7 +20,7 @@ const base = {
   route: "/sap/bc/z2ui5",
   appsDir: "srv/apps",
   auth: MOCKED,
-  requires: "authenticated-user",
+  roles: ["authenticated-user"],
 };
 
 test("one line per app with the address that starts it, then the development login", () => {
@@ -36,10 +36,10 @@ test("nothing in production", () => {
 });
 
 test("no login line when the route lets anybody in, or the auth kind has no users to name", () => {
-  assert.equal(startupHints({ ...base, requires: null }).some((l) => l.includes("login")), false);
-  assert.equal(startupHints({ ...base, requires: "any" }).some((l) => l.includes("login")), false);
-  assert.equal(startupHints({ ...base, requires: ["admin", "any"] }).some((l) => l.includes("login")), false);
-  assert.equal(startupHints({ ...base, requires: ["admin"] }).some((l) => l.includes("login")), true);
+  assert.equal(startupHints({ ...base, roles: [] }).some((l) => l.includes("login")), false);
+  assert.equal(startupHints({ ...base, roles: ["any"] }).some((l) => l.includes("login")), false);
+  assert.equal(startupHints({ ...base, roles: ["admin", "any"] }).some((l) => l.includes("login")), false);
+  assert.equal(startupHints({ ...base, roles: ["admin"] }).some((l) => l.includes("login")), true);
   assert.equal(loginHint({ kind: "dummy" }), null);
   assert.equal(loginHint({ kind: "xsuaa" }), null);
   assert.equal(loginHint({ kind: "mocked", users: { "*": true } }), null);

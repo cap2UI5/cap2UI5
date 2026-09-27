@@ -45,16 +45,16 @@
   "cds": {
     "requires": {
       "cap2ui5": {
-        "model": "cap2ui5"
+        "model": "cap2ui5",
+        "apps": "srv/apps",
+        "roles": [
+          "authenticated-user"
+        ],
+        "routes": [
+          "/sap/bc/z2ui5",
+          "/rest/root/z2ui5"
+        ]
       }
-    },
-    "cap2ui5": {
-      "apps": "srv/apps",
-      "requires": "authenticated-user",
-      "routes": [
-        "/sap/bc/z2ui5",
-        "/rest/root/z2ui5"
-      ]
     }
   }
 }

@@ -14,6 +14,7 @@ const express = require("express");
 const { locate, boot, loadApps } = require("./lib/runtime");
 const { definedApps } = require("./lib/define-app");
 const { startupHints } = require("./lib/hints");
+const { config } = require("./lib/config");
 
 // One logger, as every CAP module and plugin has: plain `[cap2ui5] - ...` lines
 // in development, and in production the JSON records CAP writes for itself,
@@ -22,7 +23,8 @@ const { startupHints } = require("./lib/hints");
 const LOG = cds.log("cap2ui5");
 
 cds.on("bootstrap", (app) => {
-  const conf = cds.env.cap2ui5;               // defaults from package.json#cds, project overrides
+  const conf = config();                      // cds.requires.cap2ui5 - see lib/config.js
+  if (!conf) return LOG.debug("switched off: cds.requires.cap2ui5 is false");
   const rt = locate();
   LOG.info(`@abap2ui5/node-runtime ${rt.version} from ${rt.dir}`);
 
@@ -49,10 +51,10 @@ cds.on("bootstrap", (app) => {
       const lines = startupHints({
         apps: definedApps(),
         url,
-        route: [].concat(conf.routes)[0],
+        route: conf.routes[0],
         appsDir: conf.apps,
         auth: cds.env.requires?.auth,
-        requires: conf.requires,
+        roles: conf.roles,
         production: cds.env.profiles?.includes("production"),
       });
       for (const line of lines) LOG.info(line);
@@ -69,8 +71,8 @@ cds.on("bootstrap", (app) => {
   // log in (401); an authenticated user without the role is refused (403).
   // The auth strategy of cds.requires.auth - mocked in development, xsuaa or
   // ias in production - has run by then, in the chain below. "any" is CAP's
-  // pseudo role for everybody, anonymous included, and null lets anybody in
-  // as well.
+  // pseudo role for everybody, anonymous included, and no roles (null) let
+  // anybody in as well.
   //
   // The guard only decides. CAP's own error middleware, last on the route,
   // answers - so the login challenge, the status and the error body are the
@@ -78,14 +80,23 @@ cds.on("bootstrap", (app) => {
   // a fresh login challenge to an authenticated user who lacked the role, and
   // 401 to everybody once requires was a list, because cds.User.is( ) takes
   // one role, not an array.
-  const roles = [].concat(conf.requires ?? []);
+  const { roles } = conf;
   const guard = (req, res, next) => {
     const user = cds.context?.user;
     if (!roles.length || roles.some((role) => user?.is(role))) return next();
     if (!user?.is("authenticated-user")) return next(401);
-    // `code` as CAP's protocol adapters normalize it, so the body reads like theirs
-    const refused = new cds.error(403, `User '${user.id}' is lacking required roles: [${roles}]`);
-    next(Object.assign(refused, { code: "403" }));
+    next(new cds.error(403, `User '${user.id}' is lacking required roles: [${roles}]`));
+  };
+
+  // What a CAP protocol adapter does with an error before the final handler
+  // sees it: a status, the code CAP derives from it, the message - and nothing
+  // of the body parser's internals. Measured on a CAP service: a body over the
+  // limit answers {"error":{"message":"request entity too large","code":"413"}};
+  // passed on raw, the same 413 also carried expected, length, limit and type.
+  const normalize = (err, req, res, next) => {
+    if (typeof err === "number") return next(err);                 // 401: the login challenge
+    const status = err.status ?? err.statusCode ?? 500;
+    next(Object.assign(new cds.error(status, err.message), { code: String(status) }));
   };
 
   // The roundtrip endpoint. cl_express_icf_shim is upstream's own adapter and
@@ -103,16 +114,17 @@ cds.on("bootstrap", (app) => {
   //
   // guard BEFORE the body parser: it reads cds.context and nothing else, and
   // behind the parser an unauthenticated caller could make the server buffer
-  // 10 MB per request before the 401 was even decided.
+  // a whole body - up to the limit - before the 401 was even decided.
   //
   // cds.middlewares.errors( ) LAST, as CAP mounts it behind every protocol
-  // adapter: it answers what the guard and the body parser pass on (401, 403,
-  // 413) in CAP's format. The roundtrip handler answers its own failures.
+  // adapter, with normalize in front of it as the adapter's own error step: it
+  // answers what the guard and the body parser pass on (401, 403, 413) in
+  // CAP's format. The roundtrip handler answers its own failures.
   app.all(
     conf.routes,
     ...cds.middlewares.before.filter(Boolean),
     guard,
-    express.raw({ type: "*/*", limit: "10mb" }),
+    express.raw({ type: "*/*", limit: conf.limit }),
     async (req, res) => {
       try {
         const { cl_express_icf_shim } = await ready;
@@ -127,6 +139,7 @@ cds.on("bootstrap", (app) => {
         if (!res.headersSent) res.status(500).type("text/plain").send(`roundtrip failed (${ref})`);
       }
     },
+    normalize,
     cds.middlewares.errors(),
   );
 });

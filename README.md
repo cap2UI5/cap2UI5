@@ -116,11 +116,17 @@ inside a structure, a table inside a structure, up to 8 levels. Component names
 are UPPERCASE in the model. A field that carries no ABAP type (`null`, an empty
 array, a cycle) is reported by its path and left out; the app runs without it. ABAP apps transpiled with upstream run unchanged next to yours.
 
-**Configuration** (`package.json#cds.cap2ui5`): `apps` (`srv/apps`), `routes`,
-`requires` (`authenticated-user`; a role or a list of roles, as with CAP's
-`@requires`; `any` or `null` allows anonymous callers). The route runs behind
-CAP's own middlewares and answers like a CAP service: 401 with the login
-challenge of `cds.requires.auth`'s strategy, 403 for a user without the role.
+**Configuration** (`cds.requires.cap2ui5`, as with SAP's own plugins):
+- `apps` (default `srv/apps`)
+- `routes`
+- `roles` (default `["authenticated-user"]`): a role or a list of roles, as
+  with CAP's `@requires`; `any` or `null` allows anonymous callers
+- `body_parser.limit` (CAP's `cds.server.body_parser.limit`, else `10mb`)
+
+`false` switches the plugin off. The route runs behind CAP's own middlewares
+and answers like a CAP service: 401 with the login challenge of
+`cds.requires.auth`'s strategy, 403 for a user without the role, 413 for a
+body over the limit.
 
 ## This repository
 

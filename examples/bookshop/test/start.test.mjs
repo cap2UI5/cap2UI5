@@ -11,7 +11,7 @@ import { boot, post } from "./server.mjs";
 
 test("an app module that cannot load fails the start, as a broken service implementation does", async () => {
   await assert.rejects(
-    boot("broken apps", { env: { CDS_CAP2UI5_APPS: "test/fixtures/broken-apps" } }),
+    boot("broken apps", { env: { CDS_REQUIRES_CAP2UI5_APPS: "test/fixtures/broken-apps" } }),
     (e) => {
       assert.match(e.message, /died/, "the server did not stop");
       assert.match(e.message, /this app module is broken on purpose/, "the cause is not in the output");
@@ -25,7 +25,7 @@ test("an app module may read the model while it loads", async () => {
   // The apps load once CAP has served the model, not while it is still
   // loading it - so cds.entities( ) at the top of an app module answers, as it
   // does at the top of a service implementation.
-  const s = await boot("model at load", { env: { CDS_CAP2UI5_APPS: "test/fixtures/model-at-load" } });
+  const s = await boot("model at load", { env: { CDS_REQUIRES_CAP2UI5_APPS: "test/fixtures/model-at-load" } });
   try {
     const r = await post(s.url, { app: "ZCL_JS_MODEL_AT_LOAD", user: "alice" });
     assert.equal(r.status, 200, r.text.slice(0, 300));
