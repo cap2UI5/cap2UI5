@@ -7,23 +7,43 @@
 // The project's own server.js, if it has one, is untouched.
 //
 // The runtime underneath is upstream's own - the real ABAP, downported and
-// transpiled by @abaplint/transpiler, published as @abap2ui5/runtime. There is
+// transpiled by @abaplint/transpiler, published as @abap2ui5/node-runtime. There is
 // no port, no transpiler of our own, no hand-maintained framework class.
 const cds = require("@sap/cds");
 const express = require("express");
 const { locate, boot } = require("./lib/runtime");
+const { definedApps } = require("./lib/define-app");
+const { startupHints } = require("./lib/hints");
 
 cds.on("bootstrap", (app) => {
   const conf = cds.env.cap2ui5;               // defaults from package.json#cds, project overrides
   const rt = locate();
   const ready = boot(rt, conf);
   ready.catch((e) => console.error("[cap2ui5] runtime failed to boot:", e));
-  console.log(`[cap2ui5] @abap2ui5/runtime ${rt.version} from ${rt.dir}`);
 
-  // The UI5 shell, straight from the runtime package. Not mirrored, not
-  // patched, not generated - the same directory upstream ships, from the same
-  // commit as the backend, which is what removes frontend/backend drift.
-  app.use(conf.webapp, express.static(rt.webapp, { maxAge: "1h" }));
+  // Where to click, once there is something to click: the server listens
+  // before the apps have loaded (boot is async), so the hints wait for both.
+  // Not in production - there the addresses and a login hint are noise, and
+  // the login hint would name a development user.
+  cds.once("listening", ({ url }) => {
+    ready.then(() => {
+      const lines = startupHints({
+        apps: definedApps(),
+        url,
+        route: [].concat(conf.routes)[0],
+        appsDir: conf.apps,
+        auth: cds.env.requires?.auth,
+        requires: conf.requires,
+        production: cds.env.profiles?.includes("production"),
+      });
+      for (const line of lines) console.log(line);
+    }, () => {});
+  });
+  console.log(`[cap2ui5] @abap2ui5/node-runtime ${rt.version} from ${rt.dir}`);
+
+  // No static frontend route: the page the roundtrip route answers a GET
+  // with embeds the whole UI5 component - every module, view and stylesheet,
+  // from the runtime's own commit - so the browser needs no files from here.
 
   // Who may call. Whatever cds.requires.auth is configured to (mocked in
   // development, xsuaa/ias in production) has already run by the time this

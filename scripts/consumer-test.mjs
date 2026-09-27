@@ -5,7 +5,7 @@
  * WHY THIS EXISTS
  * ---------------
  * Everything else in this repository runs inside the npm WORKSPACE, where
- * `cap2ui5` and `@abap2ui5/runtime` are symlinks to plugin/ and runtime/.
+ * `cap2ui5` and `@abap2ui5/node-runtime` are symlinks to plugin/ and runtime/.
  * That proves the code works; it proves nothing about the PACKAGE. A missing
  * entry in `files`, a `main` that points at nothing, a cds-plugin.js that CAP
  * only finds because the workspace put it somewhere convenient, a model
@@ -156,9 +156,19 @@ defineApp("ZCL_PROBE", class {
       throw Object.assign(new Error("server did not start"), { reported: true });
     }
 
+    // the startup hints (plugin/lib/hints.js) - what a developer reads to find
+    // the first screen; printed once the apps have loaded, so give it a moment
+    for (let i = 0; i < 20 && !/\[cap2ui5\] ZCL_PROBE\s+http/.test(log); i++) await sleep(250);
+    check("the startup log names the app and the address that starts it",
+      /\[cap2ui5\] ZCL_PROBE\s+http:\/\/\S+\?app_start=ZCL_PROBE/.test(log),
+      (log.match(/\[cap2ui5\] ZCL_PROBE.*/) ?? ["no such line"])[0]);
+    check("the startup log names the development login",
+      /\[cap2ui5\] development login: alice \(empty password\)/.test(log),
+      (log.match(/\[cap2ui5\] development login.*/) ?? ["no such line"])[0]);
+
     check("the runtime is resolved from the PROJECT",
-      /\[cap2ui5\] @abap2ui5\/runtime .* from .*proj[/\\]node_modules/.test(log),
-      (log.match(/\[cap2ui5\] @abap2ui5\/runtime.*/) ?? [""])[0]);
+      /\[cap2ui5\] @abap2ui5\/node-runtime .* from .*proj[/\\]node_modules/.test(log),
+      (log.match(/\[cap2ui5\] @abap2ui5\/node-runtime.*/) ?? [""])[0]);
 
     const url = `http://127.0.0.1:${PORT}`;
     const auth = { Authorization: "Basic " + Buffer.from("alice:").toString("base64"),
@@ -174,8 +184,12 @@ defineApp("ZCL_PROBE", class {
     check("GET serves the bootstrap page", page.status === 200 && html.length > 100_000,
       `${page.status}, ${html.length} bytes`);
 
+    check("the GET page carries the UI5 component itself",
+      html.includes('"z2ui5/Component.js"'), html.includes('"z2ui5/Component.js"') ? "" : "no z2ui5/Component.js in the page");
+
+    // and there is no static frontend route next to it - nothing to serve
     const shell = await fetch(`${url}/z2ui5/webapp/index.html`, { headers: auth });
-    check("the UI5 shell is served from the runtime package", shell.status === 200, String(shell.status));
+    check("there is no static frontend route", shell.status === 404, String(shell.status));
 
     const start = await fetch(`${url}/rest/root/z2ui5`, { method: "POST", headers: auth, body: body("", "") });
     const j1 = await start.json();

@@ -1,11 +1,11 @@
-# `@abap2ui5/runtime` — a stand-in
+# `@abap2ui5/node-runtime` — a stand-in
 
 This directory is what abap2UI5 **would publish** if its `release.yaml` gained
 one job: `npm publish` of the transpiled output. It is a stand-in so that the
 `cap2ui5` plugin next door can depend on it by name, exactly as it would on the
 real package.
 
-Only `package.json` and this file are committed. The three content directories
+Only `package.json` and this file are committed. The two content directories
 are 20 MB of generated output that any checkout rebuilds; fill them with
 
 ```bash
@@ -16,7 +16,6 @@ scripts/assemble-runtime.sh <upstream checkout>     # or: --package X.Y.Z
 |---|---|---|
 | `output/` | `node/output` after `npm run auto_downport && npm run auto_transpile` | the framework: `init.mjs` boots it, `cl_express_icf_shim.clas.mjs` is the HTTP adapter |
 | `setup/` | `node/setup/setup.mjs` | `output/init.mjs` imports `../setup/setup.mjs` — the path is fixed by upstream's `abap_transpile.json`, so the hook ships with the output |
-| `webapp/` | `app/webapp` | the UI5 shell, served as-is; same commit as the backend, so the wire protocol cannot drift |
 
 The version is the framework's version: the package is a deterministic function
 of the upstream tag, like the `X.Y.Z-702` tag `release.yaml` already cuts.
@@ -29,10 +28,12 @@ installed, 200 roundtrips send it **no SQL at all** — only `rollback` and
 `endTransaction`, two per roundtrip. It stays because an ABAP app's own Open
 SQL would go there; a CAP-backed `DatabaseClient` for those is a later step.
 
-Upstream packs exactly this as two steps at the end of
-`backend-prebuilt.yaml`, from the manifest `node/setup/runtime.package.json`
-— merged in abap2UI5#2772 — so the package rides the build that workflow
-already does for the release tarball. Dry run: 1,307 files, 1.5 MB packed,
-16.4 MB unpacked. It publishes once the organisation sets `NPM_TOKEN`; until
-then the `.tgz` is a workflow artefact and this directory is filled by
-`scripts/assemble-runtime.sh`.
+Upstream packs this as `@abap2ui5/node-runtime` (`npm run pack:node-runtime`, manifest
+`node/setup/npm.package.json`) at the end of `backend-prebuilt.yaml`, and
+publishes it by trusted publishing from its next release on. The real package
+carries more than this stand-in - `srv/host.mjs` (an entry point with
+`initialize()` and `createHandler()`) and `downport/` - none of which the
+plugin needs today. Neither carries `webapp/`: the framework's GET page embeds
+the whole UI5 component, so there are no frontend files to serve. Once it is on npm, `scripts/assemble-runtime.sh --package
+X.Y.Z` fills this directory from it, and ADR-008's cutover step 2 deletes the
+stand-in in favour of a plain dependency.
