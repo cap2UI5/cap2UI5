@@ -6,6 +6,8 @@ const path = require("path");
 const { pathToFileURL } = require("url");
 const { installExit } = require("./define-exit");
 
+const LOG = cds.log("cap2ui5");
+
 /** Where the runtime package is. Resolved from the PROJECT (cds.root), so the
  *  version the project installed wins - the plugin only declares the range. */
 function locate() {
@@ -41,7 +43,7 @@ async function boot(rt, conf) {
   const ref = new abap.types.ABAPObject({ qualifiedName: "Z2UI5_IF_UI5_DRAFT_STORE" });
   ref.set(await new ZCL_CDS_DRAFT_STORE().constructor_());
   await abap.Classes["Z2UI5_CL_UI5_SRV_DRAFT"].set_instance({ store: ref });
-  console.log("[cap2ui5] drafts live in cap2ui5.Drafts");
+  LOG.info("drafts live in cap2ui5.Drafts");
 
   await loadApps(path.resolve(cds.root, conf.apps));
 
@@ -49,7 +51,7 @@ async function boot(rt, conf) {
   // defineExit( ) from a file in the apps directory, so there is nothing to
   // bind until they have run. See lib/define-exit.js for why the host binds it
   // instead of the framework discovering it.
-  if (installExit()) console.log("[cap2ui5] user exit installed");
+  if (installExit()) LOG.info("user exit installed");
 
   return await import(pathToFileURL(rt.shim).href);
 }
@@ -60,7 +62,7 @@ async function loadApps(dir) {
   if (!fs.existsSync(dir)) return;
   const files = fs.readdirSync(dir).filter((f) => /\.(c|m)?js$/.test(f)).sort();
   for (const f of files) await import(pathToFileURL(path.join(dir, f)).href);
-  console.log(`[cap2ui5] ${files.length} app module(s) loaded from ${path.relative(cds.root, dir) || "."}`);
+  LOG.info(`${files.length} app module(s) loaded from ${path.relative(cds.root, dir) || "."}`);
 }
 
 module.exports = { locate, boot };

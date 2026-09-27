@@ -23,7 +23,10 @@
 // same one the framework's own exit_instantiate( ) writes to: gi_user_exit is
 // read afresh on every set_config call, so binding it before the first request
 // is all it takes. Nothing here reaches past a static the framework declares.
+const cds = require("@sap/cds");
+
 const IF_NAME = "Z2UI5_IF_UI5_EXIT";
+const LOG = cds.log("cap2ui5");
 
 /** The exit a project registered, if any. One, deliberately: the exit decides
  *  the CSP and every security header, so "which one wins" must not depend on
@@ -106,7 +109,7 @@ async function run(hook, INPUT, name) {
   try {
     await hook(after, context(INPUT.is_context));
   } catch (e) {
-    console.error(`[cap2ui5] user exit ${name} failed - the framework defaults stand:`, e);
+    LOG.error(`user exit ${name} failed - the framework defaults stand:`, e);
     return;
   }
   rewrap(cfg, before, after);

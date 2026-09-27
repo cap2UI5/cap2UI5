@@ -15,11 +15,17 @@ const { locate, boot } = require("./lib/runtime");
 const { definedApps } = require("./lib/define-app");
 const { startupHints } = require("./lib/hints");
 
+// One logger, as every CAP module and plugin has: plain `[cap2ui5] - ...` lines
+// in development, and in production the JSON records CAP writes for itself,
+// with the request's correlation_id - so the plugin's lines land in the same
+// log search as everything else instead of as loose text on stdout.
+const LOG = cds.log("cap2ui5");
+
 cds.on("bootstrap", (app) => {
   const conf = cds.env.cap2ui5;               // defaults from package.json#cds, project overrides
   const rt = locate();
   const ready = boot(rt, conf);
-  ready.catch((e) => console.error("[cap2ui5] runtime failed to boot:", e));
+  ready.catch((e) => LOG.error("runtime failed to boot:", e));
 
   // Where to click, once there is something to click: the server listens
   // before the apps have loaded (boot is async), so the hints wait for both.
@@ -36,10 +42,10 @@ cds.on("bootstrap", (app) => {
         requires: conf.requires,
         production: cds.env.profiles?.includes("production"),
       });
-      for (const line of lines) console.log(line);
+      for (const line of lines) LOG.info(line);
     }, () => {});
   });
-  console.log(`[cap2ui5] @abap2ui5/node-runtime ${rt.version} from ${rt.dir}`);
+  LOG.info(`@abap2ui5/node-runtime ${rt.version} from ${rt.dir}`);
 
   // No static frontend route: the page the roundtrip route answers a GET
   // with embeds the whole UI5 component - every module, view and stylesheet,
@@ -86,7 +92,7 @@ cds.on("bootstrap", (app) => {
         // carry entity names, SQL fragments and deployment paths, none of which
         // a roundtrip client needs and all of which are free reconnaissance.
         const ref = cds.context?.id ?? "-";
-        console.error(`[cap2ui5] roundtrip failed (${ref}):`, e);
+        LOG.error(`roundtrip failed (${ref}):`, e);
         if (!res.headersSent) res.status(500).type("text/plain").send(`roundtrip failed (${ref})`);
       }
     },

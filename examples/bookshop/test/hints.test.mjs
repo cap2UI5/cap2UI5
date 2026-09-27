@@ -25,9 +25,9 @@ const base = {
 
 test("one line per app with the address that starts it, then the development login", () => {
   assert.deepEqual(startupHints(base), [
-    "[cap2ui5] HELLO      http://localhost:4004/sap/bc/z2ui5?app_start=HELLO",
-    "[cap2ui5] ZCL_BOOKS  http://localhost:4004/sap/bc/z2ui5?app_start=ZCL_BOOKS",
-    "[cap2ui5] development login: alice (empty password)",
+    "HELLO      http://localhost:4004/sap/bc/z2ui5?app_start=HELLO",
+    "ZCL_BOOKS  http://localhost:4004/sap/bc/z2ui5?app_start=ZCL_BOOKS",
+    "development login: alice (empty password)",
   ]);
 });
 
@@ -62,9 +62,9 @@ after(() => s?.kill());
 test("the booted example prints its apps and the login once they have loaded", async () => {
   s = await boot("hints");
   const want = [
-    /\[cap2ui5\] ZCL_JS_HELLO\s+http:\/\/\S+\/sap\/bc\/z2ui5\?app_start=ZCL_JS_HELLO/,
-    /\[cap2ui5\] ZCL_JS_BOOKS\s+http:\/\/\S+\/sap\/bc\/z2ui5\?app_start=ZCL_JS_BOOKS/,
-    /\[cap2ui5\] development login: alice \(empty password\)/,
+    /\[cap2ui5\] - ZCL_JS_HELLO\s+http:\/\/\S+\/sap\/bc\/z2ui5\?app_start=ZCL_JS_HELLO/,
+    /\[cap2ui5\] - ZCL_JS_BOOKS\s+http:\/\/\S+\/sap\/bc\/z2ui5\?app_start=ZCL_JS_BOOKS/,
+    /\[cap2ui5\] - development login: alice \(empty password\)/,
   ];
   for (let i = 0; i < 20 && !want.every((re) => re.test(s.out())); i++) await sleep(250);
   for (const re of want) assert.match(s.out(), re);
