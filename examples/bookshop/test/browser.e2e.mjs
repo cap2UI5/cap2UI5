@@ -10,7 +10,13 @@
 // UI5 comes from the CDN the page names (sdk.openui5.org). Where there is no
 // CDN - the sandbox this was written in - set UI5_DIST to the `resources`
 // directory of an openui5-dist install and the CDN requests are answered from
-// disk; the page itself is not touched.
+// disk; the page itself is not touched. The one openui5-dist on npm that
+// carries a `resources/` directory, 1.108.10, evaluates its library preloads
+// as strings, which the page's own CSP (no 'unsafe-eval') refuses - UI5 never
+// boots. UI5_BYPASS_CSP=1 lets such a build run by opening the context with
+// Playwright's bypassCSP. It is a separate switch, off by default, so a run
+// against the CDN or a current local build - CI's run among them - still has
+// the CSP enforced and would catch a page that breaks it.
 //
 // Runs only when asked (`npm run test:browser`) - it needs a browser - which is
 // why the file is *.e2e.mjs and not *.test.mjs: `npm test` must stay browserless.
@@ -34,7 +40,10 @@ before(async () => {
   // PW_CHROMIUM: a Chromium to use instead of the one this playwright version
   // would download - for sandboxes that ship one and block the download.
   browser = await chromium.launch(process.env.PW_CHROMIUM ? { executablePath: process.env.PW_CHROMIUM } : {});
-  context = await browser.newContext({ httpCredentials: { username: "alice", password: "" } });
+  context = await browser.newContext({
+    httpCredentials: { username: "alice", password: "" },
+    bypassCSP: process.env.UI5_BYPASS_CSP === "1",
+  });
   if (DIST) {
     await context.route("https://sdk.openui5.org/**", async (route) => {
       const p = new URL(route.request().url()).pathname.replace(/^\/resources\/sap-ui-cachebuster\//, "/resources/");
@@ -100,5 +109,25 @@ test("the Books app renders a t.table( ) filled from cds.ql", async () => {
   await page.getByText("1 hits").waitFor({ timeout: 10_000 });
   await page.screenshot({ path: path.join(SHOTS, "books.png") });
   assert.equal(await rows.count(), 1);
+  assert.deepEqual(errors, [], "page errors");
+});
+
+test("c.event( ) survives a view whose attributes were XML-escaped, arguments included", async () => {
+  // ZCL_JS_ESCAPED escapes every attribute value as abap2UI5's view builder
+  // does. Before the fix the placeholder did not survive that, a raw NUL went
+  // out in the response and the page got no view at all.
+  const { page, errors } = await open("ZCL_JS_ESCAPED");
+  await page.getByRole("button", { name: "Go" }).waitFor({ timeout: 60_000 });
+  await page.getByRole("button", { name: "Go" }).click();
+  const box = (text) => page.locator(".sapMMessageBox, .sapMDialog").filter({ hasText: text });
+  await box("escaped event arrived").waitFor({ timeout: 30_000 });
+  await page.getByRole("button", { name: "OK" }).click();
+  await box("escaped event arrived").waitFor({ state: "hidden", timeout: 30_000 });
+
+  // an argument with a quote, angle brackets and an ampersand must reach the
+  // app exactly - it only can if the wire string was escaped as an attribute
+  await page.getByRole("button", { name: "Take" }).click();
+  await box('took a "quoted" <arg> & more').waitFor({ timeout: 30_000 });
+  await page.screenshot({ path: path.join(SHOTS, "escaped.png") });
   assert.deepEqual(errors, [], "page errors");
 });
