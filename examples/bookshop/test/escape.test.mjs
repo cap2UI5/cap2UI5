@@ -10,12 +10,10 @@
 // escaped as an attribute value, and a token the app DID mangle is refused
 // with an error naming c.event instead of being shipped.
 import assert from "node:assert/strict";
-import { after, before, test } from "node:test";
-import { action, boot, post } from "./server.mjs";
+import { test } from "node:test";
+import { action, post, serve } from "./server.mjs";
 
-let s;
-before(async () => { s = await boot("escape"); });
-after(() => s?.kill());
+const s = serve();
 
 const P = (o) => post(s.url, { user: "alice", app: "ZCL_JS_ESCAPED", ...o });
 const main = (r) => [

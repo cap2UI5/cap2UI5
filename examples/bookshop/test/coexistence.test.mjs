@@ -10,14 +10,12 @@
 // gets - one projection, @requires: 'authenticated-user' - and nothing in it
 // knows cap2UI5 exists.
 import assert from "node:assert/strict";
-import { after, before, test } from "node:test";
-import { boot, post } from "./server.mjs";
+import { test } from "node:test";
+import { post, serve } from "./server.mjs";
 
 const APP = "ZCL_JS_BOOKS";
 const basic = (u) => "Basic " + Buffer.from(`${u}:`).toString("base64");
-let s;
-before(async () => { s = await boot("coexistence"); });
-after(() => s?.kill());
+const s = serve();
 
 const odata = (path, { user, method = "GET", body } = {}) =>
   fetch(`http://127.0.0.1:${s.port}/odata/v4/catalog${path}`, {

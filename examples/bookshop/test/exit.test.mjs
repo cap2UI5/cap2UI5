@@ -10,31 +10,18 @@
 // before defineExit( ) existed: get_user_exit_class( ) answered the empty
 // string with an exit class registered in abap.Classes.
 //
-// srv/apps/exit.js is the project's exit; these are its effects.
+// srv/apps/exit.js is the project's exit; these are its effects. That it is
+// installed once, before the server listens, is a matter of the start and is
+// checked where the start is: start.test.mjs.
 import assert from "node:assert/strict";
-import { after, before, test } from "node:test";
+import { test } from "node:test";
 import cds from "@sap/cds";
-import { boot, post } from "./server.mjs";
+import { post, serve } from "./server.mjs";
 
 const AUTH = { Authorization: "Basic " + Buffer.from("alice:").toString("base64") };
-let s;
-before(async () => { s = await boot("exit"); });
-after(() => s?.kill());
+const s = serve();
 
 const page = (app) => fetch(`${s.url}?app_start=${app}`, { headers: AUTH });
-
-test("the exit is installed, not discovered - once, and before the server listens", async () => {
-  // The apps and the exit load inside CAP's 'served' phase, which CAP awaits
-  // before it listens - so the line is in the log by the time boot( ) returns,
-  // ahead of "server listening". It used to race with the listen and land on
-  // either side of it run to run (measured: both orders), which is why this
-  // test once had to send a request before it could look.
-  const out = s.out();
-  assert.equal(out.match(/\[cap2ui5\] - user exit installed/g)?.length, 1, out.slice(-1500));
-  assert.ok(out.indexOf("user exit installed") < out.indexOf("server listening"), "the server listened before the exit was bound");
-  const r = await post(s.url, { app: "ZCL_JS_HELLO", user: "alice" });
-  assert.equal(r.status, 200, r.text.slice(0, 200));
-});
 
 test("onPage changes what the bootstrap page carries", async () => {
   const r = await page("ZCL_JS_BOOKS");

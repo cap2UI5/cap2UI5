@@ -28,7 +28,8 @@
     "bench": "node bench.mjs"
   },
   "devDependencies": {
-    "playwright": "^1.63.0",
-    "@sap/xssec": "^4"
+    "@cap-js/cds-test": "^1.0.2",
+    "@sap/xssec": "^4",
+    "playwright": "^1.63.0"
   }
 }
