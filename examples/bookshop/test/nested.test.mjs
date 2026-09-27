@@ -7,13 +7,11 @@
 // derivation, written when only scalars had been tried. The lesson is the
 // entry, not the fix: "unsupported" meant "not attempted".
 import assert from "node:assert/strict";
-import { after, before, test } from "node:test";
-import { action, boot, post } from "./server.mjs";
+import { test } from "node:test";
+import { action, post, serve } from "./server.mjs";
 
 const APP = "ZCL_JS_NESTED";
-let s;
-before(async () => { s = await boot("nested"); });
-after(() => s?.kill());
+const s = serve();
 const P = (o) => post(s.url, { user: "alice", ...o });
 
 test("a nested structure and a nested table are in the model, initial and typed", async () => {

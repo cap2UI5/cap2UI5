@@ -3,13 +3,11 @@
 // the model carries them UPPERCASE, and the table survives the draft round trip
 // - the third roundtrip starts from the state the second one stored.
 import assert from "node:assert/strict";
-import { after, before, test } from "node:test";
-import { action, boot, post } from "./server.mjs";
+import { test } from "node:test";
+import { action, post, serve } from "./server.mjs";
 
 const APP = "ZCL_JS_BOOKS";
-let s;
-before(async () => { s = await boot("books"); });
-after(() => s?.kill());
+const s = serve();
 
 test("a t.table( ) field is in the model from the start, empty and uppercase", async () => {
   const r = await post(s.url, { app: APP, user: "alice" });

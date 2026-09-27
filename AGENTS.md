@@ -72,6 +72,14 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
   must fail.
 - `npm test` stays browserless. Browser tests are `*.e2e.mjs`, run by
   `npm run test:browser`.
+- **A test about what the route answers serves the example in-process with
+  `cds.test`** (`serve()` in `test/server.mjs`), the way a CAP project tests
+  itself and the path a consumer's own suite takes through the plugin. **A
+  test about the process boots it as a child** (`boot()`): a start that
+  fails, a restart, a production profile, a setting only the environment can
+  make, or what the log says while the server starts. `cds.test.log()`
+  clears its capture before each test, so startup lines are only visible to
+  a child.
 - **The workspace cannot prove the PACKAGE.** Every test here runs with
   `cap2ui5` and `@abap2ui5/node-runtime` as workspace symlinks, so a missing entry
   in `files`, a `main` pointing at nothing, or a model contribution that only

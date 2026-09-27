@@ -6,15 +6,13 @@
 // and every draft was stored as "anonymous" - alice's draft answered to bob.
 // cds.middlewares.before on the route is what fixes it; this is the proof.
 import assert from "node:assert/strict";
-import { after, before, test } from "node:test";
+import { test } from "node:test";
 import cds from "@sap/cds";
-import { action, boot, post } from "./server.mjs";
+import { action, boot, post, serve } from "./server.mjs";
 
 const APP = "ZCL_JS_HELLO";
-let s;
+const s = serve();
 let draftId;                       // created by alice below, checked in the database last
-before(async () => { s = await boot("auth"); });
-after(() => s?.kill());
 
 test("without credentials the route asks for a login, with the auth strategy's challenge", async () => {
   const r = await post(s.url, { app: APP });

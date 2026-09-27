@@ -6,12 +6,10 @@
 // screen that does not refresh, and it is invisible without navigation - which
 // is why it could not be tested before this slice existed.
 import assert from "node:assert/strict";
-import { after, before, test } from "node:test";
-import { boot, post } from "./server.mjs";
+import { test } from "node:test";
+import { post, serve } from "./server.mjs";
 
-let s;
-before(async () => { s = await boot("nav"); });
-after(() => s?.kill());
+const s = serve();
 
 const P = (o) => post(s.url, { user: "alice", ...o });
 const actions = (r) => [
