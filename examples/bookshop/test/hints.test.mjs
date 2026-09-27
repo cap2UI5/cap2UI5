@@ -3,8 +3,8 @@
 // the first screen needs no documentation. The text is a pure function
 // (plugin/lib/hints.js) and is pinned here case by case; the last test boots
 // the example and reads the log, because the timing is the part a pure test
-// cannot see: the server listens BEFORE the apps have loaded, and a hint
-// printed on "listening" alone would list none of them.
+// cannot see: the hints need the apps, and the apps load in CAP's 'served'
+// phase, after the model - a hint printed any earlier would list none of them.
 import { test, after } from "node:test";
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";

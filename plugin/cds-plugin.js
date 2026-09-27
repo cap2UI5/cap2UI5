@@ -11,7 +11,7 @@
 // no port, no transpiler of our own, no hand-maintained framework class.
 const cds = require("@sap/cds");
 const express = require("express");
-const { locate, boot } = require("./lib/runtime");
+const { locate, boot, loadApps } = require("./lib/runtime");
 const { definedApps } = require("./lib/define-app");
 const { startupHints } = require("./lib/hints");
 
@@ -24,13 +24,26 @@ const LOG = cds.log("cap2ui5");
 cds.on("bootstrap", (app) => {
   const conf = cds.env.cap2ui5;               // defaults from package.json#cds, project overrides
   const rt = locate();
-  const ready = boot(rt, conf);
-  ready.catch((e) => LOG.error("runtime failed to boot:", e));
+  LOG.info(`@abap2ui5/node-runtime ${rt.version} from ${rt.dir}`);
 
-  // Where to click, once there is something to click: the server listens
-  // before the apps have loaded (boot is async), so the hints wait for both.
-  // Not in production - there the addresses and a login hint are noise, and
-  // the login hint would name a development user.
+  // The runtime and the draft store boot NOW, alongside CAP loading the model.
+  // The apps load once CAP has served it, as CAP loads a service
+  // implementation, so an app module may use cds.entities( ) while it loads.
+  //
+  // CAP awaits 'served' handlers - and only those - before it listens. So the
+  // server listens once every app can answer, and a runtime or an app module
+  // that fails to load fails the start, as a service implementation that
+  // throws does. It used to be logged while the server listened anyway and
+  // answered every roundtrip with a 500.
+  let served;
+  const ready = Promise.all([boot(rt), new Promise((resolve) => (served = resolve))])
+    .then(async ([shim]) => { await loadApps(conf); return shim; });
+  ready.catch(() => {});                 // it fails the start below; nothing else awaits it yet
+  cds.once("served", () => { served(); return ready; });
+
+  // Where to click, once there is something to click. Not in production -
+  // there the addresses and a login hint are noise, and the login hint would
+  // name a development user.
   cds.once("listening", ({ url }) => {
     ready.then(() => {
       const lines = startupHints({
@@ -45,7 +58,6 @@ cds.on("bootstrap", (app) => {
       for (const line of lines) LOG.info(line);
     }, () => {});
   });
-  LOG.info(`@abap2ui5/node-runtime ${rt.version} from ${rt.dir}`);
 
   // No static frontend route: the page the roundtrip route answers a GET
   // with embeds the whole UI5 component - every module, view and stylesheet,
