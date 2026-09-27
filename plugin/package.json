@@ -24,12 +24,15 @@
   },
   "license": "MIT",
   "main": "index.js",
+  "types": "index.d.ts",
   "files": [
     "cds-plugin.js",
     "index.cds",
     "index.js",
+    "index.d.ts",
     "lib",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "engines": {

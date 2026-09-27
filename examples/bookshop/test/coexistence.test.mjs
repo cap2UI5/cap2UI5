@@ -77,3 +77,16 @@ test("a row written by a cap2UI5 app is there for the OData client, and the othe
   assert.equal(search.json.MODEL.HITS, 1, "the app does not see the OData row");
   assert.equal(search.json.MODEL.BOOKS[0].AUTHOR, "odata");
 });
+
+// CAP's start page lists the apps beside the services, as it lists the HTML
+// files in app/. It showed the services only, and a fresh project's first
+// screen gave no hint that the route existed. The list comes through
+// cds.app._app_links, which CAP reads but does not document - so this test is
+// the gate that notices if it stops.
+test("CAP's start page lists the apps next to CAP's own services", async () => {
+  const html = await (await fetch(`http://127.0.0.1:${s.port}/`)).text();
+  assert.match(html, /odata\/v4\/catalog/, "not CAP's start page");
+  for (const app of ["ZCL_JS_HELLO", "ZCL_JS_BOOKS"]) {
+    assert.ok(html.includes(`href="sap/bc/z2ui5?app_start=${app}"`), `${app} is not on the start page`);
+  }
+});

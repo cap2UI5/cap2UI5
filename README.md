@@ -23,9 +23,10 @@ read your entities with `cds.ql`.
 
 ```bash
 npm i cap2ui5            # contributing to the plugin itself: the workspace, see below
+cds add cap2ui5          # optional: a first app in srv/apps/hello.js
 ```
 
-That is the installation. On the next `cds serve` the roundtrip route
+Requires Node.js 22+ and `@sap/cds` 9 or 10. That is the installation. On the next `cds serve` the roundtrip route
 (`/rest/root/z2ui5`, `/sap/bc/z2ui5`) exists and `cds deploy` creates
 `cap2ui5.Drafts` next to your own entities. Your `server.js`, if you have one,
 is untouched.
@@ -147,7 +148,7 @@ scripts/assemble-runtime.sh --package 1.145.0
 #   scripts/assemble-runtime.sh /tmp/ref
 
 npm install
-npm test                                       # ABI gates, auth, books, concurrency, nesting, the exit  (36 tests)
+npm test                                       # ABI gates, auth, config, books, concurrency, nesting, the exit, the start
 npm run cold-test                              # state AND the app stack through SIGKILL, ABAP control included
 npm run bench -- 100                           # ms per roundtrip
 npm run consumer-test                          # pack both packages, install them into a throwaway CAP project, drive a roundtrip
@@ -167,7 +168,8 @@ npm start                                      # http://localhost:4004/rest/root
 | Restart mid-navigation | A is killed **inside a called app**; B, which never built the stack, unwinds it and carries the picked value home — the whole app stack is in the draft, not in memory |
 | Concurrency | three users interleaved in one process, every answer to its owner |
 | Navigation | `navTo` / `navBack` carrying a result, popups and nested views — on the wire and in the browser |
-| **As published** | both packages packed, installed into a CAP project that has never heard of this repository, and driven through a roundtrip - the plugin found as a cds-plugin from `node_modules`, `index.cds` in the project's model, the runtime resolved from the project, 401 for an anonymous caller (`scripts/consumer-test.mjs`, 17 checks) |
+| **As published** | both packages packed, installed into a CAP project that has never heard of this repository, and driven through a roundtrip - the plugin found as a cds-plugin from `node_modules`, `index.cds` in the project's model, the runtime the plugin pins, the type declarations and changelog in the package, 401 for an anonymous caller (`scripts/consumer-test.mjs`) |
+| CAP versions | the suite and the consumer test on `@sap/cds` 9 and 10, Node 22 and 24 (the CI matrix) |
 | Browser | renders in Chromium — the page the framework serves on GET, UI5 booted; MessageBox, table, a `sap.m.Dialog` popup, and a navigation round trip that comes back with the choice |
 
 The one hazard of the design: the plugin couples to what the transpiler

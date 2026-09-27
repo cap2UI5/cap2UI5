@@ -116,9 +116,12 @@ defineApp("ZCL_PROBE", class {
     surface.ok ? exported.join(", ") : surface.why);
 
   const pkgDir = path.join(proj, "node_modules", "cap2ui5");
-  for (const f of ["README.md", "LICENSE", "cds-plugin.js", "index.cds", "index.js", "lib"]) {
+  for (const f of ["README.md", "CHANGELOG.md", "LICENSE", "cds-plugin.js", "index.cds", "index.js", "index.d.ts", "lib"]) {
     check(`the package contains ${f}`, fs.existsSync(path.join(pkgDir, f)));
   }
+  const types = JSON.parse(fs.readFileSync(path.join(pkgDir, "package.json"), "utf8")).types;
+  check("its package.json names the type declarations it ships",
+    !!types && fs.existsSync(path.join(pkgDir, types)), String(types));
 
   // --- the model contribution, and the table it makes ----------------------
   const model = probe(`

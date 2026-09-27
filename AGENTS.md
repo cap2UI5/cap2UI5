@@ -56,7 +56,10 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
   functions. It checks this across all six auth kinds (`mocked`, `basic`,
   `dummy`, `jwt`, `xsuaa`, `ias`). `@sap/xssec` is a devDependency of the
   example, so the production three are covered by the gate and not merely
-  assumed.
+  assumed. The one other assumption is `cds.app._app_links`, which CAP's
+  start page reads to list the apps. It needs a served app, so its gate is
+  the start-page test in `coexistence.test.mjs`; if it breaks, only that list
+  is lost.
 - **Access is decided and answered the way CAP does it for `@requires`.**
   The guard mirrors `check_roles` in CAP's HTTP adapter: one of the roles lets
   the user in, `any` lets everybody in, anonymous users get 401 and
@@ -130,6 +133,11 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
 - Commit messages say why. The history of this project is its evidence.
 
 ## Publishing
+
+Every change a user of the package would notice gets a line under
+`Unreleased` in `plugin/CHANGELOG.md`, in the same pull request. The PR that
+prepares a release bumps `plugin/package.json` and moves those lines under the
+new version.
 
 A tag `v<version>` publishes `plugin/` as the npm package `cap2ui5`
 (`.github/workflows/release.yml`) by **trusted publishing** - OIDC with

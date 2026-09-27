@@ -22,6 +22,10 @@ const { config } = require("./lib/config");
 // log search as everything else instead of as loose text on stdout.
 const LOG = cds.log("cap2ui5");
 
+// `cds add cap2ui5`: the first app. cds.add exists only while cds add runs,
+// and the optional call leaves the require( ) unevaluated otherwise.
+cds.add?.register?.("cap2ui5", require("./lib/add").facet());
+
 cds.on("bootstrap", (app) => {
   const conf = config();                      // cds.requires.cap2ui5 - see lib/config.js
   if (!conf) return LOG.debug("switched off: cds.requires.cap2ui5 is false");
@@ -39,9 +43,22 @@ cds.on("bootstrap", (app) => {
   // answered every roundtrip with a 500.
   let served;
   const ready = Promise.all([boot(rt), new Promise((resolve) => (served = resolve))])
-    .then(async ([shim]) => { await loadApps(conf); return shim; });
+    .then(async ([shim]) => { await loadApps(conf); listApps(); return shim; });
   ready.catch(() => {});                 // it fails the start below; nothing else awaits it yet
   cds.once("served", () => { served(); return ready; });
+
+  // CAP's start page - served in development - lists the HTML files in app/
+  // under "Web Applications", plus cds.app._app_links. The apps belong in
+  // that list: without it, a fresh project's start page shows CAP's services
+  // and nothing to say that the route exists. _app_links is not documented;
+  // coexistence.test.mjs fails if CAP stops reading it, and all that is lost
+  // then is the list.
+  function listApps() {
+    if (!cds.env.server?.index) return;
+    const route = conf.routes[0].replace(/^\//, "");
+    const links = (app._app_links ??= []);
+    for (const name of definedApps()) links.push(`${route}?app_start=${encodeURIComponent(name)}`);
+  }
 
   // Where to click, once there is something to click. Not in production -
   // there the addresses and a login hint are noise, and the login hint would

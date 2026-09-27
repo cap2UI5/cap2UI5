@@ -12,3 +12,6 @@ examples/*/screenshots/
 
 *.log
 .DS_Store
+
+# scratch projects add.test.mjs writes (removed after the run)
+examples/*/test/fixtures/.add-*
