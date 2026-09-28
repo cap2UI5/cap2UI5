@@ -91,7 +91,7 @@ const t = {
   char: (len) => new abap.types.Character(len, {}),
   packed: (length, decimals) => new abap.types.Packed({ length, decimals, qualifiedName: "P" }),
   /** A structure: `t.struct({ street: "", zip: 0 })`. A plain object field is one implicitly. */
-  struct: (fields) => declared(structFor(fields)),
+  struct: (fields) => declared(withInitial(structFor(fields), fields)),
   /** A table of structures: `t.table({ ID: 0, title: "" })` - the argument is one ROW. */
   table: (row) => declared(tableFor(row)),
 };
@@ -171,6 +171,17 @@ function tableFor(row, path = []) {
 }
 const declared = (box) => box;
 
+// A field's INITIAL VALUE, for the rows make( ) cannot carry: a table's shape
+// comes from its first row, and make( ) is also what RTTI and the deserializer
+// construct from, so it builds every table empty - which silently dropped the
+// rows a field initializer listed. They are written in constructor_( ), not in
+// the JavaScript constructor, because that is the one the draft restore skips:
+// it creates the instance with `new` alone, as ABAP deserializes an object
+// without its constructor, and then APPENDS the stored rows - so rows written
+// by `new` were doubled on every roundtrip.
+const withInitial = (box, value) => Object.defineProperty(box, "__initial", { value });
+const initialOf = (v) => (isBoxed(v) ? v.__initial : v);
+
 /** box -> plain value, for the app to read. ABAP has no boolean; abap_bool is an "X" / " " flag. */
 function unwrap(box, shape) {
   switch (shape.k) {
@@ -180,8 +191,14 @@ function unwrap(box, shape) {
     default: return box.get();
   }
 }
-/** plain value -> box, for the app's writes. */
+/** plain value -> box, for the app's writes. A box - a t.table( ) or
+ *  t.packed( ) declared inside a plain initializer - is copied as ABAP moves
+ *  one value into another. */
 function wrap(box, value, shape) {
+  if (isBoxed(value)) {
+    box.set(value);
+    return;
+  }
   switch (shape.k) {
     case "bool": box.set(value ? "X" : " "); break;
     case "struct": plainToRow(box, value ?? {}, shape.fields); break;
@@ -244,6 +261,7 @@ function defineApp(name, cls, opts = {}) {
       super(...a);
       const attrs = {};
       const shapes = {};
+      const initial = {};
       const undecidable = [];
       for (const [f, v] of Object.entries(this)) {
         if (typeof v === "function") continue;
@@ -252,6 +270,7 @@ function defineApp(name, cls, opts = {}) {
         if (!shape) { undecidable.push(`${f} has no ABAP type`); continue; }
         this[f] = isBoxed(v) ? v : shape.make();
         shapes[f] = shape;
+        if (initialOf(v) !== undefined) initial[f] = initialOf(v);
         attrs[abapName(f)] = { type: shape.make, visibility: "U", is_constant: " ", is_class: " " };
       }
       for (const f of ["z2ui5_if_app$id_draft", "z2ui5_if_app$id_app"]) {
@@ -260,6 +279,7 @@ function defineApp(name, cls, opts = {}) {
       }
       App.ATTRIBUTES = attrs;
       Object.defineProperty(this, "__shapes", { value: shapes, enumerable: false });
+      Object.defineProperty(this, "__initial", { value: initial, enumerable: false });
       if (undecidable.length) {
         LOG.warn(
           `defineApp ${INTERNAL}: these fields are NOT part of the model —\n  ` +
@@ -270,7 +290,12 @@ function defineApp(name, cls, opts = {}) {
       }
     }
 
-    async constructor_() { return this; }
+    /** The ABAP constructor: the framework runs it when it CREATES the app,
+     *  and the draft restore does not (see withInitial). */
+    async constructor_() {
+      for (const [f, v] of Object.entries(this.__initial)) wrap(this[f], v, this.__shapes[f]);
+      return this;
+    }
 
     async z2ui5_if_app$main(input) {
       const c = input.client.get();
@@ -427,11 +452,16 @@ function defineApp(name, cls, opts = {}) {
       });
 
       // ---- run the app: no async needed on its side ------------------------
+      // A method is bound to the PROXY, not to the instance behind it: an app
+      // splits main( ) into helpers the way an ABAP app has view_display( )
+      // and on_event( ), and a helper bound to the instance read the ABAP
+      // boxes - worse, `this.name = "x"` in it replaced a box with a string,
+      // which _bind( ) matches by identity and then could not find.
       const plain = new Proxy(this, {
         get(tgt, prop, recv) {
           const v = Reflect.get(tgt, prop, recv);
           if (typeof prop === "string" && shapes[prop]) return unwrap(v, shapes[prop]);
-          return typeof v === "function" ? v.bind(tgt) : v;
+          return typeof v === "function" ? v.bind(recv) : v;
         },
         set(tgt, prop, value) {
           if (typeof prop === "string" && shapes[prop]) {

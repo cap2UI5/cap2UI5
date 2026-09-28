@@ -52,6 +52,12 @@ The plugin now follows the conventions of the plugins at
 
 - An app module that reads the model while it loads, such as
   `cds.entities(...)` at its top, used to fail to load.
+- A method that `main( )` calls reads the app's fields as plain values, as
+  `main( )` does. It used to read the framework's ABAP boxes, and a write in
+  it replaced the field's box, so the next render could not bind the field.
+- Rows in a field initializer are the field's initial value: `rows = [{ … }]`,
+  a table inside a structure, a table inside `t.struct({ … })`. They used to
+  be dropped - the table was typed from its first row and then built empty.
 
 ## [0.1.0] - 2026-09-27
 
