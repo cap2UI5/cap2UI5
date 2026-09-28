@@ -112,7 +112,7 @@ test("the Books app renders a t.table( ) filled from cds.ql", async () => {
   assert.deepEqual(errors, [], "page errors");
 });
 
-test("c.event( ) survives a view whose attributes were XML-escaped, arguments included", async () => {
+test("client._event( ) survives a view whose attributes were XML-escaped, arguments included", async () => {
   // ZCL_JS_ESCAPED escapes every attribute value as abap2UI5's view builder
   // does. Before the fix the placeholder did not survive that, a raw NUL went
   // out in the response and the page got no view at all.
@@ -132,18 +132,83 @@ test("c.event( ) survives a view whose attributes were XML-escaped, arguments in
   assert.deepEqual(errors, [], "page errors");
 });
 
-test("a view built with ViewBuilder renders, keeps literal text literal, and answers its event", async () => {
+test("a view built with z2ui5_cl_ui5_view_builder renders, keeps literal text literal, and answers its event", async () => {
   // ZCL_JS_BUILDER builds its view with abap2UI5's own view builder, replayed
   // against the transpiled class after main( ) - so this is the browser's
   // word that upstream's rendering and cap2UI5's event placeholders fit.
   const { page, errors } = await open("ZCL_JS_BUILDER");
   const input = page.locator("input.sapMInputBaseInner").first();
   await input.waitFor({ timeout: 60_000 });
-  // a( "text", { t } ): shown as typed, braces and all - not read as a binding
+  // a( { n: "text", t } ): shown as typed, braces and all - not read as a binding
   await page.getByText("{shown as typed}", { exact: true }).waitFor({ timeout: 10_000 });
   await input.fill("Ada");
   await page.getByRole("button", { name: "Go" }).click();
   await page.locator(".sapMMessageBox, .sapMDialog").filter({ hasText: "Hello Ada" }).waitFor({ timeout: 30_000 });
   await page.screenshot({ path: path.join(SHOTS, "builder.png") });
+  assert.deepEqual(errors, [], "page errors");
+});
+
+test("the handler expressions work in the browser: event options, a front-end action, the back button", async () => {
+  const { page, errors } = await open("ZCL_JS_WIRES");
+  // a view prefixes its control ids (<view>--search), hence the suffix match
+  const search = page.locator("[id$='--search'] input").first();
+  await search.waitFor({ timeout: 60_000 });
+
+  // liveChange with s_ctrl-check_queue_last: the wire runs, the argument is the typed value
+  await search.fill("ab");
+  await page.getByText("said: TYPED ab").waitFor({ timeout: 30_000 });
+
+  // s_ctrl-check_arg_literal: the argument arrives as written, not evaluated as a binding
+  await page.getByRole("button", { name: "Literal" }).click();
+  await page.getByText("said: TAKE ${not a binding}").waitFor({ timeout: 30_000 });
+
+  // follow_up_action( ) wired into a button: no roundtrip, the focus moves
+  await page.locator("body").click({ position: { x: 5, y: 5 } });
+  await page.getByRole("button", { name: "Focus" }).click();
+  await page.waitForFunction(() => globalThis.document.activeElement?.closest("[id$='--search']") !== null, null,
+    { timeout: 30_000 });
+
+  // client._event_nav_app_leave( ): the called app's back button leaves it
+  await page.getByRole("button", { name: "Call" }).click();
+  await page.getByText("press back").waitFor({ timeout: 30_000 });
+  await page.locator("[id$='-navButton']").first().click();
+  await page.getByText("said: TAKE ${not a binding}").waitFor({ timeout: 30_000 });
+  await page.screenshot({ path: path.join(SHOTS, "wires.png") });
+  assert.deepEqual(errors, [], "page errors");
+});
+
+test("a popover opens by the control it names and closes again", async () => {
+  const { page, errors } = await open("ZCL_JS_ACTIONS");
+  await page.getByRole("button", { name: "More" }).waitFor({ timeout: 60_000 });
+  await page.getByRole("button", { name: "More" }).click();
+  const popover = page.locator(".sapMPopover").filter({ hasText: "the popover" });
+  await popover.waitFor({ timeout: 30_000 });
+  await page.screenshot({ path: path.join(SHOTS, "popover.png") });
+  await popover.getByRole("button", { name: "Close" }).click();
+  await popover.waitFor({ state: "hidden", timeout: 30_000 });
+  assert.deepEqual(errors, [], "page errors");
+});
+
+test("bindings with options: a bare path, one table cell, a JSON node, a structure component", async () => {
+  const { page, errors } = await open("ZCL_JS_BINDS");
+  await page.locator("[id$='--list']").getByText("second", { exact: true }).waitFor({ timeout: 60_000 });
+  await page.getByText("From JSON", { exact: true }).waitFor({ timeout: 10_000 });
+
+  // the cell input is row 2's title; an edit of it reaches the table
+  const cell = page.locator("[id$='--cell'] input");
+  assert.equal(await cell.inputValue(), "second");
+  await cell.fill("edited");
+  await cell.press("Tab");
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await page.getByText("first,edited", { exact: true }).waitFor({ timeout: 30_000 });
+
+  // a component of a structure: the input shows it, and an edit reaches it
+  const city = page.locator("[id$='--city'] input");
+  assert.equal(await city.inputValue(), "London");
+  await city.fill("Paris");
+  await city.press("Tab");
+  await page.getByRole("button", { name: "Save order" }).click();
+  await page.getByText("Paris/A-1", { exact: true }).waitFor({ timeout: 30_000 });
+  await page.screenshot({ path: path.join(SHOTS, "binds.png") });
   assert.deepEqual(errors, [], "page errors");
 });

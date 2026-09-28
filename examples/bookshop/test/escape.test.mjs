@@ -1,6 +1,6 @@
-// c.event( )'s placeholder has to survive what a view builder does to it.
+// client._event( )'s placeholder has to survive what a view builder does to it.
 //
-// ZCL_JS_ESCAPED XML-escapes every attribute value before c.view( ), as
+// ZCL_JS_ESCAPED XML-escapes every attribute value before client.view_display( ), as
 // abap2UI5's own Z2UI5_CL_UI5_VIEW_BUILDER does. The placeholder used to be
 // the event as JSON between two NULs; the builder turned its quotes into
 // &quot;, the substitution after main( ) no longer found it, and the raw NULs
@@ -8,7 +8,7 @@
 // view at all. These assertions hold the three halves of the fix: the token
 // comes through escaping unchanged, the wire string that replaces it is itself
 // escaped as an attribute value, and a token the app DID mangle is refused
-// with an error naming c.event instead of being shipped.
+// with an error naming client._event instead of being shipped.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { action, post, serve } from "./server.mjs";
@@ -49,10 +49,10 @@ test("an argument with XML specials comes back as it was sent", async () => {
   assert.equal(take.json.MODEL.SAID, ARG);
 });
 
-test("a placeholder the app altered is refused, naming c.event, not shipped", async () => {
+test("a placeholder the app altered is refused, naming client._event, not shipped", async () => {
   const start = await P({});
   const broken = await P({ id: start.json.S_FRONT.ID, event: "BREAK" });
   assert.equal(broken.status, 500, broken.text.slice(0, 300));
   assert.ok(!broken.text.includes("z2ui5evt_"), "the placeholder reached the caller");
-  assert.match(s.out(), /c\.event\( \): a placeholder it returned reached the view altered/);
+  assert.match(s.out(), /client\._event\( \): a placeholder it returned reached the view altered/);
 });

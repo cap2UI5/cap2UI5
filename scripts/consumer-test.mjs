@@ -92,14 +92,14 @@ try {
 const { defineApp } = require("cap2ui5");
 defineApp("ZCL_PROBE", class {
   name = "";
-  main(c) {
-    if (c.isDisplay) {
-      c.view(\`<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" displayBlock="true" height="100%">
-        <Shell><Page title="Probe"><Input value="\${c.bind("name")}"/>
-        <Button text="Go" press="\${c.event("GO")}"/></Page></Shell></mvc:View>\`);
+  main(client) {
+    if (client.check_on_navigated()) {
+      client.view_display(\`<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" displayBlock="true" height="100%">
+        <Shell><Page title="Probe"><Input value="\${client._bind("name")}"/>
+        <Button text="Go" press="\${client._event("GO")}"/></Page></Shell></mvc:View>\`);
       return;
     }
-    if (c.eventName === "GO") c.messageBox(\`Hello, \${this.name}!\`);
+    if (client.check_on_event("GO")) client.message_box_display(\`Hello, \${this.name}!\`);
   }
 });
 `);
@@ -112,7 +112,8 @@ defineApp("ZCL_PROBE", class {
   const surface = probe(`console.log(JSON.stringify(Object.keys(require("cap2ui5"))))`, proj);
   const exported = surface.ok ? JSON.parse(surface.out) : [];
   check("require(\"cap2ui5\") exports the documented surface",
-    ["defineApp", "defineExit", "t", "ViewBuilder"].every((k) => exported.includes(k)),
+    ["defineApp", "defineExit", "t", "z2ui5_cl_ui5_view_builder", "z2ui5_if_client", "ViewBuilder"]
+      .every((k) => exported.includes(k)),
     surface.ok ? exported.join(", ") : surface.why);
 
   const pkgDir = path.join(proj, "node_modules", "cap2ui5");

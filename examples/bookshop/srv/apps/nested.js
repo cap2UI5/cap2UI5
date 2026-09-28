@@ -10,26 +10,26 @@ defineApp("ZCL_JS_NESTED", class {
     lines: t.table({ sku: "", qty: 0, price: t.packed(9, 2) }),  // table in a structure
   };
 
-  main(c) {
-    if (c.eventName === "FILL") {
+  main(client) {
+    if (client.check_on_event("FILL")) {
       this.order = {
         id: "4711",
         customer: { name: "Ada", city: "London" },
         lines: [{ sku: "A-1", qty: 2, price: 9.5 }, { sku: "B-2", qty: 1, price: 0.5 }],
       };
-      c.messageToast(`order ${this.order.id} for ${this.order.customer.name}`);
+      client.message_toast_display(`order ${this.order.id} for ${this.order.customer.name}`);
       return;
     }
-    if (c.eventName === "READ") {
+    if (client.check_on_event("READ")) {
       // reading it back through the proxy must give plain values all the way
       const o = this.order;
-      c.messageToast(`${o.customer.city}/${o.lines.length}/${o.lines[1]?.sku ?? "-"}`);
+      client.message_toast_display(`${o.customer.city}/${o.lines.length}/${o.lines[1]?.sku ?? "-"}`);
       return;
     }
-    if (c.isDisplay) {
-      c.view(`<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m"><Page title="nested">` +
-        `<Button text="Fill" press="${c.event("FILL")}"/>` +
-        `<Button text="Read" press="${c.event("READ")}"/>` +
+    if (client.check_on_navigated()) {
+      client.view_display(`<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m"><Page title="nested">` +
+        `<Button text="Fill" press="${client._event("FILL")}"/>` +
+        `<Button text="Read" press="${client._event("READ")}"/>` +
         `</Page></mvc:View>`);
     }
   }
