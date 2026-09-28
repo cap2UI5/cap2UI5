@@ -75,10 +75,11 @@ returns the same names.
 
 | | |
 |---|---|
-| lifecycle | `c.isFirstRun` (seed once), `c.isDisplay` (render), `c.canGoBack`, `c.eventName`, `c.eventArg(i)`, `c.prevApp` |
-| binding | `c.bind(field)`, `c.event(name, [args])` |
-| screen | `c.view(xml)`, `c.popup(xml)` / `c.popupClose()`, `c.nest(…)` / `c.nestClose()`, `c.messageBox(text)`, `c.messageToast(text)` — `xml` is XML text or a `ViewBuilder` |
-| navigation | `c.navTo(app)`, `c.navBack({event, data, app})` |
+| lifecycle | `c.isFirstRun` (seed once), `c.isDisplay` (render), `c.canGoBack`, `c.eventName`, `c.eventArg(i)`, `c.prevApp`, `c.eventData`, `c.get()`, `c.appStateHref` |
+| binding | `c.bind(field, {path, row, column, omitInitial, omitInitialPaths, json})` |
+| handlers | `c.event(name, [args], {preventDefault, argLiteral, queueLast, noBusy, …})`, `c.eventNavBack()`, `c.eventFollowUpAction(action, [args], {view})` |
+| screen | `c.view(xml)` / `c.viewClose()`, `c.popup(xml)` / `c.popupClose()`, `c.popover(xml, byId)` / `c.popoverClose()`, `c.nest(…)` / `c.nestClose()`, `c.nest2(…)` / `c.nest2Close()`, `c.messageBox(text, {…})`, `c.messageToast(text, {…})`, `c.followUpAction(action, [args], {view})` — `xml` is XML text or a `ViewBuilder` |
+| navigation | `c.navTo(app, fields)`, `c.navBack({event, data, app})`, `c.hashSet(hash)`, `c.hashReplace(hash)`, `c.appStateSetActive()` |
 | escape hatch | `c.raw` — the transpiled `z2ui5_if_client`, async |
 
 **`isDisplay`, not `isFirstRun`, is the render branch.** `isFirstRun` is the

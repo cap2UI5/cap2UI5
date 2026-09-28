@@ -23,8 +23,10 @@ const { defineApp, t } = require("cap2ui5");
 // --- the surface -----------------------------------------------------------
 // interface method -> the INPUT parameter names plugin/lib passes to it
 const CLIENT_METHODS = {          // z2ui5_if_client, used by define-app
-  _BIND: ["VAL", "RESULT"],
-  _EVENT: ["VAL", "RESULT"],
+  _BIND: ["VAL", "RESULT", "PATH", "TAB", "TAB_INDEX", "OMIT_INITIAL", "OMIT_INITIAL_PATHS", "JSON"],
+  _EVENT: ["VAL", "T_ARG", "S_CTRL", "RESULT"],
+  _EVENT_NAV_APP_LEAVE: ["RESULT"],
+  FOLLOW_UP_ACTION: ["VAL", "VIEW", "T_ARG", "RESULT"],   // RESULT supplied: the wired form
   CHECK_ON_INIT: ["RESULT"],
   CHECK_ON_NAVIGATED: ["RESULT"],
   CHECK_APP_PREV_STACK: ["RESULT"],
@@ -32,14 +34,33 @@ const CLIENT_METHODS = {          // z2ui5_if_client, used by define-app
   GET_APP_PREV: ["RESULT"],
   GET_EVENT_ARG: ["V", "RESULT"],
   VIEW_DISPLAY: ["VAL"],
+  VIEW_DESTROY: [],
   POPUP_DISPLAY: ["VAL"],
   POPUP_DESTROY: [],
+  POPOVER_DISPLAY: ["XML", "BY_ID"],
+  POPOVER_DESTROY: [],
   NEST_VIEW_DISPLAY: ["VAL", "ID", "METHOD_INSERT", "METHOD_DESTROY"],
   NEST_VIEW_DESTROY: [],          // takes none: there is one nested slot
+  NEST2_VIEW_DISPLAY: ["VAL", "ID", "METHOD_INSERT", "METHOD_DESTROY"],
+  NEST2_VIEW_DESTROY: [],
   NAV_APP_CALL: ["APP", "RESULT"],
   NAV_APP_LEAVE: ["APP", "EVENT", "R_DATA", "RESULT"],
-  MESSAGE_BOX_DISPLAY: ["TEXT"],
-  MESSAGE_TOAST_DISPLAY: ["TEXT"],
+  MESSAGE_BOX_DISPLAY: ["TEXT", "TYPE", "TITLE", "STYLECLASS", "ONCLOSE", "ACTIONS", "EMPHASIZEDACTION",
+    "INITIALFOCUS", "DETAILS"],
+  MESSAGE_TOAST_DISPLAY: ["TEXT", "DURATION", "ONCLOSE"],
+  HASH_SET: ["VAL"],
+  HASH_REPLACE: ["VAL"],
+  APP_STATE_SET_ACTIVE: ["VAL"],
+  APP_STATE_GET_HREF: ["RESULT"],
+};
+// the components of z2ui5_if_client=>ty_s_event_control c.event( )'s options
+// map to, built from the interface's own parameter type
+const EVENT_CONTROL = ["check_prevent_default", "prevent_default_expr", "check_arg_literal",
+  "check_queue_last", "check_no_busy"];
+// the constant structures define-app reads names from, and names its tests use
+const CONSTANTS = {
+  cs_event: ["set_title", "set_focus", "control_by_id", "popup_close", "hash_set"],
+  cs_view: ["main", "nested", "nested2", "popup", "popover"],
 };
 const STORE_METHODS = {           // z2ui5_if_ui5_draft_store, implemented by draft-store
   CREATE: ["DRAFT", "MODEL_XML"],
@@ -75,11 +96,13 @@ const RUNTIME_GLOBALS = {
   "abap.types.Character": "function",
   "abap.types.Packed": "function",
   "abap.types.ABAPObject": "function",
+  "abap.types.DataReference": "function",
   "abap.types.Structure": "function",
   "abap.types.TableFactory.construct": "function",
 };
-// components of z2ui5_if_client=>get( ) that define-app reads
-const GET_FIELDS = ["event"];
+// components of z2ui5_if_client=>get( ) that define-app reads - the rest is
+// handed to the app as it comes (c.get( )), these are named by the facade
+const GET_FIELDS = ["event", "r_event_data", "s_config", "s_draft"];
 const EMITTED_STATICS = ["INTERNAL_TYPE", "INTERNAL_NAME", "IMPLEMENTED_INTERFACES", "ATTRIBUTES", "METHODS"];
 const FRAMEWORK_FIELDS = ["Z2UI5_IF_APP~ID_DRAFT", "Z2UI5_IF_APP~ID_APP"];
 
@@ -190,6 +213,20 @@ test("the interface methods and parameters the plugin uses exist, by name", () =
   for (const m of BUILDER_INSTANCE) assert.equal(typeof VB.prototype[m], "function", `z2ui5_cl_ui5_view_builder->${m}`);
   const get = abap.Classes["Z2UI5_IF_CLIENT"].METHODS.GET.parameters.RESULT.type().get();
   for (const f of GET_FIELDS) assert.ok(f in get, `z2ui5_if_client=>get( )-${f}`);
+  assert.equal(get.r_event_data.constructor, abap.types.DataReference, "get( )-r_event_data is a data reference");
+  const ctrl = abap.Classes["Z2UI5_IF_CLIENT"].METHODS._EVENT.parameters.S_CTRL.type().get();
+  for (const f of EVENT_CONTROL) assert.ok(f in ctrl, `z2ui5_if_client=>ty_s_event_control-${f}`);
+});
+
+test("the constant structures the facade maps names through are readable, by name", () => {
+  const IF = abap.Classes["Z2UI5_IF_CLIENT"];
+  for (const [group, names] of Object.entries(CONSTANTS)) {
+    const box = IF[`z2ui5_if_client$${group}`];
+    assert.equal(typeof box?.get, "function", `z2ui5_if_client=>${group}`);
+    for (const n of names) {
+      assert.equal(typeof box.get()[n]?.get(), "string", `z2ui5_if_client=>${group}-${n}`);
+    }
+  }
 });
 
 test("the draft structures have the components draft-store reads and writes", () => {

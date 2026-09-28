@@ -147,3 +147,60 @@ test("a view built with ViewBuilder renders, keeps literal text literal, and ans
   await page.screenshot({ path: path.join(SHOTS, "builder.png") });
   assert.deepEqual(errors, [], "page errors");
 });
+
+test("the handler expressions work in the browser: event options, a front-end action, the back button", async () => {
+  const { page, errors } = await open("ZCL_JS_WIRES");
+  // a view prefixes its control ids (<view>--search), hence the suffix match
+  const search = page.locator("[id$='--search'] input").first();
+  await search.waitFor({ timeout: 60_000 });
+
+  // liveChange with queueLast: the wire runs, the argument is the typed value
+  await search.fill("ab");
+  await page.getByText("said: TYPED ab").waitFor({ timeout: 30_000 });
+
+  // argLiteral: the argument arrives as written, not evaluated as a binding
+  await page.getByRole("button", { name: "Literal" }).click();
+  await page.getByText("said: TAKE ${not a binding}").waitFor({ timeout: 30_000 });
+
+  // a front-end action wired into a button: no roundtrip, the focus moves
+  await page.locator("body").click({ position: { x: 5, y: 5 } });
+  await page.getByRole("button", { name: "Focus" }).click();
+  await page.waitForFunction(() => globalThis.document.activeElement?.closest("[id$='--search']") !== null, null,
+    { timeout: 30_000 });
+
+  // c.eventNavBack( ): the called app's back button leaves it
+  await page.getByRole("button", { name: "Call" }).click();
+  await page.getByText("press back").waitFor({ timeout: 30_000 });
+  await page.locator("[id$='-navButton']").first().click();
+  await page.getByText("said: TAKE ${not a binding}").waitFor({ timeout: 30_000 });
+  await page.screenshot({ path: path.join(SHOTS, "wires.png") });
+  assert.deepEqual(errors, [], "page errors");
+});
+
+test("a popover opens by the control it names and closes again", async () => {
+  const { page, errors } = await open("ZCL_JS_ACTIONS");
+  await page.getByRole("button", { name: "More" }).waitFor({ timeout: 60_000 });
+  await page.getByRole("button", { name: "More" }).click();
+  const popover = page.locator(".sapMPopover").filter({ hasText: "the popover" });
+  await popover.waitFor({ timeout: 30_000 });
+  await page.screenshot({ path: path.join(SHOTS, "popover.png") });
+  await popover.getByRole("button", { name: "Close" }).click();
+  await popover.waitFor({ state: "hidden", timeout: 30_000 });
+  assert.deepEqual(errors, [], "page errors");
+});
+
+test("bindings with options: a bare path in a composed binding, one table cell, a JSON node", async () => {
+  const { page, errors } = await open("ZCL_JS_BINDS");
+  await page.locator("[id$='--list']").getByText("second", { exact: true }).waitFor({ timeout: 60_000 });
+  await page.getByText("From JSON", { exact: true }).waitFor({ timeout: 10_000 });
+
+  // the cell input is row 2's title; an edit of it reaches the table
+  const cell = page.locator("[id$='--cell'] input");
+  assert.equal(await cell.inputValue(), "second");
+  await cell.fill("edited");
+  await cell.press("Tab");
+  await page.getByRole("button", { name: "Save" }).click();
+  await page.getByText("first,edited", { exact: true }).waitFor({ timeout: 30_000 });
+  await page.screenshot({ path: path.join(SHOTS, "binds.png") });
+  assert.deepEqual(errors, [], "page errors");
+});

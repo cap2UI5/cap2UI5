@@ -10,6 +10,37 @@ export interface NameValue {
 }
 
 /**
+ * A front-end action of z2ui5_if_client=>cs_event, by the name ABAP gives it.
+ * The list is the runtime's own; a name it does not have is refused.
+ */
+export type FrontendAction =
+  | "popup_close" | "popover_close" | "cross_app_nav_to_ext" | "cross_app_nav_to_prev_app"
+  | "set_size_limit" | "set_odata_model" | "clipboard_copy" | "set_title" | "set_title_launchpad"
+  | "set_favicon" | "set_focus" | "scroll_to" | "scroll_into_view" | "start_timer" | "system_logout"
+  | "keyboard_shortcut" | "open_new_tab" | "location_reload" | "download_b64_file" | "urlhelper"
+  | "store_data" | "play_audio" | "smart_variant_init" | "filter_bar_variant_init"
+  | "control_by_id" | "control_global" | "binding_call" | "bind_element"
+  | "hash_set" | "hash_replace" | "hash_back" | "hash_attach_changed" | "hash_routing"
+  | "app_state_set_active" | (string & {});
+
+/** A view slot of z2ui5_if_client=>cs_view. */
+export type ViewSlot = "main" | "nested" | "nested2" | "popup" | "popover";
+
+/** z2ui5_if_client=>ty_s_event_control: how the browser fires an event. */
+export interface EventControl {
+  /** cancel the control's default for this event (oEvent.preventDefault()) */
+  preventDefault?: boolean;
+  /** the same, decided per firing by a client expression; wins over preventDefault */
+  preventDefaultExpr?: string;
+  /** quote every argument, so none is evaluated as a binding or expression */
+  argLiteral?: boolean;
+  /** keep the LAST firing while a roundtrip runs, instead of dropping it - for liveChange */
+  queueLast?: boolean;
+  /** do not raise the global busy indicator for this wire */
+  noBusy?: boolean;
+}
+
+/**
  * The client an app's `main( )` receives. Queries answer synchronously;
  * commands are recorded and carried out in order after `main( )` returns.
  */
@@ -30,21 +61,54 @@ export interface Client<App = Record<string, unknown>> {
   readonly eventName: string;
   /** An argument the event carried, 1-based; the first 8 are available. */
   eventArg(i: number): string;
+  /**
+   * `client->get( )`: what the frontend sent with this roundtrip - the event,
+   * the draft ids (`s_draft`), the browser location (`s_config`), device, focus,
+   * scroll and UI5 information, the launchpad parameters - as plain values
+   * under the ABAP component names.
+   */
+  get(): Record<string, any>;
+  /** What a returning app handed over with `navBack( { data } )` (`get( )-r_event_data`); null if nothing. */
+  readonly eventData: any;
+  /** The absolute link to this app's current state (`app_state_get_href( )`). */
+  readonly appStateHref: string;
 
-  /** The binding path of one of the app's fields, for a view attribute. */
-  bind(field: Extract<keyof App, string>): string;
+  /**
+   * The binding of one of the app's fields, for a view attribute: `{/NAME}`,
+   * or with `path` the bare `/NAME` a composed binding needs. `row` and
+   * `column` bind one cell of a table field; `omitInitial`, `omitInitialPaths`
+   * and `json` are `_bind( )`'s options. With any of those five it is a
+   * placeholder until `main( )` returns - embed it as it is.
+   */
+  bind(field: Extract<keyof App, string>, options?: {
+    path?: boolean;
+    row?: number;
+    column?: string;
+    omitInitial?: boolean;
+    omitInitialPaths?: string[];
+    json?: boolean;
+  }): string;
   /**
    * The press/change handler for an event, for a view attribute. `args` come
    * back as `eventArg(1..n)`. Embed the result as it is: it is a placeholder
    * that is replaced after `main( )` returns.
    */
-  event(name: string, args?: unknown[]): string;
+  event(name: string, args?: unknown[], control?: EventControl): string;
+  /** The handler that leaves this app - a Page's navButtonPress (`_event_nav_app_leave( )`). */
+  eventNavBack(): string;
+  /** A front-end action as a handler: it runs in the browser when the control fires, no roundtrip. */
+  eventFollowUpAction(action: FrontendAction, args?: unknown[], options?: { view?: ViewSlot }): string;
 
   /** Show a view: XML text, or a ViewBuilder chain (any node of it). */
   view(xml: string | ViewBuilder): void;
+  /** Destroy the main view (`view_destroy( )`). */
+  viewClose(): void;
   /** Show a popup over the view: XML text, or a ViewBuilder chain. */
   popup(xml: string | ViewBuilder): void;
   popupClose(): void;
+  /** Open a popover anchored to the control with the id `byId`. */
+  popover(xml: string | ViewBuilder, byId: string): void;
+  popoverClose(): void;
   /**
    * Render a fragment into a control of the main view, which stays as it is.
    * `insert`/`clear` are the UI5 mutators of the receiving aggregation
@@ -52,13 +116,40 @@ export interface Client<App = Record<string, unknown>> {
    */
   nest(into: string, xml: string | ViewBuilder, options?: { insert?: string; clear?: string }): void;
   nestClose(): void;
-  messageBox(text: string): void;
-  messageToast(text: string): void;
+  /** The second nested slot, for a second control of the main view. */
+  nest2(into: string, xml: string | ViewBuilder, options?: { insert?: string; clear?: string }): void;
+  nest2Close(): void;
+  /** A message box. `text` may be data - an object, an array - laid out as for an ABAP structure or table. */
+  messageBox(text: unknown, options?: {
+    type?: string;
+    title?: string;
+    styleClass?: string;
+    onClose?: string;
+    actions?: string[];
+    emphasizedAction?: string;
+    initialFocus?: string;
+    details?: string;
+  }): void;
+  messageToast(text: string, options?: { duration?: string | number; onClose?: string }): void;
+  /** A front-end action the browser runs when this roundtrip's answer lands (`follow_up_action( )`). */
+  followUpAction(action: FrontendAction, args?: unknown[], options?: { view?: ViewSlot }): void;
 
-  /** Show another app on top of this one: its registered name, its class, or an instance. */
-  navTo(app: string | AppConstructor | object): void;
-  /** Hand the screen back to the caller. Guard with `canGoBack`. */
+  /**
+   * Show another app on top of this one: its registered name, its class, or an
+   * instance. `fields` preset a defineApp app's fields before it runs.
+   */
+  navTo(app: string | AppConstructor | object, fields?: Record<string, unknown>): void;
+  /**
+   * Hand the screen back to the caller. Guard with `canGoBack`. `event` is what
+   * the caller finds in `eventName`, `data` what it finds in `eventData`.
+   */
   navBack(options?: { app?: string | AppConstructor | object; event?: string; data?: unknown }): void;
+  /** Push a hash onto the browser history (`hash_set( )`). */
+  hashSet(hash: string): void;
+  /** Rewrite the hash without a history entry (`hash_replace( )`). */
+  hashReplace(hash: string): void;
+  /** Keep this app's state id in the URL (`app_state_set_active( )`). */
+  appStateSetActive(on?: boolean): void;
 
   /** The framework's own z2ui5_if_client, transpiled - asynchronous, for what the facade does not cover. */
   readonly raw: unknown;

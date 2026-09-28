@@ -33,6 +33,10 @@ The plugin now follows the conventions of the plugins at
 - `express` is declared with CAP's own range, `^4.22.1 || ^5`.
 - The runtime resolves as the plugin's own dependency, at the pinned version.
   Use npm `overrides` to load another version.
+- `c.navBack({ data })` hands the data over typed - a structure, a table, a
+  scalar - instead of as a JSON string. An ABAP caller can `ASSIGN` it; a
+  JavaScript caller reads it as `c.eventData`, object keys lowercase, as ABAP
+  names components.
 
 ### Added
 
@@ -43,6 +47,28 @@ The plugin now follows the conventions of the plugins at
   text.
 - `cds.requires.cap2ui5: false` switches the plugin off: no route, and no
   table in the model.
+- The facade covers what apps use of `z2ui5_if_client` - measured against
+  the 129 apps of abap2UI5's samples, where it covered 39 before. Each member
+  maps to one method of the interface:
+  - handlers: `c.eventNavBack()` (`_event_nav_app_leave( )`, a Page's back
+    button with no branch in `main( )`), `c.eventFollowUpAction(action, args,
+    { view })` (a front-end action wired into a control, no roundtrip), and
+    `c.event(name, args, control)` with the options of `ty_s_event_control`:
+    `preventDefault`, `preventDefaultExpr`, `argLiteral`, `queueLast`, `noBusy`.
+  - `c.followUpAction(action, args, { view })`: the front-end actions of
+    `cs_event` by name - `set_focus`, `open_new_tab`, `control_by_id`, … A name
+    the runtime does not have is refused with the list.
+  - `c.popover(xml, byId)` / `c.popoverClose()`, `c.nest2(…)` /
+    `c.nest2Close()`, `c.viewClose()`.
+  - `c.messageBox(text, options)` and `c.messageToast(text, options)` take the
+    methods' options. A message box's text may be data - an object, an array -
+    laid out as for an ABAP structure or table.
+  - `c.bind(field, options)`: `path` for a bare path, `row` and `column` for
+    one cell of a table, `omitInitial`, `omitInitialPaths`, `json`.
+  - `c.get()` (`client->get( )` as plain values), `c.eventData` (what a
+    returning app handed over), `c.appStateHref`.
+  - `c.navTo(app, fields)` presets a defineApp app's fields before it runs;
+    `c.hashSet(hash)`, `c.hashReplace(hash)`, `c.appStateSetActive()`.
 - TypeScript declarations (`index.d.ts`).
 - `cds add cap2ui5` creates a first app in `srv/apps/`.
 - In development, CAP's start page lists the apps under "Web Applications".

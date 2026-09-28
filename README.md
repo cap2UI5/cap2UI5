@@ -83,11 +83,18 @@ Only in development; a production profile prints neither. The full example is
 
 | | |
 |---|---|
-| lifecycle | `c.isFirstRun` (seed once), `c.isDisplay` (render), `c.canGoBack`, `c.eventName`, `c.eventArg(i)`, `c.prevApp` |
-| binding | `c.bind(field)`, `c.event(name, [args])` |
-| screen | `c.view(xml)`, `c.popup(xml)` / `c.popupClose()`, `c.nest(into, xml, {insert, clear})` / `c.nestClose()`, `c.messageBox(text)`, `c.messageToast(text)` |
-| navigation | `c.navTo(app)`, `c.navBack({event, data, app})` |
+| lifecycle | `c.isFirstRun` (seed once), `c.isDisplay` (render), `c.canGoBack`, `c.eventName`, `c.eventArg(i)`, `c.prevApp`, `c.eventData`, `c.get()` (`client->get( )`), `c.appStateHref` |
+| binding | `c.bind(field, {path, row, column, omitInitial, omitInitialPaths, json})` |
+| handlers | `c.event(name, [args], {preventDefault, argLiteral, queueLast, noBusy, …})`, `c.eventNavBack()`, `c.eventFollowUpAction(action, [args], {view})` |
+| screen | `c.view(xml)` / `c.viewClose()`, `c.popup(xml)` / `c.popupClose()`, `c.popover(xml, byId)` / `c.popoverClose()`, `c.nest(into, xml, {insert, clear})` / `c.nestClose()`, `c.nest2(…)` / `c.nest2Close()`, `c.messageBox(text, {type, title, actions, …})`, `c.messageToast(text, {duration})`, `c.followUpAction(action, [args], {view})` |
+| navigation | `c.navTo(app, fields)`, `c.navBack({event, data, app})`, `c.hashSet(hash)`, `c.hashReplace(hash)`, `c.appStateSetActive()` |
 | escape hatch | `c.raw` — the transpiled `z2ui5_if_client`, async |
+
+A front-end action (`followUpAction`, `eventFollowUpAction`) is named as
+`z2ui5_if_client=>cs_event` names it - `set_focus`, `open_new_tab`,
+`control_by_id`, … - and refused if the runtime has no such action. Every
+facade member maps to one `z2ui5_if_client` method; which one is in
+`plugin/index.d.ts`.
 
 **The user exit** — the CSP, the security headers, the UI5 bootstrap URL, the
 theme, the draft expiry, the CSRF gate — is `defineExit({ onPage, onRoundtrip })`,

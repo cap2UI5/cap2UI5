@@ -239,6 +239,135 @@ function readState(instance) {
 const abapName = (f) => f.toUpperCase().replace(/\$/g, "~");
 const isFrameworkField = (f) => f.includes("$");
 
+// ------------------------------------------------ what the framework hands over
+/** Any ABAP value as plain JavaScript, for what the app reads from the
+ *  framework without a field of its own to type it by - c.get( ) and
+ *  c.eventData: a structure as an object under the lowercase component names
+ *  the transpiler uses, a table as an array, abap_bool as a boolean, a data
+ *  reference as what it points to, a CHAR without its padding. */
+function toPlain(v) {
+  if (v === null || v === undefined) return null;
+  if (v instanceof abap.types.DataReference) {
+    const p = v.getPointer();
+    return p ? toPlain(p) : null;
+  }
+  if (v instanceof abap.types.ABAPObject) return v.get() ?? null;
+  if (v instanceof abap.types.Structure) {
+    return Object.fromEntries(Object.entries(v.get()).map(([k, c]) => [k, toPlain(c)]));
+  }
+  if (typeof v.array === "function") return v.array().map(toPlain);
+  if (v instanceof abap.types.Character) {
+    return v.getQualifiedName?.() === "ABAP_BOOL" ? v.get() === "X" : String(v.get()).trimEnd();
+  }
+  return typeof v.get === "function" ? v.get() : v;
+}
+
+/** A plain value as a box of its own shape, for what the app hands the
+ *  framework WITHOUT a field to hold it: navBack( { data } ), and a message
+ *  box's text when that is data rather than a string. The receiver gets it
+ *  typed - an ABAP app a structure it can ASSIGN, a JavaScript app, through
+ *  toPlain( ), the object again, its keys lowercase as ABAP names components. */
+function boxOf(value, who) {
+  if (isBoxed(value)) return value;
+  const shape = shapeOf(value, [who]);
+  if (!shape) {
+    throw new Error(`${who}: ${JSON.stringify(value)} has no ABAP type - null, undefined and an empty array carry none.`);
+  }
+  const box = shape.make();
+  wrap(box, value, shape);
+  return box;
+}
+
+/** z2ui5_if_client's front-end actions (cs_event) and view slots (cs_view) as
+ *  { name: value }. Read from the runtime rather than copied: they are
+ *  upstream's, and an action upstream adds is one the facade knows. */
+let CONSTANTS;
+function constants() {
+  if (!CONSTANTS) {
+    const IF = abap.Classes["Z2UI5_IF_CLIENT"];
+    const read = (n) => Object.fromEntries(
+      Object.entries(IF[`z2ui5_if_client$${n}`].get()).map(([k, v]) => [k, String(v.get())]));
+    CONSTANTS = { cs_event: read("cs_event"), cs_view: read("cs_view") };
+  }
+  return CONSTANTS;
+}
+/** A constant by the name ABAP gives it (`set_title`, `popup`) or by its
+ *  value (`SET_TITLE`, `POPUP`). The two differ for some - cs_event-hash_set
+ *  is `SET_PUSH_STATE` - so a name is what the facade documents; anything
+ *  else is refused with the list, since a wrong one would reach the browser
+ *  as an action nobody handles. */
+function constant(group, value, who) {
+  const map = constants()[group];
+  const s = String(value ?? "");
+  if (Object.hasOwn(map, s.toLowerCase())) return map[s.toLowerCase()];
+  if (Object.values(map).includes(s.toUpperCase())) return s.toUpperCase();
+  throw new Error(`${who}: "${s}" is not in z2ui5_if_client=>${group} - known: ${Object.keys(map).join(", ")}`);
+}
+
+/** A facade option object as the ABAP parameters it stands for. An unknown
+ *  option is refused: silently ignored, a typo would look like a feature
+ *  that does not work. */
+function optionsOf(opts, names, who) {
+  if (opts !== undefined && opts !== null && (typeof opts !== "object" || Array.isArray(opts))) {
+    throw new Error(`${who}: the options are an object - ${Object.keys(names).join(", ")}`);
+  }
+  const out = {};
+  for (const [k, v] of Object.entries(opts ?? {})) {
+    if (!Object.hasOwn(names, k)) {
+      throw new Error(`${who}: unknown option "${k}" - known: ${Object.keys(names).join(", ")}`);
+    }
+    if (v !== undefined && v !== null) out[names[k]] = v;
+  }
+  return out;
+}
+/** z2ui5_if_client=>ty_s_event_control, for c.event( )'s third argument */
+const EVENT_CONTROL = {
+  preventDefault: "check_prevent_default",
+  preventDefaultExpr: "prevent_default_expr",
+  argLiteral: "check_arg_literal",
+  queueLast: "check_queue_last",
+  noBusy: "check_no_busy",
+};
+/** message_box_display( )'s options */
+const MESSAGE_BOX = {
+  type: "type",
+  title: "title",
+  styleClass: "styleclass",
+  onClose: "onclose",
+  actions: "actions",
+  emphasizedAction: "emphasizedaction",
+  initialFocus: "initialfocus",
+  details: "details",
+};
+/** message_toast_display( )'s options */
+const MESSAGE_TOAST = { duration: "duration", onClose: "onclose" };
+/** _bind( )'s options, and row/column for a table cell (tab, tab_index) */
+const BIND = {
+  path: "path",
+  omitInitial: "omit_initial",
+  omitInitialPaths: "omit_initial_paths",
+  json: "json",
+  row: "row",
+  column: "column",
+};
+/** follow_up_action( )'s option besides the action and its arguments */
+const ACTION = { view: "view" };
+
+/** a string_table argument, as the app hands it over: an array */
+function stringList(list, who) {
+  if (!Array.isArray(list)) throw new Error(`${who}: expects an array, got ${typeof list}`);
+  return list.map(String);
+}
+/** follow_up_action( )'s parameters, for both of its forms */
+function actionOf(action, args, opts, who) {
+  const o = optionsOf(opts, ACTION, who);
+  return {
+    val: constant("cs_event", action, who),
+    args: stringList(args, who),
+    view: o.view === undefined ? undefined : constant("cs_view", o.view, who),
+  };
+}
+
 // --------------------------------------------------------------------- the wrap
 /** The names defineApp( ) registered, in the order it saw them - what the
  *  startup hints list (lib/hints.js). */
@@ -323,7 +452,11 @@ function defineApp(name, cls, opts = {}) {
       const isFirstRun = await truthy(c.z2ui5_if_client$check_on_init({ result: 1 }));
       const isDisplay = await truthy(c.z2ui5_if_client$check_on_navigated({ result: 1 }));
       const canGoBack = await truthy(c.z2ui5_if_client$check_app_prev_stack({ result: 1 }));
-      const eventName = String((await c.z2ui5_if_client$get({ result: 1 })).get().event.get()).trim();
+      // client->get( ): everything the frontend sent with this roundtrip. The
+      // event name is read from it here; the rest is converted only if the
+      // app asks - c.get( ), c.eventData - since most roundtrips never do.
+      const got = await c.z2ui5_if_client$get({ result: 1 });
+      const eventName = String(got.get().event.get()).trim();
       // Event arguments are indexed and the app picks by index, which a
       // synchronous facade cannot resolve on demand - so the first ARG_LIMIT
       // are fetched up front. The framework's own wires never pass more; an app
@@ -345,17 +478,37 @@ function defineApp(name, cls, opts = {}) {
         if (isFrameworkField(f)) continue;
         paths[f] = (await c.z2ui5_if_client$_bind({ val: this[f], result: 1 })).get();
       }
+      // app_state_get_href( ): composed from the browser's location and this
+      // roundtrip's draft id, no side effect - so it can be answered up front,
+      // which an app needs because it writes the link into a bound field.
+      const appStateHref = String((await c.z2ui5_if_client$app_state_get_href({ result: 1 })).get());
 
       // ---- the synchronous surface the app sees ----------------------------
       // XML-inert and JSON-safe: [A-Za-z0-9_] only. The nonce is per roundtrip
       // so a token cannot collide with text the app put there itself; the
       // closing "_" keeps _1_ from matching inside _10_.
+      //
+      // A placeholder stands for anything whose value only an async framework
+      // call can produce: an event wire (c.event, c.eventNavBack,
+      // c.eventFollowUpAction) and a binding the framework has to register
+      // with options (c.bind with omitInitial, json, a table cell). One per
+      // distinct call; resolved after main( ) in the order they were made, so
+      // a placeholder inside another one's arguments is resolved first.
       const TOK_PREFIX = `z2ui5evt_${crypto.randomBytes(6).toString("hex")}_`;
       const TOK_RE = new RegExp(`${TOK_PREFIX}(\\d+)_`, "g");
       const TOK_LEFT = new RegExp(TOK_PREFIX, "i"); // what survives a cut or a case change
-      const events = [];                      // token number -> { name, args }
-      const eventTokens = new Map();          // JSON [name, args] -> token, one per distinct event
+      const placeholders = [];                // token number -> what it stands for
+      const tokens = new Map();               // JSON of that -> token, one per distinct call
+      const placeholder = (spec) => {
+        const key = JSON.stringify(spec);
+        if (!tokens.has(key)) {
+          placeholders.push(spec);
+          tokens.set(key, `${TOK_PREFIX}${placeholders.length - 1}_`);
+        }
+        return tokens.get(key);
+      };
       const queue = [];
+      let plainGet;                            // client->get( ), converted on first use
       const facade = {
         // -- lifecycle (see the comment above; they are not the same question)
         isFirstRun,
@@ -372,35 +525,98 @@ function defineApp(name, cls, opts = {}) {
           }
           return eventArgs[i - 1];
         },
+        /** client->get( ): what the frontend sent with this roundtrip - the
+         *  browser location (s_config), the device, focus, scroll and UI5
+         *  information, the draft ids, the launchpad parameters - as plain
+         *  values under the ABAP component names. */
+        get() {
+          return (plainGet ??= toPlain(got));
+        },
+        /** What a returning app handed over with navBack( { data } ) - get(
+         *  )-r_event_data, as plain values; null when nothing was. */
+        get eventData() {
+          return facade.get().r_event_data;
+        },
+        appStateHref,                            // the absolute link to this app's current state
 
         // -- binding and events
-        bind(field) {
+        /** The binding for a field: `{/NAME}`, or with `{ path: true }` the
+         *  bare path `/NAME` a composed binding needs. `row` and `column`
+         *  address one cell of a table field (tab, tab_index); `omitInitial`,
+         *  `omitInitialPaths` and `json` are _bind( )'s options of those names.
+         *  A binding with options is registered by the framework after main( ),
+         *  so it comes back as a placeholder - embed it, like c.event( ). */
+        bind(field, opts) {
           if (!(field in paths)) {
             throw new Error(
               `c.bind("${field}"): not a bindable field of this app — ` +
                 `known: ${Object.keys(paths).join(", ") || "(none)"}`,
             );
           }
-          return paths[field];
+          const who = `c.bind("${field}")`;
+          const o = optionsOf(opts, BIND, who);
+          const cell = o.row !== undefined || o.column !== undefined;
+          if (cell) {
+            const shape = shapes[field];
+            if (shape.k !== "table") {
+              throw new Error(`${who}: row and column address a cell of a TABLE field, and ${field} is not one`);
+            }
+            if (!Number.isInteger(o.row) || o.row < 1) {
+              throw new Error(`${who}: row is the 1-based row number, as tab_index is - got ${o.row}`);
+            }
+            if (!Object.hasOwn(shape.fields, o.column)) {
+              throw new Error(`${who}: "${o.column}" is not a column of ${field} - known: ${Object.keys(shape.fields).join(", ")}`);
+            }
+          }
+          if (cell || o.omit_initial || o.omit_initial_paths || o.json) {
+            return placeholder({
+              kind: "bind", field, path: Boolean(o.path), row: o.row, column: o.column,
+              omitInitial: Boolean(o.omit_initial), json: Boolean(o.json),
+              omitInitialPaths: o.omit_initial_paths && stringList(o.omit_initial_paths, `${who} omitInitialPaths`),
+            });
+          }
+          // path_only is the same binding without its braces (finalize_path)
+          return o.path ? paths[field].slice(1, -1) : paths[field];
         },
         /** The wire string for an event. `args` travel with it and come back
          *  as c.eventArg(1..n) - which is how two buttons can fire ONE event
          *  and still be told apart. Without them the handler cannot know which
-         *  control fired: the browser sends only what the wire carries. */
-        event(n, args = []) {
-          const ev = { name: String(n), args: args.map(String) };
-          const key = JSON.stringify([ev.name, ev.args]);
-          if (!eventTokens.has(key)) {
-            events.push(ev);
-            eventTokens.set(key, `${TOK_PREFIX}${events.length - 1}_`);
-          }
-          return eventTokens.get(key);
+         *  control fired: the browser sends only what the wire carries.
+         *  `ctrl` is z2ui5_if_client=>ty_s_event_control: preventDefault,
+         *  preventDefaultExpr, argLiteral, queueLast, noBusy. */
+        event(n, args = [], ctrl) {
+          const who = `c.event("${n}")`;
+          return placeholder({ kind: "event", name: String(n), args: stringList(args, who),
+            ctrl: optionsOf(ctrl, EVENT_CONTROL, who) });
+        },
+        /** The handler expression that LEAVES this app - a Page's
+         *  navButtonPress, a Cancel button: the previous app takes the screen
+         *  back and main( ) needs no branch for it (_event_nav_app_leave). */
+        eventNavBack() {
+          return placeholder({ kind: "navBack" });
+        },
+        /** A front-end action as a handler expression: it runs in the browser
+         *  when the control fires, with no roundtrip - follow_up_action( ) in a
+         *  view attribute. `action` names a z2ui5_if_client=>cs_event. */
+        eventFollowUpAction(action, args = [], opts) {
+          const who = `c.eventFollowUpAction("${action}")`;
+          return placeholder({ kind: "action", ...actionOf(action, args, opts, who) });
         },
 
         // -- what to put on the screen (recorded, replayed in order after main)
         view(xml) { queue.push(["view", xml]); },
+        viewClose() { queue.push(["view_destroy"]); },
         popup(xml) { queue.push(["popup", xml]); },
         popupClose() { queue.push(["popup_destroy"]); },
+        /** A popover anchored to the control with the id `byId` - the usual
+         *  shape for a menu, a quick view, a confirmation next to its button. */
+        popover(xml, byId) {
+          if (byId === undefined || byId === null || byId === "") {
+            throw new Error("c.popover(xml, byId): byId is the id of the control the popover opens by");
+          }
+          queue.push(["popover", xml, String(byId)]);
+        },
+        popoverClose() { queue.push(["popover_destroy"]); },
         /** A fragment rendered INTO a control of the main view, which stays as
          *  it is - only the fragment re-renders on the next call. It shares the
          *  main view's model, so bind( ) and event( ) work in it as anywhere.
@@ -414,15 +630,45 @@ function defineApp(name, cls, opts = {}) {
         /** There is ONE nested slot and nest_view_destroy( ) takes no argument:
          *  it clears that slot, not a named one. */
         nestClose() { queue.push(["nest_destroy"]); },
-        messageBox(text) { queue.push(["box", text]); },
-        messageToast(text) { queue.push(["toast", text]); },
+        /** The second nested slot, for a second control of the main view -
+         *  the detail column of a FlexibleColumnLayout beside nest( )'s. */
+        nest2(into, xml, { insert = "addContent", clear = "removeAllContent" } = {}) {
+          queue.push(["nest2", xml, { id: String(into), insert, clear }]);
+        },
+        nest2Close() { queue.push(["nest2_destroy"]); },
+        /** `text` is a string, or data - an object, an array - which the
+         *  framework lays out as it does for an ABAP structure or table.
+         *  `opts`: type, title, styleClass, onClose, actions, emphasizedAction,
+         *  initialFocus, details - message_box_display( )'s parameters. */
+        messageBox(text, opts) { queue.push(["box", text, optionsOf(opts, MESSAGE_BOX, "c.messageBox( )")]); },
+        /** `opts`: duration, onClose */
+        messageToast(text, opts) { queue.push(["toast", text, optionsOf(opts, MESSAGE_TOAST, "c.messageToast( )")]); },
+        /** A front-end action the browser runs once this roundtrip's answer
+         *  lands - set the focus, scroll, open a URL, copy to the clipboard,
+         *  call a control method by id. `action` names a
+         *  z2ui5_if_client=>cs_event (`set_focus`, `open_new_tab`, …), `args`
+         *  are its positional arguments, `{ view }` the slot whose control ids
+         *  are meant (cs_view: main, popup, popover, nested, nested2). */
+        followUpAction(action, args = [], opts) {
+          queue.push(["follow_up", actionOf(action, args, opts, `c.followUpAction("${action}")`)]);
+        },
 
         // -- navigation. Both are scheduled for the end of the roundtrip by the
         //    framework, so they are usually the last thing a branch does.
-        /** Show another app on top of this one; it comes back through navBack( ). */
-        navTo(app) { queue.push(["nav_call", app]); },
-        /** Hand the screen back to whoever called this app. Guard with canGoBack. */
+        /** Show another app on top of this one; it comes back through navBack( ).
+         *  `fields` preset the called app's fields, when it is a defineApp app
+         *  named here - what an ABAP app does between NEW and nav_app_call( ). */
+        navTo(app, fields) { queue.push(["nav_call", app, fields]); },
+        /** Hand the screen back to whoever called this app. Guard with canGoBack.
+         *  `event` is what the caller finds in c.eventName, `data` what it
+         *  finds in c.eventData - typed, so an ABAP caller can read it too. */
         navBack(opts) { queue.push(["nav_leave", opts ?? {}]); },
+        /** the URL hash: set pushes a history entry, replace does not */
+        hashSet(hash) { queue.push(["hash_set", String(hash ?? "")]); },
+        hashReplace(hash) { queue.push(["hash_replace", String(hash ?? "")]); },
+        /** keep this app's state id in the URL, so a reload or a shared link
+         *  restores it (app_state_set_active) */
+        appStateSetActive(on = true) { queue.push(["app_state", Boolean(on)]); },
 
         raw: c,                                  // escape hatch, still async
       };
@@ -473,46 +719,97 @@ function defineApp(name, cls, opts = {}) {
       });
       await userMain.call(plain, facade);        // await: an async main still works
 
-      // ---- flush: resolve the event tokens, then replay the commands -------
-      const wire = [];
-      for (const { name, args } of events) {
-        const input = { val: S(name), result: 1 };
-        if (args.length) {
-          const t = abap.types.TableFactory.construct(
-            new abap.types.String({ qualifiedName: "STRING" }), STANDARD_TABLE, "");
-          for (const a of args) t.append(new abap.types.String().set(a));
-          input.t_arg = t;
-        }
-        wire.push((await c.z2ui5_if_client$_event(input)).get());
-      }
+      // ---- flush: resolve the placeholders, then replay the commands -------
+      const B = (v) => new abap.types.Character(1, { qualifiedName: "ABAP_BOOL" }).set(v ? "X" : " ");
+      const stringTable = (list) => {
+        const tab = abap.types.TableFactory.construct(
+          new abap.types.String({ qualifiedName: "STRING" }), STANDARD_TABLE, "");
+        for (const a of list) tab.append(new abap.types.String().set(a));
+        return tab;
+      };
       // In markup the placeholder is an attribute value, so the wire string
       // that replaces it is escaped as one - what upstream's view builder does
       // with _event( )'s result (z2ui5_cl_ui5_view_builder=>xml_escape). An
       // event argument with a quote in it would otherwise end the attribute.
       const XML_ESC = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "\n": "&#xA;", "\r": "&#xD;", "\t": "&#x9;" };
       const xmlEscape = (v) => String(v).replace(/[&<>"\n\r\t]/g, (ch) => XML_ESC[ch]);
+      const values = [];                       // token number -> what the framework answered
       const subst = (s, { xml = false } = {}) => {
         const out = String(s).replace(TOK_RE, (tok, i) =>
-          wire[i] === undefined ? tok : xml ? xmlEscape(wire[i]) : String(wire[i]));
-        // What is left is a placeholder the app changed after c.event( )
+          values[i] === undefined ? tok : xml ? xmlEscape(values[i]) : String(values[i]));
+        // What is left is a placeholder the app changed after the facade
         // returned it - cut, re-encoded, case-changed. Shipping it would send
-        // the browser a press handler that does nothing, so refuse.
+        // the browser a handler that does nothing, so refuse.
         const at = out.search(TOK_LEFT);
         if (at >= 0) {
           throw new Error(
             `c.event( ): a placeholder it returned reached the view altered, so it cannot ` +
               `be replaced by the event's wire string: "${out.slice(at, at + TOK_PREFIX.length + 12)}…". ` +
-              `Embed c.event( )'s result in the markup as it is; do not parse, cut or re-encode it.`,
+              `Embed what c.event( ), c.eventNavBack( ), c.eventFollowUpAction( ) and a c.bind( ) ` +
+              `with options return in the markup as it is; do not parse, cut or re-encode it.`,
           );
         }
         return out;
       };
+      const actionInput = (a, extra = {}) => {
+        const input = { val: S(a.val), ...extra };
+        if (a.args.length) input.t_arg = stringTable(a.args.map((x) => subst(x)));
+        if (a.view !== undefined) input.view = S(a.view);
+        return input;
+      };
+      /** z2ui5_if_client=>ty_s_event_control, built from the interface's own
+       *  parameter type so its components are upstream's */
+      const eventControl = (ctrl) => {
+        const s = abap.Classes["Z2UI5_IF_CLIENT"].METHODS._EVENT.parameters.S_CTRL.type();
+        for (const [k, v] of Object.entries(ctrl)) {
+          s.get()[k].set(k === "prevent_default_expr" ? subst(v) : v ? "X" : " ");
+        }
+        return s;
+      };
+      /** _bind( ) with its options. A cell is the component box of that row
+       *  of the table: bind_tab_cell( ) finds it by reference. */
+      const bindWith = async (p) => {
+        const input = { val: this[p.field], result: 1 };
+        if (p.row !== undefined) {
+          const table = this[p.field];
+          const row = table.array()[p.row - 1];
+          if (!row) {
+            throw new Error(`c.bind("${p.field}", { row: ${p.row} }): the table has ${table.array().length} row(s)`);
+          }
+          input.val = row.get()[shapes[p.field].fields[p.column].key];
+          input.tab = table;
+          input.tab_index = new abap.types.Integer().set(p.row);
+        }
+        if (p.path) input.path = B(true);
+        if (p.omitInitial) input.omit_initial = B(true);
+        if (p.omitInitialPaths) input.omit_initial_paths = stringTable(p.omitInitialPaths.map((x) => x.toUpperCase()));
+        if (p.json) input.json = B(true);
+        return (await c.z2ui5_if_client$_bind(input)).get();
+      };
+      // In the order the app made them: a placeholder in another one's
+      // arguments was made before it, so it is resolved first.
+      for (const [i, p] of placeholders.entries()) {
+        if (p.kind === "event") {
+          const input = { val: S(p.name), result: 1 };
+          if (p.args.length) input.t_arg = stringTable(p.args.map((x) => subst(x)));
+          if (Object.keys(p.ctrl).length) input.s_ctrl = eventControl(p.ctrl);
+          values[i] = (await c.z2ui5_if_client$_event(input)).get();
+        } else if (p.kind === "navBack") {
+          values[i] = (await c.z2ui5_if_client$_event_nav_app_leave({ result: 1 })).get();
+        } else if (p.kind === "action") {
+          // result supplied: follow_up_action( ) answers the wire instead of queueing
+          values[i] = (await c.z2ui5_if_client$follow_up_action(actionInput(p, { result: 1 }))).get();
+        } else if (p.kind === "bind") {
+          values[i] = await bindWith(p);
+        }
+      }
+
       /** nav_app_call( ) wants a BOUND z2ui5_if_app instance. The app may hand
        *  over a registered name, a defineApp class, or an instance it built
        *  itself; an unbound reference raises NAV_APP_TARGET_NOT_BOUND, so a
        *  name that resolves to nothing is refused here, where the app can see
        *  which name it was. */
-      const appRef = async (app) => {
+      const appRef = async (app, fields) => {
         let instance = app;
         if (typeof app === "string" || typeof app === "function") {
           const Cls = typeof app === "function" ? app : abap.Classes[app.toUpperCase()];
@@ -524,36 +821,74 @@ function defineApp(name, cls, opts = {}) {
           }
           instance = await new Cls().constructor_();
         }
+        if (fields !== undefined) presetFields(instance, fields);
         const ref = new abap.types.ABAPObject({ qualifiedName: "Z2UI5_IF_APP" });
         ref.set(instance);
         return ref;
       };
+      /** The fields navTo( ) presets, written through the called app's own
+       *  shapes after its constructor_( ) - so they win over its initializers. */
+      const presetFields = (instance, fields) => {
+        const name = instance?.constructor?.INTERNAL_NAME ?? "the app";
+        const own = instance?.__shapes;
+        if (!own) {
+          throw new Error(`c.navTo(${name}, fields): only a defineApp app's fields can be preset, and ${name} is not one`);
+        }
+        for (const [k, v] of Object.entries(fields)) {
+          if (!Object.hasOwn(own, k) || isFrameworkField(k)) {
+            throw new Error(`c.navTo(${name}, fields): ${k} is not a field of ${name} - known: ` +
+              `${Object.keys(own).filter((f) => !isFrameworkField(f)).join(", ")}`);
+          }
+          wrap(instance[k], v, own[k]);
+        }
+      };
+      /** A message box's text: a string, or data the framework lays out */
+      const boxText = (text) => {
+        if (text instanceof Error) return S(text.message);
+        if (text !== null && typeof text === "object") return boxOf(text, "c.messageBox( )");
+        return S(subst(text));
+      };
+      const optionInput = (o, lists = []) => Object.fromEntries(Object.entries(o).map(([k, v]) =>
+        [k, lists.includes(k) ? stringTable(stringList(v, k).map((x) => subst(x))) : S(subst(v))]));
 
       /** A view is XML text or a ViewBuilder chain (lib/view-builder.js),
        *  which upstream's z2ui5_cl_ui5_view_builder renders here, after main( ).
-       *  Its escaping leaves the event placeholders alone - [A-Za-z0-9_] -
-       *  so subst( ) finds them in the rendered XML as in hand-written text. */
+       *  Its escaping leaves the placeholders alone - [A-Za-z0-9_] - so
+       *  subst( ) finds them in the rendered XML as in hand-written text. */
       const xmlOf = async (v) => subst(isBuilder(v) ? await render(v) : v, { xml: true });
-      for (const [kind, arg, id] of queue) {
+      const nestInput = async (xml, at) => ({
+        val: S(await xmlOf(xml)), id: S(at.id), method_insert: S(at.insert), method_destroy: S(at.clear),
+      });
+      for (const [kind, arg, extra] of queue) {
         if (kind === "view") await c.z2ui5_if_client$view_display({ val: S(await xmlOf(arg)) });
+        else if (kind === "view_destroy") await c.z2ui5_if_client$view_destroy();
         else if (kind === "popup") await c.z2ui5_if_client$popup_display({ val: S(await xmlOf(arg)) });
         else if (kind === "popup_destroy") await c.z2ui5_if_client$popup_destroy();
-        else if (kind === "nest") {
-          await c.z2ui5_if_client$nest_view_display({
-            val: S(await xmlOf(arg)), id: S(id.id),
-            method_insert: S(id.insert), method_destroy: S(id.clear),
-          });
-        } else if (kind === "nest_destroy") await c.z2ui5_if_client$nest_view_destroy();
-        else if (kind === "box") await c.z2ui5_if_client$message_box_display({ text: S(subst(arg)) });
-        else if (kind === "toast") await c.z2ui5_if_client$message_toast_display({ text: S(subst(arg)) });
+        else if (kind === "popover") {
+          await c.z2ui5_if_client$popover_display({ xml: S(await xmlOf(arg)), by_id: S(extra) });
+        } else if (kind === "popover_destroy") await c.z2ui5_if_client$popover_destroy();
+        else if (kind === "nest") await c.z2ui5_if_client$nest_view_display(await nestInput(arg, extra));
+        else if (kind === "nest_destroy") await c.z2ui5_if_client$nest_view_destroy();
+        else if (kind === "nest2") await c.z2ui5_if_client$nest2_view_display(await nestInput(arg, extra));
+        else if (kind === "nest2_destroy") await c.z2ui5_if_client$nest2_view_destroy();
+        else if (kind === "box") {
+          await c.z2ui5_if_client$message_box_display({ text: boxText(arg), ...optionInput(extra, ["actions"]) });
+        } else if (kind === "toast") {
+          await c.z2ui5_if_client$message_toast_display({ text: S(subst(arg)), ...optionInput(extra) });
+        } else if (kind === "follow_up") await c.z2ui5_if_client$follow_up_action(actionInput(arg));
+        else if (kind === "hash_set") await c.z2ui5_if_client$hash_set({ val: S(arg) });
+        else if (kind === "hash_replace") await c.z2ui5_if_client$hash_replace({ val: S(arg) });
+        else if (kind === "app_state") await c.z2ui5_if_client$app_state_set_active({ val: B(arg) });
         else if (kind === "nav_call") {
-          await c.z2ui5_if_client$nav_app_call({ app: await appRef(arg), result: 1 });
+          await c.z2ui5_if_client$nav_app_call({ app: await appRef(arg, extra), result: 1 });
         } else if (kind === "nav_leave") {
           const o = arg ?? {};
           const input = { result: 1 };
           if (o.app !== undefined) input.app = await appRef(o.app);
           if (o.event !== undefined) input.event = S(o.event);
-          if (o.data !== undefined) input.r_data = S(typeof o.data === "string" ? o.data : JSON.stringify(o.data));
+          // typed, so an ABAP caller can ASSIGN it and a JavaScript one reads
+          // it back as c.eventData - not a JSON string neither could use
+          if (o.data !== undefined && o.data !== null) input.r_data = boxOf(o.data, "c.navBack( { data } )");
           await c.z2ui5_if_client$nav_app_leave(input);
         }
       }
