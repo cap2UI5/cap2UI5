@@ -8,9 +8,9 @@ const { Books } = cds.entities("my.bookshop");
 defineApp("ZCL_JS_MODEL_AT_LOAD", class {
   entity = Books.name;
 
-  main(c) {
-    if (c.isDisplay) {
-      c.view(`<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m"><Text text="${c.bind("entity")}"/></mvc:View>`);
+  main(client) {
+    if (client.check_on_navigated()) {
+      client.view_display(`<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m"><Text text="${client._bind("entity")}"/></mvc:View>`);
     }
   }
 });

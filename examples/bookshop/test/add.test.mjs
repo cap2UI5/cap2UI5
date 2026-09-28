@@ -44,9 +44,10 @@ test("the app it writes runs: renders, and answers its event", async () => {
   try {
     const start = await post(s.url, { app: "HELLO", user: "alice" });
     assert.equal(start.status, 200, start.text.slice(0, 300));
-    const go = await post(s.url, { app: "HELLO", id: start.json.S_FRONT.ID, event: "GO",
+    assert.equal(start.json.MODEL.NAME, "World");
+    const go = await post(s.url, { app: "HELLO", id: start.json.S_FRONT.ID, event: "SAY_HELLO",
       model: { NAME: "Ada" }, user: "alice" });
-    assert.deepEqual(action(go)?.slice(0, 3), ["MESSAGE_BOX", "show", "Hello Ada"]);
+    assert.deepEqual(action(go)?.slice(0, 3), ["MESSAGE_TOAST", "show", "Hello Ada!"]);
   } finally {
     s.kill();
   }

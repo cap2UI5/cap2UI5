@@ -1,33 +1,34 @@
 // A view built the way an ABAP app builds one: with abap2UI5's own
-// z2ui5_cl_ui5_view_builder, as ViewBuilder - the same verbs (ele, tag, a,
-// end), the same one rule for a( ), and upstream's rendering and escaping.
-const { defineApp, ViewBuilder } = require("cap2ui5");
+// z2ui5_cl_ui5_view_builder, under its own name - the same methods, called
+// the same way (one positional argument, or the parameters by name), the same
+// one rule for a( ), and upstream's rendering and escaping.
+const { defineApp, z2ui5_cl_ui5_view_builder } = require("cap2ui5");
 
 defineApp("ZCL_JS_BUILDER", class {
   name = "";
 
-  main(c) {
-    if (c.isDisplay) {
-      const view = ViewBuilder.factory();
-      view.ele("View", "mvc")
-              .a("xmlns", "sap.m")
-              .a("xmlns:mvc", "sap.ui.core.mvc")
-              .a("displayBlock", true)
-              .a("height", "100%")
-          .ele("Shell")
+  main(client) {
+    if (client.check_on_navigated()) {
+      const view = z2ui5_cl_ui5_view_builder.factory()
+          .ele({ n: "View", ns: "mvc" })
+              .a({ n: "xmlns", v: "sap.m" })
+              .a({ n: "xmlns:mvc", v: "sap.ui.core.mvc" })
+              .a({ n: "displayBlock", b: true })
+              .a({ n: "height", v: "100%" });
+      view.ele("Shell")
           .ele("Page")
-              .a("title", "cap2UI5 - view builder")
+              .a({ n: "title", v: "cap2UI5 - view builder" })
               .tag("Input")
-                  .a("value", c.bind("name"))
-                  .a("placeholder", "Your name")
+                  .a({ n: "value", v: client._bind("name") })
+                  .a({ n: "placeholder", v: "Your name" })
               .tag("Text")
-                  .a("text", { t: "{shown as typed}" })
+                  .a({ n: "text", t: "{shown as typed}" })
               .tag("Button")
-                  .a("text", "Go")
-                  .a("press", c.event("GO"));
-      c.view(view);
+                  .a({ n: "text", v: "Go" })
+                  .a({ n: "press", v: client._event("GO") });
+      client.view_display(view.stringify());
       return;
     }
-    if (c.eventName === "GO") c.messageBox(`Hello ${this.name}`);
+    if (client.check_on_event("GO")) client.message_box_display(`Hello ${this.name}`);
   }
 });

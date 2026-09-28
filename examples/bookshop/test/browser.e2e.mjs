@@ -112,7 +112,7 @@ test("the Books app renders a t.table( ) filled from cds.ql", async () => {
   assert.deepEqual(errors, [], "page errors");
 });
 
-test("c.event( ) survives a view whose attributes were XML-escaped, arguments included", async () => {
+test("client._event( ) survives a view whose attributes were XML-escaped, arguments included", async () => {
   // ZCL_JS_ESCAPED escapes every attribute value as abap2UI5's view builder
   // does. Before the fix the placeholder did not survive that, a raw NUL went
   // out in the response and the page got no view at all.
@@ -132,14 +132,14 @@ test("c.event( ) survives a view whose attributes were XML-escaped, arguments in
   assert.deepEqual(errors, [], "page errors");
 });
 
-test("a view built with ViewBuilder renders, keeps literal text literal, and answers its event", async () => {
+test("a view built with z2ui5_cl_ui5_view_builder renders, keeps literal text literal, and answers its event", async () => {
   // ZCL_JS_BUILDER builds its view with abap2UI5's own view builder, replayed
   // against the transpiled class after main( ) - so this is the browser's
   // word that upstream's rendering and cap2UI5's event placeholders fit.
   const { page, errors } = await open("ZCL_JS_BUILDER");
   const input = page.locator("input.sapMInputBaseInner").first();
   await input.waitFor({ timeout: 60_000 });
-  // a( "text", { t } ): shown as typed, braces and all - not read as a binding
+  // a( { n: "text", t } ): shown as typed, braces and all - not read as a binding
   await page.getByText("{shown as typed}", { exact: true }).waitFor({ timeout: 10_000 });
   await input.fill("Ada");
   await page.getByRole("button", { name: "Go" }).click();
@@ -154,21 +154,21 @@ test("the handler expressions work in the browser: event options, a front-end ac
   const search = page.locator("[id$='--search'] input").first();
   await search.waitFor({ timeout: 60_000 });
 
-  // liveChange with queueLast: the wire runs, the argument is the typed value
+  // liveChange with s_ctrl-check_queue_last: the wire runs, the argument is the typed value
   await search.fill("ab");
   await page.getByText("said: TYPED ab").waitFor({ timeout: 30_000 });
 
-  // argLiteral: the argument arrives as written, not evaluated as a binding
+  // s_ctrl-check_arg_literal: the argument arrives as written, not evaluated as a binding
   await page.getByRole("button", { name: "Literal" }).click();
   await page.getByText("said: TAKE ${not a binding}").waitFor({ timeout: 30_000 });
 
-  // a front-end action wired into a button: no roundtrip, the focus moves
+  // follow_up_action( ) wired into a button: no roundtrip, the focus moves
   await page.locator("body").click({ position: { x: 5, y: 5 } });
   await page.getByRole("button", { name: "Focus" }).click();
   await page.waitForFunction(() => globalThis.document.activeElement?.closest("[id$='--search']") !== null, null,
     { timeout: 30_000 });
 
-  // c.eventNavBack( ): the called app's back button leaves it
+  // client._event_nav_app_leave( ): the called app's back button leaves it
   await page.getByRole("button", { name: "Call" }).click();
   await page.getByText("press back").waitFor({ timeout: 30_000 });
   await page.locator("[id$='-navButton']").first().click();

@@ -41,19 +41,17 @@ defineApp("BOOKS", class {
   search = "";
   books  = t.table({ ID: 0, title: "", author: "", price: t.packed(9, 2) });
 
-  async main(c) {                       // async only because THIS app does I/O
-    if (c.isDisplay) {
-      c.view(`<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" displayBlock="true" height="100%">
+  async main(client) {                  // async only because THIS app does I/O
+    if (client.check_on_navigated()) {
+      client.view_display(`<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" displayBlock="true" height="100%">
         <Page title="Books">
-          <SearchField value="${c.bind("search")}" search="${c.event("SEARCH")}"/>
-          <Table items="${c.bind("books")}"> … <Text text="{TITLE}"/> … </Table>
+          <SearchField value="${client._bind("search")}" search="${client._event("SEARCH")}"/>
+          <Table items="${client._bind("books")}"> … <Text text="{TITLE}"/> … </Table>
         </Page></mvc:View>`);
-      return;
-    }
-    if (c.eventName === "SEARCH") {
+    } else if (client.check_on_event("SEARCH")) {
       const { Books } = cds.entities("my.bookshop");
       this.books = await SELECT.from(Books).where`title like ${"%" + this.search + "%"}`;
-      c.messageToast(`${this.books.length} found`);
+      client.message_toast_display(`${this.books.length} found`);
     }
   }
 });
@@ -73,79 +71,132 @@ A project from `cds init` + `cds add nodejs` is an ES module project, hence
 `import`. In a CommonJS project, or in a `.cjs` file, `require("cap2ui5")`
 returns the same names.
 
-| | |
-|---|---|
-| lifecycle | `c.isFirstRun` (seed once), `c.isDisplay` (render), `c.canGoBack`, `c.eventName`, `c.eventArg(i)`, `c.prevApp`, `c.eventData`, `c.get()`, `c.appStateHref` |
-| binding | `c.bind(field, {path, row, column, omitInitial, omitInitialPaths, json})`, `c.bind("field.component")` |
-| handlers | `c.event(name, [args], {preventDefault, argLiteral, queueLast, noBusy, …})`, `c.eventNavBack()`, `c.eventFollowUpAction(action, [args], {view})` |
-| screen | `c.view(xml)` / `c.viewClose()`, `c.popup(xml)` / `c.popupClose()`, `c.popover(xml, byId)` / `c.popoverClose()`, `c.nest(…)` / `c.nestClose()`, `c.nest2(…)` / `c.nest2Close()`, `c.messageBox(text, {…})`, `c.messageToast(text, {…})`, `c.followUpAction(action, [args], {view})` — `xml` is XML text or a `ViewBuilder` |
-| navigation | `c.navTo(app, fields)`, `c.navBack({event, data, app})`, `c.hashSet(hash)`, `c.hashReplace(hash)`, `c.appStateSetActive()` |
-| escape hatch | `c.raw` — the transpiled `z2ui5_if_client`, async |
+## The client is `z2ui5_if_client`, by its own names
 
-**`isDisplay`, not `isFirstRun`, is the render branch.** `isFirstRun` is the
-first roundtrip of *this app instance*; `isDisplay` is also true every time the
-app gets the screen back — a called app leaving, a value help closing, a
-bookmark restored.
+`main( client )` receives what an ABAP app's `z2ui5_if_app~main( client )`
+receives, spelled the JavaScript way: `client->check_app_prev_stack( )` is
+`client.check_app_prev_stack()`. A method's preferred parameter is its one
+positional argument, and parameters by name are one object with the ABAP
+names. The constants are there too. So an ABAP app ports line by line, and
+[abap2UI5's documentation](https://abap2ui5.github.io/docs/) of a method is
+the documentation of the JavaScript one.
+
+| ABAP | JavaScript |
+|---|---|
+| `client->check_on_navigated( )` | `client.check_on_navigated()` |
+| `client->check_on_event( `GO` )` | `client.check_on_event("GO")` |
+| `client->get_event_arg( 1 )` | `client.get_event_arg(1)` |
+| `client->_bind( name )`, `_bind( s_order-customer )` | `client._bind("name")`, `client._bind("s_order-customer")` |
+| `client->_bind( val = t_tab path = abap_true )` | `client._bind({ val: "t_tab", path: true })` |
+| `client->_event( val = `GO` t_arg = VALUE #( ( `x` ) ) )` | `client._event({ val: "GO", t_arg: ["x"] })` |
+| `client->follow_up_action( val = z2ui5_if_client=>cs_event-set_title t_arg = … )` | `client.follow_up_action({ val: z2ui5_if_client.cs_event.set_title, t_arg: [ … ] })` |
+| `client->view_display( view->stringify( ) )` | `client.view_display(view.stringify())` |
+| `client->message_box_display( text = … type = `error` )` | `client.message_box_display({ text: …, type: "error" })` |
+| `client->nav_app_call( NEW zcl_other( ) )` | `client.nav_app_call("ZCL_OTHER")` |
+| `client->nav_app_leave( event = … r_data = … )` | `client.nav_app_leave({ event, r_data })` |
+| `client->get( )-r_event_data` | `client.get().r_event_data` |
+
+Every method of the interface is there under its name - `nav.test.mjs` holds
+the client to the interface, so none is missing and none is invented. What is
+JavaScript's own, and why:
+
+- **A field is bound by its name**, `client._bind("name")`: ABAP's `_bind( )`
+  finds the attribute by reference, which a JavaScript value cannot carry. A
+  cell of a table is `{ val: column, tab: "t_tab", tab_index: 2 }`.
+- **Some answers come after `main( )`.** The framework's calls are
+  asynchronous here, so `main( )` stays synchronous by resolving what it can
+  before it runs and the rest after it: what `_event( )`, a `_bind( )` with
+  options, and `follow_up_action( )` in a view attribute return is a
+  placeholder that becomes the wire after `main( )` - embed it as it is. An
+  `async main` works as well, for an app that does I/O.
+- **`client.get_app( id )`** answers the app behind a draft id as a handle
+  whose fields can be written - `app.backend_event = "…"`, then
+  `client.nav_app_leave(app)` - but not read: it is loaded after `main( )`.
+  Reading the other app is `client.get_app_prev( )`, as plain values.
+- **`client.nav_app_call( app, fields )`** presets the called app's fields,
+  what an ABAP app does between `NEW` and `nav_app_call( )`.
+- `client.set_session_stateful( )` is not supported and throws; the
+  interface's obsolete `*_model_update( )` do nothing, as they do in ABAP.
+  `client.raw` is the transpiled `z2ui5_if_client` itself, asynchronous.
+
+**`check_on_navigated( )`, not `check_on_init( )`, is the render branch.**
+`check_on_init( )` is the first roundtrip of *this app instance*;
+`check_on_navigated( )` is also true every time the app gets the screen back
+— a called app leaving, a value help closing, a bookmark restored.
 
 **State:** strings, numbers, booleans, `t.packed(l, d)`, `t.char(n)`, a plain
 object (a structure), `t.table({ …one row… })` — and those nest, up to 8
 levels. Component names are UPPERCASE in the model. The whole instance is
 persisted to `cap2ui5.Drafts` after every roundtrip and rebuilt before the
-next, so state survives a restart.
+next, so state survives a restart. Unlike ABAP, every field is part of the
+model - there is no `PROTECTED SECTION`; a helper that needs the client gets
+it as an ABAP app does, `this.client = client` in `main( )`, without declaring
+it as a field.
 
 **Types:** the package ships TypeScript declarations (`index.d.ts`). In a
 JavaScript app, annotate the client for completion and checked field names:
-`/** @param {import("cap2ui5").Client<{ search: string }>} c */`.
+`/** @param {import("cap2ui5").Client<{ search: string }>} client */`.
 
-## Building a view with `ViewBuilder`
+## Building a view with `z2ui5_cl_ui5_view_builder`
 
-A view can also be built the way an ABAP app builds one, with abap2UI5's own
-`z2ui5_cl_ui5_view_builder`, which uses the same verbs:
+A view is built the way an ABAP app builds one, with abap2UI5's own view
+builder, under its own name and called as the client is:
 
 ```js
-const { defineApp, ViewBuilder } = require("cap2ui5");
+const { defineApp, z2ui5_cl_ui5_view_builder } = require("cap2ui5");
 
 defineApp("HELLO", class {
   name = "";
 
-  main(c) {
-    if (c.isDisplay) {
-      const view = ViewBuilder.factory();
-      view.ele("View", "mvc")
-              .a("xmlns", "sap.m")
-              .a("xmlns:mvc", "sap.ui.core.mvc")
-          .ele("Page")
-              .a("title", "Hello")
-              .tag("Input")
-                  .a("value", c.bind("name"))
-              .tag("Text")
-                  .a("text", { t: "{shown as typed}" })
-              .tag("Button")
-                  .a("text", "Go")
-                  .a("press", c.event("GO"));
-      c.view(view);
-      return;
+  main(client) {
+
+    if (client.check_on_navigated()) {
+
+      const view = z2ui5_cl_ui5_view_builder.factory()
+          .ele({ n: "View", ns: "mvc" })
+              .a({ n: "xmlns", v: "sap.m" })
+              .a({ n: "xmlns:mvc", v: "sap.ui.core.mvc" })
+
+              .ele("Shell")
+                  .ele("Page")
+                      .a({ n: "title", v: "Hello" })
+
+                      .tag("Input")
+                          .a({ n: "value", v: client._bind("name") })
+                      .tag("Text")
+                          .a({ n: "text", t: "{shown as typed}" })
+                      .tag("Button")
+                          .a({ n: "text", v: "Go" })
+                          .a({ n: "press", v: client._event("GO") });
+
+      client.view_display(view.stringify());
+
+    } else if (client.check_on_event("GO")) {
+
+      client.message_box_display(`Hello ${this.name}`);
+
     }
-    if (c.eventName === "GO") c.messageBox(`Hello ${this.name}`);
+
   }
 });
 ```
 
 | | |
 |---|---|
-| `ViewBuilder.factory()` | an empty root; open the `mvc:View` and declare its `xmlns` yourself |
-| `ele(name, ns)` | add a child element and descend into it |
-| `tag(name, ns)` | add a child element and stay: the form for a leaf |
-| `a(name, value)` | an attribute on the element the chain points at: the child just added, or the node itself while it has none. A string or number is written as it is (bindings, events, constant text), a boolean renders `true`/`false`, and `{ t: text }` renders text literally, so a `{` in user input is shown rather than read as a binding |
+| `z2ui5_cl_ui5_view_builder.factory()` | an empty root; open the `mvc:View` and declare its `xmlns` yourself |
+| `ele(n)`, `ele({ n, ns })` | add a child element and descend into it |
+| `tag(n)`, `tag({ n, ns })` | add a child element and stay: the form for a leaf |
+| `a({ n, v })`, `a({ n, b })`, `a({ n, t })` | an attribute on the element the chain points at: the child just added, or the node itself while it has none. Exactly one of `v` (written as it is: bindings, events, constant text), `b` (a boolean, rendered `true`/`false`) and `t` (text rendered literally, so a `{` in user input is shown rather than read as a binding) |
 | `end()` | ascend to the parent |
-| `ViewBuilder.escapeLiteral(text)` | the literal escaping of `t`, for one part of a value that also carries a binding |
+| `stringify()` | the XML - rendered after `main( )`, so hand it to `view_display( )` as it is; outside an app, `await` it |
+| `z2ui5_cl_ui5_view_builder.escape_literal(val)` | the literal escaping of `t`, for one part of a value that also carries a binding |
 
 The chain is recorded while `main( )` runs and rendered after it, by the
 transpiled `z2ui5_cl_ui5_view_builder` the runtime carries. The XML, its
 escaping and its refusals (an `end()` past the root, a duplicate attribute, an
 invalid name) are therefore exactly those of the same chain in an ABAP app. A
 refusal answers the roundtrip with the framework's error, naming the app.
-`await view.stringify()` returns the XML outside an app.
+`ViewBuilder` is the same class, for code that prefers a JavaScript name.
 
 ## Configure
 

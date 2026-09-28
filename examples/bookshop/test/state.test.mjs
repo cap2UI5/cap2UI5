@@ -55,3 +55,20 @@ test("a method that writes a field keeps it bound", async () => {
   assert.equal(again.status, 200, again.text.slice(0, 300));
   assert.equal(again.json.MODEL.NAME, "Grace");
 });
+
+test("the client kept in a field for the helpers, as me->client, is not part of the model", async () => {
+  // srv/apps/state.js renders from view_display( ) through this.client, the
+  // way an ABAP app keeps the client in an attribute
+  const start = await P({ app: APP });
+  assert.equal(start.status, 200, start.text.slice(0, 300));
+  assert.match(start.text, /value=\\"\{\/NAME\}\\"/, "the helper bound the field through this.client");
+  assert.equal("CLIENT" in start.json.MODEL, false, "the client is no field of the model");
+
+  // and the draft restores without it, main( ) setting it again
+  let r = start;
+  for (let i = 0; i < 2; i++) {
+    r = await P({ app: APP, id: r.json.S_FRONT.ID, event: "RENDER" });
+    assert.equal(r.status, 200, r.text.slice(0, 300));
+    assert.match(r.text, /value=\\"\{\/NAME\}\\"/, `roundtrip ${i + 1}`);
+  }
+});

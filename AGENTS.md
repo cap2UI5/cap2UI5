@@ -29,22 +29,35 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
   something cannot be done, try it.
 - **Never change behaviour without a test in `examples/bookshop/test/`.** The
   suite is the gate; there is no other.
-- **A facade method that composes view XML needs a BROWSER test, not only a
+- **The client IS `z2ui5_if_client`, by its own names - and stays it.** An
+  app's `main( client )` gets every method of the interface under its ABAP
+  name, a method's preferred parameter as its one positional argument and the
+  parameters by name as one object with the ABAP names; the constants are the
+  interface's (`client.cs_event`, `z2ui5_if_client.cs_event`), the view
+  builder is `z2ui5_cl_ui5_view_builder`, called the same way. That is what
+  lets an ABAP app port line by line and abap2UI5's documentation describe
+  the JavaScript method. So: no JavaScript-only names, no renamed parameters,
+  no defaults the ABAP signature does not have (`nest_view_display( )`'s
+  `method_insert` is required because ABAP requires it). What JavaScript
+  forces - a field bound by its NAME, a placeholder for what only resolves
+  after `main( )` - is documented as a difference, not hidden behind a new
+  name. `nav.test.mjs` holds the client's names to the interface's in both
+  directions, so a method upstream adds fails the suite until it is wired.
+- **A client method that composes view XML needs a BROWSER test, not only a
   wire test.** The wire tests play the frontend's part by hand, so they can
   feed an event argument the real page would never send — which is how
-  `c.event(name, args)` was missing while `nav.test.mjs` was green and the
-  browser was not. When the browser finds such a thing, add the assertion to
-  the wire test as well, so the cheap test fails next time too.
+  event arguments were missing while `nav.test.mjs` was green and the browser
+  was not. When the browser finds such a thing, add the assertion to the wire
+  test as well, so the cheap test fails next time too.
 - **Read `z2ui5_if_client`'s ABAP Doc before wiring one of its methods into the
-  facade.** Several are declared *"obsolete — does NOTHING"*
-  (`view_model_update` and its popup/nest siblings), and the two lifecycle
-  predicates answer different questions than their names suggest:
-  `check_on_init( )` is the first roundtrip of *this instance*,
-  `check_on_navigated( )` is also every return from a navigation or a value
-  help, and it is the one to render in. The facade refuses the first group and
-  renames the second to `isFirstRun` / `isDisplay`; `abi-gate.test.mjs` holds
-  both decisions so a change upstream re-opens them instead of passing
-  silently.
+  client.** Several are declared *"obsolete — does NOTHING"*
+  (`view_model_update` and its popup/nest siblings) and do nothing here
+  either, and the two lifecycle predicates answer different questions than
+  their names suggest: `check_on_init( )` is the first roundtrip of *this
+  instance*, `check_on_navigated( )` is also every return from a navigation
+  or a value help, and it is the one to render in. `abi-gate.test.mjs` holds
+  the no-ops to upstream's, so a change there re-opens the decision instead
+  of passing silently.
 - **Everything the plugin assumes about `@sap/cds` beyond its documentation
   goes into `cap-abi.test.mjs`.** `abi-gate.test.mjs` guards what the
   transpiler emits; this is the other surface. The one that matters is the
@@ -68,13 +81,14 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
   mounts it behind its protocol adapters, so the login challenge and the error
   body are CAP's. `auth.test.mjs` holds that behaviour; the plugin does not
   call `req._login()` or any other internal itself.
-- **`ViewBuilder` renders nothing itself.** It records the app's chain and
-  replays it after `main( )` against the transpiled
+- **`z2ui5_cl_ui5_view_builder` renders nothing itself.** It records the
+  app's chain and replays it after `main( )` against the transpiled
   `z2ui5_cl_ui5_view_builder`, so the view is upstream's, byte for byte, and
-  there is no second copy of the builder to keep in step. The one piece of
-  JavaScript of its own is `escapeLiteral( )`, which a synchronous chain
-  cannot await. `view-builder.test.mjs` pins it to the ABAP method, and the
-  replay to the same chain driven directly against the class.
+  there is no second copy of the builder to keep in step. Its `stringify( )`
+  answers a thenable that renders after `main( )` for the same reason. The
+  one piece of JavaScript of its own is `escape_literal( )`, which a
+  synchronous chain cannot await. `view-builder.test.mjs` pins it to the ABAP
+  method, and the replay to the same chain driven directly against the class.
 - **Every new `abap.*` or `z2ui5_*$*` touchpoint in `plugin/lib/` goes into
   `abi-gate.test.mjs`.** The plugin couples to the transpiler's emission
   format (static `ATTRIBUTES`/`METHODS` maps, `constructor_( )`, `~` → `$`),

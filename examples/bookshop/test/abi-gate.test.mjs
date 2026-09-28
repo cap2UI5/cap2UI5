@@ -23,17 +23,20 @@ const { defineApp, t } = require("cap2ui5");
 // --- the surface -----------------------------------------------------------
 // interface method -> the INPUT parameter names plugin/lib passes to it
 const CLIENT_METHODS = {          // z2ui5_if_client, used by define-app
-  _BIND: ["VAL", "RESULT", "PATH", "TAB", "TAB_INDEX", "OMIT_INITIAL", "OMIT_INITIAL_PATHS", "JSON"],
+  _BIND: ["VAL", "RESULT", "PATH", "TAB", "TAB_INDEX", "OMIT_INITIAL", "OMIT_INITIAL_PATHS", "JSON",
+    "SWITCH_DEFAULT_MODEL"],
   _EVENT: ["VAL", "T_ARG", "S_CTRL", "RESULT"],
   _EVENT_NAV_APP_LEAVE: ["RESULT"],
+  _EVENT_CLIENT: ["VAL", "VIEW", "T_ARG", "RESULT"],
   FOLLOW_UP_ACTION: ["VAL", "VIEW", "T_ARG", "RESULT"],   // RESULT supplied: the wired form
   CHECK_ON_INIT: ["RESULT"],
   CHECK_ON_NAVIGATED: ["RESULT"],
   CHECK_APP_PREV_STACK: ["RESULT"],
   GET: ["RESULT"],
   GET_APP_PREV: ["RESULT"],
+  GET_APP: ["ID", "RESULT"],
   GET_EVENT_ARG: ["V", "RESULT"],
-  VIEW_DISPLAY: ["VAL"],
+  VIEW_DISPLAY: ["VAL", "SWITCH_DEFAULT_MODEL_PATH", "SWITCH_DEFAULT_MODEL_ANNO_URI"],
   VIEW_DESTROY: [],
   POPUP_DISPLAY: ["VAL"],
   POPUP_DESTROY: [],
@@ -53,11 +56,11 @@ const CLIENT_METHODS = {          // z2ui5_if_client, used by define-app
   APP_STATE_SET_ACTIVE: ["VAL"],
   APP_STATE_GET_HREF: ["RESULT"],
 };
-// the components of z2ui5_if_client=>ty_s_event_control c.event( )'s options
-// map to, built from the interface's own parameter type
+// the components of z2ui5_if_client=>ty_s_event_control - what client._event( )'s
+// s_ctrl takes by name, built from the interface's own parameter type
 const EVENT_CONTROL = ["check_prevent_default", "prevent_default_expr", "check_arg_literal",
   "check_queue_last", "check_no_busy"];
-// the constant structures define-app reads names from, and names its tests use
+// the constant structures the client hands over, and names its tests use
 const CONSTANTS = {
   cs_event: ["set_title", "set_focus", "control_by_id", "popup_close", "hash_set"],
   cs_view: ["main", "nested", "nested2", "popup", "popover"],
@@ -100,8 +103,8 @@ const RUNTIME_GLOBALS = {
   "abap.types.Structure": "function",
   "abap.types.TableFactory.construct": "function",
 };
-// components of z2ui5_if_client=>get( ) that define-app reads - the rest is
-// handed to the app as it comes (c.get( )), these are named by the facade
+// components of z2ui5_if_client=>get( ) read by name - define-app reads the
+// event, the example apps the rest of what client.get( ) hands them
 const GET_FIELDS = ["event", "r_event_data", "s_config", "s_draft"];
 const EMITTED_STATICS = ["INTERNAL_TYPE", "INTERNAL_NAME", "IMPLEMENTED_INTERFACES", "ATTRIBUTES", "METHODS"];
 const FRAMEWORK_FIELDS = ["Z2UI5_IF_APP~ID_DRAFT", "Z2UI5_IF_APP~ID_APP"];
@@ -183,13 +186,14 @@ test("instance conventions: constructor_ and the ~ -> $ method naming", () => {
   assert.equal(typeof abap.Classes["Z2UI5_CL_UI5_SRV_DRAFT"].set_instance, "function", "set_instance (Naht 1)");
 });
 
-test("the retired methods are still the obsolete no-ops the facade refuses to call", () => {
+test("the obsolete methods are still the no-ops the client answers with nothing", () => {
   // view_model_update( ) and its siblings are declared "obsolete - does
-  // NOTHING" in z2ui5_if_client. The facade throws instead of calling them.
-  // If upstream ever gives them behaviour again, this goes red and the
-  // decision is worth re-reading rather than silently keeping the refusal.
+  // NOTHING" in z2ui5_if_client, and the client's are empty functions. If
+  // upstream ever gives them behaviour again, this goes red and they need
+  // wiring rather than silently doing nothing.
   const M = abap.Classes["Z2UI5_IF_CLIENT"].METHODS;
-  for (const m of ["VIEW_MODEL_UPDATE", "POPUP_MODEL_UPDATE", "NEST_VIEW_MODEL_UPDATE"]) {
+  for (const m of ["VIEW_MODEL_UPDATE", "POPUP_MODEL_UPDATE", "POPOVER_MODEL_UPDATE", "NEST_VIEW_MODEL_UPDATE",
+    "NEST2_VIEW_MODEL_UPDATE"]) {
     assert.ok(M[m], `${m} disappeared from the interface`);
     assert.deepEqual(Object.keys(M[m].parameters ?? {}), [],
       `${m} grew a parameter - re-read whether it still does nothing`);
@@ -218,7 +222,7 @@ test("the interface methods and parameters the plugin uses exist, by name", () =
   for (const f of EVENT_CONTROL) assert.ok(f in ctrl, `z2ui5_if_client=>ty_s_event_control-${f}`);
 });
 
-test("the constant structures the facade maps names through are readable, by name", () => {
+test("the constant structures the client hands over are readable, by name", () => {
   const IF = abap.Classes["Z2UI5_IF_CLIENT"];
   for (const [group, names] of Object.entries(CONSTANTS)) {
     const box = IF[`z2ui5_if_client$${group}`];

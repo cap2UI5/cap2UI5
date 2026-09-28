@@ -1,4 +1,4 @@
-// Navigation, popups and event arguments - the facade's second slice.
+// Navigation, popups and event arguments.
 //
 // The assertion that matters most is the last one in the round trip: when the
 // called app leaves, the CALLER must re-render. That is the bug
@@ -55,7 +55,7 @@ test("a nested view renders into a control of the main view and clears again", a
   assert.ok(destroys(hide, "NEST"), `NEST is destroyed; got ${JSON.stringify(actions(hide)).slice(0, 200)}`);
 });
 
-test("navTo hands the screen over, navBack hands it back with the result", async () => {
+test("nav_app_call( ) hands the screen over, nav_app_leave( ) hands it back with the result", async () => {
   const start = await P({ app: "ZCL_JS_PICK" });
   assert.deepEqual(start.json.MODEL, { CHOSEN: "", PICKS: 0 });
 
@@ -78,13 +78,13 @@ test("navTo hands the screen over, navBack hands it back with the result", async
   const back = await P({ app: "ZCL_JS_PICK_ONE", id: picker.json.S_FRONT.ID, event: "TAKE", args: ["red"] });
   assert.equal(back.status, 200, back.text.slice(0, 300));
   assert.deepEqual(back.json.MODEL, { CHOSEN: "red", PICKS: 1 },
-    "c.eventArg(1) reached the picker and c.prevApp carried its state home");
+    "get_event_arg( 1 ) reached the picker and get_app_prev( ) carried its state home");
 
-  // THE regression: the caller renders again on the way back. isFirstRun is
+  // THE regression: the caller renders again on the way back. check_on_init( ) is
   // false on this roundtrip, so an app gated on it would leave the picker's
   // screen standing and report nothing.
   assert.match(slot(back, "MAIN") ?? "", /cap2UI5 - pick/,
-    "the caller must re-render when a called app leaves (isDisplay, not isFirstRun)");
+    "the caller must re-render when a called app leaves (check_on_navigated, not check_on_init)");
 
   // --- twice, because a stack that works once may not unwind twice
   const again = await P({ app: "ZCL_JS_PICK", id: back.json.S_FRONT.ID, event: "CHOOSE" });
@@ -92,13 +92,41 @@ test("navTo hands the screen over, navBack hands it back with the result", async
   assert.deepEqual(back2.json.MODEL, { CHOSEN: "blue", PICKS: 2 });
 });
 
-test("the two retired facade members throw an error that names the replacement", async () => {
-  // srv/apps/retired-probe.js reads both getters inside main( ) and keeps what
-  // they threw in its own state, so the wire carries the answer.
+test("a name the client no longer answers to throws an error that names the replacement", async () => {
+  // srv/apps/retired-probe.js calls each one inside main( ) and keeps what it
+  // threw in its own state, so the wire carries the answer.
   const r = await P({ app: "ZCL_JS_RETIRED" });
   assert.equal(r.status, 200, r.text.slice(0, 300));
-  assert.match(r.json.MODEL.ERR_INITIAL, /c\.isDisplay/,
-    "c.isInitial must not answer undefined - it named check_on_navigated( ) and read like check_on_init( )");
-  assert.match(r.json.MODEL.ERR_MODEL, /obsolete/,
-    "c.modelUpdate must not answer undefined - view_model_update( ) does nothing");
+  const thrown = Object.fromEntries(r.json.MODEL.ERRORS.map((e) => [e.PROBE, e.MESSAGE]));
+  const expect = {
+    // cap2ui5 0.1.0's names: gone, and each says what z2ui5_if_client calls it
+    isDisplay: /client\.isDisplay is gone .* use client\.check_on_navigated\( \)/,
+    bind: /client\.bind is gone .* use client\._bind\( name \)/,
+    // gone before 0.1.0: isInitial named check_on_navigated( ) and read like check_on_init( )
+    isInitial: /client\.check_on_navigated\( \) to render and client\.check_on_init\( \) to seed state once/,
+    modelUpdate: /view_model_update\( \) is obsolete and does nothing/,
+    // declared "obsolete - does NOTHING" in z2ui5_if_client: nothing here either, no error
+    view_model_update: /^$/,
+    // refused: what it needs, the CAP host does not give
+    set_session_stateful: /client\.set_session_stateful\( \) is not supported by cap2UI5/,
+  };
+  assert.deepEqual(Object.keys(thrown), Object.keys(expect));
+  for (const [probe, re] of Object.entries(expect)) {
+    assert.match(thrown[probe], re, `${probe}: ${thrown[probe] || "(did not throw)"}`);
+  }
+});
+
+test("the client is z2ui5_if_client by name: every method and constant of it, and nothing else", async () => {
+  // srv/apps/retired-probe.js keeps the client's own names in a field
+  const r = await P({ app: "ZCL_JS_CLIENT_NAMES" });
+  assert.equal(r.status, 200, r.text.slice(0, 300));
+  const names = (kind) => r.json.MODEL.NAMES.filter((n) => n.KIND === kind).map((n) => n.NAME).sort();
+
+  // the runtime is booted in this process: the interface itself says what to expect
+  const IF = abap.Classes["Z2UI5_IF_CLIENT"];
+  assert.deepEqual(names("function"), Object.keys(IF.METHODS).map((m) => m.toLowerCase()).sort(),
+    "a method of z2ui5_if_client the client lacks, or one the interface does not have");
+  const constants = Object.keys(IF).filter((k) => k.startsWith("z2ui5_if_client$")).map((k) => k.slice(16));
+  assert.deepEqual(names("object"), [...constants, "raw"].sort(),
+    "the constants are the interface's - and raw, the transpiled client itself");
 });

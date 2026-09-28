@@ -13,23 +13,43 @@ const { config } = require("./config");
 const LOG = cds.log("cap2ui5");
 
 const HELLO = `// Your first cap2UI5 app - cds watch, then open /sap/bc/z2ui5?app_start=HELLO
-// (cds watch prints the address, and the user to log in as).
-const { defineApp } = require("cap2ui5");
+// (cds watch prints the address, and the user to log in as). It is abap2UI5's
+// hello world line by line: the same client, the same view builder.
+const { defineApp, z2ui5_cl_ui5_view_builder } = require("cap2ui5");
 
 defineApp("HELLO", class {
   name = "";
 
-  main(c) {
-    // isDisplay: the first roundtrip, and every time the app gets the screen back
-    if (c.isDisplay) {
-      c.view(\`<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" displayBlock="true" height="100%">
-        <Shell><Page title="Hello cap2UI5">
-          <Input value="\${c.bind("name")}" placeholder="Your name"/>
-          <Button text="Go" press="\${c.event("GO")}"/>
-        </Page></Shell></mvc:View>\`);
-      return;
+  main(client) {
+
+    // check_on_navigated: the first roundtrip, and every time the app gets the screen back
+    if (client.check_on_navigated()) {
+
+      this.name = "World";
+
+      const view = z2ui5_cl_ui5_view_builder.factory()
+          .ele({ n: "View", ns: "mvc" })
+              .a({ n: "xmlns", v: "sap.m" })
+              .a({ n: "xmlns:mvc", v: "sap.ui.core.mvc" })
+
+              .ele("Shell")
+                  .ele("Page")
+                      .a({ n: "title", v: "cap2UI5 - Hello World" })
+
+                      .tag("Input")
+                          .a({ n: "value", v: client._bind("name") })
+                      .tag("Button")
+                          .a({ n: "text", v: "Say Hello" })
+                          .a({ n: "press", v: client._event("SAY_HELLO") });
+
+      client.view_display(view.stringify());
+
+    } else if (client.check_on_event("SAY_HELLO")) {
+
+      client.message_toast_display(\`Hello \${this.name}!\`);
+
     }
-    if (c.eventName === "GO") c.messageBox(\`Hello \${this.name}\`);
+
   }
 });
 `;

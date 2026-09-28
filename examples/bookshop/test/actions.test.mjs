@@ -17,8 +17,10 @@ const on = async (event) => {
   return [...(r.json.S_FRONT.S_ACTION?.T_SYSTEM ?? []), ...(r.json.S_FRONT.S_ACTION?.T_CUSTOM ?? [])];
 };
 
-test("c.followUpAction( ) queues the front-end action cs_event names, with its arguments", async () => {
+test("client.follow_up_action( ) on its own queues the front-end action cs_event names, with its arguments", async () => {
   assert.deepEqual(await on("TITLE"), [["SET_TITLE", "Invoices"]]);
+  // val alone, positionally
+  assert.deepEqual(await on("RELOAD"), [["LOCATION_RELOAD"]]);
 });
 
 test("a front-end action names its view slot - control_by_id finds the id in the popup", async () => {
@@ -27,7 +29,7 @@ test("a front-end action names its view slot - control_by_id finds the id in the
   assert.deepEqual(await on("EXPAND"), [["CONTROL_BY_ID", "panel", "POPUP", "setExpanded", "true"]]);
 });
 
-test("c.popover( ) opens by the control it names, c.popoverClose( ) closes it", async () => {
+test("client.popover_display( ) opens by the control by_id names, popover_destroy( ) closes it", async () => {
   const [open] = await on("POPOVER");
   assert.deepEqual(open.slice(0, 3), ["VIEW_SLOTS", "display", "POPOVER"]);
   assert.match(open[3], /<Popover title="More"/);
@@ -36,14 +38,14 @@ test("c.popover( ) opens by the control it names, c.popoverClose( ) closes it", 
   assert.deepEqual(await on("POPOVER_CLOSE"), [["VIEW_SLOTS", "destroy", "POPOVER"]]);
 });
 
-test("c.nest2( ) fills the second nested slot, c.nest2Close( ) clears it", async () => {
+test("client.nest2_view_display( ) fills the second nested slot, nest2_view_destroy( ) clears it", async () => {
   const [nest] = await on("DETAIL");
   assert.deepEqual(nest.slice(0, 3), ["VIEW_SLOTS", "display", "NEST2"]);
   assert.deepEqual(nest[4], { id: "detail", methodDestroy: "removeAllContent", methodInsert: "addContent" });
   assert.deepEqual(await on("DETAIL_CLOSE"), [["VIEW_SLOTS", "destroy", "NEST2"]]);
 });
 
-test("c.viewClose( ) destroys the main view", async () => {
+test("client.view_destroy( ) destroys the main view", async () => {
   assert.deepEqual(await on("BLANK"), [["VIEW_SLOTS", "destroy", "MAIN"]]);
 });
 
@@ -66,7 +68,7 @@ test("the toast takes message_toast_display( )'s options", async () => {
   assert.deepEqual(await on("TOAST"), [["MESSAGE_TOAST", "show", "saved", { duration: 5000 }]]);
 });
 
-test("the URL: hashSet pushes, hashReplace replaces, appStateSetActive keeps the state id in it", async () => {
+test("the URL: hash_set pushes, hash_replace replaces, app_state_set_active keeps the state id in it", async () => {
   assert.deepEqual(await on("HASH"), [["ROUTER", "sync", { setPushState: "/detail/1" }]]);
   assert.deepEqual(await on("HASH_REPLACE"), [["ROUTER", "sync", { setHashReplace: "/detail/2" }]]);
   assert.deepEqual(await on("STATE"), [["ROUTER", "sync", { setAppStateActive: true }]]);
