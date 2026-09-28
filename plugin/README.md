@@ -84,14 +84,14 @@ the documentation of the JavaScript one.
 | ABAP | JavaScript |
 |---|---|
 | `client->check_on_navigated( )` | `client.check_on_navigated()` |
-| `client->check_on_event( `GO` )` | `client.check_on_event("GO")` |
+| ``client->check_on_event( `GO` )`` | `client.check_on_event("GO")` |
 | `client->get_event_arg( 1 )` | `client.get_event_arg(1)` |
 | `client->_bind( name )`, `_bind( s_order-customer )` | `client._bind("name")`, `client._bind("s_order-customer")` |
 | `client->_bind( val = t_tab path = abap_true )` | `client._bind({ val: "t_tab", path: true })` |
-| `client->_event( val = `GO` t_arg = VALUE #( ( `x` ) ) )` | `client._event({ val: "GO", t_arg: ["x"] })` |
+| ``client->_event( val = `GO` t_arg = VALUE #( ( `x` ) ) )`` | `client._event({ val: "GO", t_arg: ["x"] })` |
 | `client->follow_up_action( val = z2ui5_if_client=>cs_event-set_title t_arg = … )` | `client.follow_up_action({ val: z2ui5_if_client.cs_event.set_title, t_arg: [ … ] })` |
 | `client->view_display( view->stringify( ) )` | `client.view_display(view.stringify())` |
-| `client->message_box_display( text = … type = `error` )` | `client.message_box_display({ text: …, type: "error" })` |
+| ``client->message_box_display( text = … type = `error` )`` | `client.message_box_display({ text: …, type: "error" })` |
 | `client->nav_app_call( NEW zcl_other( ) )` | `client.nav_app_call("ZCL_OTHER")` |
 | `client->nav_app_leave( event = … r_data = … )` | `client.nav_app_leave({ event, r_data })` |
 | `client->get( )-r_event_data` | `client.get().r_event_data` |

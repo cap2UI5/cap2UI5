@@ -74,8 +74,8 @@ export type AppRef = string | AppConstructor | object;
 /**
  * The client an app's `main( )` receives: z2ui5_if_client, by its own method
  * names. A method's preferred parameter is its one positional argument -
- * `client->_event( `GO` )` is `client._event("GO")` - and parameters by name
- * are one object - `client->_event( val = `GO` t_arg = … )` is
+ * ``client->_event( `GO` )`` is `client._event("GO")` - and parameters by name
+ * are one object - ``client->_event( val = `GO` t_arg = … )`` is
  * `client._event({ val: "GO", t_arg: [ … ] })`. Queries answer synchronously;
  * commands are recorded and carried out in order after `main( )` returns.
  */

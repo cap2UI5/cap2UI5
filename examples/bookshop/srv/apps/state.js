@@ -41,6 +41,12 @@ defineApp("ZCL_JS_STATE", class {
       this.rename("Grace");
       return;
     }
+    if (client.check_on_event("REPLACE")) {
+      // s = VALUE #( … ): what the new value leaves out is initial afterwards
+      this.order = { id: "0815" };
+      this.cfg = {};
+      return;
+    }
     if (client.check_on_event("RENDER") || client.check_on_navigated()) {
       this.view_display();
     }

@@ -72,3 +72,11 @@ test("the client kept in a field for the helpers, as me->client, is not part of 
     assert.match(r.text, /value=\\"\{\/NAME\}\\"/, `roundtrip ${i + 1}`);
   }
 });
+
+test("assigning an object replaces the structure - what it leaves out is initial, as VALUE #( ) makes it", async () => {
+  const start = await P({ app: APP });
+  const r = await P({ app: APP, id: start.json.S_FRONT.ID, event: "REPLACE" });
+  assert.equal(r.status, 200, r.text.slice(0, 300));
+  assert.deepEqual(r.json.MODEL.ORDER, { ID: "0815", LINES: [] }, "the lines of the old order are gone");
+  assert.deepEqual(r.json.MODEL.CFG, { MODE: "", ITEMS: [] }, "{ } clears the whole structure");
+});

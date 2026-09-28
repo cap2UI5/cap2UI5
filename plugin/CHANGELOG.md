@@ -120,6 +120,10 @@ The plugin now follows the conventions of the plugins at
 - Rows in a field initializer are the field's initial value: `rows = [{ … }]`,
   a table inside a structure, a table inside `t.struct({ … })`. They used to
   be dropped - the table was typed from its first row and then built empty.
+- Assigning an object to a structure field replaces the structure:
+  `this.s_result = {}` clears it, as `s_result = VALUE #( )` does, and a
+  component the object leaves out is initial afterwards. The components it
+  left out used to keep their old values.
 
 ## [0.1.0] - 2026-09-27
 

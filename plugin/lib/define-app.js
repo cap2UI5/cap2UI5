@@ -215,7 +215,12 @@ function wrap(box, value, shape) {
   }
   switch (shape.k) {
     case "bool": box.set(value ? "X" : " "); break;
-    case "struct": plainToRow(box, value ?? {}, shape.fields); break;
+    case "struct":
+      // a new value replaces the whole structure, as `s = VALUE #( … )` does:
+      // a component it leaves out is initial afterwards, not what it was
+      box.clear();
+      plainToRow(box, value ?? {}, shape.fields);
+      break;
     case "table": {
       box.clear();
       for (const row of value ?? []) {

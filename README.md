@@ -82,7 +82,7 @@ Only in development; a production profile prints neither. The full example is
 **The app API is abap2UI5's.** `client->check_app_prev_stack( )` is
 `client.check_app_prev_stack()`: every method of `z2ui5_if_client`, under its
 name, a method's preferred parameter as its one positional argument and the
-parameters by name as one object - `client->_event( val = `GO` t_arg = … )` is
+parameters by name as one object - ``client->_event( val = `GO` t_arg = … )`` is
 `client._event({ val: "GO", t_arg: [ … ] })`. The constants are the
 interface's, `z2ui5_if_client.cs_event.set_title`, and the view builder is
 `z2ui5_cl_ui5_view_builder`, its methods called the same way:
