@@ -73,14 +73,15 @@ test("its events: CASE with OR, abap_bool as ABAP prints it, a called app", asyn
   for (const event of ["GREET", "HELLO"]) {
     const r = await P({ app: APP, id: start.json.S_FRONT.ID, event });
     assert.equal(r.status, 200, r.text.slice(0, 300));
-    assert.deepEqual(custom(r)[0].slice(0, 3), ["MESSAGE_BOX", "show", "Hello World, active: , 2 rows"], `WHEN … OR - ${event}`);
+    assert.deepEqual(custom(r)[0].slice(0, 3), ["MESSAGE_BOX", "show", "Hello World, active: , 2 rows, 1 selected"],
+      `WHEN … OR, LOOP AT … WHERE - ${event}`);
   }
 
   const toggled = await P({ app: APP, id: start.json.S_FRONT.ID, event: "TOGGLE" });
   assert.deepEqual(custom(toggled)[0], ["SET_TITLE", "2 rows", "X"],
     "an own method's RETURNING value, and CONV string( abap_true ) is X");
   const greet = await P({ app: APP, id: toggled.json.S_FRONT.ID, event: "GREET" });
-  assert.equal(custom(greet)[0][2], "Hello World, active: X, 2 rows", "the toggled abap_bool, in a string template");
+  assert.equal(custom(greet)[0][2], "Hello World, active: X, 2 rows, 1 selected", "the toggled abap_bool, in a string template");
 
   const edit = await P({ app: APP, id: start.json.S_FRONT.ID, event: "EDIT" });
   assert.deepEqual(custom(edit)[0].slice(0, 3), ["MESSAGE_TOAST", "show", "edit mode"], "WHEN OTHERS, SWITCH #( ) on a constant");

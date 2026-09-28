@@ -733,9 +733,12 @@ class MethodGen {
         const d = declared.get(name);
         if (d !== undefined && !(path === d || path.startsWith(d + "/"))) this.hoisted.add(name);
       }
+      // a LOOP's INTO DATA( ) lives in the loop's block in JavaScript (for…of),
+      // so a use after ENDLOOP - legal in ABAP, the last row - declares it on top
+      const at = k === "Loop" ? `${path}/${next}` : path;
       for (const inline of s.findAllExpressions(E.InlineData)) {
         const name = lc(text(inline.findFirstExpression(E.Field)));
-        declared.set(name, path);
+        declared.set(name, at);
       }
       if (k === "Data") {
         const name = lc(text(s.findFirstExpression(E.DefinitionName)));
@@ -953,15 +956,20 @@ class MethodGen {
 
   loop(s) {
     const E = A().Expressions;
-    if (s.findFirstExpression(E.FSTarget) || hasWord(s, "assigning") || hasWord(s, "reference")) {
+    const target = s.findDirectExpression(E.LoopTarget);
+    if (target && (hasWord(target, "assigning") || hasWord(target, "reference") || target.findFirstExpression(E.FSTarget))) {
       this.fail("LOOP AT ... ASSIGNING / REFERENCE INTO writes through the row - not supported yet", s);
     }
     for (const w of ["from", "to", "group", "using", "step"]) if (hasWord(s, w)) this.fail(`LOOP AT ... ${w.toUpperCase()} is not supported yet`, s);
-    const src = s.findDirectExpression(E.LoopSource) ?? s.findDirectExpression(E.SimpleSource2);
-    const tab = this.source(src.findFirstExpression(E.Source) ?? src);
-    const tabType = this.typeOfSource(src.findFirstExpression(E.Source) ?? src);
-    const target = s.findFirstExpression(E.LoopTarget);
-    const where = s.findFirstExpression(E.ComponentCond);
+    // LOOP AT's table is a restricted source: a field chain, or a call
+    const src = s.findDirectExpression(E.LoopSource);
+    const inner = src?.findDirectExpression(E.SimpleSource2) ?? src;
+    const operand = inner?.getChildren().find((c) => !isToken(c));
+    if (!operand) this.fail("this LOOP AT is not supported yet", s);
+    const tab = this.operand(operand);
+    let tabType = { k: "unknown" };
+    if (kind(operand) === "FieldChain") try { tabType = this.fieldChainType(operand); } catch { /* the loop still translates */ }
+    const where = s.findDirectExpression(E.ComponentCond);
     let variable = "_row";
     let decl = "const";
     if (target) {
@@ -986,10 +994,12 @@ class MethodGen {
         return text(c);
       }
       if (kind(c) === "ComponentCompare") {
-        const comp = text(c.findDirectExpression(E.ComponentChainSimple));
+        const comp = lc(text(c.findDirectExpression(E.ComponentChainSimple)));
         const op = c.findDirectExpression(E.CompareOperator);
         if (!op) this.fail("this WHERE condition is not supported yet", c);
-        return `${row}.${lc(comp).replace(/-/g, ".")} ${this.operator(op)} ${this.source(c.findDirectExpression(E.Source))}`;
+        // table_line is the row itself, in a table of scalars
+        const left = comp === "table_line" ? row : `${row}.${comp.replace(/-/g, ".")}`;
+        return `${left} ${this.operator(op)} ${this.source(c.findDirectExpression(E.Source))}`;
       }
       if (kind(c) === "ComponentCondSub") return `(${this.componentCond(c.findDirectExpression(E.ComponentCond), row)})`;
       this.fail("this WHERE condition is not supported yet", c);

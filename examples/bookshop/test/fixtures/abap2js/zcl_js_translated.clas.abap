@@ -68,8 +68,12 @@ CLASS zcl_js_translated IMPLEMENTATION.
 
     CASE client->get_event( ).
       WHEN `GREET` OR `HELLO`.
+        DATA(selected) = 0.
+        LOOP AT t_rows INTO DATA(row) WHERE selected = abap_true.
+          selected = selected + 1.
+        ENDLOOP.
         " abap_bool prints as ABAP prints it: X, or nothing
-        greeting = |Hello { name }, active: { active }, { lines( t_rows ) } rows|.
+        greeting = |Hello { name }, active: { active }, { lines( t_rows ) } rows, { selected } selected|.
         client->message_box_display( greeting ).
       WHEN `TOGGLE`.
         active = xsdbool( active = abap_false ).

@@ -49,8 +49,12 @@ defineApp("ZCL_JS_TRANSLATED", class {
 
     switch (this.client.get_event()) {
       case "GREET": case "HELLO":
+        let selected = 0;
+        for (const row of this.t_rows.filter((row) => row.selected === true)) {
+          selected = selected + 1;
+        }
         // abap_bool prints as ABAP prints it: X, or nothing
-        this.greeting = `Hello ${this.name}, active: ${this.active ? "X" : ""}, ${this.t_rows.length} rows`;
+        this.greeting = `Hello ${this.name}, active: ${this.active ? "X" : ""}, ${this.t_rows.length} rows, ${selected} selected`;
         this.client.message_box_display(this.greeting);
         break;
       case "TOGGLE":
