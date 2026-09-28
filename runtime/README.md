@@ -16,6 +16,7 @@ scripts/assemble-runtime.sh <upstream checkout>     # or: --package X.Y.Z
 |---|---|---|
 | `output/` | `node/output` after `npm run auto_downport && npm run auto_transpile` | the framework: `init.mjs` boots it, `cl_express_icf_shim.clas.mjs` is the HTTP adapter |
 | `setup/` | `node/setup/setup.mjs` | `output/init.mjs` imports `../setup/setup.mjs` — the path is fixed by upstream's `abap_transpile.json`, so the hook ships with the output |
+| `downport/` | `node/downport` | the ABAP the output was transpiled from: `abap2js` (plugin/lib/abap2js.js) reads `z2ui5_if_client`'s types there, so an app's translation knows what `client->get( )` answers |
 
 The version is the framework's version: the package is a deterministic function
 of the upstream tag, like the `X.Y.Z-702` tag `release.yaml` already cuts.

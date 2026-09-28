@@ -104,6 +104,13 @@ const t = {
   bool: () => new abap.types.Character(1, { qualifiedName: "ABAP_BOOL", ddicName: "ABAP_BOOL" }),
   char: (len) => new abap.types.Character(len, {}),
   packed: (length, decimals) => new abap.types.Packed({ length, decimals, qualifiedName: "P" }),
+  /** ABAP's N, D and T: digits kept with their leading zeros, a date as
+   *  YYYYMMDD and a time as HHMMSS - read and written as strings. What
+   *  abap2js writes for `TYPE n LENGTH 12`, `TYPE d` and `TYPE t`, so that the
+   *  model carries the value the ABAP app's would. */
+  numc: (length) => new abap.types.Numc({ length, qualifiedName: "N" }),
+  date: () => new abap.types.Date({ qualifiedName: "D" }),
+  time: () => new abap.types.Time({ qualifiedName: "T" }),
   /** A structure: `t.struct({ street: "", zip: 0 })`. A plain object field is one implicitly. */
   struct: (fields) => declared(withInitial(structFor(fields), fields)),
   /** A table of structures: `t.table({ ID: 0, title: "" })` - the argument is one ROW. */

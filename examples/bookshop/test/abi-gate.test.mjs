@@ -98,6 +98,9 @@ const RUNTIME_GLOBALS = {
   "abap.types.Float": "function",
   "abap.types.Character": "function",
   "abap.types.Packed": "function",
+  "abap.types.Numc": "function",           // t.numc( ), what abap2js writes for TYPE n
+  "abap.types.Date": "function",           // t.date( ), for TYPE d
+  "abap.types.Time": "function",           // t.time( ), for TYPE t
   "abap.types.ABAPObject": "function",
   "abap.types.DataReference": "function",
   "abap.types.Structure": "function",

@@ -7,6 +7,25 @@ starts with 0, a minor release may break the API.
 
 ## [Unreleased]
 
+### Added
+
+- **`npx cap2ui5 abap2js`: an abap2UI5 app class, translated into a cap2UI5
+  app, line for line.** `abap2js(source, options)` in code. The client and
+  the view builder being abap2UI5's own is what makes a translation that keeps
+  every line possible; what the translation does not know - a field-symbol,
+  `SELECT`, a `sy-` field - it refuses with file, row and column instead of
+  guessing. Measured on abap2UI5's samples: the 68 its first tier covers
+  behave as their transpiled ABAP originals on every roundtrip compared (view,
+  model, actions). Its parser, `@abaplint/core`, is a dependency now and is
+  loaded only when a translation runs.
+- `t.numc(n)`, `t.date()`, `t.time()` - ABAP's N, D and T as fields, read and
+  written as strings.
+
+### Changed
+
+- `scripts/assemble-runtime.sh` also copies the runtime's `downport/` - the
+  ABAP its output was transpiled from, where abap2js reads the client's types.
+
 ## [0.2.0] - 2026-09-28
 
 The client an app's `main( )` receives is abap2UI5's `z2ui5_if_client` by its
