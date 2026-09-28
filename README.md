@@ -10,8 +10,8 @@ read your entities with `cds.ql`.
 > **Status: pre-release, on npm.** The plugin works and is tested end to end
 > (wire, restart, concurrency, browser). The four abap2UI5 seams it needs
 > shipped in abap2UI5 1.144.1. Since 2026-09-27 both packages are on npm:
-> `cap2ui5@0.1.0`, and the runtime it pins, `@abap2ui5/node-runtime@1.145.0`,
-> which abap2UI5 builds and publishes itself. In this repository `runtime/` is
+> `cap2ui5`, and the runtime it pins, `@abap2ui5/node-runtime@1.145.0`, which
+> abap2UI5 builds and publishes itself. In this repository `runtime/` is
 > still a workspace stand-in for that package, which
 > `scripts/assemble-runtime.sh` fills from the published one or from an
 > upstream build. The package was drafted upstream as `@abap2ui5/runtime` and

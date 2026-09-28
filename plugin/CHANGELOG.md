@@ -7,7 +7,12 @@ starts with 0, a minor release may break the API.
 
 ## [Unreleased]
 
-The plugin now follows the conventions of the plugins at
+## [0.2.0] - 2026-09-28
+
+The client an app's `main( )` receives is abap2UI5's `z2ui5_if_client` by its
+own names, and the view builder is `z2ui5_cl_ui5_view_builder`, called as ABAP
+calls it - an ABAP app ports line by line. The plugin also follows the
+conventions of the plugins at
 [cap.cloud.sap/docs/plugins](https://cap.cloud.sap/docs/plugins/) wherever
 0.1.0 deviated from them.
 
@@ -133,5 +138,6 @@ The first release: abap2UI5 as a CAP plugin.
 - Apps are plain JavaScript classes (`defineApp`).
 - The user exit is available as `defineExit`.
 
-[Unreleased]: https://github.com/cap2UI5/cap2UI5/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/cap2UI5/cap2UI5/compare/v0.2.0...HEAD
+[0.2.0]: https://www.npmjs.com/package/cap2ui5/v/0.2.0
 [0.1.0]: https://www.npmjs.com/package/cap2ui5/v/0.1.0
