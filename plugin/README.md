@@ -77,7 +77,7 @@ returns the same names.
 |---|---|
 | lifecycle | `c.isFirstRun` (seed once), `c.isDisplay` (render), `c.canGoBack`, `c.eventName`, `c.eventArg(i)`, `c.prevApp` |
 | binding | `c.bind(field)`, `c.event(name, [args])` |
-| screen | `c.view(xml)`, `c.popup(xml)` / `c.popupClose()`, `c.nest(…)` / `c.nestClose()`, `c.messageBox(text)`, `c.messageToast(text)` |
+| screen | `c.view(xml)`, `c.popup(xml)` / `c.popupClose()`, `c.nest(…)` / `c.nestClose()`, `c.messageBox(text)`, `c.messageToast(text)` — `xml` is XML text or a `ViewBuilder` |
 | navigation | `c.navTo(app)`, `c.navBack({event, data, app})` |
 | escape hatch | `c.raw` — the transpiled `z2ui5_if_client`, async |
 
@@ -95,6 +95,56 @@ next, so state survives a restart.
 **Types:** the package ships TypeScript declarations (`index.d.ts`). In a
 JavaScript app, annotate the client for completion and checked field names:
 `/** @param {import("cap2ui5").Client<{ search: string }>} c */`.
+
+## Building a view with `ViewBuilder`
+
+A view can also be built the way an ABAP app builds one, with abap2UI5's own
+`z2ui5_cl_ui5_view_builder`, which uses the same verbs:
+
+```js
+const { defineApp, ViewBuilder } = require("cap2ui5");
+
+defineApp("HELLO", class {
+  name = "";
+
+  main(c) {
+    if (c.isDisplay) {
+      const view = ViewBuilder.factory();
+      view.ele("View", "mvc")
+              .a("xmlns", "sap.m")
+              .a("xmlns:mvc", "sap.ui.core.mvc")
+          .ele("Page")
+              .a("title", "Hello")
+              .tag("Input")
+                  .a("value", c.bind("name"))
+              .tag("Text")
+                  .a("text", { t: "{shown as typed}" })
+              .tag("Button")
+                  .a("text", "Go")
+                  .a("press", c.event("GO"));
+      c.view(view);
+      return;
+    }
+    if (c.eventName === "GO") c.messageBox(`Hello ${this.name}`);
+  }
+});
+```
+
+| | |
+|---|---|
+| `ViewBuilder.factory()` | an empty root; open the `mvc:View` and declare its `xmlns` yourself |
+| `ele(name, ns)` | add a child element and descend into it |
+| `tag(name, ns)` | add a child element and stay: the form for a leaf |
+| `a(name, value)` | an attribute on the element the chain points at: the child just added, or the node itself while it has none. A string or number is written as it is (bindings, events, constant text), a boolean renders `true`/`false`, and `{ t: text }` renders text literally, so a `{` in user input is shown rather than read as a binding |
+| `end()` | ascend to the parent |
+| `ViewBuilder.escapeLiteral(text)` | the literal escaping of `t`, for one part of a value that also carries a binding |
+
+The chain is recorded while `main( )` runs and rendered after it, by the
+transpiled `z2ui5_cl_ui5_view_builder` the runtime carries. The XML, its
+escaping and its refusals (an `end()` past the root, a duplicate attribute, an
+invalid name) are therefore exactly those of the same chain in an ABAP app. A
+refusal answers the roundtrip with the framework's error, naming the app.
+`await view.stringify()` returns the XML outside an app.
 
 ## Configure
 

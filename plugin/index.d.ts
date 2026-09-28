@@ -40,17 +40,17 @@ export interface Client<App = Record<string, unknown>> {
    */
   event(name: string, args?: unknown[]): string;
 
-  /** Show a view (XML). */
-  view(xml: string): void;
-  /** Show a popup (XML) over the view. */
-  popup(xml: string): void;
+  /** Show a view: XML text, or a ViewBuilder chain (any node of it). */
+  view(xml: string | ViewBuilder): void;
+  /** Show a popup over the view: XML text, or a ViewBuilder chain. */
+  popup(xml: string | ViewBuilder): void;
   popupClose(): void;
   /**
    * Render a fragment into a control of the main view, which stays as it is.
    * `insert`/`clear` are the UI5 mutators of the receiving aggregation
    * (default addContent/removeAllContent).
    */
-  nest(into: string, xml: string, options?: { insert?: string; clear?: string }): void;
+  nest(into: string, xml: string | ViewBuilder, options?: { insert?: string; clear?: string }): void;
   nestClose(): void;
   messageBox(text: string): void;
   messageToast(text: string): void;
@@ -117,6 +117,41 @@ export interface ExitContext {
   path: string;
   app_start: string;
   t_params: NameValue[];
+}
+
+/**
+ * abap2UI5's z2ui5_cl_ui5_view_builder, for a JavaScript app: the same verbs
+ * and the same one rule - a( ) lands on the element the chain points at, the
+ * child just added by ele( )/tag( ) or the node itself while it has none.
+ * The chain is recorded and rendered by upstream's class after main( ), so
+ * its XML and escaping are those of an ABAP app's view.
+ *
+ *     const view = ViewBuilder.factory();
+ *     view.ele("View", "mvc").a("xmlns", "sap.m").a("xmlns:mvc", "sap.ui.core.mvc")
+ *         .ele("Page").a("title", "Hello")
+ *             .tag("Input").a("value", c.bind("name"))
+ *             .tag("Button").a("text", "Go").a("press", c.event("GO"));
+ *     c.view(view);
+ */
+export class ViewBuilder {
+  /** An empty builder root; open the mvc:View and declare its xmlns yourself. */
+  static factory(): ViewBuilder;
+  /** Braces and backslashes escaped, so UI5 shows text instead of reading a binding. */
+  static escapeLiteral(text: string): string;
+  /** Add a child element and descend into it. `ns` is the namespace prefix. */
+  ele(name: string, ns?: string): ViewBuilder;
+  /** Add a child element and stay here: the form for a leaf. */
+  tag(name: string, ns?: string): ViewBuilder;
+  /**
+   * An attribute on the element the chain points at. A string or number is
+   * written as it is (bindings, events, constant text); a boolean renders
+   * true/false; `{ t: text }` renders text literally, braces and all.
+   */
+  a(name: string, value: string | number | boolean | { v?: string; b?: boolean; t?: string }): ViewBuilder;
+  /** Ascend to the parent element. */
+  end(): ViewBuilder;
+  /** The XML, rendered by upstream's builder - inside main( ) pass the builder to c.view( ) instead. */
+  stringify(): Promise<string>;
 }
 
 /** How a value maps to an ABAP type; used by defineApp, exported for tests. */

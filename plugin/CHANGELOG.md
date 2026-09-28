@@ -36,6 +36,11 @@ The plugin now follows the conventions of the plugins at
 
 ### Added
 
+- **`ViewBuilder`**: abap2UI5's `z2ui5_cl_ui5_view_builder` for JavaScript
+  apps, with the same verbs (`ele`, `tag`, `a`, `end`). The chain is rendered
+  by the upstream class in the runtime, so its XML and escaping are those of
+  an ABAP app. `c.view`, `c.popup` and `c.nest` take a builder as well as XML
+  text.
 - `cds.requires.cap2ui5: false` switches the plugin off: no route, and no
   table in the model.
 - TypeScript declarations (`index.d.ts`).
