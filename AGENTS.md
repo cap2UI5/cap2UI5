@@ -17,7 +17,7 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
 | `plugin/` | yes — the npm package `cap2ui5` |
 | `examples/bookshop/` | yes — a CAP project using it; **the test suite lives here** because the tests need a project. `srv/catalog-service.cds` is deliberately an ordinary CAP service that knows nothing about cap2UI5: it is what `coexistence.test.mjs` drives to prove the plugin is a guest in the project and not its host. |
 | `runtime/package.json`, `runtime/README.md` | yes — the stand-in's manifest |
-| `runtime/output/`, `runtime/setup/` | **no — upstream's transpiled output, never edited, never committed.** `scripts/assemble-runtime.sh` fills them from the published package (`--package X.Y.Z`) or from an upstream build. |
+| `runtime/output/`, `runtime/setup/`, `runtime/downport/` | **no — upstream's transpiled output and the ABAP it came from, never edited, never committed.** `scripts/assemble-runtime.sh` fills them from the published package (`--package X.Y.Z`) or from an upstream build. |
 | `docs/adr/`, `docs/transpiler-roadmap.md` | the decision records and the roadmap ADR-006 cites, moved here from `cap2UI5/builder-abap2UI5-js`, where they were made and which is being archived. They are the only copies this project keeps; historical paths in them refer to that repository. |
 
 ## Rules
@@ -89,6 +89,14 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
   one piece of JavaScript of its own is `escape_literal( )`, which a
   synchronous chain cannot await. `view-builder.test.mjs` pins it to the ABAP
   method, and the replay to the same chain driven directly against the class.
+- **`abap2js` refuses rather than guesses.** `plugin/lib/abap2js.js`
+  translates the part of ABAP an abap2UI5 app is written in, and anything
+  else throws an `Abap2jsError` with file, row and column. Widening it takes
+  the construct, a case in `abap2js.test.mjs` (in the fixture if the
+  construct is supported, among the refusals if not), and a run of the
+  translated samples beside their transpiled originals: a translation that
+  reads right is not the gate - one that behaves as the ABAP does is. The
+  client's types come from the runtime's `downport/`, not from a list here.
 - **Every new `abap.*` or `z2ui5_*$*` touchpoint in `plugin/lib/` goes into
   `abi-gate.test.mjs`.** The plugin couples to the transpiler's emission
   format (static `ATTRIBUTES`/`METHODS` maps, `constructor_( )`, `~` → `$`),

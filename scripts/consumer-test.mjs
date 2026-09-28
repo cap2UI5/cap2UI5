@@ -22,6 +22,9 @@
  *   - the runtime that loads is the version the plugin pins
  *   - the route answers: bootstrap page, UI5 shell, start, event, and 401
  *     for a caller with no credentials
+ *   - `npx cap2ui5 abap2js` translates an ABAP app - its parser installed
+ *     with the plugin, the client's ABAP types read from the runtime's
+ *     downport/ - and the translated app starts
  *
  * Not part of `npm test`: it installs from the network and takes about a
  * minute. Run it before publishing, and after anything that touches `files`,
@@ -104,20 +107,54 @@ defineApp("ZCL_PROBE", class {
 });
 `);
 
+  // an ABAP app for `npx cap2ui5 abap2js` to translate into srv/apps
+  fs.mkdirSync(path.join(proj, "abap"));
+  fs.writeFileSync(path.join(proj, "abap", "zcl_probe_abap.clas.abap"), `CLASS zcl_probe_abap DEFINITION PUBLIC.
+  PUBLIC SECTION.
+    INTERFACES z2ui5_if_app.
+    DATA name TYPE string VALUE \`ABAP\`.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+CLASS zcl_probe_abap IMPLEMENTATION.
+  METHOD z2ui5_if_app~main.
+    IF client->check_on_navigated( ).
+      DATA(view) = z2ui5_cl_ui5_view_builder=>factory(
+          )->ele( n = \`View\` ns = \`mvc\`
+              )->a( n = \`xmlns\`     v = \`sap.m\`
+              )->a( n = \`xmlns:mvc\` v = \`sap.ui.core.mvc\` ).
+      view->tag( \`Input\`
+          )->a( n = \`value\` v = client->_bind( name ) ).
+      client->view_display( view->stringify( ) ).
+    ENDIF.
+  ENDMETHOD.
+ENDCLASS.
+`);
+
   run("npm", ["install", "--no-audit", "--no-fund",
     ...tarballs.map((t) => path.join(dir, t))], proj);
   check("npm install of the tarballs succeeds", true);
+
+  // --- the translator the package carries -----------------------------------
+  let translated;
+  try {
+    translated = { ok: true, out: run("npx", ["--no-install", "cap2ui5", "abap2js", "abap", "--out", "srv/apps"], proj) };
+  } catch (e) {
+    translated = { ok: false, out: String(e.stderr || e.message).trim().split("\n")[0] };
+  }
+  check("npx cap2ui5 abap2js translates an ABAP app into srv/apps",
+    translated.ok && fs.existsSync(path.join(proj, "srv", "apps", "zcl_probe_abap.js")), translated.out.trim());
 
   // --- what a consumer's code sees -----------------------------------------
   const surface = probe(`console.log(JSON.stringify(Object.keys(require("cap2ui5"))))`, proj);
   const exported = surface.ok ? JSON.parse(surface.out) : [];
   check("require(\"cap2ui5\") exports the documented surface",
-    ["defineApp", "defineExit", "t", "z2ui5_cl_ui5_view_builder", "z2ui5_if_client", "ViewBuilder"]
+    ["defineApp", "defineExit", "t", "z2ui5_cl_ui5_view_builder", "z2ui5_if_client", "ViewBuilder", "abap2js"]
       .every((k) => exported.includes(k)),
     surface.ok ? exported.join(", ") : surface.why);
 
   const pkgDir = path.join(proj, "node_modules", "cap2ui5");
-  for (const f of ["README.md", "CHANGELOG.md", "LICENSE", "cds-plugin.js", "index.cds", "index.js", "index.d.ts", "lib"]) {
+  for (const f of ["README.md", "CHANGELOG.md", "LICENSE", "cds-plugin.js", "index.cds", "index.js", "index.d.ts", "lib", "bin"]) {
     check(`the package contains ${f}`, fs.existsSync(path.join(pkgDir, f)));
   }
   const types = JSON.parse(fs.readFileSync(path.join(pkgDir, "package.json"), "utf8")).types;
@@ -215,6 +252,13 @@ defineApp("ZCL_PROBE", class {
     const action = j2.S_FRONT?.S_ACTION?.T_CUSTOM?.[0] ?? j2.S_FRONT?.S_ACTION?.T_SYSTEM?.[0];
     check("the event roundtrip runs the app against the stored draft",
       evt.status === 200 && JSON.stringify(action).includes("Hello, Ada!"), JSON.stringify(action));
+
+    const abap = await fetch(`${url}/rest/root/z2ui5`, { method: "POST", headers: auth,
+      body: body("", "").replace(/ZCL_PROBE/g, "ZCL_PROBE_ABAP") });
+    const j3 = abap.status === 200 ? await abap.json() : {};
+    check("the app abap2js translated starts, its field bound",
+      abap.status === 200 && j3.MODEL?.NAME === "ABAP" && JSON.stringify(j3.S_FRONT?.S_ACTION).includes("{/NAME}"),
+      `${abap.status} ${JSON.stringify(j3.MODEL)}`);
 
     const anon = await fetch(`${url}/rest/root/z2ui5`, { method: "POST",
       headers: { "Content-Type": "application/json" }, body: body("", "") });

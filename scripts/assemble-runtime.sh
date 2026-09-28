@@ -22,9 +22,10 @@ if [ "${1:-}" = "--package" ]; then
   VERSION=${2:-latest}
   TMP=$(mktemp -d)
   (cd "$TMP" && npm pack "@abap2ui5/node-runtime@$VERSION" --silent >/dev/null && tar xzf ./*.tgz)
-  rm -rf "$RT/output" "$RT/setup" "$RT/webapp"
+  rm -rf "$RT/output" "$RT/setup" "$RT/downport" "$RT/webapp"
   cp -r "$TMP/package/output" "$RT/output"
   cp -r "$TMP/package/setup" "$RT/setup"
+  cp -r "$TMP/package/downport" "$RT/downport"
   cp "$TMP/package/package.json" "$RT/package.json"
   rm -rf "$TMP"
   echo "runtime/ assembled from @abap2ui5/node-runtime@$(node -p "require('$RT/package.json').version") ($(ls "$RT/output" | wc -l) transpiled files)"
@@ -35,7 +36,9 @@ REF=${1:?usage: assemble-runtime.sh <upstream checkout> | --package [version]}
 for d in node/output/init.mjs node/setup/setup.mjs; do
   test -f "$REF/$d" || { echo "missing $REF/$d - run npm run auto_downport && npm run auto_transpile there" >&2; exit 1; }
 done
-rm -rf "$RT/output" "$RT/setup" "$RT/webapp"
+rm -rf "$RT/output" "$RT/setup" "$RT/downport" "$RT/webapp"
 cp -r "$REF/node/output" "$RT/output"
 mkdir -p "$RT/setup" && cp "$REF/node/setup/setup.mjs" "$RT/setup/"
+# the ABAP the output was transpiled from - abap2js reads the client's types there
+if [ -d "$REF/node/downport" ]; then cp -r "$REF/node/downport" "$RT/downport"; fi
 echo "runtime/ assembled from $REF ($(ls "$RT/output" | wc -l) transpiled files)"

@@ -274,6 +274,12 @@ export const t: {
   char(length: number): string;
   /** A decimal amount: P, `length` bytes, `decimals` places. */
   packed(length: number, decimals: number): number;
+  /** NUMC n: digits, kept with their leading zeros. */
+  numc(length: number): string;
+  /** A date, D: YYYYMMDD. */
+  date(): string;
+  /** A time, T: HHMMSS. */
+  time(): string;
   /** A structure; a plain object field is one implicitly. */
   struct<S extends object>(fields: S): S;
   /** A table of structures - the argument is one ROW, the initial value is empty. */
@@ -360,3 +366,29 @@ export { z2ui5_cl_ui5_view_builder as ViewBuilder };
 
 /** How a value maps to an ABAP type; used by defineApp, exported for tests. */
 export function shapeOf(value: unknown, path?: string[]): unknown;
+
+export interface Abap2jsOptions {
+  /** The file the source came from: named in messages, and the class's file name. */
+  file?: string;
+  /** Directories the other classes a class names are read from - `zcl_other=>ty_s_row`. */
+  lib?: string[];
+  /** Written into the header as `// @origin <origin>`. */
+  origin?: string;
+  /** "esm" (the default) imports from cap2ui5, "cjs" requires it. */
+  format?: "esm" | "cjs";
+}
+
+/**
+ * Translate an abap2UI5 app class - a class implementing z2ui5_if_app - into
+ * a cap2UI5 app module, line for line: `code` registers the app under the
+ * class's name with defineApp( ). What the translation does not know it
+ * refuses with an Abap2jsError naming file, row and column.
+ */
+export function abap2js(source: string, options?: Abap2jsOptions): { name: string; code: string };
+
+/** What abap2js throws for a class it does not translate. */
+export class Abap2jsError extends Error {
+  file: string;
+  row?: number;
+  col?: number;
+}

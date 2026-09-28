@@ -4,6 +4,7 @@ package-lock.json
 # the runtime content is upstream's transpiled output: scripts/assemble-runtime.sh
 runtime/output/
 runtime/setup/
+runtime/downport/
 .upstream/
 
 # the example's database and screenshots

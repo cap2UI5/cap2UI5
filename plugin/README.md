@@ -124,7 +124,7 @@ JavaScript's own, and why:
 `check_on_navigated( )` is also true every time the app gets the screen back
 — a called app leaving, a value help closing, a bookmark restored.
 
-**State:** strings, numbers, booleans, `t.packed(l, d)`, `t.char(n)`, a plain
+**State:** strings, numbers, booleans, `t.packed(l, d)`, `t.char(n)`, `t.numc(n)`, `t.date()`, `t.time()`, a plain
 object (a structure), `t.table({ …one row… })` — and those nest, up to 8
 levels. Component names are UPPERCASE in the model. The whole instance is
 persisted to `cap2ui5.Drafts` after every roundtrip and rebuilt before the
@@ -197,6 +197,58 @@ escaping and its refusals (an `end()` past the root, a duplicate attribute, an
 invalid name) are therefore exactly those of the same chain in an ABAP app. A
 refusal answers the roundtrip with the framework's error, naming the app.
 `ViewBuilder` is the same class, for code that prefers a JavaScript name.
+
+## An ABAP app, translated: `npx cap2ui5 abap2js`
+
+Because the client and the view builder are abap2UI5's own, an abap2UI5 app
+class translates into a cap2UI5 app line for line - and the package does it:
+
+```bash
+npx cap2ui5 abap2js src/z2ui5_cl_my_app.clas.abap --out srv/apps
+```
+
+`z2ui5_cl_my_app.clas.abap` becomes `srv/apps/z2ui5_cl_my_app.js`, registered
+as `Z2UI5_CL_MY_APP`, so `?app_start=` is the same on both sides. The module
+starts where the ABAP statement starts and breaks where the ABAP breaks: a
+view chain keeps one call per line, `VALUE #( )` one row per line, comments
+come along and texts are never touched. A directory translates every class in
+it.
+
+| option | |
+|---|---|
+| `--out <dir>` | where the modules go, `srv/apps` by default |
+| `--lib <dir>` | where other classes a class names are read from - `zcl_other=>ty_s_row` (repeatable; the inputs' directories by default) |
+| `--origin <text>` | writes `// @origin <text> <input path>` into each module |
+| `--esm`, `--cjs` | the module format; by default what the `package.json` nearest to `--out` declares |
+| `--check` | writes nothing and exits 1 when a module is missing or would change - for CI |
+
+It knows the part of ABAP an abap2UI5 app is written in - attributes and
+`TYPES`, `VALUE #( )`, `COND`/`SWITCH`, string templates, `IF`/`CASE`/`DO`,
+the client's and the view builder's calls - and **refuses everything else**
+with file, row and column (`refused: z2ui5_cl_x.clas.abap:41:7 - LOOP AT ...
+ASSIGNING / REFERENCE INTO writes through the row - not supported yet`)
+rather than guess. What it writes where JavaScript differs from ABAP:
+
+- `_bind( s_order-customer )` is `_bind("s_order-customer")`; a `_bind( )` of
+  anything but an attribute or its component is refused.
+- `nav_app_call( NEW zcl_other( ) )` is `nav_app_call("ZCL_OTHER")`.
+- `abap_bool` is a boolean; where ABAP turns it into a string - a string
+  template, `CONV string( )`, a `t_arg` row - it is `"X"` or `""`, as ABAP
+  prints it.
+- `TYPE p`, `n`, `d`, `t` fields are `t.packed( )`, `t.numc( )`, `t.date( )`,
+  `t.time( )`; a structure `TYPES` is a module constant, and `INCLUDE TYPE` of
+  it that constant, spread.
+- A local ABAP scopes to the method and JavaScript would scope to a block -
+  declared in a `WHEN`, or used after the `IF`/`LOOP` that declares it - is
+  declared on top of the method, starting with the value ABAP gives it.
+- `CONV string( )` of a number is `String( )`, without ABAP's trailing sign
+  position (`"0 "`).
+
+In code, `abap2js(source, { file, lib, origin, format })` answers
+`{ name, code }` and throws an `Abap2jsError` with `file`, `row` and `col`.
+How far "line for line" goes was measured on abap2UI5's samples: each
+translated sample served beside its original, transpiled, in one cap2UI5
+server, and every roundtrip compared - view, model and actions.
 
 ## Configure
 
