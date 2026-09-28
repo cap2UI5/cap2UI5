@@ -72,8 +72,9 @@ CLASS zcl_js_translated IMPLEMENTATION.
         LOOP AT t_rows INTO DATA(row) WHERE selected = abap_true.
           selected = selected + 1.
         ENDLOOP.
-        " abap_bool prints as ABAP prints it: X, or nothing
-        greeting = |Hello { name }, active: { active }, { lines( t_rows ) } rows, { selected } selected|.
+        " abap_bool prints as ABAP prints it: X, or nothing - and after ENDLOOP,
+        " row is the last row the loop read
+        greeting = |Hello { name }, active: { active }, { lines( t_rows ) } rows, { selected } selected ({ row-title })|.
         client->message_box_display( greeting ).
       WHEN `TOGGLE`.
         active = xsdbool( active = abap_false ).
@@ -124,6 +125,10 @@ CLASS zcl_js_translated IMPLEMENTATION.
     page->tag( `Button`
         )->a( n = `text`  v = `Edit`
         )->a( n = `press` v = client->_event( val = cs_mode-edit t_arg = VALUE #( ( `a` ) ( name ) ) ) ).
+    page->tag( `Switch`
+        )->a( n = `state`        b = active
+        " the text beside it: what SWITCH gives is a string, the abap_bool it looks at is not
+        )->a( n = `customTextOn` t = SWITCH #( active WHEN abap_true THEN `on` ELSE `off` ) ).
 
     client->view_display( view->stringify( ) ).
 

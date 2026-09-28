@@ -14,7 +14,7 @@ starts with 0, a minor release may break the API.
   the view builder being abap2UI5's own is what makes a translation that keeps
   every line possible; what the translation does not know - a field-symbol,
   `SELECT`, a `sy-` field - it refuses with file, row and column instead of
-  guessing. Measured on abap2UI5's samples: the 68 its first tier covers
+  guessing. Measured on abap2UI5's samples: the 69 its first tier covers
   behave as their transpiled ABAP originals on every roundtrip compared (view,
   model, actions). Its parser, `@abaplint/core`, is a dependency now and is
   loaded only when a translation runs.

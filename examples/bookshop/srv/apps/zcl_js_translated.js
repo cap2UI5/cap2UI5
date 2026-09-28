@@ -46,15 +46,18 @@ defineApp("ZCL_JS_TRANSLATED", class {
   }
 
   on_event() {
+    let selected;
+    let row = { ...ty_s_row };
 
     switch (this.client.get_event()) {
       case "GREET": case "HELLO":
-        let selected = 0;
-        for (const row of this.t_rows.filter((row) => row.selected === true)) {
+        selected = 0;
+        for (row of this.t_rows.filter((row) => row.selected === true)) {
           selected = selected + 1;
         }
-        // abap_bool prints as ABAP prints it: X, or nothing
-        this.greeting = `Hello ${this.name}, active: ${this.active ? "X" : ""}, ${this.t_rows.length} rows, ${selected} selected`;
+        // abap_bool prints as ABAP prints it: X, or nothing - and after ENDLOOP,
+        // row is the last row the loop read
+        this.greeting = `Hello ${this.name}, active: ${this.active ? "X" : ""}, ${this.t_rows.length} rows, ${selected} selected (${row.title})`;
         this.client.message_box_display(this.greeting);
         break;
       case "TOGGLE":
@@ -109,6 +112,10 @@ defineApp("ZCL_JS_TRANSLATED", class {
     page.tag("Button")
         .a({ n: "text",  v: "Edit" })
         .a({ n: "press", v: this.client._event({ val: cs_mode.edit, t_arg: [ "a", this.name ] }) });
+    page.tag("Switch")
+        .a({ n: "state",        b: this.active })
+        // the text beside it: what SWITCH gives is a string, the abap_bool it looks at is not
+        .a({ n: "customTextOn", t: (this.active === true ? "on" : "off") });
 
     this.client.view_display(view.stringify());
 

@@ -245,9 +245,14 @@ function readModel(af, file, lib, strict) {
         break;
       }
       case "IncludeType": {
+        if (hasWord(s, "as") || hasWord(s, "renaming")) {
+          fail("INCLUDE TYPE ... AS / RENAMING WITH SUFFIX is not supported", s.getFirstToken());
+          break;
+        }
         const t = resolveType(m, text(child(s, "TypeName")), s.getFirstToken());
         if (t.k !== "struct") { fail("INCLUDE TYPE of a type that is no structure", s.getFirstToken()); break; }
-        stack.at(-1)?.fields.push(...t.fields.map((f) => ({ ...f, comments: [] })));
+        // flat, as in ABAP - `include` remembers where the components came from
+        stack.at(-1)?.fields.push(...t.fields.map((f) => ({ ...f, comments: [], include: t })));
         break;
       }
       case "Type": case "Data": case "Constant": {
@@ -525,7 +530,7 @@ class Generator {
       if (t.type.k !== "struct") continue;
       if (out.length) out.push("");
       out.push(...t.comments.map((c) => this.comment(c)).filter((l) => l !== null));
-      out.push(`const ${t.name} = ${this.structLiteral(t.type, 0, "field")};`);
+      out.push(`const ${t.name} = ${this.structLiteral(t.type, "field")};`);
     }
     for (const key of this.m.constOrder) {
       const c = this.m.constants.get(key);
@@ -589,20 +594,35 @@ class Generator {
     return `t.${expr}`;
   }
   /** A structure: the module constant of this class's own named type, or the
-   *  literal of any other. A local variable gets a copy, never the constant. */
+   *  literal of any other. A local variable gets a copy, never the constant -
+   *  and a literal where the constant holds a field's t.*( ), which only a
+   *  class field reads. */
   structRef(type, mode) {
-    const own = type.owner === this.m && type.name && this.m.types.get(lc(type.name))?.type === type;
-    if (own) return mode === "field" ? type.name : `{ ...${type.name} }`;
-    return this.structLiteral(type, 2, mode);
+    if (this.ownConstant(type, mode)) return mode === "field" ? type.name : `{ ...${type.name} }`;
+    return this.structLiteral(type, mode);
   }
-  structLiteral(type, indent, mode) {
-    const pad = " ".repeat(indent + 2);
-    const rows = type.fields.map((f) => {
-      const cmts = (f.comments ?? []).map((c) => this.comment(c)).filter((l) => l !== null).map((l) => pad + l);
+  ownConstant(type, mode) {
+    const own = type.owner === this.m && type.name && this.m.types.get(lc(type.name))?.type === type;
+    const plain = (t) => ["string", "int", "bool"].includes(t.k) || (t.k === "struct" && t.fields.every((f) => plain(f.type)));
+    return own && (mode === "field" || plain(type));
+  }
+  /** `{`, a line per component, `}` - from column 0; whoever places it
+   *  indents the lines after the first. */
+  structLiteral(type, mode) {
+    const rows = [];
+    for (let i = 0; i < type.fields.length; i++) {
+      const f = type.fields[i];
+      // INCLUDE TYPE of an own type: its constant, spread - the ABAP names it too
+      if (f.include && this.ownConstant(f.include, mode)) {
+        rows.push(`  ...${f.include.name},`);
+        while (type.fields[i + 1]?.include === f.include) i++;
+        continue;
+      }
+      rows.push(...(f.comments ?? []).map((c) => this.comment(c)).filter((l) => l !== null).map((l) => `  ${l}`));
       const value = f.value ? this.literal(f.value, f.type) : this.initial(f.type, mode, f.stmt);
-      return [...cmts, `${pad}${f.name}:${" ".repeat(f.gap ?? 1)}${value},`].join("\n");
-    });
-    return `{\n${rows.join("\n")}\n${" ".repeat(indent)}}`;
+      rows.push(`  ${f.name}:${" ".repeat(f.gap ?? 1)}${value.replace(/\n/g, "\n  ")},`);
+    }
+    return `{\n${rows.join("\n")}\n}`;
   }
 
   fields() {
@@ -621,8 +641,11 @@ class Generator {
         if (line !== null) out.push(`  ${line}`);
       }
       const value = a.value ? this.literal(a.value, a.type) : this.initial(a.type, "field", a.stmt);
-      const typeNote = a.type.k === "struct" && a.type.owner !== this.m ? `      // ${a.type.name}` : "";
-      out.push(`  ${a.name}${" ".repeat(a.gap)}= ${value.replace(/\n/g, "\n  ")};${typeNote}`);
+      // another class's structure is written out - the note says which it is
+      const typeNote = a.type.k === "struct" && a.type.owner !== this.m
+        ? `      // ${a.type.owner?.name ? `${a.type.owner.name}=>` : ""}${a.type.name}` : "";
+      const [first, ...rest] = `  ${a.name}${" ".repeat(a.gap)}= ${value.replace(/\n/g, "\n  ")};`.split("\n");
+      out.push(first + typeNote, ...rest);
     }
     return out;
   }
@@ -652,7 +675,8 @@ class MethodGen {
     this.locals = new Map();          // lc name -> { name, type, js }
     for (const p of def.importing) this.locals.set(lc(p.name), { name: p.name, js: jsName(p.name), type: p.type });
     if (def.returning) this.locals.set(lc(def.returning.name), { name: def.returning.name, js: jsName(def.returning.name), type: def.returning.type });
-    this.hoisted = new Set();
+    this.hoisted = new Set();          // declared on top of the method
+    this.outside = new Set();          // … and read where their declaration may not have run
     this.reassigned = new Set();
   }
 
@@ -674,17 +698,42 @@ class MethodGen {
     }
     out.push(`${pad}${this.signature()} {`);
     this.scan();
+    const top = out.length;
+    this.body(out);
+    // the declarations on top come last: a local's type is known once its
+    // statement is translated
     const decls = [];
+    const indent = (value) => value.replace(/\n/g, `\n${inner}`);
     if (this.def.returning) {
       const r = this.def.returning;
-      decls.push(`${inner}let ${jsName(r.name)} = ${this.g.initial(r.type, "plain", this.def.stmt)};`);
+      decls.push(`${inner}let ${jsName(r.name)} = ${indent(this.g.initial(r.type, "plain", this.def.stmt))};`);
     }
-    for (const name of this.hoisted) decls.push(`${inner}let ${this.locals.get(name)?.js ?? jsName(name)};`);
-    out.push(...decls);
-    this.body(out);
+    for (const name of this.hoisted) {
+      const local = this.locals.get(name);
+      const start = this.outside.has(name) ? this.startValue(local) : "";
+      decls.push(`${inner}let ${local?.js ?? jsName(name)}${start ? ` = ${indent(start)}` : ""};`);
+    }
+    out.splice(top, 0, ...decls);
     if (this.def.returning) out.push(`${inner}return ${jsName(this.def.returning.name)};`);
     out.push(`${pad}}`);
     return out;
+  }
+
+  /** What a local declared on top starts with. ABAP creates every local on
+   *  entering the method - with its DATA's VALUE, else its type's initial
+   *  value - so that is what a read finds where the declaration did not run
+   *  (`IF … DATA(x) = 1. ENDIF.` and x after it). Nothing when the type is
+   *  not known here. */
+  startValue(local) {
+    if (!local) return "";
+    if (local.start !== undefined) return local.start;
+    if (!local.type || local.type.k === "unknown") return "";
+    try {
+      return this.g.initial(local.type, "plain", this.def.stmt);
+    } catch (e) {
+      if (e instanceof Abap2jsError) return "";
+      throw e;
+    }
   }
 
   signature() {
@@ -707,7 +756,8 @@ class MethodGen {
   /** Before emitting: which locals are assigned twice (let, not const), and
    *  which are used outside the block they are declared in - ABAP scopes a
    *  local to the method, JavaScript to the block, so those are declared at
-   *  the top of the method instead. */
+   *  the top of the method instead. So is what a WHEN declares right in it:
+   *  a case clause is no block, its `let` would belong to the whole switch. */
   scan() {
     const E = A().Expressions;
     const blocks = [{ id: 0, kind: "method" }];
@@ -731,18 +781,30 @@ class MethodGen {
       for (const f of s.findAllExpressions(E.Field)) {
         const name = lc(text(f));
         const d = declared.get(name);
-        if (d !== undefined && !(path === d || path.startsWith(d + "/"))) this.hoisted.add(name);
+        if (d !== undefined && !(path === d || path.startsWith(d + "/"))) {
+          this.hoisted.add(name);
+          this.outside.add(name);
+        }
       }
       // a LOOP's INTO DATA( ) lives in the loop's block in JavaScript (for…of),
       // so a use after ENDLOOP - legal in ABAP, the last row - declares it on top
       const at = k === "Loop" ? `${path}/${next}` : path;
+      const inWhen = k !== "Loop" && blocks.at(-1).kind === "when";
       for (const inline of s.findAllExpressions(E.InlineData)) {
         const name = lc(text(inline.findFirstExpression(E.Field)));
         declared.set(name, at);
+        if (inWhen) this.hoisted.add(name);
       }
       if (k === "Data") {
         const name = lc(text(s.findFirstExpression(E.DefinitionName)));
         declared.set(name, path);
+        if (inWhen) this.hoisted.add(name);
+        // DATA is no statement that runs: ABAP creates the variable once, on
+        // entering the method, and the next iteration does not set it back
+        if (blocks.some((b) => b.kind === "loop")) {
+          this.fail("DATA inside DO / LOOP / WHILE keeps its value from one iteration to the next in ABAP - " +
+            "not supported, declare it before the loop", s);
+        }
       }
       if (k === "Move") {
         const target = s.findDirectExpression(E.Target);
@@ -750,7 +812,8 @@ class MethodGen {
           this.reassigned.add(lc(text(target)));
         }
       }
-      if (["If", "Do", "Loop", "While"].includes(k)) open("block");
+      if (k === "If") open("block");
+      if (["Do", "Loop", "While"].includes(k)) open("loop");
       if (k === "Case") open("case");
     }
   }
@@ -761,12 +824,22 @@ class MethodGen {
     let lastRow = this.impl.start.getLastToken().getRow();
     const cases = [];                  // open CASEs: { bodyCol, hasBody }
     const push = (line) => out.push(line);
-    for (const s of this.impl.body) {
+    // abaplint lists a comment that stands INSIDE a statement - between the
+    // calls of a view chain - before that statement: the statement places it,
+    // at its row (breakAt)
+    const statements = this.impl.body;
+    const inside = new Set(statements.filter((s, i) => {
+      if (kind(s) !== "Comment") return false;
+      const next = statements.slice(i + 1).find((x) => kind(x) !== "Comment");
+      const r = s.getFirstToken().getRow();
+      return next && next.getFirstToken().getRow() < r && r < next.getLastToken().getRow();
+    }));
+    for (const s of statements) {
       const k = kind(s);
       const tok = s.getFirstToken();
       const row = tok.getRow();
       if (k === "Comment") {
-        if (g.emittedComments.has(s)) continue;
+        if (g.emittedComments.has(s) || inside.has(s)) continue;
         if (row === lastRow && out.length) {           // a comment behind code on the same row
           const line = g.comment(s);
           if (line !== null) out[out.length - 1] += `  ${line}`;
@@ -833,8 +906,9 @@ class MethodGen {
       case "Call": return `${this.callChain(s.getChildren().find((c) => !isToken(c)))};`;
       case "Data": {
         const decl = declaration(this.m, s);
-        this.locals.set(lc(decl.name), { name: decl.name, js: jsName(decl.name), type: decl.type });
-        const value = decl.value ? this.g.literal(decl.value, decl.type) : this.g.initial(decl.type, "plain", s);
+        const start = decl.value ? this.g.literal(decl.value, decl.type) : this.g.initial(decl.type, "plain", s);
+        this.locals.set(lc(decl.name), { name: decl.name, js: jsName(decl.name), type: decl.type, start });
+        const value = start.replace(/\n/g, `\n${" ".repeat(s.getFirstToken().getCol() - 1)}`);
         if (this.hoisted.has(lc(decl.name))) return `${jsName(decl.name)} = ${value};`;
         return `let ${jsName(decl.name)} = ${value};`;
       }
@@ -1724,8 +1798,15 @@ class MethodGen {
         const t = node.findDirectExpression(E.TypeNameOrInfer);
         return t && text(t) !== "#" ? resolveType(this.m, text(t), t.getFirstToken()) : { k: "unknown" };
       }
-      if (w === "cond") return this.typeOfSource(node.findDirectExpression(E.CondBody)?.findDirectExpression(E.Source));
-      if (w === "switch") return this.typeOfSource(node.findDirectExpression(E.SwitchBody)?.findDirectExpression(E.Source) && node.findDirectExpression(E.SwitchBody).findDirectExpressions(E.Source)[1]);
+      if (w === "cond" || w === "switch") {
+        // the type it names, else what its first THEN gives - not SWITCH's
+        // operand, nor the value a WHEN compares it with
+        const t = node.findDirectExpression(E.TypeNameOrInfer);
+        if (t && text(t) !== "#") return resolveType(this.m, text(t), t.getFirstToken());
+        const body = (node.findDirectExpression(w === "cond" ? E.CondBody : E.SwitchBody)?.getChildren() ?? []);
+        const then = body.findIndex((c) => isToken(c) && lc(text(c)) === "then");
+        return this.typeOfSource(then < 0 ? null : body.slice(then + 1).find((c) => !isToken(c)));
+      }
       if (w === "(") return this.typeOfSource(parts[1]);
       return { k: "unknown" };
     }

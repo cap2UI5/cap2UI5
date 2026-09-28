@@ -50,6 +50,30 @@ test("line for line: a view chain keeps its calls, lines and columns", () => {
     "a structure TYPES is a module constant, its components aligned as the ABAP aligned them");
   assert.match(code, /this\.client\._bind\("s_order-title"\)/, "_bind( ) takes the field's name");
   assert.match(code, /this\.client\.nav_app_call\("ZCL_JS_HELLO"\)/, "nav_app_call( NEW zcl( ) ) names the app");
+  assert.match(code, /^ {2}on_event\(\) \{\n {4}let selected;\n {4}let row = \{ \.\.\.ty_s_row \};\n/m,
+    "declared on top, where ABAP has every local: what a WHEN declares (a case clause is no block), and a LOOP's " +
+    "row read after ENDLOOP - which starts initial, as in ABAP, should the loop not run");
+  assert.match(code, /^ {8}for \(row of this\.t_rows\.filter\(/m, "the loop writes the row declared on top");
+  assert.match(code, /^ {8}\.a\(\{ n: "state", {8}b: this\.active \}\)\n {8}\/\/ the text beside it: [^\n]+\n {8}\.a\(\{ n: "customTextOn"/m,
+    "a comment between the calls of a chain stays between them");
+});
+
+test("INCLUDE TYPE of the class's own type is that type's constant, spread", () => {
+  const { code } = abap2js(`CLASS zcl_js_include DEFINITION PUBLIC.
+  PUBLIC SECTION.
+    INTERFACES z2ui5_if_app.
+    TYPES: BEGIN OF ty_s_head, title TYPE string, END OF ty_s_head.
+    DATA BEGIN OF s_order.
+      INCLUDE TYPE ty_s_head.
+      DATA note TYPE string.
+    DATA END OF s_order.
+ENDCLASS.
+CLASS zcl_js_include IMPLEMENTATION.
+  METHOD z2ui5_if_app~main.
+  ENDMETHOD.
+ENDCLASS.
+`, { file: "zcl_js_include.clas.abap" });
+  assert.match(code, /^ {2}s_order = \{\n {4}\.\.\.ty_s_head,\n {4}note: "",\n {2}\};$/m);
 });
 
 test("the translated app starts: its view and model are the ABAP app's", async () => {
@@ -61,6 +85,7 @@ test("the translated app starts: its view and model are the ABAP app's", async (
   assert.match(xml, /<Input value="\{\/S_ORDER\/TITLE\}"\/>/);
   assert.match(xml, /<Text text="\{\/CODE\}"\/>/, "a path binding inside \\{ \\} - ABAP's escapes undone, JavaScript's applied");
   assert.match(xml, /<List items="\{\/T_ROWS\}">/);
+  assert.match(xml, /<Switch state="false" customTextOn="off"\/>/, "SWITCH #( ) on an abap_bool gives its THEN's string - no X");
   const m = r.json.MODEL;
   assert.equal(m.NAME, "World", "DATA … VALUE is the field's initial value");
   assert.equal(m.CODE, "000000", "TYPE n LENGTH 6 is t.numc( 6 )");
@@ -73,15 +98,15 @@ test("its events: CASE with OR, abap_bool as ABAP prints it, a called app", asyn
   for (const event of ["GREET", "HELLO"]) {
     const r = await P({ app: APP, id: start.json.S_FRONT.ID, event });
     assert.equal(r.status, 200, r.text.slice(0, 300));
-    assert.deepEqual(custom(r)[0].slice(0, 3), ["MESSAGE_BOX", "show", "Hello World, active: , 2 rows, 1 selected"],
-      `WHEN … OR, LOOP AT … WHERE - ${event}`);
+    assert.deepEqual(custom(r)[0].slice(0, 3), ["MESSAGE_BOX", "show", "Hello World, active: , 2 rows, 1 selected (first)"],
+      `WHEN … OR, LOOP AT … WHERE and its row after ENDLOOP - ${event}`);
   }
 
   const toggled = await P({ app: APP, id: start.json.S_FRONT.ID, event: "TOGGLE" });
   assert.deepEqual(custom(toggled)[0], ["SET_TITLE", "2 rows", "X"],
     "an own method's RETURNING value, and CONV string( abap_true ) is X");
   const greet = await P({ app: APP, id: toggled.json.S_FRONT.ID, event: "GREET" });
-  assert.equal(custom(greet)[0][2], "Hello World, active: X, 2 rows, 1 selected", "the toggled abap_bool, in a string template");
+  assert.equal(custom(greet)[0][2], "Hello World, active: X, 2 rows, 1 selected (first)", "the toggled abap_bool, in a string template");
 
   const edit = await P({ app: APP, id: start.json.S_FRONT.ID, event: "EDIT" });
   assert.deepEqual(custom(edit)[0].slice(0, 3), ["MESSAGE_TOAST", "show", "edit mode"], "WHEN OTHERS, SWITCH #( ) on a constant");
@@ -124,6 +149,11 @@ test("what it does not know, it refuses - with file, row and column", () => {
     ["    client->message_toast_display( sy-uname ).", "", /sy- fields are not supported yet/, 12],
     // not the translation's limit but the model's: defineApp( ) has no table of scalars yet
     ["", "    DATA names TYPE string_table.", /a table of scalars cannot be a cap2UI5 field yet/, 6],
+    ["", "    DATA BEGIN OF s_both.\n      INCLUDE TYPE ty_s_row AS row RENAMING WITH SUFFIX _x.\n    DATA END OF s_both.",
+      /INCLUDE TYPE \.\.\. AS \/ RENAMING WITH SUFFIX is not supported/, 7],
+    // DATA runs once, on entering the method: a `let` in the loop would reset it every iteration
+    ["    DO 2 TIMES.\n      DATA count TYPE i.\n      count = count + 1.\n    ENDDO.", "",
+      /DATA inside DO \/ LOOP \/ WHILE keeps its value from one iteration to the next/, 13],
   ];
   for (const [body, data, message, row] of cases) {
     const e = refusal(body, data);

@@ -236,7 +236,11 @@ rather than guess. What it writes where JavaScript differs from ABAP:
   template, `CONV string( )`, a `t_arg` row - it is `"X"` or `""`, as ABAP
   prints it.
 - `TYPE p`, `n`, `d`, `t` fields are `t.packed( )`, `t.numc( )`, `t.date( )`,
-  `t.time( )`; a structure `TYPES` is a module constant.
+  `t.time( )`; a structure `TYPES` is a module constant, and `INCLUDE TYPE` of
+  it that constant, spread.
+- A local ABAP scopes to the method and JavaScript would scope to a block -
+  declared in a `WHEN`, or used after the `IF`/`LOOP` that declares it - is
+  declared on top of the method, starting with the value ABAP gives it.
 - `CONV string( )` of a number is `String( )`, without ABAP's trailing sign
   position (`"0 "`).
 
