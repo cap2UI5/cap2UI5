@@ -84,7 +84,7 @@ Only in development; a production profile prints neither. The full example is
 | | |
 |---|---|
 | lifecycle | `c.isFirstRun` (seed once), `c.isDisplay` (render), `c.canGoBack`, `c.eventName`, `c.eventArg(i)`, `c.prevApp`, `c.eventData`, `c.get()` (`client->get( )`), `c.appStateHref` |
-| binding | `c.bind(field, {path, row, column, omitInitial, omitInitialPaths, json})` |
+| binding | `c.bind(field, {path, row, column, omitInitial, omitInitialPaths, json})`, `c.bind("field.component")` |
 | handlers | `c.event(name, [args], {preventDefault, argLiteral, queueLast, noBusy, …})`, `c.eventNavBack()`, `c.eventFollowUpAction(action, [args], {view})` |
 | screen | `c.view(xml)` / `c.viewClose()`, `c.popup(xml)` / `c.popupClose()`, `c.popover(xml, byId)` / `c.popoverClose()`, `c.nest(into, xml, {insert, clear})` / `c.nestClose()`, `c.nest2(…)` / `c.nest2Close()`, `c.messageBox(text, {type, title, actions, …})`, `c.messageToast(text, {duration})`, `c.followUpAction(action, [args], {view})` |
 | navigation | `c.navTo(app, fields)`, `c.navBack({event, data, app})`, `c.hashSet(hash)`, `c.hashReplace(hash)`, `c.appStateSetActive()` |

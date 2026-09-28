@@ -541,13 +541,16 @@ function defineApp(name, cls, opts = {}) {
 
         // -- binding and events
         /** The binding for a field: `{/NAME}`, or with `{ path: true }` the
-         *  bare path `/NAME` a composed binding needs. `row` and `column`
-         *  address one cell of a table field (tab, tab_index); `omitInitial`,
-         *  `omitInitialPaths` and `json` are _bind( )'s options of those names.
-         *  A binding with options is registered by the framework after main( ),
-         *  so it comes back as a placeholder - embed it, like c.event( ). */
+         *  bare path `/NAME` a composed binding needs. A dotted name binds a
+         *  component of a structure field, as `_bind( s_order-customer )` does:
+         *  `c.bind("order.customer")`. `row` and `column` address one cell of
+         *  a table field (tab, tab_index); `omitInitial`, `omitInitialPaths`
+         *  and `json` are _bind( )'s options of those names. A component, a
+         *  cell or an option is registered by the framework after main( ), so
+         *  it comes back as a placeholder - embed it, like c.event( ). */
         bind(field, opts) {
-          if (!(field in paths)) {
+          const [top, ...components] = String(field).split(".");
+          if (!(top in paths)) {
             throw new Error(
               `c.bind("${field}"): not a bindable field of this app — ` +
                 `known: ${Object.keys(paths).join(", ") || "(none)"}`,
@@ -555,9 +558,20 @@ function defineApp(name, cls, opts = {}) {
           }
           const who = `c.bind("${field}")`;
           const o = optionsOf(opts, BIND, who);
+          // the component the dotted name points at, through the structure shapes
+          let shape = shapes[top];
+          const keys = [];
+          for (const [i, name] of components.entries()) {
+            if (shape.k !== "struct" || !Object.hasOwn(shape.fields, name)) {
+              const at = [top, ...components.slice(0, i)].join(".");
+              throw new Error(`${who}: ${name} is not a component of ${at}` + (shape.k === "struct"
+                ? ` - known: ${Object.keys(shape.fields).join(", ")}` : `, which is no structure`));
+            }
+            keys.push(shape.fields[name].key);
+            shape = shape.fields[name].shape;
+          }
           const cell = o.row !== undefined || o.column !== undefined;
           if (cell) {
-            const shape = shapes[field];
             if (shape.k !== "table") {
               throw new Error(`${who}: row and column address a cell of a TABLE field, and ${field} is not one`);
             }
@@ -568,15 +582,16 @@ function defineApp(name, cls, opts = {}) {
               throw new Error(`${who}: "${o.column}" is not a column of ${field} - known: ${Object.keys(shape.fields).join(", ")}`);
             }
           }
-          if (cell || o.omit_initial || o.omit_initial_paths || o.json) {
+          if (keys.length || cell || o.omit_initial || o.omit_initial_paths || o.json) {
             return placeholder({
-              kind: "bind", field, path: Boolean(o.path), row: o.row, column: o.column,
+              kind: "bind", field: top, components: keys, path: Boolean(o.path),
+              row: o.row, column: o.row === undefined ? undefined : shape.fields[o.column].key,
               omitInitial: Boolean(o.omit_initial), json: Boolean(o.json),
               omitInitialPaths: o.omit_initial_paths && stringList(o.omit_initial_paths, `${who} omitInitialPaths`),
             });
           }
           // path_only is the same binding without its braces (finalize_path)
-          return o.path ? paths[field].slice(1, -1) : paths[field];
+          return o.path ? paths[top].slice(1, -1) : paths[top];
         },
         /** The wire string for an event. `args` travel with it and come back
          *  as c.eventArg(1..n) - which is how two buttons can fire ONE event
@@ -766,18 +781,21 @@ function defineApp(name, cls, opts = {}) {
         }
         return s;
       };
-      /** _bind( ) with its options. A cell is the component box of that row
-       *  of the table: bind_tab_cell( ) finds it by reference. */
+      /** _bind( ) with its options, on the box itself: the framework finds a
+       *  component, like a field, by reference - and a cell as the component
+       *  box of that row of the table (bind_tab_cell). */
       const bindWith = async (p) => {
-        const input = { val: this[p.field], result: 1 };
+        let box = this[p.field];
+        for (const k of p.components) box = box.get()[k];
+        const input = { val: box, result: 1 };
         if (p.row !== undefined) {
-          const table = this[p.field];
-          const row = table.array()[p.row - 1];
+          const row = box.array()[p.row - 1];
           if (!row) {
-            throw new Error(`c.bind("${p.field}", { row: ${p.row} }): the table has ${table.array().length} row(s)`);
+            throw new Error(`c.bind( ${[p.field, ...p.components].join(".")}, { row: ${p.row} } ): ` +
+              `the table has ${box.array().length} row(s)`);
           }
-          input.val = row.get()[shapes[p.field].fields[p.column].key];
-          input.tab = table;
+          input.val = row.get()[p.column];
+          input.tab = box;
           input.tab_index = new abap.types.Integer().set(p.row);
         }
         if (p.path) input.path = B(true);

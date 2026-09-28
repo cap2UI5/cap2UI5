@@ -64,7 +64,9 @@ The plugin now follows the conventions of the plugins at
     methods' options. A message box's text may be data - an object, an array -
     laid out as for an ABAP structure or table.
   - `c.bind(field, options)`: `path` for a bare path, `row` and `column` for
-    one cell of a table, `omitInitial`, `omitInitialPaths`, `json`.
+    one cell of a table, `omitInitial`, `omitInitialPaths`, `json` - and a
+    dotted name for a component of a structure, `c.bind("order.customer")`,
+    as `_bind( s_order-customer )` binds one.
   - `c.get()` (`client->get( )` as plain values), `c.eventData` (what a
     returning app handed over), `c.appStateHref`.
   - `c.navTo(app, fields)` presets a defineApp app's fields before it runs;

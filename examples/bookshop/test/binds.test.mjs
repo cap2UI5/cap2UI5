@@ -65,3 +65,26 @@ test("the options stay registered on a roundtrip that does not render", async ()
   assert.deepEqual(again.json.MODEL.OMITTED?.[0], { LABEL: "no max" });
   assert.equal(typeof again.json.MODEL.CONFIG, "object");
 });
+
+test("a dotted name binds a component of a structure, as _bind( s_order-customer-city ) does", async () => {
+  const r = await P({ app: APP });
+  const xml = mainView(r);
+  assert.match(xml, /<Input id="city" value="\{\/ORDER\/CUSTOMER\/CITY\}"\/>/);
+  assert.match(xml, /<Input id="sku" value="\{\/ORDER\/LINES\/0\/SKU\}"\/>/, "a cell of a table in a structure");
+
+  // edits of both reach the structure
+  const order = { CUSTOMER: { NAME: "Ada", CITY: "Paris" }, LINES: [{ SKU: "B-2", QTY: 2 }] };
+  const saved = await P({ app: APP, id: r.json.S_FRONT.ID, event: "SAVE_ORDER", model: { ORDER: order } });
+  assert.equal(saved.json.MODEL.SAVED, "Paris/B-2");
+});
+
+test("a component, a cell or an option c.bind( ) cannot resolve is refused with the choices", async () => {
+  const r = await P({ app: "ZCL_JS_BINDS_WRONG" });
+  assert.equal(r.status, 200, r.text.slice(0, 300));
+  const lines = r.json.MODEL.REFUSALS.split("\n");
+  assert.match(lines[0], /^component: .*zip is not a component of order\.customer - known: name$/);
+  assert.match(lines[1], /^scalar: .*first is not a component of order\.customer\.name, which is no structure$/);
+  assert.match(lines[2], /^cell: .*address a cell of a TABLE field, and order\.customer is not one$/);
+  assert.match(lines[3], /^column: .*"qty" is not a column of order\.lines - known: sku$/);
+  assert.match(lines[4], /^option: .*unknown option "omitEmpty" - known: path, omitInitial/);
+});

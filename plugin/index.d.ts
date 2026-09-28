@@ -75,12 +75,13 @@ export interface Client<App = Record<string, unknown>> {
 
   /**
    * The binding of one of the app's fields, for a view attribute: `{/NAME}`,
-   * or with `path` the bare `/NAME` a composed binding needs. `row` and
+   * or with `path` the bare `/NAME` a composed binding needs. A dotted name
+   * binds a component of a structure field (`"order.customer"`). `row` and
    * `column` bind one cell of a table field; `omitInitial`, `omitInitialPaths`
-   * and `json` are `_bind( )`'s options. With any of those five it is a
-   * placeholder until `main( )` returns - embed it as it is.
+   * and `json` are `_bind( )`'s options. A component, a cell or one of those
+   * options makes it a placeholder until `main( )` returns - embed it as it is.
    */
-  bind(field: Extract<keyof App, string>, options?: {
+  bind(field: Extract<keyof App, string> | `${Extract<keyof App, string>}.${string}`, options?: {
     path?: boolean;
     row?: number;
     column?: string;

@@ -9,6 +9,7 @@ defineApp("ZCL_JS_BINDS", class {
   omitted = t.table({ label: "", maxvalue: 0, note: "" });
   some_omitted = t.table({ label: "", maxvalue: 0, note: "" });
   config = `{ "title": "From JSON", "sap.app": { "id": "z2ui5.demo" } }`;
+  order = { customer: { name: "Ada", city: "London" }, lines: [{ sku: "A-1", qty: 2 }] };
   saved = "";
 
   main(c) {
@@ -20,6 +21,10 @@ defineApp("ZCL_JS_BINDS", class {
     }
     if (c.eventName === "SAVE") {
       this.saved = this.rows.map((r) => r.title).join(",");
+      return;
+    }
+    if (c.eventName === "SAVE_ORDER") {
+      this.saved = `${this.order.customer.city}/${this.order.lines[0].sku}`;
       return;
     }
     if (c.isDisplay) {
@@ -35,11 +40,36 @@ defineApp("ZCL_JS_BINDS", class {
         `<List items="${c.bind("some_omitted", { omitInitialPaths: ["maxvalue"] })}">` +
         `<StandardListItem title="{LABEL}"/></List>` +
         `<Text id="json" text="{${c.bind("config", { json: true, path: true })}/title}"/>` +
+        // a component of a structure, and a cell of a table inside one
+        `<Input id="city" value="${c.bind("order.customer.city")}"/>` +
+        `<Input id="sku" value="${c.bind("order.lines", { row: 1, column: "sku" })}"/>` +
+        `<Button id="save_order" text="Save order" press="${c.event("SAVE_ORDER")}"/>` +
         // the same bare path twice: derived from the braced binding, and from
         // _bind( path = abap_true ) itself - binds.test.mjs holds them equal
         `<Text id="bare" text="${c.bind("omitted", { path: true })}"/>` +
         `<Text id="bare_abap" text="${c.bind("omitted", { path: true, omitInitial: true })}"/>` +
         `</Page></Shell></mvc:View>`);
     }
+  }
+});
+
+// Every c.bind( ) the facade refuses, answered in a field (retired-probe.js).
+defineApp("ZCL_JS_BINDS_WRONG", class {
+  order = { customer: { name: "" }, lines: t.table({ sku: "" }) };
+  refusals = "";
+
+  main(c) {
+    const tries = {
+      component: () => c.bind("order.customer.zip"),
+      scalar: () => c.bind("order.customer.name.first"),
+      cell: () => c.bind("order.customer", { row: 1, column: "name" }),
+      column: () => c.bind("order.lines", { row: 1, column: "qty" }),
+      option: () => c.bind("order", { omitEmpty: true }),
+    };
+    const out = [];
+    for (const [k, f] of Object.entries(tries)) {
+      try { f(); out.push(`${k}: accepted`); } catch (e) { out.push(`${k}: ${e.message}`); }
+    }
+    this.refusals = out.join("\n");
   }
 });

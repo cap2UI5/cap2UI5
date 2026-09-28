@@ -189,7 +189,7 @@ test("a popover opens by the control it names and closes again", async () => {
   assert.deepEqual(errors, [], "page errors");
 });
 
-test("bindings with options: a bare path in a composed binding, one table cell, a JSON node", async () => {
+test("bindings with options: a bare path, one table cell, a JSON node, a structure component", async () => {
   const { page, errors } = await open("ZCL_JS_BINDS");
   await page.locator("[id$='--list']").getByText("second", { exact: true }).waitFor({ timeout: 60_000 });
   await page.getByText("From JSON", { exact: true }).waitFor({ timeout: 10_000 });
@@ -199,8 +199,16 @@ test("bindings with options: a bare path in a composed binding, one table cell, 
   assert.equal(await cell.inputValue(), "second");
   await cell.fill("edited");
   await cell.press("Tab");
-  await page.getByRole("button", { name: "Save" }).click();
+  await page.getByRole("button", { name: "Save", exact: true }).click();
   await page.getByText("first,edited", { exact: true }).waitFor({ timeout: 30_000 });
+
+  // a component of a structure: the input shows it, and an edit reaches it
+  const city = page.locator("[id$='--city'] input");
+  assert.equal(await city.inputValue(), "London");
+  await city.fill("Paris");
+  await city.press("Tab");
+  await page.getByRole("button", { name: "Save order" }).click();
+  await page.getByText("Paris/A-1", { exact: true }).waitFor({ timeout: 30_000 });
   await page.screenshot({ path: path.join(SHOTS, "binds.png") });
   assert.deepEqual(errors, [], "page errors");
 });
