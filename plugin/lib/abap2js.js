@@ -1189,13 +1189,19 @@ class MethodGen {
       case "int":
         if (st.k === "numc") return `Number(${js})`;
         if (!literal && (["packed", "float"].includes(st.k) || TEXT.has(st.k))) refuse("ABAP rounds it to an integer");
+        if (["date", "time"].includes(st.k)) refuse("ABAP counts days or seconds");
         return js;
       case "packed":
         if (!literal && (st.k === "float" || TEXT.has(st.k) || (st.k === "packed" && st.decimals > type.decimals) ||
           this.hasOp(src, ["*", "**"]))) {
           refuse("ABAP rounds it to the decimals of the target");
         }
+        if (["date", "time"].includes(st.k)) refuse("ABAP counts days or seconds");
         return js;
+      case "float":
+        // the number in a text - kept as the text, `f + 1` appended
+        if (["date", "time"].includes(st.k)) refuse("ABAP counts days or seconds");
+        return TEXT.has(st.k) && !literal ? `Number(${js})` : js;
       case "date": case "time":
         if (NUMERIC.has(st.k)) refuse("ABAP counts days or seconds");
         return js;
@@ -2190,8 +2196,8 @@ class MethodGen {
     }
     return type;
   }
-  /** The calculation type of an arithmetic chain: p if an operand is p, f if
-   *  one is f, else i. */
+  /** The calculation type of an arithmetic chain: f if an operand is f, else
+   *  p if one is p, else i - ABAP's order, in which f outranks p. */
   arithType(node) {
     const types = [];
     const walk = (n) => {
@@ -2201,9 +2207,9 @@ class MethodGen {
       parts.forEach((p, i) => { if (i > close && !isToken(p) && kind(p) === "Source") walk(p); });
     };
     walk(node);
+    if (types.some((t) => t.k === "float")) return { k: "float" };
     const packed = types.filter((t) => t.k === "packed");
     if (packed.length) return { k: "packed", length: 16, decimals: Math.max(...packed.map((t) => t.decimals)) };
-    if (types.some((t) => t.k === "float")) return { k: "float" };
     return { k: "int" };
   }
   /** A local, parameter or constant, read to be stored: its copy. A read of

@@ -85,8 +85,8 @@ starts with 0, a minor release may break the API.
 - `abap2js` refuses what it cannot translate exactly: `/=`, comparing
   structures or tables, SORTED and HASHED tables, a TYPE p or f in `&&`, a
   number into a TYPE c, rounding into a TYPE p or an integer, `DATA( )` of
-  arithmetic on a TYPE p, `CONV string( )` of a TYPE f, and CONTINUE outside
-  a loop.
+  arithmetic on a TYPE p, `CONV string( )` of a TYPE f, a date or a time
+  moved into a number, and CONTINUE outside a loop.
 
 ### Fixed
 
@@ -132,7 +132,9 @@ starts with 0, a minor release may break the API.
   numbers in `&&`, text in arithmetic, `'X'` against abap_bool in CASE, WHERE
   and SWITCH, a text compared with a number, literals into numeric types,
   `DATA … VALUE` of TYPE p/c/n/d/t/f keeping its type, `|{ packed }|` with
-  its decimals, local TYPE c/n cut and padded, APPEND INITIAL LINE.
+  its decimals, local TYPE c/n cut and padded, a text moved into a TYPE f,
+  APPEND INITIAL LINE. Arithmetic with a TYPE f in it is a TYPE f, as in
+  ABAP, also where a TYPE p takes part: `p = p + f` was stored unrounded.
 - `abap2js`: text after a closing parenthesis, as in `COND #( … ) && x`, was
   dropped.
 - `abap2js`: `?=` and any other statement that crashed the translator now

@@ -217,6 +217,12 @@ test("a translation behaves as the ABAP: the answers are what the transpiled ABA
     [`${rows}\n    METHODS m IMPORTING is_row TYPE ty_s_row RETURNING VALUE(result) TYPE string.`,
       "    client->message_box_display( m( VALUE #( id = 1 ) ) ).", "initial",
       "  METHOD m.\n    IF is_row-done IS INITIAL.\n      result = `initial`.\n    ENDIF.\n  ENDMETHOD."],
+    // a TYPE f takes the number in a text - it kept the text, and f + 1 appended ("1.51")
+    ["", "    DATA f TYPE f.\n    DATA s TYPE string VALUE `1.5`.\n    f = s.\n    f = f + 1.\n    IF f > 2 AND f < 3.\n" +
+      "      client->message_box_display( `2.5` ).\n    ENDIF.", "2.5"],
+    // a TYPE f makes arithmetic a TYPE f, a TYPE p in it or not
+    ["", "    DATA p TYPE p LENGTH 8 DECIMALS 2 VALUE '1.5'.\n    DATA f TYPE f VALUE '0.25'.\n    DATA(x) = p + f.\n" +
+      "    IF x = '1.75'.\n      client->message_box_display( `1.75` ).\n    ENDIF.", "1.75"],
   ];
   for (const [decl, body, want, methods] of cases) {
     const { shown, code } = run(decl, body, "", methods);
@@ -306,6 +312,12 @@ test("what it does not know, it refuses - with file, row and column", () => {
     ["    DATA c TYPE c LENGTH 3.\n    c = 5.", "", /a TYPE int moved into a TYPE char LENGTH 3 is not supported - ABAP right-aligns/, 13],
     ["    DATA p TYPE p LENGTH 10 DECIMALS 2.\n    DATA(q) = p + 1.", "", /DATA\( \) = arithmetic on a TYPE p is not supported/, 13],
     ["    DATA p TYPE p LENGTH 10 DECIMALS 2.\n    p = p * p.", "", /moved into a TYPE packed LENGTH 10 is not supported - ABAP rounds/, 13],
+    // p + f is a TYPE f, rounded into the p - it was taken for a TYPE p and stored unrounded
+    ["    DATA p TYPE p LENGTH 8 DECIMALS 2.\n    DATA f TYPE f VALUE '0.004'.\n    p = p + f.", "",
+      /a TYPE float moved into a TYPE packed LENGTH 8 is not supported - ABAP rounds/, 14],
+    // a date in a number is its count of days - it was the text "20240101"
+    ["    DATA i TYPE i.\n    DATA d TYPE d VALUE '20240101'.\n    i = d.", "",
+      /a TYPE date moved into a TYPE int is not supported - ABAP counts days or seconds/, 14],
   ];
   for (const [body, data, message, row] of cases) {
     const e = refusal(body, data);
