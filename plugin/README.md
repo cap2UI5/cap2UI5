@@ -151,6 +151,9 @@ stays on the server, in the draft; a MODEL the browser sends for it is
 ignored. A helper that needs the client gets it as an ABAP app does,
 `this.client = client` in `main( )`, without declaring it as a field.
 
+`t.bool( )` reads as a boolean, `t.char(n)` without its padding and
+`t.float( )` as a number, as the plain `true`, `""` and `0.5` do.
+
 **Types:** the package ships TypeScript declarations (`index.d.ts`). In a
 JavaScript app, annotate the client for completion and checked field names:
 `/** @param {import("@cap2ui5/cds-plugin").Client<{ search: string }>} client */`.

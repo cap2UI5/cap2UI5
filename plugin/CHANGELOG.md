@@ -25,6 +25,20 @@ starts with 0, a minor release may break the API.
   is still kept in the draft. An app that read an unbound field in the
   browser - or a test that read it off the wire - binds it now.
 
+### Fixed
+
+- `t.float( )` and a fractional field (`ratio = 0.5`) read as numbers. They
+  read as open-abap's external format, `"5,0000000000000000E-01"`, so
+  `ratio * 2` was `NaN`.
+- `t.char(n)` reads without its padding (`"ab"`, not `"ab   "`).
+- `t.bool( )` reads as a boolean and takes one; it read `" "` - truthy - or
+  `"X"`, and `this.flag = true` threw `value.get is not a function`.
+- A field cleared to its initial value stays cleared: `name = "Alice"` set to
+  `""`, `count = 5` set to `0`, `flag = true` set to `false` came back as the
+  initializer on the next roundtrip. The initializer is applied once, when the
+  app is created, not on every draft restore. A table row that leaves a
+  column out has it initial, not the value the declaring row gave it.
+
 ## [0.3.1] - 2026-09-29
 
 `cds add cap2ui5` writes a first app that starts in the ES module project

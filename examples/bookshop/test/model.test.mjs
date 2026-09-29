@@ -10,15 +10,16 @@
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
 import { test } from "node:test";
-import { action, post, serve } from "./server.mjs";
+import { post, serve } from "./server.mjs";
 
-const { defineApp } = createRequire(import.meta.url)("@cap2ui5/cds-plugin");
+const { defineApp, t } = createRequire(import.meta.url)("@cap2ui5/cds-plugin");
 
 const s = serve();
 const P = (o) => post(s.url, { user: "alice", ...o });
 const toast = (r) => {
-  const a = action(r);
-  assert.equal(a?.[0], "MESSAGE_TOAST", `no toast: ${r.text.slice(0, 400)}`);
+  const a = [...(r.json?.S_FRONT?.S_ACTION?.T_SYSTEM ?? []), ...(r.json?.S_FRONT?.S_ACTION?.T_CUSTOM ?? [])]
+    .find((x) => x[0] === "MESSAGE_TOAST");
+  assert.ok(a, `no toast: ${r.text.slice(0, 400)}`);
   return a[2];
 };
 
@@ -86,4 +87,93 @@ test("a field bound once stays in the model on the roundtrips that do not render
   const said = await P({ app: "ZCL_JS_MODEL_LATER", id: start.json.S_FRONT.ID, event: "SAY" });
   assert.equal(said.status, 200, said.text.slice(0, 300));
   assert.equal(said.json.MODEL?.SAID, "hello");
+});
+
+// ---- how a field reads and writes, by what declares it
+
+test("t.float( ), t.char( n ) and t.bool( ) read as a number, a trimmed string and a boolean - and take them", async () => {
+  // Read as generic boxes, a float answered open-abap's external format
+  // ("5,0000000000000000E-01", and ratio * 2 was NaN), a CHAR its padding
+  // ("ab   " !== "ab") and t.bool( ) " " - truthy - while `this.flag = true`
+  // threw "value.get is not a function".
+  defineApp("ZCL_JS_MODEL_TYPES", class {
+    ratio = 0.5;
+    f = t.float();
+    code = t.char(5);
+    flag = t.bool();
+    s = { code: t.char(3), flag: t.bool(), f: t.float() };
+    out = "";
+    main(client) {
+      if (client.check_on_init()) {
+        this.f = 1.25;
+        this.code = "ab";
+        this.flag = true;
+        this.s = { code: "x", flag: true, f: 0.25 };
+      }
+      const s = this.s;
+      this.out = JSON.stringify([this.ratio * 2, this.f * 2, this.code, this.code === "ab", this.flag,
+        s.code, s.flag, s.f * 2]);
+      if (client.check_on_navigated()) {
+        client.view_display(`<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m">` +
+          `<Text text="${client._bind("out")}"/><CheckBox selected="${client._bind("flag")}"/></mvc:View>`);
+      }
+    }
+  });
+  const start = await P({ app: "ZCL_JS_MODEL_TYPES" });
+  assert.equal(start.status, 200, start.text.slice(0, 300));
+  const expected = [1, 2.5, "ab", true, true, "x", true, 0.5];
+  assert.deepEqual(JSON.parse(start.json.MODEL.OUT), expected);
+  assert.equal(start.json.MODEL.FLAG, true);
+
+  // and the same after the draft restore, with the checkbox unticked in the browser
+  const again = await P({ app: "ZCL_JS_MODEL_TYPES", id: start.json.S_FRONT.ID, event: "X", model: { FLAG: false } });
+  assert.equal(again.status, 200, again.text.slice(0, 300));
+  assert.deepEqual(JSON.parse(again.json.MODEL.OUT), [1, 2.5, "ab", true, false, "x", true, 0.5]);
+});
+
+test("a field cleared to its initial value stays cleared, whatever its initializer said", async () => {
+  // The initializer's value used to be in the box `new` built, and the draft
+  // restore - which builds the instance with `new` and leaves an initial
+  // value out - brought it back: name = "Alice", cleared to "", was "Alice"
+  // again on the next roundtrip. The initializer is constructor_( )'s now,
+  // which the restore does not run.
+  defineApp("ZCL_JS_MODEL_CLEAR", class {
+    name = "Alice";
+    count = 5;
+    flag = true;
+    code = t.char(3).set("abc");
+    addr = { city: "London", zip: 1234 };
+    rows = [{ id: 1, title: "first" }, { id: 2, title: "second" }];
+    main(client) {
+      if (client.check_on_event("CLEAR")) {
+        this.count = 0;
+        this.flag = false;
+        this.code = "";
+        this.addr = { city: "", zip: 0 };
+        this.rows = [{ id: 3 }];          // a row that leaves title out has it initial
+      }
+      client.message_toast_display(JSON.stringify([this.name, this.count, this.flag, this.code, this.addr, this.rows]));
+      if (client.check_on_navigated()) {
+        client.view_display(`<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m"><Input value="${client._bind("name")}"/></mvc:View>`);
+      }
+    }
+  });
+  const start = await P({ app: "ZCL_JS_MODEL_CLEAR" });
+  assert.equal(start.status, 200, start.text.slice(0, 300));
+  assert.deepEqual(JSON.parse(toast(start)), ["Alice", 5, true, "abc", { city: "London", zip: 1234 }, [{ id: 1, title: "first" }, { id: 2, title: "second" }]]);
+  assert.deepEqual(start.json.MODEL, { NAME: "Alice" });
+
+  // the browser clears the bound name, the app clears the rest
+  const cleared = await P({ app: "ZCL_JS_MODEL_CLEAR", id: start.json.S_FRONT.ID, event: "CLEAR", model: { NAME: "" } });
+  assert.equal(cleared.status, 200, cleared.text.slice(0, 300));
+  const empty = ["", 0, false, "", { city: "", zip: 0 }, [{ id: 3, title: "" }]];
+  assert.deepEqual(JSON.parse(toast(cleared)), empty);
+
+  // and a roundtrip later - out of the draft - they are still what they were set to
+  let r = cleared;
+  for (let i = 0; i < 2; i++) {
+    r = await P({ app: "ZCL_JS_MODEL_CLEAR", id: r.json.S_FRONT.ID, event: "LOOK" });
+    assert.equal(r.status, 200, r.text.slice(0, 300));
+    assert.deepEqual(JSON.parse(toast(r)), empty, `roundtrip ${i + 1} after the clear`);
+  }
 });

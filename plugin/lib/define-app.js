@@ -120,25 +120,42 @@ const t = {
 
 const isBoxed = (v) =>
   v !== null && typeof v === "object" && typeof v.get === "function" && typeof v.set === "function";
+/** How a declared box - t.bool( ), t.float( ), t.char( n ), … - reads and
+ *  writes: an abap_bool is a boolean, a CHAR is read without its padding, a
+ *  float as the number it holds. Read as a generic box, t.bool( ) answered
+ *  " " - which is truthy - and took no boolean; a float answered open-abap's
+ *  external format, "5,0000000000000000E-01", with which `ratio * 2` is NaN;
+ *  and a CHAR came back padded, "ab   " !== "ab". */
+function boxKind(box) {
+  if (box instanceof abap.types.Float) return "float";
+  if (box instanceof abap.types.Character) return box.getQualifiedName?.() === "ABAP_BOOL" ? "bool" : "char";
+  return "boxed";
+}
 const isPlainObject = (v) => v !== null && typeof v === "object" && Object.getPrototypeOf(v) === Object.prototype;
 
 // A "shape" says how a value crosses between the app and its box:
-//   { k: "string" | "number" | "bool" | "boxed" }            scalar
+//   { k: "string" | "number" | "float" | "char" | "bool" | "boxed" }   scalar
 //   { k: "struct", fields: { <appKey>: { key, shape } } }    key = lowercase component
 //   { k: "table",  fields }                                  one row = that structure
 // `make()` builds a fresh box of the shape - what ATTRIBUTES.type() must do on
-// every call, because RTTI and the deserializer construct from it.
+// every call, because RTTI and the deserializer construct from it. It builds
+// the box INITIAL: the value a field initializer gives is written once, in
+// constructor_( ) (see withInitial). A box that carried it from `new` came
+// back from the draft restore with it - the restore leaves an initial value
+// out - so `name = "Alice"`, cleared to "", was "Alice" again one roundtrip
+// later.
 function shapeOf(v, path = []) {
-  if (typeof v === "string") return { k: "string", make: () => t.string().set(v) };
-  if (typeof v === "boolean") return { k: "bool", make: () => t.bool().set(v ? "X" : " ") };
-  if (typeof v === "number") {
-    return Number.isInteger(v)
-      ? { k: "number", make: () => t.int().set(v) }
-      : { k: "number", make: () => t.float().set(v) };
-  }
+  if (typeof v === "string") return { k: "string", make: t.string };
+  if (typeof v === "boolean") return { k: "bool", make: t.bool };
+  if (typeof v === "number") return Number.isInteger(v) ? { k: "number", make: t.int } : { k: "float", make: t.float };
   if (isBoxed(v)) {
     if (v.__shape) return v.__shape;                        // t.struct / t.table
-    return { k: "boxed", make: () => v.clone ? v.clone() : v };
+    const make = () => {
+      const box = v.clone();
+      box.clear();
+      return box;
+    };
+    return { k: boxKind(v), make };
   }
   if (Array.isArray(v)) return v.length && isPlainObject(v[0]) ? tableFor(v[0], path).__shape : null;
   if (isPlainObject(v)) return structFor(v, path).__shape;
@@ -202,12 +219,21 @@ const declared = (box) => box;
 // without its constructor, and then APPENDS the stored rows - so rows written
 // by `new` were doubled on every roundtrip.
 const withInitial = (box, value) => Object.defineProperty(box, "__initial", { value });
-const initialOf = (v) => (isBoxed(v) ? v.__initial : v);
+/** The value an initializer gives, to be written in constructor_( ): a plain
+ *  value as it is, a t.struct( ) its components, and a box the app declared
+ *  with a value of its own - `t.char(3).set("abc")` - that box. */
+const initialOf = (v) => {
+  if (!isBoxed(v)) return v;
+  if (v.__shape) return v.__initial;
+  return abap.compare.initial(v) ? undefined : v;
+};
 
 /** box -> plain value, for the app to read. ABAP has no boolean; abap_bool is an "X" / " " flag. */
 function unwrap(box, shape) {
   switch (shape.k) {
     case "bool": return box.get() === "X";
+    case "float": return box.getRaw();
+    case "char": return String(box.get()).trimEnd();
     case "struct": return rowToPlain(box, shape.fields);
     case "table": return box.array().map((r) => rowToPlain(r, shape.fields));
     default: return box.get();
@@ -292,6 +318,7 @@ function toPlain(v) {
   if (v instanceof abap.types.Character) {
     return v.getQualifiedName?.() === "ABAP_BOOL" ? v.get() === "X" : String(v.get()).trimEnd();
   }
+  if (v instanceof abap.types.Float) return v.getRaw();
   return typeof v.get === "function" ? v.get() : v;
 }
 
@@ -542,7 +569,7 @@ function defineApp(name, cls, opts = {}) {
         let shape;
         try { shape = shapeOf(v, [f]); } catch (e) { undecidable.push(e.message); continue; }
         if (!shape) { undecidable.push(`${f} has no ABAP type`); continue; }
-        this[f] = isBoxed(v) ? v : shape.make();
+        this[f] = shape.make();                 // initial - the initializer is constructor_( )'s
         shapes[f] = shape;
         if (initialOf(v) !== undefined) initial[f] = initialOf(v);
         attrs[abapName(f)] = { type: shape.make, visibility: "U", is_constant: " ", is_class: " " };
