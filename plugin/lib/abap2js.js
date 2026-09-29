@@ -2242,10 +2242,7 @@ class MethodGen {
     this.g.used = used;
     if (f.attribute || SCALAR.has(f.type?.k)) return js;
     const copy = this.g.copyExpr(js, f.type);
-    if (copy === null) {
-      if (process.env.A2J_DEBUG) console.error("UNKNOWN COPY", this.g.file, text(chain), JSON.stringify(f.type).slice(0, 80));
-      return js;
-    }
+    if (copy === null) return js;
     return copy;
   }
   fieldChainType(n) {
