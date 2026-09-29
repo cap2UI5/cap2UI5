@@ -174,6 +174,7 @@ npm install
 npm test                                       # ABI gates, auth, config, books, concurrency, nesting, the exit, the start
 npm run cold-test                              # state AND the app stack through SIGKILL, ABAP control included
 npm run bench -- 100                           # ms per roundtrip
+npm run bench -- --rows 2000                   # one table of 2000 rows: time and wire size per roundtrip
 npm run consumer-test                          # pack both packages, install them into a throwaway CAP project, drive a roundtrip
 npm run test:browser                           # real Chromium against the framework's own page
 npm start                                      # http://localhost:4004/rest/root/z2ui5?app_start=ZCL_JS_BOOKS
