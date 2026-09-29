@@ -43,8 +43,9 @@ cds.on("bootstrap", (app) => {
   // throws does. It used to be logged while the server listened anyway and
   // answered every roundtrip with a 500.
   let served;
+  let origins = new Map();                    // app -> "the project" or its package
   const ready = Promise.all([boot(rt), new Promise((resolve) => (served = resolve))])
-    .then(async ([shim]) => { await loadApps(conf); listApps(); return shim; });
+    .then(async ([shim]) => { origins = await loadApps(conf); listApps(); return shim; });
   ready.catch(() => {});                 // it fails the start below; nothing else awaits it yet
   cds.once("served", () => { served(); return ready; });
 
@@ -68,6 +69,8 @@ cds.on("bootstrap", (app) => {
     ready.then(() => {
       const lines = startupHints({
         apps: definedApps(),
+        origins,
+        startPage: Boolean(cds.env.server?.index),
         url,
         route: conf.routes[0],
         appsDir: conf.apps,

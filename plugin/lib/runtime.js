@@ -129,6 +129,8 @@ async function importAll(dir) {
  * abap.types.* - the global the runtime installs. And only once CAP has served
  * the model, as CAP loads a service implementation: an app module may reach
  * for cds.entities( ) while it loads.
+ *
+ * @returns {Map<string, string>} app name -> "the project" or the package it came from
  */
 async function loadApps(conf) {
   const own = path.resolve(cds.root, conf.apps);
@@ -158,6 +160,7 @@ async function loadApps(conf) {
   // bind until they have run. See lib/define-exit.js for why the host binds it
   // instead of the framework discovering it.
   if (installExit()) LOG.info("user exit installed");
+  return origin;
 }
 
 module.exports = { locate, boot, loadApps, appPackages };

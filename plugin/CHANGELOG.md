@@ -39,6 +39,10 @@ starts with 0, a minor release may break the API.
   framework's, one of its apps, the plugin's own. `defineApp("Z2UI5_CL_UTIL")`
   replaced the framework's utility class and broke every roundtrip. A name
   `defineApp( )` registered before may still be registered again.
+- The startup log lists the project's own apps one by one and the apps a
+  package brings in one line per package - how many, and where to find them
+  (CAP's start page, which lists every app). With `@cap2ui5/samples`
+  installed it printed 71 lines of addresses around the project's own.
 
 ### Fixed
 

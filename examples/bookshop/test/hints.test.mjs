@@ -32,6 +32,24 @@ test("one line per app with the address that starts it, then the development log
   ]);
 });
 
+test("the apps a package brings are one line per package - its count and where to find them", () => {
+  // @cap2ui5/samples alone brings 71 apps: a line each buried the project's own
+  const origins = new Map([["HELLO", "the project"], ["ZCL_BOOKS", "the project"],
+    ...Array.from({ length: 71 }, (_, i) => [`Z2UI5_CL_SMP_APP_${i}`, "@cap2ui5/samples"]),
+    ["ZCL_ONE", "one-app"]]);
+  const apps = [...origins.keys()];
+  assert.deepEqual(startupHints({ ...base, apps, origins, startPage: true }), [
+    "HELLO             http://localhost:4004/sap/bc/z2ui5?app_start=HELLO",
+    "ZCL_BOOKS         http://localhost:4004/sap/bc/z2ui5?app_start=ZCL_BOOKS",
+    "@cap2ui5/samples  71 apps - listed on CAP's start page, http://localhost:4004/",
+    "one-app           1 app - listed on CAP's start page, http://localhost:4004/",
+    "development login: alice (empty password)",
+  ]);
+  // without the start page - cds.env.server.index off - the line says how to start one
+  assert.equal(startupHints({ ...base, apps, origins })[2],
+    "@cap2ui5/samples  71 apps - start one with http://localhost:4004/sap/bc/z2ui5?app_start=<name>");
+});
+
 test("nothing in production", () => {
   assert.deepEqual(startupHints({ ...base, production: true }), []);
 });

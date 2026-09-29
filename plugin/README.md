@@ -61,10 +61,13 @@ defineApp("BOOKS", class {
 });
 ```
 
-`cds watch` prints the address of every app, and the user to log in as:
+`cds watch` prints the address of every app of the project, one line for
+each package that brings apps (see [Apps from a package](#apps-from-a-package)),
+and the user to log in as:
 
 ```
-[cap2ui5] - BOOKS  http://localhost:4004/sap/bc/z2ui5?app_start=BOOKS
+[cap2ui5] - BOOKS             http://localhost:4004/sap/bc/z2ui5?app_start=BOOKS
+[cap2ui5] - @cap2ui5/samples  71 apps - listed on CAP's start page, http://localhost:4004/
 [cap2ui5] - development login: alice (empty password)
 ```
 
