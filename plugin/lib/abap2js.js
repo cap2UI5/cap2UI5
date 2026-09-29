@@ -65,7 +65,7 @@ const path = require("path");
 
 // Loaded on first use: the plugin's runtime path never translates anything.
 let core;
-const A = () => (core ??= require("@abaplint/core"));
+const A = () => (core ??= require("./abaplint-core").requireCore());
 
 class Abap2jsError extends Error {
   constructor(message, file, token) {

@@ -24,6 +24,10 @@ starts with 0, a minor release may break the API.
   cell), and stays bound, as the framework does for an ABAP app. Every field
   is still kept in the draft. An app that read an unbound field in the
   browser - or a test that read it off the wire - binds it now.
+- `abap2js`: an ABAP comment containing CR, U+2028 or U+2029 ended the
+  JavaScript `//` comment early, and the rest of it ran as code when the
+  module loaded. Those characters are now neutralised in comments, and
+  escaped in string literals and template texts.
 
 ### Changed
 
@@ -48,6 +52,11 @@ starts with 0, a minor release may break the API.
   translating needs, installed with every project that serves apps. A
   project that translates adds it - `npm add -D @abaplint/core` - and the
   command and `abap2js( )` say so where it is missing.
+- `abap2js` refuses what it cannot translate exactly: `/=`, comparing
+  structures or tables, SORTED and HASHED tables, a TYPE p or f in `&&`, a
+  number into a TYPE c, rounding into a TYPE p or an integer, `DATA( )` of
+  arithmetic on a TYPE p, `CONV string( )` of a TYPE f, and CONTINUE outside
+  a loop.
 
 ### Fixed
 
@@ -76,6 +85,25 @@ starts with 0, a minor release may break the API.
   app package whose peer range the project's plugin did not satisfy - is
   installed; it was ignored silently. A second copy of the plugin is named
   in the log, with how to find the package that brought it.
+- `abap2js`: `NOT a = b` (also `AND NOT`, `WHERE NOT`) lost its NOT.
+- `abap2js`: `a += 1` and `a -= b` were translated as `a = 1` and `a = b`.
+- `abap2js`: a local structure shared the module constant of its TYPES, one
+  level down, so a write leaked into every later request, anybody's.
+  `DATA(c) = s`, APPEND and INSERT shared the object. Structures and tables
+  stored in locals, rows and components are now copied all the way down, and
+  components a local `VALUE #( )` leaves out are initial.
+- `abap2js`: an empty WHEN ran into the next WHEN; `DO lines( t ) TIMES`
+  re-read its count on every iteration; EXIT outside a loop became a
+  `break;` that kept the server from starting (it now leaves the method).
+- `abap2js`: values are converted as ABAP converts them: abap_bool and
+  numbers in `&&`, text in arithmetic, `'X'` against abap_bool in CASE, WHERE
+  and SWITCH, a text compared with a number, literals into numeric types,
+  `DATA … VALUE` of TYPE p/c/n/d/t/f keeping its type, `|{ packed }|` with
+  its decimals, local TYPE c/n cut and padded, APPEND INITIAL LINE.
+- `abap2js`: text after a closing parenthesis, as in `COND #( … ) && x`, was
+  dropped.
+- `abap2js`: `?=` and any other statement that crashed the translator now
+  give an `Abap2jsError` with file, row and column.
 
 ## [0.3.1] - 2026-09-29
 
