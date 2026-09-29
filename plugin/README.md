@@ -355,6 +355,7 @@ Under `cds.requires.cap2ui5` - in `package.json`, a `.cdsrc.json`, a profile or
 | `roles` | `["authenticated-user"]` | who may call: a role, or a list of roles any one of which lets the user in, as with CAP's `@requires`; `any` or `null` allows anonymous callers |
 | `routes` | `/sap/bc/z2ui5`, `/rest/root/z2ui5` | where the roundtrip answers |
 | `body_parser.limit` | CAP's `cds.server.body_parser.limit`, else `10mb` | the largest roundtrip body; a larger one gets 413 |
+| `compression` | `true` | gzip for the page and the roundtrips, where the browser accepts it; `false` leaves compressing to a proxy in front |
 
 `"cap2ui5": false` switches the plugin off: no route, and no `cap2ui5.Drafts`
 table in the model.
@@ -389,6 +390,12 @@ theme, the draft expiry, the CSRF gate — comes from the user exit,
 - **Body size:** a roundtrip carries the app's whole model.
   `cds.server.body_parser.limit`, CAP's global limit, applies here too;
   `body_parser.limit` above overrides it for this route.
+- **Compression:** the route gzips what it answers where the browser accepts
+  gzip - the page and every roundtrip of 1 kB or more - as the framework asks
+  the ICF to on an ABAP system. Behind an approuter or an ingress that
+  compresses too, nothing is compressed twice: it finds `Content-Encoding`
+  set and passes the body on. `"compression": false` leaves the work to it
+  and saves the CPU here.
 - **Logs:** the plugin logs through `cds.log('cap2ui5')`, so production gets
   JSON records with the request's correlation id. Set the level with
   `cds.log.levels.cap2ui5`.

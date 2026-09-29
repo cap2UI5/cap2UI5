@@ -146,6 +146,8 @@ array, a cycle) is reported by its path and left out; the app runs without it. A
 - `roles` (default `["authenticated-user"]`): a role or a list of roles, as
   with CAP's `@requires`; `any` or `null` allows anonymous callers
 - `body_parser.limit` (CAP's `cds.server.body_parser.limit`, else `10mb`)
+- `compression` (default `true`): gzip for the page and the roundtrips;
+  `false` leaves it to a proxy in front
 
 `false` switches the plugin off. The route runs behind CAP's own middlewares
 and answers like a CAP service: 401 with the login challenge of

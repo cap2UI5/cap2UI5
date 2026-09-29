@@ -29,6 +29,19 @@ starts with 0, a minor release may break the API.
   module loaded. Those characters are now neutralised in comments, and
   escaped in string literals and template texts.
 
+### Added
+
+- The route gzips what it answers where the browser accepts gzip - what
+  abap2UI5's HTTP handler asks the ICF for on an ABAP system
+  (`SET_COMPRESSION`), and the express shim it runs behind here had no
+  method for. The page, which carries the whole UI5 frontend, goes out as
+  83 kB instead of 358 kB, and a roundtrip of a 2000-row table as 21 kB
+  instead of 181 kB. A compressed page is tagged with the `-gzip` suffix the
+  framework's conditional GET accepts, so a reload is still answered with a
+  304. gzip only, from 1 kB, never where a `Content-Encoding` is set already;
+  `cds.requires.cap2ui5.compression: false` switches it off, for a proxy in
+  front that compresses anyway.
+
 ### Changed
 
 - A camelCase field - `isAdmin = false` - is refused by `defineApp( )`,

@@ -16,6 +16,7 @@ const { locate, boot, loadApps } = require("./lib/runtime");
 const { definedApps } = require("./lib/define-app");
 const { startupHints } = require("./lib/hints");
 const { config } = require("./lib/config");
+const { compression } = require("./lib/compression");
 
 // One logger, as every CAP module and plugin has: plain `[cap2ui5] - ...` lines
 // in development, and in production the JSON records CAP writes for itself,
@@ -137,6 +138,10 @@ cds.on("bootstrap", (app) => {
   // behind the parser an unauthenticated caller could make the server buffer
   // a whole body - up to the limit - before the 401 was even decided.
   //
+  // compression behind the guard: gzip for what the handler answers - the
+  // compression upstream asks the ICF for (lib/compression.js), unless
+  // cds.requires.cap2ui5.compression is false.
+  //
   // cds.middlewares.errors( ) LAST, as CAP mounts it behind every protocol
   // adapter, with normalize in front of it as the adapter's own error step: it
   // answers what the guard and the body parser pass on (401, 403, 413) in
@@ -145,6 +150,7 @@ cds.on("bootstrap", (app) => {
     conf.routes,
     ...cds.middlewares.before.filter(Boolean),
     guard,
+    ...(conf.compression ? [compression()] : []),
     express.raw({ type: "*/*", limit: conf.limit }),
     async (req, res) => {
       try {

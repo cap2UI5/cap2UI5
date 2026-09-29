@@ -9,7 +9,8 @@
 //     "apps":   "srv/apps",                          the app modules
 //     "roles":  ["authenticated-user"],              who may call, as @requires
 //     "routes": ["/sap/bc/z2ui5", "/rest/root/z2ui5"],
-//     "body_parser": { "limit": "10mb" }             optional, see below
+//     "body_parser": { "limit": "10mb" },            optional, see below
+//     "compression": false                           gzip off - lib/compression.js
 //   } } }
 //
 // 0.1.0 read a top-level cds.cap2ui5 with `requires` for the roles. That is
@@ -50,6 +51,9 @@ function config(env = cds.env) {
     // then the global cds.server.body_parser.limit that applies to every
     // endpoint, then the plugin's default.
     limit: conf.body_parser?.limit ?? env.server?.body_parser?.limit ?? DEFAULT_LIMIT,
+    // gzip unless switched off - for a proxy in front that compresses anyway;
+    // with both on, the proxy finds the body compressed and leaves it alone
+    compression: conf.compression !== false,
   };
 }
 
