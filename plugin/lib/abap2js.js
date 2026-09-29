@@ -1358,7 +1358,8 @@ class MethodGen {
   // ----------------------------------------------------------- expressions
   /** A Source: operands and the operators between them, as the ABAP has them.
    *  `copy`: the value is stored - in a local, a row, a component - and a
-   *  structure or table must arrive as a copy of its own, as ABAP moves it. */
+   *  structure or table must arrive as a copy of its own, as ABAP moves it;
+   *  "value": only a VALUE #( ) in it is made whole (see ownArgs( )). */
   source(node, expected, copy = false) {
     if (!node) return "";
     const lead = this.g.lead(node);
@@ -1400,7 +1401,7 @@ class MethodGen {
       return js + this.rest(node, close + 1);
     }
     let js = this.operand(first, expected);
-    if (copy && parts.length === 1 && kind(first) === "FieldChain") js = this.copied(first, js);
+    if (copy === true && parts.length === 1 && kind(first) === "FieldChain") js = this.copied(first, js);
     let i = 1;
     // client->get( )-s_config-hash: components after a call
     if (parts[i] && isToken(parts[i]) && text(parts[i]) === "-" && parts[i + 1] && kind(parts[i + 1]) === "ComponentChain") {
@@ -1752,7 +1753,7 @@ class MethodGen {
     }
     this.fail(`${kind(node)} is not supported yet`, node);
   }
-  named(params, special = {}, types = {}) {
+  named(params, special = {}, types = {}, copy = false) {
     const E = A().Expressions;
     let out = "{";
     params.forEach((p, idx) => {
@@ -1765,11 +1766,11 @@ class MethodGen {
       const name = lc(text(nameNode));
       const gapEq = this.g.gap(nameNode.getLastToken(), eq.get());
       this.g.used.add(src.getFirstToken());
-      out += `${sep}${lead}${name}:${gapEq}${this.arg(src, special[name], types[name])}`;
+      out += `${sep}${lead}${name}:${gapEq}${this.arg(src, special[name], types[name], copy)}`;
     });
     return `${out} }`;
   }
-  arg(src, how, expected) {
+  arg(src, how, expected, copy = false) {
     if (how === "path") return JSON.stringify(this.bindPath(src));
     if (how === "app") {
       const E = A().Expressions;
@@ -1783,7 +1784,7 @@ class MethodGen {
         return JSON.stringify(text(cls).toUpperCase());
       }
     }
-    return this.source(src, expected);
+    return this.source(src, expected, copy);
   }
   /** _bind( ) takes the field's name: an attribute, or a component of one. */
   bindPath(src) {
@@ -1802,6 +1803,11 @@ class MethodGen {
     return [this.m.attributes.find((a) => lc(a.name) === name).name, ...comps].join("-");
   }
 
+  /** The arguments of a call of the class's own method. A VALUE #( ) among
+   *  them is the whole structure, every row of it - "value": complete and
+   *  converted as a stored VALUE is, without copying what is not a VALUE. As
+   *  an argument it used to hold only the components it named, and the
+   *  method that copied the parameter threw on the table it left out. */
   ownArgs(def, call) {
     const E = A().Expressions;
     const param = call.findDirectExpression(E.MethodCallParam);
@@ -1810,16 +1816,16 @@ class MethodGen {
     if (!inner.length) return "()";
     const node = inner[0];
     if (kind(node) === "Source") {
-      if (ps.length === 1) return `(${this.source(node, ps[0].type)})`;
+      if (ps.length === 1) return `(${this.source(node, ps[0].type, "value")})`;
       const pref = ps.find((p) => lc(p.name) === ps.preferred) ?? ps.find((p) => !p.optional);
-      return `({ ${pref.name}: ${this.source(node, pref.type)} })`;
+      return `({ ${pref.name}: ${this.source(node, pref.type, "value")} })`;
     }
     const list = node.findAllExpressions(E.ParameterS);
     if (kind(node) === "MethodParameters" && node.getChildren().filter(isToken).some((t) => lc(text(t)) !== "exporting")) {
       this.fail("IMPORTING / CHANGING / RECEIVING in a call is not supported", node);
     }
-    if (ps.length === 1 && list.length === 1) return `(${this.source(list[0].findDirectExpression(E.Source), ps[0].type)})`;
-    return `(${this.named(list, {}, Object.fromEntries(ps.map((p) => [lc(p.name), p.type])))})`;
+    if (ps.length === 1 && list.length === 1) return `(${this.source(list[0].findDirectExpression(E.Source), ps[0].type, "value")})`;
+    return `(${this.named(list, {}, Object.fromEntries(ps.map((p) => [lc(p.name), p.type])), "value")})`;
   }
 
   builtin(name, call) {

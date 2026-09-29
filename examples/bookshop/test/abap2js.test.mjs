@@ -19,7 +19,7 @@ import { test } from "node:test";
 import { EXAMPLE, post, serve } from "./server.mjs";
 
 const require = createRequire(import.meta.url);
-const { abap2js, Abap2jsError } = require("@cap2ui5/cds-plugin");
+const { abap2js, Abap2jsError, t } = require("@cap2ui5/cds-plugin");
 const s = serve();
 
 const FIXTURE = path.join(EXAMPLE, "test/fixtures/abap2js/zcl_js_translated.clas.abap");
@@ -149,7 +149,8 @@ ${methods}
 ENDCLASS.
 `, { file: "zcl_js_run.clas.abap", format: "cjs" });
   let App;
-  const stub = { defineApp: (name, cls) => { App = cls; } };
+  // t: a TYPES structure with a table in it is a module constant built with t.table( )
+  const stub = { defineApp: (name, cls) => { App = cls; }, t };
   new Function("require", code)(() => stub);
   let shown;
   new App().main({ get_event: () => event, message_box_display: (v) => { shown = v; } });
@@ -158,6 +159,10 @@ ENDCLASS.
 
 test("a translation behaves as the ABAP: the answers are what the transpiled ABAP answers", () => {
   const rows = "    TYPES: BEGIN OF ty_s_row, id TYPE i, done TYPE abap_bool, END OF ty_s_row.";
+  const nodes = "    TYPES: BEGIN OF ty_s_item, id TYPE i, END OF ty_s_item.\n" +
+    "    TYPES ty_t_items TYPE STANDARD TABLE OF ty_s_item WITH EMPTY KEY.\n" +
+    "    TYPES: BEGIN OF ty_s_node, name TYPE string, items TYPE ty_t_items, END OF ty_s_node.\n" +
+    "    TYPES ty_t_nodes TYPE STANDARD TABLE OF ty_s_node WITH EMPTY KEY.";
   const cases = [
     // NOT stands in front of the comparison it negates
     ["", "    DATA(a) = `5`.\n    IF NOT a = `5`.\n      client->message_box_display( `NOT lost` ).\n    ELSE.\n" +
@@ -199,6 +204,19 @@ test("a translation behaves as the ABAP: the answers are what the transpiled ABA
       "    LOOP AT t INTO r.\n      o = o && r-id && `,`.\n    ENDLOOP.\n    client->message_box_display( o && s-id ).", "11,12,10,1,2,0,2"],
     // a component VALUE leaves out is initial
     [rows, "    DATA(s) = VALUE ty_s_row( id = 1 ).\n    IF s-done IS INITIAL.\n      client->message_box_display( `initial` ).\n    ENDIF.", "initial"],
+    // ... also in the VALUE #( ) handed to a method of the class: the component was missing, so copying the
+    // parameter threw "Cannot read properties of undefined (reading 'map')", a LOOP over it "is not iterable"
+    // and IS INITIAL of a missing scalar was false
+    [`${nodes}\n    METHODS m IMPORTING is_node TYPE ty_s_node RETURNING VALUE(result) TYPE string.`,
+      "    client->message_box_display( m( VALUE #( name = `a` ) ) ).", "a0",
+      "  METHOD m.\n    DATA(ls) = is_node.\n    result = |{ ls-name }{ lines( ls-items ) }|.\n  ENDMETHOD."],
+    [`${nodes}\n    METHODS m IMPORTING it_nodes TYPE ty_t_nodes iv_sep TYPE string RETURNING VALUE(result) TYPE string.`,
+      "    client->message_box_display( m( it_nodes = VALUE #( ( name = `a` ) ( name = `b` ) ) iv_sep = `,` ) ).", "a,b,",
+      "  METHOD m.\n    DATA(lt) = it_nodes.\n    LOOP AT lt INTO DATA(n).\n      result = result && n-name && iv_sep.\n" +
+      "      LOOP AT n-items INTO DATA(i).\n        result = result && i-id.\n      ENDLOOP.\n    ENDLOOP.\n  ENDMETHOD."],
+    [`${rows}\n    METHODS m IMPORTING is_row TYPE ty_s_row RETURNING VALUE(result) TYPE string.`,
+      "    client->message_box_display( m( VALUE #( id = 1 ) ) ).", "initial",
+      "  METHOD m.\n    IF is_row-done IS INITIAL.\n      result = `initial`.\n    ENDIF.\n  ENDMETHOD."],
   ];
   for (const [decl, body, want, methods] of cases) {
     const { shown, code } = run(decl, body, "", methods);

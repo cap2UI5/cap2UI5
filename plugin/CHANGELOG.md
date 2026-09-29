@@ -121,7 +121,9 @@ starts with 0, a minor release may break the API.
   level down, so a write leaked into every later request, anybody's.
   `DATA(c) = s`, APPEND and INSERT shared the object. Structures and tables
   stored in locals, rows and components are now copied all the way down, and
-  components a local `VALUE #( )` leaves out are initial.
+  components a local `VALUE #( )` leaves out are initial - also in a
+  `VALUE #( )` handed to a method of the class, where copying the parameter
+  threw on a table the `VALUE #( )` did not name.
 - `abap2js`: an empty WHEN ran into the next WHEN, a comment behind it
   included; `DO lines( t ) TIMES`
   re-read its count on every iteration; EXIT outside a loop became a
