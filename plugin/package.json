@@ -1,6 +1,6 @@
 {
   "name": "@cap2ui5/cds-plugin",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "abap2UI5 for CAP: a cds-plugin that hosts the transpiled abap2UI5 runtime, keeps its drafts in a CDS entity and lets apps be written as plain JavaScript classes",
   "keywords": [
     "cap",
