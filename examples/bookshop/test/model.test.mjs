@@ -247,3 +247,21 @@ test("a placeholder kept in a field and embedded a roundtrip later is refused, n
   assert.equal(later.status, 500, later.text.slice(0, 300));
   assert.match(s.out(), /a placeholder from an EARLIER roundtrip reached the view/);
 });
+
+// ---- what an app can be called
+
+test("a name the runtime already has for a class of its own is refused; an app's own name may be defined again", () => {
+  // abap.Classes is the whole runtime's registry: defineApp("Z2UI5_CL_UTIL")
+  // replaced the framework's utility class and broke every roundtrip.
+  const before = abap.Classes.Z2UI5_CL_UTIL;
+  for (const name of ["Z2UI5_CL_UTIL", "z2ui5_if_client", "ZCL_CDS_DRAFT_STORE"]) {
+    assert.throws(() => defineApp(name, class { main() {} }),
+      new RegExp(`defineApp\\(${name.toUpperCase()}\\): the abap2UI5 runtime has a class of that name already`));
+  }
+  assert.equal(abap.Classes.Z2UI5_CL_UTIL, before, "and the framework's class is untouched");
+
+  const first = defineApp("ZCL_JS_MODEL_AGAIN", class { main() {} });
+  const second = defineApp("ZCL_JS_MODEL_AGAIN", class { main() {} });
+  assert.notEqual(first, second);
+  assert.equal(abap.Classes.ZCL_JS_MODEL_AGAIN, second);
+});

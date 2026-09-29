@@ -587,8 +587,22 @@ function definedApps() {
   return [...defined];
 }
 
+/** Marks a class defineApp( ) registered - a global symbol, so that a second
+ *  copy of the plugin recognises the first one's apps. */
+const DEFINED = Symbol.for("cap2ui5.defineApp");
+
 function defineApp(name, cls, opts = {}) {
   const INTERNAL = String(name).toUpperCase();
+  // abap.Classes is the runtime's class registry, framework and all: an app
+  // named Z2UI5_CL_UTIL replaced the framework's utility class and broke
+  // every roundtrip of every app. A name defineApp( ) registered before may
+  // be registered again - that is how an app is replaced.
+  const existing = globalThis.abap?.Classes?.[INTERNAL];
+  if (existing && !existing[DEFINED]) {
+    throw new Error(`defineApp(${INTERNAL}): the abap2UI5 runtime has a class of that name already - part of the ` +
+      `framework, one of its apps, or the plugin's own - and replacing it would change what every roundtrip ` +
+      `runs. Choose another name.`);
+  }
   const userMain = cls.prototype.main ?? cls.prototype.z2ui5_if_app$main;
   if (typeof userMain !== "function") {
     throw new Error(`defineApp(${INTERNAL}): the class needs a main( client ) method`);
@@ -1280,6 +1294,7 @@ function defineApp(name, cls, opts = {}) {
 
   App.INTERNAL_TYPE = "CLAS";
   App.INTERNAL_NAME = INTERNAL;
+  App[DEFINED] = true;
   App.IMPLEMENTED_INTERFACES = opts.interfaces ?? ["Z2UI5_IF_APP", "IF_SERIALIZABLE_OBJECT"];
   App.METHODS = {};
   App.ATTRIBUTES = {};

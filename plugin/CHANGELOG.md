@@ -35,6 +35,10 @@ starts with 0, a minor release may break the API.
 - A `#private` member used in `main( )` or a method it calls is refused with
   what to write instead. It threw V8's bare "Cannot read private member"
   TypeError, and a `#field` was never kept in the draft.
+- `defineApp( )` refuses a name the runtime already has a class of - the
+  framework's, one of its apps, the plugin's own. `defineApp("Z2UI5_CL_UTIL")`
+  replaced the framework's utility class and broke every roundtrip. A name
+  `defineApp( )` registered before may still be registered again.
 
 ### Fixed
 
