@@ -38,7 +38,8 @@ starts with 0, a minor release may break the API.
   83 kB instead of 358 kB, and a roundtrip of a 2000-row table as 21 kB
   instead of 181 kB. A compressed page is tagged with the `-gzip` suffix the
   framework's conditional GET accepts, so a reload is still answered with a
-  304. gzip only, from 1 kB, never where a `Content-Encoding` is set already;
+  304 - which carries that tag and the `Vary` too, as the 200 does. gzip
+  only, from 1 kB, never where a `Content-Encoding` is set already;
   `cds.requires.cap2ui5.compression: false` switches it off, for a proxy in
   front that compresses anyway.
 - The runtime's accelerations: where the installed `@abap2ui5/node-runtime`

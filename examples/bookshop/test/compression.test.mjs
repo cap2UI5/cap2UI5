@@ -71,9 +71,17 @@ test("a browser that has the gzipped page revalidates it: the framework answers 
   assert.equal(again.status, 304, again.body.toString().slice(0, 200));
   assert.equal(again.body.length, 0);
   assert.equal(again.headers["content-encoding"], undefined);
+  // the 304 carries the tag and the Vary the 200 would have (RFC 9110 15.4.5) - it carried the
+  // framework's own tag, which names the uncompressed page the browser does not have, and no Vary
+  assert.equal(again.headers.etag, gz.headers.etag);
+  assert.match(again.headers.vary ?? "", /accept-encoding/i);
   // and the tag of the uncompressed page, as before
   const plain = await page({});
   assert.equal((await page({ "Accept-Encoding": BROWSER, "If-None-Match": plain.headers.etag })).status, 304);
+  const plainAgain = await page({ "If-None-Match": plain.headers.etag });
+  assert.equal(plainAgain.status, 304);
+  assert.equal(plainAgain.headers.etag, plain.headers.etag, "a client that takes no gzip keeps the plain tag");
+  assert.match(plainAgain.headers.vary ?? "", /accept-encoding/i);
   // on the other route as well - it serves the same page under the same tag
   assert.equal((await page({ "If-None-Match": gz.headers.etag }, s.url.replace("/rest/root/z2ui5", "/sap/bc/z2ui5"))).status, 304);
 });
@@ -167,6 +175,21 @@ test("the page is compressed once per tag, again when its bytes change, and PAGE
   } finally {
     zlib.gzipSync = gzipSync;
   }
+});
+
+test("a strong tag gets -gzip once; a weak one stays - the gzip is the same content", () => {
+  const tagged = (etag) => {
+    const headers = new Map([["etag", etag]]);
+    const res = { statusCode: 200, headersSent: false, getHeader: (n) => headers.get(n.toLowerCase()),
+      setHeader: (n, v) => headers.set(n.toLowerCase(), v), vary() {}, end() {} };
+    compression()({ method: "POST", headers: { "accept-encoding": "gzip" } }, res, () => {});
+    res.end(Buffer.from("x".repeat(4096)));
+    assert.equal(headers.get("content-encoding"), "gzip");
+    return headers.get("etag");
+  };
+  assert.equal(tagged('"a"'), '"a-gzip"');
+  assert.equal(tagged('"a-gzip"'), '"a-gzip"', "a tag suffixed already - by a second middleware - got it twice");
+  assert.equal(tagged('W/"a"'), 'W/"a"', "express tags every POST answer weakly");
 });
 
 test("cds.requires.cap2ui5.compression: false - nothing is compressed", async () => {

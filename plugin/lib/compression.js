@@ -21,7 +21,10 @@
 // Compressed: what a response sends in one piece (res.end( ) with the body -
 // every responder on the route does that, send( ) and json( ) included), of
 // at least THRESHOLD bytes, when Accept-Encoding allows gzip, nothing set a
-// Content-Encoding already, and it is not a HEAD, 204 or 304. Behind a proxy
+// Content-Encoding already, and it is not a HEAD, 204 or 304. A 304 carries
+// what the 200 would (RFC 9110 15.4.5): the Vary, and for a client that
+// takes gzip the "x-gzip" tag - the framework's 304 carried "x", a tag that
+// names the uncompressed page such a browser does not have. Behind a proxy
 // that compresses as well nothing is compressed twice: the proxy sees the
 // Content-Encoding and leaves the body alone. `cds.requires.cap2ui5.
 // compression: false` switches this off, for a proxy that should do the work.
@@ -52,6 +55,13 @@ function acceptsGzip(header) {
   return (gzip ?? any ?? 0) > 0;
 }
 
+/** "x" -> "x-gzip": a strong tag, once. A weak one stays as it is - it
+ *  already says "the same content", which the gzip of it is. */
+const gzipTag = (etag) => {
+  const tag = String(etag);
+  return /^"[^"]*"$/.test(tag) && !tag.endsWith('-gzip"') ? `${tag.slice(0, -1)}-gzip"` : tag;
+};
+
 /** The middleware. One per route; the page cache is its own. */
 function compression({ threshold = THRESHOLD, pages = PAGES } = {}) {
   const cache = new Map();           // the page's ETag -> { plain, gzip }, oldest first
@@ -76,6 +86,10 @@ function compression({ threshold = THRESHOLD, pages = PAGES } = {}) {
     res.end = function (chunk, encoding, callback) {
       if (typeof encoding === "function") [callback, encoding] = [encoding, undefined];
       const status = res.statusCode;
+      if (status === 304 && !res.headersSent && res.getHeader("ETag") !== undefined) {
+        res.vary("Accept-Encoding");
+        if (acceptsGzip(req.headers["accept-encoding"])) res.setHeader("ETag", gzipTag(res.getHeader("ETag")));
+      }
       if (chunk == null || typeof chunk === "function" || res.headersSent ||
           status < 200 || status === 204 || status === 304 || res.getHeader("Content-Encoding")) {
         return end.call(this, chunk, encoding, callback);
@@ -91,7 +105,7 @@ function compression({ threshold = THRESHOLD, pages = PAGES } = {}) {
       const gzip = etag && req.method === "GET" && status === 200 ? page(String(etag), plain) : zlib.gzipSync(plain);
       res.setHeader("Content-Encoding", "gzip");
       res.setHeader("Content-Length", gzip.length);
-      if (etag) res.setHeader("ETag", String(etag).replace(/"$/, '-gzip"'));
+      if (etag) res.setHeader("ETag", gzipTag(etag));
       return end.call(this, gzip, undefined, callback);
     };
     next();
