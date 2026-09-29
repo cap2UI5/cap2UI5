@@ -24,6 +24,7 @@
 // read afresh on every set_config call, so binding it before the first request
 // is all it takes. Nothing here reaches past a static the framework declares.
 const cds = require("@sap/cds");
+const { isDeepStrictEqual } = require("node:util");
 
 const IF_NAME = "Z2UI5_IF_UI5_EXIT";
 const LOG = cds.log("cap2ui5");
@@ -76,10 +77,11 @@ function unwrap(struct) {
 }
 
 /** Write the object back. Only what CHANGED is assigned, so an exit that
- *  ignores a field leaves the framework's default exactly as it found it. */
+ *  ignores a field leaves the framework's default exactly as it found it.
+ *  Changed by VALUE: the hook may replace a table or change it in place. */
 function rewrap(struct, before, after) {
   for (const [k, v] of Object.entries(struct.get())) {
-    if (!(k in after) || after[k] === before[k]) continue;
+    if (!(k in after) || isDeepStrictEqual(after[k], before[k])) continue;
     if (isTable(v)) writePairs(v, after[k] ?? []);
     else if (typeof v.get() === "number") v.set(Number(after[k]));
     else if (isBool(v)) v.set(after[k] ? "X" : " ");
@@ -105,7 +107,10 @@ async function run(hook, INPUT, name) {
   if (typeof hook !== "function") return;
   const cfg = INPUT.cs_config;
   const before = unwrap(cfg);
-  const after = { ...before };
+  // A deep copy: the hook is told to change cfg in place, and with a shallow
+  // one cfg.t_security_header.push( … ) changed the array `before` holds
+  // too - so the comparison saw no change and the header was dropped.
+  const after = structuredClone(before);
   try {
     await hook(after, context(INPUT.is_context));
   } catch (e) {

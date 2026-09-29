@@ -59,6 +59,10 @@ starts with 0, a minor release may break the API.
 - A placeholder from an earlier roundtrip - `_event( )` kept in a field and
   embedded later - is refused. It went to the browser as
   `press="z2ui5evt_…"`, a button that did nothing.
+- `defineExit( )`: a table of `cfg` changed in place -
+  `cfg.t_security_header.push( … )`, an entry's `v` changed - reaches the
+  framework. The hook got a shallow copy, so the change also changed what it
+  was compared against, and it was dropped without a word.
 
 ## [0.3.1] - 2026-09-29
 

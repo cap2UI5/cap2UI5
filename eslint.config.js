@@ -20,6 +20,7 @@ module.exports = [
         Buffer: "readonly",
         __dirname: "readonly",
         fetch: "readonly",
+        structuredClone: "readonly",
         setTimeout: "readonly",
         Proxy: "readonly",
         Reflect: "readonly",

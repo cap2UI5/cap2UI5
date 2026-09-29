@@ -8,12 +8,13 @@ defineExit({
   // the bootstrap page: once per full page load, not once per roundtrip
   onPage(cfg, ctx) {
     cfg.theme = "sap_horizon_dark";
-    // HSTS on top of the seven the framework already sends, rather than
-    // instead of them - cfg.t_security_header arrives fully populated.
-    cfg.t_security_header = [
-      ...cfg.t_security_header,
-      { n: "Strict-Transport-Security", v: "max-age=31536000; includeSubDomains" },
-    ];
+    // HSTS on top of the ones the framework already sends, rather than
+    // instead of them - cfg.t_security_header arrives fully populated, and
+    // is changed IN PLACE, appended to and one entry edited: exit.test.mjs
+    // holds that both arrive (they were dropped while the hook got a
+    // shallow copy whose arrays were the ones it was compared against).
+    cfg.t_security_header.push({ n: "Strict-Transport-Security", v: "max-age=31536000; includeSubDomains" });
+    cfg.t_security_header.find((h) => h.n === "Referrer-Policy").v = "no-referrer";
     if (ctx.app_start === "ZCL_JS_HELLO") cfg.theme = "sap_horizon";
   },
 
