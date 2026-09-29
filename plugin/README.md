@@ -314,6 +314,18 @@ the same one:
 "peerDependencies": { "@cap2ui5/cds-plugin": "^0.3.0" }
 ```
 
+The range moves in lockstep with the plugin's minor version, and stays that
+narrow on purpose: `^0.3.0` is 0.3.x only, and while the plugin is 0.x a
+minor release may break the API an app is written against (the CHANGELOG
+says so, and the release after 0.3.1 does: only bound fields are sent to
+the browser, and a camelCase field is refused). A range like `>=0.3.0 <1` would let npm install
+a plugin the package's apps have never run on, and they would break where
+they are used instead of at `npm install`. So a package with apps publishes
+a release for each plugin minor, with the range that names it; from 1.0 on,
+`^1.0.0` is the range to use. A range the project's plugin does not satisfy
+makes npm refuse the install or bring a second, nested copy of the plugin -
+which the log names.
+
 The plugin finds such a package the way CAP finds its plugins: among the
 project's `dependencies`, and outside production (`NODE_ENV` other than
 `production`) among its `devDependencies` too - so `npm add -D` brings a
