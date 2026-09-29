@@ -1,0 +1,6 @@
+{
+  "name": "cap2ui5-fixture-apps",
+  "version": "1.0.0",
+  "description": "A package that brings apps, as @cap2ui5/samples does.",
+  "cap2ui5": { "apps": "apps" }
+}

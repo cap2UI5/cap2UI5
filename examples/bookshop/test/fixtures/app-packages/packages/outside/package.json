@@ -1,0 +1,6 @@
+{
+  "name": "cap2ui5-fixture-outside",
+  "version": "1.0.0",
+  "description": "Names an apps directory outside the package - refused.",
+  "cap2ui5": { "apps": "../apps/apps" }
+}

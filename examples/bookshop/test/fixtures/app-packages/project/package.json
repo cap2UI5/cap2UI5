@@ -1,0 +1,23 @@
+{
+  "name": "cap2ui5-fixture-project",
+  "private": true,
+  "description": "A project whose dependencies bring apps - app-packages.test.mjs links the packages in packages/ into its node_modules and serves it.",
+  "dependencies": {
+    "@cap-js/sqlite": "*",
+    "@sap/cds": "*",
+    "cap2ui5": "*",
+    "cap2ui5-fixture-apps": "*",
+    "cap2ui5-fixture-missing": "*",
+    "cap2ui5-fixture-no-apps": "*",
+    "cap2ui5-fixture-not-installed": "*",
+    "cap2ui5-fixture-outside": "*"
+  },
+  "devDependencies": {
+    "cap2ui5-fixture-dev-apps": "*"
+  },
+  "cds": {
+    "requires": {
+      "db": { "kind": "sqlite", "credentials": { "url": ":memory:" } }
+    }
+  }
+}

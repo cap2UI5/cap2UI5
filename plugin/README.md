@@ -250,6 +250,29 @@ How far "line for line" goes was measured on abap2UI5's samples: each
 translated sample served beside its original, transpiled, in one cap2UI5
 server, and every roundtrip compared - view, model and actions.
 
+## Apps from a package
+
+A package can bring apps with it: add it to the project, and its apps run
+beside the project's own - as abap2UI5's samples run in the system they are
+pulled into. The package says where its app modules are, in its
+`package.json`, and names the plugin as a peer dependency, so that its apps
+and the project's run on the same one:
+
+```json
+"cap2ui5": { "apps": "srv/apps" },
+"peerDependencies": { "cap2ui5": "^0.2.0" }
+```
+
+The plugin finds such a package the way CAP finds its plugins: among the
+project's `dependencies`, and outside production (`NODE_ENV` other than
+`production`) among its `devDependencies` too - so `npm add -D` brings a
+package's apps to development only. Its directory is loaded like the
+project's own apps directory, after it, and the log names every package it
+loaded apps from. An app of a name the project has already stays the
+project's, and the log says so. A directory outside the package, or one the
+installed package does not have - a `files` entry forgotten - is skipped with
+a warning.
+
 ## Configure
 
 Under `cds.requires.cap2ui5` - in `package.json`, a `.cdsrc.json`, a profile or

@@ -20,6 +20,12 @@ starts with 0, a minor release may break the API.
   loaded only when a translation runs.
 - `t.numc(n)`, `t.date()`, `t.time()` - ABAP's N, D and T as fields, read and
   written as strings.
+- **Apps from a package.** A dependency whose `package.json` says
+  `"cap2ui5": { "apps": "srv/apps" }` brings its apps: they are served beside
+  the project's own, and the package is found as CAP finds its plugins -
+  `dependencies`, and `devDependencies` outside production. An app of a name
+  the project has already stays the project's, with a warning; a directory
+  outside the package, or missing from it, is skipped with one.
 
 ### Changed
 

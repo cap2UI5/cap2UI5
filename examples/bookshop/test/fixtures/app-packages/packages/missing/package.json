@@ -1,0 +1,6 @@
+{
+  "name": "cap2ui5-fixture-missing",
+  "version": "1.0.0",
+  "description": "Names an apps directory it does not ship - skipped, with a warning.",
+  "cap2ui5": { "apps": "srv/apps" }
+}
