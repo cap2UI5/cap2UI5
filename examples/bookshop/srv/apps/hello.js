@@ -1,7 +1,7 @@
 // A cap2UI5 app. Plain JavaScript: plain values, no async, no await, no ABAP -
 // and the client an ABAP app gets, z2ui5_if_client, by its own method names.
 // Files in srv/apps/ are loaded by the plugin once the runtime is up.
-const { defineApp } = require("cap2ui5");
+const { defineApp } = require("@cap2ui5/cds-plugin");
 
 defineApp("ZCL_JS_HELLO", class {
   name = "";

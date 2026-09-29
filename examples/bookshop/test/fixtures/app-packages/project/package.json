@@ -5,7 +5,7 @@
   "dependencies": {
     "@cap-js/sqlite": "*",
     "@sap/cds": "*",
-    "cap2ui5": "*",
+    "@cap2ui5/cds-plugin": "*",
     "cap2ui5-fixture-apps": "*",
     "cap2ui5-fixture-missing": "*",
     "cap2ui5-fixture-no-apps": "*",

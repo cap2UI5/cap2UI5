@@ -1,6 +1,6 @@
 // z2ui5_cl_ui5_view_builder - abap2UI5's view builder, for a JavaScript app.
 //
-//   const { defineApp, z2ui5_cl_ui5_view_builder } = require("cap2ui5");
+//   const { defineApp, z2ui5_cl_ui5_view_builder } = require("@cap2ui5/cds-plugin");
 //   const view = z2ui5_cl_ui5_view_builder.factory()
 //       .ele({ n: "View", ns: "mvc" })
 //           .a({ n: "xmlns", v: "sap.m" })

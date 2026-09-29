@@ -1,7 +1,7 @@
 // An app module that reads the model while it loads, as a CAP service
 // implementation may - start.test.mjs points the plugin here.
 const cds = require("@sap/cds");
-const { defineApp } = require("cap2ui5");
+const { defineApp } = require("@cap2ui5/cds-plugin");
 
 const { Books } = cds.entities("my.bookshop");
 

@@ -3,7 +3,7 @@
 // Z2UI5_CL_UI5_VIEW_BUILDER does to the string client._event( ) returns. The
 // placeholder has to come through that unchanged, or the substitution misses
 // and the placeholder itself ships to the browser (escape.test.mjs).
-const { defineApp } = require("cap2ui5");
+const { defineApp } = require("@cap2ui5/cds-plugin");
 
 const esc = (v) => String(v)
   .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");

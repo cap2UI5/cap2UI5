@@ -14,7 +14,7 @@ import { createRequire } from "node:module";
 import { after, before, test } from "node:test";
 import { EXAMPLE, boot, post } from "./server.mjs";
 
-const { appPackages } = createRequire(import.meta.url)("cap2ui5/lib/runtime.js");
+const { appPackages } = createRequire(import.meta.url)("@cap2ui5/cds-plugin/lib/runtime.js");
 
 const FIXTURE = path.join(EXAMPLE, "test", "fixtures", "app-packages");
 const PROJECT = path.join(FIXTURE, "project");

@@ -1,5 +1,5 @@
 // An app of the same name as one of the project's - it does not replace it.
-const { defineApp } = require("cap2ui5");
+const { defineApp } = require("@cap2ui5/cds-plugin");
 
 defineApp("ZCL_FIXTURE_OWN", class {
   from = "cap2ui5-fixture-apps";

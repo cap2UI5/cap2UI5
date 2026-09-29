@@ -5,7 +5,7 @@
 // app leaves, THIS main( ) runs again with check_on_navigated( ) true and
 // check_on_init( ) FALSE - so an app that rendered only on check_on_init( )
 // would show the caller's old screen, with nothing anywhere saying why.
-const { defineApp } = require("cap2ui5");
+const { defineApp } = require("@cap2ui5/cds-plugin");
 
 const PICKER = "ZCL_JS_PICK_ONE";
 

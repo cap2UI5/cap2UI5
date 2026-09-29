@@ -1,5 +1,5 @@
 // An app a package brings.
-const { defineApp } = require("cap2ui5");
+const { defineApp } = require("@cap2ui5/cds-plugin");
 
 defineApp("ZCL_FIXTURE_PACKAGED", class {
   from = "cap2ui5-fixture-apps";

@@ -3,7 +3,7 @@
 // the nav-back wire, and a front-end action wired into a control, which runs
 // in the browser with no roundtrip. wires.test.mjs reads them off the wire,
 // browser.e2e.mjs presses them.
-const { defineApp, z2ui5_if_client } = require("cap2ui5");
+const { defineApp, z2ui5_if_client } = require("@cap2ui5/cds-plugin");
 
 defineApp("ZCL_JS_WIRES", class {
   query = "";

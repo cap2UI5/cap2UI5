@@ -1,4 +1,4 @@
-# cap2ui5
+# @cap2ui5/cds-plugin
 
 **[abap2UI5](https://github.com/abap2UI5/abap2UI5) as a CAP plugin.** Build
 SAPUI5 apps inside your CAP backend, as plain JavaScript classes — no frontend
@@ -15,9 +15,13 @@ authorization; your apps read your entities with `cds.ql`.
 ## Install
 
 ```bash
-npm i cap2ui5
+npm i @cap2ui5/cds-plugin
 cds add cap2ui5      # optional: a first app in srv/apps/hello.js
 ```
+
+Up to 0.2.0 the package was called `cap2ui5`. A project that has it swaps
+it - `npm rm cap2ui5 && npm add @cap2ui5/cds-plugin` - and its app modules
+require `@cap2ui5/cds-plugin`; everything it configured keeps its name.
 
 Requires Node.js 22 or later and `@sap/cds` 9 or 10 (CI tests both, on
 Node 22 and 24).
@@ -33,7 +37,7 @@ frontend - and
 ```js
 // srv/apps/books.js
 import cds from "@sap/cds";
-import { defineApp, t } from "cap2ui5";
+import { defineApp, t } from "@cap2ui5/cds-plugin";
 
 const { SELECT } = cds.ql;
 
@@ -68,8 +72,8 @@ Only in development; a production profile prints neither. CAP's start page
 at `/` lists the same addresses under "Web Applications".
 
 A project from `cds init` + `cds add nodejs` is an ES module project, hence
-`import`. In a CommonJS project, or in a `.cjs` file, `require("cap2ui5")`
-returns the same names.
+`import`. In a CommonJS project, or in a `.cjs` file,
+`require("@cap2ui5/cds-plugin")` returns the same names.
 
 ## The client is `z2ui5_if_client`, by its own names
 
@@ -135,7 +139,7 @@ it as a field.
 
 **Types:** the package ships TypeScript declarations (`index.d.ts`). In a
 JavaScript app, annotate the client for completion and checked field names:
-`/** @param {import("cap2ui5").Client<{ search: string }>} client */`.
+`/** @param {import("@cap2ui5/cds-plugin").Client<{ search: string }>} client */`.
 
 ## Building a view with `z2ui5_cl_ui5_view_builder`
 
@@ -143,7 +147,7 @@ A view is built the way an ABAP app builds one, with abap2UI5's own view
 builder, under its own name and called as the client is:
 
 ```js
-const { defineApp, z2ui5_cl_ui5_view_builder } = require("cap2ui5");
+const { defineApp, z2ui5_cl_ui5_view_builder } = require("@cap2ui5/cds-plugin");
 
 defineApp("HELLO", class {
   name = "";
@@ -254,13 +258,16 @@ server, and every roundtrip compared - view, model and actions.
 
 A package can bring apps with it: add it to the project, and its apps run
 beside the project's own - as abap2UI5's samples run in the system they are
-pulled into. The package says where its app modules are, in its
-`package.json`, and names the plugin as a peer dependency, so that its apps
-and the project's run on the same one:
+pulled into. `npm add @cap2ui5/samples` does exactly that with abap2UI5's
+samples.
+
+The package says where its app modules are, in its `package.json`, and names
+the plugin as a peer dependency, so that its apps and the project's run on
+the same one:
 
 ```json
 "cap2ui5": { "apps": "srv/apps" },
-"peerDependencies": { "cap2ui5": "^0.2.0" }
+"peerDependencies": { "@cap2ui5/cds-plugin": "^0.3.0" }
 ```
 
 The plugin finds such a package the way CAP finds its plugins: among the

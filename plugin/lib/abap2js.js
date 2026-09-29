@@ -1,6 +1,6 @@
 // abap2js - an abap2UI5 app class as a cap2UI5 app module, line for line.
 //
-//   const { abap2js } = require("cap2ui5");
+//   const { abap2js } = require("@cap2ui5/cds-plugin");
 //   const { code } = abap2js(fs.readFileSync(file, "utf8"), { file });
 //
 //   npx cap2ui5 abap2js src/z2ui5_cl_my_app.clas.abap --out srv/apps
@@ -491,8 +491,8 @@ class Generator {
     const methods = this.methods();
     const names = ["defineApp", "t", "z2ui5_cl_ui5_view_builder", "z2ui5_if_client"].filter((n) => this.imports.has(n));
     out.push(this.options.format === "cjs"
-      ? `const { ${names.join(", ")} } = require("cap2ui5");`
-      : `import { ${names.join(", ")} } from "cap2ui5";`);
+      ? `const { ${names.join(", ")} } = require("@cap2ui5/cds-plugin");`
+      : `import { ${names.join(", ")} } from "@cap2ui5/cds-plugin";`);
     out.push("");
     if (consts.length) out.push(...consts, "");
     out.push(`defineApp(${JSON.stringify(this.m.name.toUpperCase())}, class {`);

@@ -17,8 +17,8 @@ import { before, test } from "node:test";
 import { pathToFileURL } from "node:url";
 
 const require = createRequire(import.meta.url);
-const { locate } = require("cap2ui5/lib/runtime");
-const { defineApp, t } = require("cap2ui5");
+const { locate } = require("@cap2ui5/cds-plugin/lib/runtime");
+const { defineApp, t } = require("@cap2ui5/cds-plugin");
 
 // --- the surface -----------------------------------------------------------
 // interface method -> the INPUT parameter names plugin/lib passes to it

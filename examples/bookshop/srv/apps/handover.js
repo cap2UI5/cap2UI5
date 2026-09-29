@@ -6,7 +6,7 @@
 // the caller itself, reached with client.get_app( id ), as abap2UI5's sample
 // 025 does. The caller also reads client->get( ) and the link to its app
 // state. handover.test.mjs drives it.
-const { defineApp } = require("cap2ui5");
+const { defineApp } = require("@cap2ui5/cds-plugin");
 
 defineApp("ZCL_JS_HANDOVER", class {
   result = { product: "", quantity: 0 };

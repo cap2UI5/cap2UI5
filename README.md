@@ -9,9 +9,11 @@ read your entities with `cds.ql`.
 > [!IMPORTANT]
 > **Status: pre-release, on npm.** The plugin works and is tested end to end
 > (wire, restart, concurrency, browser). The four abap2UI5 seams it needs
-> shipped in abap2UI5 1.144.1. Since 2026-09-27 both packages are on npm:
-> `cap2ui5`, and the runtime it pins, `@abap2ui5/node-runtime@1.145.0`, which
-> abap2UI5 builds and publishes itself. In this repository `runtime/` is
+> shipped in abap2UI5 1.144.1. The plugin is on npm as `@cap2ui5/cds-plugin`
+> (up to 0.2.0 `cap2ui5`, which is withdrawn), next to `@cap2ui5/samples` -
+> abap2UI5's samples as a package a project adds - and the runtime it pins,
+> `@abap2ui5/node-runtime@1.145.0`, which abap2UI5 builds and publishes
+> itself. In this repository `runtime/` is
 > still a workspace stand-in for that package, which
 > `scripts/assemble-runtime.sh` fills from the published one or from an
 > upstream build. The package was drafted upstream as `@abap2ui5/runtime` and
@@ -22,8 +24,9 @@ read your entities with `cds.ql`.
 ## Using it
 
 ```bash
-npm i cap2ui5            # contributing to the plugin itself: the workspace, see below
-cds add cap2ui5          # optional: a first app in srv/apps/hello.js
+npm i @cap2ui5/cds-plugin    # contributing to the plugin itself: the workspace, see below
+cds add cap2ui5              # optional: a first app in srv/apps/hello.js
+npm i -D @cap2ui5/samples    # optional: abap2UI5's samples beside your apps, in development
 ```
 
 Requires Node.js 22+ and `@sap/cds` 9 or 10. That is the installation. On the next `cds serve` the roundtrip route
@@ -37,7 +40,7 @@ method names:
 
 ```js
 import cds from "@sap/cds";
-import { defineApp, t } from "cap2ui5";
+import { defineApp, t } from "@cap2ui5/cds-plugin";
 
 const { SELECT } = cds.ql;
 
@@ -66,8 +69,8 @@ defineApp("BOOKS", class {
 
 `cds init` + `cds add nodejs` create an ES module project (`"type": "module"`),
 so an app file imports. In a CommonJS project - or as a `.cjs` file in an ES
-module one - `require("cap2ui5")` gives the same names; the plugin loads
-`.js`, `.mjs` and `.cjs` alike.
+module one - `require("@cap2ui5/cds-plugin")` gives the same names; the
+plugin loads `.js`, `.mjs` and `.cjs` alike.
 
 `cds watch` prints the address of every app, and the user to log in as:
 
@@ -152,7 +155,7 @@ body over the limit.
 ## This repository
 
 ```
-plugin/              the npm package cap2ui5: cds-plugin.js, index.cds, lib/
+plugin/              the npm package @cap2ui5/cds-plugin: cds-plugin.js, index.cds, lib/
 examples/bookshop/   a CAP project using it: a plain CAP service, the apps, the test suite
 runtime/             @abap2ui5/node-runtime: only package.json + README are here, see runtime/README.md
 scripts/             assemble-runtime.sh - fills runtime/ from an upstream build or the package

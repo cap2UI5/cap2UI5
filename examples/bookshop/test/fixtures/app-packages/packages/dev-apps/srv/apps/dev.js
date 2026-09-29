@@ -1,5 +1,5 @@
 // An app of a devDependency - served in development, not in production.
-const { defineApp } = require("cap2ui5");
+const { defineApp } = require("@cap2ui5/cds-plugin");
 
 defineApp("ZCL_FIXTURE_DEV", class {
   from = "cap2ui5-fixture-dev-apps";

@@ -1,6 +1,6 @@
 // What the plugin prints once the server listens, so that a developer who
-// just ran `npm add cap2ui5` and `cds watch` needs no documentation for the
-// next step: every app with the address that starts it, and - when CAP's
+// just ran `npm add @cap2ui5/cds-plugin` and `cds watch` needs no
+// documentation for the next step: every app with the address that starts it, and - when CAP's
 // development login is on - the user to log in as.
 //
 // Measured before this existed, in a fresh `cds init` project: the log said

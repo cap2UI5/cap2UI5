@@ -3,7 +3,7 @@
 // client to what a JavaScript author expects of both - an abap2UI5 app of any
 // size splits main( ) into view_display( ) / on_event( ) helpers, and a
 // JavaScript field initializer is the obvious place for seed rows.
-const { defineApp, t } = require("cap2ui5");
+const { defineApp, t } = require("@cap2ui5/cds-plugin");
 
 defineApp("ZCL_JS_STATE", class {
   name = "Ada";

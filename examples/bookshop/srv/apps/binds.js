@@ -2,7 +2,7 @@
 // bare path a composed binding needs, one cell of a table, initial values
 // kept out of the model, and a string spliced in as the JSON it holds.
 // binds.test.mjs reads the view and the model; browser.e2e.mjs edits the cell.
-const { defineApp, t } = require("cap2ui5");
+const { defineApp, t } = require("@cap2ui5/cds-plugin");
 
 defineApp("ZCL_JS_BINDS", class {
   rows = t.table({ title: "", value: "" });
