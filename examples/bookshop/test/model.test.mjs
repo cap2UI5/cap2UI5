@@ -177,3 +177,73 @@ test("a field cleared to its initial value stays cleared, whatever its initializ
     assert.deepEqual(JSON.parse(toast(r)), empty, `roundtrip ${i + 1} after the clear`);
   }
 });
+
+// ---- what a field can be called, and what it cannot
+
+test("a camelCase field is refused where it is declared, naming the snake_case it wants", () => {
+  // The runtime reads an attribute by its lower-case name, so `isAdmin` was
+  // an attribute it never found: every roundtrip failed with a 500
+  // BINDING_ERROR, bound or not, and nothing named the field.
+  assert.throws(() => defineApp("ZCL_JS_MODEL_CAMEL", class {
+    isAdmin = false;
+    main() {}
+  }), /defineApp\(ZCL_JS_MODEL_CAMEL\): field isAdmin - .* Name it in lower case, snake_case as ABAP does - is_admin/);
+  // a component of a structure maps to its upper-case name, so it may be camelCase
+  assert.doesNotThrow(() => defineApp("ZCL_JS_MODEL_CAMEL_COMP", class {
+    order = { customerName: "" };
+    main() {}
+  }));
+});
+
+test("what every object inherits is no field: this.constructor, ${this}, hasOwnProperty, _bind(\"toString\")", async () => {
+  // shapes[prop] found the inherited keys too, so each of these threw
+  // "box.get is not a function" - and _bind("toString") answered the
+  // function's source as a binding.
+  let App;
+  App = defineApp("ZCL_JS_MODEL_INHERITED", class {
+    name = "Ada";
+    main(client) {
+      const out = [this.constructor === App, typeof `${this}`, this.hasOwnProperty("name"), this.name];
+      try { client._bind("toString"); out.push("bound"); } catch (e) { out.push(e.message); }
+      client.message_toast_display(JSON.stringify(out));
+    }
+  });
+  const r = await P({ app: "ZCL_JS_MODEL_INHERITED" });
+  assert.equal(r.status, 200, r.text.slice(0, 300));
+  const [same, str, own, name, bound] = JSON.parse(toast(r));
+  assert.deepEqual([same, str, own, name], [true, "string", true, "Ada"]);
+  assert.match(bound, /client\._bind\( \): toString is not a field of this app .* Known: name/);
+});
+
+test("a #private member is refused with what to write instead", async () => {
+  // main( ) runs on a proxy, which a private name does not reach - V8 said
+  // only "Cannot read private member #secret from an object whose class did
+  // not declare it" - and a #field would not be in the draft either.
+  defineApp("ZCL_JS_MODEL_PRIVATE", class {
+    #secret = 1;
+    main(client) {
+      client.message_toast_display(String(this.#secret));
+    }
+  });
+  const r = await P({ app: "ZCL_JS_MODEL_PRIVATE" });
+  assert.equal(r.status, 500);
+  assert.match(s.out(), /defineApp\(ZCL_JS_MODEL_PRIVATE\): #secret - private class members are not supported in an app/);
+});
+
+test("a placeholder kept in a field and embedded a roundtrip later is refused, not shipped as a dead handler", async () => {
+  // The guard knew only the current roundtrip's nonce, so an _event( )
+  // placeholder from an earlier one went out as press="z2ui5evt_…_0_".
+  defineApp("ZCL_JS_MODEL_STALE", class {
+    press = "";
+    main(client) {
+      if (client.check_on_init()) this.press = client._event("GO");
+      client.view_display(`<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m"><Button press="${this.press}"/></mvc:View>`);
+    }
+  });
+  const start = await P({ app: "ZCL_JS_MODEL_STALE" });
+  assert.equal(start.status, 200, start.text.slice(0, 300));
+  assert.match(start.text, /press=\\".eB\(\['GO'\]\)\\"/, "in the roundtrip that made it, it is the handler");
+  const later = await P({ app: "ZCL_JS_MODEL_STALE", id: start.json.S_FRONT.ID, event: "GO" });
+  assert.equal(later.status, 500, later.text.slice(0, 300));
+  assert.match(s.out(), /a placeholder from an EARLIER roundtrip reached the view/);
+});

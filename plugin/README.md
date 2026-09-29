@@ -151,6 +151,13 @@ stays on the server, in the draft; a MODEL the browser sends for it is
 ignored. A helper that needs the client gets it as an ABAP app does,
 `this.client = client` in `main( )`, without declaring it as a field.
 
+A field is an ABAP attribute, so **its name is lower case** - `is_admin`, not
+`isAdmin`, which `defineApp( )` refuses: ABAP names are not case-sensitive and
+the runtime reads the attribute by its lower-case name. A structure's
+components and the app's methods may be camelCase. `main( )` and its helpers
+run on a proxy that reads the fields as plain values, which a `#private`
+member does not reach - using one is refused with a message; a plain field
+is private enough, as it is not sent to the browser unless it is bound.
 `t.bool( )` reads as a boolean, `t.char(n)` without its padding and
 `t.float( )` as a number, as the plain `true`, `""` and `0.5` do.
 

@@ -288,6 +288,22 @@ function readState(instance) {
   return out;
 }
 
+/** A field is an ABAP attribute, and the runtime reads an attribute from
+ *  the instance under its LOWERCASE name - the transpiler's convention - while
+ *  ATTRIBUTES lists it upper case. `isAdmin` is therefore an attribute
+ *  ISADMIN the runtime looks for as `isadmin` and does not find: every
+ *  roundtrip of the app failed with a BINDING_ERROR, bound or not. Mapping
+ *  the name would need a second name for every field in the draft, the
+ *  model, nav_app_call( )'s presets and get_app_prev( ) - and two fields
+ *  `isAdmin` and `isadmin` would collide - so the name is refused where it
+ *  is declared, as ABAP would never produce it. A structure's components
+ *  and the app's methods may be camelCase. */
+function fieldNameError(app, f) {
+  const snake = f.replace(/([a-z0-9])([A-Z])/g, "$1_$2").toLowerCase();
+  return `defineApp(${app}): field ${f} - a field is an ABAP attribute, and ABAP names are not case-sensitive: ` +
+    `the runtime reads it as "${f.toLowerCase()}". Name it in lower case, snake_case as ABAP does - ${snake}.`;
+}
+
 /** `name` -> NAME, `z2ui5_if_app$id_draft` -> Z2UI5_IF_APP~ID_DRAFT. */
 const abapName = (f) => f.toUpperCase().replace(/\$/g, "~");
 const isFrameworkField = (f) => f.includes("$");
@@ -536,6 +552,27 @@ const RETIRED = {
 const OBSOLETE = ["view_model_update", "popup_model_update", "popover_model_update",
   "nest_view_model_update", "nest2_view_model_update"];
 
+/** A #private member used in main( ) or a method it calls: `this` there is
+ *  the proxy that unwraps the fields, and JavaScript lets only the instance
+ *  itself through a private name - V8 says "Cannot read private member #x
+ *  from an object whose class did not declare it" and nothing about why. It
+ *  cannot be bound through: a private name is not a property a proxy sees,
+ *  and neither would the draft see it - a #field is not kept from one
+ *  roundtrip to the next. So it is refused, saying what to write instead: a
+ *  plain field is not part of the model until the app binds it. */
+function privateMemberError(e, app) {
+  if (!(e instanceof TypeError)) return null;
+  const m = /private member (#[\w$]+)|Receiver must be an instance of class|Object must be an instance of class/.exec(e.message);
+  if (!m) return null;
+  return new TypeError(
+    `defineApp(${app}): ${m[1] ?? "a #private method"} - private class members are not supported in an app: ` +
+      `main( ) and the methods it calls run on a proxy of the instance, which a private name does not ` +
+      `reach, and a #field would not be kept in the draft either. Use a plain field - it is not sent to ` +
+      `the browser unless main( ) binds it - or a module-level function instead of a #method. (${e.message})`,
+    { cause: e },
+  );
+}
+
 /** What client.get_app( id ) answers - see there. */
 class DraftApp {}
 const DRAFT_APP = Symbol("cap2ui5.draftApp");
@@ -569,6 +606,7 @@ function defineApp(name, cls, opts = {}) {
         let shape;
         try { shape = shapeOf(v, [f]); } catch (e) { undecidable.push(e.message); continue; }
         if (!shape) { undecidable.push(`${f} has no ABAP type`); continue; }
+        if (f !== f.toLowerCase()) throw new Error(fieldNameError(INTERNAL, f));
         this[f] = shape.make();                 // initial - the initializer is constructor_( )'s
         shapes[f] = shape;
         if (initialOf(v) !== undefined) initial[f] = initialOf(v);
@@ -674,7 +712,11 @@ function defineApp(name, cls, opts = {}) {
       // closing "_" keeps _1_ from matching inside _10_.
       const TOK_PREFIX = `z2ui5evt_${crypto.randomBytes(6).toString("hex")}_`;
       const TOK_RE = new RegExp(`${TOK_PREFIX}(\\d+)_`, "g");
-      const TOK_LEFT = new RegExp(TOK_PREFIX, "i"); // what survives a cut or a case change
+      // What survives a cut or a case change - of THIS roundtrip's nonce or
+      // of any other: a placeholder the app kept in a field and embedded one
+      // roundtrip later carries an old nonce, and only matching that one let
+      // it through to the browser as press="z2ui5evt_…" - a dead button.
+      const TOK_LEFT = /z2ui5evt_[0-9a-f]{12}_/i;
       const placeholders = [];                // token number -> what it stands for
       const tokens = new Map();               // JSON of that -> token, one per distinct call
       const placeholder = (spec) => {
@@ -968,21 +1010,31 @@ function defineApp(name, cls, opts = {}) {
       // and on_event( ), and a helper bound to the instance read the ABAP
       // boxes - worse, `this.name = "x"` in it replaced a box with a string,
       // which _bind( ) matches by identity and then could not find.
+      //
+      // A field is an OWN key of shapes: `shapes[prop]` alone also found what
+      // every object inherits - constructor, toString, hasOwnProperty - and
+      // then `${this}` or `this.constructor` threw "box.get is not a function".
+      const isField = (prop) => typeof prop === "string" && Object.hasOwn(shapes, prop);
       const plain = new Proxy(this, {
         get(tgt, prop, recv) {
           const v = Reflect.get(tgt, prop, recv);
-          if (typeof prop === "string" && shapes[prop]) return unwrap(v, shapes[prop]);
-          return typeof v === "function" ? v.bind(recv) : v;
+          if (isField(prop)) return unwrap(v, shapes[prop]);
+          // the class itself stays the class - bound, it is no constructor of anything
+          return typeof v === "function" && prop !== "constructor" ? v.bind(recv) : v;
         },
         set(tgt, prop, value) {
-          if (typeof prop === "string" && shapes[prop]) {
+          if (isField(prop)) {
             wrap(tgt[prop], value, shapes[prop]);
             return true;
           }
           return Reflect.set(tgt, prop, value);
         },
       });
-      await userMain.call(plain, client);        // await: an async main still works
+      try {
+        await userMain.call(plain, client);      // await: an async main still works
+      } catch (e) {
+        throw privateMemberError(e, INTERNAL) ?? e;
+      }
 
       // ---- flush: resolve the placeholders, prepare, then replay -----------
       const B = (v) => new abap.types.Character(1, { qualifiedName: "ABAP_BOOL" }).set(v ? "X" : " ");
@@ -1010,6 +1062,14 @@ function defineApp(name, cls, opts = {}) {
         // returned it - cut, re-encoded, case-changed. Shipping it would send
         // the browser a handler that does nothing, so refuse.
         const at = out.search(TOK_LEFT);
+        if (at >= 0 && !out.slice(at).toLowerCase().startsWith(TOK_PREFIX)) {
+          throw new Error(
+            `client._event( ): a placeholder from an EARLIER roundtrip reached the view: ` +
+              `"${out.slice(at, at + TOK_PREFIX.length + 4)}…". A placeholder is replaced in the roundtrip ` +
+              `that made it and means nothing after it - call _event( ), _event_nav_app_leave( ), ` +
+              `follow_up_action( ) or the _bind( ) with options where the view is built, not once into a field.`,
+          );
+        }
         if (at >= 0) {
           throw new Error(
             `client._event( ): a placeholder it returned reached the view altered, so it cannot be ` +

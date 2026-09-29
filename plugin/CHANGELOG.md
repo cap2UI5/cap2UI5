@@ -25,6 +25,17 @@ starts with 0, a minor release may break the API.
   is still kept in the draft. An app that read an unbound field in the
   browser - or a test that read it off the wire - binds it now.
 
+### Changed
+
+- A camelCase field - `isAdmin = false` - is refused by `defineApp( )`,
+  naming the snake_case it wants (`is_admin`). The runtime reads an attribute
+  by its lower-case name, so such a field made every roundtrip of the app
+  fail with a 500 BINDING_ERROR, bound or not. Components of a structure may
+  still be camelCase.
+- A `#private` member used in `main( )` or a method it calls is refused with
+  what to write instead. It threw V8's bare "Cannot read private member"
+  TypeError, and a `#field` was never kept in the draft.
+
 ### Fixed
 
 - `t.float( )` and a fractional field (`ratio = 0.5`) read as numbers. They
@@ -38,6 +49,12 @@ starts with 0, a minor release may break the API.
   initializer on the next roundtrip. The initializer is applied once, when the
   app is created, not on every draft restore. A table row that leaves a
   column out has it initial, not the value the declaring row gave it.
+- `this.constructor`, `` `${this}` ``, `this.hasOwnProperty( )` in `main( )`
+  work - they threw `box.get is not a function` - and `client._bind("toString")`
+  is refused as no field instead of answering the function's source.
+- A placeholder from an earlier roundtrip - `_event( )` kept in a field and
+  embedded later - is refused. It went to the browser as
+  `press="z2ui5evt_…"`, a button that did nothing.
 
 ## [0.3.1] - 2026-09-29
 
