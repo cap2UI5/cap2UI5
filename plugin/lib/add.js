@@ -15,7 +15,7 @@ const LOG = cds.log("cap2ui5");
 const HELLO = `// Your first cap2UI5 app - cds watch, then open /sap/bc/z2ui5?app_start=HELLO
 // (cds watch prints the address, and the user to log in as). It is abap2UI5's
 // hello world line by line: the same client, the same view builder.
-const { defineApp, z2ui5_cl_ui5_view_builder } = require("cap2ui5");
+const { defineApp, z2ui5_cl_ui5_view_builder } = require("@cap2ui5/cds-plugin");
 
 defineApp("HELLO", class {
   name = "";

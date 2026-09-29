@@ -61,10 +61,12 @@ export function serve() {
 }
 
 /** A fresh server on a fresh port. It is started detached, in a process group
- *  of its own, so kill( ) takes the whole group - nothing keeps listening. */
-export async function boot(label, { port = freePort(), env = {} } = {}) {
+ *  of its own, so kill( ) takes the whole group - nothing keeps listening.
+ *  `root` is the project it serves: the example, or a fixture project inside
+ *  this repository, which finds CAP and the plugin in the workspace. */
+export async function boot(label, { port = freePort(), env = {}, root = EXAMPLE } = {}) {
   const p = spawn(process.execPath, [SERVE], {
-    cwd: EXAMPLE,
+    cwd: root,
     env: { ...process.env, PORT: String(port), ...env },
     stdio: ["ignore", "pipe", "pipe"],
     detached: true,

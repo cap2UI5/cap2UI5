@@ -1,0 +1,6 @@
+{
+  "name": "cap2ui5-fixture-dev-apps",
+  "version": "1.0.0",
+  "description": "A package that brings apps, installed as a devDependency.",
+  "cap2ui5": { "apps": "srv/apps" }
+}

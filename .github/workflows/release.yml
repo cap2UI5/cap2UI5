@@ -1,12 +1,16 @@
-# Publishes plugin/ as the npm package `cap2ui5` when a tag v<version> is
-# pushed. The version is plugin/package.json's - bump it in the pull request
-# that prepares the release; the job refuses a tag that says something else.
+# Publishes plugin/ as the npm package `@cap2ui5/cds-plugin` when a tag
+# v<version> is pushed. The version is plugin/package.json's - bump it in the
+# pull request that prepares the release; the job refuses a tag that says
+# something else.
 #
 # Trusted publishing (OIDC) is how it publishes: no NPM_TOKEN to leak or
 # rotate, and npm records a provenance attestation tying the tarball to this
 # run and commit. `id-token: write` below mints the token, and the package's
 # Settings -> Trusted Publisher on npmjs.com has to name this repository and
-# this workflow file (`release.yml`).
+# this workflow file (`release.yml`) - on the command line:
+#
+#     npx npm@11 trust github @cap2ui5/cds-plugin --file release.yml \
+#       --repo cap2UI5/cap2UI5 --allow-publish
 #
 # That setting can only be made for a package that ALREADY EXISTS, so the very
 # first version is published by hand, once, after `npm login` - from a
@@ -17,9 +21,11 @@
 #
 # (no --provenance there: npm generates an attestation only from a supported
 # CI and aborts anywhere else). Until that has happened, a failed publish here
-# is a warning naming the bootstrap and the run stays green; once `cap2ui5`
-# exists on the registry, a failed publish is an error. A stored NPM_TOKEN
-# still works and takes precedence.
+# is a warning naming the bootstrap and the run stays green; once
+# `@cap2ui5/cds-plugin` exists on the registry, a failed publish is an error.
+# Set the Trusted Publisher right after that first publish: v0.2.0 was
+# tagged while the package existed without one, and failed with ENEEDAUTH.
+# A stored NPM_TOKEN still works and takes precedence.
 name: release
 
 on:
@@ -67,7 +73,7 @@ jobs:
       # The runtime a consumer will get: the PUBLISHED @abap2ui5/node-runtime, at the
       # version plugin/package.json names (or the latest when it names a
       # range). Never a build of upstream main - that is what ci.yml tests,
-      # and it is not what `npm i cap2ui5` installs.
+      # and it is not what `npm i @cap2ui5/cds-plugin` installs.
       - name: Fill runtime/ from the published @abap2ui5/node-runtime
         run: |
           SPEC="$(node -p "require('./plugin/package.json').dependencies['@abap2ui5/node-runtime']")"

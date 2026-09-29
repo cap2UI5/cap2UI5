@@ -1,6 +1,6 @@
 // defineApp — write a cap2UI5 app as ordinary, SYNCHRONOUS JavaScript.
 //
-//   const { defineApp, t } = require("cap2ui5");
+//   const { defineApp, t } = require("@cap2ui5/cds-plugin");
 //   defineApp("ZCL_HELLO", class {
 //     name = "";
 //     books = t.table({ ID: 0, title: "", price: t.packed(9, 2) });

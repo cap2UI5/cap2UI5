@@ -8,7 +8,7 @@
 // before 0.1.0 (isInitial, modelUpdate) - and next to them a z2ui5_if_client
 // method declared obsolete, which does nothing here as in ABAP
 // (view_model_update), and the one the client refuses (set_session_stateful).
-const { defineApp } = require("cap2ui5");
+const { defineApp } = require("@cap2ui5/cds-plugin");
 
 const PROBES = {
   isDisplay: (client) => client.isDisplay,

@@ -2,7 +2,7 @@
 // app's business - the theme, the UI5 bootstrap URL, the
 // Content-Security-Policy, the security headers, the draft expiry, the CSRF
 // gate. One per project; see the docs' User Exit page.
-const { defineExit } = require("cap2ui5");
+const { defineExit } = require("@cap2ui5/cds-plugin");
 
 defineExit({
   // the bootstrap page: once per full page load, not once per roundtrip

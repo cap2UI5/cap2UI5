@@ -1,5 +1,6 @@
-// The startup hints: after `npm add cap2ui5` and `cds watch`, the log names
-// every app with the address that starts it and the development login - so
+// The startup hints: after `npm add @cap2ui5/cds-plugin` and `cds watch`, the
+// log names every app with the address that starts it and the development
+// login - so
 // the first screen needs no documentation. The text is a pure function
 // (plugin/lib/hints.js) and is pinned here case by case; the last test boots
 // the example and reads the log, because the timing is the part a pure test
@@ -11,7 +12,7 @@ import { createRequire } from "node:module";
 import { setTimeout as sleep } from "node:timers/promises";
 import { boot } from "./server.mjs";
 
-const { startupHints, loginHint } = createRequire(import.meta.url)("cap2ui5/lib/hints.js");
+const { startupHints, loginHint } = createRequire(import.meta.url)("@cap2ui5/cds-plugin/lib/hints.js");
 
 const MOCKED = { kind: "mocked", users: { "*": true, alice: { roles: ["admin"] }, bob: {} } };
 const base = {

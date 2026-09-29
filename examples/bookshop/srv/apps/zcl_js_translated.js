@@ -4,7 +4,7 @@
 //
 // The source of srv/apps/zcl_js_translated.js: abap2js.test.mjs holds the
 // module to what abap2js makes of this class, byte for byte, and drives it.
-const { defineApp, t, z2ui5_cl_ui5_view_builder } = require("cap2ui5");
+const { defineApp, t, z2ui5_cl_ui5_view_builder } = require("@cap2ui5/cds-plugin");
 
 const ty_s_row = {
   title:    "",

@@ -16,8 +16,8 @@ import { test } from "node:test";
 import { boot, post } from "./server.mjs";
 
 const require = createRequire(import.meta.url);
-const { config, DEFAULT_LIMIT } = require("cap2ui5/lib/config.js");
-const shipped = require("cap2ui5/package.json").cds.requires.cap2ui5;
+const { config, DEFAULT_LIMIT } = require("@cap2ui5/cds-plugin/lib/config.js");
+const shipped = require("@cap2ui5/cds-plugin/package.json").cds.requires.cap2ui5;
 
 const env = (over = {}) => ({ requires: { cap2ui5: { ...shipped, ...over.own } }, ...over.env });
 

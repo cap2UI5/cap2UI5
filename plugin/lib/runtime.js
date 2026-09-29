@@ -5,6 +5,7 @@ const fs = require("fs");
 const path = require("path");
 const { pathToFileURL } = require("url");
 const { installExit } = require("./define-exit");
+const { definedApps } = require("./define-app");
 
 const LOG = cds.log("cap2ui5");
 
@@ -53,9 +54,76 @@ async function boot(rt) {
 }
 
 /**
- * Load the project's apps: every .js/.mjs/.cjs file in the apps directory is
- * an app module. A project without one simply has no JavaScript apps - the
- * ABAP ones still run. Then bind the user exit one of them may register.
+ * The packages that bring apps: every direct dependency of the project whose
+ * package.json says where its app modules are -
+ *
+ *   "cap2ui5": { "apps": "srv/apps" }
+ *
+ * - found the way CAP finds its plugins (lib/plugins.js in @sap/cds): the
+ * project's dependencies and, outside production, its devDependencies, so a
+ * package added with `npm add -D` brings its apps to development only. A
+ * dependency that is not installed, or says nothing, brings none; one whose
+ * apps directory lies outside the package, or is missing, is skipped with a
+ * warning, as that is a packaging mistake its author wants to hear about.
+ *
+ * Looked up in node_modules as Node looks up a package, not with
+ * require.resolve( ): a package's `exports` need not list package.json.
+ *
+ * @param {string}  [root] the project, cds.root
+ * @param {boolean} [dev]  whether devDependencies count, as for CAP's plugins
+ * @returns {{ name: string, dir: string }[]} in the order package.json lists them
+ */
+function appPackages(root = cds.root, dev = process.env.NODE_ENV !== "production") {
+  let pkg;
+  try { pkg = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8")); } catch { return []; }
+  const deps = { ...pkg.dependencies, ...(dev && pkg.devDependencies) };
+  const found = [];
+  for (const name of Object.keys(deps)) {
+    const home = installed(name, root);
+    if (!home) continue;
+    let declared;
+    try { declared = JSON.parse(fs.readFileSync(path.join(home, "package.json"), "utf8")).cap2ui5?.apps; } catch { continue; }
+    if (declared === undefined) continue;
+    const dir = typeof declared === "string" ? path.resolve(home, declared) : null;
+    const inside = dir && !path.relative(home, dir).startsWith("..") && !path.isAbsolute(path.relative(home, dir));
+    if (!inside) {
+      LOG.warn(`${name}: cap2ui5.apps in its package.json has to be a directory inside the package - its apps are not loaded`);
+    } else if (!fs.existsSync(dir)) {
+      LOG.warn(`${name}: its apps directory ${declared} is not in the installed package - is it in package.json#files?`);
+    } else {
+      found.push({ name, dir });
+    }
+  }
+  return found;
+}
+
+/** The directory of an installed package, or null: the first
+ *  node_modules/<name> from root upwards, as Node finds it. */
+function installed(name, root) {
+  for (let dir = path.resolve(root); ; dir = path.dirname(dir)) {
+    const home = path.join(dir, "node_modules", name);
+    if (fs.existsSync(path.join(home, "package.json"))) return fs.realpathSync(home);
+    if (path.dirname(dir) === dir) return null;
+  }
+}
+
+/** Import every .js/.mjs/.cjs file in dir, in name order. */
+async function importAll(dir) {
+  const files = fs.readdirSync(dir).filter((f) => /\.(c|m)?js$/.test(f)).sort();
+  for (const f of files) await import(pathToFileURL(path.join(dir, f)).href);
+  return files.length;
+}
+
+/**
+ * Load the apps: the project's own - every .js/.mjs/.cjs file in the apps
+ * directory is an app module - and then those of the packages it depends on
+ * (appPackages above). A project without any simply has no JavaScript apps -
+ * the ABAP ones still run. Then bind the user exit one of them may register.
+ *
+ * An app is registered by its name, and a later defineApp( ) of the same name
+ * replaces it. So the project's own apps load first, and a package does not
+ * get to replace an app that is already there: the project's stays, or the
+ * one of the package listed first, with a warning naming both.
  *
  * Only once boot( ) has finished, because defineApp boxes an app's fields with
  * abap.types.* - the global the runtime installs. And only once CAP has served
@@ -63,11 +131,26 @@ async function boot(rt) {
  * for cds.entities( ) while it loads.
  */
 async function loadApps(conf) {
-  const dir = path.resolve(cds.root, conf.apps);
-  if (fs.existsSync(dir)) {
-    const files = fs.readdirSync(dir).filter((f) => /\.(c|m)?js$/.test(f)).sort();
-    for (const f of files) await import(pathToFileURL(path.join(dir, f)).href);
-    LOG.info(`${files.length} app module(s) loaded from ${path.relative(cds.root, dir) || "."}`);
+  const own = path.resolve(cds.root, conf.apps);
+  const origin = new Map();                       // app name -> where it was loaded from
+  const record = (from) => { for (const n of definedApps()) if (!origin.has(n)) origin.set(n, from); };
+
+  if (fs.existsSync(own)) {
+    const n = await importAll(own);
+    LOG.info(`${n} app module(s) loaded from ${path.relative(cds.root, own) || "."}`);
+  }
+  record("the project");
+
+  for (const { name, dir } of appPackages()) {
+    const before = new Map([...origin.keys()].map((n) => [n, abap.Classes[n]]));
+    const n = await importAll(dir);
+    for (const [app, cls] of before) {
+      if (abap.Classes[app] === cls) continue;
+      abap.Classes[app] = cls;
+      LOG.warn(`${name} defines ${app}, which ${origin.get(app)} defines already - that one stays`);
+    }
+    record(name);
+    LOG.info(`${n} app module(s) loaded from ${name}`);
   }
 
   // The user exit AFTER the app modules: a project registers it with
@@ -77,4 +160,4 @@ async function loadApps(conf) {
   if (installExit()) LOG.info("user exit installed");
 }
 
-module.exports = { locate, boot, loadApps };
+module.exports = { locate, boot, loadApps, appPackages };

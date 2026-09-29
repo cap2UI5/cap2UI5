@@ -1,11 +1,20 @@
 # Changelog
 
-All notable changes to `cap2ui5` are recorded here. The format follows
+All notable changes to `@cap2ui5/cds-plugin` - `cap2ui5` up to 0.2.0 - are
+recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the versions
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While the version
 starts with 0, a minor release may break the API.
 
 ## [Unreleased]
+
+## [0.3.0] - 2026-09-29
+
+The plugin is `@cap2ui5/cds-plugin` now, published by the npm organisation
+`cap2ui5` next to `@cap2ui5/samples`: abap2UI5's samples as a package a
+project adds, which needs this version. It is the first version on npm since
+0.1.0 - 0.2.0 was tagged, but its release had no Trusted Publisher to publish
+with and never reached the registry, so its changes come with this one.
 
 ### Added
 
@@ -20,9 +29,21 @@ starts with 0, a minor release may break the API.
   loaded only when a translation runs.
 - `t.numc(n)`, `t.date()`, `t.time()` - ABAP's N, D and T as fields, read and
   written as strings.
+- **Apps from a package.** A dependency whose `package.json` says
+  `"cap2ui5": { "apps": "srv/apps" }` brings its apps: they are served beside
+  the project's own, and the package is found as CAP finds its plugins -
+  `dependencies`, and `devDependencies` outside production. An app of a name
+  the project has already stays the project's, with a warning; a directory
+  outside the package, or missing from it, is skipped with one.
 
 ### Changed
 
+- **The package is `@cap2ui5/cds-plugin`.** A project installs it with
+  `npm add @cap2ui5/cds-plugin`, and an app module requires or imports
+  `@cap2ui5/cds-plugin`, which is also what abap2js writes. What a project
+  configures keeps its name: `cds.requires.cap2ui5`, `cds add cap2ui5`, the
+  command `npx cap2ui5 abap2js`, the table `cap2ui5.Drafts` and the log
+  `cap2ui5`. The unscoped package `cap2ui5` is withdrawn from npm.
 - `scripts/assemble-runtime.sh` also copies the runtime's `downport/` - the
   ABAP its output was transpiled from, where abap2js reads the client's types.
 
@@ -157,6 +178,7 @@ The first release: abap2UI5 as a CAP plugin.
 - Apps are plain JavaScript classes (`defineApp`).
 - The user exit is available as `defineExit`.
 
-[Unreleased]: https://github.com/cap2UI5/cap2UI5/compare/v0.2.0...HEAD
-[0.2.0]: https://www.npmjs.com/package/cap2ui5/v/0.2.0
-[0.1.0]: https://www.npmjs.com/package/cap2ui5/v/0.1.0
+[Unreleased]: https://github.com/cap2UI5/cap2UI5/compare/v0.3.0...HEAD
+[0.3.0]: https://www.npmjs.com/package/@cap2ui5/cds-plugin/v/0.3.0
+[0.2.0]: https://github.com/cap2UI5/cap2UI5/tree/v0.2.0
+[0.1.0]: https://github.com/cap2UI5/cap2UI5/pull/77

@@ -3,7 +3,7 @@
 // client's calls need no await either way.
 const cds = require("@sap/cds");
 const { SELECT, INSERT } = cds.ql;                 // CAP also installs it as a global; the import is the honest form
-const { defineApp, t } = require("cap2ui5");
+const { defineApp, t } = require("@cap2ui5/cds-plugin");
 
 defineApp("ZCL_JS_BOOKS", class {
   search = "";

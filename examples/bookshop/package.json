@@ -5,7 +5,7 @@
   "dependencies": {
     "@cap-js/sqlite": "^3",
     "@sap/cds": "^10",
-    "cap2ui5": "*"
+    "@cap2ui5/cds-plugin": "*"
   },
   "cds": {
     "requires": {

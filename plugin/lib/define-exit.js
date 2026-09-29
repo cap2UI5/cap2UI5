@@ -1,6 +1,6 @@
 // defineExit — the framework's user exit, reachable from a CAP project.
 //
-//   const { defineExit } = require("cap2ui5");
+//   const { defineExit } = require("@cap2ui5/cds-plugin");
 //   defineExit({
 //     onPage(cfg, ctx) { cfg.theme = "sap_horizon_dark"; },
 //     onRoundtrip(cfg, ctx) { cfg.draft_exp_time_in_hours = 24; },

@@ -1,10 +1,11 @@
-// cap2ui5 - the CAP plugin.
+// @cap2ui5/cds-plugin - cap2UI5, the CAP plugin.
 //
-// CAP loads this file from every dependency that has one, so `npm i cap2ui5`
-// is the whole installation: on the next cds serve the roundtrip route exists,
-// the UI5 shell is served, and cds deploy creates cap2ui5.Drafts next to the
-// project's own entities (index.cds, contributed through package.json#cds).
-// The project's own server.js, if it has one, is untouched.
+// CAP loads this file from every dependency that has one, so
+// `npm i @cap2ui5/cds-plugin` is the whole installation: on the next cds serve
+// the roundtrip route exists, the UI5 shell is served, and cds deploy creates
+// cap2ui5.Drafts next to the project's own entities (index.cds, contributed
+// through package.json#cds). The project's own server.js, if it has one, is
+// untouched.
 //
 // The runtime underneath is upstream's own - the real ABAP, downported and
 // transpiled by @abaplint/transpiler, published as @abap2ui5/node-runtime. There is

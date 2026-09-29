@@ -2,7 +2,7 @@
 // z2ui5_cl_ui5_view_builder, under its own name - the same methods, called
 // the same way (one positional argument, or the parameters by name), the same
 // one rule for a( ), and upstream's rendering and escaping.
-const { defineApp, z2ui5_cl_ui5_view_builder } = require("cap2ui5");
+const { defineApp, z2ui5_cl_ui5_view_builder } = require("@cap2ui5/cds-plugin");
 
 defineApp("ZCL_JS_BUILDER", class {
   name = "";

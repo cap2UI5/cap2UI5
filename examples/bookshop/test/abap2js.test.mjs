@@ -19,12 +19,12 @@ import { test } from "node:test";
 import { EXAMPLE, post, serve } from "./server.mjs";
 
 const require = createRequire(import.meta.url);
-const { abap2js, Abap2jsError } = require("cap2ui5");
+const { abap2js, Abap2jsError } = require("@cap2ui5/cds-plugin");
 const s = serve();
 
 const FIXTURE = path.join(EXAMPLE, "test/fixtures/abap2js/zcl_js_translated.clas.abap");
 const MODULE = path.join(EXAMPLE, "srv/apps/zcl_js_translated.js");
-const CLI = require.resolve("cap2ui5/bin/cap2ui5.js");
+const CLI = require.resolve("@cap2ui5/cds-plugin/bin/cap2ui5.js");
 const REGENERATE = "npx cap2ui5 abap2js test/fixtures/abap2js/zcl_js_translated.clas.abap --out srv/apps " +
   '--origin "cap2UI5 examples/bookshop" (in examples/bookshop)';
 

@@ -14,7 +14,7 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
 
 | path | hand-written? |
 |---|---|
-| `plugin/` | yes — the npm package `cap2ui5` |
+| `plugin/` | yes — the npm package `@cap2ui5/cds-plugin` (`cap2ui5` up to 0.2.0) |
 | `examples/bookshop/` | yes — a CAP project using it; **the test suite lives here** because the tests need a project. `srv/catalog-service.cds` is deliberately an ordinary CAP service that knows nothing about cap2UI5: it is what `coexistence.test.mjs` drives to prove the plugin is a guest in the project and not its host. |
 | `runtime/package.json`, `runtime/README.md` | yes — the stand-in's manifest |
 | `runtime/output/`, `runtime/setup/`, `runtime/downport/` | **no — upstream's transpiled output and the ABAP it came from, never edited, never committed.** `scripts/assemble-runtime.sh` fills them from the published package (`--package X.Y.Z`) or from an upstream build. |
@@ -113,9 +113,10 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
   clears its capture before each test, so startup lines are only visible to
   a child.
 - **The workspace cannot prove the PACKAGE.** Every test here runs with
-  `cap2ui5` and `@abap2ui5/node-runtime` as workspace symlinks, so a missing entry
-  in `files`, a `main` pointing at nothing, or a model contribution that only
-  resolves relatively cannot fail - and all of them fail on `npm i cap2ui5`.
+  `@cap2ui5/cds-plugin` and `@abap2ui5/node-runtime` as workspace symlinks,
+  so a missing entry in `files`, a `main` pointing at nothing, or a model
+  contribution that only resolves relatively cannot fail - and all of them
+  fail on `npm i @cap2ui5/cds-plugin`.
   `npm run consumer-test` packs both packages as `npm publish` would, installs
   the tarballs into a throwaway CAP project and drives a roundtrip. Run it
   before publishing and after anything that touches `files`, `main`,
@@ -163,13 +164,22 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
 
 ## Publishing
 
+**The package is `@cap2ui5/cds-plugin`; the plugin's own names are
+`cap2ui5`.** An app requires the package by its name, and so does what
+abap2js writes. What a project configures - `cds.requires.cap2ui5`,
+`cds add cap2ui5`, the command `npx cap2ui5`, the namespace of
+`cap2ui5.Drafts`, the logger, the `"cap2ui5": { "apps" }` a package declares
+its apps with - is the plugin's, and keeps its name. The unscoped `cap2ui5`
+was withdrawn from npm and is not published again.
+
 Every change a user of the package would notice gets a line under
 `Unreleased` in `plugin/CHANGELOG.md`, in the same pull request. The PR that
 prepares a release bumps `plugin/package.json` and moves those lines under the
 new version.
 
-A tag `v<version>` publishes `plugin/` as the npm package `cap2ui5`
-(`.github/workflows/release.yml`) by **trusted publishing** - OIDC with
+A tag `v<version>` publishes `plugin/` as the npm package
+`@cap2ui5/cds-plugin` (`.github/workflows/release.yml`) by **trusted
+publishing** - OIDC with
 provenance, no token. The workflow refuses a tag that disagrees with
 `plugin/package.json`, fills `runtime/` from the PUBLISHED `@abap2ui5/node-runtime`
 (the version `plugin/package.json` pins, or the latest), and runs lint, the
@@ -178,9 +188,13 @@ package be pointed at a workflow only once the package exists, so the first
 version is published by hand once (`npm login`, then
 `npm publish --workspace plugin --access public`) and the package's Settings →
 Trusted Publisher on npmjs.com is pointed at this repository and
-`release.yml`. Until then the publish step ends in a warning naming that
-bootstrap; once `cap2ui5` exists on the registry, a failed publish is an
-error. Publish only against a published `@abap2ui5/node-runtime` - never against the
+`release.yml` - or, from the command line,
+`npx npm@11 trust github @cap2ui5/cds-plugin --file release.yml --repo cap2UI5/cap2UI5 --allow-publish`.
+Both steps, one right after the other: v0.2.0 was tagged while `cap2ui5`
+existed without a Trusted Publisher, and its release failed with
+`ENEEDAUTH`. Until the package exists the publish step ends in a warning
+naming that bootstrap; once `@cap2ui5/cds-plugin` exists on the registry, a
+failed publish is an error. Publish only against a published `@abap2ui5/node-runtime` - never against the
 stand-in, which no consumer can install.
 
 ## Running

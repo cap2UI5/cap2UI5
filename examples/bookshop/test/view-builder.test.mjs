@@ -14,7 +14,7 @@ import { test } from "node:test";
 import { action, post, serve } from "./server.mjs";
 
 const require = createRequire(import.meta.url);
-const { z2ui5_cl_ui5_view_builder, ViewBuilder, defineApp } = require("cap2ui5");
+const { z2ui5_cl_ui5_view_builder, ViewBuilder, defineApp } = require("@cap2ui5/cds-plugin");
 const s = serve();
 
 /** the same chain, driven against the transpiled ABAP class directly */

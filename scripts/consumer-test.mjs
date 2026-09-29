@@ -5,19 +5,20 @@
  * WHY THIS EXISTS
  * ---------------
  * Everything else in this repository runs inside the npm WORKSPACE, where
- * `cap2ui5` and `@abap2ui5/node-runtime` are symlinks to plugin/ and runtime/.
+ * `@cap2ui5/cds-plugin` and `@abap2ui5/node-runtime` are symlinks to plugin/
+ * and runtime/.
  * That proves the code works; it proves nothing about the PACKAGE. A missing
  * entry in `files`, a `main` that points at nothing, a cds-plugin.js that CAP
  * only finds because the workspace put it somewhere convenient, a model
  * contribution that depends on a relative path - none of those can fail in
- * the workspace, and all of them fail on `npm i cap2ui5`.
+ * the workspace, and all of them fail on `npm i @cap2ui5/cds-plugin`.
  *
  * So this packs both packages exactly as `npm publish` would, installs the
  * tarballs into a throwaway CAP project that has never heard of this
  * repository, and drives a roundtrip through them:
  *
  *   - the plugin is loaded because it IS a cds-plugin, from node_modules
- *   - `require("cap2ui5")` resolves and exports what the docs say
+ *   - `require("@cap2ui5/cds-plugin")` resolves and exports what the docs say
  *   - index.cds reaches the project's model, so cds deploy makes the table
  *   - the runtime that loads is the version the plugin pins
  *   - the route answers: bootstrap page, UI5 shell, start, event, and 401
@@ -92,7 +93,7 @@ try {
                             client: { timeout: 5000 } } } },
   }, null, 2));
   fs.writeFileSync(path.join(proj, "srv", "apps", "probe.js"), `
-const { defineApp } = require("cap2ui5");
+const { defineApp } = require("@cap2ui5/cds-plugin");
 defineApp("ZCL_PROBE", class {
   name = "";
   main(client) {
@@ -146,14 +147,14 @@ ENDCLASS.
     translated.ok && fs.existsSync(path.join(proj, "srv", "apps", "zcl_probe_abap.js")), translated.out.trim());
 
   // --- what a consumer's code sees -----------------------------------------
-  const surface = probe(`console.log(JSON.stringify(Object.keys(require("cap2ui5"))))`, proj);
+  const surface = probe(`console.log(JSON.stringify(Object.keys(require("@cap2ui5/cds-plugin"))))`, proj);
   const exported = surface.ok ? JSON.parse(surface.out) : [];
-  check("require(\"cap2ui5\") exports the documented surface",
+  check("require(\"@cap2ui5/cds-plugin\") exports the documented surface",
     ["defineApp", "defineExit", "t", "z2ui5_cl_ui5_view_builder", "z2ui5_if_client", "ViewBuilder", "abap2js"]
       .every((k) => exported.includes(k)),
     surface.ok ? exported.join(", ") : surface.why);
 
-  const pkgDir = path.join(proj, "node_modules", "cap2ui5");
+  const pkgDir = path.join(proj, "node_modules", "@cap2ui5", "cds-plugin");
   for (const f of ["README.md", "CHANGELOG.md", "LICENSE", "cds-plugin.js", "index.cds", "index.js", "index.d.ts", "lib", "bin"]) {
     check(`the package contains ${f}`, fs.existsSync(path.join(pkgDir, f)));
   }

@@ -3,7 +3,7 @@
 // nested slot, the message box with its options and with data, the toast's
 // options, the URL hash and the app state. actions.test.mjs reads each off
 // the response; browser.e2e.mjs opens the popover.
-const { defineApp, z2ui5_if_client } = require("cap2ui5");
+const { defineApp, z2ui5_if_client } = require("@cap2ui5/cds-plugin");
 
 const fragment = (body) =>
   `<core:FragmentDefinition xmlns:core="sap.ui.core" xmlns="sap.m">${body}</core:FragmentDefinition>`;

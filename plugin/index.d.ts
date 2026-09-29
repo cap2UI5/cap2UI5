@@ -1,8 +1,9 @@
-// Type declarations for what `require("cap2ui5")` exports: defineApp, the
-// client an app's main( ) receives - z2ui5_if_client, by its own names - the
-// field declarations in `t`, the view builder and the interface's constants
-// under their ABAP names, and defineExit. The runtime is plain JavaScript (lib/); these types describe it
-// as an app author sees it.
+// Type declarations for what `require("@cap2ui5/cds-plugin")` exports:
+// defineApp, the client an app's main( ) receives - z2ui5_if_client, by its
+// own names - the field declarations in `t`, the view builder and the
+// interface's constants under their ABAP names, and defineExit. The runtime
+// is plain JavaScript (lib/); these types describe it as an app author sees
+// it.
 
 /** One name/value pair of the framework's configuration tables. */
 export interface NameValue {

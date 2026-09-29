@@ -12,9 +12,10 @@ import { createRequire } from "node:module";
 import { after, test } from "node:test";
 import { EXAMPLE, action, boot, post } from "./server.mjs";
 
-const { scaffold } = createRequire(import.meta.url)("cap2ui5/lib/add.js");
+const { scaffold } = createRequire(import.meta.url)("@cap2ui5/cds-plugin/lib/add.js");
 
-// inside the example, so the written app can require("cap2ui5") as a project's would
+// inside the example, so the written app can require("@cap2ui5/cds-plugin")
+// as a project's would
 const scratch = fs.mkdtempSync(path.join(EXAMPLE, "test", "fixtures", ".add-"));
 after(() => fs.rmSync(scratch, { recursive: true, force: true }));
 

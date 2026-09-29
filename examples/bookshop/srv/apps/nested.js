@@ -1,7 +1,7 @@
 // Nested state: a structure inside a structure, and a table inside a structure.
 // A fixture as much as a demo - whether the framework's model carries this is
 // an empirical question, and nested.test.mjs is the measurement.
-const { defineApp, t } = require("cap2ui5");
+const { defineApp, t } = require("@cap2ui5/cds-plugin");
 
 defineApp("ZCL_JS_NESTED", class {
   order = {
