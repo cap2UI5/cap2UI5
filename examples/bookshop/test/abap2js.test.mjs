@@ -115,6 +115,53 @@ test("its events: CASE with OR, abap_bool as ABAP prints it, a called app", asyn
   assert.equal(call.json.S_FRONT.APP, "ZCL_JS_HELLO", "nav_app_call( NEW zcl_js_hello( ) )");
 });
 
+/** The class around `body` in its main( ) and `methods`, translated and run on a stand-in client
+ *  whose get_event( ) is `event`: what it hands message_box_display( ). */
+const run = (decl, body, event = "", methods = "") => {
+  const { code } = abap2js(`CLASS zcl_js_run DEFINITION PUBLIC.
+  PUBLIC SECTION.
+    INTERFACES z2ui5_if_app.
+${decl}
+ENDCLASS.
+CLASS zcl_js_run IMPLEMENTATION.
+  METHOD z2ui5_if_app~main.
+${body}
+  ENDMETHOD.
+${methods}
+ENDCLASS.
+`, { file: "zcl_js_run.clas.abap", format: "cjs" });
+  let App;
+  const stub = { defineApp: (name, cls) => { App = cls; } };
+  new Function("require", code)(() => stub);
+  let shown;
+  new App().main({ get_event: () => event, message_box_display: (v) => { shown = v; } });
+  return { shown, code };
+};
+
+test("an ABAP comment or text cannot end a JavaScript line: U+2028, U+2029 and CR stay inside it", () => {
+  // JavaScript ends a line at all three, ABAP only at LF: a comment that carried one through ran
+  // the rest of the ABAP comment as code. (A '…' or `…` literal with one is an ABAP syntax error.)
+  globalThis.abap2jsInjected = false;
+  for (const br of ["\u2028", "\u2029", "\r"]) {
+    const { shown, code } = run("", `    " harmless${br}globalThis.abap2jsInjected = true;\n` +
+      `    client->message_box_display( |e${br}f| ).`);
+    assert.equal(globalThis.abap2jsInjected, false, `${JSON.stringify(br)}: the comment's rest ran as code\n${code}`);
+    if (br !== "\r") assert.equal(shown, `e${br}f`, "the text is the text");
+    assert.ok(!/[\u2028\u2029]/.test(code), `${JSON.stringify(br)} is written as an escape`);
+  }
+  delete globalThis.abap2jsInjected;
+});
+
+test("a slip of the translator itself is an Abap2jsError with the row it was translating", () => {
+  const broken = { frameworkFound: true, model() { throw new TypeError("boom"); } };
+  const src = "CLASS zcl_x DEFINITION PUBLIC.\n  PUBLIC SECTION.\n    INTERFACES z2ui5_if_app.\n" +
+    "    DATA s TYPE zcl_other=>ty_s.\nENDCLASS.\nCLASS zcl_x IMPLEMENTATION.\n  METHOD z2ui5_if_app~main.\n  ENDMETHOD.\nENDCLASS.\n";
+  const e = (() => { try { abap2js(src, { file: "zcl_x.clas.abap", library: broken }); } catch (x) { return x; } })();
+  assert.ok(e instanceof Abap2jsError, String(e));
+  assert.match(e.message, /^zcl_x\.clas\.abap:4:5 - abap2js failed on this statement \(boom\)/);
+  assert.equal(e.row, 4);
+});
+
 /** abap2js of a class around `body` in its main( ), with `data` in its public section. */
 const refusal = (body, data = "") => {
   const src = `CLASS zcl_js_refused DEFINITION PUBLIC.
@@ -154,6 +201,8 @@ test("what it does not know, it refuses - with file, row and column", () => {
     // DATA runs once, on entering the method: a `let` in the loop would reset it every iteration
     ["    DO 2 TIMES.\n      DATA count TYPE i.\n      count = count + 1.\n    ENDDO.", "",
       /DATA inside DO \/ LOOP \/ WHILE keeps its value from one iteration to the next/, 13],
+    // a translator error, not a crash
+    ["    DATA lo TYPE REF TO object.\n    lo ?= client.", "", /\?= \(a down cast\) is not supported/, 13],
   ];
   for (const [body, data, message, row] of cases) {
     const e = refusal(body, data);

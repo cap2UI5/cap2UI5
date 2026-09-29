@@ -82,6 +82,15 @@ const RESERVED = new Set(("break case catch class const continue debugger defaul
   "await arguments eval undefined").split(" "));
 const jsName = (name) => (RESERVED.has(lc(name)) ? `${name}_` : name);
 
+// JavaScript ends a line - and so a `//` comment - at \n, \r, U+2028 and
+// U+2029; ABAP ends one at \n only. A comment that carried one of the others
+// through would end early and run the rest of the ABAP comment as code, so
+// whatever lands behind `//` goes through lineText( ), and a string literal
+// spells the two Unicode separators as escapes.
+const LINE_BREAKS = /[\n\r\u2028\u2029]/g;
+const lineText = (s) => String(s).replace(LINE_BREAKS, " ");
+const jsString = (s) => JSON.stringify(s).replace(/\u2028/g, "\\u2028").replace(/\u2029/g, "\\u2029");
+
 /** An ABAP literal as JavaScript. A backquote literal is a string; a quote
  *  literal is type c, whose trailing blanks ABAP drops wherever it becomes a
  *  string. Where a boolean is expected, 'X' and ' ' are abap_true/false. */
@@ -93,7 +102,7 @@ function literalJs(n, expected, fail) {
   else if (s.startsWith("'")) value = s.slice(1, s.lastIndexOf("'")).replace(/''/g, "'").replace(/ +$/, "");
   else fail(`the literal ${s} is not supported`);
   if (expected?.k === "bool" && (value === "X" || value === "")) return value === "X" ? "true" : "false";
-  return JSON.stringify(value);
+  return jsString(value);
 }
 
 // ------------------------------------------------------------------ parsing
@@ -182,7 +191,7 @@ function library(lib = []) {
 }
 
 // ------------------------------------------------------- the class, as data
-function readModel(af, file, lib, strict) {
+function readModel(af, file, lib, strict, at = {}) {
   const m = {
     file, lib, strict, name: null, isInterface: false, header: [], types: new Map(), typeOrder: [],
     constants: new Map(), constOrder: [], attributes: [], methods: new Map(), impls: [], interfaces: [],
@@ -199,6 +208,7 @@ function readModel(af, file, lib, strict) {
 
   for (const s of af.getStatements()) {
     const k = kind(s);
+    at.node = s;
     if (impl) {
       if (k === "EndMethod") { impl.end = s; m.impls.push(impl); impl = null; continue; }
       impl.body.push(s);
@@ -400,13 +410,24 @@ function abap2js(source, options = {}) {
   if (!lib.frameworkFound) {
     throw new Abap2jsError("@abap2ui5/node-runtime carries no downport/ - the client's ABAP types are read from there", file);
   }
-  const m = readModel(af, file, lib, true);
-  if (m.isInterface) throw new Abap2jsError("an interface is not an app - give the class that implements z2ui5_if_app", file);
-  if (!m.interfaces.includes("z2ui5_if_app")) throw new Abap2jsError("the class does not implement z2ui5_if_app", file);
-  const other = m.interfaces.filter((i) => i !== "z2ui5_if_app");
-  if (other.length) throw new Abap2jsError(`INTERFACES ${other.join(", ")}: only z2ui5_if_app is supported`, file);
-  const g = new Generator(af, m, options);
-  return { name: m.name.toUpperCase(), code: g.module() };
+  // where the translation is - so that a slip of the translator itself, a
+  // TypeError on a statement it did not expect, still names the row
+  const at = { node: null };
+  try {
+    const m = readModel(af, file, lib, true, at);
+    if (m.isInterface) throw new Abap2jsError("an interface is not an app - give the class that implements z2ui5_if_app", file);
+    if (!m.interfaces.includes("z2ui5_if_app")) throw new Abap2jsError("the class does not implement z2ui5_if_app", file);
+    const other = m.interfaces.filter((i) => i !== "z2ui5_if_app");
+    if (other.length) throw new Abap2jsError(`INTERFACES ${other.join(", ")}: only z2ui5_if_app is supported`, file);
+    const g = new Generator(af, m, options, at);
+    return { name: m.name.toUpperCase(), code: g.module() };
+  } catch (e) {
+    if (e instanceof Abap2jsError) throw e;
+    const err = new Abap2jsError(`abap2js failed on this statement (${e.message}) - not translated; ` +
+      "this is abap2js's own limit, please report it", file, at.node ? firstToken(at.node) : undefined);
+    err.cause = e;
+    throw err;
+  }
 }
 
 /** The abapGit file name a class source would have, for sources passed as text. */
@@ -417,7 +438,8 @@ function classFile(source) {
 }
 
 class Generator {
-  constructor(af, model, options) {
+  constructor(af, model, options, at = {}) {
+    this.at = at;
     this.af = af;
     this.m = model;
     this.file = model.file;
@@ -477,8 +499,8 @@ class Generator {
     let body = raw.replace(/^\*/, "").replace(/^"!?/, "");
     if (/^#EC\b/i.test(body)) return null;
     const pragma = /^\s*abap2ui5lint-(?:disable|enable)\S*\s+\S+(?:\s+--\s*(.*))?$/.exec(body);
-    if (pragma) return pragma[1] ? `// ${pragma[1]}` : null;
-    body = body.replace(/\s+$/, "");
+    if (pragma) return pragma[1] ? `// ${lineText(pragma[1])}` : null;
+    body = lineText(body).replace(/\s+$/, "");
     return body.trim() ? `//${body.startsWith(" ") ? "" : " "}${body}` : "//";
   }
 
@@ -505,7 +527,7 @@ class Generator {
   header() {
     const lines = [];
     let doc = false;
-    const origin = this.options.origin ? `// @origin ${this.options.origin}` : null;
+    const origin = this.options.origin ? `// @origin ${lineText(this.options.origin)}` : null;
     const cmts = this.m.header;
     const lastTag = cmts.map((c) => /^"\s*@\w+/.test(c.concatTokens())).lastIndexOf(true);
     for (const [i, c] of cmts.entries()) {
@@ -527,6 +549,7 @@ class Generator {
     const out = [];
     for (const key of this.m.typeOrder) {
       const t = this.m.types.get(key);
+      this.at.node = t.stmt;
       if (t.type.k !== "struct") continue;
       if (out.length) out.push("");
       out.push(...t.comments.map((c) => this.comment(c)).filter((l) => l !== null));
@@ -534,6 +557,7 @@ class Generator {
     }
     for (const key of this.m.constOrder) {
       const c = this.m.constants.get(key);
+      this.at.node = c.stmt;
       if (out.length) out.push("");
       out.push(...c.comments.map((x) => this.comment(x)).filter((l) => l !== null));
       out.push(`const ${c.name} = ${this.constValue(c.type, c.value, 0, c.stmt)};`);
@@ -630,6 +654,7 @@ class Generator {
     let section = null;
     let lastRow = 0;
     for (const a of this.m.attributes) {
+      this.at.node = a.stmt;
       if (a.type.k === "ref" && a.type.to === "z2ui5_if_client") continue;   // assigned in main( ), see define-app.js
       if (a.isStatic) this.fail("CLASS-DATA is not supported", a.stmt);
       const row = a.stmt.getFirstToken().getRow();
@@ -653,6 +678,7 @@ class Generator {
   methods() {
     const defs = this.m.methods;
     return this.m.impls.map((impl) => {
+      this.at.node = impl.start;
       const name = lc(impl.name);
       if (name.includes("~") && name !== "z2ui5_if_app~main") this.fail(`${impl.name}: only z2ui5_if_app~main is supported`, impl.start);
       const def = name === "z2ui5_if_app~main"
@@ -856,6 +882,7 @@ class MethodGen {
         continue;
       }
       const col = tok.getCol() - 1;
+      g.at.node = s;
       if ((k === "When" || k === "WhenOthers" || k === "EndCase") && cases.length) {
         const c = cases.at(-1);
         if (c.hasBody && !c.ended) {
@@ -944,7 +971,11 @@ class MethodGen {
     const targets = s.getChildren().filter((c) => !isToken(c) && kind(c) === "Target");
     if (targets.length !== 1) this.fail("a chained assignment is not supported", s);
     const target = targets[0];
+    if (s.getChildren().some((c) => isToken(c) && text(c) === "?=")) {
+      this.fail("?= (a down cast) is not supported - an app's own objects are not translated", s);
+    }
     const op = s.getChildren().find((c) => isToken(c) && /^([+\-*/]|&&)?=$/.test(text(c)));
+    if (!op) this.fail("this assignment is not supported", s);
     const source = s.findDirectExpression(E.Source);
     const gap = this.g.gap(target.getLastToken(), op.get());
     const jsOp = text(op) === "&&=" ? "+=" : text(op);
@@ -1268,7 +1299,8 @@ class MethodGen {
       else this.fail(`the escape \\${e} in a string template is not supported`, node);
     }
     return raw.replace(/\\/g, "\\\\").replace(/`/g, "\\`").replace(/\$\{/g, "\\${")
-      .replace(/\n/g, "\\n").replace(/\t/g, "\\t").replace(/\r/g, "\\r");
+      .replace(/\n/g, "\\n").replace(/\t/g, "\\t").replace(/\r/g, "\\r")
+      .replace(/\u2028/g, "\\u2028").replace(/\u2029/g, "\\u2029");
   }
 
   fieldChain(n) {
