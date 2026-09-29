@@ -94,7 +94,7 @@ test("cleanup follows the exit's draft_exp_time_in_hours, not a fixed 4 hours", 
     "INSERT INTO cap2ui5_Drafts (id, owner, createdAt, data) VALUES (?, ?, ?, ?), (?, ?, ?, ?)",
     [expired, "alice", hoursAgo(30), "{}", alive, "alice", hoursAgo(6), "{}"]);
 
-  // any roundtrip runs cleanup( )
+  // an app start runs cleanup( )
   await post(s.url, { app: "ZCL_JS_HELLO", user: "alice" });
   await new Promise((r) => setTimeout(r, 500));
 

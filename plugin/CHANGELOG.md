@@ -65,6 +65,10 @@ starts with 0, a minor release may break the API.
   translating needs, installed with every project that serves apps. A
   project that translates adds it - `npm add -D @abaplint/core` - and the
   command and `abap2js( )` say so where it is missing.
+- The draft store's `count_entries( )` and `count_entries_total( )` - the two
+  numbers the framework's start page shows - are counted by the database, as
+  the shipped store's `SELECT COUNT( * )` counts, instead of loading the id
+  of every draft into Node to take the length of the list.
 - `abap2js` refuses what it cannot translate exactly: `/=`, comparing
   structures or tables, SORTED and HASHED tables, a TYPE p or f in `&&`, a
   number into a TYPE c, rounding into a TYPE p or an integer, `DATA( )` of

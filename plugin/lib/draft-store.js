@@ -64,6 +64,15 @@ async function expiryHours() {
   }
 }
 
+/** The count a `count(*) as n` query answers, as the Integer the interface
+ *  returns. CAP answers a count as a number, or as a string where 64-bit
+ *  integers come back as text (cds.features.count_as_string, PostgreSQL's
+ *  bigint) - hence Number( ). */
+async function count(query) {
+  const r = await cds.run(query);
+  return new abap.types.Integer().set(Number(r?.n ?? 0));
+}
+
 class ZCL_CDS_DRAFT_STORE {
   static INTERNAL_TYPE = "CLAS";
   static INTERNAL_NAME = "ZCL_CDS_DRAFT_STORE";
@@ -141,20 +150,25 @@ class ZCL_CDS_DRAFT_STORE {
     return new abap.types.Character(1).set(ok ? "X" : " ");
   }
 
+  // COUNT( * ) in the database, as the shipped store counts - not every id
+  // loaded to take the length of the list, which grew with the table the
+  // start page shows these two numbers for.
   async z2ui5_if_ui5_draft_store$count_entries() {
     const { Drafts } = cds.entities("cap2ui5");
-    const rows = await cds.run(SELECT.from(Drafts).columns("id").where({ owner: who() }));
-    return new abap.types.Integer().set(rows.length);
+    return count(SELECT.one.from(Drafts).columns("count(*) as n").where({ owner: who() }));
   }
 
   async z2ui5_if_ui5_draft_store$count_entries_total() {
     const { Drafts } = cds.entities("cap2ui5");
-    const rows = await cds.run(SELECT.from(Drafts).columns("id"));
-    return new abap.types.Integer().set(rows.length);
+    return count(SELECT.one.from(Drafts).columns("count(*) as n"));
   }
 
   async z2ui5_if_ui5_draft_store$cleanup() {
-    // Called once per roundtrip, so it must be cheap and must not raise.
+    // The framework calls this on an app START - a roundtrip without a draft
+    // id whose URL names the app (z2ui5_cl_ui5_handler->main_begin, the
+    // app_start branch) - not on the roundtrips of an app's events. So it
+    // runs about as often as somebody opens an app, and it must not raise:
+    // an expired draft left in the table is no reason to refuse the start.
     try {
       const { Drafts } = cds.entities("cap2ui5");
       const cutoff = new Date(Date.now() - (await expiryHours()) * 3600 * 1000).toISOString();
