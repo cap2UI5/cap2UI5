@@ -172,10 +172,14 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
 **The package is `@cap2ui5/cds-plugin`; the plugin's own names are
 `cap2ui5`.** An app requires the package by its name, and so does what
 abap2js writes. What a project configures - `cds.requires.cap2ui5`,
-`cds add cap2ui5`, the command `npx cap2ui5`, the namespace of
+`cds add cap2ui5`, the command `cap2ui5`, the namespace of
 `cap2ui5.Drafts`, the logger, the `"cap2ui5": { "apps" }` a package declares
 its apps with - is the plugin's, and keeps its name. The unscoped `cap2ui5`
-was withdrawn from npm and is not published again.
+was withdrawn from npm and is not published again, so that name on npm is
+anybody's: docs, comments and messages write the command as
+`npx --no-install cap2ui5 abap2js`, which runs the project's own or fails. A
+bare `npx cap2ui5` where the plugin is not installed downloads and runs what
+npm has under the name.
 
 Every change a user of the package would notice gets a line under
 `Unreleased` in `plugin/CHANGELOG.md`, in the same pull request. The PR that

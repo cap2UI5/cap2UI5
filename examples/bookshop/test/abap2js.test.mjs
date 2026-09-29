@@ -25,7 +25,7 @@ const s = serve();
 const FIXTURE = path.join(EXAMPLE, "test/fixtures/abap2js/zcl_js_translated.clas.abap");
 const MODULE = path.join(EXAMPLE, "srv/apps/zcl_js_translated.js");
 const CLI = require.resolve("@cap2ui5/cds-plugin/bin/cap2ui5.js");
-const REGENERATE = "npx cap2ui5 abap2js test/fixtures/abap2js/zcl_js_translated.clas.abap --out srv/apps " +
+const REGENERATE = "npx --no-install cap2ui5 abap2js test/fixtures/abap2js/zcl_js_translated.clas.abap --out srv/apps " +
   '--origin "cap2UI5 examples/bookshop" (in examples/bookshop)';
 
 const APP = "ZCL_JS_TRANSLATED";
@@ -176,7 +176,7 @@ test("a class that is no app is refused as a whole", () => {
   assert.match(e.message, /does not implement z2ui5_if_app/);
 });
 
-test("npx cap2ui5 abap2js: writes the module, --check holds it, a refusal is exit 1", () => {
+test("cap2ui5 abap2js: writes the module, --check holds it, a refusal is exit 1", () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "abap2js-"));
   try {
     const run = (...args) => spawnSync(process.execPath, [CLI, "abap2js", ...args], { cwd: EXAMPLE, encoding: "utf8" });

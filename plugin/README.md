@@ -212,14 +212,25 @@ invalid name) are therefore exactly those of the same chain in an ABAP app. A
 refusal answers the roundtrip with the framework's error, naming the app.
 `ViewBuilder` is the same class, for code that prefers a JavaScript name.
 
-## An ABAP app, translated: `npx cap2ui5 abap2js`
+<!-- the section's anchor while it was titled `npx cap2ui5 abap2js`: the
+published README of @cap2ui5/samples 0.1.0 links to it -->
+<a id="an-abap-app-translated-npx-cap2ui5-abap2js"></a>
+
+## An ABAP app, translated: `cap2ui5 abap2js`
 
 Because the client and the view builder are abap2UI5's own, an abap2UI5 app
 class translates into a cap2UI5 app line for line - and the package does it:
 
 ```bash
-npx cap2ui5 abap2js src/z2ui5_cl_my_app.clas.abap --out srv/apps
+npx --no-install cap2ui5 abap2js src/z2ui5_cl_my_app.clas.abap --out srv/apps
 ```
+
+`--no-install` makes npx run the `cap2ui5` of the project's
+`@cap2ui5/cds-plugin` or fail - never download one. Without it, `npx cap2ui5`
+where the plugin is not installed fetches and runs whatever npm has under the
+unscoped name `cap2ui5`, and that name is no longer this package's. In a
+`package.json` script the command is `cap2ui5 abap2js …`, which runs the
+installed one as well.
 
 `z2ui5_cl_my_app.clas.abap` becomes `srv/apps/z2ui5_cl_my_app.js`, registered
 as `Z2UI5_CL_MY_APP`, so `?app_start=` is the same on both sides. The module

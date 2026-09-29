@@ -58,7 +58,7 @@ test("the app it writes runs: renders, and answers its event", async () => {
 // .js file in it as an ES module, where require( ) is not defined - so the
 // first app written with require( ) failed the start of exactly the project
 // cds add was run in. The module format follows the package.json nearest to
-// the apps directory, as `npx cap2ui5 abap2js` decides it.
+// the apps directory, as `cap2ui5 abap2js` decides it.
 test("writes an ES module in a project whose package.json says type: module", () => {
   const root = fs.mkdtempSync(path.join(scratch, "esm-"));
   fs.writeFileSync(path.join(root, "package.json"), JSON.stringify({ type: "module" }));

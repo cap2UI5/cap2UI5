@@ -105,9 +105,9 @@ client.view_display(view.stringify());
 
 So an ABAP app ports line by line, and abap2UI5's documentation of a method is
 the documentation of the JavaScript one - and the package does the porting:
-`npx cap2ui5 abap2js zcl_my_app.clas.abap` writes `srv/apps/zcl_my_app.js`,
+`npx --no-install cap2ui5 abap2js zcl_my_app.clas.abap` writes `srv/apps/zcl_my_app.js`,
 and refuses with file, row and column what it does not know
-([plugin/README.md](plugin/README.md#an-abap-app-translated-npx-cap2ui5-abap2js)). What JavaScript changes: a field is
+([plugin/README.md](plugin/README.md#an-abap-app-translated-cap2ui5-abap2js)). What JavaScript changes: a field is
 bound by its NAME (`client._bind("s_order-customer")`), since ABAP's `_bind( )`
 finds it by reference; what only an asynchronous framework call can produce -
 an event's wire, `view.stringify()` - is resolved after `main( )`, so embed

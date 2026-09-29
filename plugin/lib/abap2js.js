@@ -3,7 +3,7 @@
 //   const { abap2js } = require("@cap2ui5/cds-plugin");
 //   const { code } = abap2js(fs.readFileSync(file, "utf8"), { file });
 //
-//   npx cap2ui5 abap2js src/z2ui5_cl_my_app.clas.abap --out srv/apps
+//   npx --no-install cap2ui5 abap2js src/z2ui5_cl_my_app.clas.abap --out srv/apps
 //
 // WHY A TRANSLATION AND NOT THE TRANSPILER
 //
