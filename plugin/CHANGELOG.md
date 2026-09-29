@@ -8,6 +8,14 @@ starts with 0, a minor release may break the API.
 
 ## [Unreleased]
 
+### Security
+
+- The documentation writes the command as `npx --no-install cap2ui5 abap2js`,
+  which runs the project's own `cap2ui5` or fails. The unscoped package name
+  `cap2ui5` has not been this package's since 0.3.0, and a plain
+  `npx cap2ui5` where the plugin is not installed - outside the project,
+  before `npm add` - downloads and runs whatever npm has under it.
+
 ## [0.3.1] - 2026-09-29
 
 `cds add cap2ui5` writes a first app that starts in the ES module project

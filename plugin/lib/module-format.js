@@ -2,7 +2,7 @@
 // Node decides it by the package.json nearest to the file: "type": "module"
 // makes every .js an ES module, where require( ) is not defined. `cds init`
 // writes "type": "module", so a file generated into such a project with
-// require( ) fails as soon as it is loaded. `npx cap2ui5 abap2js` and
+// require( ) fails as soon as it is loaded. `cap2ui5 abap2js` and
 // `cds add cap2ui5` both ask here.
 const fs = require("fs");
 const path = require("path");

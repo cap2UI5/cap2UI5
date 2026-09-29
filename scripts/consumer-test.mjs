@@ -23,7 +23,8 @@
  *   - the runtime that loads is the version the plugin pins
  *   - the route answers: bootstrap page, UI5 shell, start, event, and 401
  *     for a caller with no credentials
- *   - `npx cap2ui5 abap2js` translates an ABAP app - its parser installed
+ *   - `npx --no-install cap2ui5 abap2js`, as the README gives it, finds the
+ *     plugin's command and translates an ABAP app - its parser installed
  *     with the plugin, the client's ABAP types read from the runtime's
  *     downport/ - and the translated app starts
  *
@@ -108,7 +109,7 @@ defineApp("ZCL_PROBE", class {
 });
 `);
 
-  // an ABAP app for `npx cap2ui5 abap2js` to translate into srv/apps
+  // an ABAP app for `cap2ui5 abap2js` to translate into srv/apps
   fs.mkdirSync(path.join(proj, "abap"));
   fs.writeFileSync(path.join(proj, "abap", "zcl_probe_abap.clas.abap"), `CLASS zcl_probe_abap DEFINITION PUBLIC.
   PUBLIC SECTION.
@@ -143,7 +144,7 @@ ENDCLASS.
   } catch (e) {
     translated = { ok: false, out: String(e.stderr || e.message).trim().split("\n")[0] };
   }
-  check("npx cap2ui5 abap2js translates an ABAP app into srv/apps",
+  check("npx --no-install cap2ui5 abap2js translates an ABAP app into srv/apps",
     translated.ok && fs.existsSync(path.join(proj, "srv", "apps", "zcl_probe_abap.js")), translated.out.trim());
 
   // --- what a consumer's code sees -----------------------------------------

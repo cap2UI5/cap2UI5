@@ -1,7 +1,10 @@
 #!/usr/bin/env node
 // cap2ui5 - the package's command line. One command so far:
 //
-//   npx cap2ui5 abap2js <class.clas.abap | directory>... [options]
+//   npx --no-install cap2ui5 abap2js <class.clas.abap | directory>... [options]
+//
+// --no-install: this package's cap2ui5 or none - where the package is not
+// installed, a bare `npx cap2ui5` downloads whatever npm has under that name.
 //
 // It translates abap2UI5 app classes into cap2UI5 app modules, one module per
 // class, named after it: z2ui5_cl_my_app.clas.abap becomes
