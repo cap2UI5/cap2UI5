@@ -179,6 +179,28 @@ test("a table attribute is emitted the way the transpiler emits one", () => {
   assert.deepEqual(Object.keys(App.ATTRIBUTES.ADDRESS.type().get()), ["street", "zip"]);
 });
 
+test("the box methods a field is read and written through: getRaw, getQualifiedName, clone and clear", () => {
+  // a float is read with getRaw( ) - get( ) answers the external format
+  const f = t.float();
+  f.set(0.5);
+  assert.equal(f.getRaw(), 0.5, "Float.getRaw( )");
+  assert.equal(f instanceof abap.types.Float, true);
+  // t.bool( ) is told from t.char( n ) by its qualified name
+  assert.equal(t.bool().getQualifiedName(), "ABAP_BOOL");
+  assert.equal(t.bool() instanceof abap.types.Character, true);
+  assert.equal(t.char(3) instanceof abap.types.Character, true);
+  assert.notEqual(t.char(3).getQualifiedName?.(), "ABAP_BOOL");
+  // a declared box is copied, then cleared, into each instance's initial box
+  for (const box of [t.string(), t.int(), t.float(), t.bool(), t.char(3), t.packed(9, 2), t.numc(4), t.date(), t.time()]) {
+    const name = box.constructor.name;
+    const copy = box.clone();
+    assert.notEqual(copy, box, `${name}.clone( )`);
+    copy.set(box instanceof abap.types.Character ? "X" : 1);
+    copy.clear();
+    assert.equal(abap.compare.initial(copy), true, `${name}.clear( ) leaves it initial`);
+  }
+});
+
 test("instance conventions: constructor_ and the ~ -> $ method naming", () => {
   for (const C of [Ref, App]) {
     assert.equal(typeof C.prototype.constructor_, "function", `${C.INTERNAL_NAME}.constructor_`);
