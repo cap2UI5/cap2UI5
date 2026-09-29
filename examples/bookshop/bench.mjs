@@ -22,9 +22,15 @@
 // that changed (buildDeltaFromPaths), not the table - and answers the whole
 // model, as every roundtrip does. Which runtime and which Node ran is
 // printed with the numbers, and whether the runtime's accelerations are
-// active is the [cap2ui5] line above them.
+// active is the [cap2ui5] line above them; CDS_REQUIRES_CAP2UI5_ACCELERATE=
+// false measures the same runtime without them.
+//
+// The project served is the one in the working directory, as for cds serve,
+// and the plugin and runtime are the ones IT resolves - so the bench also
+// runs in another project: `node <this file> --rows 2000` there.
 import http from "node:http";
 import { createRequire } from "node:module";
+import path from "node:path";
 import zlib from "node:zlib";
 import { post } from "./test/server.mjs";
 
@@ -78,7 +84,10 @@ async function pairs() {
 }
 
 async function rows(n) {
-  const { defineApp, t } = require("@cap2ui5/cds-plugin");
+  // the plugin CAP loaded - the served project's, not the one beside this file
+  const project = createRequire(path.join(cds.root, "package.json"));
+  const { defineApp, t } = project("@cap2ui5/cds-plugin");
+  const rt = project("@cap2ui5/cds-plugin/lib/runtime").locate();
   const app = "ZCL_BENCH_ROWS";
   defineApp(app, class {
     rows = t.table({ id: 0, title: "", author: "", price: t.packed(9, 2), stock: 0, done: false });
@@ -112,7 +121,7 @@ async function rows(n) {
     `${kb(r.plain).padStart(9)}  gzip ${r.gzip === null ? "-" : kb(r.gzip)}` +
     (r.sent ? `   request ${kb(r.sent)}` : ""));
   console.log(`${app}, ${n} rows - node ${process.version}, @abap2ui5/node-runtime ` +
-    `${require("@abap2ui5/node-runtime/package.json").version}:`);
+    `${rt.version}:`);
 
   line("page", await wire("GET", `?app_start=${app}`));
   for (let run = 0; run < RUNS; run++) {

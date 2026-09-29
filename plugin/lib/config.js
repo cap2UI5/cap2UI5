@@ -10,7 +10,8 @@
 //     "roles":  ["authenticated-user"],              who may call, as @requires
 //     "routes": ["/sap/bc/z2ui5", "/rest/root/z2ui5"],
 //     "body_parser": { "limit": "10mb" },            optional, see below
-//     "compression": false                           gzip off - lib/compression.js
+//     "compression": false,                          gzip off - lib/compression.js
+//     "accelerate": false                            the runtime's accelerate( ) off
 //   } } }
 //
 // 0.1.0 read a top-level cds.cap2ui5 with `requires` for the roles. That is
@@ -54,6 +55,10 @@ function config(env = cds.env) {
     // gzip unless switched off - for a proxy in front that compresses anyway;
     // with both on, the proxy finds the body compressed and leaves it alone
     compression: conf.compression !== false,
+    // the runtime's accelerate( ), where it has one - lib/runtime.js; false
+    // runs its own code, for a project that meets a fast path's limit and
+    // for measuring what the accelerations save
+    accelerate: conf.accelerate !== false,
   };
 }
 

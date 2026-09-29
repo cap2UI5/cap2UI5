@@ -41,6 +41,15 @@ starts with 0, a minor release may break the API.
   304. gzip only, from 1 kB, never where a `Content-Encoding` is set already;
   `cds.requires.cap2ui5.compression: false` switches it off, for a proxy in
   front that compresses anyway.
+- The runtime's accelerations: where the installed `@abap2ui5/node-runtime`
+  has `accelerate( )` - the releases after 1.145.0 - the plugin calls it once
+  after booting the runtime, and the log says "runtime accelerations active".
+  It replaces the two places in `@abaplint/runtime` that made an app with one
+  table of n rows cost time in n² - a LOOP ... WHERE over a sorted primary
+  key, and CP. Measured with the next release's function, 2000 rows: the
+  app start from 19.6 s to 1.6 s, an edited cell from 43.5 s to 2.9 s. On
+  1.145.0, which has none, nothing changes and nothing is logged above
+  debug. `cds.requires.cap2ui5.accelerate: false` leaves them off.
 
 ### Changed
 

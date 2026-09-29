@@ -5,6 +5,7 @@ package-lock.json
 runtime/output/
 runtime/setup/
 runtime/downport/
+runtime/srv/
 .upstream/
 
 # the example's database and screenshots

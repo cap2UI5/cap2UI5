@@ -356,6 +356,7 @@ Under `cds.requires.cap2ui5` - in `package.json`, a `.cdsrc.json`, a profile or
 | `routes` | `/sap/bc/z2ui5`, `/rest/root/z2ui5` | where the roundtrip answers |
 | `body_parser.limit` | CAP's `cds.server.body_parser.limit`, else `10mb` | the largest roundtrip body; a larger one gets 413 |
 | `compression` | `true` | gzip for the page and the roundtrips, where the browser accepts it; `false` leaves compressing to a proxy in front |
+| `accelerate` | `true` | calls the runtime's `accelerate( )` where it has one - the releases after 1.145.0; `false` runs the runtime's own code |
 
 `"cap2ui5": false` switches the plugin off: no route, and no `cap2ui5.Drafts`
 table in the model.

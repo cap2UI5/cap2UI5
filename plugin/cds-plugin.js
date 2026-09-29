@@ -45,7 +45,7 @@ cds.on("bootstrap", (app) => {
   // answered every roundtrip with a 500.
   let served;
   let origins = new Map();                    // app -> "the project" or its package
-  const ready = Promise.all([boot(rt), new Promise((resolve) => (served = resolve))])
+  const ready = Promise.all([boot(rt, conf), new Promise((resolve) => (served = resolve))])
     .then(async ([shim]) => { origins = await loadApps(conf); listApps(); return shim; });
   ready.catch(() => {});                 // it fails the start below; nothing else awaits it yet
   cds.once("served", () => { served(); return ready; });

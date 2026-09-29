@@ -12,7 +12,9 @@
 // exactly what to look at. Keep it complete: a new abap.* or z2ui5_*$* use in
 // plugin/lib/ belongs in here.
 import assert from "node:assert/strict";
+import fs from "node:fs";
 import { createRequire } from "node:module";
+import path from "node:path";
 import { before, test } from "node:test";
 import { pathToFileURL } from "node:url";
 
@@ -112,6 +114,11 @@ const RUNTIME_GLOBALS = {
 // event, the example apps the rest of what client.get( ) hands them
 const GET_FIELDS = ["event", "r_event_data", "s_config", "s_draft"];
 const EMITTED_STATICS = ["INTERNAL_TYPE", "INTERNAL_NAME", "IMPLEMENTED_INTERFACES", "ATTRIBUTES", "METHODS"];
+// the runtime PACKAGE, not the transpiler: lib/runtime.js imports accelerate
+// from the entries the package's exports declare - "./accelerate", else
+// the main entry "." - calls it once after the boot with no arguments, and
+// reads `false` as "not active". Upstream's module is srv/accelerate.mjs.
+const ACCELERATE_MODULE = path.join("srv", "accelerate.mjs");
 const FRAMEWORK_FIELDS = ["Z2UI5_IF_APP~ID_DRAFT", "Z2UI5_IF_APP~ID_APP"];
 
 // --- boot the runtime in-process, once ------------------------------------
@@ -266,4 +273,23 @@ test("the draft structures have the components draft-store reads and writes", ()
   for (const f of DRAFT_FIELDS) assert.ok(fields("CREATE", "DRAFT").includes(f), `CREATE draft-${f}`);
   for (const f of READ_DRAFT_FIELDS) assert.ok(fields("READ_DRAFT", "RESULT").includes(f), `READ_DRAFT result-${f}`);
   for (const f of DRAFT_FIELDS) assert.ok(fields("READ_INFO", "RESULT").includes(f), `READ_INFO result-${f}`);
+});
+
+test("accelerate( ), where the runtime ships one: the plugin finds it, and it answers whether it is active", async (t) => {
+  const { findAccelerate } = require("@cap2ui5/cds-plugin/lib/runtime");
+  const rt = locate();
+  const { exports } = JSON.parse(fs.readFileSync(path.join(rt.dir, "package.json"), "utf8"));
+  const ships = (typeof exports === "object" && Object.hasOwn(exports ?? {}, "./accelerate")) ||
+    fs.existsSync(path.join(rt.dir, ACCELERATE_MODULE));
+  const accelerate = await findAccelerate(rt);
+  if (!accelerate) {
+    // a runtime that ships the module and the plugin does not find it would
+    // run without the accelerations, silently - the name or entry changed
+    assert.equal(ships, false, `@abap2ui5/node-runtime ${rt.version} ships accelerate, and the plugin does not find it`);
+    t.diagnostic(`@abap2ui5/node-runtime ${rt.version} has no accelerate( ) - nothing to hold the plugin's call to`);
+    return;
+  }
+  const active = await accelerate();
+  assert.equal(typeof active, "boolean", "accelerate( ) answers whether its fast paths are installed");
+  assert.equal(await accelerate(), active, "a second call changes nothing");
 });
