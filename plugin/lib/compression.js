@@ -57,9 +57,10 @@ function compression({ threshold = THRESHOLD, pages = PAGES } = {}) {
   const cache = new Map();           // the page's ETag -> { plain, gzip }, oldest first
 
   /** The gzip of a page, from the cache when the page under this tag is the
-   *  same, byte for byte. The tag alone would do if every tag the framework
-   *  sends were strong - it has sent one tag with two bodies before (see
-   *  sv_get_etag_key), and comparing costs microseconds. */
+   *  same, byte for byte. The tag alone would do - a strong tag names one
+   *  body - but the framework has sent one tag with two bodies before (see
+   *  sv_get_etag_key in z2ui5_cl_ui5_http_handler), and comparing costs
+   *  microseconds where compressing costs milliseconds. */
   function page(etag, plain) {
     const hit = cache.get(etag);
     cache.delete(etag);

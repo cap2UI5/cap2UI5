@@ -1,6 +1,6 @@
-// How long is a roundtrip? The number nobody had. Boots the example project in
-// THIS process (what `cds serve` boots, minus the CLI) and times roundtrips
-// over real HTTP.
+// How long is a roundtrip? The number nobody had. Boots the project in the
+// working directory - the example, run as `npm run bench` - in THIS process
+// (what `cds serve` boots, minus the CLI) and times roundtrips over real HTTP.
 //
 //   node bench.mjs [N] [APP]         warms up, then times N start+event pairs
 //                                    of APP (100 of ZCL_JS_HELLO), and reports
@@ -25,17 +25,18 @@
 // active is the [cap2ui5] line above them; CDS_REQUIRES_CAP2UI5_ACCELERATE=
 // false measures the same runtime without them.
 //
-// The project served is the one in the working directory, as for cds serve,
-// and the plugin and runtime are the ones IT resolves - so the bench also
-// runs in another project: `node <this file> --rows 2000` there.
+// CAP, the plugin and the runtime are the ones that project resolves, as for
+// cds serve - so the table mode runs in another project as well:
+// `node <this file> --rows 2000` there.
 import http from "node:http";
 import { createRequire } from "node:module";
 import path from "node:path";
 import zlib from "node:zlib";
 import { post } from "./test/server.mjs";
 
-const require = createRequire(import.meta.url);
-const cds = require("@sap/cds");
+// the served project's CAP - the one its plugin registers with
+const project = createRequire(path.join(process.cwd(), "package.json"));
+const cds = project("@sap/cds");
 
 const argv = process.argv.slice(2);
 /** the value after a flag; "" for a flag without one, refused below */
@@ -85,7 +86,6 @@ async function pairs() {
 
 async function rows(n) {
   // the plugin CAP loaded - the served project's, not the one beside this file
-  const project = createRequire(path.join(cds.root, "package.json"));
   const { defineApp, t } = project("@cap2ui5/cds-plugin");
   const rt = project("@cap2ui5/cds-plugin/lib/runtime").locate();
   const app = "ZCL_BENCH_ROWS";
