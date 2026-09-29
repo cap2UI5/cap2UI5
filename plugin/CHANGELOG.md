@@ -77,7 +77,9 @@ starts with 0, a minor release may break the API.
   optional peer dependency instead of a dependency: 8.3 MB that only
   translating needs, installed with every project that serves apps. A
   project that translates adds it - `npm add -D @abaplint/core` - and the
-  command and `abap2js( )` say so where it is missing.
+  command and `abap2js( )` say so where it is missing, and name the version
+  to install where the project has one of another major (0.1.0 made every
+  translation fail with `reg.getFirstObject is not a function`).
 - The draft store's `count_entries( )` and `count_entries_total( )` - the two
   numbers the framework's start page shows - are counted by the database, as
   the shipped store's `SELECT COUNT( * )` counts, instead of loading the id
