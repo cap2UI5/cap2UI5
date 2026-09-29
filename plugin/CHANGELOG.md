@@ -8,6 +8,22 @@ starts with 0, a minor release may break the API.
 
 ## [Unreleased]
 
+### Added
+
+- `client.view_display({ val, transition, transition_back })` and
+  `cs_transition` - abap2UI5's page transitions - where the runtime has them:
+  the abap2UI5 releases after 1.145.0. The runtime this version pins, 1.145.0,
+  has neither.
+
+### Changed
+
+- The constant groups are read from the runtime, which groups there are
+  included: a group upstream adds is on the client and on `z2ui5_if_client`
+  without a change here. A fixed list of four was what failed the suite
+  against abap2UI5's main when upstream added `cs_transition`.
+- A parameter the runtime in use does not declare is refused, naming the
+  runtime, instead of being dropped unseen by the transpiled method.
+
 ## [0.3.0] - 2026-09-29
 
 The plugin is `@cap2ui5/cds-plugin` now, published by the npm organisation

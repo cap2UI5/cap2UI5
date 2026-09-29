@@ -43,6 +43,12 @@ export interface ClientConstants {
     };
     readonly orientation: { readonly portrait: string; readonly landscape: string };
   };
+  /** The page transitions of view_display( ) - in the runtime from the abap2UI5
+   *  releases after 1.145.0 on, absent before. */
+  readonly cs_transition?: {
+    readonly slide: string; readonly base_slide: string; readonly fade: string;
+    readonly flip: string; readonly show: string;
+  };
 }
 
 /** z2ui5_if_client's constants, on the interface as an ABAP app reads them. */
@@ -171,7 +177,12 @@ export interface Client<App = Record<string, unknown>> extends ClientConstants {
   follow_up_action(params: { val: string; view?: string; t_arg?: unknown[] }): string;
 
   view_display(val: View): void;
-  view_display(params: { val: View; switch_default_model_path?: string; switch_default_model_anno_uri?: string }): void;
+  /** transition (a cs_transition value) and transition_back come with the abap2UI5
+   *  releases after 1.145.0; on an older runtime a call that sets them is refused. */
+  view_display(params: {
+    val: View; switch_default_model_path?: string; switch_default_model_anno_uri?: string;
+    transition?: string; transition_back?: boolean;
+  }): void;
   view_destroy(): void;
   /** obsolete in z2ui5_if_client - does nothing, bound data is pushed on its own */
   view_model_update(): void;

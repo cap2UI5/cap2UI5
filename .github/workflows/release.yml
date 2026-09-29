@@ -109,8 +109,19 @@ jobs:
             # secret itself is never written to disk
             echo '//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}' >> ~/.npmrc
           fi
-          if npm publish --workspace plugin --provenance --access public; then
+          out="$RUNNER_TEMP/publish.log"
+          if npm publish --workspace plugin --provenance --access public >"$out" 2>&1; then
+            cat "$out"
             echo "published $NAME@$VERSION"
+            exit 0
+          fi
+          cat "$out"
+          # npm view lags a publish by minutes: right after the first version
+          # went out by hand, it still answers 404 while the registry already
+          # refuses to publish that version again (cap2UI5/samples' 0.1.0 tag
+          # run reached its publish step in that window).
+          if grep -q "cannot publish over the previously published version" "$out"; then
+            echo "$NAME@$VERSION is already on the registry (npm view does not show it yet) - nothing to do"
             exit 0
           fi
           if npm view "$NAME" version >/dev/null 2>&1; then

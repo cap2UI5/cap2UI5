@@ -306,10 +306,13 @@ function boxOf(value, who) {
 }
 
 /** z2ui5_if_client's constant structures - cs_event, cs_view, cs_nav_mode,
- *  cs_device - as plain frozen objects: `client.cs_event.set_title` is
- *  `client->cs_event-set_title`. Read from the runtime rather than copied:
- *  they are upstream's, and an action upstream adds is one the client knows. */
-const CONSTANT_GROUPS = ["cs_event", "cs_view", "cs_nav_mode", "cs_device"];
+ *  cs_device, and cs_transition where the runtime has it (the releases after
+ *  1.145.0) - as plain frozen objects: `client.cs_event.set_title` is
+ *  `client->cs_event-set_title`. Read from the runtime rather than copied,
+ *  the groups included: they are upstream's, and an action or a group
+ *  upstream adds is one the client knows. A fixed list of groups was what
+ *  failed first when upstream added cs_transition. */
+const PREFIX = "z2ui5_if_client$";
 let CONSTANTS;
 const deepFreeze = (o) => {
   for (const v of Object.values(o)) if (v && typeof v === "object") deepFreeze(v);
@@ -320,16 +323,31 @@ function constants() {
     throw new Error("z2ui5_if_client's constants are read from the abap2UI5 runtime, which has not booted yet - " +
       "read them in main( ) or in an app file under srv/apps/, which loads after it.");
   }
-  CONSTANTS ??= deepFreeze(Object.fromEntries(CONSTANT_GROUPS.map((n) =>
-    [n, toPlain(abap.Classes["Z2UI5_IF_CLIENT"][`z2ui5_if_client$${n}`])])));
+  const IF = abap.Classes["Z2UI5_IF_CLIENT"];
+  CONSTANTS ??= deepFreeze(Object.fromEntries(Object.keys(IF).filter((k) => k.startsWith(PREFIX))
+    .map((k) => [k.slice(PREFIX.length), toPlain(IF[k])])));
   return CONSTANTS;
 }
 /** The interface's constants as an ABAP app reads them, on the interface
  *  itself: `z2ui5_if_client=>cs_event-set_title` is
  *  `z2ui5_if_client.cs_event.set_title`. The same objects as client.cs_event
- *  and its siblings. */
-const z2ui5_if_client = Object.freeze(Object.defineProperties({}, Object.fromEntries(
-  CONSTANT_GROUPS.map((n) => [n, { enumerable: true, get: () => constants()[n] }]))));
+ *  and its siblings - which groups there are, the runtime says, so this is
+ *  a read-only view on constants( ) rather than a fixed set of getters. */
+const booted = () => Boolean(globalThis.abap?.Classes?.["Z2UI5_IF_CLIENT"]);
+const z2ui5_if_client = new Proxy({}, {
+  get: (_, k) => {
+    if (typeof k !== "string") return undefined;
+    if (k.startsWith("cs_")) return constants()[k];   // before the boot, constants( ) says why not
+    return booted() && Object.hasOwn(constants(), k) ? constants()[k] : undefined;
+  },
+  has: (_, k) => booted() && Object.hasOwn(constants(), k),
+  ownKeys: () => (booted() ? Object.keys(constants()) : []),
+  getOwnPropertyDescriptor: (_, k) => (booted() && Object.hasOwn(constants(), k)
+    ? { value: constants()[k], enumerable: true, configurable: true, writable: false } : undefined),
+  set: () => false,
+  defineProperty: () => false,
+  deleteProperty: () => false,
+});
 /** A constant's value, given the value itself (`client.cs_event.set_title`,
  *  "SET_TITLE") or, leniently, its name ("set_title"). Anything else is
  *  refused with the names: it would reach the browser as an action nobody
@@ -360,7 +378,7 @@ const SIGNATURES = {
   _event: "val t_arg s_ctrl arg",
   _event_client: "val! view t_arg",
   follow_up_action: "val! view t_arg",
-  view_display: "val! switch_default_model_path switch_default_model_anno_uri",
+  view_display: "val! switch_default_model_path switch_default_model_anno_uri transition transition_back",
   popup_display: "val!",
   popover_display: "xml! by_id!",
   nest_view_display: "val! id! method_insert! method_destroy",
@@ -373,6 +391,20 @@ const SIGNATURES = {
   hash_replace: "val",
   app_state_set_active: "val",
   set_session_stateful: "val",
+};
+/** The parameters the RUNTIME in use declares for a method, lower case - or
+ *  null before it has booted. SIGNATURES is what the client wires, and it
+ *  follows upstream's interface; a runtime from before a parameter was added
+ *  does not know it, and its transpiled method ignores what it does not
+ *  declare. So a call that sets such a parameter is refused, naming the
+ *  runtime, instead of doing nothing (view_display's transition, which came
+ *  after @abap2ui5/node-runtime 1.145.0). */
+function runtimeParams(method) {
+  const m = globalThis.abap?.Classes?.["Z2UI5_IF_CLIENT"]?.METHODS?.[method.toUpperCase()];
+  return m?.parameters ? Object.keys(m.parameters).map((p) => p.toLowerCase()) : null;
+}
+const runtimeVersion = () => {
+  try { return require("@abap2ui5/node-runtime/package.json").version; } catch { return "?"; }
 };
 const signature = (method) => {
   const params = SIGNATURES[method].split(" ");
@@ -408,6 +440,13 @@ function paramsOf(method, args, named = isPlainObject) {
     for (const [k, v] of Object.entries(first)) {
       if (!names.includes(k)) throw new Error(`${who}: no parameter "${k}" - { ${names.join(", ")} }`);
       if (v !== undefined) out[k] = v;
+    }
+  }
+  const known = runtimeParams(method);
+  for (const k of Object.keys(out)) {
+    if (known && !known.includes(k)) {
+      throw new Error(`${who}: ${k} is not a parameter of z2ui5_if_client=>${method} in the abap2UI5 runtime ` +
+        `this project runs on (@abap2ui5/node-runtime ${runtimeVersion()}) - it came with a later release`);
     }
   }
   const missing = required.filter((k) => out[k] === undefined || out[k] === null);
@@ -824,7 +863,7 @@ function defineApp(name, cls, opts = {}) {
           );
         },
 
-        ...constants(),                          // cs_event, cs_view, cs_nav_mode, cs_device
+        ...constants(),                          // cs_event, cs_view, cs_nav_mode, cs_device - cs_transition
         raw: c,                                  // the transpiled z2ui5_if_client, async
       };
 
@@ -1072,7 +1111,10 @@ function defineApp(name, cls, opts = {}) {
       // whether to queue it.
       const prepared = [];
       for (const [kind, arg] of queue) {
-        if (kind === "view") prepared.push({ ...strings(arg, ["val"]), val: S(await xmlOf(arg.val)) });
+        if (kind === "view") {
+          prepared.push({ ...strings(arg, ["val", "transition_back"]), val: S(await xmlOf(arg.val)),
+            ...(arg.transition_back === undefined ? {} : { transition_back: B(arg.transition_back) }) });
+        }
         else if (kind === "popup") prepared.push({ val: S(await xmlOf(arg.val)) });
         else if (kind === "popover") prepared.push({ xml: S(await xmlOf(arg.xml)), by_id: S(subst(arg.by_id)) });
         else if (kind === "nest" || kind === "nest2") {

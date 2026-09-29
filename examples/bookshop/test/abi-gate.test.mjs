@@ -36,6 +36,8 @@ const CLIENT_METHODS = {          // z2ui5_if_client, used by define-app
   GET_APP_PREV: ["RESULT"],
   GET_APP: ["ID", "RESULT"],
   GET_EVENT_ARG: ["V", "RESULT"],
+  // TRANSITION and TRANSITION_BACK too, from the releases after 1.145.0 - not
+  // required here: the client refuses them on a runtime that lacks them
   VIEW_DISPLAY: ["VAL", "SWITCH_DEFAULT_MODEL_PATH", "SWITCH_DEFAULT_MODEL_ANNO_URI"],
   VIEW_DESTROY: [],
   POPUP_DISPLAY: ["VAL"],

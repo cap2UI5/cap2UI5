@@ -43,6 +43,11 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
   after `main( )` - is documented as a difference, not hidden behind a new
   name. `nav.test.mjs` holds the client's names to the interface's in both
   directions, so a method upstream adds fails the suite until it is wired.
+  The constant groups are read from the runtime; a parameter is wired in
+  `SIGNATURES` (`lib/define-app.js`), and one the runtime in use does not
+  declare is refused. So a parameter upstream adds goes into `SIGNATURES`
+  with a test that holds on the pinned runtime AND on upstream's main, which
+  CI builds - as `view_display( )`'s `transition` does in `nav.test.mjs`.
 - **A client method that composes view XML needs a BROWSER test, not only a
   wire test.** The wire tests play the frontend's part by hand, so they can
   feed an event argument the real page would never send — which is how
