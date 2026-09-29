@@ -74,5 +74,6 @@ defineApp("ZCL_JS_BINDS_WRONG", class {
       try { f(); out.push(`${k}: accepted`); } catch (e) { out.push(`${k}: ${e.message}`); }
     }
     this.refusals = out.join("\n");
+    client._bind("refusals");         // bound, so the wire carries the messages
   }
 });

@@ -15,6 +15,15 @@ starts with 0, a minor release may break the API.
   `cap2ui5` has not been this package's since 0.3.0, and a plain
   `npx cap2ui5` where the plugin is not installed - outside the project,
   before `npm add` - downloads and runs whatever npm has under it.
+- **Only a field the app binds is part of the model.** Every field used to
+  be bound before `main( )` - to learn its path - so every field was sent to
+  the browser, and the browser could overwrite every field: a MODEL with
+  `PRICE: 0, IS_ADMIN: true` for fields no view shows was taken as if a
+  control had sent it. Now a field is sent and written back once the app
+  binds it (`_bind( )`, `_bind_edit( )`, `_bind_path( )`, a component or a
+  cell), and stays bound, as the framework does for an ABAP app. Every field
+  is still kept in the draft. An app that read an unbound field in the
+  browser - or a test that read it off the wire - binds it now.
 
 ## [0.3.1] - 2026-09-29
 

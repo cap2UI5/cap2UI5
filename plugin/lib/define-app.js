@@ -37,8 +37,9 @@
 //
 //   QUERIES  (check_on_navigated, get_event, _bind, _event, …) must answer a
 //            value the app uses inline, so they cannot be deferred. The
-//            lifecycle, the event and its arguments and every field's binding
-//            are resolved BEFORE main( ) and handed over as plain values. An
+//            lifecycle, the event and its arguments are resolved BEFORE
+//            main( ) and handed over as plain values; a field's binding is
+//            known without asking (boundPath) and registered after it. An
 //            event wire cannot be - its names are invented by the app - so
 //            _event( ) returns a PLACEHOLDER token and the real wire string is
 //            substituted in afterwards, once the async call can be awaited.
@@ -264,6 +265,11 @@ function readState(instance) {
 /** `name` -> NAME, `z2ui5_if_app$id_draft` -> Z2UI5_IF_APP~ID_DRAFT. */
 const abapName = (f) => f.toUpperCase().replace(/\$/g, "~");
 const isFrameworkField = (f) => f.includes("$");
+/** The binding z2ui5_if_client=>_bind( ) answers for a top-level attribute:
+ *  its name as RTTI spells it, under the model's root (get_client_name in
+ *  z2ui5_cl_ui5_srv_bind). Known without binding, so _bind( ) can answer it
+ *  inline and bind the field after main( ) - see there. */
+const boundPath = (f) => `{/${abapName(f)}}`;
 
 // ------------------------------------------------ what the framework hands over
 /** Any ABAP value as plain JavaScript, for what the app reads from the
@@ -613,11 +619,15 @@ function defineApp(name, cls, opts = {}) {
       // app can still read.
       const prevRef = await c.z2ui5_if_client$get_app_prev({ result: 1 });
       const prevApp = readState(abap.compare.initial(prevRef) ? null : prevRef.get());
-      const paths = {};
-      for (const f of Object.keys(shapes)) {
-        if (isFrameworkField(f)) continue;
-        paths[f] = (await c.z2ui5_if_client$_bind({ val: this[f], result: 1 })).get();
-      }
+      // The app's own fields - what _bind( ) can name. NOT bound here: a
+      // field becomes part of the model when the app binds it, as in ABAP,
+      // where the framework sends and accepts only bound attributes. Binding
+      // every field up front - which is how the path used to be learnt -
+      // sent every field to the browser and let the browser write every
+      // field, the ones no view shows included (a forged PRICE or IS_ADMIN
+      // was taken as if a control had sent it). See boundPath( ).
+      const fields = new Set(Object.keys(shapes).filter((f) => !isFrameworkField(f)));
+      const bound = new Set();                 // fields main( ) bound without options
       // app_state_get_href( ): composed from the browser's location and this
       // roundtrip's draft id, no side effect - so it can be answered up front,
       // which an app needs because it writes the link into a bound field.
@@ -657,10 +667,10 @@ function defineApp(name, cls, opts = {}) {
        *  keys from the field's box to it. */
       const fieldOf = (name, who) => {
         const [top, ...components] = String(name).split(/[-.]/);
-        if (!(top in paths)) {
+        if (!fields.has(top)) {
           throw new Error(
             `${who}: ${top} is not a field of this app - in JavaScript the client takes a field's ` +
-              `NAME, client._bind("name"), not its value. Known: ${Object.keys(paths).join(", ") || "(none)"}`,
+              `NAME, client._bind("name"), not its value. Known: ${[...fields].join(", ") || "(none)"}`,
           );
         }
         let shape = shapes[top];
@@ -907,8 +917,11 @@ function defineApp(name, cls, opts = {}) {
             ...options,
           });
         }
-        // path_only is the same binding without its braces (finalize_path)
-        return p.path ? paths[target.top].slice(1, -1) : paths[target.top];
+        // Answered now, bound after main( ) - see boundPath( ). path_only is
+        // the same binding without its braces (finalize_path).
+        bound.add(target.top);
+        const braced = boundPath(target.top);
+        return p.path ? braced.slice(1, -1) : braced;
       }
       for (const m of OBSOLETE) client[m] = () => {};
       // The names of cap2ui5 0.1.0 say where they went, rather than answer
@@ -1020,6 +1033,18 @@ function defineApp(name, cls, opts = {}) {
         if (p.switch_default_model) input.switch_default_model = B(true);
         return (await c.z2ui5_if_client$_bind(input)).get();
       };
+      // The fields main( ) bound: now they are part of the model, sent to
+      // the browser and written back by it - and only they. The framework's
+      // answer is what the app was handed; abi-gate.test.mjs holds the two
+      // equal, and a runtime that disagrees fails the roundtrip here rather
+      // than render a view bound to nothing.
+      for (const f of bound) {
+        const real = String((await c.z2ui5_if_client$_bind({ val: this[f], result: 1 })).get());
+        if (real !== boundPath(f)) {
+          throw new Error(`client._bind( "${f}" ): the runtime bound it as ${real}, not as ${boundPath(f)} - ` +
+            `the path a field's binding is answered with before main( ) returns`);
+        }
+      }
       // In the order the app made them: a placeholder in another one's
       // arguments was made before it, so it is resolved first.
       for (const [i, p] of placeholders.entries()) {

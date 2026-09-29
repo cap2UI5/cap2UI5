@@ -142,10 +142,14 @@ What is JavaScript's own, and why:
 object (a structure), `t.table({ …one row… })` — and those nest, up to 8
 levels. Component names are UPPERCASE in the model. The whole instance is
 persisted to `cap2ui5.Drafts` after every roundtrip and rebuilt before the
-next, so state survives a restart. Unlike ABAP, every field is part of the
-model - there is no `PROTECTED SECTION`; a helper that needs the client gets
-it as an ABAP app does, `this.client = client` in `main( )`, without declaring
-it as a field.
+next, so state survives a restart. As in ABAP, only what the app **binds** is
+part of the model: a field goes to the browser, and the browser can write it,
+once `main( )` has bound it with `client._bind( )` (or `_bind_edit( )`,
+`_bind_path( )`, a component or a cell of it) - and stays bound for the rest
+of the session. A field no view binds - a price, a role flag, a counter -
+stays on the server, in the draft; a MODEL the browser sends for it is
+ignored. A helper that needs the client gets it as an ABAP app does,
+`this.client = client` in `main( )`, without declaring it as a field.
 
 **Types:** the package ships TypeScript declarations (`index.d.ts`). In a
 JavaScript app, annotate the client for completion and checked field names:

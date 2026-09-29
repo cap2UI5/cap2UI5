@@ -32,7 +32,10 @@ defineApp("ZCL_JS_RETIRED", class {
       }
     });
     if (client.check_on_navigated()) {
-      client.view_display(`<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m"><Page title="retired"/></mvc:View>`);
+      // bound, so the wire carries what each probe threw
+      client.view_display(`<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m"><Page title="retired">` +
+        `<List items="${client._bind("errors")}"><StandardListItem title="{PROBE}" description="{MESSAGE}"/></List>` +
+        `</Page></mvc:View>`);
     }
   }
 });
@@ -45,5 +48,6 @@ defineApp("ZCL_JS_CLIENT_NAMES", class {
 
   main(client) {
     this.names = Object.entries(client).map(([name, v]) => ({ name, kind: typeof v }));
+    client._bind("names");            // bound, so the wire carries them
   }
 });

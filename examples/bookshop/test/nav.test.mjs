@@ -65,7 +65,8 @@ test("nav_app_call( ) hands the screen over, nav_app_leave( ) hands it back with
   // --- into the called app
   const picker = await P({ app: "ZCL_JS_PICK", id: start.json.S_FRONT.ID, event: "CHOOSE" });
   assert.equal(picker.status, 200, picker.text.slice(0, 300));
-  assert.deepEqual(picker.json.MODEL, { COLOUR: "" }, "the called app's own state is on the wire");
+  assert.equal(picker.json.MODEL, undefined,
+    "the called app's model is on the wire - which is none, as it binds no field; the caller's is not");
   assert.match(slot(picker, "MAIN") ?? "", /cap2UI5 - pick one/);
 
   // The two buttons fire ONE event and are told apart by the argument they

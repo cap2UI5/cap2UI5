@@ -262,9 +262,10 @@ export type AppConstructor = new (...args: unknown[]) => object;
 /**
  * Register an app under `name` - the name `?app_start=` starts it by.
  *
- * Every field with an initial value is part of the model and survives each
- * roundtrip; declare what an initial value cannot tell with `t`. Inside
- * `main( )` the fields read and write as plain values.
+ * Every field with an initial value survives each roundtrip in the draft;
+ * declare what an initial value cannot tell with `t`. A field is part of the
+ * MODEL - sent to the browser and written back by it - once `main( )` binds
+ * it, as in ABAP. Inside `main( )` the fields read and write as plain values.
  */
 export function defineApp<App extends object>(
   name: string,
