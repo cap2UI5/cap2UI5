@@ -220,6 +220,16 @@ test("a translation behaves as the ABAP: the answers are what the transpiled ABA
     // a TYPE f takes the number in a text - it kept the text, and f + 1 appended ("1.51")
     ["", "    DATA f TYPE f.\n    DATA s TYPE string VALUE `1.5`.\n    f = s.\n    f = f + 1.\n    IF f > 2 AND f < 3.\n" +
       "      client->message_box_display( `2.5` ).\n    ENDIF.", "2.5"],
+    // a number and a text are compared as numbers in WHERE and in CASE too, as in IF - they were compared with ===
+    [rows, "    DATA t TYPE STANDARD TABLE OF ty_s_row WITH EMPTY KEY.\n    t = VALUE #( ( id = 1 ) ( id = 2 ) ).\n" +
+      "    DATA(s) = `2`.\n    DATA(n) = 0.\n    LOOP AT t INTO DATA(r) WHERE id = s.\n      n = n + 1.\n    ENDLOOP.\n" +
+      "    client->message_box_display( |{ n }| ).", "1"],
+    ["    TYPES: BEGIN OF ty_s_code, code TYPE string, END OF ty_s_code.",
+      "    DATA t TYPE STANDARD TABLE OF ty_s_code WITH EMPTY KEY.\n    t = VALUE #( ( code = `07` ) ( code = `8` ) ).\n" +
+      "    DATA(k) = 7.\n    DATA(n) = 0.\n    LOOP AT t INTO DATA(r) WHERE code = k.\n      n = n + 1.\n    ENDLOOP.\n" +
+      "    client->message_box_display( |{ n }| ).", "1"],
+    ["", "    DATA(i) = 7.\n    DATA(s) = `07`.\n    CASE i.\n      WHEN s.\n        client->message_box_display( `match` ).\n" +
+      "      WHEN OTHERS.\n        client->message_box_display( `no` ).\n    ENDCASE.", "match"],
     // a TYPE f makes arithmetic a TYPE f, a TYPE p in it or not
     ["", "    DATA p TYPE p LENGTH 8 DECIMALS 2 VALUE '1.5'.\n    DATA f TYPE f VALUE '0.25'.\n    DATA(x) = p + f.\n" +
       "    IF x = '1.75'.\n      client->message_box_display( `1.75` ).\n    ENDIF.", "1.75"],
@@ -312,6 +322,9 @@ test("what it does not know, it refuses - with file, row and column", () => {
     ["    DATA c TYPE c LENGTH 3.\n    c = 5.", "", /a TYPE int moved into a TYPE char LENGTH 3 is not supported - ABAP right-aligns/, 13],
     ["    DATA p TYPE p LENGTH 10 DECIMALS 2.\n    DATA(q) = p + 1.", "", /DATA\( \) = arithmetic on a TYPE p is not supported/, 13],
     ["    DATA p TYPE p LENGTH 10 DECIMALS 2.\n    p = p * p.", "", /moved into a TYPE packed LENGTH 10 is not supported - ABAP rounds/, 13],
+    // CASE `05`. WHEN 5. matches in ABAP; a switch compares "05" === "5"
+    ["    DATA(s) = `05`.\n    CASE s.\n      WHEN 5.\n    ENDCASE.", "",
+      /a number in a WHEN of a CASE on a text is not supported - ABAP compares the text as a number/, 14],
     // p + f is a TYPE f, rounded into the p - it was taken for a TYPE p and stored unrounded
     ["    DATA p TYPE p LENGTH 8 DECIMALS 2.\n    DATA f TYPE f VALUE '0.004'.\n    p = p + f.", "",
       /a TYPE float moved into a TYPE packed LENGTH 8 is not supported - ABAP rounds/, 14],

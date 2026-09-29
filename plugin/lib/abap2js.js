@@ -182,6 +182,8 @@ const BUILTIN = {
 const SCALAR = new Set(["string", "int", "float", "bool", "xstring", "date", "time", "packed", "char", "numc", "ref"]);
 const NUMERIC = new Set(["int", "float", "packed"]);
 const TEXT = new Set(["string", "char", "numc"]);
+/** Whether a Source is one literal, '5' or `text` or 42 */
+const isLiteral = (src) => src.getChildren().length === 1 && kind(src.getChildren()[0]) === "Constant";
 /** js, or js in parentheses where a method call on it would bind to its last part */
 const wrapJs = (js) => (/^[\w$.]+(\(\))?$|^"[^"]*"$/.test(js) ? js : `(${js})`);
 const sized = (name, length, decimals) => {
@@ -1068,9 +1070,18 @@ class MethodGen {
         return `switch (${this.source(subject)}) {`;
       }
       case "When": {
-        // a WHEN value is compared as a value of the CASE's type: WHEN 'X' on an abap_bool
+        // a WHEN value is compared as a value of the CASE's type: WHEN 'X' on an abap_bool.
+        // A number and a text are compared as numbers, as `=` compares them
         const values = [...children(s, "Source"), ...children(s, "Or").map((o) => o.findDirectExpression(E.Source))];
-        return values.map((v) => `case ${this.source(v, this.caseTypes.at(-1))}:`).join(" ");
+        const subject = this.caseTypes.at(-1);
+        return values.map((v) => {
+          const vt = this.typeOfSource(v);
+          if (TEXT.has(subject?.k) && NUMERIC.has(vt.k)) {
+            this.fail("a number in a WHEN of a CASE on a text is not supported - ABAP compares the text as a number", v);
+          }
+          if (NUMERIC.has(subject?.k) && TEXT.has(vt.k) && !isLiteral(v)) return `case Number(${this.source(v)}):`;
+          return `case ${this.source(v, subject)}:`;
+        }).join(" ");
       }
       case "WhenOthers": return "default:";
       case "Do": {
@@ -1336,7 +1347,12 @@ class MethodGen {
         let type = rowType;
         if (comp !== "table_line") for (const name of children(chain, "ComponentName")) type = this.component(type, text(name));
         const src = c.findDirectExpression(E.Source);
-        const expr = `${left} ${this.operator(op)} ${this.source(src, type)}`;
+        // a number and a text: ABAP compares the numbers, as cond( ) does
+        const st = this.typeOfSource(src);
+        let expr;
+        if (NUMERIC.has(type?.k) && TEXT.has(st.k) && !isLiteral(src)) expr = `${left} ${this.operator(op)} Number(${this.source(src)})`;
+        else if (TEXT.has(type?.k) && NUMERIC.has(st.k)) expr = `Number(${left}) ${this.operator(op)} ${this.source(src)}`;
+        else expr = `${left} ${this.operator(op)} ${this.source(src, type)}`;
         return not ? `!(${expr})` : expr;
       }
       if (kind(c) === "ComponentCondSub") return `${not}(${this.componentCond(c.findDirectExpression(E.ComponentCond), row, rowType)})`;
