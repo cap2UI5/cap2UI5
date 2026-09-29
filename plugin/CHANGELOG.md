@@ -43,6 +43,11 @@ starts with 0, a minor release may break the API.
   package brings in one line per package - how many, and where to find them
   (CAP's start page, which lists every app). With `@cap2ui5/samples`
   installed it printed 71 lines of addresses around the project's own.
+- `@abaplint/core`, the ABAP parser `cap2ui5 abap2js` reads with, is an
+  optional peer dependency instead of a dependency: 8.3 MB that only
+  translating needs, installed with every project that serves apps. A
+  project that translates adds it - `npm add -D @abaplint/core` - and the
+  command and `abap2js( )` say so where it is missing.
 
 ### Fixed
 

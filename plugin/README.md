@@ -239,8 +239,14 @@ Because the client and the view builder are abap2UI5's own, an abap2UI5 app
 class translates into a cap2UI5 app line for line - and the package does it:
 
 ```bash
+npm add -D @abaplint/core      # once: the ABAP parser it reads with
 npx --no-install cap2ui5 abap2js src/z2ui5_cl_my_app.clas.abap --out srv/apps
 ```
+
+The parser, `@abaplint/core`, is an optional peer dependency of the plugin:
+8 MB that only translating needs, so a project that serves apps does not
+install it. Without it the command, and `abap2js( )` in code, say how to add
+it.
 
 `--no-install` makes npx run the `cap2ui5` of the project's
 `@cap2ui5/cds-plugin` or fail - never download one. Without it, `npx cap2ui5`

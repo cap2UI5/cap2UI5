@@ -24,9 +24,11 @@
  *   - the route answers: bootstrap page, UI5 shell, start, event, and 401
  *     for a caller with no credentials
  *   - `npx --no-install cap2ui5 abap2js`, as the README gives it, finds the
- *     plugin's command and translates an ABAP app - its parser installed
- *     with the plugin, the client's ABAP types read from the runtime's
- *     downport/ - and the translated app starts
+ *     plugin's command; without its parser - @abaplint/core, an optional
+ *     peer the plugin does not install - it says how to add it, and once
+ *     the project has added it, it translates an ABAP app (the client's
+ *     ABAP types read from the runtime's downport/) and the translated app
+ *     starts
  *
  * Not part of `npm test`: it installs from the network and takes about a
  * minute. Run it before publishing, and after anything that touches `files`,
@@ -138,6 +140,19 @@ ENDCLASS.
   check("npm install of the tarballs succeeds", true);
 
   // --- the translator the package carries -----------------------------------
+  // its parser is an optional peer: not installed with the plugin, and the
+  // command says so - then the project adds it, as the README says
+  let refused;
+  try {
+    run("npx", ["--no-install", "cap2ui5", "abap2js", "abap", "--out", "srv/apps"], proj);
+    refused = { ok: false, out: "it ran without @abaplint/core installed" };
+  } catch (e) {
+    const err = String(e.stderr || e.message);
+    refused = { ok: /npm add -D @abaplint\/core/.test(err), out: err.trim().split("\n")[0] };
+  }
+  check("without @abaplint/core, npx --no-install cap2ui5 abap2js says how to add it", refused.ok, refused.out);
+  run("npm", ["install", "--no-audit", "--no-fund", "--save-dev", "@abaplint/core"], proj);
+
   let translated;
   try {
     translated = { ok: true, out: run("npx", ["--no-install", "cap2ui5", "abap2js", "abap", "--out", "srv/apps"], proj) };

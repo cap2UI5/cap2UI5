@@ -43,11 +43,16 @@
     "node": ">=22"
   },
   "peerDependencies": {
-    "@sap/cds": ">=9"
+    "@sap/cds": ">=9",
+    "@abaplint/core": "^2.120.60"
+  },
+  "peerDependenciesMeta": {
+    "@abaplint/core": {
+      "optional": true
+    }
   },
   "dependencies": {
     "@abap2ui5/node-runtime": "1.145.0",
-    "@abaplint/core": "^2.120.60",
     "express": "^4.22.1 || ^5"
   },
   "cds": {
