@@ -106,7 +106,13 @@ test("on a runtime without it - 1.145.0, and the workspace's stand-in - nothing 
   calls.length = 0;
   const published = standIn({ ".": "./srv/host.mjs", "./package.json": "./package.json", "./output/*": "./output/*" },
     { "host.mjs": HOST });
-  for (const rt of [published, real]) {
+  // The workspace's runtime is the stand-in or a published release without
+  // accelerate( ) - unless scripts/assemble-runtime.sh built it from an
+  // upstream checkout that ships one (the CI job that builds upstream's
+  // main). Then it is no runtime WITHOUT it, and abi-gate.test.mjs holds
+  // that the plugin finds it.
+  const workspaceShipsIt = (await findAccelerate(real)) !== null;
+  for (const rt of workspaceShipsIt ? [published] : [published, real]) {
     const { result, info, debug } = await logged(() => accelerations(rt));
     assert.equal(result, false, rt.dir);
     assert.deepEqual(info, [], "a runtime without accelerations is not worth an info line");
