@@ -8,6 +8,12 @@ starts with 0, a minor release may break the API.
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-09-29
+
+`cds add cap2ui5` writes a first app that starts in the ES module project
+`cds init --nodejs` creates. Still `^0.3.0`, so `@cap2ui5/samples` 0.1.0 keeps
+installing beside it.
+
 ### Added
 
 - `client.view_display({ val, transition, transition_back })` and
@@ -202,7 +208,8 @@ The first release: abap2UI5 as a CAP plugin.
 - Apps are plain JavaScript classes (`defineApp`).
 - The user exit is available as `defineExit`.
 
-[Unreleased]: https://github.com/cap2UI5/cap2UI5/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/cap2UI5/cap2UI5/compare/v0.3.1...HEAD
+[0.3.1]: https://www.npmjs.com/package/@cap2ui5/cds-plugin/v/0.3.1
 [0.3.0]: https://www.npmjs.com/package/@cap2ui5/cds-plugin/v/0.3.0
 [0.2.0]: https://github.com/cap2UI5/cap2UI5/tree/v0.2.0
 [0.1.0]: https://github.com/cap2UI5/cap2UI5/pull/77
