@@ -985,8 +985,10 @@ class MethodGen {
           push(`${" ".repeat(c.bodyCol)}break;`);
           out.push(...blanks);
         } else if (!c.hasBody && c.whenLine !== undefined && k !== "EndCase") {
-          // an empty WHEN does nothing - in a switch it would run into the next case
-          out[c.whenLine] += " break;";
+          // an empty WHEN does nothing - in a switch it would run into the next case.
+          // In front of a comment behind the WHEN: appended, it was part of the comment
+          const line = out[c.whenLine];
+          out[c.whenLine] = `${line.slice(0, c.whenEnd)} break;${line.slice(c.whenEnd)}`;
         }
         c.hasBody = false;
         c.ended = false;
@@ -1013,7 +1015,7 @@ class MethodGen {
       };
       if (k === "Case") { mark(cases.at(-1)); cases.push({ bodyCol: col + 2, hasBody: false, loops }); }
       else if (k === "EndCase") { cases.pop(); mark(cases.at(-1)); }
-      else if (k === "When") cases.at(-1).whenLine = out.length - 1;
+      else if (k === "When") Object.assign(cases.at(-1), { whenLine: out.length - 1, whenEnd: out.at(-1).length });
       else if (k !== "WhenOthers") mark(cases.at(-1));
       if (["Do", "Loop", "While"].includes(k)) loops++;
       if (["EndDo", "EndLoop", "EndWhile"].includes(k)) loops--;

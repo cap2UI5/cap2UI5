@@ -122,7 +122,8 @@ starts with 0, a minor release may break the API.
   `DATA(c) = s`, APPEND and INSERT shared the object. Structures and tables
   stored in locals, rows and components are now copied all the way down, and
   components a local `VALUE #( )` leaves out are initial.
-- `abap2js`: an empty WHEN ran into the next WHEN; `DO lines( t ) TIMES`
+- `abap2js`: an empty WHEN ran into the next WHEN, a comment behind it
+  included; `DO lines( t ) TIMES`
   re-read its count on every iteration; EXIT outside a loop became a
   `break;` that kept the server from starting (it now leaves the method).
 - `abap2js`: values are converted as ABAP converts them: abap_bool and

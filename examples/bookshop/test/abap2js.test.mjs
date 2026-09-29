@@ -169,6 +169,9 @@ test("a translation behaves as the ABAP: the answers are what the transpiled ABA
     // an empty WHEN does nothing - in a switch it ran into the next case
     ["", "    DATA(o) = `start`.\n    CASE o.\n      WHEN `start`.\n      WHEN `other`.\n        o = `fell through`.\n" +
       "      WHEN OTHERS.\n        o = `fell through`.\n    ENDCASE.\n    client->message_box_display( o ).", "start"],
+    // ... also with a comment behind it: the break was appended behind the comment, inside it
+    ["", "    DATA(o) = `start`.\n    CASE o.\n      WHEN `start`. \" nothing to do\n      WHEN `other`.\n" +
+      "        o = `fell through`.\n    ENDCASE.\n    client->message_box_display( o ).", "start"],
     // 'X' is the abap_bool it is compared with, in CASE, WHERE and SWITCH
     ["", "    DATA(f) = abap_true.\n    DATA(o) = `start`.\n    CASE f.\n      WHEN 'X'.\n      WHEN OTHERS.\n" +
       "        o = `fell through`.\n    ENDCASE.\n    client->message_box_display( o && SWITCH string( f WHEN 'X' THEN ` X` ) ).", "start X"],
