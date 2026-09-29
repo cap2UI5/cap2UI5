@@ -54,6 +54,9 @@ test("line for line: a view chain keeps its calls, lines and columns", () => {
     "declared on top, where ABAP has every local: what a WHEN declares (a case clause is no block), and a LOOP's " +
     "row read after ENDLOOP - which starts initial, as in ABAP, should the loop not run");
   assert.match(code, /^ {8}for \(row of this\.t_rows\.filter\(/m, "the loop writes the row declared on top");
+  assert.match(code, /^ {4}let pair = \{ \.\.\.ty_s_pair, row: \{ \.\.\.ty_s_pair\.row \} \};$/m,
+    "a local of the class's structure type is a copy of its constant all the way down - a spread one level deep " +
+    "shared the inner structure with the module, and every request after wrote into it");
   assert.match(code, /^ {8}\.a\(\{ n: "state", {8}b: this\.active \}\)\n {8}\/\/ the text beside it: [^\n]+\n {8}\.a\(\{ n: "customTextOn"/m,
     "a comment between the calls of a chain stays between them");
 });
@@ -115,6 +118,21 @@ test("its events: CASE with OR, abap_bool as ABAP prints it, a called app", asyn
   assert.equal(call.json.S_FRONT.APP, "ZCL_JS_HELLO", "nav_app_call( NEW zcl_js_hello( ) )");
 });
 
+test("what ABAP's = does and JavaScript's does not: copies, conversions, NOT, an empty WHEN, DO", async () => {
+  // what the ABAP method answers, transpiled and run on open-abap: a structure copied all the way
+  // down and a row appended as it was, an empty WHEN that runs into no other, NOT, DO's count
+  // read once, APPEND INITIAL LINE, a text in arithmetic, a number and an abap_bool in &&
+  const ABAP = "4 rows, 6, 42, 99, X";
+  for (const user of ["alice", "bob", "alice"]) {
+    // twice and by two users: a local structure that shared the TYPES constant wrote it, and
+    // the next request - anybody's - started from what the last one left (5, then 10, then 15)
+    const start = await P({ app: APP, user });
+    const r = await P({ app: APP, id: start.json.S_FRONT.ID, event: "RULES", user });
+    assert.equal(r.status, 200, r.text.slice(0, 300));
+    assert.deepEqual(custom(r)[0].slice(0, 3), ["MESSAGE_BOX", "show", ABAP], `${user}: what the ABAP method answers`);
+  }
+});
+
 /** The class around `body` in its main( ) and `methods`, translated and run on a stand-in client
  *  whose get_event( ) is `event`: what it hands message_box_display( ). */
 const run = (decl, body, event = "", methods = "") => {
@@ -151,13 +169,33 @@ test("a translation behaves as the ABAP: the answers are what the transpiled ABA
     // an empty WHEN does nothing - in a switch it ran into the next case
     ["", "    DATA(o) = `start`.\n    CASE o.\n      WHEN `start`.\n      WHEN `other`.\n        o = `fell through`.\n" +
       "      WHEN OTHERS.\n        o = `fell through`.\n    ENDCASE.\n    client->message_box_display( o ).", "start"],
+    // 'X' is the abap_bool it is compared with, in CASE, WHERE and SWITCH
+    ["", "    DATA(f) = abap_true.\n    DATA(o) = `start`.\n    CASE f.\n      WHEN 'X'.\n      WHEN OTHERS.\n" +
+      "        o = `fell through`.\n    ENDCASE.\n    client->message_box_display( o && SWITCH string( f WHEN 'X' THEN ` X` ) ).", "start X"],
+    [rows, "    DATA t TYPE STANDARD TABLE OF ty_s_row WITH EMPTY KEY.\n    t = VALUE #( ( id = 1 done = abap_true ) ( id = 2 ) ).\n" +
+      "    DATA(n) = 0.\n    LOOP AT t INTO DATA(r) WHERE done = 'X'.\n      n = n + 1.\n    ENDLOOP.\n" +
+      "    client->message_box_display( |{ n }| ).", "1"],
     // EXIT outside a loop leaves the method; DO reads its count once
     ["    METHODS m RETURNING VALUE(result) TYPE string.", "    client->message_box_display( m( ) ).", "before",
       "  METHOD m.\n    result = `before`.\n    EXIT.\n  ENDMETHOD."],
     ["", "    DATA(k) = 3.\n    DATA(c) = 0.\n    DO k TIMES.\n      k = k + 1.\n      c = c + 1.\n    ENDDO.\n" +
       "    client->message_box_display( |{ c }| ).", "3"],
     // abaplint reads += and -= as two tokens: the + was lost, `i += 2` was `i = 2`
-    ["", "    DATA(i) = 1.\n    DATA(s) = 4.\n    i += 2.\n    i -= s.\n    i *= 3.\n    client->message_box_display( |{ i }| ).", "-3"],
+    ["", "    DATA(i) = 1.\n    DATA(s) = `4`.\n    i += 2.\n    i -= s.\n    i *= 3.\n    client->message_box_display( |{ i }| ).", "-3"],
+    // conversions: a text in arithmetic, && of numbers and abap_bool, a text compared with a number
+    ["", "    DATA(s) = `5`.\n    DATA(i) = 5.\n    DATA(x) = 1.\n    DATA(y) = 2.\n" +
+      "    client->message_box_display( |{ s + 1 } { 1 + s } | && x && y && ` ` && abap_true && xsdbool( i = '5' ) ).", "6 6 12 XX"],
+    ["", "    DATA s TYPE string.\n    s = `05`.\n    IF s = 5.\n      client->message_box_display( `equal` ).\n    ENDIF.", "equal"],
+    // a TYPE p prints with its decimals; TYPE c and n take the value as ABAP moves it
+    ["", "    DATA p TYPE p LENGTH 10 DECIMALS 2 VALUE '-1.5'.\n    DATA c TYPE c LENGTH 3.\n    DATA n TYPE n LENGTH 5.\n" +
+      "    c = `ABCDEF`.\n    n = 42.\n    client->message_box_display( |{ p } { c } { n }| ).", "-1.50 ABC 00042"],
+    // APPEND INITIAL LINE appends a row; a copy is a copy, a row appended the row as it was
+    [rows, "    DATA t TYPE STANDARD TABLE OF ty_s_row WITH EMPTY KEY.\n    DATA s TYPE ty_s_row.\n    s-id = 1.\n" +
+      "    APPEND s TO t.\n    s-id = 2.\n    APPEND s TO t.\n    DATA(c) = s.\n    c-id = 99.\n    APPEND INITIAL LINE TO t.\n" +
+      "    DATA(o) = ``.\n    LOOP AT t INTO DATA(r).\n      r-id = r-id + 10.\n      o = o && r-id && `,`.\n    ENDLOOP.\n" +
+      "    LOOP AT t INTO r.\n      o = o && r-id && `,`.\n    ENDLOOP.\n    client->message_box_display( o && s-id ).", "11,12,10,1,2,0,2"],
+    // a component VALUE leaves out is initial
+    [rows, "    DATA(s) = VALUE ty_s_row( id = 1 ).\n    IF s-done IS INITIAL.\n      client->message_box_display( `initial` ).\n    ENDIF.", "initial"],
   ];
   for (const [decl, body, want, methods] of cases) {
     const { shown, code } = run(decl, body, "", methods);
@@ -230,10 +268,23 @@ test("what it does not know, it refuses - with file, row and column", () => {
       /DATA inside DO \/ LOOP \/ WHILE keeps its value from one iteration to the next/, 13],
     // a translator error, not a crash
     ["    DATA lo TYPE REF TO object.\n    lo ?= client.", "", /\?= \(a down cast\) is not supported/, 13],
+    // ABAP rounds an integer quotient
+    ["    DATA(q) = 7.\n    q /= 2.", "", /\/= is not supported - ABAP rounds an integer quotient/, 13],
+    // === compares objects by identity; ABAP compares structures by content
+    ["    DATA(a) = VALUE ty_s_row( ).\n    DATA(b) = a.\n    IF a = b.\n    ENDIF.", "",
+      /comparing structures or tables is not supported/, 14],
+    // an array keeps neither key order nor unique keys
+    ["    DATA t TYPE SORTED TABLE OF ty_s_row WITH UNIQUE KEY title.", "", /a SORTED or HASHED table is not supported/, 12],
     // EXIT in a CASE in a loop leaves the loop, a break in a switch only the switch
     ["    DO 2 TIMES.\n      CASE 1.\n        WHEN 1.\n          EXIT.\n      ENDCASE.\n    ENDDO.", "",
       /EXIT inside a CASE inside a loop is not supported/, 15],
     ["    CONTINUE.", "", /CONTINUE outside a loop is not supported/, 12],
+    // what ABAP formats or rounds its own way
+    ["    DATA p TYPE p LENGTH 10 DECIMALS 2.\n    client->message_box_display( `p` && p ).", "",
+      /a TYPE p in && is not supported/, 13],
+    ["    DATA c TYPE c LENGTH 3.\n    c = 5.", "", /a TYPE int moved into a TYPE char LENGTH 3 is not supported - ABAP right-aligns/, 13],
+    ["    DATA p TYPE p LENGTH 10 DECIMALS 2.\n    DATA(q) = p + 1.", "", /DATA\( \) = arithmetic on a TYPE p is not supported/, 13],
+    ["    DATA p TYPE p LENGTH 10 DECIMALS 2.\n    p = p * p.", "", /moved into a TYPE packed LENGTH 10 is not supported - ABAP rounds/, 13],
   ];
   for (const [body, data, message, row] of cases) {
     const e = refusal(body, data);

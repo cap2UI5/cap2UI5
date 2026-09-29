@@ -45,6 +45,19 @@
 //   write to a component of an attribute assigns the whole structure again.
 // - abap_bool is a boolean; in a string template it prints as ABAP prints
 //   it, "X" or nothing.
+// - A number converted to a string - CONV string( ), a move into a string,
+//   an operand of && - has its sign in front ("-5"), where ABAP's conversion
+//   puts it behind ("5-"); a TYPE p keeps its decimals ("1.50").
+//
+// WHAT ABAP DOES THAT `=` DOES NOT
+//
+// ABAP's `=` copies a structure or table, all the way down, and converts a
+// value into the type of its target. JavaScript's shares the object and
+// converts nothing. So a structure or table stored in a local, a row or a
+// component is a copy (copyExpr( )), a value stored in a local is converted
+// as ABAP's MOVE converts it (stored( )), and where a short expression cannot
+// get the conversion right - a number into a TYPE c, rounding into a TYPE p -
+// it is refused.
 "use strict";
 
 const fs = require("fs");
@@ -96,13 +109,41 @@ const jsString = (s) => JSON.stringify(s).replace(/\u2028/g, "\\u2028").replace(
  *  string. Where a boolean is expected, 'X' and ' ' are abap_true/false. */
 function literalJs(n, expected, fail) {
   const s = text(n).trim();
-  if (/^-?\d+$/.test(s.replace(/\s+/g, ""))) return s.replace(/\s+/g, "");
+  if (/^-?\d+$/.test(s.replace(/\s+/g, ""))) {
+    const num = s.replace(/\s+/g, "");
+    // a number where a string is expected is a string - as CONV string( )
+    // gives it, the sign in front (README)
+    return expected?.k === "string" ? jsString(String(Number(num))) : num;
+  }
   let value;
   if (s.startsWith("`") && s.endsWith("`")) value = s.slice(1, -1).replace(/``/g, "`");
   else if (s.startsWith("'")) value = s.slice(1, s.lastIndexOf("'")).replace(/''/g, "'").replace(/ +$/, "");
   else fail(`the literal ${s} is not supported`);
   if (expected?.k === "bool" && (value === "X" || value === "")) return value === "X" ? "true" : "false";
+  // a text where a number is expected is the number ABAP converts it to -
+  // written with the digits the ABAP has, rounded as ABAP rounds into the type
+  if (NUMERIC.has(expected?.k)) {
+    const v = value.trim();
+    if (v === "") return "0";
+    if (!/^[+-]?(\d+\.?\d*|\.\d+)$/.test(v)) fail(`${s} is no number - ABAP cannot convert it either`);
+    let out = expected.k === "float" ? v : roundDecimal(v, expected.k === "int" ? 0 : expected.decimals);
+    out = out.replace(/^\+/, "").replace(/^(-?)0+(?=\d)/, "$1").replace(/\.$/, "");
+    if (out.replace(/\D/g, "").replace(/^0+/, "").length > 15) fail(`${s} has more digits than a JavaScript number holds`);
+    return out === "-0" ? "0" : out;
+  }
   return jsString(value);
+}
+
+/** A decimal number, as digits, rounded to `decimals` places half away from
+ *  zero - ABAP's rounding into an integer or a TYPE p. */
+function roundDecimal(v, decimals) {
+  const neg = v.startsWith("-");
+  const [int, frac = ""] = v.replace(/^[+-]/, "").split(".");
+  if (frac.length <= decimals) return v;
+  const digits = BigInt((int || "0") + frac.slice(0, decimals)) + (frac[decimals] >= "5" ? 1n : 0n);
+  const str = digits.toString().padStart(decimals + 1, "0");
+  const out = decimals ? `${str.slice(0, -decimals)}.${str.slice(-decimals)}` : str;
+  return (neg && /[1-9]/.test(out) ? "-" : "") + out;
 }
 
 // ------------------------------------------------------------------ parsing
@@ -136,6 +177,13 @@ const BUILTIN = {
   d: { k: "date" }, t: { k: "time" },
   string_table: { k: "table", row: { k: "string" } },
 };
+// the types whose values JavaScript copies on `=` - a reference is copied as
+// the reference, as ABAP does
+const SCALAR = new Set(["string", "int", "float", "bool", "xstring", "date", "time", "packed", "char", "numc", "ref"]);
+const NUMERIC = new Set(["int", "float", "packed"]);
+const TEXT = new Set(["string", "char", "numc"]);
+/** js, or js in parentheses where a method call on it would bind to its last part */
+const wrapJs = (js) => (/^[\w$.]+(\(\))?$|^"[^"]*"$/.test(js) ? js : `(${js})`);
 const sized = (name, length, decimals) => {
   if (name === "c") return { k: "char", length: length ?? 1 };
   if (name === "n") return { k: "numc", length: length ?? 1 };
@@ -345,7 +393,7 @@ function typeOf(m, node, around = node) {
   }
   if (words.includes("table")) {
     const row = words.includes("ref") ? { k: "ref", to: lc(text(nameNode)) } : resolveType(m, text(nameNode), tok);
-    return { k: "table", row };
+    return { k: "table", row, sorted: words.includes("sorted") || words.includes("hashed") };
   }
   if (words.includes("ref")) return { k: "ref", to: lc(text(nameNode)) };
   if (!nameNode) return { k: "unknown", name: text(node) };
@@ -401,6 +449,9 @@ function methodDef(m, s, comments, section) {
     stmt: s,
   });
 }
+
+const SORTED = "a SORTED or HASHED table is not supported - ABAP keeps its rows in key order and refuses a " +
+  "duplicate key, an array does neither";
 
 // ------------------------------------------------------ the module, emitted
 function abap2js(source, options = {}) {
@@ -604,6 +655,7 @@ class Generator {
       case "time": return field ? this.t("time()") : '"000000"';
       case "struct": return this.structRef(type, mode);
       case "table":
+        if (type.sorted) this.fail(SORTED, node);
         if (!field) return "[]";
         if (type.row.k !== "struct") this.fail("a table of scalars cannot be a cap2UI5 field yet", node);
         return this.t(`table(${this.structRef(type.row, "field")})`);
@@ -622,8 +674,35 @@ class Generator {
    *  and a literal where the constant holds a field's t.*( ), which only a
    *  class field reads. */
   structRef(type, mode) {
-    if (this.ownConstant(type, mode)) return mode === "field" ? type.name : `{ ...${type.name} }`;
+    if (this.ownConstant(type, mode)) return mode === "field" ? type.name : this.copyExpr(type.name, type);
     return this.structLiteral(type, mode);
+  }
+  /** A copy of a structure or table as ABAP's `=` makes one: all the way
+   *  down, so that a write to the copy never reaches the original - in
+   *  JavaScript `=` shares the object, and a nested structure spread only
+   *  one level deep would still be the module constant's own. Null where the
+   *  type is not known all the way down. */
+  copyExpr(js, type, depth = 0) {
+    if (!type) return null;
+    if (SCALAR.has(type.k)) return js;
+    if (type.k === "struct") {
+      let deep = "";
+      for (const f of type.fields) {
+        if (SCALAR.has(f.type.k)) continue;
+        const inner = this.copyExpr(`${js}.${f.name}`, f.type, depth);
+        if (inner === null) return null;
+        deep += `, ${f.name}: ${inner}`;
+      }
+      return `{ ...${js}${deep} }`;
+    }
+    if (type.k === "table" || type.k === "range") {
+      const row = type.k === "range" ? { k: "struct", fields: [] } : type.row;
+      if (SCALAR.has(row?.k)) return `[...${js}]`;
+      const r = depth ? `r${depth}` : "r";
+      const inner = this.copyExpr(r, row, depth + 1);
+      return inner === null ? null : `${js}.map((${r}) => (${inner}))`;
+    }
+    return null;
   }
   ownConstant(type, mode) {
     const own = type.owner === this.m && type.name && this.m.types.get(lc(type.name))?.type === type;
@@ -638,7 +717,8 @@ class Generator {
       const f = type.fields[i];
       // INCLUDE TYPE of an own type: its constant, spread - the ABAP names it too
       if (f.include && this.ownConstant(f.include, mode)) {
-        rows.push(`  ...${f.include.name},`);
+        const copy = mode === "field" ? f.include.name : this.copyExpr(f.include.name, f.include);
+        rows.push(`  ...${copy === `{ ...${f.include.name} }` ? f.include.name : copy},`);
         while (type.fields[i + 1]?.include === f.include) i++;
         continue;
       }
@@ -665,7 +745,7 @@ class Generator {
         const line = this.comment(c);
         if (line !== null) out.push(`  ${line}`);
       }
-      const value = a.value ? this.literal(a.value, a.type) : this.initial(a.type, "field", a.stmt);
+      const value = a.value ? this.fieldValue(a) : this.initial(a.type, "field", a.stmt);
       // another class's structure is written out - the note says which it is
       const typeNote = a.type.k === "struct" && a.type.owner !== this.m
         ? `      // ${a.type.owner?.name ? `${a.type.owner.name}=>` : ""}${a.type.name}` : "";
@@ -673,6 +753,15 @@ class Generator {
       out.push(first + typeNote, ...rest);
     }
     return out;
+  }
+
+  /** DATA … VALUE: a value of the declared type. A plain number or string
+   *  would make defineApp( ) derive F or STRING from it, so a TYPE p, c, n,
+   *  d, t or f field is its t.*( ) set to the value. */
+  fieldValue(a) {
+    const value = this.literal(a.value, a.type);
+    if (!["packed", "char", "numc", "date", "time", "float"].includes(a.type.k) || hasWord(a.value, "initial")) return value;
+    return `${this.initial(a.type, "field", a.stmt)}.set(${value})`;
   }
 
   methods() {
@@ -704,6 +793,8 @@ class MethodGen {
     this.hoisted = new Set();          // declared on top of the method
     this.outside = new Set();          // … and read where their declaration may not have run
     this.reassigned = new Set();
+    this.componentWrites = new Set();  // locals a component of which is written: `ls-a = 1.`
+    this.caseTypes = [];               // the types of the open CASEs' operands
   }
 
   fail(msg, node) { this.g.fail(msg, node); }
@@ -838,6 +929,8 @@ class MethodGen {
           this.reassigned.add(lc(text(target)));
         }
       }
+      const written = s.findDirectExpression(E.Target) ?? s.findDirectExpression(E.SimpleTarget);
+      if (written && written.getChildren().length > 1) this.componentWrites.add(lc(text(written.getChildren()[0])));
       if (k === "If") open("block");
       if (["Do", "Loop", "While"].includes(k)) open("loop");
       if (k === "Case") open("case");
@@ -945,7 +1038,16 @@ class MethodGen {
       case "Call": return `${this.callChain(s.getChildren().find((c) => !isToken(c)))};`;
       case "Data": {
         const decl = declaration(this.m, s);
-        const start = decl.value ? this.g.literal(decl.value, decl.type) : this.g.initial(decl.type, "plain", s);
+        let start = decl.value ? this.g.literal(decl.value, decl.type) : this.g.initial(decl.type, "plain", s);
+        // VALUE 'ABCDEF' of a TYPE c LENGTH 3 is 'ABC', VALUE 42 of a TYPE n LENGTH 5 is '00042'
+        if (decl.value && !hasWord(decl.value, "initial") && ["char", "numc"].includes(decl.type.k)) {
+          const n = decl.type.length;
+          const number = /^-?\d+$/.test(start);
+          if (number && decl.type.k === "char") this.fail("a number as the VALUE of a TYPE c is not supported - ABAP right-aligns it", s);
+          const v = number ? String(Math.abs(Number(start))) : JSON.parse(start);
+          if (decl.type.k === "numc" && !/^\d*$/.test(v.trim())) this.fail(`VALUE ${start} of a TYPE n - ABAP keeps only its digits`, s);
+          start = jsString(decl.type.k === "char" ? v.slice(0, n).replace(/ +$/, "") : v.trim().padStart(n, "0").slice(-n));
+        }
         this.locals.set(lc(decl.name), { name: decl.name, js: jsName(decl.name), type: decl.type, start });
         const value = start.replace(/\n/g, `\n${" ".repeat(s.getFirstToken().getCol() - 1)}`);
         if (this.hoisted.has(lc(decl.name))) return `${jsName(decl.name)} = ${value};`;
@@ -954,11 +1056,19 @@ class MethodGen {
       case "If": return `if (${this.cond(s.findDirectExpression(E.Cond))}) {`;
       case "ElseIf": return `} else if (${this.cond(s.findDirectExpression(E.Cond))}) {`;
       case "Else": return "} else {";
-      case "EndIf": case "EndDo": case "EndLoop": case "EndWhile": case "EndCase": return "}";
-      case "Case": return `switch (${this.source(s.findDirectExpression(E.Source))}) {`;
+      case "EndCase": this.caseTypes.pop(); return "}";
+      case "EndIf": case "EndDo": case "EndLoop": case "EndWhile": return "}";
+      case "Case": {
+        const subject = s.findDirectExpression(E.Source);
+        const type = this.typeOfSource(subject);
+        if (["struct", "table", "range"].includes(type.k)) this.fail("CASE on a structure or table is not supported", s);
+        this.caseTypes.push(type);
+        return `switch (${this.source(subject)}) {`;
+      }
       case "When": {
+        // a WHEN value is compared as a value of the CASE's type: WHEN 'X' on an abap_bool
         const values = [...children(s, "Source"), ...children(s, "Or").map((o) => o.findDirectExpression(E.Source))];
-        return values.map((v) => `case ${this.source(v)}:`).join(" ");
+        return values.map((v) => `case ${this.source(v, this.caseTypes.at(-1))}:`).join(" ");
       }
       case "WhenOthers": return "default:";
       case "Do": {
@@ -999,23 +1109,97 @@ class MethodGen {
     const source = s.findDirectExpression(E.Source);
     const gap = this.g.gap(target.getLastToken(), opTok);
     const jsOp = opText === "&&=" ? "+=" : opText;
+    // ABAP rounds an integer quotient and raises on zero; JavaScript does neither
+    if (jsOp === "/=") this.fail("/= is not supported - ABAP rounds an integer quotient and raises on zero", s);
     const inline = target.findDirectExpression(E.InlineData);
     if (inline) {
       const name = lc(text(inline.findFirstExpression(E.Field)));
       const type = this.typeOfSource(source);
+      if (type.k === "packed" && source.getChildren().some((c) => !isToken(c) && kind(c) === "ArithOperator")) {
+        this.fail("DATA( ) = arithmetic on a TYPE p is not supported - the type ABAP gives it is its calculation type's, not a JavaScript number", s);
+      }
       this.locals.set(name, { name, js: jsName(name), type });
-      const value = this.source(source, type);
+      const value = this.source(source, type, true);
       if (this.hoisted.has(name)) return `${jsName(name)}${gap}= ${value};`;
       return `${this.reassigned.has(name) ? "let" : "const"} ${jsName(name)}${gap}= ${value};`;
     }
     const t = this.target(target);
-    const value = this.source(source, t.type);
+    // an attribute's write is a copy already (define-app.js)
+    let value = this.source(source, t.type, !t.attribute);
+    if (jsOp === "=") {
+      // a local takes the value as ABAP's MOVE converts it; an attribute is a
+      // box of its type, which converts it itself (define-app.js)
+      if (!t.attribute) value = this.stored(t.type, source, value, s);
+    } else if (opText !== "&&=") {
+      // += -= *= are arithmetic: on a number, with the number in a text
+      if (TEXT.has(t.type?.k) || ["bool", "date", "time"].includes(t.type?.k)) {
+        this.fail(`${opText} on a TYPE ${t.type.k === "bool" ? "abap_bool" : t.type.k} is not supported - ABAP converts it to a number and back`, s);
+      }
+      const literal = source.getChildren().length === 1 && kind(source.getChildren()[0]) === "Constant";
+      if (!literal) value = this.operandAs("arith", this.typeOfSource(source), value, source);
+      if (t.type?.k === "int" && ["packed", "float"].includes(this.typeOfSource(source).k)) {
+        this.fail(`${opText} of a TYPE p or f on an integer is not supported - ABAP rounds the result`, s);
+      }
+    }
     if (t.component) {
       // a read of a structure attribute is a copy - so the whole structure is written again
       if (jsOp !== "=") this.fail(`${opText} on a component of an attribute is not supported`, s);
       return `${t.js}${gap}= ${t.component(value)};`;
     }
     return `${t.js}${gap}${jsOp} ${value};`;
+  }
+
+  /** A value moved into a local of `type`, converted as ABAP's MOVE converts
+   *  it - what JavaScript's `=` does not do. Where the conversion is not one
+   *  a short expression gets right, refused. */
+  stored(type, src, js, node) {
+    const st = this.typeOfSource(src);
+    const literal = src.getChildren().length === 1 && kind(src.getChildren()[0]) === "Constant";
+    const quoted = /^"(?:[^"\\]|\\.)*"$/.test(js);
+    const refuse = (why) => this.fail(`a ${st.k === "unknown" ? "value of a type this translation cannot see" : `TYPE ${st.k}`} ` +
+      `moved into a TYPE ${type.k}${type.length ? ` LENGTH ${type.length}` : ""} is not supported - ${why}`, node);
+    switch (type?.k) {
+      case "string":
+        if (st.k === "int" && !literal) return `String(${js})`;          // as CONV string( ) - README
+        if (st.k === "packed") return `${wrapJs(js)}.toFixed(${st.decimals})`;
+        if (st.k === "float") refuse("ABAP formats it otherwise");
+        return js;
+      case "char": {
+        const fit = (v) => v.slice(0, type.length).replace(/ +$/, "");
+        if (quoted) return jsString(fit(JSON.parse(js)));
+        if (st.k === "bool") return js;                                  // "X" or "", source( ) made it
+        if (!TEXT.has(st.k) && !["date", "time"].includes(st.k)) refuse("ABAP right-aligns a number and cuts the rest");
+        return `${wrapJs(js)}.slice(0, ${type.length}).replace(/ +$/, "")`;
+      }
+      case "numc": {
+        const n = type.length;
+        if (literal && /^-?\d+$/.test(js)) return jsString(String(Math.abs(Number(js))).padStart(n, "0").slice(-n));
+        if (quoted) {
+          const v = JSON.parse(js);
+          if (!/^\d*$/.test(v.trim())) refuse("ABAP keeps only its digits");
+          return jsString(v.trim().padStart(n, "0").slice(-n));
+        }
+        if (st.k === "numc" && st.length === n) return js;
+        if (st.k === "int") return `String(Math.abs(${js})).padStart(${n}, "0").slice(-${n})`;
+        refuse("ABAP keeps only its digits, right-aligned");
+        break;
+      }
+      case "int":
+        if (st.k === "numc") return `Number(${js})`;
+        if (!literal && (["packed", "float"].includes(st.k) || TEXT.has(st.k))) refuse("ABAP rounds it to an integer");
+        return js;
+      case "packed":
+        if (!literal && (st.k === "float" || TEXT.has(st.k) || (st.k === "packed" && st.decimals > type.decimals) ||
+          this.hasOp(src, ["*", "**"]))) {
+          refuse("ABAP rounds it to the decimals of the target");
+        }
+        return js;
+      case "date": case "time":
+        if (NUMERIC.has(st.k)) refuse("ABAP counts days or seconds");
+        return js;
+      default:
+        return js;
+    }
   }
 
   target(node) {
@@ -1041,11 +1225,11 @@ class MethodGen {
     }
     let type = base.type;
     for (const c of comps) type = this.component(type, c, node);
-    if (!comps.length) return { js: base.js, type };
+    if (!comps.length) return { js: base.js, type, attribute: !!base.attribute };
     if (base.attribute) {
       const spread = (js, rest, value) => rest.length === 0 ? value
         : `{ ...${js}, ${rest[0]}: ${spread(`${js}.${rest[0]}`, rest.slice(1), value)} }`;
-      return { js: base.js, type, component: (value) => spread(base.js, comps, value) };
+      return { js: base.js, type, attribute: true, component: (value) => spread(base.js, comps, value) };
     }
     return { js: `${base.js}.${comps.join(".")}`, type };
   }
@@ -1091,9 +1275,17 @@ class MethodGen {
     const inner = src?.findDirectExpression(E.SimpleSource2) ?? src;
     const operand = inner?.getChildren().find((c) => !isToken(c));
     if (!operand) this.fail("this LOOP AT is not supported yet", s);
-    const tab = this.operand(operand);
+    let tab = this.operand(operand);
     let tabType = { k: "unknown" };
-    if (kind(operand) === "FieldChain") try { tabType = this.fieldChainType(operand); } catch { /* the loop still translates */ }
+    let fromAttribute = false;
+    if (kind(operand) === "FieldChain") {
+      const used = new Set(this.g.used);
+      try {
+        ({ type: tabType, attribute: fromAttribute } = this.fieldChain(operand));
+      } catch { /* the loop still translates */ } finally {
+        this.g.used = used;             // a type question must not consume line breaks
+      }
+    }
     const where = s.findDirectExpression(E.ComponentCond);
     let variable = "_row";
     let decl = "const";
@@ -1102,13 +1294,20 @@ class MethodGen {
       const name = lc(text((inline ?? target).findFirstExpression(E.Field) ?? target));
       if (inline) this.locals.set(name, { name, js: jsName(name), type: tabType.row ?? { k: "unknown" } });
       variable = jsName(name);
+      // INTO is a copy of the row: a write to the row variable must not reach
+      // the table - an attribute's table is read as a copy already
+      if (this.componentWrites.has(name) && kind(operand) !== "MethodCallChain" && !fromAttribute) {
+        const copy = tabType.k === "table" ? this.g.copyExpr(tab, tabType) : null;
+        if (copy === null) this.fail("LOOP AT … INTO a row whose type this translation cannot see, and a write to it", s);
+        tab = copy;
+      }
       if (!inline || this.hoisted.has(name)) decl = "";
     }
-    const filter = where ? `.filter((${variable}) => ${this.componentCond(where, variable)})` : "";
+    const filter = where ? `.filter((${variable}) => ${this.componentCond(where, variable, tabType.row)})` : "";
     return `for (${decl ? `${decl} ` : ""}${variable} of ${tab}${filter}) {`;
   }
 
-  componentCond(node, row) {
+  componentCond(node, row, rowType) {
     const E = A().Expressions;
     return node.getChildren().map((c) => {
       if (isToken(c)) {
@@ -1120,65 +1319,86 @@ class MethodGen {
       // abaplint puts a NOT in front of a comparison INTO it: `WHERE NOT id = 1`
       const not = hasWord(c, "not") ? "!" : "";
       if (kind(c) === "ComponentCompare") {
-        const comp = lc(text(c.findDirectExpression(E.ComponentChainSimple)));
+        const chain = c.findDirectExpression(E.ComponentChainSimple);
+        const comp = lc(text(chain));
         const op = c.findDirectExpression(E.CompareOperator);
         if (!op) this.fail("this WHERE condition is not supported yet", c);
         // table_line is the row itself, in a table of scalars
         const left = comp === "table_line" ? row : `${row}.${comp.replace(/-/g, ".")}`;
-        const expr = `${left} ${this.operator(op)} ${this.source(c.findDirectExpression(E.Source))}`;
+        let type = rowType;
+        if (comp !== "table_line") for (const name of children(chain, "ComponentName")) type = this.component(type, text(name));
+        const src = c.findDirectExpression(E.Source);
+        const expr = `${left} ${this.operator(op)} ${this.source(src, type)}`;
         return not ? `!(${expr})` : expr;
       }
-      if (kind(c) === "ComponentCondSub") return `${not}(${this.componentCond(c.findDirectExpression(E.ComponentCond), row)})`;
+      if (kind(c) === "ComponentCondSub") return `${not}(${this.componentCond(c.findDirectExpression(E.ComponentCond), row, rowType)})`;
       this.fail("this WHERE condition is not supported yet", c);
     }).join(" ");
   }
 
   insert(s) {
     const E = A().Expressions;
-    if (hasWord(s, "index") || hasWord(s, "assigning") || hasWord(s, "reference")) this.fail(`${kind(s)} ... INDEX / ASSIGNING is not supported yet`, s);
+    if (["index", "assigning", "reference", "sorted"].some((w) => hasWord(s, w))) this.fail(`${kind(s)} ... INDEX / ASSIGNING / SORTED BY is not supported yet`, s);
     const targetNode = s.findDirectExpression(E.Target) ?? s.findDirectExpression(E.SimpleTarget);
     const sources = s.findDirectExpression(E.Source) ?? s.findDirectExpression(E.SimpleSource4);
     const lines = hasWord(s, "lines");
     const t = this.target(targetNode);
-    const v = this.source(sources, lines ? t.type : t.type?.row);
+    if (t.type?.sorted) this.fail(SORTED, s);
+    if (!sources && !hasWord(s, "initial")) this.fail(`this ${kind(s).toUpperCase()} is not supported yet`, s);
+    if ((hasWord(s, "initial") || lines) && t.type?.k !== "table") this.fail(`${kind(s).toUpperCase()} into a table whose type this translation cannot see`, s);
+    // APPEND INITIAL LINE: a row of the table's type, initial
+    const v = sources ? this.source(sources, lines ? t.type : t.type?.row, !t.attribute) : this.g.initial(t.type.row, "plain", s);
     if (t.component) this.fail("an INSERT into a component of an attribute is not supported yet", s);
     if (t.js.startsWith("this.")) return `${t.js} = [...${t.js}, ${lines ? "..." : ""}${v}];`;
     return `${t.js}.push(${lines ? "..." : ""}${v});`;
   }
 
   // ----------------------------------------------------------- expressions
-  /** A Source: operands and the operators between them, as the ABAP has them. */
-  source(node, expected) {
+  /** A Source: operands and the operators between them, as the ABAP has them.
+   *  `copy`: the value is stored - in a local, a row, a component - and a
+   *  structure or table must arrive as a copy of its own, as ABAP moves it. */
+  source(node, expected, copy = false) {
     if (!node) return "";
     const lead = this.g.lead(node);
-    const js = this.sourceBody(node, expected);
+    const js = this.sourceBody(node, expected, copy);
     // abap_bool is a boolean here; where ABAP hands it to a string it is "X" or ""
     if ((expected?.k === "string" || expected?.k === "char") && this.typeOfSource(node).k === "bool") {
       return `${lead}(${js} ? "X" : "")`;
     }
     return lead + js;
   }
-  sourceBody(node, expected) {
+  /** `mode`: what the operator IN FRONT of this source is, for a source that
+   *  is the right-hand rest of a chain - "&&" or "arith". */
+  sourceBody(node, expected, copy = false, mode = null) {
     const E = A().Expressions;
     const parts = node.getChildren();
     const first = parts[0];
+    const concat = parts.some((p) => isToken(p) && text(p) === "&&");
+    const arith = parts.some((p) => !isToken(p) && kind(p) === "ArithOperator");
+    // how the first operand takes part: `&&` makes a string of it, arithmetic a number
+    const how = mode ?? (concat ? "&&head" : arith ? "arith" : null);
     if ((!isToken(first) || text(first) === "(") && this.hasOp(node, ["div", "mod", "**"])) return this.arith(node);
     if (isToken(first)) {
       const w = lc(text(first));
-      if (w === "value") return this.value(node, expected);
-      if (w === "cond") return this.condExpr(node, expected);
-      if (w === "switch") return this.switchExpr(node, expected);
-      if (w === "conv") return this.conv(node);
-      if (w === "xsdbool" || w === "boolc") return `(${this.cond(node.findDirectExpression(E.Cond))})`;
-      if (w === "(") {
-        const inner = parts[1];
-        const rest = this.rest(node, 3);
-        return `(${this.source(inner)})${rest}`;
-      }
       if (w === "-" && parts.length === 2) return `-${this.source(parts[1])}`;
-      this.fail(`${text(first).toUpperCase()} is not supported yet`, node);
+      // VALUE #( … ), COND, SWITCH, CONV, xsdbool( ), ( … ) - and the `&& …`
+      // or `+ …` that may follow its closing parenthesis
+      const close = parts.findIndex((p) => isToken(p) && text(p) === ")");
+      if (close < 0) this.fail(`${text(first).toUpperCase()} is not supported yet`, node);
+      const alone = close === parts.length - 1;
+      let js;
+      if (w === "value") js = this.value(node, alone ? expected : undefined, copy && alone);
+      else if (w === "cond") js = this.condExpr(node, alone ? expected : undefined, copy && alone);
+      else if (w === "switch") js = this.switchExpr(node, alone ? expected : undefined, copy && alone);
+      else if (w === "conv") js = this.conv(node);
+      else if (w === "xsdbool" || w === "boolc") js = `(${this.cond(node.findDirectExpression(E.Cond))})`;
+      else if (w === "(") js = `(${this.source(parts[1], undefined, copy && alone)})`;
+      else this.fail(`${text(first).toUpperCase()} is not supported yet`, node);
+      if (how) js = this.operandAs(how, this.typeOfFirst(node), js, node);
+      return js + this.rest(node, close + 1);
     }
     let js = this.operand(first, expected);
+    if (copy && parts.length === 1 && kind(first) === "FieldChain") js = this.copied(first, js);
     let i = 1;
     // client->get( )-s_config-hash: components after a call
     if (parts[i] && isToken(parts[i]) && text(parts[i]) === "-" && parts[i + 1] && kind(parts[i + 1]) === "ComponentChain") {
@@ -1186,7 +1406,30 @@ class MethodGen {
         .filter((c) => isToken(c) ? false : kind(c) === "ComponentName").map((c) => text(c)).join(".");
       i += 2;
     }
+    if (how) js = this.operandAs(how, this.typeOfFirst(node), js, node);
     return js + this.rest(node, i);
+  }
+  /** One operand of `&&` or of arithmetic, as ABAP converts it. In `&&`
+   *  abap_bool is "X" or nothing and an integer its digits - JavaScript's `+`
+   *  would add two numbers unless the first is a string; a TYPE p or f is
+   *  refused, ABAP gives it a format of its own. Arithmetic takes a text as
+   *  the number in it, where JavaScript's `+` would append. */
+  operandAs(how, type, js, node) {
+    if (how === "arith") {
+      if (TEXT.has(type.k)) return `Number(${js})`;
+      if (["bool", "date", "time", "xstring"].includes(type.k)) {
+        this.fail(`a ${type.k === "bool" ? "abap_bool" : `TYPE ${type.k}`} in arithmetic is not supported - ABAP does not add it as JavaScript does`, node);
+      }
+      return js;
+    }
+    switch (type.k) {
+      case "bool": return `(${js} ? "X" : "")`;
+      case "int": return how === "&&head" ? `String(${js})` : js;
+      case "packed": case "float": case "xstring":
+        this.fail(`a TYPE ${{ packed: "p", float: "f" }[type.k] ?? type.k} in && is not supported - ABAP formats it otherwise`, node);
+      // falls through
+      default: return js;
+    }
   }
   /** Whether the flat operator chain abaplint builds for `a + b DIV c` -
    *  nested to the right - has one of these operators at any depth. */
@@ -1208,7 +1451,7 @@ class MethodGen {
       let i;
       if (isToken(parts[0]) && text(parts[0]) === "(") { items.push(`(${this.source(parts[1])})`); i = 3; }
       else if (isToken(parts[0])) this.fail(`${text(parts[0]).toUpperCase()} in arithmetic with DIV or MOD is not supported yet`, n);
-      else { items.push(this.operand(parts[0])); i = 1; }
+      else { items.push(this.operandAs("arith", this.typeOfFirst(n), this.operand(parts[0]), n)); i = 1; }
       for (; i < parts.length; i++) {
         const p = parts[i];
         if (!isToken(p) && kind(p) === "ArithOperator") items.push({ op: lc(text(p)) });
@@ -1242,6 +1485,7 @@ class MethodGen {
   rest(node, from) {
     const parts = node.getChildren();
     let js = "";
+    let mode = null;
     for (let i = from; i < parts.length; i++) {
       const p = parts[i];
       if (isToken(p)) {
@@ -1249,6 +1493,7 @@ class MethodGen {
         const brk = this.g.breakAt(p.get());
         if (w === "&&") js += brk ? `${brk}+` : " +";
         else this.fail(`the operator ${w} is not supported yet`, node);
+        mode = "&&";
         continue;
       }
       if (kind(p) === "ArithOperator") {
@@ -1256,11 +1501,12 @@ class MethodGen {
         if (!["+", "-", "*"].includes(op)) this.fail(`the operator ${text(p).toUpperCase()} is not supported yet`, p);
         const brk = this.g.lead(p);
         js += brk ? `${brk}${op}` : ` ${op}`;
+        mode = "arith";
         continue;
       }
       if (kind(p) === "Source") {
         const lead = this.g.lead(p);
-        js += (lead || " ") + this.sourceBody(p);
+        js += (lead || " ") + this.sourceBody(p, undefined, false, mode);
         continue;
       }
       this.fail(`${kind(p)} is not supported yet`, p);
@@ -1300,7 +1546,11 @@ class MethodGen {
         const src = c.findDirectExpression(A().Expressions.Source);
         const type = this.typeOfSource(src);
         const js = this.sourceBody(src);
-        out += type.k === "bool" ? `\${${js} ? "X" : ""}` : `\${${js}}`;
+        if (type.k === "packed" && src.getChildren().some((p) => !isToken(p) && kind(p) === "ArithOperator")) {
+          this.fail("arithmetic on a TYPE p in a string template is not supported - its decimals are ABAP's calculation type's", c);
+        }
+        // a TYPE p prints with its decimals: 5.00
+        out += type.k === "bool" ? `\${${js} ? "X" : ""}` : type.k === "packed" ? `\${${wrapJs(js)}.toFixed(${type.decimals})}` : `\${${js}}`;
       }
     }
     return `${out}\``;
@@ -1383,7 +1633,7 @@ class MethodGen {
       if (kind(p) === "ArrowOrDash") continue;
       this.fail(`${kind(p)} is not supported yet`, p);
     }
-    return { js, type };
+    return { js, type, attribute: !!base.attribute };
   }
 
   frameworkConstant(name) {
@@ -1624,15 +1874,15 @@ class MethodGen {
   }
 
   // --------------------------------------------------------------- VALUE #
-  value(node, expected) {
+  value(node, expected, copy = false) {
     const E = A().Expressions;
     const typeNode = node.findDirectExpression(E.TypeNameOrInfer);
     let type = expected;
     if (typeNode && text(typeNode) !== "#") type = resolveType(this.m, text(typeNode), typeNode.getFirstToken());
+    if (type?.sorted) this.fail(SORTED, node);
     const body = node.findDirectExpression(E.ValueBody);
     if (!body) {
       if (type?.k === "table") return "[]";
-      if (type?.k === "struct") return "{}";
       if (type?.k && type.k !== "unknown") return this.g.initial(type, "plain", node);
       this.fail("VALUE #( ) of a type this translation cannot see", node);
     }
@@ -1649,21 +1899,22 @@ class MethodGen {
       lines.forEach((line, idx) => {
         const lead = this.g.lead(line);
         const sep = idx ? "," : "";
-        out += `${sep}${lead || (idx ? " " : " ")}${this.valueLine(line, rowType)}`;
+        out += `${sep}${lead || (idx ? " " : " ")}${this.valueLine(line, rowType, copy)}`;
       });
       return `${out} ]`;
     }
-    return this.fieldsLiteral(children(body, "FieldAssignment"), type);
+    return this.fieldsLiteral(children(body, "FieldAssignment"), type, copy);
   }
-  valueLine(line, rowType) {
+  valueLine(line, rowType, copy) {
     const E = A().Expressions;
     const assigns = children(line, "FieldAssignment");
-    if (assigns.length) return this.fieldsLiteral(assigns, rowType);
+    if (assigns.length) return this.fieldsLiteral(assigns, rowType, copy);
     const src = line.findDirectExpression(E.Source);
-    if (src) return this.source(src, rowType);
-    return "{}";
+    if (src) return copy && rowType ? this.stored(rowType, src, this.source(src, rowType, copy), line) : this.source(src, rowType, copy);
+    // ( ): an initial row
+    return rowType && rowType.k !== "unknown" ? this.g.initial(rowType, "plain", line) : "{}";
   }
-  fieldsLiteral(assigns, type) {
+  fieldsLiteral(assigns, type, copy) {
     const E = A().Expressions;
     let out = "{";
     assigns.forEach((a, idx) => {
@@ -1677,12 +1928,23 @@ class MethodGen {
       if (name.includes("-")) this.fail("a component path in VALUE #( ) is not supported", a);
       const ftype = type?.k === "struct" ? type.fields.find((f) => lc(f.name) === lc(name))?.type : undefined;
       this.g.used.add(src.getFirstToken());
-      out += `${sep}${lead}${name}:${this.g.gap(sub.getLastToken(), eq.get())}${this.source(src, ftype)}`;
+      let value = this.source(src, ftype, copy);
+      if (copy && ftype) value = this.stored(ftype, src, value, a);
+      out += `${sep}${lead}${name}:${this.g.gap(sub.getLastToken(), eq.get())}${value}`;
     });
+    // a component VALUE leaves out is initial - where the value is stored in
+    // a local, which no box fills in (an attribute's is, define-app.js)
+    if (copy && type?.k === "struct") {
+      const named = new Set(assigns.map((a) => lc(text(a.findDirectExpression(E.FieldSub)))));
+      for (const f of type.fields) {
+        if (named.has(lc(f.name))) continue;
+        out += `${out === "{" ? " " : ", "}${f.name}: ${this.g.initial(f.type, "plain", assigns[0])}`;
+      }
+    }
     return `${out} }`;
   }
 
-  condExpr(node, expected) {
+  condExpr(node, expected, copy = false) {
     const E = A().Expressions;
     const body = node.findDirectExpression(E.CondBody);
     const parts = body.getChildren();
@@ -1698,7 +1960,7 @@ class MethodGen {
         const cond = this.cond(parts[i + 1]);
         const then = parts[i + 3];
         firstType ??= this.typeOfSource(then);
-        out += `${i ? `${brk || " "}: ` : ""}${cond} ? ${this.source(then, expected ?? firstType)}`;
+        out += `${i ? `${brk || " "}: ` : ""}${cond} ? ${this.source(then, expected ?? firstType, copy)}`;
         i += 3;
       } else if (w === "else") {
         els = { tok: p, src: parts[i + 1] };
@@ -1709,13 +1971,14 @@ class MethodGen {
     }
     const t = expected ?? firstType;
     const brk = els ? this.g.breakAt(els.tok.get()) : "";
-    const elseJs = els ? this.source(els.src, t) : this.fallback(t, node);
+    const elseJs = els ? this.source(els.src, t, copy) : this.fallback(t, node);
     return `${out}${brk || " "}: ${elseJs})`;
   }
-  switchExpr(node, expected) {
+  switchExpr(node, expected, copy = false) {
     const E = A().Expressions;
     const body = node.findDirectExpression(E.SwitchBody);
     const parts = body.getChildren();
+    const subjectType = this.typeOfSource(parts[0]);
     const subject = this.source(parts[0]);
     let out = "(";
     let els = null;
@@ -1727,10 +1990,10 @@ class MethodGen {
       const w = lc(text(p));
       if (w === "when") {
         const brk = this.g.breakAt(p.get());
-        const when = this.source(parts[i + 1]);
+        const when = this.source(parts[i + 1], subjectType);
         const then = parts[i + 3];
         firstType ??= this.typeOfSource(then);
-        out += `${first ? "" : `${brk || " "}: `}${subject} === ${when} ? ${this.source(then, expected ?? firstType)}`;
+        out += `${first ? "" : `${brk || " "}: `}${subject} === ${when} ? ${this.source(then, expected ?? firstType, copy)}`;
         first = false;
         i += 3;
       } else if (w === "else") {
@@ -1742,12 +2005,12 @@ class MethodGen {
     }
     const t = expected ?? firstType;
     const brk = els ? this.g.breakAt(els.tok.get()) : "";
-    const elseJs = els ? this.source(els.src, t) : this.fallback(t, node);
+    const elseJs = els ? this.source(els.src, t, copy) : this.fallback(t, node);
     return `${out}${brk || " "}: ${elseJs})`;
   }
   fallback(type, node) {
     if (!type || type.k === "unknown") this.fail("COND / SWITCH without ELSE, of a type this translation cannot see", node);
-    return type.k === "table" ? "[]" : type.k === "struct" ? "{}" : this.g.initial(type, "plain", node);
+    return type.k === "table" ? "[]" : this.g.initial(type, "plain", node);
   }
   conv(node) {
     const E = A().Expressions;
@@ -1755,7 +2018,11 @@ class MethodGen {
     const src = node.findDirectExpression(E.ConvBody).findDirectExpression(E.Source);
     // abap_bool converts to "X" or ""; a number without ABAP's trailing sign position ("0 ")
     if (type === "string") {
-      return this.typeOfSource(src).k === "bool" ? `(${this.source(src)} ? "X" : "")` : `String(${this.source(src)})`;
+      const st = this.typeOfSource(src);
+      if (st.k === "bool") return `(${this.source(src)} ? "X" : "")`;
+      if (st.k === "packed") return `${wrapJs(this.source(src))}.toFixed(${st.decimals})`;
+      if (st.k === "float") this.fail("CONV string( ) of a TYPE f is not supported - ABAP formats it otherwise", node);
+      return `String(${this.source(src)})`;
     }
     this.fail(`CONV ${type}( ) is not supported yet`, node);
   }
@@ -1813,10 +2080,32 @@ class MethodGen {
     const [a, b] = sources;
     const ta = this.typeOfSource(a);
     const tb = this.typeOfSource(b);
-    const left = this.source(a, tb);
-    const right = this.source(b, ta);
+    if ([ta, tb].some((t) => ["struct", "table", "range"].includes(t.k))) {
+      this.fail("comparing structures or tables is not supported - JavaScript's === compares whether they are the same object", node);
+    }
+    const literal = (src) => src.getChildren().length === 1 && kind(src.getChildren()[0]) === "Constant";
+    let left;
+    let right;
+    if (ta.k === "bool" && literal(b)) {
+      // flag = 'X': the literal is the abap_bool, not the flag a string
+      left = this.source(a);
+      right = this.source(b, ta);
+    } else if (tb.k === "bool" && literal(a)) {
+      left = this.source(a, tb);
+      right = this.source(b);
+    } else if (NUMERIC.has(ta.k) && TEXT.has(tb.k) && !literal(b)) {
+      // a number and a text: ABAP compares the numbers
+      left = this.source(a);
+      right = `Number(${this.source(b)})`;
+    } else if (TEXT.has(ta.k) && NUMERIC.has(tb.k) && !literal(a)) {
+      left = `Number(${this.source(a)})`;
+      right = this.source(b);
+    } else {
+      left = this.source(a, tb);
+      right = this.source(b, ta);
+    }
     const o = lc(text(op));
-    const w = (js) => (/^[\w$.]+(\(\))?$|^"[^"]*"$/.test(js) ? js : `(${js})`);
+    const w = wrapJs;
     let expr;
     switch (o) {
       case "cs": expr = `${w(left)}.toUpperCase().includes(${w(right)}.toUpperCase())`; break;
@@ -1834,7 +2123,7 @@ class MethodGen {
     return map[o];
   }
   initialTest(js, type, not, node) {
-    const w = /^[\w$.]+(\(\))?$/.test(js) ? js : `(${js})`;
+    const w = wrapJs(js);
     switch (type.k) {
       case "string": case "char": return `${w} ${not ? "!==" : "==="} ""`;
       case "int": case "float": case "packed": return `${w} ${not ? "!==" : "==="} 0`;
@@ -1847,6 +2136,14 @@ class MethodGen {
   // ------------------------------------------------------------------ types
   typeOfSource(node) {
     if (!node) return { k: "unknown" };
+    const parts = node.getChildren();
+    if (parts.some((p) => isToken(p) && text(p) === "&&")) return { k: "string" };
+    if (parts.some((p) => !isToken(p) && kind(p) === "ArithOperator")) return this.arithType(node);
+    return this.typeOfFirst(node);
+  }
+  /** The type of what a source starts with - an operand, or a VALUE, COND, … -
+   *  the operators after it aside. */
+  typeOfFirst(node) {
     const E = A().Expressions;
     const parts = node.getChildren();
     const first = parts[0];
@@ -1866,11 +2163,9 @@ class MethodGen {
         const then = body.findIndex((c) => isToken(c) && lc(text(c)) === "then");
         return this.typeOfSource(then < 0 ? null : body.slice(then + 1).find((c) => !isToken(c)));
       }
-      if (w === "(") return this.typeOfSource(parts[1]);
+      if (w === "(" || w === "-") return this.typeOfSource(parts[1]);
       return { k: "unknown" };
     }
-    if (parts.some((p) => isToken(p) && text(p) === "&&")) return { k: "string" };
-    if (parts.some((p) => !isToken(p) && kind(p) === "ArithOperator")) return { k: "int" };
     let type;
     switch (kind(first)) {
       case "Constant": type = /^-?\d+$/.test(text(first)) ? { k: "int" } : { k: "string" }; break;
@@ -1886,6 +2181,36 @@ class MethodGen {
       for (const c of children(parts[2], "ComponentName")) type = this.component(type, text(c));
     }
     return type;
+  }
+  /** The calculation type of an arithmetic chain: p if an operand is p, f if
+   *  one is f, else i. */
+  arithType(node) {
+    const types = [];
+    const walk = (n) => {
+      const parts = n.getChildren();
+      types.push(this.typeOfFirst(n));
+      const close = isToken(parts[0]) ? parts.findIndex((p) => isToken(p) && text(p) === ")") : 0;
+      parts.forEach((p, i) => { if (i > close && !isToken(p) && kind(p) === "Source") walk(p); });
+    };
+    walk(node);
+    const packed = types.filter((t) => t.k === "packed");
+    if (packed.length) return { k: "packed", length: 16, decimals: Math.max(...packed.map((t) => t.decimals)) };
+    if (types.some((t) => t.k === "float")) return { k: "float" };
+    return { k: "int" };
+  }
+  /** A local, parameter or constant, read to be stored: its copy. A read of
+   *  an attribute is a copy already (define-app.js). */
+  copied(chain, js) {
+    const used = new Set(this.g.used);
+    const f = this.fieldChain(chain);
+    this.g.used = used;
+    if (f.attribute || SCALAR.has(f.type?.k)) return js;
+    const copy = this.g.copyExpr(js, f.type);
+    if (copy === null) {
+      if (process.env.A2J_DEBUG) console.error("UNKNOWN COPY", this.g.file, text(chain), JSON.stringify(f.type).slice(0, 80));
+      return js;
+    }
+    return copy;
   }
   fieldChainType(n) {
     const used = new Set(this.g.used);

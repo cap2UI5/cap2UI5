@@ -13,6 +13,11 @@ CLASS zcl_js_translated DEFINITION PUBLIC.
         count    TYPE i,
         selected TYPE abap_bool,
       END OF ty_s_row.
+    TYPES:
+      BEGIN OF ty_s_pair,
+        row  TYPE ty_s_row,
+        note TYPE string,
+      END OF ty_s_pair.
     DATA t_rows   TYPE STANDARD TABLE OF ty_s_row WITH EMPTY KEY.
     DATA s_order  TYPE ty_s_row.
     DATA name     TYPE string VALUE `World`.
@@ -35,6 +40,10 @@ CLASS zcl_js_translated DEFINITION PUBLIC.
     METHODS label
       IMPORTING
         count         TYPE i
+      RETURNING
+        VALUE(result) TYPE string.
+    "! what ABAP's = does and JavaScript's does not
+    METHODS rules
       RETURNING
         VALUE(result) TYPE string.
 
@@ -82,6 +91,8 @@ CLASS zcl_js_translated IMPLEMENTATION.
                                   t_arg = VALUE #( ( label( lines( t_rows ) ) ) ( CONV string( active ) ) ) ).
       WHEN `CALL`.
         client->nav_app_call( NEW zcl_js_hello( ) ).
+      WHEN `RULES`.
+        client->message_box_display( rules( ) ).
       WHEN OTHERS.
         client->message_toast_display( SWITCH #( client->get_event( )
                                          WHEN cs_mode-edit THEN `edit mode`
@@ -94,6 +105,46 @@ CLASS zcl_js_translated IMPLEMENTATION.
   METHOD label.
 
     result = COND #( WHEN count = 1 THEN `one row` ELSE |{ count } rows| ).
+
+  ENDMETHOD.
+
+
+  METHOD rules.
+
+    " a structure is copied all the way down: the type's constant, pair and
+    " copy stay three, and a row appended is the row as it was then
+    DATA pair TYPE ty_s_pair.
+    DATA rows TYPE STANDARD TABLE OF ty_s_row WITH EMPTY KEY.
+    pair-row-count = pair-row-count + 5.
+    DATA(copy) = pair.
+    copy-row-count = 99.
+    APPEND pair-row TO rows.
+    pair-row-count = 1.
+    APPEND pair-row TO rows.
+    " an empty WHEN does nothing - it runs into no other
+    CASE lines( rows ).
+      WHEN 2.
+      WHEN OTHERS.
+        result = `fell through`.
+        EXIT.
+    ENDCASE.
+    " NOT negates the comparison it stands in front of
+    IF NOT pair-row-count = 1.
+      result = `NOT lost`.
+      EXIT.
+    ENDIF.
+    " DO reads its count once
+    DO lines( rows ) TIMES.
+      APPEND INITIAL LINE TO rows.
+    ENDDO.
+    DATA(sum) = 0.
+    LOOP AT rows INTO DATA(row).
+      sum = sum + row-count.
+    ENDLOOP.
+    " a text in arithmetic is the number in it; && makes a string of a number
+    DATA(text) = `41`.
+    result = lines( rows ) && ` rows, ` && sum && `, ` && ( text + 1 ) && `, ` && copy-row-count && `, ` &&
+             xsdbool( active = ' ' ).
 
   ENDMETHOD.
 
