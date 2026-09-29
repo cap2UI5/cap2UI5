@@ -12,6 +12,11 @@ const ty_s_row = {
   selected: false,
 };
 
+const ty_s_pair = {
+  row:  ty_s_row,
+  note: "",
+};
+
 const cs_mode = {
   edit:    "EDIT",
   display: "DISPLAY",
@@ -68,6 +73,9 @@ defineApp("ZCL_JS_TRANSLATED", class {
       case "CALL":
         this.client.nav_app_call("ZCL_JS_HELLO");
         break;
+      case "RULES":
+        this.client.message_box_display(this.rules());
+        break;
       default:
         this.client.message_toast_display((this.client.get_event() === cs_mode.edit ? "edit mode"
                                          : "unknown event"));
@@ -81,6 +89,48 @@ defineApp("ZCL_JS_TRANSLATED", class {
     let result = "";
 
     result = (count === 1 ? "one row" : `${count} rows`);
+
+    return result;
+  }
+
+  // what ABAP's = does and JavaScript's does not
+  rules() {
+    let result = "";
+
+    // a structure is copied all the way down: the type's constant, pair and
+    // copy stay three, and a row appended is the row as it was then
+    let pair = { ...ty_s_pair, row: { ...ty_s_pair.row } };
+    let rows = [];
+    pair.row.count = pair.row.count + 5;
+    const copy = { ...pair, row: { ...pair.row } };
+    copy.row.count = 99;
+    rows.push({ ...pair.row });
+    pair.row.count = 1;
+    rows.push({ ...pair.row });
+    // an empty WHEN does nothing - it runs into no other
+    switch (rows.length) {
+      case 2: break;
+      default:
+        result = "fell through";
+        return result;
+    }
+    // NOT negates the comparison it stands in front of
+    if (!(pair.row.count === 1)) {
+      result = "NOT lost";
+      return result;
+    }
+    // DO reads its count once
+    for (let sy_index = 1, sy_times = rows.length; sy_index <= sy_times; sy_index++) {
+      rows.push({ ...ty_s_row });
+    }
+    let sum = 0;
+    for (const row of rows) {
+      sum = sum + row.count;
+    }
+    // a text in arithmetic is the number in it; && makes a string of a number
+    const text = "41";
+    result = String(rows.length) + " rows, " + sum + ", " + (Number(text) + 1) + ", " + copy.row.count + ", " +
+             ((this.active === false) ? "X" : "");
 
     return result;
   }
