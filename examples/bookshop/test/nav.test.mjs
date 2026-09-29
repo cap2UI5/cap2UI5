@@ -6,8 +6,11 @@
 // screen that does not refresh, and it is invisible without navigation - which
 // is why it could not be tested before this slice existed.
 import assert from "node:assert/strict";
+import { createRequire } from "node:module";
 import { test } from "node:test";
 import { post, serve } from "./server.mjs";
+
+const { defineApp } = createRequire(import.meta.url)("@cap2ui5/cds-plugin");
 
 const s = serve();
 
@@ -129,4 +132,38 @@ test("the client is z2ui5_if_client by name: every method and constant of it, an
   const constants = Object.keys(IF).filter((k) => k.startsWith("z2ui5_if_client$")).map((k) => k.slice(16));
   assert.deepEqual(names("object"), [...constants, "raw"].sort(),
     "the constants are the interface's - and raw, the transpiled client itself");
+});
+
+test("view_display( ) takes upstream's page transition where the runtime has it, and refuses it where not", async () => {
+  // abap2UI5 added cs_transition and view_display( transition transition_back )
+  // after 1.145.0. The client reads the constant groups from the runtime and
+  // wires the parameters; a runtime that does not declare them gets a call
+  // that sets them refused - its transpiled method would drop them unseen.
+  // The suite runs on both: the pinned runtime and upstream's main in CI.
+  const has = Boolean(abap.Classes["Z2UI5_IF_CLIENT"]["z2ui5_if_client$cs_transition"]);
+  defineApp("ZCL_JS_TRANSITION", class {
+    refused = "";
+    main(client) {
+      if (!client.check_on_navigated()) return;
+      const xml = `<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m"><Text text="${client._bind("refused")}"/></mvc:View>`;
+      try {
+        client.view_display({ val: xml, transition: has ? client.cs_transition.slide : "slide", transition_back: true });
+      } catch (e) {
+        this.refused = e.message;
+        client.view_display(xml);
+      }
+    }
+  });
+  const r = await P({ app: "ZCL_JS_TRANSITION" });
+  assert.equal(r.status, 200, r.text.slice(0, 300));
+  const display = actions(r).find((a) => a[0] === "VIEW_SLOTS" && a[1] === "display" && a[2] === "MAIN");
+  assert.ok(display, "no MAIN display");
+  if (has) {
+    assert.equal(r.json.MODEL.REFUSED, "");
+    assert.equal(display[4]?.transition, "slide", JSON.stringify(display.slice(4)));
+    assert.equal(display[4]?.transitionBack, true, JSON.stringify(display.slice(4)));
+  } else {
+    assert.match(r.json.MODEL.REFUSED, /^client\.view_display\( \): transition is not a parameter of z2ui5_if_client=>view_display in the abap2UI5 runtime this project runs on \(@abap2ui5\/node-runtime [\d.]+\) - it came with a later release$/);
+    assert.equal(JSON.stringify(display).includes("transition"), false, "a transition reached the wire");
+  }
 });
