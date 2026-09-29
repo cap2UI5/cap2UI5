@@ -848,7 +848,8 @@ class MethodGen {
   body(out) {
     const g = this.g;
     let lastRow = this.impl.start.getLastToken().getRow();
-    const cases = [];                  // open CASEs: { bodyCol, hasBody }
+    const cases = [];                  // open CASEs: { bodyCol, hasBody, whenLine, loops }
+    let loops = 0;                     // open DO / LOOP / WHILE
     const push = (line) => out.push(line);
     // abaplint lists a comment that stands INSIDE a statement - between the
     // calls of a view chain - before that statement: the statement places it,
@@ -890,15 +891,23 @@ class MethodGen {
           while (out.length && out.at(-1) === "") blanks.push(out.pop());
           push(`${" ".repeat(c.bodyCol)}break;`);
           out.push(...blanks);
+        } else if (!c.hasBody && c.whenLine !== undefined && k !== "EndCase") {
+          // an empty WHEN does nothing - in a switch it would run into the next case
+          out[c.whenLine] += " break;";
         }
         c.hasBody = false;
         c.ended = false;
+        c.whenLine = undefined;
       }
       g.used.add(tok);
-      // ABAP's EXIT inside a CASE inside a loop leaves the LOOP; JavaScript's
-      // break would only leave the switch
-      if (k === "Exit" && cases.length) this.fail("EXIT inside a CASE is not supported", s);
-      const js = this.statement(s);
+      if (k === "Exit" && loops && cases.length && cases.at(-1).loops === loops) {
+        // ABAP's EXIT inside a CASE inside a loop leaves the LOOP; JavaScript's
+        // break would only leave the switch
+        this.fail("EXIT inside a CASE inside a loop is not supported", s);
+      }
+      if (k === "Continue" && !loops) this.fail("CONTINUE outside a loop is not supported", s);
+      // EXIT outside a loop leaves the method, as RETURN does
+      const js = k === "Exit" && !loops ? this.statement(s, "Return") : this.statement(s);
       const lines = js.split("\n");
       push(" ".repeat(col) + lines[0]);
       out.push(...lines.slice(1));
@@ -907,11 +916,14 @@ class MethodGen {
         if (!c) return;
         if (!c.hasBody) c.bodyCol = col;
         c.hasBody = true;
-        c.ended = k === "Return";
+        c.ended = js.startsWith("return");
       };
-      if (k === "Case") { mark(cases.at(-1)); cases.push({ bodyCol: col + 2, hasBody: false }); }
+      if (k === "Case") { mark(cases.at(-1)); cases.push({ bodyCol: col + 2, hasBody: false, loops }); }
       else if (k === "EndCase") { cases.pop(); mark(cases.at(-1)); }
-      else if (k !== "When" && k !== "WhenOthers") mark(cases.at(-1));
+      else if (k === "When") cases.at(-1).whenLine = out.length - 1;
+      else if (k !== "WhenOthers") mark(cases.at(-1));
+      if (["Do", "Loop", "While"].includes(k)) loops++;
+      if (["EndDo", "EndLoop", "EndWhile"].includes(k)) loops--;
       lastRow = s.getLastToken().getRow();
       // comments inside the statement that no line break carried
       for (const [r, c] of g.comments) {
@@ -925,9 +937,9 @@ class MethodGen {
     for (let r = lastRow + 1; r < this.impl.end.getFirstToken().getRow(); r++) if (!g.comments.has(r)) out.push("");
   }
 
-  statement(s) {
+  statement(s, as) {
     const E = A().Expressions;
-    const k = kind(s);
+    const k = as ?? kind(s);
     switch (k) {
       case "Move": return this.move(s);
       case "Call": return `${this.callChain(s.getChildren().find((c) => !isToken(c)))};`;
@@ -952,8 +964,11 @@ class MethodGen {
       case "Do": {
         const times = s.findDirectExpression(E.Source);
         if (hasWord(s, "varying")) this.fail("DO ... VARYING is not supported", s);
-        return times ? `for (let sy_index = 1; sy_index <= ${this.source(times)}; sy_index++) {`
-          : "for (let sy_index = 1; ; sy_index++) {";
+        if (!times) return "for (let sy_index = 1; ; sy_index++) {";
+        // ABAP reads the count once, when the loop starts
+        const count = this.source(times);
+        if (/^\d+$/.test(count)) return `for (let sy_index = 1; sy_index <= ${count}; sy_index++) {`;
+        return `for (let sy_index = 1, sy_times = ${count}; sy_index <= sy_times; sy_index++) {`;
       }
       case "While": return `while (${this.cond(s.findDirectExpression(E.Cond))}) {`;
       case "Loop": return this.loop(s);
@@ -974,11 +989,16 @@ class MethodGen {
     if (s.getChildren().some((c) => isToken(c) && text(c) === "?=")) {
       this.fail("?= (a down cast) is not supported - an app's own objects are not translated", s);
     }
-    const op = s.getChildren().find((c) => isToken(c) && /^([+\-*/]|&&)?=$/.test(text(c)));
-    if (!op) this.fail("this assignment is not supported", s);
+    const kids = s.getChildren();
+    const at = kids.findIndex((c) => isToken(c) && /^([+\-*/]|&&)?=$/.test(text(c)));
+    if (at < 0) this.fail("this assignment is not supported", s);
+    // abaplint reads `a += 1` as the two tokens + and = ( *= /= &&= as one)
+    const split = text(kids[at]) === "=" && isToken(kids[at - 1]) && ["+", "-"].includes(text(kids[at - 1]));
+    const opTok = (split ? kids[at - 1] : kids[at]).get();
+    const opText = split ? `${text(kids[at - 1])}=` : text(kids[at]);
     const source = s.findDirectExpression(E.Source);
-    const gap = this.g.gap(target.getLastToken(), op.get());
-    const jsOp = text(op) === "&&=" ? "+=" : text(op);
+    const gap = this.g.gap(target.getLastToken(), opTok);
+    const jsOp = opText === "&&=" ? "+=" : opText;
     const inline = target.findDirectExpression(E.InlineData);
     if (inline) {
       const name = lc(text(inline.findFirstExpression(E.Field)));
@@ -992,7 +1012,7 @@ class MethodGen {
     const value = this.source(source, t.type);
     if (t.component) {
       // a read of a structure attribute is a copy - so the whole structure is written again
-      if (jsOp !== "=") this.fail(`${text(op)} on a component of an attribute is not supported`, s);
+      if (jsOp !== "=") this.fail(`${opText} on a component of an attribute is not supported`, s);
       return `${t.js}${gap}= ${t.component(value)};`;
     }
     return `${t.js}${gap}${jsOp} ${value};`;
@@ -1095,18 +1115,20 @@ class MethodGen {
         const w = lc(text(c));
         if (w === "and") return "&&";
         if (w === "or") return "||";
-        if (w === "not") return "!";
-        return text(c);
+        this.fail(`${text(c)} in a WHERE condition is not supported yet`, c);
       }
+      // abaplint puts a NOT in front of a comparison INTO it: `WHERE NOT id = 1`
+      const not = hasWord(c, "not") ? "!" : "";
       if (kind(c) === "ComponentCompare") {
         const comp = lc(text(c.findDirectExpression(E.ComponentChainSimple)));
         const op = c.findDirectExpression(E.CompareOperator);
         if (!op) this.fail("this WHERE condition is not supported yet", c);
         // table_line is the row itself, in a table of scalars
         const left = comp === "table_line" ? row : `${row}.${comp.replace(/-/g, ".")}`;
-        return `${left} ${this.operator(op)} ${this.source(c.findDirectExpression(E.Source))}`;
+        const expr = `${left} ${this.operator(op)} ${this.source(c.findDirectExpression(E.Source))}`;
+        return not ? `!(${expr})` : expr;
       }
-      if (kind(c) === "ComponentCondSub") return `(${this.componentCond(c.findDirectExpression(E.ComponentCond), row)})`;
+      if (kind(c) === "ComponentCondSub") return `${not}(${this.componentCond(c.findDirectExpression(E.ComponentCond), row)})`;
       this.fail("this WHERE condition is not supported yet", c);
     }).join(" ");
   }
@@ -1773,11 +1795,14 @@ class MethodGen {
     if (words[0] === "not" && kids.length === 2 && kind(kids[1]) === "MethodCallChain") {
       return `${lead}!${this.callChain(kids[1])}`;
     }
-    const not = words.includes("not");
+    // `NOT a = b`: abaplint puts the NOT into the comparison it negates
+    const leadingNot = isToken(kids[0]) && lc(text(kids[0])) === "not";
     if (words.includes("is")) {
       const src = sources[0];
       const type = this.typeOfSource(src);
       const js = this.source(src);
+      // NOT a IS NOT INITIAL is a IS INITIAL
+      const not = words.filter((w) => w === "not").length % 2 === 1;
       if (words.includes("initial")) return lead + this.initialTest(js, type, not, node);
       this.fail(`IS ${words.filter((w) => w !== "is" && w !== "not").join(" ").toUpperCase()} is not supported yet`, node);
     }
@@ -1792,13 +1817,15 @@ class MethodGen {
     const right = this.source(b, ta);
     const o = lc(text(op));
     const w = (js) => (/^[\w$.]+(\(\))?$|^"[^"]*"$/.test(js) ? js : `(${js})`);
+    let expr;
     switch (o) {
-      case "cs": return `${lead}${w(left)}.toUpperCase().includes(${w(right)}.toUpperCase())`;
-      case "ns": return `${lead}!${w(left)}.toUpperCase().includes(${w(right)}.toUpperCase())`;
-      case "co": return `${lead}[...${w(left)}].every((c) => ${w(right)}.includes(c))`;
-      case "cn": return `${lead}![...${w(left)}].every((c) => ${w(right)}.includes(c))`;
-      default: return `${lead}${left} ${this.operator(op)} ${right}`;
+      case "cs": expr = `${w(left)}.toUpperCase().includes(${w(right)}.toUpperCase())`; break;
+      case "ns": expr = `!${w(left)}.toUpperCase().includes(${w(right)}.toUpperCase())`; break;
+      case "co": expr = `[...${w(left)}].every((c) => ${w(right)}.includes(c))`; break;
+      case "cn": expr = `![...${w(left)}].every((c) => ${w(right)}.includes(c))`; break;
+      default: expr = `${left} ${this.operator(op)} ${right}`;
     }
+    return lead + (leadingNot ? `!(${expr})` : expr);
   }
   operator(op) {
     const o = lc(text(op));

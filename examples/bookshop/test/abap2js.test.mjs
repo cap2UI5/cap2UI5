@@ -138,6 +138,33 @@ ENDCLASS.
   return { shown, code };
 };
 
+test("a translation behaves as the ABAP: the answers are what the transpiled ABAP answers", () => {
+  const rows = "    TYPES: BEGIN OF ty_s_row, id TYPE i, done TYPE abap_bool, END OF ty_s_row.";
+  const cases = [
+    // NOT stands in front of the comparison it negates
+    ["", "    DATA(a) = `5`.\n    IF NOT a = `5`.\n      client->message_box_display( `NOT lost` ).\n    ELSE.\n" +
+      "      client->message_box_display( `else` ).\n    ENDIF.", "else"],
+    ["", "    DATA(e) = ``.\n    IF NOT e IS NOT INITIAL.\n      client->message_box_display( `initial` ).\n    ENDIF.", "initial"],
+    [rows, "    DATA t TYPE STANDARD TABLE OF ty_s_row WITH EMPTY KEY.\n    t = VALUE #( ( id = 1 ) ( id = 2 ) ( id = 3 ) ).\n" +
+      "    DATA(n) = 0.\n    LOOP AT t INTO DATA(r) WHERE NOT id = 1 AND NOT ( id = 3 ).\n      n = n + r-id.\n    ENDLOOP.\n" +
+      "    client->message_box_display( |{ n }| ).", "2"],
+    // an empty WHEN does nothing - in a switch it ran into the next case
+    ["", "    DATA(o) = `start`.\n    CASE o.\n      WHEN `start`.\n      WHEN `other`.\n        o = `fell through`.\n" +
+      "      WHEN OTHERS.\n        o = `fell through`.\n    ENDCASE.\n    client->message_box_display( o ).", "start"],
+    // EXIT outside a loop leaves the method; DO reads its count once
+    ["    METHODS m RETURNING VALUE(result) TYPE string.", "    client->message_box_display( m( ) ).", "before",
+      "  METHOD m.\n    result = `before`.\n    EXIT.\n  ENDMETHOD."],
+    ["", "    DATA(k) = 3.\n    DATA(c) = 0.\n    DO k TIMES.\n      k = k + 1.\n      c = c + 1.\n    ENDDO.\n" +
+      "    client->message_box_display( |{ c }| ).", "3"],
+    // abaplint reads += and -= as two tokens: the + was lost, `i += 2` was `i = 2`
+    ["", "    DATA(i) = 1.\n    DATA(s) = 4.\n    i += 2.\n    i -= s.\n    i *= 3.\n    client->message_box_display( |{ i }| ).", "-3"],
+  ];
+  for (const [decl, body, want, methods] of cases) {
+    const { shown, code } = run(decl, body, "", methods);
+    assert.equal(shown, want, `${body.trim()}\n--- translated:\n${code}`);
+  }
+});
+
 test("an ABAP comment or text cannot end a JavaScript line: U+2028, U+2029 and CR stay inside it", () => {
   // JavaScript ends a line at all three, ABAP only at LF: a comment that carried one through ran
   // the rest of the ABAP comment as code. (A '…' or `…` literal with one is an ABAP syntax error.)
@@ -203,6 +230,10 @@ test("what it does not know, it refuses - with file, row and column", () => {
       /DATA inside DO \/ LOOP \/ WHILE keeps its value from one iteration to the next/, 13],
     // a translator error, not a crash
     ["    DATA lo TYPE REF TO object.\n    lo ?= client.", "", /\?= \(a down cast\) is not supported/, 13],
+    // EXIT in a CASE in a loop leaves the loop, a break in a switch only the switch
+    ["    DO 2 TIMES.\n      CASE 1.\n        WHEN 1.\n          EXIT.\n      ENDCASE.\n    ENDDO.", "",
+      /EXIT inside a CASE inside a loop is not supported/, 15],
+    ["    CONTINUE.", "", /CONTINUE outside a loop is not supported/, 12],
   ];
   for (const [body, data, message, row] of cases) {
     const e = refusal(body, data);
