@@ -31,20 +31,36 @@ const LOG = cds.log("cap2ui5");
 
 /** The exit a project registered, if any. One, deliberately: the exit decides
  *  the CSP and every security header, so "which one wins" must not depend on
- *  module load order. A second registration is an error, not a silent winner. */
-let pending = null;
+ *  module load order. A second registration is an error, not a silent winner.
+ *
+ *  Kept on a global symbol, not in this module: an app package that brings
+ *  its own nested copy of the plugin - a peer range that did not match -
+ *  loads a second copy of this file, and an exit it registered there sat in
+ *  that copy's variable while the copy CAP runs installed nothing, without a
+ *  word. The registration is shared, and the second copy is named in the log
+ *  (see below), since its apps are loaded by the wrong copy as well. */
+const REGISTRY = (globalThis[Symbol.for("cap2ui5.exit")] ??= { pending: null });
+
+const COPY = Symbol.for("cap2ui5.pluginCopy");
+const home = require("path").resolve(__dirname, "..");
+globalThis[COPY] ??= home;
+if (globalThis[COPY] !== home) {
+  LOG.warn(`a second copy of @cap2ui5/cds-plugin is loaded, from ${home}, beside the one in ` +
+    `${globalThis[COPY]}. A package with apps names the plugin as a peer dependency, so that ` +
+    `there is one; \`npm ls @cap2ui5/cds-plugin\` shows which package brought this one.`);
+}
 
 function defineExit(exit) {
   if (!exit || (typeof exit.onPage !== "function" && typeof exit.onRoundtrip !== "function")) {
     throw new Error("[cap2ui5] defineExit(exit): exit needs an onPage and/or an onRoundtrip method");
   }
-  if (pending) {
+  if (REGISTRY.pending) {
     throw new Error(
       "[cap2ui5] defineExit was called twice - only one user exit can be active, " +
         "because it decides the CSP and the security headers. Merge them into one.",
     );
   }
-  pending = exit;
+  REGISTRY.pending = exit;
   return exit;
 }
 
@@ -123,8 +139,8 @@ async function run(hook, INPUT, name) {
 /** Bind the registered exit, once the runtime exists. Called from boot( ) after
  *  the app modules have loaded, because an exit is registered from one of them. */
 function installExit() {
-  if (!pending) return null;
-  const exit = pending;
+  if (!REGISTRY.pending) return null;
+  const exit = REGISTRY.pending;
 
   class ZCL_CAP2UI5_EXIT {
     static INTERNAL_TYPE = "CLAS";
@@ -144,6 +160,6 @@ function installExit() {
 }
 
 /** tests only: forget the registration so a second scenario can register its own */
-function resetExit() { pending = null; }
+function resetExit() { REGISTRY.pending = null; }
 
 module.exports = { defineExit, installExit, resetExit };

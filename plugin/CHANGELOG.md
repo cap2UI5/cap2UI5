@@ -63,6 +63,10 @@ starts with 0, a minor release may break the API.
   `cfg.t_security_header.push( … )`, an entry's `v` changed - reaches the
   framework. The hook got a shallow copy, so the change also changed what it
   was compared against, and it was dropped without a word.
+- `defineExit( )` called through a second, nested copy of the plugin - an
+  app package whose peer range the project's plugin did not satisfy - is
+  installed; it was ignored silently. A second copy of the plugin is named
+  in the log, with how to find the package that brought it.
 
 ## [0.3.1] - 2026-09-29
 
