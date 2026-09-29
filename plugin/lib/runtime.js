@@ -34,10 +34,15 @@ function locate() {
  *
  * The store must be installed before the first roundtrip, or the first draft
  * lands in the runtime's private SQLite.
+ *
+ * @param {object}  rt  what locate( ) found
+ * @param {{ accelerate?: boolean }} [options] false: leave the runtime's
+ *   accelerations off (cds.requires.cap2ui5.accelerate)
  */
-async function boot(rt) {
+async function boot(rt, { accelerate = true } = {}) {
   const { initializeABAP } = await import(pathToFileURL(rt.init).href);
   await initializeABAP();
+  await accelerations(rt, { enabled: accelerate });
 
   // Drafts go into the CAP database, not the ABAP runtime's private SQLite.
   // This is Naht 1 doing its job: one set_instance( ) and the framework's
@@ -51,6 +56,94 @@ async function boot(rt) {
   LOG.info("drafts live in cap2ui5.Drafts");
 
   return await import(pathToFileURL(rt.shim).href);
+}
+
+/**
+ * The runtime's own accelerations, where the installed @abap2ui5/node-runtime
+ * has them - called once, right after initializeABAP( ).
+ *
+ * An app with one table of n rows costs the transpiled framework time in n²,
+ * in two places of @abaplint/runtime rather than in abap2UI5's ABAP: a LOOP
+ * ... WHERE over a SORTED primary key evaluates the WHERE on every row, and
+ * CP compiles a `[\s\S]*$` RegExp that walks the rest of the draft XML for
+ * every token the parser reads. The runtime package fixes both with
+ * accelerate( ), from the release after 1.145.0, and calls it in its own
+ * initialize( ). The plugin boots through output/init.mjs instead, so it
+ * calls it here - the runtime's code, found in the package, not a copy.
+ *
+ * Logged once: "active" at info; a runtime without it (1.145.0), or one
+ * whose accelerate( ) declines (it warns itself), at debug only.
+ *
+ * @returns {Promise<boolean>} whether the accelerations are active
+ */
+async function accelerations(rt, { enabled = true } = {}) {
+  if (!enabled) {
+    LOG.debug("runtime accelerations switched off: cds.requires.cap2ui5.accelerate is false");
+    return false;
+  }
+  const accelerate = await findAccelerate(rt);
+  if (!accelerate) {
+    LOG.debug(`@abap2ui5/node-runtime ${rt.version} has no accelerate( ) - running without runtime accelerations`);
+    return false;
+  }
+  if ((await accelerate()) === false) {
+    LOG.debug(`@abap2ui5/node-runtime ${rt.version}: accelerate( ) declined - running without runtime accelerations`);
+    return false;
+  }
+  LOG.info("runtime accelerations active");
+  return true;
+}
+
+/**
+ * accelerate( ) of the runtime package in rt.dir, or null: the export of its
+ * "./accelerate" entry, else the named export of its main entry "." - each
+ * only where the package's `exports` DECLARES the entry. So a runtime that
+ * has none is told apart from one that has it and fails to load it: the
+ * first is quiet, the second fails the start, as a runtime that does not
+ * load does.
+ *
+ * Found in rt.dir, as locate( ) found init.mjs and the shim, so what is
+ * imported is always the package that was booted. Importing an entry must
+ * not start anything: 1.145.0's ".", srv/host.mjs, only defines functions,
+ * and its two imports - output/init.mjs and the shim - resolve to the modules
+ * the boot has loaded already. Were it ever to load a second copy of the
+ * runtime, the global ABAP runtime would be replaced under the booted
+ * framework; that fails the start here instead of every roundtrip later.
+ */
+async function findAccelerate(rt) {
+  let exports;
+  try {
+    ({ exports } = JSON.parse(fs.readFileSync(path.join(rt.dir, "package.json"), "utf8")));
+  } catch {
+    return null;
+  }
+  for (const entry of ["./accelerate", "."]) {
+    const file = exported(exports, entry);
+    if (!file) continue;
+    const runtime = globalThis.abap;
+    const mod = await import(pathToFileURL(path.join(rt.dir, file)).href);
+    if (globalThis.abap !== runtime) {
+      throw new Error(`@abap2ui5/node-runtime: importing its "${entry}" entry started a second ABAP runtime`);
+    }
+    const fn = entry === "." ? mod.accelerate : (mod.accelerate ?? mod.default);
+    if (typeof fn === "function") return fn;
+  }
+  return null;
+}
+
+/** The file a package's `exports` names for one of its entries, as `import`
+ *  reads it: a string, or the import/node/default branch of conditions.
+ *  Null where it names none - a package without `exports`, as the
+ *  workspace's stand-in for the runtime is, has no entries to find. */
+function exported(exports, entry) {
+  if (exports === undefined || exports === null) return null;
+  const sugar = typeof exports === "string" || Array.isArray(exports) ||
+    !Object.keys(exports).some((key) => key.startsWith("."));
+  let target = (sugar ? { ".": exports } : exports)[entry];
+  while (target && typeof target === "object" && !Array.isArray(target)) {
+    target = target.import ?? target.node ?? target.default;
+  }
+  return typeof target === "string" ? target : null;
 }
 
 /**
@@ -129,6 +222,8 @@ async function importAll(dir) {
  * abap.types.* - the global the runtime installs. And only once CAP has served
  * the model, as CAP loads a service implementation: an app module may reach
  * for cds.entities( ) while it loads.
+ *
+ * @returns {Map<string, string>} app name -> "the project" or the package it came from
  */
 async function loadApps(conf) {
   const own = path.resolve(cds.root, conf.apps);
@@ -158,6 +253,7 @@ async function loadApps(conf) {
   // bind until they have run. See lib/define-exit.js for why the host binds it
   // instead of the framework discovering it.
   if (installExit()) LOG.info("user exit installed");
+  return origin;
 }
 
-module.exports = { locate, boot, loadApps, appPackages };
+module.exports = { locate, boot, accelerations, findAccelerate, loadApps, appPackages };

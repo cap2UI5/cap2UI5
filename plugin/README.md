@@ -61,10 +61,13 @@ defineApp("BOOKS", class {
 });
 ```
 
-`cds watch` prints the address of every app, and the user to log in as:
+`cds watch` prints the address of every app of the project, one line for
+each package that brings apps (see [Apps from a package](#apps-from-a-package)),
+and the user to log in as:
 
 ```
-[cap2ui5] - BOOKS  http://localhost:4004/sap/bc/z2ui5?app_start=BOOKS
+[cap2ui5] - BOOKS             http://localhost:4004/sap/bc/z2ui5?app_start=BOOKS
+[cap2ui5] - @cap2ui5/samples  71 apps - listed on CAP's start page, http://localhost:4004/
 [cap2ui5] - development login: alice (empty password)
 ```
 
@@ -142,10 +145,24 @@ What is JavaScript's own, and why:
 object (a structure), `t.table({ …one row… })` — and those nest, up to 8
 levels. Component names are UPPERCASE in the model. The whole instance is
 persisted to `cap2ui5.Drafts` after every roundtrip and rebuilt before the
-next, so state survives a restart. Unlike ABAP, every field is part of the
-model - there is no `PROTECTED SECTION`; a helper that needs the client gets
-it as an ABAP app does, `this.client = client` in `main( )`, without declaring
-it as a field.
+next, so state survives a restart. As in ABAP, only what the app **binds** is
+part of the model: a field goes to the browser, and the browser can write it,
+once `main( )` has bound it with `client._bind( )` (or `_bind_edit( )`,
+`_bind_path( )`, a component or a cell of it) - and stays bound for the rest
+of the session. A field no view binds - a price, a role flag, a counter -
+stays on the server, in the draft; a MODEL the browser sends for it is
+ignored. A helper that needs the client gets it as an ABAP app does,
+`this.client = client` in `main( )`, without declaring it as a field.
+
+A field is an ABAP attribute, so **its name is lower case** - `is_admin`, not
+`isAdmin`, which `defineApp( )` refuses: ABAP names are not case-sensitive and
+the runtime reads the attribute by its lower-case name. A structure's
+components and the app's methods may be camelCase. `main( )` and its helpers
+run on a proxy that reads the fields as plain values, which a `#private`
+member does not reach - using one is refused with a message; a plain field
+is private enough, as it is not sent to the browser unless it is bound.
+`t.bool( )` reads as a boolean, `t.char(n)` without its padding and
+`t.float( )` as a number, as the plain `true`, `""` and `0.5` do.
 
 **Types:** the package ships TypeScript declarations (`index.d.ts`). In a
 JavaScript app, annotate the client for completion and checked field names:
@@ -222,8 +239,14 @@ Because the client and the view builder are abap2UI5's own, an abap2UI5 app
 class translates into a cap2UI5 app line for line - and the package does it:
 
 ```bash
+npm add -D @abaplint/core      # once: the ABAP parser it reads with
 npx --no-install cap2ui5 abap2js src/z2ui5_cl_my_app.clas.abap --out srv/apps
 ```
+
+The parser, `@abaplint/core`, is an optional peer dependency of the plugin:
+8 MB that only translating needs, so a project that serves apps does not
+install it. Without it the command, and `abap2js( )` in code, say how to add
+it.
 
 `--no-install` makes npx run the `cap2ui5` of the project's
 `@cap2ui5/cds-plugin` or fail - never download one. Without it, `npx cap2ui5`
@@ -291,6 +314,18 @@ the same one:
 "peerDependencies": { "@cap2ui5/cds-plugin": "^0.3.0" }
 ```
 
+The range moves in lockstep with the plugin's minor version, and stays that
+narrow on purpose: `^0.3.0` is 0.3.x only, and while the plugin is 0.x a
+minor release may break the API an app is written against (the CHANGELOG
+says so, and the release after 0.3.1 does: only bound fields are sent to
+the browser, and a camelCase field is refused). A range like `>=0.3.0 <1` would let npm install
+a plugin the package's apps have never run on, and they would break where
+they are used instead of at `npm install`. So a package with apps publishes
+a release for each plugin minor, with the range that names it; from 1.0 on,
+`^1.0.0` is the range to use. A range the project's plugin does not satisfy
+makes npm refuse the install or bring a second, nested copy of the plugin -
+which the log names.
+
 The plugin finds such a package the way CAP finds its plugins: among the
 project's `dependencies`, and outside production (`NODE_ENV` other than
 `production`) among its `devDependencies` too - so `npm add -D` brings a
@@ -320,6 +355,8 @@ Under `cds.requires.cap2ui5` - in `package.json`, a `.cdsrc.json`, a profile or
 | `roles` | `["authenticated-user"]` | who may call: a role, or a list of roles any one of which lets the user in, as with CAP's `@requires`; `any` or `null` allows anonymous callers |
 | `routes` | `/sap/bc/z2ui5`, `/rest/root/z2ui5` | where the roundtrip answers |
 | `body_parser.limit` | CAP's `cds.server.body_parser.limit`, else `10mb` | the largest roundtrip body; a larger one gets 413 |
+| `compression` | `true` | gzip for the page and the roundtrips, where the browser accepts it; `false` leaves compressing to a proxy in front |
+| `accelerate` | `true` | calls the runtime's `accelerate( )` where it has one - the releases after 1.145.0, see [Performance](#performance); `false` runs the runtime's own code |
 
 `"cap2ui5": false` switches the plugin off: no route, and no `cap2ui5.Drafts`
 table in the model.
@@ -354,6 +391,12 @@ theme, the draft expiry, the CSRF gate — comes from the user exit,
 - **Body size:** a roundtrip carries the app's whole model.
   `cds.server.body_parser.limit`, CAP's global limit, applies here too;
   `body_parser.limit` above overrides it for this route.
+- **Compression:** the route gzips what it answers where the browser accepts
+  gzip - the page and every roundtrip of 1 kB or more - as the framework asks
+  the ICF to on an ABAP system. Behind an approuter or an ingress that
+  compresses too, nothing is compressed twice: it finds `Content-Encoding`
+  set and passes the body on. `"compression": false` leaves the work to it
+  and saves the CPU here.
 - **Logs:** the plugin logs through `cds.log('cap2ui5')`, so production gets
   JSON records with the request's correlation id. Set the level with
   `cds.log.levels.cap2ui5`.
@@ -364,6 +407,46 @@ theme, the draft expiry, the CSRF gate — comes from the user exit,
 - **Multitenancy (MTX):** not tested yet. The draft store reads and writes
   through `cds.run`, which follows `cds.context`. The drafts should therefore
   land in each tenant's database like any other row, but no test proves it.
+
+## Performance
+
+A roundtrip carries the app's model: the framework restores it from the
+draft, runs the app and answers it whole. So what a roundtrip costs grows
+with the model - one editable table of n rows, measured with
+`npm run bench -- --rows <n>` in this repository (Node 22, a shared 4-core
+machine; take the ratios, not the seconds):
+
+| rows | answer, plain / gzip | start / edit one cell, 1.145.0 | with the runtime's accelerations |
+|---:|---|---|---|
+| 500 | 45 / 6 kB | 2.7 s / 4.3 s | 0.9 s / 1.4 s |
+| 1000 | 90 / 11 kB | 6.0 s / 12.1 s | 0.6 s / 1.4 s |
+| 2000 | 181 / 21 kB | 19.6 s / 43.5 s | 1.6 s / 2.9 s |
+| 8000 | 727 / 82 kB | - | 3.3 s / 16.4 s |
+
+- **The runtime's accelerations.** On 1.145.0 the time grows with n², not
+  in abap2UI5's ABAP but in two places of `@abaplint/runtime`: a LOOP ...
+  WHERE over a sorted primary key reads every row, and CP rescans the rest
+  of the draft's XML for every token the parser reads.
+  `@abap2ui5/node-runtime` fixes both
+  with `accelerate( )` from the release after 1.145.0 - the right column,
+  measured before that release - and the plugin calls it when the server
+  starts; the log then says `runtime accelerations active`.
+  `"accelerate": false` switches them off.
+- **Node 24 is recommended.** CAP keeps `cds.context` in an
+  `AsyncLocalStorage`, and on Node 22 that costs the transpiled framework -
+  which awaits at nearly every method call - about as much time again as its
+  own work. Node 24 keeps it in the async context frame, which costs next to
+  nothing. On Node 22.7 and later,
+  `NODE_OPTIONS=--experimental-async-context-frame` does the same: measured
+  back to back, it halved the times in the table, with the accelerations and
+  without (2000 rows, an edit with them: 3.4 s, then 2.0 s).
+- **`NODE_COMPILE_CACHE`.** The runtime is about 800 transpiled modules, and
+  importing them takes 0.7 s on every start. With `NODE_COMPILE_CACHE` set
+  to a directory, Node keeps their compiled code there and the import takes
+  0.5 s - worth it for `cds watch`, which restarts on every save.
+- **Compression.** The page carries the whole UI5 frontend, 358 kB - 83 kB
+  gzipped - and the route gzips it and every roundtrip of 1 kB or more where
+  the browser accepts gzip (see [In production](#in-production)).
 
 ## Documentation
 

@@ -17,6 +17,7 @@ scripts/assemble-runtime.sh <upstream checkout>     # or: --package X.Y.Z
 | `output/` | `node/output` after `npm run auto_downport && npm run auto_transpile` | the framework: `init.mjs` boots it, `cl_express_icf_shim.clas.mjs` is the HTTP adapter |
 | `setup/` | `node/setup/setup.mjs` | `output/init.mjs` imports `../setup/setup.mjs` — the path is fixed by upstream's `abap_transpile.json`, so the hook ships with the output |
 | `downport/` | `node/downport` | the ABAP the output was transpiled from: `abap2js` (plugin/lib/abap2js.js) reads `z2ui5_if_client`'s types there, so an app's translation knows what `client->get( )` answers |
+| `srv/` | the published package only (`--package`) | the entries its `package.json` declares: the plugin imports `accelerate( )` from `./accelerate`, or from the main entry `srv/host.mjs`, where they are declared - the releases after 1.145.0 |
 
 The version is the framework's version: the package is a deterministic function
 of the upstream tag, like the `X.Y.Z-702` tag `release.yaml` already cuts.
@@ -32,9 +33,11 @@ SQL would go there; a CAP-backed `DatabaseClient` for those is a later step.
 Upstream packs this as `@abap2ui5/node-runtime` (`npm run pack:node-runtime`, manifest
 `node/setup/npm.package.json`) at the end of `backend-prebuilt.yaml`, and
 publishes it by trusted publishing from its next release on. The real package
-carries more than this stand-in - `srv/host.mjs` (an entry point with
-`initialize()` and `createHandler()`) and `downport/` - none of which the
-plugin needs today. Neither carries `webapp/`: the framework's GET page embeds
+carries more than this stand-in: `srv/host.mjs`, an entry point with
+`initialize()` and `createHandler()`, which the plugin does not use - it boots
+through `output/init.mjs` - and, from the release after 1.145.0,
+`accelerate()`, which the plugin calls where the manifest declares it (`srv/`
+above). Neither carries `webapp/`: the framework's GET page embeds
 the whole UI5 component, so there are no frontend files to serve. Once it is on npm, `scripts/assemble-runtime.sh --package
 X.Y.Z` fills this directory from it, and ADR-008's cutover step 2 deletes the
 stand-in in favour of a plain dependency.

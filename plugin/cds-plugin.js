@@ -16,6 +16,7 @@ const { locate, boot, loadApps } = require("./lib/runtime");
 const { definedApps } = require("./lib/define-app");
 const { startupHints } = require("./lib/hints");
 const { config } = require("./lib/config");
+const { compression } = require("./lib/compression");
 
 // One logger, as every CAP module and plugin has: plain `[cap2ui5] - ...` lines
 // in development, and in production the JSON records CAP writes for itself,
@@ -43,8 +44,9 @@ cds.on("bootstrap", (app) => {
   // throws does. It used to be logged while the server listened anyway and
   // answered every roundtrip with a 500.
   let served;
-  const ready = Promise.all([boot(rt), new Promise((resolve) => (served = resolve))])
-    .then(async ([shim]) => { await loadApps(conf); listApps(); return shim; });
+  let origins = new Map();                    // app -> "the project" or its package
+  const ready = Promise.all([boot(rt, conf), new Promise((resolve) => (served = resolve))])
+    .then(async ([shim]) => { origins = await loadApps(conf); listApps(); return shim; });
   ready.catch(() => {});                 // it fails the start below; nothing else awaits it yet
   cds.once("served", () => { served(); return ready; });
 
@@ -68,6 +70,8 @@ cds.on("bootstrap", (app) => {
     ready.then(() => {
       const lines = startupHints({
         apps: definedApps(),
+        origins,
+        startPage: Boolean(cds.env.server?.index),
         url,
         route: conf.routes[0],
         appsDir: conf.apps,
@@ -134,6 +138,10 @@ cds.on("bootstrap", (app) => {
   // behind the parser an unauthenticated caller could make the server buffer
   // a whole body - up to the limit - before the 401 was even decided.
   //
+  // compression behind the guard: gzip for what the handler answers - the
+  // compression upstream asks the ICF for (lib/compression.js), unless
+  // cds.requires.cap2ui5.compression is false.
+  //
   // cds.middlewares.errors( ) LAST, as CAP mounts it behind every protocol
   // adapter, with normalize in front of it as the adapter's own error step: it
   // answers what the guard and the body parser pass on (401, 403, 413) in
@@ -142,6 +150,7 @@ cds.on("bootstrap", (app) => {
     conf.routes,
     ...cds.middlewares.before.filter(Boolean),
     guard,
+    ...(conf.compression ? [compression()] : []),
     express.raw({ type: "*/*", limit: conf.limit }),
     async (req, res) => {
       try {

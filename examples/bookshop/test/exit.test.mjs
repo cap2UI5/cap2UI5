@@ -36,9 +36,14 @@ test("the context is per request: the same exit answers differently per app", as
   assert.ok(html.includes("sap_horizon"), "no theme at all on the page");
 });
 
-test("a header the exit ADDS rides along with the seven it did not touch", async () => {
+test("a header the exit ADDS rides along with the ones it did not touch - appended and edited in place", async () => {
+  // cfg.t_security_header.push( … ) and an entry changed in place were
+  // dropped without a word: the hook got a shallow copy, so the array it
+  // changed was the very one its result was compared against, and "nothing
+  // changed" was the answer
   const r = await page("ZCL_JS_BOOKS");
   assert.equal(r.headers.get("strict-transport-security"), "max-age=31536000; includeSubDomains");
+  assert.equal(r.headers.get("referrer-policy"), "no-referrer");
   // the framework's own defaults are still there - the exit appended, and the
   // wrapper writes back only what changed
   assert.equal(r.headers.get("x-content-type-options"), "nosniff");
@@ -89,7 +94,7 @@ test("cleanup follows the exit's draft_exp_time_in_hours, not a fixed 4 hours", 
     "INSERT INTO cap2ui5_Drafts (id, owner, createdAt, data) VALUES (?, ?, ?, ?), (?, ?, ?, ?)",
     [expired, "alice", hoursAgo(30), "{}", alive, "alice", hoursAgo(6), "{}"]);
 
-  // any roundtrip runs cleanup( )
+  // an app start runs cleanup( )
   await post(s.url, { app: "ZCL_JS_HELLO", user: "alice" });
   await new Promise((r) => setTimeout(r, 500));
 

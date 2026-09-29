@@ -15,6 +15,136 @@ starts with 0, a minor release may break the API.
   `cap2ui5` has not been this package's since 0.3.0, and a plain
   `npx cap2ui5` where the plugin is not installed - outside the project,
   before `npm add` - downloads and runs whatever npm has under it.
+- **Only a field the app binds is part of the model.** Every field used to
+  be bound before `main( )` - to learn its path - so every field was sent to
+  the browser, and the browser could overwrite every field: a MODEL with
+  `PRICE: 0, IS_ADMIN: true` for fields no view shows was taken as if a
+  control had sent it. Now a field is sent and written back once the app
+  binds it (`_bind( )`, `_bind_edit( )`, `_bind_path( )`, a component or a
+  cell), and stays bound, as the framework does for an ABAP app. Every field
+  is still kept in the draft. An app that read an unbound field in the
+  browser - or a test that read it off the wire - binds it now.
+- `abap2js`: an ABAP comment containing CR, U+2028 or U+2029 ended the
+  JavaScript `//` comment early, and the rest of it ran as code when the
+  module loaded. Those characters are now neutralised in comments, and
+  escaped in string literals and template texts.
+
+### Added
+
+- The route gzips what it answers where the browser accepts gzip - what
+  abap2UI5's HTTP handler asks the ICF for on an ABAP system
+  (`SET_COMPRESSION`), and the express shim it runs behind here had no
+  method for. The page, which carries the whole UI5 frontend, goes out as
+  83 kB instead of 358 kB, and a roundtrip of a 2000-row table as 21 kB
+  instead of 181 kB. A compressed page is tagged with the `-gzip` suffix the
+  framework's conditional GET accepts, so a reload is still answered with a
+  304 - which carries that tag and the `Vary` too, as the 200 does. gzip
+  only, from 1 kB, never where a `Content-Encoding` is set already;
+  `cds.requires.cap2ui5.compression: false` switches it off, for a proxy in
+  front that compresses anyway.
+- The runtime's accelerations: where the installed `@abap2ui5/node-runtime`
+  has `accelerate( )` - the releases after 1.145.0 - the plugin calls it once
+  after booting the runtime, and the log says "runtime accelerations active".
+  It replaces the two places in `@abaplint/runtime` that made an app with one
+  table of n rows cost time in n² - a LOOP ... WHERE over a sorted primary
+  key, and CP. Measured with the next release's function, 2000 rows: the
+  app start from 19.6 s to 1.6 s, an edited cell from 43.5 s to 2.9 s. On
+  1.145.0, which has none, nothing changes and nothing is logged above
+  debug. `cds.requires.cap2ui5.accelerate: false` leaves them off.
+- A Performance section in the README: what a table of n rows costs, with
+  and without the runtime's accelerations, why Node 24 is recommended (or
+  `--experimental-async-context-frame` on Node 22), what `NODE_COMPILE_CACHE`
+  saves `cds watch`, and the compression.
+
+### Changed
+
+- A camelCase field - `isAdmin = false` - is refused by `defineApp( )`,
+  naming the snake_case it wants (`is_admin`). The runtime reads an attribute
+  by its lower-case name, so such a field made every roundtrip of the app
+  fail with a 500 BINDING_ERROR, bound or not. Components of a structure may
+  still be camelCase.
+- A `#private` member used in `main( )` or a method it calls is refused with
+  what to write instead. It threw V8's bare "Cannot read private member"
+  TypeError, and a `#field` was never kept in the draft.
+- `defineApp( )` refuses a name the runtime already has a class of - the
+  framework's, one of its apps, the plugin's own. `defineApp("Z2UI5_CL_UTIL")`
+  replaced the framework's utility class and broke every roundtrip. A name
+  `defineApp( )` registered before may still be registered again.
+- The startup log lists the project's own apps one by one and the apps a
+  package brings in one line per package - how many, and where to find them
+  (CAP's start page, which lists every app). With `@cap2ui5/samples`
+  installed it printed 71 lines of addresses around the project's own.
+- `@abaplint/core`, the ABAP parser `cap2ui5 abap2js` reads with, is an
+  optional peer dependency instead of a dependency: 8.3 MB that only
+  translating needs, installed with every project that serves apps. A
+  project that translates adds it - `npm add -D @abaplint/core` - and the
+  command and `abap2js( )` say so where it is missing, and name the version
+  to install where the project has one of another major (0.1.0 made every
+  translation fail with `reg.getFirstObject is not a function`).
+- The draft store's `count_entries( )` and `count_entries_total( )` - the two
+  numbers the framework's start page shows - are counted by the database, as
+  the shipped store's `SELECT COUNT( * )` counts, instead of loading the id
+  of every draft into Node to take the length of the list.
+- `abap2js` refuses what it cannot translate exactly: `/=`, comparing
+  structures or tables, SORTED and HASHED tables, a TYPE p or f in `&&`, a
+  number into a TYPE c, rounding into a TYPE p or an integer, `DATA( )` of
+  arithmetic on a TYPE p - and a move or `CONV string( )` of it into a
+  string -, `CONV string( )` of a TYPE f, a date or a time moved into a
+  number, a number in a WHEN of a CASE on a text, and CONTINUE outside a
+  loop.
+
+### Fixed
+
+- `t.float( )` and a fractional field (`ratio = 0.5`) read as numbers. They
+  read as open-abap's external format, `"5,0000000000000000E-01"`, so
+  `ratio * 2` was `NaN`.
+- `t.char(n)` reads without its padding (`"ab"`, not `"ab   "`).
+- `t.bool( )` reads as a boolean and takes one; it read `" "` - truthy - or
+  `"X"`, and `this.flag = true` threw `value.get is not a function`.
+- A field cleared to its initial value stays cleared: `name = "Alice"` set to
+  `""`, `count = 5` set to `0`, `flag = true` set to `false` came back as the
+  initializer on the next roundtrip. The initializer is applied once, when the
+  app is created, not on every draft restore. A table row that leaves a
+  column out has it initial, not the value the declaring row gave it.
+- `this.constructor`, `` `${this}` ``, `this.hasOwnProperty( )` in `main( )`
+  work - they threw `box.get is not a function` - and `client._bind("toString")`
+  is refused as no field instead of answering the function's source.
+- A placeholder from an earlier roundtrip - `_event( )` kept in a field and
+  embedded later - is refused. It went to the browser as
+  `press="z2ui5evt_…"`, a button that did nothing.
+- `defineExit( )`: a table of `cfg` changed in place -
+  `cfg.t_security_header.push( … )`, an entry's `v` changed - reaches the
+  framework. The hook got a shallow copy, so the change also changed what it
+  was compared against, and it was dropped without a word.
+- `defineExit( )` called through a second, nested copy of the plugin - an
+  app package whose peer range the project's plugin did not satisfy - is
+  installed; it was ignored silently. A second copy of the plugin is named
+  in the log, with how to find the package that brought it.
+- `abap2js`: `NOT a = b` (also `AND NOT`, `WHERE NOT`) lost its NOT.
+- `abap2js`: `a += 1` and `a -= b` were translated as `a = 1` and `a = b`.
+- `abap2js`: a local structure shared the module constant of its TYPES, one
+  level down, so a write leaked into every later request, anybody's.
+  `DATA(c) = s`, APPEND and INSERT shared the object. Structures and tables
+  stored in locals, rows and components are now copied all the way down, and
+  components a local `VALUE #( )` leaves out are initial - also in a
+  `VALUE #( )` handed to a method of the class, where copying the parameter
+  threw on a table the `VALUE #( )` did not name.
+- `abap2js`: an empty WHEN ran into the next WHEN, one with a comment
+  behind it included; `DO lines( t ) TIMES` re-read its count on every
+  iteration; EXIT outside a loop became a `break;` that kept the server
+  from starting (it now leaves the method).
+- `abap2js`: values are converted as ABAP converts them: abap_bool and
+  numbers in `&&`, text in arithmetic, `'X'` against abap_bool in CASE, WHERE
+  and SWITCH, a text compared with a number - in IF, WHERE and WHEN -,
+  literals into numeric types, `DATA … VALUE` of TYPE p/c/n/d/t/f keeping
+  its type, `|{ packed }|` with its decimals, local TYPE c/n cut and padded,
+  a text moved into a TYPE f, APPEND INITIAL LINE. Arithmetic with a TYPE f
+  in it is a TYPE f, as in ABAP, also where a TYPE p takes part:
+  `p = p + f` was stored unrounded.
+- `abap2js`: text after a closing parenthesis, as in `COND #( … ) && x`, was
+  dropped.
+- `abap2js`: `?=` and any other statement that crashed the translator now
+  give an `Abap2jsError` with file, row and column.
 
 ## [0.3.1] - 2026-09-29
 

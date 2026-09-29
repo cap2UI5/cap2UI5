@@ -30,6 +30,9 @@ defineApp("ZCL_JS_NESTED", class {
       client.view_display(`<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m"><Page title="nested">` +
         `<Button text="Fill" press="${client._event("FILL")}"/>` +
         `<Button text="Read" press="${client._event("READ")}"/>` +
+        // the whole tree, bound: what nested.test.mjs reads off the wire
+        `<VBox binding="{${client._bind_path("order")}}"><Text text="{ID}: {CUSTOMER/NAME}, {CUSTOMER/CITY}"/>` +
+        `<List items="{path: 'LINES', templateShareable: false}"><StandardListItem title="{SKU}"/></List></VBox>` +
         `</Page></mvc:View>`);
     }
   }

@@ -69,7 +69,9 @@ test("the JS hello app renders, takes input and answers with a MessageBox", asyn
   const input = page.locator("input.sapMInputBaseInner").first();
   await input.waitFor({ timeout: 60_000 });                      // UI5 booted, view rendered
   await input.fill("Ada");
-  await page.getByRole("button", { name: "Go" }).click();
+  // exact: a role name matches as a case-insensitive substring by default,
+  // and the Shell's own "Logout" link contains "go"
+  await page.getByRole("button", { name: "Go", exact: true }).click();
   const box = page.locator(".sapMMessageBox, .sapMDialog").filter({ hasText: "Hello Ada" });
   await box.waitFor({ timeout: 30_000 });
   await page.screenshot({ path: path.join(SHOTS, "hello.png") });
@@ -117,8 +119,8 @@ test("client._event( ) survives a view whose attributes were XML-escaped, argume
   // does. Before the fix the placeholder did not survive that, a raw NUL went
   // out in the response and the page got no view at all.
   const { page, errors } = await open("ZCL_JS_ESCAPED");
-  await page.getByRole("button", { name: "Go" }).waitFor({ timeout: 60_000 });
-  await page.getByRole("button", { name: "Go" }).click();
+  await page.getByRole("button", { name: "Go", exact: true }).waitFor({ timeout: 60_000 });
+  await page.getByRole("button", { name: "Go", exact: true }).click();
   const box = (text) => page.locator(".sapMMessageBox, .sapMDialog").filter({ hasText: text });
   await box("escaped event arrived").waitFor({ timeout: 30_000 });
   await page.getByRole("button", { name: "OK" }).click();
@@ -142,7 +144,7 @@ test("a view built with z2ui5_cl_ui5_view_builder renders, keeps literal text li
   // a( { n: "text", t } ): shown as typed, braces and all - not read as a binding
   await page.getByText("{shown as typed}", { exact: true }).waitFor({ timeout: 10_000 });
   await input.fill("Ada");
-  await page.getByRole("button", { name: "Go" }).click();
+  await page.getByRole("button", { name: "Go", exact: true }).click();
   await page.locator(".sapMMessageBox, .sapMDialog").filter({ hasText: "Hello Ada" }).waitFor({ timeout: 30_000 });
   await page.screenshot({ path: path.join(SHOTS, "builder.png") });
   assert.deepEqual(errors, [], "page errors");

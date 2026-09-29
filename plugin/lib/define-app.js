@@ -37,8 +37,9 @@
 //
 //   QUERIES  (check_on_navigated, get_event, _bind, _event, …) must answer a
 //            value the app uses inline, so they cannot be deferred. The
-//            lifecycle, the event and its arguments and every field's binding
-//            are resolved BEFORE main( ) and handed over as plain values. An
+//            lifecycle, the event and its arguments are resolved BEFORE
+//            main( ) and handed over as plain values; a field's binding is
+//            known without asking (boundPath) and registered after it. An
 //            event wire cannot be - its names are invented by the app - so
 //            _event( ) returns a PLACEHOLDER token and the real wire string is
 //            substituted in afterwards, once the async call can be awaited.
@@ -119,25 +120,42 @@ const t = {
 
 const isBoxed = (v) =>
   v !== null && typeof v === "object" && typeof v.get === "function" && typeof v.set === "function";
+/** How a declared box - t.bool( ), t.float( ), t.char( n ), … - reads and
+ *  writes: an abap_bool is a boolean, a CHAR is read without its padding, a
+ *  float as the number it holds. Read as a generic box, t.bool( ) answered
+ *  " " - which is truthy - and took no boolean; a float answered open-abap's
+ *  external format, "5,0000000000000000E-01", with which `ratio * 2` is NaN;
+ *  and a CHAR came back padded, "ab   " !== "ab". */
+function boxKind(box) {
+  if (box instanceof abap.types.Float) return "float";
+  if (box instanceof abap.types.Character) return box.getQualifiedName?.() === "ABAP_BOOL" ? "bool" : "char";
+  return "boxed";
+}
 const isPlainObject = (v) => v !== null && typeof v === "object" && Object.getPrototypeOf(v) === Object.prototype;
 
 // A "shape" says how a value crosses between the app and its box:
-//   { k: "string" | "number" | "bool" | "boxed" }            scalar
+//   { k: "string" | "number" | "float" | "char" | "bool" | "boxed" }   scalar
 //   { k: "struct", fields: { <appKey>: { key, shape } } }    key = lowercase component
 //   { k: "table",  fields }                                  one row = that structure
 // `make()` builds a fresh box of the shape - what ATTRIBUTES.type() must do on
-// every call, because RTTI and the deserializer construct from it.
+// every call, because RTTI and the deserializer construct from it. It builds
+// the box INITIAL: the value a field initializer gives is written once, in
+// constructor_( ) (see withInitial). A box that carried it from `new` came
+// back from the draft restore with it - the restore leaves an initial value
+// out - so `name = "Alice"`, cleared to "", was "Alice" again one roundtrip
+// later.
 function shapeOf(v, path = []) {
-  if (typeof v === "string") return { k: "string", make: () => t.string().set(v) };
-  if (typeof v === "boolean") return { k: "bool", make: () => t.bool().set(v ? "X" : " ") };
-  if (typeof v === "number") {
-    return Number.isInteger(v)
-      ? { k: "number", make: () => t.int().set(v) }
-      : { k: "number", make: () => t.float().set(v) };
-  }
+  if (typeof v === "string") return { k: "string", make: t.string };
+  if (typeof v === "boolean") return { k: "bool", make: t.bool };
+  if (typeof v === "number") return Number.isInteger(v) ? { k: "number", make: t.int } : { k: "float", make: t.float };
   if (isBoxed(v)) {
     if (v.__shape) return v.__shape;                        // t.struct / t.table
-    return { k: "boxed", make: () => v.clone ? v.clone() : v };
+    const make = () => {
+      const box = v.clone();
+      box.clear();
+      return box;
+    };
+    return { k: boxKind(v), make };
   }
   if (Array.isArray(v)) return v.length && isPlainObject(v[0]) ? tableFor(v[0], path).__shape : null;
   if (isPlainObject(v)) return structFor(v, path).__shape;
@@ -201,12 +219,21 @@ const declared = (box) => box;
 // without its constructor, and then APPENDS the stored rows - so rows written
 // by `new` were doubled on every roundtrip.
 const withInitial = (box, value) => Object.defineProperty(box, "__initial", { value });
-const initialOf = (v) => (isBoxed(v) ? v.__initial : v);
+/** The value an initializer gives, to be written in constructor_( ): a plain
+ *  value as it is, a t.struct( ) its components, and a box the app declared
+ *  with a value of its own - `t.char(3).set("abc")` - that box. */
+const initialOf = (v) => {
+  if (!isBoxed(v)) return v;
+  if (v.__shape) return v.__initial;
+  return abap.compare.initial(v) ? undefined : v;
+};
 
 /** box -> plain value, for the app to read. ABAP has no boolean; abap_bool is an "X" / " " flag. */
 function unwrap(box, shape) {
   switch (shape.k) {
     case "bool": return box.get() === "X";
+    case "float": return box.getRaw();
+    case "char": return String(box.get()).trimEnd();
     case "struct": return rowToPlain(box, shape.fields);
     case "table": return box.array().map((r) => rowToPlain(r, shape.fields));
     default: return box.get();
@@ -261,9 +288,30 @@ function readState(instance) {
   return out;
 }
 
+/** A field is an ABAP attribute, and the runtime reads an attribute from
+ *  the instance under its LOWERCASE name - the transpiler's convention - while
+ *  ATTRIBUTES lists it upper case. `isAdmin` is therefore an attribute
+ *  ISADMIN the runtime looks for as `isadmin` and does not find: every
+ *  roundtrip of the app failed with a BINDING_ERROR, bound or not. Mapping
+ *  the name would need a second name for every field in the draft, the
+ *  model, nav_app_call( )'s presets and get_app_prev( ) - and two fields
+ *  `isAdmin` and `isadmin` would collide - so the name is refused where it
+ *  is declared, as ABAP would never produce it. A structure's components
+ *  and the app's methods may be camelCase. */
+function fieldNameError(app, f) {
+  const snake = f.replace(/([a-z0-9])([A-Z])/g, "$1_$2").toLowerCase();
+  return `defineApp(${app}): field ${f} - a field is an ABAP attribute, and ABAP names are not case-sensitive: ` +
+    `the runtime reads it as "${f.toLowerCase()}". Name it in lower case, snake_case as ABAP does - ${snake}.`;
+}
+
 /** `name` -> NAME, `z2ui5_if_app$id_draft` -> Z2UI5_IF_APP~ID_DRAFT. */
 const abapName = (f) => f.toUpperCase().replace(/\$/g, "~");
 const isFrameworkField = (f) => f.includes("$");
+/** The binding z2ui5_if_client=>_bind( ) answers for a top-level attribute:
+ *  its name as RTTI spells it, under the model's root (get_client_name in
+ *  z2ui5_cl_ui5_srv_bind). Known without binding, so _bind( ) can answer it
+ *  inline and bind the field after main( ) - see there. */
+const boundPath = (f) => `{/${abapName(f)}}`;
 
 // ------------------------------------------------ what the framework hands over
 /** Any ABAP value as plain JavaScript, for what the app reads from the
@@ -286,6 +334,7 @@ function toPlain(v) {
   if (v instanceof abap.types.Character) {
     return v.getQualifiedName?.() === "ABAP_BOOL" ? v.get() === "X" : String(v.get()).trimEnd();
   }
+  if (v instanceof abap.types.Float) return v.getRaw();
   return typeof v.get === "function" ? v.get() : v;
 }
 
@@ -503,6 +552,27 @@ const RETIRED = {
 const OBSOLETE = ["view_model_update", "popup_model_update", "popover_model_update",
   "nest_view_model_update", "nest2_view_model_update"];
 
+/** A #private member used in main( ) or a method it calls: `this` there is
+ *  the proxy that unwraps the fields, and JavaScript lets only the instance
+ *  itself through a private name - V8 says "Cannot read private member #x
+ *  from an object whose class did not declare it" and nothing about why. It
+ *  cannot be bound through: a private name is not a property a proxy sees,
+ *  and neither would the draft see it - a #field is not kept from one
+ *  roundtrip to the next. So it is refused, saying what to write instead: a
+ *  plain field is not part of the model until the app binds it. */
+function privateMemberError(e, app) {
+  if (!(e instanceof TypeError)) return null;
+  const m = /private member (#[\w$]+)|Receiver must be an instance of class|Object must be an instance of class/.exec(e.message);
+  if (!m) return null;
+  return new TypeError(
+    `defineApp(${app}): ${m[1] ?? "a #private method"} - private class members are not supported in an app: ` +
+      `main( ) and the methods it calls run on a proxy of the instance, which a private name does not ` +
+      `reach, and a #field would not be kept in the draft either. Use a plain field - it is not sent to ` +
+      `the browser unless main( ) binds it - or a module-level function instead of a #method. (${e.message})`,
+    { cause: e },
+  );
+}
+
 /** What client.get_app( id ) answers - see there. */
 class DraftApp {}
 const DRAFT_APP = Symbol("cap2ui5.draftApp");
@@ -517,8 +587,22 @@ function definedApps() {
   return [...defined];
 }
 
+/** Marks a class defineApp( ) registered - a global symbol, so that a second
+ *  copy of the plugin recognises the first one's apps. */
+const DEFINED = Symbol.for("cap2ui5.defineApp");
+
 function defineApp(name, cls, opts = {}) {
   const INTERNAL = String(name).toUpperCase();
+  // abap.Classes is the runtime's class registry, framework and all: an app
+  // named Z2UI5_CL_UTIL replaced the framework's utility class and broke
+  // every roundtrip of every app. A name defineApp( ) registered before may
+  // be registered again - that is how an app is replaced.
+  const existing = globalThis.abap?.Classes?.[INTERNAL];
+  if (existing && !existing[DEFINED]) {
+    throw new Error(`defineApp(${INTERNAL}): the abap2UI5 runtime has a class of that name already - part of the ` +
+      `framework, one of its apps, or the plugin's own - and replacing it would change what every roundtrip ` +
+      `runs. Choose another name.`);
+  }
   const userMain = cls.prototype.main ?? cls.prototype.z2ui5_if_app$main;
   if (typeof userMain !== "function") {
     throw new Error(`defineApp(${INTERNAL}): the class needs a main( client ) method`);
@@ -536,7 +620,8 @@ function defineApp(name, cls, opts = {}) {
         let shape;
         try { shape = shapeOf(v, [f]); } catch (e) { undecidable.push(e.message); continue; }
         if (!shape) { undecidable.push(`${f} has no ABAP type`); continue; }
-        this[f] = isBoxed(v) ? v : shape.make();
+        if (f !== f.toLowerCase()) throw new Error(fieldNameError(INTERNAL, f));
+        this[f] = shape.make();                 // initial - the initializer is constructor_( )'s
         shapes[f] = shape;
         if (initialOf(v) !== undefined) initial[f] = initialOf(v);
         attrs[abapName(f)] = { type: shape.make, visibility: "U", is_constant: " ", is_class: " " };
@@ -613,11 +698,15 @@ function defineApp(name, cls, opts = {}) {
       // app can still read.
       const prevRef = await c.z2ui5_if_client$get_app_prev({ result: 1 });
       const prevApp = readState(abap.compare.initial(prevRef) ? null : prevRef.get());
-      const paths = {};
-      for (const f of Object.keys(shapes)) {
-        if (isFrameworkField(f)) continue;
-        paths[f] = (await c.z2ui5_if_client$_bind({ val: this[f], result: 1 })).get();
-      }
+      // The app's own fields - what _bind( ) can name. NOT bound here: a
+      // field becomes part of the model when the app binds it, as in ABAP,
+      // where the framework sends and accepts only bound attributes. Binding
+      // every field up front - which is how the path used to be learnt -
+      // sent every field to the browser and let the browser write every
+      // field, the ones no view shows included (a forged PRICE or IS_ADMIN
+      // was taken as if a control had sent it). See boundPath( ).
+      const fields = new Set(Object.keys(shapes).filter((f) => !isFrameworkField(f)));
+      const bound = new Set();                 // fields main( ) bound without options
       // app_state_get_href( ): composed from the browser's location and this
       // roundtrip's draft id, no side effect - so it can be answered up front,
       // which an app needs because it writes the link into a bound field.
@@ -637,7 +726,11 @@ function defineApp(name, cls, opts = {}) {
       // closing "_" keeps _1_ from matching inside _10_.
       const TOK_PREFIX = `z2ui5evt_${crypto.randomBytes(6).toString("hex")}_`;
       const TOK_RE = new RegExp(`${TOK_PREFIX}(\\d+)_`, "g");
-      const TOK_LEFT = new RegExp(TOK_PREFIX, "i"); // what survives a cut or a case change
+      // What survives a cut or a case change - of THIS roundtrip's nonce or
+      // of any other: a placeholder the app kept in a field and embedded one
+      // roundtrip later carries an old nonce, and only matching that one let
+      // it through to the browser as press="z2ui5evt_…" - a dead button.
+      const TOK_LEFT = /z2ui5evt_[0-9a-f]{12}_/i;
       const placeholders = [];                // token number -> what it stands for
       const tokens = new Map();               // JSON of that -> token, one per distinct call
       const placeholder = (spec) => {
@@ -657,10 +750,10 @@ function defineApp(name, cls, opts = {}) {
        *  keys from the field's box to it. */
       const fieldOf = (name, who) => {
         const [top, ...components] = String(name).split(/[-.]/);
-        if (!(top in paths)) {
+        if (!fields.has(top)) {
           throw new Error(
             `${who}: ${top} is not a field of this app - in JavaScript the client takes a field's ` +
-              `NAME, client._bind("name"), not its value. Known: ${Object.keys(paths).join(", ") || "(none)"}`,
+              `NAME, client._bind("name"), not its value. Known: ${[...fields].join(", ") || "(none)"}`,
           );
         }
         let shape = shapes[top];
@@ -907,8 +1000,11 @@ function defineApp(name, cls, opts = {}) {
             ...options,
           });
         }
-        // path_only is the same binding without its braces (finalize_path)
-        return p.path ? paths[target.top].slice(1, -1) : paths[target.top];
+        // Answered now, bound after main( ) - see boundPath( ). path_only is
+        // the same binding without its braces (finalize_path).
+        bound.add(target.top);
+        const braced = boundPath(target.top);
+        return p.path ? braced.slice(1, -1) : braced;
       }
       for (const m of OBSOLETE) client[m] = () => {};
       // The names of cap2ui5 0.1.0 say where they went, rather than answer
@@ -928,21 +1024,31 @@ function defineApp(name, cls, opts = {}) {
       // and on_event( ), and a helper bound to the instance read the ABAP
       // boxes - worse, `this.name = "x"` in it replaced a box with a string,
       // which _bind( ) matches by identity and then could not find.
+      //
+      // A field is an OWN key of shapes: `shapes[prop]` alone also found what
+      // every object inherits - constructor, toString, hasOwnProperty - and
+      // then `${this}` or `this.constructor` threw "box.get is not a function".
+      const isField = (prop) => typeof prop === "string" && Object.hasOwn(shapes, prop);
       const plain = new Proxy(this, {
         get(tgt, prop, recv) {
           const v = Reflect.get(tgt, prop, recv);
-          if (typeof prop === "string" && shapes[prop]) return unwrap(v, shapes[prop]);
-          return typeof v === "function" ? v.bind(recv) : v;
+          if (isField(prop)) return unwrap(v, shapes[prop]);
+          // the class itself stays the class - bound, it is no constructor of anything
+          return typeof v === "function" && prop !== "constructor" ? v.bind(recv) : v;
         },
         set(tgt, prop, value) {
-          if (typeof prop === "string" && shapes[prop]) {
+          if (isField(prop)) {
             wrap(tgt[prop], value, shapes[prop]);
             return true;
           }
           return Reflect.set(tgt, prop, value);
         },
       });
-      await userMain.call(plain, client);        // await: an async main still works
+      try {
+        await userMain.call(plain, client);      // await: an async main still works
+      } catch (e) {
+        throw privateMemberError(e, INTERNAL) ?? e;
+      }
 
       // ---- flush: resolve the placeholders, prepare, then replay -----------
       const B = (v) => new abap.types.Character(1, { qualifiedName: "ABAP_BOOL" }).set(v ? "X" : " ");
@@ -970,6 +1076,14 @@ function defineApp(name, cls, opts = {}) {
         // returned it - cut, re-encoded, case-changed. Shipping it would send
         // the browser a handler that does nothing, so refuse.
         const at = out.search(TOK_LEFT);
+        if (at >= 0 && !out.slice(at).toLowerCase().startsWith(TOK_PREFIX)) {
+          throw new Error(
+            `client._event( ): a placeholder from an EARLIER roundtrip reached the view: ` +
+              `"${out.slice(at, at + TOK_PREFIX.length + 4)}…". A placeholder is replaced in the roundtrip ` +
+              `that made it and means nothing after it - call _event( ), _event_nav_app_leave( ), ` +
+              `follow_up_action( ) or the _bind( ) with options where the view is built, not once into a field.`,
+          );
+        }
         if (at >= 0) {
           throw new Error(
             `client._event( ): a placeholder it returned reached the view altered, so it cannot be ` +
@@ -1020,6 +1134,18 @@ function defineApp(name, cls, opts = {}) {
         if (p.switch_default_model) input.switch_default_model = B(true);
         return (await c.z2ui5_if_client$_bind(input)).get();
       };
+      // The fields main( ) bound: now they are part of the model, sent to
+      // the browser and written back by it - and only they. The framework's
+      // answer is what the app was handed; abi-gate.test.mjs holds the two
+      // equal, and a runtime that disagrees fails the roundtrip here rather
+      // than render a view bound to nothing.
+      for (const f of bound) {
+        const real = String((await c.z2ui5_if_client$_bind({ val: this[f], result: 1 })).get());
+        if (real !== boundPath(f)) {
+          throw new Error(`client._bind( "${f}" ): the runtime bound it as ${real}, not as ${boundPath(f)} - ` +
+            `the path a field's binding is answered with before main( ) returns`);
+        }
+      }
       // In the order the app made them: a placeholder in another one's
       // arguments was made before it, so it is resolved first.
       for (const [i, p] of placeholders.entries()) {
@@ -1168,6 +1294,7 @@ function defineApp(name, cls, opts = {}) {
 
   App.INTERNAL_TYPE = "CLAS";
   App.INTERNAL_NAME = INTERNAL;
+  App[DEFINED] = true;
   App.IMPLEMENTED_INTERFACES = opts.interfaces ?? ["Z2UI5_IF_APP", "IF_SERIALIZABLE_OBJECT"];
   App.METHODS = {};
   App.ATTRIBUTES = {};

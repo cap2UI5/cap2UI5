@@ -16,7 +16,10 @@ test("nav_app_call( ) presets the called app's fields, over its own initial valu
   const form = await P({ app: APP, id: start.json.S_FRONT.ID, event: "EDIT" });
   assert.equal(form.status, 200, form.text.slice(0, 300));
   assert.equal(form.json.S_FRONT.APP, FORM);
-  assert.deepEqual(form.json.MODEL, { PRODUCT: "Notebook", QUANTITY: 2, MODE: "edit" });
+  // mode is preset as well - the title says so - but the form binds only
+  // product and quantity, so only they are on the wire
+  assert.deepEqual(form.json.MODEL, { PRODUCT: "Notebook", QUANTITY: 2 });
+  assert.match(form.text, /cap2UI5 - handover, form \(edit\)/);
 });
 
 test("nav_app_leave( { r_data } ) arrives typed, as get( ).r_event_data, with the event it names", async () => {

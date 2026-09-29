@@ -146,6 +146,10 @@ array, a cycle) is reported by its path and left out; the app runs without it. A
 - `roles` (default `["authenticated-user"]`): a role or a list of roles, as
   with CAP's `@requires`; `any` or `null` allows anonymous callers
 - `body_parser.limit` (CAP's `cds.server.body_parser.limit`, else `10mb`)
+- `compression` (default `true`): gzip for the page and the roundtrips;
+  `false` leaves it to a proxy in front
+- `accelerate` (default `true`): the runtime's `accelerate( )`, where it has
+  one; `false` runs the runtime's own code
 
 `false` switches the plugin off. The route runs behind CAP's own middlewares
 and answers like a CAP service: 401 with the login challenge of
@@ -174,6 +178,7 @@ npm install
 npm test                                       # ABI gates, auth, config, books, concurrency, nesting, the exit, the start
 npm run cold-test                              # state AND the app stack through SIGKILL, ABAP control included
 npm run bench -- 100                           # ms per roundtrip
+npm run bench -- --rows 2000                   # one table of 2000 rows: time and wire size per roundtrip
 npm run consumer-test                          # pack both packages, install them into a throwaway CAP project, drive a roundtrip
 npm run test:browser                           # real Chromium against the framework's own page
 npm start                                      # http://localhost:4004/rest/root/z2ui5?app_start=ZCL_JS_BOOKS

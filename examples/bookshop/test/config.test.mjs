@@ -21,14 +21,22 @@ const shipped = require("@cap2ui5/cds-plugin/package.json").cds.requires.cap2ui5
 
 const env = (over = {}) => ({ requires: { cap2ui5: { ...shipped, ...over.own } }, ...over.env });
 
-test("the defaults: srv/apps, authenticated users, both routes, 10mb", () => {
+test("the defaults: srv/apps, authenticated users, both routes, 10mb, gzip, the runtime's accelerations", () => {
   assert.deepEqual(config(env()), {
     apps: "srv/apps",
     routes: ["/sap/bc/z2ui5", "/rest/root/z2ui5"],
     roles: ["authenticated-user"],
     limit: DEFAULT_LIMIT,
+    compression: true,
+    accelerate: true,
   });
   assert.equal(DEFAULT_LIMIT, "10mb");
+});
+
+test("compression: false switches gzip off; unset or true leaves it on", () => {
+  assert.equal(config(env({ own: { compression: false } })).compression, false);
+  assert.equal(config(env({ own: { compression: true } })).compression, true);
+  assert.equal(config(env({ own: { compression: undefined } })).compression, true);
 });
 
 test("roles: one role or a list; null lets anybody in", () => {

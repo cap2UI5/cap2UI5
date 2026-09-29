@@ -12,12 +12,13 @@
     "test": "npm --workspace examples/bookshop test",
     "test:browser": "npm --workspace examples/bookshop run test:browser",
     "cold-test": "npm --workspace examples/bookshop run cold-test",
-    "bench": "npm --workspace examples/bookshop run bench",
+    "bench": "npm --workspace examples/bookshop run bench --",
     "consumer-test": "node scripts/consumer-test.mjs",
     "lint": "eslint ."
   },
   "devDependencies": {
     "eslint": "^10",
-    "@sap/cds": "^10"
+    "@sap/cds": "^10",
+    "@abaplint/core": "^2.120.60"
   }
 }

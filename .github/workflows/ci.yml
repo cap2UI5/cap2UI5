@@ -74,7 +74,11 @@ jobs:
         env:
           RUNTIME_VERSION: ${{ inputs.runtime_version }}
         run: scripts/assemble-runtime.sh --package "$RUNTIME_VERSION"
-      # package.json too: --package replaces the stand-in's with the published one
+      # package.json too: --package replaces the stand-in's with the published one.
+      # srv too: that manifest declares its entries there (srv/host.mjs, and
+      # srv/accelerate.mjs from the release after 1.145.0), and the plugin
+      # fails the start when a declared entry cannot be loaded - a manifest
+      # without its srv/ would fail every job downstream.
       - uses: actions/upload-artifact@v7
         with:
           name: runtime
@@ -82,6 +86,7 @@ jobs:
             runtime/output
             runtime/setup
             runtime/downport
+            runtime/srv
             runtime/package.json
           if-no-files-found: error
           retention-days: 1

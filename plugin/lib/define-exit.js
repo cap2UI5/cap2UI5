@@ -24,26 +24,43 @@
 // read afresh on every set_config call, so binding it before the first request
 // is all it takes. Nothing here reaches past a static the framework declares.
 const cds = require("@sap/cds");
+const { isDeepStrictEqual } = require("node:util");
 
 const IF_NAME = "Z2UI5_IF_UI5_EXIT";
 const LOG = cds.log("cap2ui5");
 
 /** The exit a project registered, if any. One, deliberately: the exit decides
  *  the CSP and every security header, so "which one wins" must not depend on
- *  module load order. A second registration is an error, not a silent winner. */
-let pending = null;
+ *  module load order. A second registration is an error, not a silent winner.
+ *
+ *  Kept on a global symbol, not in this module: an app package that brings
+ *  its own nested copy of the plugin - a peer range that did not match -
+ *  loads a second copy of this file, and an exit it registered there sat in
+ *  that copy's variable while the copy CAP runs installed nothing, without a
+ *  word. The registration is shared, and the second copy is named in the log
+ *  (see below), since its apps are loaded by the wrong copy as well. */
+const REGISTRY = (globalThis[Symbol.for("cap2ui5.exit")] ??= { pending: null });
+
+const COPY = Symbol.for("cap2ui5.pluginCopy");
+const home = require("path").resolve(__dirname, "..");
+globalThis[COPY] ??= home;
+if (globalThis[COPY] !== home) {
+  LOG.warn(`a second copy of @cap2ui5/cds-plugin is loaded, from ${home}, beside the one in ` +
+    `${globalThis[COPY]}. A package with apps names the plugin as a peer dependency, so that ` +
+    `there is one; \`npm ls @cap2ui5/cds-plugin\` shows which package brought this one.`);
+}
 
 function defineExit(exit) {
   if (!exit || (typeof exit.onPage !== "function" && typeof exit.onRoundtrip !== "function")) {
     throw new Error("[cap2ui5] defineExit(exit): exit needs an onPage and/or an onRoundtrip method");
   }
-  if (pending) {
+  if (REGISTRY.pending) {
     throw new Error(
       "[cap2ui5] defineExit was called twice - only one user exit can be active, " +
         "because it decides the CSP and the security headers. Merge them into one.",
     );
   }
-  pending = exit;
+  REGISTRY.pending = exit;
   return exit;
 }
 
@@ -76,10 +93,11 @@ function unwrap(struct) {
 }
 
 /** Write the object back. Only what CHANGED is assigned, so an exit that
- *  ignores a field leaves the framework's default exactly as it found it. */
+ *  ignores a field leaves the framework's default exactly as it found it.
+ *  Changed by VALUE: the hook may replace a table or change it in place. */
 function rewrap(struct, before, after) {
   for (const [k, v] of Object.entries(struct.get())) {
-    if (!(k in after) || after[k] === before[k]) continue;
+    if (!(k in after) || isDeepStrictEqual(after[k], before[k])) continue;
     if (isTable(v)) writePairs(v, after[k] ?? []);
     else if (typeof v.get() === "number") v.set(Number(after[k]));
     else if (isBool(v)) v.set(after[k] ? "X" : " ");
@@ -105,7 +123,10 @@ async function run(hook, INPUT, name) {
   if (typeof hook !== "function") return;
   const cfg = INPUT.cs_config;
   const before = unwrap(cfg);
-  const after = { ...before };
+  // A deep copy: the hook is told to change cfg in place, and with a shallow
+  // one cfg.t_security_header.push( … ) changed the array `before` holds
+  // too - so the comparison saw no change and the header was dropped.
+  const after = structuredClone(before);
   try {
     await hook(after, context(INPUT.is_context));
   } catch (e) {
@@ -118,8 +139,8 @@ async function run(hook, INPUT, name) {
 /** Bind the registered exit, once the runtime exists. Called from boot( ) after
  *  the app modules have loaded, because an exit is registered from one of them. */
 function installExit() {
-  if (!pending) return null;
-  const exit = pending;
+  if (!REGISTRY.pending) return null;
+  const exit = REGISTRY.pending;
 
   class ZCL_CAP2UI5_EXIT {
     static INTERNAL_TYPE = "CLAS";
@@ -139,6 +160,6 @@ function installExit() {
 }
 
 /** tests only: forget the registration so a second scenario can register its own */
-function resetExit() { pending = null; }
+function resetExit() { REGISTRY.pending = null; }
 
 module.exports = { defineExit, installExit, resetExit };

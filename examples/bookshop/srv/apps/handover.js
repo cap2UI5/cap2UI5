@@ -44,6 +44,9 @@ defineApp("ZCL_JS_HANDOVER", class {
         `<Shell><Page title="cap2UI5 - handover">` +
         `<Button text="Edit" press="${client._event("EDIT")}"/>` +
         `<Text text="${client._bind("returned")}"/>` +
+        `<VBox binding="{${client._bind_path("result")}}"><Text text="{PRODUCT} x {QUANTITY}"/></VBox>` +
+        `<Text text="${client._bind("where")}"/><Link text="this state" href="${client._bind("link")}"/>` +
+        `<Text text="backend event: ${client._bind("backend_event")}"/>` +
         `</Page></Shell></mvc:View>`);
     }
   }

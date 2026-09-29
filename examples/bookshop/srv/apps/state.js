@@ -27,7 +27,12 @@ defineApp("ZCL_JS_STATE", class {
   // every roundtrip.
   view_display() {
     this.client.view_display(`<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m"><Page title="state">` +
-      `<Input value="${this.client._bind("name")}"/></Page></mvc:View>`);
+      `<Input value="${this.client._bind("name")}"/>` +
+      `<Text text="${this.client._bind("seen")} (${this.client._bind("describes")})"/>` +
+      `<List items="${this.client._bind("rows")}"><StandardListItem title="{TITLE}"/></List>` +
+      `<VBox binding="{${this.client._bind_path("order")}}"><Text text="{ID}"/></VBox>` +
+      `<VBox binding="{${this.client._bind_path("cfg")}}"><Text text="{MODE}"/></VBox>` +
+      `</Page></mvc:View>`);
   }
 
   main(client) {

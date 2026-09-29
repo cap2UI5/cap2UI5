@@ -12,6 +12,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
 import { after, before, test } from "node:test";
+import { setTimeout as sleep } from "node:timers/promises";
 import { EXAMPLE, boot, post } from "./server.mjs";
 
 const { appPackages } = createRequire(import.meta.url)("@cap2ui5/cds-plugin/lib/runtime.js");
@@ -74,6 +75,18 @@ test("the project serves the apps its packages bring, beside its own", async () 
   const dev = await post(s.url, { app: "ZCL_FIXTURE_DEV", user: "alice" });
   assert.equal(dev.status, 200, dev.text.slice(0, 300));
   assert.equal(dev.json.MODEL.FROM, "cap2ui5-fixture-dev-apps");
+});
+
+test("the log names the project's apps one by one and a package's apps in one line", async () => {
+  // @cap2ui5/samples brings 71 apps: a line each buried the project's own
+  const s = await server();
+  const summary = /\[cap2ui5\] - cap2ui5-fixture-apps\s+1 app - (listed on CAP's start page|start one with)/;
+  for (let i = 0; i < 20 && !summary.test(s.out()); i++) await sleep(250);
+  const out = s.out();
+  assert.match(out, /\[cap2ui5\] - ZCL_FIXTURE_OWN\s+http:\/\/\S+\?app_start=ZCL_FIXTURE_OWN/, out.slice(-2000));
+  assert.match(out, summary, out.slice(-2000));
+  assert.match(out, /\[cap2ui5\] - cap2ui5-fixture-dev-apps\s+1 app - /, out.slice(-2000));
+  assert.doesNotMatch(out, /app_start=ZCL_FIXTURE_PACKAGED/, "a package's app has no line of its own");
 });
 
 test("a package does not replace an app the project has - the project's stays, with a warning", async () => {
