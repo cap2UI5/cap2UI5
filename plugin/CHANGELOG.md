@@ -88,9 +88,10 @@ starts with 0, a minor release may break the API.
 - `abap2js` refuses what it cannot translate exactly: `/=`, comparing
   structures or tables, SORTED and HASHED tables, a TYPE p or f in `&&`, a
   number into a TYPE c, rounding into a TYPE p or an integer, `DATA( )` of
-  arithmetic on a TYPE p, `CONV string( )` of a TYPE f, a date or a time
-  moved into a number, a number in a WHEN of a CASE on a text, and CONTINUE
-  outside a loop.
+  arithmetic on a TYPE p - and a move or `CONV string( )` of it into a
+  string -, `CONV string( )` of a TYPE f, a date or a time moved into a
+  number, a number in a WHEN of a CASE on a text, and CONTINUE outside a
+  loop.
 
 ### Fixed
 

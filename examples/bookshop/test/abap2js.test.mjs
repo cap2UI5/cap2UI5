@@ -322,6 +322,12 @@ test("what it does not know, it refuses - with file, row and column", () => {
     ["    DATA c TYPE c LENGTH 3.\n    c = 5.", "", /a TYPE int moved into a TYPE char LENGTH 3 is not supported - ABAP right-aligns/, 13],
     ["    DATA p TYPE p LENGTH 10 DECIMALS 2.\n    DATA(q) = p + 1.", "", /DATA\( \) = arithmetic on a TYPE p is not supported/, 13],
     ["    DATA p TYPE p LENGTH 10 DECIMALS 2.\n    p = p * p.", "", /moved into a TYPE packed LENGTH 10 is not supported - ABAP rounds/, 13],
+    // arithmetic on a TYPE p into a string: ABAP formats its calculation type - it went out with the p's decimals,
+    // "4.50", where the transpiled ABAP answers "4.5000000000000000E+00"; a string template of it is refused already
+    ["    DATA p TYPE p LENGTH 8 DECIMALS 2.\n    DATA s TYPE string.\n    s = p * 3.", "",
+      /a TYPE packed moved into a TYPE string is not supported - its decimals are ABAP's calculation type's/, 14],
+    ["    DATA p TYPE p LENGTH 8 DECIMALS 2.\n    DATA(s) = CONV string( p + 1 ).", "",
+      /CONV string\( \) of arithmetic on a TYPE p is not supported - its decimals are ABAP's calculation type's/, 13],
     // CASE `05`. WHEN 5. matches in ABAP; a switch compares "05" === "5"
     ["    DATA(s) = `05`.\n    CASE s.\n      WHEN 5.\n    ENDCASE.", "",
       /a number in a WHEN of a CASE on a text is not supported - ABAP compares the text as a number/, 14],

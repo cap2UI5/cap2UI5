@@ -184,6 +184,10 @@ const NUMERIC = new Set(["int", "float", "packed"]);
 const TEXT = new Set(["string", "char", "numc"]);
 /** Whether a Source is one literal, '5' or `text` or 42 */
 const isLiteral = (src) => src.getChildren().length === 1 && kind(src.getChildren()[0]) === "Constant";
+/** Whether a Source is arithmetic at its top: a + b, not ( a + b ) && c */
+const isArith = (src) => src.getChildren().some((p) => !isToken(p) && kind(p) === "ArithOperator");
+/** Why a TYPE p calculated cannot be printed with the p's decimals */
+const CALCULATED = "its decimals are ABAP's calculation type's";
 /** js, or js in parentheses where a method call on it would bind to its last part */
 const wrapJs = (js) => (/^[\w$.]+(\(\))?$|^"[^"]*"$/.test(js) ? js : `(${js})`);
 const sized = (name, length, decimals) => {
@@ -1174,6 +1178,7 @@ class MethodGen {
     switch (type?.k) {
       case "string":
         if (st.k === "int" && !literal) return `String(${js})`;          // as CONV string( ) - README
+        if (st.k === "packed" && isArith(src)) refuse(CALCULATED);
         if (st.k === "packed") return `${wrapJs(js)}.toFixed(${st.decimals})`;
         if (st.k === "float") refuse("ABAP formats it otherwise");
         return js;
@@ -1571,8 +1576,8 @@ class MethodGen {
         const src = c.findDirectExpression(A().Expressions.Source);
         const type = this.typeOfSource(src);
         const js = this.sourceBody(src);
-        if (type.k === "packed" && src.getChildren().some((p) => !isToken(p) && kind(p) === "ArithOperator")) {
-          this.fail("arithmetic on a TYPE p in a string template is not supported - its decimals are ABAP's calculation type's", c);
+        if (type.k === "packed" && isArith(src)) {
+          this.fail(`arithmetic on a TYPE p in a string template is not supported - ${CALCULATED}`, c);
         }
         // a TYPE p prints with its decimals: 5.00
         out += type.k === "bool" ? `\${${js} ? "X" : ""}` : type.k === "packed" ? `\${${wrapJs(js)}.toFixed(${type.decimals})}` : `\${${js}}`;
@@ -2050,6 +2055,7 @@ class MethodGen {
     if (type === "string") {
       const st = this.typeOfSource(src);
       if (st.k === "bool") return `(${this.source(src)} ? "X" : "")`;
+      if (st.k === "packed" && isArith(src)) this.fail(`CONV string( ) of arithmetic on a TYPE p is not supported - ${CALCULATED}`, node);
       if (st.k === "packed") return `${wrapJs(this.source(src))}.toFixed(${st.decimals})`;
       if (st.k === "float") this.fail("CONV string( ) of a TYPE f is not supported - ABAP formats it otherwise", node);
       return `String(${this.source(src)})`;
