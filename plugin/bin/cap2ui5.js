@@ -24,6 +24,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const { moduleFormat } = require("../lib/module-format");
 
 const USAGE = `usage: cap2ui5 abap2js <class.clas.abap | directory>... [--out dir] [--lib dir]... [--origin text] [--esm | --cjs] [--check]`;
 
@@ -66,14 +67,6 @@ function classes(inputs) {
   return out;
 }
 
-/** ES modules when the package.json nearest to the output says "module" - what `cds init` writes. */
-function formatFor(dir) {
-  for (let d = path.resolve(dir); ; d = path.dirname(d)) {
-    const pkg = path.join(d, "package.json");
-    if (fs.existsSync(pkg)) return JSON.parse(fs.readFileSync(pkg, "utf8")).type === "module" ? "esm" : "cjs";
-    if (path.dirname(d) === d) return "esm";
-  }
-}
 
 function abap2jsCommand(argv) {
   const o = args(argv);
@@ -84,7 +77,7 @@ function abap2jsCommand(argv) {
   if (!lib.frameworkFound) {
     throw new Error("@abap2ui5/node-runtime carries no downport/ - the client's ABAP types are read from there");
   }
-  const format = o.format ?? formatFor(o.out);
+  const format = o.format ?? moduleFormat(o.out);
   let refused = 0;
   let changed = 0;
   let written = 0;

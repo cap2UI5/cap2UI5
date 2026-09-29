@@ -24,6 +24,14 @@ starts with 0, a minor release may break the API.
 - A parameter the runtime in use does not declare is refused, naming the
   runtime, instead of being dropped unseen by the transpiled method.
 
+### Fixed
+
+- `cds add cap2ui5` writes its first app in the project's module format: an
+  ES module (`import`) where the package.json nearest to the apps directory
+  says `"type": "module"` - what `cds init --nodejs` writes - and CommonJS
+  otherwise, as `npx cap2ui5 abap2js` already decided it. It always wrote
+  `require( )`, which fails the start of an ES module project.
+
 ## [0.3.0] - 2026-09-29
 
 The plugin is `@cap2ui5/cds-plugin` now, published by the npm organisation
