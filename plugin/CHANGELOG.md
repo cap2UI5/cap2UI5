@@ -50,6 +50,10 @@ starts with 0, a minor release may break the API.
   app start from 19.6 s to 1.6 s, an edited cell from 43.5 s to 2.9 s. On
   1.145.0, which has none, nothing changes and nothing is logged above
   debug. `cds.requires.cap2ui5.accelerate: false` leaves them off.
+- A Performance section in the README: what a table of n rows costs, with
+  and without the runtime's accelerations, why Node 24 is recommended (or
+  `--experimental-async-context-frame` on Node 22), what `NODE_COMPILE_CACHE`
+  saves `cds watch`, and the compression.
 
 ### Changed
 

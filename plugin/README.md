@@ -356,7 +356,7 @@ Under `cds.requires.cap2ui5` - in `package.json`, a `.cdsrc.json`, a profile or
 | `routes` | `/sap/bc/z2ui5`, `/rest/root/z2ui5` | where the roundtrip answers |
 | `body_parser.limit` | CAP's `cds.server.body_parser.limit`, else `10mb` | the largest roundtrip body; a larger one gets 413 |
 | `compression` | `true` | gzip for the page and the roundtrips, where the browser accepts it; `false` leaves compressing to a proxy in front |
-| `accelerate` | `true` | calls the runtime's `accelerate( )` where it has one - the releases after 1.145.0; `false` runs the runtime's own code |
+| `accelerate` | `true` | calls the runtime's `accelerate( )` where it has one - the releases after 1.145.0, see [Performance](#performance); `false` runs the runtime's own code |
 
 `"cap2ui5": false` switches the plugin off: no route, and no `cap2ui5.Drafts`
 table in the model.
@@ -407,6 +407,46 @@ theme, the draft expiry, the CSRF gate — comes from the user exit,
 - **Multitenancy (MTX):** not tested yet. The draft store reads and writes
   through `cds.run`, which follows `cds.context`. The drafts should therefore
   land in each tenant's database like any other row, but no test proves it.
+
+## Performance
+
+A roundtrip carries the app's model: the framework restores it from the
+draft, runs the app and answers it whole. So what a roundtrip costs grows
+with the model - one editable table of n rows, measured with
+`npm run bench -- --rows <n>` in this repository (Node 22, a shared 4-core
+machine; take the ratios, not the seconds):
+
+| rows | answer, plain / gzip | start / edit one cell, 1.145.0 | with the runtime's accelerations |
+|---:|---|---|---|
+| 500 | 45 / 6 kB | 2.7 s / 4.3 s | 0.9 s / 1.4 s |
+| 1000 | 90 / 11 kB | 6.0 s / 12.1 s | 0.6 s / 1.4 s |
+| 2000 | 181 / 21 kB | 19.6 s / 43.5 s | 1.6 s / 2.9 s |
+| 8000 | 727 / 82 kB | - | 3.3 s / 16.4 s |
+
+- **The runtime's accelerations.** On 1.145.0 the time grows with n², not
+  in abap2UI5's ABAP but in two places of `@abaplint/runtime`: a LOOP ...
+  WHERE over a sorted primary key reads every row, and CP rescans the rest
+  of the draft's XML for every token the parser reads.
+  `@abap2ui5/node-runtime` fixes both
+  with `accelerate( )` from the release after 1.145.0 - the right column,
+  measured before that release - and the plugin calls it when the server
+  starts; the log then says `runtime accelerations active`.
+  `"accelerate": false` switches them off.
+- **Node 24 is recommended.** CAP keeps `cds.context` in an
+  `AsyncLocalStorage`, and on Node 22 that costs the transpiled framework -
+  which awaits at nearly every method call - about as much time again as its
+  own work. Node 24 keeps it in the async context frame, which costs next to
+  nothing. On Node 22.7 and later,
+  `NODE_OPTIONS=--experimental-async-context-frame` does the same: measured
+  back to back, it halved the times in the table, with the accelerations and
+  without (2000 rows, an edit with them: 3.4 s, then 2.0 s).
+- **`NODE_COMPILE_CACHE`.** The runtime is about 800 transpiled modules, and
+  importing them takes 0.7 s on every start. With `NODE_COMPILE_CACHE` set
+  to a directory, Node keeps their compiled code there and the import takes
+  0.5 s - worth it for `cds watch`, which restarts on every save.
+- **Compression.** The page carries the whole UI5 frontend, 358 kB - 83 kB
+  gzipped - and the route gzips it and every roundtrip of 1 kB or more where
+  the browser accepts gzip (see [In production](#in-production)).
 
 ## Documentation
 
