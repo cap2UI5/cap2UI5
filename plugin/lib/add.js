@@ -9,13 +9,14 @@ const cds = require("@sap/cds");
 const fs = require("fs");
 const path = require("path");
 const { config } = require("./config");
+const { moduleFormat } = require("./module-format");
 
 const LOG = cds.log("cap2ui5");
 
-const HELLO = `// Your first cap2UI5 app - cds watch, then open /sap/bc/z2ui5?app_start=HELLO
+const HELLO = (IMPORT) => `// Your first cap2UI5 app - cds watch, then open /sap/bc/z2ui5?app_start=HELLO
 // (cds watch prints the address, and the user to log in as). It is abap2UI5's
 // hello world line by line: the same client, the same view builder.
-const { defineApp, z2ui5_cl_ui5_view_builder } = require("@cap2ui5/cds-plugin");
+${IMPORT}
 
 defineApp("HELLO", class {
   name = "";
@@ -54,6 +55,9 @@ defineApp("HELLO", class {
 });
 `;
 
+const CJS = `const { defineApp, z2ui5_cl_ui5_view_builder } = require("@cap2ui5/cds-plugin");`;
+const ESM = `import { defineApp, z2ui5_cl_ui5_view_builder } from "@cap2ui5/cds-plugin";`;
+
 /**
  * Write the first app into the project's apps directory, unless it has one.
  * @param {string} root the project root
@@ -66,7 +70,9 @@ function scaffold(root, conf) {
   if (apps.length) return null;
   fs.mkdirSync(dir, { recursive: true });
   const file = path.join(dir, "hello.js");
-  fs.writeFileSync(file, HELLO);
+  // the format Node will load it in: `cds init` writes "type": "module", and a
+  // require( ) there fails the start of the very project this ran in
+  fs.writeFileSync(file, HELLO(moduleFormat(dir) === "esm" ? ESM : CJS));
   return path.relative(root, file);
 }
 

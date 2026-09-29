@@ -53,3 +53,40 @@ test("the app it writes runs: renders, and answers its event", async () => {
     s.kill();
   }
 });
+
+// A project from `cds init --nodejs` says "type": "module", and Node loads every
+// .js file in it as an ES module, where require( ) is not defined - so the
+// first app written with require( ) failed the start of exactly the project
+// cds add was run in. The module format follows the package.json nearest to
+// the apps directory, as `npx cap2ui5 abap2js` decides it.
+test("writes an ES module in a project whose package.json says type: module", () => {
+  const root = fs.mkdtempSync(path.join(scratch, "esm-"));
+  fs.writeFileSync(path.join(root, "package.json"), JSON.stringify({ type: "module" }));
+  scaffold(root, { apps: "srv/apps" });
+  const src = fs.readFileSync(path.join(root, "srv", "apps", "hello.js"), "utf8");
+  assert.match(src, /^import \{ defineApp, z2ui5_cl_ui5_view_builder \} from "@cap2ui5\/cds-plugin";$/m);
+  assert.doesNotMatch(src, /require\(/);
+});
+
+test("writes CommonJS in a project whose package.json says nothing", () => {
+  const root = fs.mkdtempSync(path.join(scratch, "cjs-"));
+  fs.writeFileSync(path.join(root, "package.json"), JSON.stringify({ name: "p" }));
+  scaffold(root, { apps: "srv/apps" });
+  const src = fs.readFileSync(path.join(root, "srv", "apps", "hello.js"), "utf8");
+  assert.match(src, /^const \{ defineApp, z2ui5_cl_ui5_view_builder \} = require\("@cap2ui5\/cds-plugin"\);$/m);
+  assert.doesNotMatch(src, /^import /m);
+});
+
+test("the ES module it writes runs as well", async () => {
+  const root = fs.mkdtempSync(path.join(scratch, "esm-served-"));
+  fs.writeFileSync(path.join(root, "package.json"), JSON.stringify({ type: "module" }));
+  scaffold(root, { apps: "apps" });
+  const s = await boot("scaffolded-esm", { env: { CDS_REQUIRES_CAP2UI5_APPS: path.join(root, "apps") } });
+  try {
+    const start = await post(s.url, { app: "HELLO", user: "alice" });
+    assert.equal(start.status, 200, start.text.slice(0, 300));
+    assert.equal(start.json.MODEL.NAME, "World");
+  } finally {
+    s.kill();
+  }
+});
