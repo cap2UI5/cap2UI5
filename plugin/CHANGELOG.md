@@ -8,6 +8,11 @@ starts with 0, a minor release may break the API.
 
 ## [Unreleased]
 
+### Changed
+
+- `package.json` names the author (cap2UI5), as npm and the Best of CAP
+  listing show it.
+
 ## [0.4.0] - 2026-09-30
 
 ### Security
