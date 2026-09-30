@@ -8,6 +8,8 @@ starts with 0, a minor release may break the API.
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-09-30
+
 ### Security
 
 - The documentation writes the command as `npx --no-install cap2ui5 abap2js`,
@@ -43,11 +45,11 @@ starts with 0, a minor release may break the API.
   `cds.requires.cap2ui5.compression: false` switches it off, for a proxy in
   front that compresses anyway.
 - The runtime's accelerations: where the installed `@abap2ui5/node-runtime`
-  has `accelerate( )` - the releases after 1.145.0 - the plugin calls it once
-  after booting the runtime, and the log says "runtime accelerations active".
+  has `accelerate( )` - 1.146.0, which this version pins - the plugin calls
+  it once after booting the runtime, and the log says "runtime accelerations active".
   It replaces the two places in `@abaplint/runtime` that made an app with one
   table of n rows cost time in n² - a LOOP ... WHERE over a sorted primary
-  key, and CP. Measured with the next release's function, 2000 rows: the
+  key, and CP. Measured with 1.146.0's function, 2000 rows: the
   app start from 19.6 s to 1.6 s, an edited cell from 43.5 s to 2.9 s. On
   1.145.0, which has none, nothing changes and nothing is logged above
   debug. `cds.requires.cap2ui5.accelerate: false` leaves them off.
@@ -58,6 +60,7 @@ starts with 0, a minor release may break the API.
 
 ### Changed
 
+- It hosts `@abap2ui5/node-runtime` 1.146.0.
 - A camelCase field - `isAdmin = false` - is refused by `defineApp( )`,
   naming the snake_case it wants (`is_admin`). The runtime reads an attribute
   by its lower-case name, so such a field made every roundtrip of the app
@@ -346,7 +349,8 @@ The first release: abap2UI5 as a CAP plugin.
 - Apps are plain JavaScript classes (`defineApp`).
 - The user exit is available as `defineExit`.
 
-[Unreleased]: https://github.com/cap2UI5/cap2UI5/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/cap2UI5/cap2UI5/compare/v0.4.0...HEAD
+[0.4.0]: https://www.npmjs.com/package/@cap2ui5/cds-plugin/v/0.4.0
 [0.3.1]: https://www.npmjs.com/package/@cap2ui5/cds-plugin/v/0.3.1
 [0.3.0]: https://www.npmjs.com/package/@cap2ui5/cds-plugin/v/0.3.0
 [0.2.0]: https://github.com/cap2UI5/cap2UI5/tree/v0.2.0

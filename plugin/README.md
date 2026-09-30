@@ -107,9 +107,9 @@ Every method of the interface is there under its name - `nav.test.mjs` holds
 the client to the interface, so none is missing and none is invented. The
 constants are read from the runtime, and so is which of them there are:
 abap2UI5's page transitions - `cs_transition`, and `view_display( )`'s
-`transition` and `transition_back` - come with the abap2UI5 releases after
-1.145.0, and on the runtime this version pins (1.145.0) a call that sets one
-is refused, naming the runtime, rather than dropped unseen:
+`transition` and `transition_back` - come with abap2UI5 1.146.0, the runtime
+this version pins; on an older runtime (1.145.0) a call that sets one is
+refused, naming the runtime, rather than dropped unseen:
 
 ```js
 client.view_display({ val: view.stringify(), transition: client.cs_transition.slide });
