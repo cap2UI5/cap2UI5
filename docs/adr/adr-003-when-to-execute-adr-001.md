@@ -3,8 +3,8 @@
 > Moved here on 2026-09-27 from `cap2UI5/builder-abap2UI5-js` @ `d09dd5e`, `docs/adr-003-when-to-execute-adr-001.md`; otherwise unchanged, so its paths refer to that repository.
 
 **Status:** **decided** (2026-09-18) — option 3 accepted, trigger list below is
-binding. The one open item is registry credentials, which no contributor
-without them can close.
+binding. The one open item is the `abap2ui5` placeholder, which needs
+registry credentials no contributor without them has.
 **Date:** 2026-08-30, decided 2026-09-18
 
 ## The problem
@@ -71,8 +71,10 @@ is the rehearsal, and ADR-001's "What is left" remains the checklist.
 
 1. A maintainer creates the npm `cap2ui5` scope and publishes the two
    placeholder stubs (needs registry credentials — same blocker ADR-001
-   records). **Still open**, and the only time-critical item here: the names
-   are free until they are not, and losing `abap2ui5` costs the upstream
+   records). **Half done, 2026-09-30:** the `@cap2ui5` scope carries
+   `@cap2ui5/cds-plugin` and `@cap2ui5/samples`, and `cap2ui5` holds a
+   deprecated placeholder that points at the plugin. **`abap2ui5` is still
+   free** - the one time-critical item left: losing it costs the upstream
    project as well as this one.
 2. ~~The trigger list above is accepted or amended; status flips to decided.~~
    **Done, 2026-09-18.** The four triggers in option 3 are accepted as written.
