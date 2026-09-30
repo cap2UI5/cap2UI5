@@ -12,7 +12,7 @@ read your entities with `cds.ql`.
 > shipped in abap2UI5 1.144.1. The plugin is on npm as `@cap2ui5/cds-plugin`
 > (up to 0.2.0 `cap2ui5`, which is withdrawn), next to `@cap2ui5/samples` -
 > abap2UI5's samples as a package a project adds - and the runtime it pins,
-> `@abap2ui5/node-runtime@1.145.0`, which abap2UI5 builds and publishes
+> `@abap2ui5/node-runtime@1.146.0`, which abap2UI5 builds and publishes
 > itself. In this repository `runtime/` is
 > still a workspace stand-in for that package, which
 > `scripts/assemble-runtime.sh` fills from the published one or from an
@@ -168,7 +168,7 @@ docs/adr/            the decisions, with the measurements that made them (ADR-00
 
 ```bash
 # once per checkout: fill runtime/ from the published runtime the plugin pins
-scripts/assemble-runtime.sh --package 1.145.0
+scripts/assemble-runtime.sh --package 1.146.0
 # ...or, to try an unreleased upstream, from an upstream build:
 #   git clone https://github.com/abap2UI5/abap2UI5 /tmp/ref
 #   (cd /tmp/ref && npm ci && npm run deps && npm run auto_downport && npm run auto_transpile)
