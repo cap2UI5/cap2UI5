@@ -11,15 +11,17 @@
 // The first tests read lib/config.js against stand-ins for cds.env; the last
 // ones boot the example to check what a setting does on the wire.
 import assert from "node:assert/strict";
+import http from "node:http";
 import { createRequire } from "node:module";
 import { test } from "node:test";
-import { boot, post } from "./server.mjs";
+import { boot, post, serve } from "./server.mjs";
 
 const require = createRequire(import.meta.url);
 const { config, DEFAULT_LIMIT } = require("@cap2ui5/cds-plugin/lib/config.js");
 const shipped = require("@cap2ui5/cds-plugin/package.json").cds.requires.cap2ui5;
 
 const env = (over = {}) => ({ requires: { cap2ui5: { ...shipped, ...over.own } }, ...over.env });
+const s = serve();                                 // the example, for what the route reads off a request
 
 test("the defaults: srv/apps, authenticated users, both routes, 10mb, gzip, the runtime's accelerations", () => {
   assert.deepEqual(config(env()), {
@@ -43,6 +45,14 @@ test("roles: one role or a list; null lets anybody in", () => {
   assert.deepEqual(config(env({ own: { roles: "admin" } })).roles, ["admin"]);
   assert.deepEqual(config(env({ own: { roles: ["admin", "support"] } })).roles, ["admin", "support"]);
   assert.deepEqual(config(env({ own: { roles: null } })).roles, []);
+});
+
+test("routes: a route or a list; none at all is refused - it crashed the start from the start page's list of apps", () => {
+  assert.deepEqual(config(env({ own: { routes: "/my/z2ui5" } })).routes, ["/my/z2ui5"]);
+  assert.throws(() => config(env({ own: { routes: [] } })), /cds\.requires\.cap2ui5\.routes names no route/);
+  // the shipped defaults where a stand-in for cds.env leaves the key out - CAP's env never does
+  assert.deepEqual(config({ requires: { cap2ui5: {} } }).routes, shipped.routes);
+  assert.deepEqual(config({ requires: { cap2ui5: { routes: null } } }).routes, shipped.routes);
 });
 
 test("false switches the plugin off", () => {
@@ -114,5 +124,30 @@ test("a 0.1.0 configuration keeps working and says where it belongs now", async 
     assert.match(s.out(), /\[cap2ui5\] - cds\.cap2ui5 is deprecated - move these settings to cds\.requires\.cap2ui5/);
   } finally {
     s.kill();
+  }
+});
+
+test("the body is read whatever its Content-Type says - a POST without the header is a roundtrip, not a start page", async () => {
+  // express.raw( ) with type "*/*" parses a body only where a Content-Type names one; without the header the
+  // body was dropped unread, and the framework, handed an empty roundtrip, answered with its own start page app
+  const body = JSON.stringify({ value: { S_FRONT: { ID: "", APP: "ZCL_JS_HELLO", EVENT: "", T_EVENT_ARG: [],
+    ORIGIN: "http://127.0.0.1", PATHNAME: "/rest/root/z2ui5", SEARCH: "?app_start=ZCL_JS_HELLO", HASH: "", CONFIG: {} },
+    XX: {}, MODEL: {} } });
+  // raw node:http: fetch( ) adds a Content-Type of its own to a string body
+  const answered = (headers) => new Promise((resolve, reject) => {
+    const req = http.request(s.url, { method: "POST", headers: {
+      Authorization: "Basic " + Buffer.from("alice:").toString("base64"), "Content-Length": Buffer.byteLength(body), ...headers,
+    } }, (res) => {
+      let text = "";
+      res.on("data", (c) => (text += c));
+      res.on("end", () => resolve({ status: res.statusCode, text }));
+    });
+    req.on("error", reject);
+    req.end(body);
+  });
+  for (const headers of [{}, { "Content-Type": "text/plain" }, { "Content-Type": "application/json" }]) {
+    const r = await answered(headers);
+    assert.equal(r.status, 200, r.text.slice(0, 200));
+    assert.equal(JSON.parse(r.text).S_FRONT.APP, "ZCL_JS_HELLO", `with ${JSON.stringify(headers)}: ${r.text.slice(0, 200)}`);
   }
 });

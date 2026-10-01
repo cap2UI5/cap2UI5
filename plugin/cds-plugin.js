@@ -151,7 +151,11 @@ cds.on("bootstrap", (app) => {
     ...cds.middlewares.before.filter(Boolean),
     guard,
     ...(conf.compression ? [compression()] : []),
-    express.raw({ type: "*/*", limit: conf.limit }),
+    // type: every request that has a body, whatever its Content-Type says -
+    // and so one without the header, which "*/*" does not match: that body
+    // was dropped unread, and the framework answered the empty roundtrip
+    // with its start page. An ICF handler reads the body it is given.
+    express.raw({ type: () => true, limit: conf.limit }),
     async (req, res) => {
       try {
         const { cl_express_icf_shim } = await ready;

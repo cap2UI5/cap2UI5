@@ -162,7 +162,13 @@ run on a proxy that reads the fields as plain values, which a `#private`
 member does not reach - using one is refused with a message; a plain field
 is private enough, as it is not sent to the browser unless it is bound.
 `t.bool( )` reads as a boolean, `t.char(n)` without its padding and
-`t.float( )` as a number, as the plain `true`, `""` and `0.5` do.
+`t.float( )` as a number, as the plain `true`, `""` and `0.5` do. `t.date( )`
+and `t.time( )` store and read `YYYYMMDD` and `HHMMSS`, as ABAP does, and
+take a `cds.Date`'s `YYYY-MM-DD` and a `cds.Time`'s `HH:MM:SS` as well; the
+model carries both as ISO, as the framework serializes a D and a T. `null` and
+`undefined` clear a field, as `CLEAR` does; a value a field cannot take - a
+text into a number, a string into a table, a JavaScript `Date` into a
+`t.date( )` - is refused with the field's name.
 
 **Types:** the package ships TypeScript declarations (`index.d.ts`). In a
 JavaScript app, annotate the client for completion and checked field names:

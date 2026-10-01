@@ -129,12 +129,14 @@ const isBoxed = (v) =>
 function boxKind(box) {
   if (box instanceof abap.types.Float) return "float";
   if (box instanceof abap.types.Character) return box.getQualifiedName?.() === "ABAP_BOOL" ? "bool" : "char";
+  if (box instanceof abap.types.Date) return "date";
+  if (box instanceof abap.types.Time) return "time";
   return "boxed";
 }
 const isPlainObject = (v) => v !== null && typeof v === "object" && Object.getPrototypeOf(v) === Object.prototype;
 
 // A "shape" says how a value crosses between the app and its box:
-//   { k: "string" | "number" | "float" | "char" | "bool" | "boxed" }   scalar
+//   { k: "string" | "number" | "float" | "char" | "bool" | "date" | "time" | "boxed" }   scalar
 //   { k: "struct", fields: { <appKey>: { key, shape } } }    key = lowercase component
 //   { k: "table",  fields }                                  one row = that structure
 // `make()` builds a fresh box of the shape - what ATTRIBUTES.type() must do on
@@ -239,41 +241,112 @@ function unwrap(box, shape) {
     default: return box.get();
   }
 }
+/** A value a field cannot take, named by the field - `this.count` - or the
+ *  component - `this.rows[2].id` - it was written to. The box threw V8's
+ *  "Cannot read properties of null (reading 'get')" or "value.get is not a
+ *  function" for it, or an ABAP conversion exception with no message at all,
+ *  and none of them said which field. */
+const REFUSED = Symbol("cap2ui5.refused");
+const describe = (v) => {
+  if (typeof v === "string") return JSON.stringify(v.length > 40 ? `${v.slice(0, 40)}…` : v);
+  if (v instanceof Date) return `a Date (${Number.isNaN(v.getTime()) ? "invalid" : v.toISOString()})`;
+  if (Array.isArray(v)) return "an array";
+  if (typeof v === "object") return "an object";
+  return `${typeof v} ${String(v)}`;
+};
+const refuse = (at, value, why, cause) =>
+  Object.assign(new TypeError(`${at} cannot take ${describe(value)} - ${why}`, cause ? { cause } : undefined), { [REFUSED]: true });
+
+/** A date as t.date( ) stores it, YYYYMMDD, from what a CAP project has in
+ *  hand: the YYYYMMDD itself, or the YYYY-MM-DD a cds.Date comes as - also as
+ *  the start of a cds.DateTime or cds.Timestamp. Anything else is refused:
+ *  an ABAP D keeps the first eight characters of whatever it is given, so
+ *  "2026-01-02" became "2026-01-" without a word. A JavaScript Date is an
+ *  instant, and which day that is depends on a time zone the field does not
+ *  have, so it is refused too: format it first. */
+function dateValue(value, at) {
+  const s = String(value);
+  if (/^(\d{8})?$/.test(s)) return s;
+  const iso = /^(\d{4})-(\d{2})-(\d{2})(?:$|T)/.exec(s);
+  if (iso) return `${iso[1]}${iso[2]}${iso[3]}`;
+  throw refuse(at, value, value instanceof Date
+    ? "a Date is an instant, and the day it falls on depends on a time zone a t.date( ) does not have; format it, YYYY-MM-DD"
+    : "a t.date( ) takes YYYYMMDD or YYYY-MM-DD (a cds.Date, or the start of a cds.DateTime)");
+}
+/** A time as t.time( ) stores it, HHMMSS: that, or the HH:MM:SS of a cds.Time. */
+function timeValue(value, at) {
+  const s = String(value);
+  if (/^(\d{6})?$/.test(s)) return s;
+  const iso = /^(\d{2}):(\d{2}):(\d{2})(?:$|\.|Z)/.exec(s);
+  if (iso) return `${iso[1]}${iso[2]}${iso[3]}`;
+  throw refuse(at, value, "a t.time( ) takes HHMMSS or HH:MM:SS (a cds.Time)");
+}
+
 /** plain value -> box, for the app's writes. A box - a t.table( ) or
  *  t.packed( ) declared inside a plain initializer - is copied as ABAP moves
- *  one value into another. */
-function wrap(box, value, shape) {
+ *  one value into another. `null` and `undefined` CLEAR the field: ABAP has
+ *  no null, `{ }` and `[ ]` cleared a structure and a table already, and the
+ *  box took a null as an object to call .get( ) on - a TypeError that named
+ *  no field. `at` is the field, for a refusal: `this.count`. */
+function wrap(box, value, shape, at = "the field") {
+  if (value === null || value === undefined) {
+    box.clear();
+    return;
+  }
   if (isBoxed(value)) {
     box.set(value);
     return;
   }
-  switch (shape.k) {
-    case "bool": box.set(value ? "X" : " "); break;
-    case "struct":
-      // a new value replaces the whole structure, as `s = VALUE #( … )` does:
-      // a component it leaves out is initial afterwards, not what it was
-      box.clear();
-      plainToRow(box, value ?? {}, shape.fields);
-      break;
-    case "table": {
-      box.clear();
-      for (const row of value ?? []) {
-        const r = box.getRowType().clone();
-        plainToRow(r, row, shape.fields);
-        box.append(r);
+  try {
+    switch (shape.k) {
+      case "bool": box.set(value ? "X" : " "); break;
+      case "date": box.set(dateValue(value, at)); break;
+      case "time": box.set(timeValue(value, at)); break;
+      case "struct": {
+        // a new value replaces the whole structure, as `s = VALUE #( … )` does:
+        // a component it leaves out is initial afterwards, not what it was
+        if (typeof value !== "object" || Array.isArray(value)) {
+          throw refuse(at, value, "a structure takes an object with its components");
+        }
+        // built beside the field and moved in whole, so a component that is
+        // refused leaves the field as it was, not half written
+        const s = box.clone();
+        s.clear();
+        plainToRow(s, value, shape.fields, at);
+        box.set(s);
+        break;
       }
-      break;
+      case "table": {
+        // a string is iterable too: "rows" appended four initial rows
+        if (!Array.isArray(value)) throw refuse(at, value, "a table takes an array of rows");
+        const rows = value.map((row, i) => {
+          const r = box.getRowType().clone();
+          if (row !== null && row !== undefined) plainToRow(r, row, shape.fields, `${at}[${i}]`);  // null: an initial row
+          return r;
+        });
+        box.clear();
+        for (const r of rows) box.append(r);
+        break;
+      }
+      default: box.set(value);
     }
-    default: box.set(value);
+  } catch (e) {
+    if (e?.[REFUSED]) throw e;
+    // a transpiled ABAP exception has a class name and no message
+    const abapEx = e?.constructor?.INTERNAL_NAME;
+    throw refuse(at, value, `it is an ABAP ${box.constructor.name} field${abapEx ? ` (${String(abapEx).toLowerCase()})` : ""}`, e);
   }
 }
 const rowToPlain = (row, fields) =>
   Object.fromEntries(Object.entries(fields).map(([k, { key, shape }]) => [k, unwrap(row.get()[key], shape)]));
-function plainToRow(row, value, fields) {
+function plainToRow(row, value, fields, at = "the row") {
+  if (typeof value !== "object" || Array.isArray(value)) {
+    throw refuse(at, value, "a structure takes an object with its components");
+  }
   const comps = row.get();
   for (const [k, { key, shape }] of Object.entries(fields)) {
     if (value[k] === undefined || value[k] === null) continue;      // keep the initial value
-    wrap(comps[key], value[k], shape);
+    wrap(comps[key], value[k], shape, `${at}.${k}`);
   }
 }
 
@@ -350,7 +423,7 @@ function boxOf(value, who) {
     throw new Error(`${who}: ${JSON.stringify(value)} has no ABAP type - null, undefined and an empty array carry none.`);
   }
   const box = shape.make();
-  wrap(box, value, shape);
+  wrap(box, value, shape, who);
   return box;
 }
 
@@ -646,7 +719,7 @@ function defineApp(name, cls, opts = {}) {
     /** The ABAP constructor: the framework runs it when it CREATES the app,
      *  and the draft restore does not (see withInitial). */
     async constructor_() {
-      for (const [f, v] of Object.entries(this.__initial)) wrap(this[f], v, this.__shapes[f]);
+      for (const [f, v] of Object.entries(this.__initial)) wrap(this[f], v, this.__shapes[f], `this.${f}`);
       return this;
     }
 
@@ -682,15 +755,12 @@ function defineApp(name, cls, opts = {}) {
       // asks for client.get( ), since most roundtrips never do.
       const got = await c.z2ui5_if_client$get({ result: 1 });
       const eventName = String(got.get().event.get()).trim();
-      // Event arguments are indexed and the app picks by index, which a
-      // synchronous client cannot resolve on demand - so the first ARG_LIMIT
-      // are fetched up front. The framework's own wires never pass more; an app
-      // that needs a longer list has client.raw.
-      const ARG_LIMIT = 8;
-      const eventArgs = [];
-      for (let i = 1; i <= ARG_LIMIT; i++) {
-        eventArgs.push(String((await c.z2ui5_if_client$get_event_arg({ v: i, result: 1 })).get()));
-      }
+      // The event's arguments, all of them: get( ) carries the table that
+      // get_event_arg( v ) reads row v of, so there is nothing to ask the
+      // framework for one at a time. The first eight used to be fetched up
+      // front, one call each, and a ninth was refused - a limit the ABAP
+      // method does not have.
+      const eventArgs = got.get().t_event_arg.array().map((a) => String(a.get()));
       // The instance on the other side of the last navigation: inside a called
       // app the caller, and back in the caller after nav_app_leave( ) the app
       // that just returned. Unwrapped to plain values when it is a defineApp
@@ -802,16 +872,14 @@ function defineApp(name, cls, opts = {}) {
         },
         check_app_prev_stack: () => prevStack,
         get_event: () => eventName,
-        /** an argument the event carried, 1-based as `v` is; the first 8 */
+        /** an argument the event carried, 1-based as `v` is; past the last
+         *  one it is initial - "" - as the ABAP READ TABLE leaves it */
         get_event_arg(...args) {
           const { v = 1 } = paramsOf("get_event_arg", args);
-          if (!Number.isInteger(v) || v < 1 || v > ARG_LIMIT) {
-            throw new Error(
-              `client.get_event_arg( ${v} ): the first ${ARG_LIMIT} arguments are resolved up front; ` +
-                `for more, read them through client.raw.`,
-            );
+          if (!Number.isInteger(v) || v < 1) {
+            throw new Error(`client.get_event_arg( ${v} ): v is the position of the argument, 1-based`);
           }
-          return eventArgs[v - 1];
+          return eventArgs[v - 1] ?? "";
         },
         /** client->get( ) as plain values under its ABAP component names -
          *  the event and its arguments, the draft ids (s_draft), the browser
@@ -1038,7 +1106,7 @@ function defineApp(name, cls, opts = {}) {
         },
         set(tgt, prop, value) {
           if (isField(prop)) {
-            wrap(tgt[prop], value, shapes[prop]);
+            wrap(tgt[prop], value, shapes[prop], `this.${prop}`);
             return true;
           }
           return Reflect.set(tgt, prop, value);
@@ -1209,7 +1277,7 @@ function defineApp(name, cls, opts = {}) {
               throw new Error(`${who}: ${k} is not a field of ${name} - known: ` +
                 `${Object.keys(own).filter((f) => !isFrameworkField(f)).join(", ")}`);
             }
-            wrap(instance[k], v, own[k]);
+            wrap(instance[k], v, own[k], `${who}: ${k}`);
             continue;
           }
           const box = instance?.[k.toLowerCase()];

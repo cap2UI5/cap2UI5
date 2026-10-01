@@ -98,7 +98,7 @@ export interface Client<App = Record<string, unknown>> extends ClientConstants {
   check_app_prev_stack(): boolean;
   /** The event this roundtrip answers; `""` on a start. */
   get_event(): string;
-  /** An argument the event carried, 1-based; the first 8 are available. */
+  /** An argument the event carried, 1-based; `""` past the last one. */
   get_event_arg(v?: number): string;
   get_event_arg(params: { v?: number }): string;
   /**
@@ -289,9 +289,9 @@ export const t: {
   packed(length: number, decimals: number): number;
   /** NUMC n: digits, kept with their leading zeros. */
   numc(length: number): string;
-  /** A date, D: YYYYMMDD. */
+  /** A date, D: YYYYMMDD - takes a cds.Date's YYYY-MM-DD as well. */
   date(): string;
-  /** A time, T: HHMMSS. */
+  /** A time, T: HHMMSS - takes a cds.Time's HH:MM:SS as well. */
   time(): string;
   /** A structure; a plain object field is one implicitly. */
   struct<S extends object>(fields: S): S;
