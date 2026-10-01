@@ -328,10 +328,19 @@ function readModel(af, file, lib, strict, at = {}) {
         break;
       }
       case "MethodDef":
+        // abaplint files CLASS-METHODS under MethodDef as well - there is no
+        // ClassMethods statement - so a static method was read as an instance
+        // method and translated as one, its `zcl_x=>factory( )` calls refused
+        // elsewhere or not at all. Its first token tells the two apart.
+        if (lc(s.getFirstToken().getStr()) === "class") {
+          fail("CLASS-METHODS is not supported", s.getFirstToken());
+          take();
+          break;
+        }
         methodDef(m, s, take(), section);
         break;
-      case "ClassData": case "ClassMethods": case "ClassDataBegin":
-        fail(`${k === "ClassMethods" ? "CLASS-METHODS" : "CLASS-DATA"} is not supported`, s.getFirstToken());
+      case "ClassData": case "ClassDataBegin":
+        fail("CLASS-DATA is not supported", s.getFirstToken());
         take();
         break;
       case "EndClass": case "EndInterface":
@@ -392,14 +401,19 @@ function typeOf(m, node, around = node) {
   const nameNode = node.findFirstExpression(E.TypeName);
   const tok = node.getFirstToken();
   if (words[0] === "like") return { k: "unknown", name: text(node) };
-  if (kind(node) === "TypeTable") {
-    if (words.includes("range")) return { k: "range" };
-    const row = words.includes("ref") ? { k: "ref", to: lc(text(nameNode)) } : resolveType(m, text(nameNode), tok);
-    return { k: "table", row, sorted: words.includes("sorted") || words.includes("hashed") };
-  }
-  if (words.includes("table")) {
-    const row = words.includes("ref") ? { k: "ref", to: lc(text(nameNode)) } : resolveType(m, text(nameNode), tok);
-    return { k: "table", row, sorted: words.includes("sorted") || words.includes("hashed") };
+  // The row type of a table: a REF TO, a named type - or none. `TYPE ANY
+  // TABLE` and `TYPE STANDARD TABLE` without OF are generic and name no row,
+  // and reading the name that was not there crashed the type reader with a
+  // TypeError ("please report it") on every class with a
+  // `CLASS-METHODS factory IMPORTING t_range TYPE ANY TABLE` - four of
+  // abap2UI5's own popups - instead of refusing the class for the CLASS-METHODS.
+  const rowOf = () => {
+    if (!nameNode) return { k: "unknown", name: text(node) };
+    return words.includes("ref") ? { k: "ref", to: lc(text(nameNode)) } : resolveType(m, text(nameNode), tok);
+  };
+  if (kind(node) === "TypeTable" && words.includes("range")) return { k: "range" };
+  if (kind(node) === "TypeTable" || words.includes("table")) {
+    return { k: "table", row: rowOf(), sorted: words.includes("sorted") || words.includes("hashed") };
   }
   if (words.includes("ref")) return { k: "ref", to: lc(text(nameNode)) };
   if (!nameNode) return { k: "unknown", name: text(node) };

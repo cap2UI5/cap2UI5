@@ -12,6 +12,41 @@ starts with 0, a minor release may break the API.
 
 - `package.json` names the author (cap2UI5), as npm and the Best of CAP
   listing show it.
+- `null` and `undefined` written to a field clear it - `this.name = null` is
+  `CLEAR name` - as `{ }` and `[ ]` already cleared a structure and a table.
+  A scalar field threw V8's "Cannot read properties of null (reading
+  'get')", naming no field.
+- A value a field cannot take is refused with the field's name and what the
+  field takes: `this.count = "many"` says `this.count cannot take "many" -
+  it is an ABAP Integer field (cx_sy_conversion_no_number)`, a component
+  `this.rows[1].id`. A string assigned to a table, which appended one
+  initial row per character, and a text assigned to a structure, which
+  cleared it, are refused too. A refused write leaves the field as it was.
+- `t.date( )` and `t.time( )` take what a CAP project has in hand: the
+  `YYYY-MM-DD` of a `cds.Date` and the start of a `cds.DateTime` or
+  `cds.Timestamp`, the `HH:MM:SS` of a `cds.Time` - besides `YYYYMMDD` and
+  `HHMMSS`, which is what they store and read as. Anything else, a
+  JavaScript `Date` included, is refused naming the formats: an ABAP D kept
+  the first eight characters of `"2026-01-02"` - `"2026-01-"` - without a
+  word.
+- `client.get_event_arg( v )` answers every argument the event carried, and
+  `""` past the last one, as the ABAP method does. The first eight were
+  fetched up front, one framework call each, and a ninth was refused.
+
+### Fixed
+
+- `abap2js`: a class with `CLASS-METHODS` is refused as such. abaplint files
+  `CLASS-METHODS` under the statement `METHODS` has, so a static method was
+  read as an instance method; and a generic parameter type - `TYPE ANY
+  TABLE`, `TYPE STANDARD TABLE` without `OF` - crashed the type reader with
+  "please report it". Four of abap2UI5's seventeen popup classes did.
+- `cds.requires.cap2ui5.routes` set to an empty list is refused at the
+  start, naming the setting; it failed with a TypeError from the start
+  page's list of apps.
+- The roundtrip route reads the body of a POST without a `Content-Type`
+  header. It was dropped unread - `express.raw( )` parses only what a
+  `Content-Type` names - and the framework answered the empty roundtrip
+  with its start page.
 
 ## [0.4.0] - 2026-09-30
 

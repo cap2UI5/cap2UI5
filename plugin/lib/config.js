@@ -20,6 +20,10 @@ const cds = require("@sap/cds");
 
 const LOG = cds.log("cap2ui5");
 
+/** The shipped settings - package.json#cds.requires.cap2ui5, which CAP merges
+ *  into cds.env before a project's own apply. */
+const DEFAULTS = require("../package.json").cds.requires.cap2ui5;
+
 /** A roundtrip carries the app's whole model, so a table of a few thousand
  *  rows is an ordinary request - express's 100kb default would refuse it. */
 const DEFAULT_LIMIT = "10mb";
@@ -42,9 +46,19 @@ function config(env = cds.env) {
     Object.assign(conf, rest);
     if ("requires" in legacy) conf.roles = requires;
   }
+  // A route or a list of them. The shipped defaults are in cds.env already,
+  // as CAP merges them; a stand-in for it in a test may leave them out, and
+  // gets them here. An EMPTY list is a setting that cannot mean anything: it
+  // used to fail the start with a TypeError from the start page's list of
+  // apps, far from the setting.
+  const routes = [].concat(conf.routes ?? DEFAULTS.routes);
+  if (!routes.length) {
+    throw new Error("[cap2ui5] cds.requires.cap2ui5.routes names no route to answer the roundtrip on - leave it " +
+      `out for the defaults (${DEFAULTS.routes.join(", ")}), or name one`);
+  }
   return {
-    apps: conf.apps,
-    routes: [].concat(conf.routes ?? []),
+    apps: conf.apps ?? DEFAULTS.apps,
+    routes,
     // a role or a list of them, any one of which lets the user in - as with
     // @requires; "any" (CAP's pseudo role for everybody) and null let anybody in
     roles: [].concat(conf.roles ?? []),

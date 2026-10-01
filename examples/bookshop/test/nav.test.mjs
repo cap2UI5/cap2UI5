@@ -168,3 +168,28 @@ test("view_display( ) takes upstream's page transition where the runtime has it,
     assert.equal(JSON.stringify(display).includes("transition"), false, "a transition reached the wire");
   }
 });
+
+test("get_event_arg( ) reaches every argument the event carried - the ninth as well as the first", async () => {
+  // the first eight were fetched up front, one framework call each, and a ninth was refused - a limit
+  // z2ui5_if_client=>get_event_arg( ) does not have: the whole list is get( )-t_event_arg, row v of it
+  const args = Array.from({ length: 10 }, (_, i) => `a${i + 1}`);
+  defineApp("ZCL_JS_ARGS", class {
+    got = "";
+    main(client) {
+      if (client.check_on_event("TAKE")) {
+        this.got = [1, 8, 9, 10, 11].map((i) => client.get_event_arg(i)).join("|");
+        this.got += ` ${client.get().t_event_arg.length}`;
+        try { client.get_event_arg(0); } catch (e) { this.got += ` ${e.message}`; }
+      } else if (client.check_on_navigated()) {
+        client.view_display(`<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m">` +
+          `<Button press="${client._event({ val: "TAKE", t_arg: args })}"/><Text text="${client._bind("got")}"/></mvc:View>`);
+      }
+    }
+  });
+  const start = await P({ app: "ZCL_JS_ARGS" });
+  assert.equal(start.status, 200, start.text.slice(0, 300));
+  assert.match(slot(start, "MAIN") ?? "", /press="\.eB\(\['TAKE'\], 'a1', .*'a9', 'a10'\)"/, "the wire carries all ten");
+  const took = await P({ app: "ZCL_JS_ARGS", id: start.json.S_FRONT.ID, event: "TAKE", args });
+  assert.equal(took.status, 200, took.text.slice(0, 300));
+  assert.equal(took.json.MODEL.GOT, "a1|a8|a9|a10| 10 client.get_event_arg( 0 ): v is the position of the argument, 1-based");
+});

@@ -337,6 +337,10 @@ test("what it does not know, it refuses - with file, row and column", () => {
     // a date in a number is its count of days - it was the text "20240101"
     ["    DATA i TYPE i.\n    DATA d TYPE d VALUE '20240101'.\n    i = d.", "",
       /a TYPE date moved into a TYPE int is not supported - ABAP counts days or seconds/, 14],
+    // abaplint files CLASS-METHODS under the statement METHODS has, so it was read as an instance method - and a
+    // generic parameter, TYPE ANY TABLE, names no row type and crashed the type reader ("please report it")
+    ["", "    CLASS-METHODS factory IMPORTING t_range TYPE ANY TABLE OPTIONAL RETURNING VALUE(r) TYPE REF TO zcl_js_refused.",
+      /CLASS-METHODS is not supported/, 6],
   ];
   for (const [body, data, message, row] of cases) {
     const e = refusal(body, data);
@@ -357,6 +361,16 @@ test("a class that is no app is refused as a whole", () => {
   })();
   assert.ok(e instanceof Abap2jsError);
   assert.match(e.message, /does not implement z2ui5_if_app/);
+});
+
+test("a generic parameter type - TYPE ANY TABLE, TYPE STANDARD TABLE without OF - is read, not crashed on", () => {
+  // what the factory( ) of z2ui5_cl_pop_get_range and three more of abap2UI5's popups declare: four of the
+  // seventeen crashed the translator with a TypeError instead of being refused for their CLASS-METHODS
+  assert.equal(refusal("", "    METHODS count IMPORTING t TYPE ANY TABLE RETURNING VALUE(r) TYPE i.\n" +
+    "    METHODS rows IMPORTING t TYPE STANDARD TABLE."), null);
+  // and in the class another class's type is read from - the runtime's z2ui5_cl_ui5_util_context has both
+  const e = refusal("", "    DATA t_filter TYPE z2ui5_cl_ui5_util_context=>ty_t_filter_multi.");
+  assert.ok(e === null || (e instanceof Abap2jsError && !/abap2js failed/.test(e.message)), String(e));
 });
 
 test("cap2ui5 abap2js: writes the module, --check holds it, a refusal is exit 1", () => {

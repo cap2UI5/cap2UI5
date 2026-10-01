@@ -37,7 +37,6 @@ const CLIENT_METHODS = {          // z2ui5_if_client, used by define-app
   GET: ["RESULT"],
   GET_APP_PREV: ["RESULT"],
   GET_APP: ["ID", "RESULT"],
-  GET_EVENT_ARG: ["V", "RESULT"],
   // TRANSITION and TRANSITION_BACK too, from the releases after 1.145.0 - not
   // required here: the client refuses them on a runtime that lacks them
   VIEW_DISPLAY: ["VAL", "SWITCH_DEFAULT_MODEL_PATH", "SWITCH_DEFAULT_MODEL_ANNO_URI"],
@@ -111,8 +110,9 @@ const RUNTIME_GLOBALS = {
   "abap.types.TableFactory.construct": "function",
 };
 // components of z2ui5_if_client=>get( ) read by name - define-app reads the
-// event, the example apps the rest of what client.get( ) hands them
-const GET_FIELDS = ["event", "r_event_data", "s_config", "s_draft"];
+// event and its arguments (t_event_arg: what get_event_arg( v ) reads row v
+// of), the example apps the rest of what client.get( ) hands them
+const GET_FIELDS = ["event", "t_event_arg", "r_event_data", "s_config", "s_draft"];
 const EMITTED_STATICS = ["INTERNAL_TYPE", "INTERNAL_NAME", "IMPLEMENTED_INTERFACES", "ATTRIBUTES", "METHODS"];
 // the runtime PACKAGE, not the transpiler: lib/runtime.js imports accelerate
 // from the entries the package's exports declare - "./accelerate", else
