@@ -35,7 +35,8 @@ describes the screen, and as whom the agent acts.
 2. **The snapshot is the MCP server's code, vendored, not reimplemented.**
    `lib/viewxml.mjs`, `lib/snapshot.mjs` and `lib/appclient.mjs` of
    abap2UI5/mcp-server at the commit `source.json` records (first `9ca6cdf`,
-   then `6bd3cc3` for the selection dialogs and message lists) are copied
+   then `6bd3cc3` for the selection dialogs and message lists, then
+   `ea4e9fa`, the same code squashed onto mcp-server's main) are copied
    unchanged into `plugin/lib/agent/vendor/` by `scripts/vendor-agent.mjs`,
    behind a header naming repository, path and commit; `source.json` records the sha256 of
    each, and `agent-vendor.test.mjs` fails on a hand edit (`npm run

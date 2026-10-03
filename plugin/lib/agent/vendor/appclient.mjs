@@ -1,6 +1,6 @@
 /*
  * VENDORED - do not edit. abap2UI5/mcp-server lib/appclient.mjs
- * at commit 6bd3cc3a79e99f8027fb0b62cc968f4161bf1118,
+ * at commit ea4e9fa8f6eaeca8f9c975a1c4fbd532c44ff76c,
  * copied unchanged by scripts/vendor-agent.mjs (`npm run agent-vendor`).
  * `npm run agent-vendor:check` fails when this copy drifts from that
  * commit, agent-vendor.test.mjs when it no longer matches source.json.
