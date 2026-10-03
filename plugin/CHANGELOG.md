@@ -70,6 +70,13 @@ starts with 0, a minor release may break the API.
 
 ### Fixed
 
+- Roundtrips run one at a time per process. The transpiled framework keeps
+  per-request state in statics (the shim's server entity, `sy`, the open
+  transaction, the handler's class-data) and the CDS draft store really
+  awaits, so a second request could run inside the first and share it. The
+  same queue as the node runtime's `exclusive( )` (abap2UI5/abap2UI5 #2844);
+  a failed roundtrip never blocks the next one.
+
 - `abap2js`: a class with `CLASS-METHODS` is refused as such. abaplint files
   `CLASS-METHODS` under the statement `METHODS` has, so a static method was
   read as an instance method; and a generic parameter type - `TYPE ANY

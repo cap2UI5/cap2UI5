@@ -127,6 +127,8 @@ cds.on("bootstrap", (app) => {
     next(Object.assign(new cds.error(status, err.message), { code: String(status) }));
   };
 
+  let queue = Promise.resolve();                 // roundtrip( ): one at a time, below
+
   // The roundtrip endpoint. cl_express_icf_shim is upstream's own adapter and
   // reads plain express fields (req.method, req.body, headers, url) - so CAP,
   // whose handlers expose the raw express request, can hand it the same objects
@@ -189,7 +191,22 @@ cds.on("bootstrap", (app) => {
   }
 
   // One roundtrip: upstream's express adapter with the framework's ICF handler.
-  async function roundtrip(req, res) {
+  //
+  // One at a time per process. The transpiled framework keeps per-request
+  // state where ABAP keeps it per work process - the shim's static server
+  // entity, sy, the open transaction, the handler's class-data - and the
+  // draft store here really awaits (cds.run), so without the queue a second
+  // request runs inside the first and both share that state. The queue is the
+  // node runtime's own fix (host.mjs exclusive( ), abap2UI5/abap2UI5 #2844)
+  // for hosts that call the shim themselves; a failed roundtrip never blocks
+  // the next one.
+  function roundtrip(req, res) {
+    const run = queue.then(() => roundtripNow(req, res));
+    queue = run.catch(() => {});
+    return run;
+  }
+
+  async function roundtripNow(req, res) {
     try {
       const { cl_express_icf_shim } = await ready;
       if (!req.body || !Buffer.isBuffer(req.body)) req.body = Buffer.alloc(0);
