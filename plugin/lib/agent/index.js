@@ -201,8 +201,12 @@ function createAgent({ agent, roundtrip }) {
 
   /** One roundtrip, in process: the UI route's own handler, for the user of
    *  the MCP request (cds.context is that request's). A restore puts the
-   *  draft into the hash, as the handover link does in the browser. */
-  async function transport({ body, headers }) {
+   *  draft into the hash, as the handover link does in the browser. The
+   *  client sends a HEAD only to fetch a CSRF token after a 403 "Required",
+   *  which the in-process handler never answers - so a HEAD gets an empty
+   *  200 and never reaches the handler. */
+  async function transport({ method = "POST", body, headers }) {
+    if (method === "HEAD") return { status: 200, headers: {}, body: "" };
     const { hash } = call.getStore() ?? {};
     let text = body;
     if (hash) {

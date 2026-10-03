@@ -39,6 +39,12 @@ starts with 0, a minor release may break the API.
 
 ### Changed
 
+- The agent endpoint vendors abap2UI5/mcp-server a4d9f07: the agent client
+  follows the protocol's frontend rules (PROTOCOL check, sap-contextid, one
+  roundtrip at a time per session, popups closed when the app changes, the
+  error body verbatim). The in-process transport answers the client's HEAD
+  token fetch with an empty 200 - the handler never asks for a CSRF token.
+
 - `package.json` names the author (cap2UI5), as npm and the Best of CAP
   listing show it.
 - `null` and `undefined` written to a field clear it - `this.name = null` is
