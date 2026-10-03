@@ -24,6 +24,11 @@ const { compression } = require("./lib/compression");
 // log search as everything else instead of as loose text on stdout.
 const LOG = cds.log("cap2ui5");
 
+// A request-derived reference (the correlation id) made fit for an error
+// body: letters, digits and . _ : - only, at most 128 of them, "-" when
+// nothing is left.
+const safeRef = (id) => String(id ?? "").replace(/[^A-Za-z0-9._:-]/g, "").slice(0, 128) || "-";
+
 // `cds add cap2ui5`: the first app. cds.add exists only while cds add runs,
 // and the optional call leaves the require( ) unevaluated otherwise.
 cds.add?.register?.("cap2ui5", require("./lib/add").facet());
@@ -193,9 +198,20 @@ cds.on("bootstrap", (app) => {
       // The detail goes to the log, not to the caller: CDS and driver messages
       // carry entity names, SQL fragments and deployment paths, none of which
       // a roundtrip client needs and all of which are free reconnaissance.
-      const ref = cds.context?.id ?? "-";
+      //
+      // The reference is the correlation id, and CAP takes that from the
+      // request's x-correlation-id (or x-request-id ...) header when there is
+      // one - so it is request data nothing has validated, and a backend must
+      // not reflect that into an error body (abap2UI5/protocol, open question
+      // 3). Stripped to what an id is made of, as the framework strips a
+      // class name: a UUID or any other well-formed id passes unchanged.
+      const ref = safeRef(cds.context?.id);
       LOG.error(`roundtrip failed (${ref}):`, e);
-      if (!res.headersSent) res.status(500).type("text/plain").send(`roundtrip failed (${ref})`);
+      // nosniff as the framework's own error bodies carry it: text, never a
+      // page a browser might guess its way into rendering
+      if (!res.headersSent) {
+        res.status(500).type("text/plain").set("X-Content-Type-Options", "nosniff").send(`roundtrip failed (${ref})`);
+      }
     }
   }
 });

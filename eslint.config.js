@@ -4,7 +4,7 @@
 // `abap`. Nothing else is switched on; the tests are the real gate.
 module.exports = [
   {
-    ignores: ["node_modules/**", "runtime/**", ".upstream/**"],
+    ignores: ["node_modules/**", "runtime/**", ".upstream/**", ".protocol/**"],
   },
   {
     files: ["**/*.{js,mjs,cjs}"],

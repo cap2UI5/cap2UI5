@@ -76,6 +76,14 @@ starts with 0, a minor release may break the API.
   header. It was dropped unread - `express.raw( )` parses only what a
   `Content-Type` names - and the framework answered the empty roundtrip
   with its start page.
+- The 500 the plugin answers when an app throws no longer reflects request
+  data: its reference is the correlation id, which CAP takes from the
+  request's `x-correlation-id` header, and it is now stripped to letters,
+  digits and `. _ : -` (at most 128) - a UUID passes unchanged. The body
+  also carries `X-Content-Type-Options: nosniff`, as the framework's error
+  bodies do. abap2UI5/protocol, open question 3: a backend must not reflect
+  request data it did not validate into an error body. The framework's own
+  error bodies are fixed in abap2UI5 core and arrive with the runtime.
 
 ## [0.4.0] - 2026-09-30
 
