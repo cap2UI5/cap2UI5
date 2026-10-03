@@ -87,13 +87,13 @@ export async function boot(label, { port = freePort(), env = {}, root = EXAMPLE 
 }
 
 /** One abap2UI5 roundtrip. No id = app start; with id = the follow-up event. */
-export async function post(url, { app, id = "", event = "", model = {}, user, args = [] } = {}) {
+export async function post(url, { app, id = "", event = "", model = {}, user, args = [], headers: extra = {} } = {}) {
   const body = { value: { S_FRONT: {
     ID: id, APP: app, EVENT: event, T_EVENT_ARG: args,
     ORIGIN: "http://127.0.0.1", PATHNAME: "/rest/root/z2ui5",
     SEARCH: id ? "" : `?app_start=${app}`, HASH: "", CONFIG: {} },
     XX: {}, MODEL: model } };
-  const headers = { "Content-Type": "application/json" };
+  const headers = { "Content-Type": "application/json", ...extra };
   if (user) headers.Authorization = "Basic " + Buffer.from(`${user}:`).toString("base64");   // mocked users, no password
   const r = await fetch(url, { method: "POST", headers, body: JSON.stringify(body) });
   const text = await r.text();
