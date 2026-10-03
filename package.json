@@ -14,6 +14,7 @@
     "cold-test": "npm --workspace examples/bookshop run cold-test",
     "bench": "npm --workspace examples/bookshop run bench --",
     "consumer-test": "node scripts/consumer-test.mjs",
+    "conformance": "node scripts/conformance.mjs",
     "lint": "eslint .",
     "agent-vendor": "node scripts/vendor-agent.mjs",
     "agent-vendor:check": "node scripts/vendor-agent.mjs --check"
