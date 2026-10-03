@@ -266,12 +266,31 @@ export type AppConstructor = new (...args: unknown[]) => object;
  * declare what an initial value cannot tell with `t`. A field is part of the
  * MODEL - sent to the browser and written back by it - once `main( )` binds
  * it, as in ABAP. Inside `main( )` the fields read and write as plain values.
+ * `options.agent` opts the app in for AI agents (see AgentOption).
  */
 export function defineApp<App extends object>(
   name: string,
   app: new () => App & { main(client: Client<App>): void | Promise<void> },
-  options?: { interfaces?: string[] },
+  options?: { interfaces?: string[]; agent?: AgentOption },
 ): AppConstructor;
+
+/** How an agent may treat an event: fire it, leave it to a human (the agent
+ *  is refused with a link that hands the screen over), or never. */
+export type AgentPolicy = "allowed" | "confirm" | "forbidden";
+
+/**
+ * defineApp( )'s `agent` option: whether AI agents may operate the app
+ * through the plugin's MCP endpoint (cds.requires.cap2ui5.agent) - `true` or
+ * an object opts it in, `false` keeps it out whatever the project's settings
+ * say, and leaving it out leaves the decision to the settings' `apps`.
+ * `events` maps an event name, or a pattern with `*`, to its policy; an event
+ * it does not name is allowed, and the project's settings can only make one
+ * stricter. `description` is what app_list shows.
+ */
+export type AgentOption = boolean | {
+  events?: Record<string, AgentPolicy>;
+  description?: string;
+};
 
 /**
  * Field declarations for what an initial value cannot say. Each returns an

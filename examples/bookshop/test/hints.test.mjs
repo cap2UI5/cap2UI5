@@ -74,6 +74,14 @@ test("without JavaScript apps the hint says where they go", () => {
   assert.match(line, /http:\/\/localhost:4004\/sap\/bc\/z2ui5/);
 });
 
+test("the agent endpoint, when it is switched on, gets a line with its address", () => {
+  const lines = startupHints({ apps: ["ZCL_A"], url: "http://localhost:4004", route: "/sap/bc/z2ui5", appsDir: "srv/apps",
+    agent: "/rest/root/z2ui5/mcp" });
+  assert.ok(lines.includes("agent endpoint (MCP): http://localhost:4004/rest/root/z2ui5/mcp"), lines.join("\n"));
+  assert.ok(!startupHints({ apps: ["ZCL_A"], url: "http://localhost:4004", route: "/x", appsDir: "srv/apps" })
+    .some((l) => l.includes("agent")), "no line when it is off");
+});
+
 test("a trailing slash on the server URL does not double", () => {
   assert.match(startupHints({ ...base, url: "http://localhost:4004/" })[0], /4004\/sap\/bc\/z2ui5\?/);
 });

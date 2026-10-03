@@ -77,6 +77,7 @@ cds.on("bootstrap", (app) => {
         appsDir: conf.apps,
         auth: cds.env.requires?.auth,
         roles: conf.roles,
+        agent: conf.agent?.path,
         production: cds.env.profiles?.includes("production"),
       });
       for (const line of lines) LOG.info(line);
@@ -156,21 +157,44 @@ cds.on("bootstrap", (app) => {
     // was dropped unread, and the framework answered the empty roundtrip
     // with its start page. An ICF handler reads the body it is given.
     express.raw({ type: () => true, limit: conf.limit }),
-    async (req, res) => {
-      try {
-        const { cl_express_icf_shim } = await ready;
-        if (!req.body || !Buffer.isBuffer(req.body)) req.body = Buffer.alloc(0);
-        await cl_express_icf_shim.run({ req, res, class: "ZCL_SICF" });
-      } catch (e) {
-        // The detail goes to the log, not to the caller: CDS and driver messages
-        // carry entity names, SQL fragments and deployment paths, none of which
-        // a roundtrip client needs and all of which are free reconnaissance.
-        const ref = cds.context?.id ?? "-";
-        LOG.error(`roundtrip failed (${ref}):`, e);
-        if (!res.headersSent) res.status(500).type("text/plain").send(`roundtrip failed (${ref})`);
-      }
-    },
+    roundtrip,
     normalize,
     cds.middlewares.errors(),
   );
+
+  // The agent endpoint (lib/agent/) - only where a project switches it on
+  // (cds.requires.cap2ui5.agent). It is mounted the way the roundtrip route
+  // is: CAP's middlewares first, so cds.context.user is the caller; the same
+  // guard and so the same roles; CAP's error middleware last. A tool call
+  // runs `roundtrip` above in process, inside the MCP request - the agent
+  // acts as the user who called, with that user's drafts, and never as
+  // anybody else.
+  if (conf.agent) {
+    const { endpoint } = require("./lib/agent/mcp");
+    app.all(
+      conf.agent.path,
+      ...cds.middlewares.before.filter(Boolean),
+      guard,
+      ...endpoint({ agent: conf.agent, limit: conf.limit, version: require("./package.json").version, ready, roundtrip }),
+      normalize,
+      cds.middlewares.errors(),
+    );
+    LOG.info(`agent endpoint (MCP) at ${conf.agent.path}`);
+  }
+
+  // One roundtrip: upstream's express adapter with the framework's ICF handler.
+  async function roundtrip(req, res) {
+    try {
+      const { cl_express_icf_shim } = await ready;
+      if (!req.body || !Buffer.isBuffer(req.body)) req.body = Buffer.alloc(0);
+      await cl_express_icf_shim.run({ req, res, class: "ZCL_SICF" });
+    } catch (e) {
+      // The detail goes to the log, not to the caller: CDS and driver messages
+      // carry entity names, SQL fragments and deployment paths, none of which
+      // a roundtrip client needs and all of which are free reconnaissance.
+      const ref = cds.context?.id ?? "-";
+      LOG.error(`roundtrip failed (${ref}):`, e);
+      if (!res.headersSent) res.status(500).type("text/plain").send(`roundtrip failed (${ref})`);
+    }
+  }
 });

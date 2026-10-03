@@ -150,11 +150,25 @@ array, a cycle) is reported by its path and left out; the app runs without it. A
   `false` leaves it to a proxy in front
 - `accelerate` (default `true`): the runtime's `accelerate( )`, where it has
   one; `false` runs the runtime's own code
+- `agent` (default off): the MCP endpoint for AI agents, below
 
 `false` switches the plugin off. The route runs behind CAP's own middlewares
 and answers like a CAP service: 401 with the login challenge of
 `cds.requires.auth`'s strategy, 403 for a user without the role, 413 for a
 body over the limit.
+
+**Agents.** With `cds.requires.cap2ui5.agent` switched on, AI agents operate
+the apps over MCP (`/rest/root/z2ui5/mcp`): `app_list`, `app_start`,
+`app_describe`, `app_act` - the tools and the agent snapshot of abap2UI5's
+MCP server, whose code the plugin carries vendored. An app opts in with
+`defineApp( name, cls, { agent: { events: { SAVE: "confirm", DELETE: "forbidden" } } })`,
+a transpiled ABAP app through the setting's `apps`; agents never fire a
+`confirm` or `forbidden` event, and a `confirm` refusal answers a link that
+opens the screen for a human. The agent is always the CAP user who calls -
+same roles as the UI, the user's own drafts - and every call is logged in
+`cap2ui5.AgentLog`. [plugin/README.md](plugin/README.md#agents-the-mcp-endpoint)
+has the security model; [ADR-009](docs/adr/adr-009-agent-endpoint.md) the
+decisions.
 
 ## This repository
 

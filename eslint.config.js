@@ -24,12 +24,19 @@ module.exports = [
         setTimeout: "readonly",
         Proxy: "readonly",
         Reflect: "readonly",
+        AbortSignal: "readonly",
       },
     },
     rules: {
       "no-undef": "error",
       "no-unused-vars": ["error", { args: "none" }],
     },
+  },
+  {
+    // byte for byte upstream's (scripts/vendor-agent.mjs): its eslint-disable
+    // comments are for upstream's rules, which are not switched on here
+    files: ["plugin/lib/agent/vendor/**"],
+    linterOptions: { reportUnusedDisableDirectives: "off" },
   },
   {
     files: ["**/*.js", "**/*.cjs"],

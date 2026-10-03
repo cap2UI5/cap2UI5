@@ -138,6 +138,20 @@ before(async () => {
 
 const get = (path) => path.split(".").reduce((o, k) => o?.[k], globalThis);
 
+test("the agent endpoint tells apps from other classes by the transpiler's statics", () => {
+  // lib/agent/policy.js appClass( ): a class registered under its name in
+  // abap.Classes, Z2UI5_IF_APP in IMPLEMENTED_INTERFACES - its own or, up
+  // the STATIC_SUPER chain, a superclass's; reachableApps( ) skips the
+  // CLAS-<pool>-<name> keys local classes are registered under
+  assert.ok(Ref.IMPLEMENTED_INTERFACES.includes("Z2UI5_IF_APP"));
+  assert.ok(App.IMPLEMENTED_INTERFACES.includes("Z2UI5_IF_APP"));
+  assert.ok(!(abap.Classes["Z2UI5_CL_UTIL"].IMPLEMENTED_INTERFACES ?? []).includes("Z2UI5_IF_APP"));
+  const sub = Object.values(abap.Classes).find((c) => typeof c === "function" && typeof c.STATIC_SUPER === "function");
+  assert.ok(sub, "no transpiled class names its superclass in STATIC_SUPER");
+  assert.ok(Object.keys(abap.Classes).some((k) => k.startsWith("CLAS-") && k.split("-").length === 3),
+    "local classes are no longer registered as CLAS-<pool>-<name>");
+});
+
 test("the runtime globals the plugin touches exist", () => {
   for (const [path, type] of Object.entries(RUNTIME_GLOBALS)) {
     assert.equal(typeof get(path), type, path);

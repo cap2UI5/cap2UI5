@@ -31,6 +31,7 @@ test("the defaults: srv/apps, authenticated users, both routes, 10mb, gzip, the 
     limit: DEFAULT_LIMIT,
     compression: true,
     accelerate: true,
+    agent: null,
   });
   assert.equal(DEFAULT_LIMIT, "10mb");
 });
@@ -53,6 +54,29 @@ test("routes: a route or a list; none at all is refused - it crashed the start f
   // the shipped defaults where a stand-in for cds.env leaves the key out - CAP's env never does
   assert.deepEqual(config({ requires: { cap2ui5: {} } }).routes, shipped.routes);
   assert.deepEqual(config({ requires: { cap2ui5: { routes: null } } }).routes, shipped.routes);
+});
+
+test("agent: off unless switched on; true is the default path under /rest/root/z2ui5", () => {
+  for (const off of [undefined, null, false]) assert.equal(config(env({ own: { agent: off } })).agent, null);
+  const on = config(env({ own: { agent: true } })).agent;
+  assert.equal(on.path, "/rest/root/z2ui5/mcp");
+  assert.equal(on.route, "/rest/root/z2ui5", "the UI route the endpoint stands for: the one its path lies under");
+  assert.deepEqual([on.apps, on.confirm, on.forbidden], [[], [], []]);
+  const own = config(env({ own: { agent: { path: "/agents", apps: "ZCL_*", confirm: ["ZCL_A:SAVE"], forbidden: "DELETE*" } } })).agent;
+  assert.equal(own.route, "/sap/bc/z2ui5", "a path under no route stands for the first");
+  assert.deepEqual(own.apps.map((a) => a.text), ["ZCL_*"]);
+  assert.deepEqual(own.confirm.map((r) => r.text), ["ZCL_A:SAVE"]);
+  assert.deepEqual(own.forbidden.map((r) => r.text), ["DELETE*"]);
+});
+
+test("agent: a setting it does not know, a malformed rule or a route's path is refused, not ignored", () => {
+  assert.throws(() => config(env({ own: { agent: { forbiden: ["DELETE"] } } })), /forbiden - not a setting of the agent endpoint/);
+  assert.throws(() => config(env({ own: { agent: "yes" } })), /is true, false or \{ path, apps, confirm, forbidden \}/);
+  assert.throws(() => config(env({ own: { agent: { forbidden: [":DELETE"] } } })), /names no app/);
+  assert.throws(() => config(env({ own: { agent: { confirm: ["ZCL_A:"] } } })), /names no event/);
+  assert.throws(() => config(env({ own: { agent: { apps: [42] } } })), /agent\.apps takes names/);
+  assert.throws(() => config(env({ own: { agent: { path: "/sap/bc/z2ui5" } } })), /is a roundtrip route already/);
+  assert.throws(() => config(env({ own: { agent: { path: "mcp" } } })), /a path starting with \//);
 });
 
 test("false switches the plugin off", () => {

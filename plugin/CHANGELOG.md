@@ -8,6 +8,27 @@ starts with 0, a minor release may break the API.
 
 ## [Unreleased]
 
+### Added
+
+- An MCP endpoint for AI agents, off unless `cds.requires.cap2ui5.agent` is
+  `true` or `{ path, apps, confirm, forbidden }`: JSON-RPC over Streamable
+  HTTP at `/rest/root/z2ui5/mcp`, with the tools `app_list`, `app_start`,
+  `app_describe` and `app_act` answering abap2UI5's agent snapshot v1 - the
+  MCP server's own code, vendored unchanged in `lib/agent/vendor/`. An app
+  opts in with defineApp( )'s new option `agent` (`true`, `false`, or
+  `{ events: { SAVE: "confirm", "DELETE*": "forbidden" }, description }`), a
+  transpiled ABAP app through `agent.apps`. Agents never fire a `confirm` or
+  `forbidden` event; a `confirm` refusal answers a link that opens the screen
+  for a human, restored from the draft for the same user. A tool call runs
+  the roundtrip in process as the CAP user who called, behind the same roles
+  as the route; anonymous callers are refused even where `roles` lets them
+  into the UI. A session the server lost in a restart is restored from its
+  draft.
+- `cap2ui5.AgentLog`: one row per agent tool call - user, tool, app, session,
+  event, outcome - but never the values an agent entered. Like
+  `cap2ui5.Drafts` it is part of the model, so the next `cds deploy` creates
+  the table, whether the endpoint is on or not.
+
 ### Changed
 
 - `package.json` names the author (cap2UI5), as npm and the Best of CAP

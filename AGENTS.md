@@ -15,6 +15,7 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
 | path | hand-written? |
 |---|---|
 | `plugin/` | yes — the npm package `@cap2ui5/cds-plugin` (`cap2ui5` up to 0.2.0) |
+| `plugin/lib/agent/vendor/` | **no — abap2UI5/mcp-server's `viewxml.mjs`, `snapshot.mjs`, `appclient.mjs`, vendored unchanged at the commit `source.json` records by `scripts/vendor-agent.mjs` (`npm run agent-vendor`), never edited.** `agent-vendor.test.mjs` fails on a hand edit; a fix goes upstream, then re-vendor. ADR-009. |
 | `examples/bookshop/` | yes — a CAP project using it; **the test suite lives here** because the tests need a project. `srv/catalog-service.cds` is deliberately an ordinary CAP service that knows nothing about cap2UI5: it is what `coexistence.test.mjs` drives to prove the plugin is a guest in the project and not its host. |
 | `runtime/package.json`, `runtime/README.md` | yes — the stand-in's manifest |
 | `runtime/output/`, `runtime/setup/`, `runtime/downport/` | **no — upstream's transpiled output and the ABAP it came from, never edited, never committed.** `scripts/assemble-runtime.sh` fills them from the published package (`--package X.Y.Z`) or from an upstream build. |
@@ -107,6 +108,13 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
   format (static `ATTRIBUTES`/`METHODS` maps, `constructor_( )`, `~` → `$`),
   which is not a published contract; that test is where a transpiler bump
   must fail.
+- **The agent endpoint acts as the CAP user who calls, never as anybody
+  else.** A tool call runs the route's own roundtrip handler in process,
+  inside the MCP request, so `cds.context` - and with it the drafts' owner -
+  is the caller's; there is no technical user and no HTTP hop. Every
+  behaviour of it - opt-in, `confirm`/`forbidden`, handover, owner scoping,
+  the audit row, the restore after a restart - has its test in the
+  `agent*.test.mjs` files. ADR-009 records why it looks the way it does.
 - `npm test` stays browserless. Browser tests are `*.e2e.mjs`, run by
   `npm run test:browser`.
 - **A test about what the route answers serves the example in-process with

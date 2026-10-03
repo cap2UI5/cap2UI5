@@ -11,12 +11,14 @@
 //     "routes": ["/sap/bc/z2ui5", "/rest/root/z2ui5"],
 //     "body_parser": { "limit": "10mb" },            optional, see below
 //     "compression": false,                          gzip off - lib/compression.js
-//     "accelerate": false                            the runtime's accelerate( ) off
+//     "accelerate": false,                           the runtime's accelerate( ) off
+//     "agent": true                                  the MCP endpoint - lib/agent/, off by default
 //   } } }
 //
 // 0.1.0 read a top-level cds.cap2ui5 with `requires` for the roles. That is
 // still read, over the defaults, with a warning naming the new place.
 const cds = require("@sap/cds");
+const { agentConfig } = require("./agent/policy");
 
 const LOG = cds.log("cap2ui5");
 
@@ -73,6 +75,9 @@ function config(env = cds.env) {
     // runs its own code, for a project that meets a fast path's limit and
     // for measuring what the accelerations save
     accelerate: conf.accelerate !== false,
+    // the MCP endpoint agents operate apps through - null, the default, is
+    // no route at all; see lib/agent/policy.js for what the object holds
+    agent: agentConfig(conf.agent, routes),
   };
 }
 

@@ -89,6 +89,7 @@
 const crypto = require("node:crypto");
 const cds = require("@sap/cds");
 const { renderOf } = require("./view-builder");
+const { AGENT, appOption } = require("./agent/policy");
 
 const LOG = cds.log("cap2ui5");
 
@@ -676,6 +677,9 @@ function defineApp(name, cls, opts = {}) {
       `framework, one of its apps, or the plugin's own - and replacing it would change what every roundtrip ` +
       `runs. Choose another name.`);
   }
+  // whether, and how, agents may operate the app - lib/agent/policy.js;
+  // checked before anything is registered, so a wrong option registers nothing
+  const agent = appOption(INTERNAL, opts.agent);
   const userMain = cls.prototype.main ?? cls.prototype.z2ui5_if_app$main;
   if (typeof userMain !== "function") {
     throw new Error(`defineApp(${INTERNAL}): the class needs a main( client ) method`);
@@ -1363,6 +1367,7 @@ function defineApp(name, cls, opts = {}) {
   App.INTERNAL_TYPE = "CLAS";
   App.INTERNAL_NAME = INTERNAL;
   App[DEFINED] = true;
+  if (agent !== undefined) App[AGENT] = agent;
   App.IMPLEMENTED_INTERFACES = opts.interfaces ?? ["Z2UI5_IF_APP", "IF_SERIALIZABLE_OBJECT"];
   App.METHODS = {};
   App.ATTRIBUTES = {};
