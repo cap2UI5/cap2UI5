@@ -23,7 +23,9 @@ starts with 0, a minor release may break the API.
   the roundtrip in process as the CAP user who called, behind the same roles
   as the route; anonymous callers are refused even where `roles` lets them
   into the UI. A session the server lost in a restart is restored from its
-  draft.
+  draft. A `SelectDialog` / `TableSelectDialog` is a table of the snapshot
+  and `app_act` with `row` on its `confirm` picks that row as a click does;
+  the items of a `MessagePopover` / `MessageView` are messages.
 - `cap2ui5.AgentLog`: one row per agent tool call - user, tool, app, session,
   event, outcome - but never the values an agent entered. Like
   `cap2ui5.Drafts` it is part of the model, so the next `cds deploy` creates
