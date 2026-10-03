@@ -156,6 +156,18 @@ and answers like a CAP service: 401 with the login challenge of
 `cds.requires.auth`'s strategy, 403 for a user without the role, 413 for a
 body over the limit.
 
+## Building with AI
+
+The app API is abap2UI5's, so abap2UI5's agent setup serves a cap2UI5 app
+too: the [MCP server](https://github.com/abap2UI5/mcp-server)'s
+`api_reference` and `examples` answer with the `z2ui5_if_client` method and
+the sample to start from, and an app written in ABAP - validated, deployed and
+booted headless by the server, without an SAP system - is one
+`cap2ui5 abap2js` away from `srv/apps/`. The setup for every client, the
+Claude Code plugin among them, is on the
+[AI page](https://abap2ui5.github.io/docs/get_started/ai.html) of the abap2UI5
+documentation.
+
 ## This repository
 
 ```
