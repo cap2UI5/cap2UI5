@@ -70,6 +70,18 @@ starts with 0, a minor release may break the API.
 
 ### Fixed
 
+- A transpiled ABAP app that calls `set_session_stateful( )` no longer answers
+  other users. The framework keeps a stateful app's handler in class-data - one
+  per roll area on an SAP system, one per process here - and took it for every
+  later request of every user; the ICF cookie transform failed first with a
+  500 that left it in place all the same. Stateful sessions are kept per CAP
+  user now (`lib/sessions.js`, the layer of @abap2ui5/node-runtime's
+  `withSession( )`): a session id the plugin issues travels as `sap-contextid`
+  (a header when the request asks for it, else an HttpOnly cookie), only that
+  user's requests naming it get the session, and `set_session_stateful(
+  abap_false )`, the terminate ping and 30 idle minutes end it. Sessions live
+  in the process. JS apps still cannot go stateful.
+
 - Roundtrips run one at a time per process. The transpiled framework keeps
   per-request state in statics (the shim's server entity, `sy`, the open
   transaction, the handler's class-data) and the CDS draft store really

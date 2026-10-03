@@ -17,6 +17,7 @@ const { definedApps } = require("./lib/define-app");
 const { startupHints } = require("./lib/hints");
 const { config } = require("./lib/config");
 const { compression } = require("./lib/compression");
+const { withSession } = require("./lib/sessions");
 
 // One logger, as every CAP module and plugin has: plain `[cap2ui5] - ...` lines
 // in development, and in production the JSON records CAP writes for itself,
@@ -199,9 +200,13 @@ cds.on("bootstrap", (app) => {
   // request runs inside the first and both share that state. The queue is the
   // node runtime's own fix (host.mjs exclusive( ), abap2UI5/abap2UI5 #2844)
   // for hosts that call the shim themselves; a failed roundtrip never blocks
-  // the next one.
+  // the next one. Inside it, each roundtrip runs in its stateful session -
+  // lib/sessions.js, per CAP user.
   function roundtrip(req, res) {
-    const run = queue.then(() => roundtripNow(req, res));
+    // the stateful session belongs to the user who calls (lib/sessions.js)
+    const user = cds.context?.user;
+    const owner = user?.id ? `${cds.context?.tenant ?? ""}\u0000${user.id}` : "";
+    const run = queue.then(() => withSession(req, res, () => roundtripNow(req, res), { owner }));
     queue = run.catch(() => {});
     return run;
   }

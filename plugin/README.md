@@ -134,6 +134,8 @@ What is JavaScript's own, and why:
   what an ABAP app does between `NEW` and `nav_app_call( )`.
 - `client.set_session_stateful( )` is not supported and throws; the
   interface's obsolete `*_model_update( )` do nothing, as they do in ABAP.
+  (A transpiled ABAP app can go stateful: its session is kept per CAP user,
+  in the process - a restart or a second instance loses it.)
   `client.raw` is the transpiled `z2ui5_if_client` itself, asynchronous.
 
 **`check_on_navigated( )`, not `check_on_init( )`, is the render branch.**
