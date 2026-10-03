@@ -169,7 +169,8 @@ ENDCLASS.
   const surface = probe(`console.log(JSON.stringify(Object.keys(require("@cap2ui5/cds-plugin"))))`, proj);
   const exported = surface.ok ? JSON.parse(surface.out) : [];
   check("require(\"@cap2ui5/cds-plugin\") exports the documented surface",
-    ["defineApp", "defineExit", "t", "z2ui5_cl_ui5_view_builder", "z2ui5_if_client", "ViewBuilder", "abap2js"]
+    ["defineApp", "defineExit", "t", "z2ui5_cl_ui5_view_builder", "z2ui5_if_client", "ViewBuilder", "abap2js",
+      "purgeAgentLog"]
       .every((k) => exported.includes(k)),
     surface.ok ? exported.join(", ") : surface.why);
 
@@ -200,6 +201,20 @@ ENDCLASS.
   `, proj);
   check("cds deploy creates the drafts table",
     deploy.ok && fs.existsSync(path.join(proj, "db.sqlite")), deploy.ok ? "" : deploy.why);
+
+  // the scheduled-job form of the agent log's retention, against the table
+  // the deploy made - the entity is resolved from the INSTALLED model
+  const purged = probe(`
+    const cds = require("@sap/cds");
+    (async () => {
+      cds.model = cds.compile.for.nodejs(await cds.load("*"));
+      await cds.connect.to("db");
+      const { purgeAgentLog } = require("@cap2ui5/cds-plugin");
+      console.log(await purgeAgentLog({ days: 1 }));
+    })().catch((e) => { console.error(e); process.exit(1); });
+  `, proj);
+  check("purgeAgentLog( ) runs against the deployed cap2ui5.AgentLog", purged.ok && purged.out.split("\n").at(-1) === "0",
+    purged.ok ? purged.out.split("\n").at(-1) : purged.why);
 
   // --- and it answers ------------------------------------------------------
   const server = spawn(process.execPath, [

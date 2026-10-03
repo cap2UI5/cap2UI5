@@ -366,9 +366,13 @@ system).
 | `apps` | none | apps the project opts in - names, or patterns with `*`; how a transpiled ABAP app opts in |
 | `confirm` | none | events an agent hands to a human: `"EVENT"` for every app, `"APP:EVENT"` for one, `*` as a wildcard |
 | `forbidden` | none | events an agent never fires, written the same way |
+| `retention` | `90` | days a row of the audit log `cap2ui5.AgentLog` is kept; `0` or `false` keeps every row - see [Audit retention](#audit-retention) |
 
-A key the endpoint does not know is refused at start - `"forbiden"` would
-otherwise leave the event open.
+A key the endpoint does not know, or a value of the wrong type, is refused
+at start - `"forbiden"` would otherwise leave the event open, and a
+`"retention": "90d"` read as "forever" or as "now" would be a wrong guess
+for an audit log either way. Any object switches the endpoint on, so
+`CDS_REQUIRES_CAP2UI5_AGENT_RETENTION=30` alone does too.
 
 **An app opts in** where it is defined, and classifies its events there:
 
@@ -447,7 +451,8 @@ sentence naming what is allowed, and a refused act sends nothing.
   and the refusal. The *values* an agent entered are never stored, only which
   fields it filled. Like `cap2ui5.Drafts` the entity is in the model and in
   no service; to show it, expose it in a service of your own with a
-  `@restrict` such as `where: 'owner = $user'`.
+  `@restrict` such as `where: 'owner = $user'`. Rows older than `retention`
+  days are deleted - see below.
 - **Browser-side abuse is refused:** a request whose `Origin` names another
   host gets 403, and only `Content-Type: application/json` is read (415), so
   a web page cannot drive the endpoint with a user's cookies.
@@ -467,6 +472,36 @@ the screen the agent chose its action on is not in front of it now. Edits
 pending before the restart are lost, as a browser tab's are. Only a session
 the audit log shows the same user's agent reached, which is the newest of
 its line and whose draft has not expired, is restored.
+
+### Audit retention
+
+A row of `cap2ui5.AgentLog` is kept `retention` days - 90 unless the
+setting says otherwise - and then deleted, the way the draft store expires
+drafts: one `DELETE` of everything older than a cutoff, run on the way of an
+ordinary request rather than by a timer of the plugin's own. The drafts are
+swept on every app start; the log is swept by an agent call, **at most once
+an hour per process and tenant**, so the endpoint pays for one `DELETE` an
+hour. A sweep that fails is logged as a warning and tried again an hour
+later; it never fails the agent's call.
+
+`"retention": 0` (or `false`) keeps every row. A project that prefers a
+scheduled job of its own sets that, so the endpoint leaves the log alone,
+and runs the same `DELETE` from the job:
+
+```js
+const { purgeAgentLog } = require("@cap2ui5/cds-plugin");
+const deleted = await purgeAgentLog({ days: 90 });   // without `days`: the setting's retention, else 90
+```
+
+It deletes every user's rows older than the cutoff and answers how many. It
+runs in `cds.context`'s transaction where there is one - in a multitenant
+application, call it per tenant inside `cds.tx({ tenant }, ...)` (the
+endpoint's own sweep follows the caller's tenant).
+
+A session is restored after a restart only from its audit rows, so a
+retention shorter than the draft expiry (`draft_exp_time_in_hours`, 4 hours
+unless the user exit changes it) would lose sessions whose drafts are still
+there - which takes an expiry of weeks.
 
 ## Configure
 
@@ -489,7 +524,7 @@ Under `cds.requires.cap2ui5` - in `package.json`, a `.cdsrc.json`, a profile or
 | `body_parser.limit` | CAP's `cds.server.body_parser.limit`, else `10mb` | the largest roundtrip body; a larger one gets 413 |
 | `compression` | `true` | gzip for the page and the roundtrips, where the browser accepts it; `false` leaves compressing to a proxy in front |
 | `accelerate` | `true` | calls the runtime's `accelerate( )` where it has one - the releases after 1.145.0, see [Performance](#performance); `false` runs the runtime's own code |
-| `agent` | off | the MCP endpoint for AI agents - `true` or `{ path, apps, confirm, forbidden }`, see [Agents](#agents-the-mcp-endpoint) |
+| `agent` | off | the MCP endpoint for AI agents - `true` or `{ path, apps, confirm, forbidden, retention }`, see [Agents](#agents-the-mcp-endpoint) |
 
 `"cap2ui5": false` switches the plugin off: no route, and no `cap2ui5.Drafts`
 or `cap2ui5.AgentLog` table in the model.
@@ -535,9 +570,13 @@ theme, the draft expiry, the CSRF gate — comes from the user exit,
   `cds.log.levels.cap2ui5`.
 - **Database:** `cap2ui5.Drafts` and `cap2ui5.AgentLog` are part of the
   model, so `cds deploy` and `cds build --production` create them like any
-  other table (`.hdbtable` for SAP HANA). The agent log is written only when
-  the agent endpoint is on, and nothing deletes its rows. A draft is deleted after the user exit's
-  `draft_exp_time_in_hours`, 4 hours unless the exit changes it.
+  other table (`.hdbtable` for SAP HANA). The agent log's table is there
+  whether the endpoint is on or not - the database is built from the model
+  where `cds build` runs, the endpoint is switched on where the server runs,
+  often by an environment variable the build never sees; ADR-009 has the
+  reasons. It is written only while the endpoint is on, and its rows are
+  deleted after `agent.retention` days (90). A draft is deleted after the
+  user exit's `draft_exp_time_in_hours`, 4 hours unless the exit changes it.
 - **Multitenancy (MTX):** not tested yet. The draft store reads and writes
   through `cds.run`, which follows `cds.context`. The drafts should therefore
   land in each tenant's database like any other row, but no test proves it.

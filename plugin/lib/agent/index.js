@@ -29,7 +29,9 @@
 //   sessions    one client per CAP user, so a session id is only ever looked
 //               up among the caller's own sessions; after a restart a session
 //               is restored from its draft (below).
-//   audit       one cap2ui5.AgentLog row per call (audit.js).
+//   audit       one cap2ui5.AgentLog row per call (audit.js), and the rows
+//               older than agent.retention deleted on the way of a call, at
+//               most once an hour per process and tenant (audit.sweep( )).
 //
 // AFTER A RESTART the drafts are still in the database, but the client's
 // memory of a session - the views in their slots, the pending edits, the last
@@ -424,7 +426,7 @@ function createAgent({ agent, roundtrip }) {
     const user = cds.context.user;
     const { AgentError } = await client();
     const a = { tool: name, userAgent: ctx.userAgent };
-    return call.run({ origin: ctx.origin }, async () => {
+    const respond = async () => {
       try {
         const u = await forUser(user);
         const answer = name === "app_list" ? await appList(a, args)
@@ -442,6 +444,13 @@ function createAgent({ agent, roundtrip }) {
         LOG.error(`agent: ${name} failed (${ref}):`, e);
         await audit.write({ ...a, outcome: "error", message: `failed (${ref})` });
         return { content: [{ type: "text", text: `${name} failed (${ref}) - the server log names the cause` }], isError: true };
+      }
+    };
+    return call.run({ origin: ctx.origin }, async () => {
+      try {
+        return await respond();
+      } finally {
+        await audit.sweep(agent.retention);      // never throws, and runs at most once an hour
       }
     });
   }

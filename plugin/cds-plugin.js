@@ -179,7 +179,8 @@ cds.on("bootstrap", (app) => {
       normalize,
       cds.middlewares.errors(),
     );
-    LOG.info(`agent endpoint (MCP) at ${conf.agent.path}`);
+    LOG.info(`agent endpoint (MCP) at ${conf.agent.path} - audit rows kept ` +
+      (conf.agent.retention ? `${conf.agent.retention} days` : "forever"));
   }
 
   // One roundtrip: upstream's express adapter with the framework's ICF handler.

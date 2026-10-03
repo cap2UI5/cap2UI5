@@ -62,6 +62,7 @@ test("agent: off unless switched on; true is the default path under /rest/root/z
   assert.equal(on.path, "/rest/root/z2ui5/mcp");
   assert.equal(on.route, "/rest/root/z2ui5", "the UI route the endpoint stands for: the one its path lies under");
   assert.deepEqual([on.apps, on.confirm, on.forbidden], [[], [], []]);
+  assert.equal(on.retention, 90, "the audit log keeps 90 days unless the project says otherwise");
   const own = config(env({ own: { agent: { path: "/agents", apps: "ZCL_*", confirm: ["ZCL_A:SAVE"], forbidden: "DELETE*" } } })).agent;
   assert.equal(own.route, "/sap/bc/z2ui5", "a path under no route stands for the first");
   assert.deepEqual(own.apps.map((a) => a.text), ["ZCL_*"]);
@@ -71,12 +72,27 @@ test("agent: off unless switched on; true is the default path under /rest/root/z
 
 test("agent: a setting it does not know, a malformed rule or a route's path is refused, not ignored", () => {
   assert.throws(() => config(env({ own: { agent: { forbiden: ["DELETE"] } } })), /forbiden - not a setting of the agent endpoint/);
-  assert.throws(() => config(env({ own: { agent: "yes" } })), /is true, false or \{ path, apps, confirm, forbidden \}/);
+  assert.throws(() => config(env({ own: { agent: "yes" } })), /is true, false or \{ path, apps, confirm, forbidden, retention \}/);
   assert.throws(() => config(env({ own: { agent: { forbidden: [":DELETE"] } } })), /names no app/);
   assert.throws(() => config(env({ own: { agent: { confirm: ["ZCL_A:"] } } })), /names no event/);
   assert.throws(() => config(env({ own: { agent: { apps: [42] } } })), /agent\.apps takes names/);
   assert.throws(() => config(env({ own: { agent: { path: "/sap/bc/z2ui5" } } })), /is a roundtrip route already/);
   assert.throws(() => config(env({ own: { agent: { path: "mcp" } } })), /a path starting with \//);
+});
+
+test("agent.retention: days an audit row is kept - 0 or false keeps every row, anything else is refused", () => {
+  const retention = (v) => config(env({ own: { agent: { retention: v } } })).agent.retention;
+  assert.equal(retention(undefined), 90);
+  assert.equal(retention(null), 90);
+  assert.equal(retention(30), 30);
+  assert.equal(retention(0.5), 0.5, "a fraction of a day is a number of days too");
+  assert.equal(retention(0), 0);
+  assert.equal(retention(false), 0, "false is forever, as 0 is");
+  for (const wrong of ["90", "90d", -1, true, Number.NaN, Infinity, [30], { days: 30 }]) {
+    assert.throws(() => retention(wrong), /agent\.retention is the number of days an audit row is kept/, String(wrong));
+  }
+  assert.throws(() => config(env({ own: { agent: { retenton: 30 } } })),
+    /retenton - not a setting of the agent endpoint; it knows path, apps, confirm, forbidden and retention/);
 });
 
 test("false switches the plugin off", () => {
@@ -115,6 +131,20 @@ test("cds.requires.cap2ui5: false - no route, no table, and CAP serves on as bef
   } finally {
     s.kill();
   }
+});
+
+test("an agent.retention the endpoint cannot read fails the start, as every agent setting does", async () => {
+  // through the environment, as CAP reads it: "90d" is no number of days - read
+  // as "forever" or as "now" it would be the wrong guess for an audit log
+  await assert.rejects(
+    boot("bad retention", { env: { CDS_REQUIRES_CAP2UI5_AGENT_RETENTION: "90d" } }),
+    (e) => {
+      assert.match(e.message, /died/, "the server did not stop");
+      assert.match(e.message, /agent\.retention is the number of days an audit row is kept/);
+      assert.doesNotMatch(e.message, /server listening/);
+      return true;
+    },
+  );
 });
 
 test("CAP's global body limit applies to the roundtrip, and the plugin's own setting beats it", async () => {

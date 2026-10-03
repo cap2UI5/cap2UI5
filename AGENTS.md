@@ -113,7 +113,7 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
   inside the MCP request, so `cds.context` - and with it the drafts' owner -
   is the caller's; there is no technical user and no HTTP hop. Every
   behaviour of it - opt-in, `confirm`/`forbidden`, handover, owner scoping,
-  the audit row, the restore after a restart - has its test in the
+  the audit row and its retention, the restore after a restart - has its test in the
   `agent*.test.mjs` files. ADR-009 records why it looks the way it does.
 - `npm test` stays browserless. Browser tests are `*.e2e.mjs`, run by
   `npm run test:browser`.

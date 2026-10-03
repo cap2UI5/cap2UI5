@@ -30,6 +30,12 @@ starts with 0, a minor release may break the API.
   event, outcome - but never the values an agent entered. Like
   `cap2ui5.Drafts` it is part of the model, so the next `cds deploy` creates
   the table, whether the endpoint is on or not.
+- Retention for `cap2ui5.AgentLog`: `cds.requires.cap2ui5.agent.retention`
+  days, 90 unless set, `0` or `false` to keep every row; a value that is not
+  a number of days fails the start. The endpoint deletes the older rows on
+  the way of an agent call, at most once an hour per process and tenant, as
+  the draft store expires drafts on an app start. `purgeAgentLog( { days } )`
+  runs the same `DELETE` from a project's own scheduled job.
 
 ### Changed
 

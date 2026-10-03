@@ -11,7 +11,8 @@
 //     "path":      "/rest/root/z2ui5/mcp",          where the endpoint answers (the default)
 //     "apps":      ["Z2UI5_CL_UI5_APP_HI_WORLD"],   apps that cannot say it themselves: transpiled ABAP
 //     "confirm":   ["ZCL_BOOKS:ADD"],               "APP:EVENT" or "EVENT" (every app)
-//     "forbidden": ["DELETE*"]
+//     "forbidden": ["DELETE*"],
+//     "retention": 90                               days an audit row is kept (audit.js); 0 or false: forever
 //   } } } }
 //
 // `*` matches any run of characters, and names and events compare without
@@ -29,6 +30,28 @@ const RANK = { allowed: 0, confirm: 1, forbidden: 2 };
 const AGENT = Symbol.for("cap2ui5.agent");
 
 const DEFAULT_PATH = "/rest/root/z2ui5/mcp";
+
+/** Days a cap2ui5.AgentLog row is kept - audit.js purges what is older. */
+const DEFAULT_RETENTION = 90;
+
+/** The settings the endpoint knows - any other key is refused at start. */
+const KEYS = ["path", "apps", "confirm", "forbidden", "retention"];
+
+/**
+ * agent.retention, normalized: the days a log row is kept, or 0 - forever.
+ * Unset is the default; `false` and `0` keep every row. Anything else that is
+ * not a number of days >= 0 is refused: "90d" or "-1" silently read as
+ * "forever" (or as "now") would be the wrong guess for an audit log either way.
+ */
+function retentionOf(value) {
+  if (value === undefined || value === null) return DEFAULT_RETENTION;
+  if (value === false) return 0;
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
+    throw new Error(`[cap2ui5] cds.requires.cap2ui5.agent.retention is the number of days an audit row is kept - ` +
+      `0 or false keeps every row, unset means ${DEFAULT_RETENTION} - not ${JSON.stringify(value)}`);
+  }
+  return value;
+}
 
 /** A pattern with `*` as a case-insensitive regular expression for a whole name. */
 function glob(pattern) {
@@ -77,13 +100,13 @@ function agentConfig(agent, routes = []) {
   if (agent === undefined || agent === null || agent === false) return null;
   if (agent === true) agent = {};
   if (typeof agent !== "object" || Array.isArray(agent)) {
-    throw new Error(`[cap2ui5] cds.requires.cap2ui5.agent is true, false or { path, apps, confirm, forbidden } - ` +
+    throw new Error(`[cap2ui5] cds.requires.cap2ui5.agent is true, false or { ${KEYS.join(", ")} } - ` +
       `not ${JSON.stringify(agent)}`);
   }
-  const unknown = Object.keys(agent).filter((k) => !["path", "apps", "confirm", "forbidden"].includes(k));
+  const unknown = Object.keys(agent).filter((k) => !KEYS.includes(k));
   if (unknown.length) {
     throw new Error(`[cap2ui5] cds.requires.cap2ui5.agent: ${unknown.join(", ")} - not a setting of the agent ` +
-      `endpoint; it knows path, apps, confirm and forbidden`);
+      `endpoint; it knows ${KEYS.slice(0, -1).join(", ")} and ${KEYS.at(-1)}`);
   }
   const path = agent.path ?? DEFAULT_PATH;
   if (typeof path !== "string" || !path.startsWith("/") || path.length < 2) {
@@ -103,6 +126,7 @@ function agentConfig(agent, routes = []) {
     apps: list(agent.apps, "apps").map((a) => ({ text: a, re: glob(a), pattern: isPattern(a) })),
     confirm: list(agent.confirm, "confirm").map((e) => eventRule(e, "confirm")),
     forbidden: list(agent.forbidden, "forbidden").map((e) => eventRule(e, "forbidden")),
+    retention: retentionOf(agent.retention),
   };
 }
 
@@ -201,4 +225,4 @@ function classify({ app, start, event }, conf) {
   return result;
 }
 
-module.exports = { AGENT, DEFAULT_PATH, agentConfig, appOption, appClass, reachable, reachableApps, classify, glob };
+module.exports = { AGENT, DEFAULT_PATH, DEFAULT_RETENTION, agentConfig, retentionOf, appOption, appClass, reachable, reachableApps, classify, glob };

@@ -1,6 +1,7 @@
 # ADR-009 — An agent endpoint in the plugin: MCP, the vendored snapshot, the CAP user
 
-**Status:** accepted (2026-10-03).
+**Status:** accepted (2026-10-03); amended the same day with the audit
+log's retention (decision 8) and why its table is unconditional (decision 9).
 **Supersedes nothing.**
 
 ## Context
@@ -23,7 +24,7 @@ describes the screen, and as whom the agent acts.
 ## Decision
 
 1. **The plugin serves the endpoint**, off by default
-   (`cds.requires.cap2ui5.agent: true | { path, apps, confirm, forbidden }`),
+   (`cds.requires.cap2ui5.agent: true | { path, apps, confirm, forbidden, retention }`),
    at `/rest/root/z2ui5/mcp`: MCP over Streamable HTTP, JSON-RPC 2.0, one POST
    per message answered with `application/json` - `initialize`,
    notifications (202), `ping`, `tools/list`, `tools/call`. No SSE stream and
@@ -88,11 +89,62 @@ describes the screen, and as whom the agent acts.
    gone. The alternative - "unknown session, start again" - would throw away
    state the database still has.
 
+8. **The log is kept `agent.retention` days (90), and purged the way the
+   drafts are.** The draft store has no timer: the framework calls its
+   `cleanup( )` on every app start, and it deletes every user's drafts
+   older than the user exit's expiry in one `DELETE`. The log follows that
+   pattern: an agent call, after it has answered and been logged, deletes
+   every user's rows older than the cutoff - but at most once an hour per
+   process and tenant, since an endpoint answers far more calls than users
+   start apps and a row an hour late is no matter. The clock is set before
+   the `DELETE`, so concurrent calls do not each start one and a failing one
+   is not retried by every call; a failure is a warning, never the agent's
+   error. `0` or `false` keeps every row; any other value that is not a
+   number of days fails the start, as every agent setting does - an audit
+   log silently kept for ever, or emptied, is the wrong guess either way.
+   `purgeAgentLog( { days } )`, exported by the package, is the same
+   `DELETE` for a project that prefers a scheduled job (and sets the
+   retention to 0). Not chosen: a `setInterval` in the plugin - a timer per
+   process that runs without a request has no `cds.context`, so no tenant
+   to purge for in a multitenant application; CAP's own outbox (`cds.queued`) - a
+   purge is idempotent and needs neither its persistence nor its retries.
+
+9. **The `cap2ui5_AgentLog` table stays in every project's model, the
+   endpoint on or off.** Making it conditional was considered: the model
+   comes in as `cds.requires.cap2ui5.model`, one entry for `index.cds`, and
+   the plugin could split the log into a second file and add it only where
+   `agent` is set. It stays unconditional because:
+   - **The database is built where the server does not run.** `cds build
+     --production` turns the model into `.hdbtable` files in CI or the MTA
+     build; the endpoint is switched on where the server runs, often by an
+     environment variable (`CDS_REQUIRES_CAP2UI5_AGENT`) or a profile the
+     build never sees. A conditional table is missing exactly there: every
+     audit write fails (logged, swallowed, because the agent's action has
+     happened), the purge fails, and a session can no longer be restored
+     after a restart - an endpoint that runs without its audit trail.
+   - **Switching the endpoint off would delete the audit trail.** The next
+     deploy of a model without the entity drops the table (SQLite's
+     `cds deploy` recreates the schema; on SAP HANA, HDI drops it where the
+     project's `undeploy.json` lets tables go), and with it the record of what agents did - an
+     audit log whose existence follows a feature flag loses its evidence
+     when the flag flips.
+   - **A model that depends on a runtime setting is not CAP's contract.**
+     `cds.requires.<x>.model` is static configuration; rewriting it from the
+     plugin while it loads depends on plugins loading before the model is
+     resolved in every command that compiles it (`cds build`, `cds deploy`,
+     `cds watch`, an MTX sidecar's extension build), which CAP does not
+     document. `cap2ui5.Drafts` is unconditional for the same reason.
+   - An empty table costs nothing, and `cds.requires.cap2ui5: false` - CAP's
+     documented switch - still removes both tables with the plugin.
+
 ## Consequences
 
 - Every consumer project gets the `cap2ui5_AgentLog` table on its next
   deploy, whether the endpoint is on or not - the model contribution is one
-  file, as for the drafts. Nothing deletes its rows.
+  file, as for the drafts (decision 9). Its rows are deleted after
+  `agent.retention` days (decision 8).
+- A retention shorter than the draft expiry would lose restorable sessions
+  (decision 7 reads the log); it takes an expiry of weeks to get there.
 - A bump of the vendored code is a re-vendor (`npm run agent-vendor --
   <mcp-server checkout> --ref <commit>`) that goes through this suite; a fix
   to the snapshot goes upstream first.
@@ -101,4 +153,5 @@ describes the screen, and as whom the agent acts.
   fail if it changes.
 - Not done: MCP's own authorization discovery (CAP does not implement it; a
   client passes the token as a header), SSE, MCP sessions, an administration
-  app for the log, deleting old log rows.
+  app for the log, an index on `createdAt` (CDS has no portable way to
+  declare one; the hourly `DELETE` scans the table).
