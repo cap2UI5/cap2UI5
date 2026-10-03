@@ -23,6 +23,8 @@
  *   - the runtime that loads is the version the plugin pins
  *   - the route answers: bootstrap page, UI5 shell, start, event, and 401
  *     for a caller with no credentials
+ *   - the agent endpoint, switched on as a project switches it on, operates
+ *     an app over MCP - with the vendored snapshot code from the package
  *   - `npx --no-install cap2ui5 abap2js`, as the README gives it, finds the
  *     plugin's command; without its parser - @abaplint/core, an optional
  *     peer the plugin does not install - it says how to add it, and once
@@ -93,7 +95,8 @@ try {
       "@sap/cds": example.dependencies["@sap/cds"],
     },
     cds: { requires: { db: { kind: "sqlite", credentials: { url: "db.sqlite" },
-                            client: { timeout: 5000 } } } },
+                            client: { timeout: 5000 } },
+                       cap2ui5: { agent: { apps: ["ZCL_PROBE"] } } } },
   }, null, 2));
   fs.writeFileSync(path.join(proj, "srv", "apps", "probe.js"), `
 const { defineApp } = require("@cap2ui5/cds-plugin");
@@ -166,7 +169,8 @@ ENDCLASS.
   const surface = probe(`console.log(JSON.stringify(Object.keys(require("@cap2ui5/cds-plugin"))))`, proj);
   const exported = surface.ok ? JSON.parse(surface.out) : [];
   check("require(\"@cap2ui5/cds-plugin\") exports the documented surface",
-    ["defineApp", "defineExit", "t", "z2ui5_cl_ui5_view_builder", "z2ui5_if_client", "ViewBuilder", "abap2js"]
+    ["defineApp", "defineExit", "t", "z2ui5_cl_ui5_view_builder", "z2ui5_if_client", "ViewBuilder", "abap2js",
+      "purgeAgentLog"]
       .every((k) => exported.includes(k)),
     surface.ok ? exported.join(", ") : surface.why);
 
@@ -185,7 +189,7 @@ ENDCLASS.
       Object.keys(cds.linked(m).definitions).filter((n) => n.startsWith("cap2ui5")))));
   `, proj);
   const defs = model.ok ? JSON.parse(model.out) : [];
-  check("index.cds reaches the project's model", defs.includes("cap2ui5.Drafts"),
+  check("index.cds reaches the project's model", defs.includes("cap2ui5.Drafts") && defs.includes("cap2ui5.AgentLog"),
     model.ok ? defs.join(", ") : model.why);
 
   const deploy = probe(`
@@ -197,6 +201,20 @@ ENDCLASS.
   `, proj);
   check("cds deploy creates the drafts table",
     deploy.ok && fs.existsSync(path.join(proj, "db.sqlite")), deploy.ok ? "" : deploy.why);
+
+  // the scheduled-job form of the agent log's retention, against the table
+  // the deploy made - the entity is resolved from the INSTALLED model
+  const purged = probe(`
+    const cds = require("@sap/cds");
+    (async () => {
+      cds.model = cds.compile.for.nodejs(await cds.load("*"));
+      await cds.connect.to("db");
+      const { purgeAgentLog } = require("@cap2ui5/cds-plugin");
+      console.log(await purgeAgentLog({ days: 1 }));
+    })().catch((e) => { console.error(e); process.exit(1); });
+  `, proj);
+  check("purgeAgentLog( ) runs against the deployed cap2ui5.AgentLog", purged.ok && purged.out.split("\n").at(-1) === "0",
+    purged.ok ? purged.out.split("\n").at(-1) : purged.why);
 
   // --- and it answers ------------------------------------------------------
   const server = spawn(process.execPath, [
@@ -280,6 +298,20 @@ ENDCLASS.
     const anon = await fetch(`${url}/rest/root/z2ui5`, { method: "POST",
       headers: { "Content-Type": "application/json" }, body: body("", "") });
     check("an unauthenticated caller is refused", anon.status === 401, String(anon.status));
+
+    // the agent endpoint: the project switched it on (cds.requires.cap2ui5.agent)
+    const tool = async (name, args) => {
+      const r = await fetch(`${url}/rest/root/z2ui5/mcp`, { method: "POST", headers: auth,
+        body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name, arguments: args } }) });
+      const text = r.status === 200 ? (await r.json()).result?.content?.[0]?.text ?? "" : `HTTP ${r.status}`;
+      try { return JSON.parse(text); } catch { return { refused: text }; }
+    };
+    const snap = await tool("app_start", { app: "ZCL_PROBE" });
+    check("the agent endpoint starts an app and answers its snapshot",
+      snap.snapshotVersion === 1 && snap.fields?.[0]?.path === "/NAME", JSON.stringify(snap).slice(0, 200));
+    const acted = snap.session ? await tool("app_act", { session: snap.session, values: { NAME: "Ada" }, event: "GO" }) : {};
+    check("and operates it: the event runs the app as the user who called",
+      JSON.stringify(acted.messages ?? []).includes("Hello, Ada!"), JSON.stringify(acted).slice(0, 200));
   } finally {
     kill();
   }

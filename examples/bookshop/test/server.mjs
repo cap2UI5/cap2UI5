@@ -105,3 +105,29 @@ export async function post(url, { app, id = "", event = "", model = {}, user, ar
 /** The first action of a response, for logs and assertions. */
 export const action = (r) => r?.json?.S_FRONT?.S_ACTION?.T_SYSTEM?.[0]
   ?? r?.json?.S_FRONT?.S_ACTION?.T_CUSTOM?.[0] ?? null;
+
+/** One JSON-RPC message to the agent endpoint (cds.requires.cap2ui5.agent).
+ *  `body` is the message or a batch; `user` a mocked user, none for anonymous.
+ *  Answers the HTTP status, the parsed body and - for a tools/call - the
+ *  tool's result as `tool`: { error, text, json } (json when the text is). */
+export async function mcp(url, body, { user, headers = {} } = {}) {
+  const h = { "Content-Type": "application/json", Accept: "application/json, text/event-stream", ...headers };
+  if (user) h.Authorization = "Basic " + Buffer.from(`${user}:`).toString("base64");
+  const r = await fetch(url, { method: "POST", headers: h, body: typeof body === "string" ? body : JSON.stringify(body) });
+  const text = await r.text();
+  let json = null;
+  try { json = JSON.parse(text); } catch { /* 202, or an error page */ }
+  let tool = null;
+  const result = json?.result;
+  if (result?.content) {
+    const t = result.content[0]?.text ?? "";
+    let parsed = null;
+    try { parsed = JSON.parse(t); } catch { /* a refusal is a sentence */ }
+    tool = { error: result.isError === true, text: t, json: parsed };
+  }
+  return { status: r.status, headers: r.headers, text, json, tool };
+}
+
+/** A tools/call message. */
+export const toolCall = (name, args = {}, id = 1) =>
+  ({ jsonrpc: "2.0", id, method: "tools/call", params: { name, arguments: args } });

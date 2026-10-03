@@ -140,6 +140,9 @@ jobs:
             '@sap/cds ' + require('@sap/cds/package.json').version,
             '@cap-js/sqlite ' + require('@cap-js/sqlite/package.json').version].join(', ')"
       - run: npm run lint
+      # the agent endpoint's vendored snapshot code against abap2UI5/mcp-server
+      # at the commit it records (plugin/lib/agent/vendor/source.json, ADR-009)
+      - run: npm run agent-vendor:check
       - run: npm test
       - run: npm run cold-test
       - run: npm run bench -- 50

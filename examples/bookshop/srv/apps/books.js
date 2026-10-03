@@ -1,6 +1,11 @@
 // A cap2UI5 app that reads the project's own CDS entity - the reason to host
 // abap2UI5 in CAP at all. main( ) is async because the APP does I/O; the
 // client's calls need no await either way.
+//
+// It is also the example of an app agents may operate (the plugin's agent
+// endpoint, cds.requires.cap2ui5.agent): the third argument opts it in, and
+// classifies ADD - which writes the project's data - as one a human confirms.
+// An agent may search; adding a book it hands over.
 const cds = require("@sap/cds");
 const { SELECT, INSERT } = cds.ql;                 // CAP also installs it as a global; the import is the honest form
 const { defineApp, t } = require("@cap2ui5/cds-plugin");
@@ -46,4 +51,4 @@ defineApp("ZCL_JS_BOOKS", class {
       client.message_toast_display(`${this.hits} found`);   // the changed table is pushed on its own
     }
   }
-});
+}, { agent: { description: "Search the bookshop's books", events: { ADD: "confirm" } } });

@@ -41,11 +41,12 @@ function loginHint(auth) {
  * @param {string}   o.appsDir    where app modules are read from, e.g. srv/apps
  * @param {object}   [o.auth]     cds.env.requires.auth
  * @param {string[]} [o.roles]  cds.requires.cap2ui5.roles - none, or "any", lets anybody in
+ * @param {string}   [o.agent]    the agent endpoint's path, when it is switched on
  * @param {boolean}  [o.production]
  * @returns {string[]} the lines to print, none in production
  */
 function startupHints({ apps, origins = new Map(), startPage = false, url, route, appsDir, auth, roles = [],
-  production = false }) {
+  agent, production = false }) {
   if (production) return [];
   const server = String(url).replace(/\/+$/, "");
   const base = `${server}${route}`;
@@ -69,6 +70,7 @@ function startupHints({ apps, origins = new Map(), startPage = false, url, route
       lines.push(`${pkg.padEnd(width)}  ${n} app${n === 1 ? "" : "s"} - ${where}`);
     }
   }
+  if (agent) lines.push(`agent endpoint (MCP): ${server}${agent}`);
   const open = !roles.length || roles.includes("any");  // nobody has to log in
   const login = open ? null : loginHint(auth);
   if (login) lines.push(`development login: ${login}`);
