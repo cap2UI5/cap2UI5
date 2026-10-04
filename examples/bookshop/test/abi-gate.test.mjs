@@ -58,6 +58,8 @@ const CLIENT_METHODS = {          // z2ui5_if_client, used by define-app
   HASH_REPLACE: ["VAL"],
   APP_STATE_SET_ACTIVE: ["VAL"],
   APP_STATE_GET_HREF: ["RESULT"],
+  // through client.raw, by the session test's probe (srv/apps/sticky-probe.js)
+  SET_SESSION_STATEFUL: ["VAL"],
 };
 // the components of z2ui5_if_client=>ty_s_event_control - what client._event( )'s
 // s_ctrl takes by name, built from the interface's own parameter type
@@ -137,6 +139,36 @@ before(async () => {
 });
 
 const get = (path) => path.split(".").reduce((o, k) => o?.[k], globalThis);
+
+test("the agent endpoint tells apps from other classes by the transpiler's statics", () => {
+  // lib/agent/policy.js appClass( ): a class registered under its name in
+  // abap.Classes, Z2UI5_IF_APP in IMPLEMENTED_INTERFACES - its own or, up
+  // the STATIC_SUPER chain, a superclass's; reachableApps( ) skips the
+  // CLAS-<pool>-<name> keys local classes are registered under
+  assert.ok(Ref.IMPLEMENTED_INTERFACES.includes("Z2UI5_IF_APP"));
+  assert.ok(App.IMPLEMENTED_INTERFACES.includes("Z2UI5_IF_APP"));
+  assert.ok(!(abap.Classes["Z2UI5_CL_UTIL"].IMPLEMENTED_INTERFACES ?? []).includes("Z2UI5_IF_APP"));
+  const sub = Object.values(abap.Classes).find((c) => typeof c === "function" && typeof c.STATIC_SUPER === "function");
+  assert.ok(sub, "no transpiled class names its superclass in STATIC_SUPER");
+  assert.ok(Object.keys(abap.Classes).some((k) => k.startsWith("CLAS-") && k.split("-").length === 3),
+    "local classes are no longer registered as CLAS-<pool>-<name>");
+});
+
+test("the sticky handler lib/sessions.js swaps per session is the framework's class-data box", async () => {
+  // lib/sessions.js stickySlot( ): abap.Classes.Z2UI5_CL_UI5_HTTP_HANDLER
+  // .so_sticky_handler, an ABAPObject read with get( ), put back with set( )
+  // and emptied with clear( ) - a CLASS-DATA attribute is a static of the class
+  const Handler = abap.Classes["Z2UI5_CL_UI5_HTTP_HANDLER"];
+  assert.equal(typeof Handler, "function", "Z2UI5_CL_UI5_HTTP_HANDLER is registered");
+  assert.equal(Handler.ATTRIBUTES?.SO_STICKY_HANDLER?.is_class, "X", "so_sticky_handler is CLASS-DATA");
+  const slot = Handler.so_sticky_handler;
+  assert.ok(slot instanceof abap.types.ABAPObject, "the static is an ABAPObject box");
+  const probe = {};
+  slot.set(probe);
+  assert.equal(slot.get(), probe);
+  slot.clear();
+  assert.equal(slot.get(), undefined);
+});
 
 test("the runtime globals the plugin touches exist", () => {
   for (const [path, type] of Object.entries(RUNTIME_GLOBALS)) {

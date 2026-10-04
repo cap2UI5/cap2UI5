@@ -150,6 +150,7 @@ array, a cycle) is reported by its path and left out; the app runs without it. A
   `false` leaves it to a proxy in front
 - `accelerate` (default `true`): the runtime's `accelerate( )`, where it has
   one; `false` runs the runtime's own code
+- `agent` (default off): the MCP endpoint for AI agents, below
 
 `false` switches the plugin off. The route runs behind CAP's own middlewares
 and answers like a CAP service: 401 with the login challenge of
@@ -192,6 +193,7 @@ npm run cold-test                              # state AND the app stack through
 npm run bench -- 100                           # ms per roundtrip
 npm run bench -- --rows 2000                   # one table of 2000 rows: time and wire size per roundtrip
 npm run consumer-test                          # pack both packages, install them into a throwaway CAP project, drive a roundtrip
+npm run conformance -- <protocol checkout>     # abap2UI5/protocol's backend conformance suite against this checkout (a throwaway clone)
 npm run test:browser                           # real Chromium against the framework's own page
 npm start                                      # http://localhost:4004/rest/root/z2ui5?app_start=ZCL_JS_BOOKS
 ```
@@ -209,6 +211,7 @@ npm start                                      # http://localhost:4004/rest/root
 | Concurrency | three users interleaved in one process, every answer to its owner |
 | Navigation | `navTo` / `navBack` carrying a result, popups and nested views — on the wire and in the browser |
 | **As published** | both packages packed, installed into a CAP project that has never heard of this repository, and driven through a roundtrip - the plugin found as a cds-plugin from `node_modules`, `index.cds` in the project's model, the runtime the plugin pins, the type declarations and changelog in the package, 401 for an anonymous caller (`scripts/consumer-test.mjs`) |
+| **Protocol conformance** | abap2UI5/protocol's backend suite, run by its own runner against this checkout's packages with the protocol's conformance apps: 74 checks passed, 0 failed, 1 SHOULD warning (`error.details`, the deliberately bare body of an app's exception) at profile `ui5` (`scripts/conformance.mjs`, the CI job `conformance`) |
 | CAP versions | the suite and the consumer test on `@sap/cds` 9 and 10, Node 22 and 24 (the CI matrix) |
 | Browser | renders in Chromium — the page the framework serves on GET, UI5 booted; MessageBox, table, a `sap.m.Dialog` popup, and a navigation round trip that comes back with the choice |
 

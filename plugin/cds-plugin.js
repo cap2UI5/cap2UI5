@@ -17,12 +17,18 @@ const { definedApps } = require("./lib/define-app");
 const { startupHints } = require("./lib/hints");
 const { config } = require("./lib/config");
 const { compression } = require("./lib/compression");
+const { withSession } = require("./lib/sessions");
 
 // One logger, as every CAP module and plugin has: plain `[cap2ui5] - ...` lines
 // in development, and in production the JSON records CAP writes for itself,
 // with the request's correlation_id - so the plugin's lines land in the same
 // log search as everything else instead of as loose text on stdout.
 const LOG = cds.log("cap2ui5");
+
+// A request-derived reference (the correlation id) made fit for an error
+// body: letters, digits and . _ : - only, at most 128 of them, "-" when
+// nothing is left.
+const safeRef = (id) => String(id ?? "").replace(/[^A-Za-z0-9._:-]/g, "").slice(0, 128) || "-";
 
 // `cds add cap2ui5`: the first app. cds.add exists only while cds add runs,
 // and the optional call leaves the require( ) unevaluated otherwise.
@@ -77,6 +83,7 @@ cds.on("bootstrap", (app) => {
         appsDir: conf.apps,
         auth: cds.env.requires?.auth,
         roles: conf.roles,
+        agent: conf.agent?.path,
         production: cds.env.profiles?.includes("production"),
       });
       for (const line of lines) LOG.info(line);
@@ -121,6 +128,8 @@ cds.on("bootstrap", (app) => {
     next(Object.assign(new cds.error(status, err.message), { code: String(status) }));
   };
 
+  let queue = Promise.resolve();                 // roundtrip( ): one at a time, below
+
   // The roundtrip endpoint. cl_express_icf_shim is upstream's own adapter and
   // reads plain express fields (req.method, req.body, headers, url) - so CAP,
   // whose handlers expose the raw express request, can hand it the same objects
@@ -156,21 +165,75 @@ cds.on("bootstrap", (app) => {
     // was dropped unread, and the framework answered the empty roundtrip
     // with its start page. An ICF handler reads the body it is given.
     express.raw({ type: () => true, limit: conf.limit }),
-    async (req, res) => {
-      try {
-        const { cl_express_icf_shim } = await ready;
-        if (!req.body || !Buffer.isBuffer(req.body)) req.body = Buffer.alloc(0);
-        await cl_express_icf_shim.run({ req, res, class: "ZCL_SICF" });
-      } catch (e) {
-        // The detail goes to the log, not to the caller: CDS and driver messages
-        // carry entity names, SQL fragments and deployment paths, none of which
-        // a roundtrip client needs and all of which are free reconnaissance.
-        const ref = cds.context?.id ?? "-";
-        LOG.error(`roundtrip failed (${ref}):`, e);
-        if (!res.headersSent) res.status(500).type("text/plain").send(`roundtrip failed (${ref})`);
-      }
-    },
+    roundtrip,
     normalize,
     cds.middlewares.errors(),
   );
+
+  // The agent endpoint (lib/agent/) - only where a project switches it on
+  // (cds.requires.cap2ui5.agent). It is mounted the way the roundtrip route
+  // is: CAP's middlewares first, so cds.context.user is the caller; the same
+  // guard and so the same roles; CAP's error middleware last. A tool call
+  // runs `roundtrip` above in process, inside the MCP request - the agent
+  // acts as the user who called, with that user's drafts, and never as
+  // anybody else.
+  if (conf.agent) {
+    const { endpoint } = require("./lib/agent/mcp");
+    app.all(
+      conf.agent.path,
+      ...cds.middlewares.before.filter(Boolean),
+      guard,
+      ...endpoint({ agent: conf.agent, limit: conf.limit, version: require("./package.json").version, ready, roundtrip }),
+      normalize,
+      cds.middlewares.errors(),
+    );
+    LOG.info(`agent endpoint (MCP) at ${conf.agent.path} - audit rows kept ` +
+      (conf.agent.retention ? `${conf.agent.retention} days` : "forever"));
+  }
+
+  // One roundtrip: upstream's express adapter with the framework's ICF handler.
+  //
+  // One at a time per process. The transpiled framework keeps per-request
+  // state where ABAP keeps it per work process - the shim's static server
+  // entity, sy, the open transaction, the handler's class-data - and the
+  // draft store here really awaits (cds.run), so without the queue a second
+  // request runs inside the first and both share that state. The queue is the
+  // node runtime's own fix (host.mjs exclusive( ), abap2UI5/abap2UI5 #2844)
+  // for hosts that call the shim themselves; a failed roundtrip never blocks
+  // the next one. Inside it, each roundtrip runs in its stateful session -
+  // lib/sessions.js, per CAP user.
+  function roundtrip(req, res) {
+    // the stateful session belongs to the user who calls (lib/sessions.js)
+    const user = cds.context?.user;
+    const owner = user?.id ? `${cds.context?.tenant ?? ""}\u0000${user.id}` : "";
+    const run = queue.then(() => withSession(req, res, () => roundtripNow(req, res), { owner }));
+    queue = run.catch(() => {});
+    return run;
+  }
+
+  async function roundtripNow(req, res) {
+    try {
+      const { cl_express_icf_shim } = await ready;
+      if (!req.body || !Buffer.isBuffer(req.body)) req.body = Buffer.alloc(0);
+      await cl_express_icf_shim.run({ req, res, class: "ZCL_SICF" });
+    } catch (e) {
+      // The detail goes to the log, not to the caller: CDS and driver messages
+      // carry entity names, SQL fragments and deployment paths, none of which
+      // a roundtrip client needs and all of which are free reconnaissance.
+      //
+      // The reference is the correlation id, and CAP takes that from the
+      // request's x-correlation-id (or x-request-id ...) header when there is
+      // one - so it is request data nothing has validated, and a backend must
+      // not reflect that into an error body (abap2UI5/protocol, open question
+      // 3). Stripped to what an id is made of, as the framework strips a
+      // class name: a UUID or any other well-formed id passes unchanged.
+      const ref = safeRef(cds.context?.id);
+      LOG.error(`roundtrip failed (${ref}):`, e);
+      // nosniff as the framework's own error bodies carry it: text, never a
+      // page a browser might guess its way into rendering
+      if (!res.headersSent) {
+        res.status(500).type("text/plain").set("X-Content-Type-Options", "nosniff").send(`roundtrip failed (${ref})`);
+      }
+    }
+  }
 });

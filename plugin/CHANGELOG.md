@@ -8,7 +8,42 @@ starts with 0, a minor release may break the API.
 
 ## [Unreleased]
 
+### Added
+
+- An MCP endpoint for AI agents, off unless `cds.requires.cap2ui5.agent` is
+  `true` or `{ path, apps, confirm, forbidden }`: JSON-RPC over Streamable
+  HTTP at `/rest/root/z2ui5/mcp`, with the tools `app_list`, `app_start`,
+  `app_describe` and `app_act` answering abap2UI5's agent snapshot v1 - the
+  MCP server's own code, vendored unchanged in `lib/agent/vendor/`. An app
+  opts in with defineApp( )'s new option `agent` (`true`, `false`, or
+  `{ events: { SAVE: "confirm", "DELETE*": "forbidden" }, description }`), a
+  transpiled ABAP app through `agent.apps`. Agents never fire a `confirm` or
+  `forbidden` event; a `confirm` refusal answers a link that opens the screen
+  for a human, restored from the draft for the same user. A tool call runs
+  the roundtrip in process as the CAP user who called, behind the same roles
+  as the route; anonymous callers are refused even where `roles` lets them
+  into the UI. A session the server lost in a restart is restored from its
+  draft. A `SelectDialog` / `TableSelectDialog` is a table of the snapshot
+  and `app_act` with `row` on its `confirm` picks that row as a click does;
+  the items of a `MessagePopover` / `MessageView` are messages.
+- `cap2ui5.AgentLog`: one row per agent tool call - user, tool, app, session,
+  event, outcome - but never the values an agent entered. Like
+  `cap2ui5.Drafts` it is part of the model, so the next `cds deploy` creates
+  the table, whether the endpoint is on or not.
+- Retention for `cap2ui5.AgentLog`: `cds.requires.cap2ui5.agent.retention`
+  days, 90 unless set, `0` or `false` to keep every row; a value that is not
+  a number of days fails the start. The endpoint deletes the older rows on
+  the way of an agent call, at most once an hour per process and tenant, as
+  the draft store expires drafts on an app start. `purgeAgentLog( { days } )`
+  runs the same `DELETE` from a project's own scheduled job.
+
 ### Changed
+
+- The agent endpoint vendors abap2UI5/mcp-server a4d9f07: the agent client
+  follows the protocol's frontend rules (PROTOCOL check, sap-contextid, one
+  roundtrip at a time per session, popups closed when the app changes, the
+  error body verbatim). The in-process transport answers the client's HEAD
+  token fetch with an empty 200 - the handler never asks for a CSRF token.
 
 - `package.json` names the author (cap2UI5), as npm and the Best of CAP
   listing show it.
@@ -35,6 +70,25 @@ starts with 0, a minor release may break the API.
 
 ### Fixed
 
+- A transpiled ABAP app that calls `set_session_stateful( )` no longer answers
+  other users. The framework keeps a stateful app's handler in class-data - one
+  per roll area on an SAP system, one per process here - and took it for every
+  later request of every user; the ICF cookie transform failed first with a
+  500 that left it in place all the same. Stateful sessions are kept per CAP
+  user now (`lib/sessions.js`, the layer of @abap2ui5/node-runtime's
+  `withSession( )`): a session id the plugin issues travels as `sap-contextid`
+  (a header when the request asks for it, else an HttpOnly cookie), only that
+  user's requests naming it get the session, and `set_session_stateful(
+  abap_false )`, the terminate ping and 30 idle minutes end it. Sessions live
+  in the process. JS apps still cannot go stateful.
+
+- Roundtrips run one at a time per process. The transpiled framework keeps
+  per-request state in statics (the shim's server entity, `sy`, the open
+  transaction, the handler's class-data) and the CDS draft store really
+  awaits, so a second request could run inside the first and share it. The
+  same queue as the node runtime's `exclusive( )` (abap2UI5/abap2UI5 #2844);
+  a failed roundtrip never blocks the next one.
+
 - `abap2js`: a class with `CLASS-METHODS` is refused as such. abaplint files
   `CLASS-METHODS` under the statement `METHODS` has, so a static method was
   read as an instance method; and a generic parameter type - `TYPE ANY
@@ -47,6 +101,14 @@ starts with 0, a minor release may break the API.
   header. It was dropped unread - `express.raw( )` parses only what a
   `Content-Type` names - and the framework answered the empty roundtrip
   with its start page.
+- The 500 the plugin answers when an app throws no longer reflects request
+  data: its reference is the correlation id, which CAP takes from the
+  request's `x-correlation-id` header, and it is now stripped to letters,
+  digits and `. _ : -` (at most 128) - a UUID passes unchanged. The body
+  also carries `X-Content-Type-Options: nosniff`, as the framework's error
+  bodies do. abap2UI5/protocol, open question 3: a backend must not reflect
+  request data it did not validate into an error body. The framework's own
+  error bodies are fixed in abap2UI5 core and arrive with the runtime.
 
 ## [0.4.0] - 2026-09-30
 

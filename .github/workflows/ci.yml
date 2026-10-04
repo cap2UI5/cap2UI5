@@ -1,7 +1,8 @@
 # Build upstream's runtime from scratch once, then install the workspace and
 # run everything on every Node and CAP version the plugin declares: lint, the
 # suite (ABI gates, auth, books, concurrency), the cold test, the bench, the
-# consumer test - and the browser, once.
+# consumer test - and the browser, once. Beside them, abap2UI5/protocol's
+# backend conformance suite against this checkout (the job `conformance`).
 name: ci
 
 on:
@@ -140,6 +141,9 @@ jobs:
             '@sap/cds ' + require('@sap/cds/package.json').version,
             '@cap-js/sqlite ' + require('@cap-js/sqlite/package.json').version].join(', ')"
       - run: npm run lint
+      # the agent endpoint's vendored snapshot code against abap2UI5/mcp-server
+      # at the commit it records (plugin/lib/agent/vendor/source.json, ADR-009)
+      - run: npm run agent-vendor:check
       - run: npm test
       - run: npm run cold-test
       - run: npm run bench -- 50
@@ -164,4 +168,46 @@ jobs:
         with:
           name: screenshots
           path: examples/bookshop/screenshots
+          if-no-files-found: ignore
+
+  # abap2UI5/protocol's backend conformance suite against THIS checkout: the
+  # protocol's own runner (scripts/run-conformance.mjs there) starts its
+  # cap2UI5 host with the protocol's conformance apps, and
+  # scripts/conformance.mjs points that host at this checkout's plugin and the
+  # runtime built above, packed as publish packs them - nothing of the suite
+  # is copied here. A failed MUST check fails the job; a SHOULD warns.
+  #
+  # The protocol is pinned to a commit of its main: its checks move with the
+  # spec, and a new check should arrive here by a commit that bumps this SHA,
+  # not overnight. The runtime is upstream's main (or the dispatched
+  # version), so a framework fix shows here as soon as it merges.
+  conformance:
+    needs: runtime
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: runtime
+          path: runtime
+      # The runner installs into this checkout's host directory and runs the
+      # protocol's scripts - no credentials for them to read.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: abap2UI5/protocol
+          ref: d1251093e3cbdd9a44ac1a29770a2c1add0ec46b # main, 2026-10-03
+          path: .protocol
+          persist-credentials: false
+      - run: npm run conformance -- .protocol --profile ui5 --json conformance.json
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: conformance
+          path: conformance.json
           if-no-files-found: ignore

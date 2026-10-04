@@ -134,6 +134,8 @@ What is JavaScript's own, and why:
   what an ABAP app does between `NEW` and `nav_app_call( )`.
 - `client.set_session_stateful( )` is not supported and throws; the
   interface's obsolete `*_model_update( )` do nothing, as they do in ABAP.
+  (A transpiled ABAP app can go stateful: its session is kept per CAP user,
+  in the process - a restart or a second instance loses it.)
   `client.raw` is the transpiled `z2ui5_if_client` itself, asynchronous.
 
 **`check_on_navigated( )`, not `check_on_init( )`, is the render branch.**
@@ -342,6 +344,167 @@ project's, and the log says so. A directory outside the package, or one the
 installed package does not have - a `files` entry forgotten - is skipped with
 a warning.
 
+## Agents: the MCP endpoint
+
+AI agents - Claude Code, any client that speaks the
+[Model Context Protocol](https://modelcontextprotocol.io) over HTTP - can
+operate the project's apps: read a screen as data, fill its fields, fire its
+events. Through the app's own `main( )`, as the CAP user who calls, with that
+user's drafts and roles; there is no second API and no technical user. It is
+the same idea, the same four tools and the same answers as abap2UI5's
+[MCP server](https://github.com/abap2UI5/mcp-server) (for the transpiled
+backend in development) and abap2UI5's ABAP agent addon (inside an SAP
+system).
+
+**It is off** until the project switches it on:
+
+```json
+"cds": { "requires": { "cap2ui5": { "agent": true } } }
+```
+
+| key under `agent` | default | |
+|---|---|---|
+| `path` | `/rest/root/z2ui5/mcp` | where the endpoint answers |
+| `apps` | none | apps the project opts in - names, or patterns with `*`; how a transpiled ABAP app opts in |
+| `confirm` | none | events an agent hands to a human: `"EVENT"` for every app, `"APP:EVENT"` for one, `*` as a wildcard |
+| `forbidden` | none | events an agent never fires, written the same way |
+| `retention` | `90` | days a row of the audit log `cap2ui5.AgentLog` is kept; `0` or `false` keeps every row - see [Audit retention](#audit-retention) |
+
+A key the endpoint does not know, or a value of the wrong type, is refused
+at start - `"forbiden"` would otherwise leave the event open, and a
+`"retention": "90d"` read as "forever" or as "now" would be a wrong guess
+for an audit log either way. Any object switches the endpoint on, so
+`CDS_REQUIRES_CAP2UI5_AGENT_RETENTION=30` alone does too.
+
+**An app opts in** where it is defined, and classifies its events there:
+
+```js
+defineApp("ZCL_JS_BOOKS", class { /* ... */ }, {
+  agent: { description: "Search the bookshop's books", events: { ADD: "confirm", "DELETE*": "forbidden" } },
+});
+```
+
+`agent: true` opts in with every event allowed; `agent: false` keeps the app
+out whatever `apps` says - for an app that administers something. An event is
+`allowed`, `confirm` or `forbidden`; the app's word and the settings' are
+both applied and the stricter wins, so a project can tighten what an app
+allows but not loosen it. A setting `"APP:EVENT"` covers the app on the
+screen and the app the session was started with, so a framework popup an app
+calls (`z2ui5_cl_pop_to_confirm`) is covered by that app's rules.
+
+**Connecting a client** - Claude Code, for one:
+
+```sh
+claude mcp add --transport http bookshop http://localhost:4004/rest/root/z2ui5/mcp \
+  --header "Authorization: Basic $(printf '%s' 'alice:' | base64)"
+```
+
+In production the header is the token your identity provider issues (XSUAA,
+IAS) - pass it as a header, CAP does not implement MCP's own authorization
+discovery.
+
+### The tools
+
+| tool | input | answer |
+|---|---|---|
+| `app_list` | `filter?` | `{ count, apps: [{ app, source: "app" \| "config", description? }], hint }` |
+| `app_start` | `app`, `values?`, `max_rows?` (0-200, default 20) | snapshot |
+| `app_describe` | `session`, `max_rows?` | the snapshot of the last answer - no roundtrip |
+| `app_act` | `session`, `values?`, `event?`, `args?`, `row?`, `max_rows?` | the next snapshot |
+
+The answer is **agent snapshot v1**, specified in the MCP server's
+[docs/agent-snapshot.md](https://github.com/abap2UI5/mcp-server/blob/main/docs/agent-snapshot.md):
+`fields` (id, model path, label, kind, value, editable, choices), `actions`
+(event, arguments, label, enabled, row scope), `tables` (columns, the first
+rows, selection), `messages`, `texts`, `unsupported`, and `pending`. It is
+not reimplemented here: the plugin carries the MCP server's own
+`viewxml.mjs`, `snapshot.mjs` and `appclient.mjs`, vendored unchanged at a
+recorded commit (`lib/agent/vendor/`, `npm run agent-vendor`), and adds one
+key - an action an app or the settings classify `confirm` or `forbidden`
+carries `"policy"`, as in the ABAP addon. `values` address a field by id,
+model path or name, a table cell as `"<table>/<row>/<COLUMN>"`; `event` is an
+event name or an action id; values without an event stay pending, as typing
+does in the browser. Every refusal is a tool result with `isError` and a
+sentence naming what is allowed, and a refused act sends nothing.
+
+### Security model
+
+- **Off by default**, and an app is reachable only when it opted in or the
+  settings name it.
+- **The real user, always.** The endpoint runs behind CAP's middlewares and
+  the same `roles` guard as the roundtrip route: 401 with the auth
+  strategy's challenge for anonymous callers, 403 for a user without the
+  role. It admits authenticated users only, even where `roles` lets anybody
+  into the UI. A tool call runs the route's own roundtrip handler in
+  process, inside the MCP request, so the draft store binds every draft to
+  that user, and the app's own checks see that user.
+- **`confirm` and `forbidden` events are never fired by an agent.** A
+  `confirm` refusal answers the link that hands the screen to a human:
+  `<origin>/rest/root/z2ui5#/app/<APP>/<session>`. Opened in the browser by
+  the same user, the framework restores the session's draft - the state the
+  agent prepared - and the human checks it and presses the button. Anybody
+  else gets a fresh app: the draft store serves a draft to its owner only.
+  Values the agent left pending are not in the draft; the refusal lists them.
+- **Sessions are owner-scoped.** Each user has a client of their own; a
+  session id of another user's is "unknown", exactly as a missing one.
+- **Audit:** every call writes a row to `cap2ui5.AgentLog` - time, user, the
+  MCP client's User-Agent, tool, app, the session in and out, event,
+  arguments, the outcome (`ok`, `refused`, `confirm`, `forbidden`, `error`)
+  and the refusal. The *values* an agent entered are never stored, only which
+  fields it filled. Like `cap2ui5.Drafts` the entity is in the model and in
+  no service; to show it, expose it in a service of your own with a
+  `@restrict` such as `where: 'owner = $user'`. Rows older than `retention`
+  days are deleted - see below.
+- **Browser-side abuse is refused:** a request whose `Origin` names another
+  host gets 403, and only `Content-Type: application/json` is read (415), so
+  a web page cannot drive the endpoint with a user's cookies.
+
+### Sessions and restarts
+
+A session is the app's draft - in `cap2ui5.Drafts`, owned by the user,
+expiring with the draft expiry - plus what the client remembers of the
+screen: the views in their slots, the pending edits, the last answer
+`app_describe` reads. That memory is the process's (20 sessions per user),
+and a restart loses it while the drafts survive. So a session the server no
+longer knows is **restored from its draft**, the way the handover link
+restores it for a human: the framework renders the app from the draft
+(`check_on_navigated( )` is true). `app_describe` answers the restored screen,
+under a new session id; `app_act` sends nothing and names the new id, since
+the screen the agent chose its action on is not in front of it now. Edits
+pending before the restart are lost, as a browser tab's are. Only a session
+the audit log shows the same user's agent reached, which is the newest of
+its line and whose draft has not expired, is restored.
+
+### Audit retention
+
+A row of `cap2ui5.AgentLog` is kept `retention` days - 90 unless the
+setting says otherwise - and then deleted, the way the draft store expires
+drafts: one `DELETE` of everything older than a cutoff, run on the way of an
+ordinary request rather than by a timer of the plugin's own. The drafts are
+swept on every app start; the log is swept by an agent call, **at most once
+an hour per process and tenant**, so the endpoint pays for one `DELETE` an
+hour. A sweep that fails is logged as a warning and tried again an hour
+later; it never fails the agent's call.
+
+`"retention": 0` (or `false`) keeps every row. A project that prefers a
+scheduled job of its own sets that, so the endpoint leaves the log alone,
+and runs the same `DELETE` from the job:
+
+```js
+const { purgeAgentLog } = require("@cap2ui5/cds-plugin");
+const deleted = await purgeAgentLog({ days: 90 });   // without `days`: the setting's retention, else 90
+```
+
+It deletes every user's rows older than the cutoff and answers how many. It
+runs in `cds.context`'s transaction where there is one - in a multitenant
+application, call it per tenant inside `cds.tx({ tenant }, ...)` (the
+endpoint's own sweep follows the caller's tenant).
+
+A session is restored after a restart only from its audit rows, so a
+retention shorter than the draft expiry (`draft_exp_time_in_hours`, 4 hours
+unless the user exit changes it) would lose sessions whose drafts are still
+there - which takes an expiry of weeks.
+
 ## Configure
 
 Under `cds.requires.cap2ui5` - in `package.json`, a `.cdsrc.json`, a profile or
@@ -363,9 +526,10 @@ Under `cds.requires.cap2ui5` - in `package.json`, a `.cdsrc.json`, a profile or
 | `body_parser.limit` | CAP's `cds.server.body_parser.limit`, else `10mb` | the largest roundtrip body; a larger one gets 413 |
 | `compression` | `true` | gzip for the page and the roundtrips, where the browser accepts it; `false` leaves compressing to a proxy in front |
 | `accelerate` | `true` | calls the runtime's `accelerate( )` where it has one - the releases after 1.145.0, see [Performance](#performance); `false` runs the runtime's own code |
+| `agent` | off | the MCP endpoint for AI agents - `true` or `{ path, apps, confirm, forbidden, retention }`, see [Agents](#agents-the-mcp-endpoint) |
 
 `"cap2ui5": false` switches the plugin off: no route, and no `cap2ui5.Drafts`
-table in the model.
+or `cap2ui5.AgentLog` table in the model.
 
 The route runs behind CAP's own middlewares and answers like a CAP service.
 Whatever `cds.requires.auth` is configured to identifies the user. A caller who
@@ -406,10 +570,15 @@ theme, the draft expiry, the CSRF gate — comes from the user exit,
 - **Logs:** the plugin logs through `cds.log('cap2ui5')`, so production gets
   JSON records with the request's correlation id. Set the level with
   `cds.log.levels.cap2ui5`.
-- **Database:** `cap2ui5.Drafts` is part of the model, so `cds deploy` and
-  `cds build --production` create it like any other table (`.hdbtable` for
-  SAP HANA). A draft is deleted after the user exit's
-  `draft_exp_time_in_hours`, 4 hours unless the exit changes it.
+- **Database:** `cap2ui5.Drafts` and `cap2ui5.AgentLog` are part of the
+  model, so `cds deploy` and `cds build --production` create them like any
+  other table (`.hdbtable` for SAP HANA). The agent log's table is there
+  whether the endpoint is on or not - the database is built from the model
+  where `cds build` runs, the endpoint is switched on where the server runs,
+  often by an environment variable the build never sees; ADR-009 has the
+  reasons. It is written only while the endpoint is on, and its rows are
+  deleted after `agent.retention` days (90). A draft is deleted after the
+  user exit's `draft_exp_time_in_hours`, 4 hours unless the exit changes it.
 - **Multitenancy (MTX):** not tested yet. The draft store reads and writes
   through `cds.run`, which follows `cds.context`. The drafts should therefore
   land in each tenant's database like any other row, but no test proves it.

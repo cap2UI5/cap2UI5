@@ -7,6 +7,8 @@ runtime/setup/
 runtime/downport/
 runtime/srv/
 .upstream/
+# abap2UI5/protocol, checked out for scripts/conformance.mjs (which installs into it)
+.protocol/
 
 # the example's database and screenshots
 examples/*/db.sqlite*
