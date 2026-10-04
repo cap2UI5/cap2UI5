@@ -157,18 +157,17 @@ and answers like a CAP service: 401 with the login challenge of
 `cds.requires.auth`'s strategy, 403 for a user without the role, 413 for a
 body over the limit.
 
-**Agents.** With `cds.requires.cap2ui5.agent` switched on, AI agents operate
-the apps over MCP (`/rest/root/z2ui5/mcp`): `app_list`, `app_start`,
-`app_describe`, `app_act` - the tools and the agent snapshot of abap2UI5's
-MCP server, whose code the plugin carries vendored. An app opts in with
-`defineApp( name, cls, { agent: { events: { SAVE: "confirm", DELETE: "forbidden" } } })`,
-a transpiled ABAP app through the setting's `apps`; agents never fire a
-`confirm` or `forbidden` event, and a `confirm` refusal answers a link that
-opens the screen for a human. The agent is always the CAP user who calls -
-same roles as the UI, the user's own drafts - and every call is logged in
-`cap2ui5.AgentLog`. [plugin/README.md](plugin/README.md#agents-the-mcp-endpoint)
-has the security model; [ADR-009](docs/adr/adr-009-agent-endpoint.md) the
-decisions.
+## Building with AI
+
+The app API is abap2UI5's, so abap2UI5's agent setup serves a cap2UI5 app
+too: the [MCP server](https://github.com/abap2UI5/mcp-server)'s
+`api_reference` and `examples` answer with the `z2ui5_if_client` method and
+the sample to start from, and an app written in ABAP - validated, deployed and
+booted headless by the server, without an SAP system - is one
+`cap2ui5 abap2js` away from `srv/apps/`. The setup for every client, the
+Claude Code plugin among them, is on the
+[AI page](https://abap2ui5.github.io/docs/get_started/ai.html) of the abap2UI5
+documentation.
 
 ## This repository
 
