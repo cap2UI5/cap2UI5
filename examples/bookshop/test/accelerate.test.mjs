@@ -35,8 +35,11 @@ export function accelerate(...args) {
 }
 `;
 // the shape of 1.145.0's srv/host.mjs: it imports what the boot loaded, and defines functions
+// the shim sits where the real runtime has it - output/express-icf-shim/ from
+// 1.147.0 on (the transpiler 2.14 layout), the flat output/ before
+const SHIM = path.relative(real.dir, real.shim).split(path.sep).join("/");
 const HOST = `import { initializeABAP } from "../output/init.mjs";
-import { cl_express_icf_shim } from "../output/cl_express_icf_shim.clas.mjs";
+import { cl_express_icf_shim } from "../${SHIM}";
 export const HANDLER_CLASS = "ZCL_SICF";
 export function initialize() { return initializeABAP(); }
 export function createHandler() { return (req, res) => cl_express_icf_shim.run({ req, res, class: HANDLER_CLASS }); }
@@ -53,7 +56,7 @@ function standIn(exports, files) {
     JSON.stringify({ name: "@abap2ui5/node-runtime", version, type: "module", exports }));
   for (const [file, src] of Object.entries(files)) fs.writeFileSync(path.join(dir, "srv", file), src);
   return { ...real, dir, version, init: path.join(dir, "output", "init.mjs"),
-    shim: path.join(dir, "output", "cl_express_icf_shim.clas.mjs") };
+    shim: path.join(dir, path.relative(real.dir, real.shim)) };
 }
 
 /** What the plugin logged at info and at debug while fn ran. */
