@@ -37,7 +37,12 @@ carries more than this stand-in: `srv/host.mjs`, an entry point with
 `initialize()` and `createHandler()`, which the plugin does not use - it boots
 through `output/init.mjs` - and, from the release after 1.145.0,
 `accelerate()`, which the plugin calls where the manifest declares it (`srv/`
-above). Neither carries `webapp/`: the framework's GET page embeds
+above). From the release after 1.147.0, `srv/host.mjs` claims the `output/`
+it loads (`srv/claim.mjs`), because a process runs one transpiled output. The
+output the plugin boots is that same one, so the claim holds. The package also
+gains the bin `abap2ui5-transpile`, which builds a host's own ABAP apps into a
+complete runtime of their own. The plugin does not need it: its apps are
+JavaScript, and `abap2js` translates ABAP ones into them. The package carries no `webapp/`: the framework's GET page embeds
 the whole UI5 component, so there are no frontend files to serve. Once it is on npm, `scripts/assemble-runtime.sh --package
 X.Y.Z` fills this directory from it, and ADR-008's cutover step 2 deletes the
 stand-in in favour of a plain dependency.

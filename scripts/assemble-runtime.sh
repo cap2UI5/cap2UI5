@@ -45,7 +45,8 @@ mkdir -p "$RT/setup" && cp "$REF/node/setup/setup.mjs" "$RT/setup/"
 # the ABAP the output was transpiled from - abap2js reads the client's types there
 if [ -d "$REF/node/downport" ]; then cp -r "$REF/node/downport" "$RT/downport"; fi
 # The package's entries and its manifest, as the release packs them
-# (node/setup/pack-npm.mjs): srv/host.mjs and its siblings, and
+# (node/setup/pack-npm.mjs): srv/host.mjs and its siblings (from the release
+# after 1.147.0 hostcore.mjs, framework.mjs and claim.mjs among them), and
 # node/setup/npm.package.json with the checkout's version. Without them a
 # runtime built from upstream's main is the stand-in - no `exports` - and the
 # plugin's lookup of accelerate( ) (lib/runtime.js) never reaches the code
@@ -56,7 +57,13 @@ if [ -f "$REF/node/setup/npm.package.json" ] && [ -f "$REF/node/srv/host.mjs" ];
   for f in "$REF"/node/srv/*.mjs; do
     case "$(basename "$f")" in express.mjs) ;; *) cp "$f" "$RT/srv/" ;; esac
   done
-  if [ -f "$REF/node/setup/own-apps.mjs" ]; then cp "$REF/node/setup/own-apps.mjs" "$RT/setup/"; fi
+  # The package's bins, where the checkout has them: abap2ui5-transpile
+  # (setup/transpile.mjs, from the release after 1.147.0) and its deprecated
+  # predecessor abap2ui5-own-apps. The plugin runs neither - its apps are
+  # JavaScript, and abap2js translates ABAP ones - but the manifest names them.
+  for f in own-apps.mjs transpile.mjs; do
+    if [ -f "$REF/node/setup/$f" ]; then cp "$REF/node/setup/$f" "$RT/setup/"; fi
+  done
   # The dependencies EXACT, from the checkout's lockfile, as pack-npm.mjs pins
   # them: transpiled output is tied to the runtime it was transpiled for, and
   # accelerate( ) installs itself only on the one runtime version it was

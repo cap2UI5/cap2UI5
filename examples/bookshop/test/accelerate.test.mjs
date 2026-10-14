@@ -16,6 +16,7 @@ import { createRequire } from "node:module";
 import os from "node:os";
 import path from "node:path";
 import { after, before, test } from "node:test";
+import { pathToFileURL } from "node:url";
 import cds from "@sap/cds";
 
 const require = createRequire(import.meta.url);
@@ -152,6 +153,24 @@ test("a runtime that declares the entry and cannot load it fails the start, as a
   } finally {
     globalThis.abap = abap;
   }
+});
+
+// The releases after 1.147.0 split the main entry: srv/host.mjs claims its
+// output/ first (srv/claim.mjs), loads it, binds the framework classes
+// (srv/framework.mjs) and re-exports srv/hostcore.mjs - a process runs ONE
+// transpiled output, and a second one is refused before its init.mjs loads.
+// The output the plugin booted is the one that entry claims, so importing it
+// after the boot is still the no-op findAccelerate( ) relies on. Only where
+// the workspace's runtime ships that entry - assemble-runtime.sh from an
+// upstream checkout, or --package of such a release.
+test("the main entry that claims its output: importing it after the boot keeps the booted runtime", async (t) => {
+  if (!fs.existsSync(path.join(real.dir, "srv", "claim.mjs"))) return t.skip("the workspace's runtime has no srv/claim.mjs");
+  const abap = globalThis.abap;
+  const host = await import(pathToFileURL(path.join(real.dir, "srv", "host.mjs")).href);
+  assert.equal(globalThis.abap, abap, "importing the main entry replaced the running ABAP runtime");
+  assert.equal(typeof host.accelerate, "function");
+  const { claimOutput } = await import(pathToFileURL(path.join(real.dir, "srv", "framework.mjs")).href);
+  assert.doesNotThrow(() => claimOutput(pathToFileURL(path.join(fs.realpathSync(real.dir), "output")).href + "/"), "it claimed another output than the booted one");
 });
 
 test("cds.requires.cap2ui5.accelerate is on unless it is false", () => {
