@@ -24,8 +24,29 @@ function locate() {
     dir,
     version: require(pkg).version,
     init: path.join(dir, "output", "init.mjs"),
-    shim: path.join(dir, "output", "cl_express_icf_shim.clas.mjs"),
+    shim: shimPath(dir),
   };
+}
+
+/** The express adapter of the runtime package in `dir`. Two layouts: from
+ *  1.147.0 on (`@abaplint/transpiler` 2.14) `output/` holds a folder per
+ *  origin and the shim sits in `output/express-icf-shim/`; up to 1.146.0
+ *  `output/` is flat. `init.mjs` stays at `output/init.mjs` in both. The
+ *  first that exists wins, and a package with neither names what it lacks
+ *  instead of failing on the import. */
+function shimPath(dir) {
+  const candidates = [
+    path.join(dir, "output", "express-icf-shim", "cl_express_icf_shim.clas.mjs"),
+    path.join(dir, "output", "cl_express_icf_shim.clas.mjs"),
+  ];
+  const found = candidates.find((file) => fs.existsSync(file));
+  if (!found) {
+    throw new Error(
+      `@abap2ui5/node-runtime in ${dir} carries no cl_express_icf_shim.clas.mjs under output/ ` +
+        "(neither output/express-icf-shim/ of the 2.14 layout nor the flat output/ of 1.146.0 and older)",
+    );
+  }
+  return found;
 }
 
 /**

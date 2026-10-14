@@ -8,6 +8,8 @@ starts with 0, a minor release may break the API.
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-14
+
 ### Added
 
 - An MCP endpoint for AI agents, off unless `cds.requires.cap2ui5.agent` is
@@ -39,6 +41,16 @@ starts with 0, a minor release may break the API.
 
 ### Changed
 
+- It hosts `@abap2ui5/node-runtime` 1.147.0 (abap2UI5 1.147.0): a bound table
+  of flat rows written to JSON directly, the draft kept as a digest, the
+  developer tools as a bundle of their own, the request URL in a 500 body
+  stripped to the characters a URL is made of, and the two embedded-page
+  switches `ownsHash` / `ownsPage`. The package's `output/` is a folder per
+  origin from this release on (`@abaplint/transpiler` 2.14): the plugin finds
+  the express adapter under `output/express-icf-shim/` there and under the
+  flat `output/` of 1.146.0 and older, so an `overrides` to an older runtime
+  still boots. A host that imports a module of `output/` by its own path has
+  to follow the layout (abap2UI5's release notes name the mapping).
 - The agent endpoint vendors abap2UI5/mcp-server a4d9f07: the agent client
   follows the protocol's frontend rules (PROTOCOL check, sap-contextid, one
   roundtrip at a time per session, popups closed when the app changes, the
@@ -451,7 +463,8 @@ The first release: abap2UI5 as a CAP plugin.
 - Apps are plain JavaScript classes (`defineApp`).
 - The user exit is available as `defineExit`.
 
-[Unreleased]: https://github.com/cap2UI5/cap2UI5/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/cap2UI5/cap2UI5/compare/v0.5.0...HEAD
+[0.5.0]: https://www.npmjs.com/package/@cap2ui5/cds-plugin/v/0.5.0
 [0.4.0]: https://www.npmjs.com/package/@cap2ui5/cds-plugin/v/0.4.0
 [0.3.1]: https://www.npmjs.com/package/@cap2ui5/cds-plugin/v/0.3.1
 [0.3.0]: https://www.npmjs.com/package/@cap2ui5/cds-plugin/v/0.3.0
