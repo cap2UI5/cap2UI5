@@ -525,6 +525,7 @@ Under `cds.requires.cap2ui5` - in `package.json`, a `.cdsrc.json`, a profile or
 | `routes` | `/sap/bc/z2ui5`, `/rest/root/z2ui5` | where the roundtrip answers |
 | `body_parser.limit` | CAP's `cds.server.body_parser.limit`, else `10mb` | the largest roundtrip body; a larger one gets 413 |
 | `compression` | `true` | gzip for the page and the roundtrips, where the browser accepts it; `false` leaves compressing to a proxy in front |
+| `timeout` | `60000` | the milliseconds an app's async `main( )` may take. Roundtrips run one at a time per process, so a `main( )` that waits holds everybody else's; past the limit its roundtrip is given up with a 504, its draft is not written and the next one runs. `0` or `false` is no limit. A roundtrip that waited a second or more for its turn is logged as a warning |
 | `accelerate` | `true` | calls the runtime's `accelerate( )` where it has one - the releases after 1.145.0, see [Performance](#performance); `false` runs the runtime's own code |
 | `agent` | off | the MCP endpoint for AI agents - `true` or `{ path, apps, confirm, forbidden, retention }`, see [Agents](#agents-the-mcp-endpoint) |
 

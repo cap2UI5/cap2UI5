@@ -11,6 +11,7 @@
 //     "routes": ["/sap/bc/z2ui5", "/rest/root/z2ui5"],
 //     "body_parser": { "limit": "10mb" },            optional, see below
 //     "compression": false,                          gzip off - lib/compression.js
+//     "timeout": 60000,                              ms an async main( ) may take; 0 or false: no limit
 //     "accelerate": false,                           the runtime's accelerate( ) off
 //     "agent": true                                  the MCP endpoint - lib/agent/, off by default
 //   } } }
@@ -29,6 +30,22 @@ const DEFAULTS = require("../package.json").cds.requires.cap2ui5;
 /** A roundtrip carries the app's whole model, so a table of a few thousand
  *  rows is an ordinary request - express's 100kb default would refuse it. */
 const DEFAULT_LIMIT = "10mb";
+
+/** An async main( ) holds every other roundtrip of the process while it
+ *  waits (cds-plugin.js, roundtrip( )) - a minute is past what a browser's
+ *  user and most proxies in front wait for an answer. */
+const DEFAULT_TIMEOUT = 60000;
+
+/** timeout, normalized: the milliseconds an async main( ) may take, or 0 - no
+ *  limit. Anything else fails the start: a limit that silently is none is
+ *  worse than no setting. */
+function timeoutOf(value) {
+  if (value === undefined || value === null) return DEFAULT_TIMEOUT;
+  if (value === false || value === 0) return 0;
+  if (typeof value === "number" && Number.isFinite(value) && value > 0) return value;
+  throw new Error("[cap2ui5] cds.requires.cap2ui5.timeout is the number of milliseconds an app's async main( ) " +
+    `may take - 0 or false for no limit - not ${JSON.stringify(value)}`);
+}
 
 /**
  * The effective settings, or null when the plugin is switched off.
@@ -75,10 +92,13 @@ function config(env = cds.env) {
     // runs its own code, for a project that meets a fast path's limit and
     // for measuring what the accelerations save
     accelerate: conf.accelerate !== false,
+    // how long an async main( ) may hold the roundtrips behind it, in ms;
+    // 0 - no limit (lib/define-app.js, within( ))
+    timeout: timeoutOf(conf.timeout),
     // the MCP endpoint agents operate apps through - null, the default, is
     // no route at all; see lib/agent/policy.js for what the object holds
     agent: agentConfig(conf.agent, routes),
   };
 }
 
-module.exports = { config, DEFAULT_LIMIT };
+module.exports = { config, DEFAULT_LIMIT, DEFAULT_TIMEOUT };

@@ -148,6 +148,10 @@ array, a cycle) is reported by its path and left out; the app runs without it. A
 - `body_parser.limit` (CAP's `cds.server.body_parser.limit`, else `10mb`)
 - `compression` (default `true`): gzip for the page and the roundtrips;
   `false` leaves it to a proxy in front
+- `timeout` (default `60000`): the milliseconds an app's async `main( )` may
+  take before its roundtrip is given up with a 504; `0` or `false` is no
+  limit. Roundtrips run one at a time per process, so a `main( )` that waits
+  holds everybody else's
 - `accelerate` (default `true`): the runtime's `accelerate( )`, where it has
   one; `false` runs the runtime's own code
 - `agent` (default off): the MCP endpoint for AI agents, below

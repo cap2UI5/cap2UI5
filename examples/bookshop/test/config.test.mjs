@@ -31,9 +31,19 @@ test("the defaults: srv/apps, authenticated users, both routes, 10mb, gzip, the 
     limit: DEFAULT_LIMIT,
     compression: true,
     accelerate: true,
+    timeout: 60000,
     agent: null,
   });
   assert.equal(DEFAULT_LIMIT, "10mb");
+});
+
+test("timeout: milliseconds; 0 or false is no limit; anything else fails the start", () => {
+  assert.equal(config(env({ own: { timeout: 1500 } })).timeout, 1500);
+  assert.equal(config(env({ own: { timeout: 0 } })).timeout, 0);
+  assert.equal(config(env({ own: { timeout: false } })).timeout, 0);
+  for (const bad of ["60s", -1, true, Infinity]) {
+    assert.throws(() => config(env({ own: { timeout: bad } })), /cds\.requires\.cap2ui5\.timeout is the number of milliseconds/);
+  }
 });
 
 test("compression: false switches gzip off; unset or true leaves it on", () => {

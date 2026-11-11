@@ -8,6 +8,27 @@ starts with 0, a minor release may break the API.
 
 ## [Unreleased]
 
+### Added
+
+- `cds.requires.cap2ui5.timeout`: the milliseconds an app's async `main( )`
+  may take, `60000` unless set, `0` or `false` for no limit; a value that is
+  not a number of milliseconds fails the start. Roundtrips run one at a time
+  per process, so a `main( )` that waited - a slow query, a remote call that
+  never answered - held every other user's roundtrip, and one that never
+  settled held the process for good. Past the limit the roundtrip is given up
+  with `504 roundtrip timed out (<ref>)`, its draft is not written and the
+  next roundtrip runs. A synchronous `main( )` and a transpiled ABAP app are
+  not timed.
+- A roundtrip that waited a second or more for its turn is logged as a
+  warning, with the wait and how many were ahead of it - at most every ten
+  seconds.
+
+### Changed
+
+- An async `main( )` that takes longer than a minute now fails its roundtrip
+  (above). Raise `cds.requires.cap2ui5.timeout`, or set it to `0`, for an app
+  that legitimately takes longer.
+
 ## [0.5.0] - 2026-10-14
 
 ### Added
