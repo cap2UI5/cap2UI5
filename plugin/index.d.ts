@@ -436,3 +436,13 @@ export class Abap2jsError extends Error {
  * cds.tx({ tenant }).
  */
 export function purgeAgentLog(options?: { days?: number | false; now?: Date }): Promise<number>;
+
+/**
+ * Deletes the expired drafts (cap2ui5.Drafts) - of every user - and answers
+ * how many it deleted: the DELETE the framework runs when somebody opens an
+ * app, for a project that wants it on a schedule as well. `hours` defaults to
+ * the user exit's draft_exp_time_in_hours, else 4. Runs in cds.context's
+ * transaction where there is one - in a multitenant application, call it per
+ * tenant inside cds.tx({ tenant }).
+ */
+export function purgeDrafts(options?: { hours?: number; now?: Date }): Promise<number>;

@@ -169,12 +169,36 @@ class ZCL_CDS_DRAFT_STORE {
     // app_start branch) - not on the roundtrips of an app's events. So it
     // runs about as often as somebody opens an app, and it must not raise:
     // an expired draft left in the table is no reason to refuse the start.
-    try {
-      const { Drafts } = cds.entities("cap2ui5");
-      const cutoff = new Date(Date.now() - (await expiryHours()) * 3600 * 1000).toISOString();
-      await cds.run(DELETE.from(Drafts).where({ createdAt: { "<": cutoff } }));
-    } catch { /* a failed cleanup must never fail the roundtrip */ }
+    try { await purge(); } catch { /* a failed cleanup must never fail the roundtrip */ }
   }
 }
 
-module.exports = { ZCL_CDS_DRAFT_STORE };
+/**
+ * Deletes the cap2ui5.Drafts rows older than `hours` - of every user, the
+ * DELETE cleanup( ) above runs on an app start - and answers how many it
+ * deleted. For a project's own scheduled job: the framework cleans up only
+ * when somebody opens an app, so where nobody does for a while the expired
+ * drafts - each a whole app state - stay in the table until somebody does.
+ * Runs in cds.context's transaction where there is one, so a multitenant
+ * application calls it once per tenant, inside cds.tx({ tenant }).
+ *
+ * @param {object} [o]
+ * @param {number} [o.hours] the expiry; default: the user exit's
+ *   draft_exp_time_in_hours, as the framework reads it, else 4
+ * @param {Date} [o.now] the moment the cutoff is counted back from - for a test
+ */
+async function purge({ hours, now = new Date() } = {}) {
+  if (hours !== undefined && !(typeof hours === "number" && Number.isFinite(hours) && hours > 0)) {
+    throw new Error("[cap2ui5] purgeDrafts( { hours } ) takes the number of hours a draft is kept, above 0 - " +
+      `not ${JSON.stringify(hours)}`);
+  }
+  const { Drafts } = cds.entities("cap2ui5");
+  if (!Drafts) {
+    throw new Error("[cap2ui5] cap2ui5.Drafts is not in the model - the plugin is switched off " +
+      "(cds.requires.cap2ui5: false), or the model is not loaded yet");
+  }
+  const cutoff = new Date(now.getTime() - (hours ?? await expiryHours()) * 3600 * 1000).toISOString();
+  return Number(await cds.run(DELETE.from(Drafts).where({ createdAt: { "<": cutoff } }))) || 0;
+}
+
+module.exports = { ZCL_CDS_DRAFT_STORE, purge };

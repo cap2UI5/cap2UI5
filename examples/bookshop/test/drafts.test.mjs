@@ -19,7 +19,9 @@ import { test } from "node:test";
 import cds from "@sap/cds";
 import { post, serve } from "./server.mjs";
 
-const { ZCL_CDS_DRAFT_STORE } = createRequire(import.meta.url)("@cap2ui5/cds-plugin/lib/draft-store.js");
+const require = createRequire(import.meta.url);
+const { ZCL_CDS_DRAFT_STORE } = require("@cap2ui5/cds-plugin/lib/draft-store.js");
+const { purgeDrafts } = require("@cap2ui5/cds-plugin");
 const s = serve();
 
 /** A draft store call as `user`, inside one transaction - one snapshot. */
@@ -81,5 +83,36 @@ test("cleanup( ) runs when an app starts, not on the roundtrips of its events", 
     assert.equal(calls, 2);
   } finally {
     proto.z2ui5_if_ui5_draft_store$cleanup = cleanup;
+  }
+});
+
+// The framework cleans up when somebody opens an app, and only then. A
+// project that wants the expired drafts gone on a schedule runs the same
+// DELETE from a job of its own.
+test("purgeDrafts( ) deletes the expired drafts, of every user, and answers how many", async () => {
+  await cds.connect.to("db");
+  const run = randomUUID().slice(0, 8);
+  const { Drafts } = cds.entities("cap2ui5");
+  const ago = (hours) => new Date(Date.now() - hours * 3600 * 1000).toISOString();
+  const left = async () => (await cds.run(cds.ql.SELECT.from(Drafts).columns("id")
+    .where({ owner: { in: [`ann-${run}`, `ben-${run}`] } }))).map((r) => r.id.slice(8)).sort();
+  await cds.run(cds.ql.INSERT.into(Drafts).entries([
+    { id: `${run}-ann-30h`, owner: `ann-${run}`, createdAt: ago(30), data: "{}" },
+    { id: `${run}-ben-30h`, owner: `ben-${run}`, createdAt: ago(30), data: "{}" },
+    { id: `${run}-ann-3h`, owner: `ann-${run}`, createdAt: ago(3), data: "{}" },
+    { id: `${run}-ann-1h`, owner: `ann-${run}`, createdAt: ago(1), data: "{}" },
+  ]));
+  try {
+    // no hours: the framework's expiry - the user exit's, which is 24 hours
+    // in this project (srv/apps/exit.js) and 4 where no exit says otherwise
+    assert.ok(await purgeDrafts() >= 2, "both thirty-hour-old drafts are counted");
+    assert.deepEqual(await left(), ["-ann-1h", "-ann-3h"]);
+    assert.equal(await purgeDrafts({ hours: 2 }), 1, "the three-hour-old draft, and nobody's younger one");
+    assert.deepEqual(await left(), ["-ann-1h"]);
+    for (const bad of [0, -1, "4", false]) {
+      await assert.rejects(purgeDrafts({ hours: bad }), /purgeDrafts\( \{ hours \} \) takes the number of hours/);
+    }
+  } finally {
+    await cds.run(cds.ql.DELETE.from(Drafts).where({ owner: { in: [`ann-${run}`, `ben-${run}`] } }));
   }
 });
