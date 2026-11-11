@@ -4,10 +4,12 @@ Guidance for AI agents and contributors. Read before making any change.
 
 ## What this is
 
-abap2UI5 hosted in CAP. **There is no port here**: `plugin/` is ~570 lines of
-hand-written JavaScript that boots upstream's transpiled runtime
+abap2UI5 hosted in CAP. **There is no port here**: `plugin/` is hand-written
+JavaScript that boots upstream's transpiled runtime
 (`@abap2ui5/node-runtime`), keeps its drafts in a CDS entity and lets apps be plain
-JavaScript classes. Everything the framework does, upstream's ABAP does. The
+JavaScript classes - about 1,900 lines of code for that, with `abap2js`
+(2,100) and the agent endpoint (700) beside it as optional parts. It was
+~570 lines when ADR-008 was written; count again before quoting a number. Everything the framework does, upstream's ABAP does. The
 decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
 
 ## Layout, and what is generated
@@ -115,6 +117,13 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
   behaviour of it - opt-in, `confirm`/`forbidden`, handover, owner scoping,
   the audit row and its retention, the restore after a restart - has its test in the
   `agent*.test.mjs` files. ADR-009 records why it looks the way it does.
+- **A roundtrip is never abandoned inside the framework.** Roundtrips run one
+  at a time per process because the transpiled framework keeps per-request
+  state in statics; one given up halfway would wake up later inside another
+  user's. The only place a limit may cut is around an app's `main( )`
+  (`cds.requires.cap2ui5.timeout`, `within( )` in `lib/define-app.js`), which
+  touches nothing but its own instance while it waits. `timeout.test.mjs`
+  holds it.
 - `npm test` stays browserless. Browser tests are `*.e2e.mjs`, run by
   `npm run test:browser`.
 - **A test about what the route answers serves the example in-process with

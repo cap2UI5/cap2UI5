@@ -19,6 +19,10 @@ starts with 0, a minor release may break the API.
   with `504 roundtrip timed out (<ref>)`, its draft is not written and the
   next roundtrip runs. A synchronous `main( )` and a transpiled ABAP app are
   not timed.
+- `purgeDrafts( { hours } )`: deletes the expired drafts of every user and
+  answers how many, for a project's own scheduled job. The framework deletes
+  them when somebody opens an app, and only then. Without `hours`: the user
+  exit's `draft_exp_time_in_hours`, else 4.
 - A roundtrip that waited a second or more for its turn is logged as a
   warning, with the wait and how many were ahead of it - at most every ten
   seconds.

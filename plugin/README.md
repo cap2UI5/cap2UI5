@@ -61,6 +61,25 @@ defineApp("BOOKS", class {
 });
 ```
 
+**What a read is checked against.** The app above reads the entity straight
+from the database, as a service's own handler does: no service's `@requires`
+or `@restrict` is asked, and whoever may open the app - the `roles` under
+[Configure](#configure) - reads the table. Where a service guards the data,
+read through the service, and CAP checks its authorization for the user of
+the roundtrip, as for an OData call:
+
+```js
+const srv = await cds.connect.to("AdminService");          // @requires: 'admin'
+try {
+  this.books = await srv.run(SELECT.from(srv.entities.Books));
+} catch (e) {
+  if (Number(e.code ?? e.status) !== 403) throw e;
+  client.message_box_display("You are not allowed to read the books");
+}
+```
+
+Both are measured in `examples/bookshop/test/service.test.mjs`.
+
 `cds watch` prints the address of every app of the project, one line for
 each package that brings apps (see [Apps from a package](#apps-from-a-package)),
 and the user to log in as:
@@ -559,6 +578,17 @@ theme, the draft expiry, the CSRF gate — comes from the user exit,
   host, and the user exit configures it. The token handshake comes with the
   abap2UI5 release after 1.145.0
   ([abap2UI5#2802](https://github.com/abap2UI5/abap2UI5/pull/2802)).
+- **Scaling:** roundtrips run **one at a time per process** - the transpiled
+  framework keeps per-request state where ABAP keeps it per work process. A
+  roundtrip costs milliseconds, so that is rarely felt, but an app whose
+  `main( )` awaits a slow query holds every other user's roundtrip for as
+  long. So: keep I/O in `main( )` short, scale with instances - the drafts
+  are in the database, so any instance answers any roundtrip - and watch the
+  log, which warns when a roundtrip waited a second or more for its turn. An
+  async `main( )` is given up after `timeout` (a minute) with a 504. The one
+  thing that does not scale out is a *stateful* ABAP app
+  (`set_session_stateful( )`): its session lives in the process, so it needs
+  sticky routing and is lost in a restart.
 - **Body size:** a roundtrip carries the app's whole model.
   `cds.server.body_parser.limit`, CAP's global limit, applies here too;
   `body_parser.limit` above overrides it for this route.
@@ -580,6 +610,11 @@ theme, the draft expiry, the CSRF gate — comes from the user exit,
   reasons. It is written only while the endpoint is on, and its rows are
   deleted after `agent.retention` days (90). A draft is deleted after the
   user exit's `draft_exp_time_in_hours`, 4 hours unless the exit changes it.
+  The framework deletes the expired drafts when somebody opens an app, and
+  only then; `await purgeDrafts()` from `@cap2ui5/cds-plugin` runs the same
+  `DELETE` from a scheduled job of the project's own and answers how many
+  rows went (`{ hours }` for another expiry; per tenant inside
+  `cds.tx({ tenant }, ...)`).
 - **Multitenancy (MTX):** not tested yet. The draft store reads and writes
   through `cds.run`, which follows `cds.context`. The drafts should therefore
   land in each tenant's database like any other row, but no test proves it.
