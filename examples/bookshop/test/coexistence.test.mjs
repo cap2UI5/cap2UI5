@@ -87,6 +87,8 @@ test("CAP's start page lists the apps next to CAP's own services", async () => {
   const html = await (await fetch(`http://127.0.0.1:${s.port}/`)).text();
   assert.match(html, /odata\/v4\/catalog/, "not CAP's start page");
   for (const app of ["ZCL_JS_HELLO", "ZCL_JS_BOOKS"]) {
-    assert.ok(html.includes(`href="sap/bc/z2ui5?app_start=${app}"`), `${app} is not on the start page`);
+    // as a link in the markup (@sap/cds up to 10.1), or as an entry of the
+    // list @sap/cds 10.2 hands its page to render, with a leading slash
+    assert.match(html, new RegExp(`"?href"?[=:]"/?sap/bc/z2ui5\\?app_start=${app}"`), `${app} is not on the start page`);
   }
 });

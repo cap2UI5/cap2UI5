@@ -7,19 +7,18 @@ database, under your authorization. Your apps are plain JavaScript classes that
 read your entities with `cds.ql`.
 
 > [!IMPORTANT]
-> **Status: pre-release, on npm.** The plugin works and is tested end to end
-> (wire, restart, concurrency, browser). The four abap2UI5 seams it needs
-> shipped in abap2UI5 1.144.1. The plugin is on npm as `@cap2ui5/cds-plugin`
-> (up to 0.2.0 `cap2ui5`, which is withdrawn), next to `@cap2ui5/samples` -
-> abap2UI5's samples as a package a project adds - and the runtime it pins,
-> `@abap2ui5/node-runtime@1.147.0`, which abap2UI5 builds and publishes
-> itself. In this repository `runtime/` is
-> still a workspace stand-in for that package, which
-> `scripts/assemble-runtime.sh` fills from the published one or from an
-> upstream build. The package was drafted upstream as `@abap2ui5/runtime` and
-> renamed before it was ever published; the ADRs keep the old name as the
-> record of their time. See
+> **Status: pre-release, on npm** as `@cap2ui5/cds-plugin`, tested end to end
+> (wire, restart, concurrency, browser). It pins `@abap2ui5/node-runtime`,
+> which abap2UI5 builds and publishes itself; `@cap2ui5/samples` brings
+> abap2UI5's samples as a package a project adds. While the version starts
+> with 0, a minor release may break the API -
+> [plugin/CHANGELOG.md](plugin/CHANGELOG.md). Why this is a host for
+> upstream's runtime and not a port of it:
 > [docs/adr/adr-008-host-not-port.md](docs/adr/adr-008-host-not-port.md).
+>
+> **Know before you build on it:** roundtrips run one at a time per process,
+> so a slow `main( )` holds every other user's roundtrip - scale with
+> instances, see [In production](plugin/README.md#in-production).
 
 ## Using it
 
@@ -66,6 +65,14 @@ defineApp("BOOKS", class {
   }
 });
 ```
+
+The app reads the entity straight from the database, as a service's own
+handler does - so no service's `@requires` or `@restrict` is asked, and
+whoever may open the app (`roles`, below) reads the table. Where a service
+guards the data, read through it: `const srv = await cds.connect.to("CatalogService")`,
+then `srv.run(SELECT.from(srv.entities.Books))` checks the service's
+authorization for the user of the roundtrip
+([plugin/README.md](plugin/README.md#an-app-is-one-file)).
 
 `cds init` + `cds add nodejs` create an ES module project (`"type": "module"`),
 so an app file imports. In a CommonJS project - or as a `.cjs` file in an ES
@@ -148,6 +155,10 @@ array, a cycle) is reported by its path and left out; the app runs without it. A
 - `body_parser.limit` (CAP's `cds.server.body_parser.limit`, else `10mb`)
 - `compression` (default `true`): gzip for the page and the roundtrips;
   `false` leaves it to a proxy in front
+- `timeout` (default `60000`): the milliseconds an app's async `main( )` may
+  take before its roundtrip is given up with a 504; `0` or `false` is no
+  limit. Roundtrips run one at a time per process, so a `main( )` that waits
+  holds everybody else's
 - `accelerate` (default `true`): the runtime's `accelerate( )`, where it has
   one; `false` runs the runtime's own code
 - `agent` (default off): the MCP endpoint for AI agents, below
@@ -176,7 +187,7 @@ plugin/              the npm package @cap2ui5/cds-plugin: cds-plugin.js, index.c
 examples/bookshop/   a CAP project using it: a plain CAP service, the apps, the test suite
 runtime/             @abap2ui5/node-runtime: only package.json + README are here, see runtime/README.md
 scripts/             assemble-runtime.sh - fills runtime/ from an upstream build or the package
-docs/adr/            the decisions, with the measurements that made them (ADR-001 to -008)
+docs/adr/            the decisions, with the measurements that made them (ADR-001 to -009)
 ```
 
 ```bash
@@ -202,7 +213,7 @@ npm start                                      # http://localhost:4004/rest/root
 
 | | |
 |---|---|
-| Hand-written framework code | **589 lines** of code (`plugin/`, 968 with comments), against 16,874 in the JavaScript port this replaces |
+| Hand-written code | about **1,900 lines** of code for hosting the runtime and `defineApp` (`plugin/`, comments not counted), against 16,874 in the JavaScript port this replaces - and none of them is framework code: views, events, navigation and drafts are upstream's ABAP. Beside it, each optional: `abap2js` (2,100 lines) and the agent endpoint (700) |
 | Roundtrip | **14 ms**, sequential, HTTP, SQLite |
 | Drafts | a CDS entity, owner-scoped: alice's draft answers to alice and to nobody else, deleted on the clock the user exit sets |
 | Restart | process A writes, is SIGKILLed, process B answers correctly |

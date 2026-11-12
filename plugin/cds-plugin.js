@@ -13,7 +13,7 @@
 const cds = require("@sap/cds");
 const express = require("express");
 const { locate, boot, loadApps } = require("./lib/runtime");
-const { definedApps } = require("./lib/define-app");
+const { definedApps, configure, MAIN_TIMEOUT } = require("./lib/define-app");
 const { startupHints } = require("./lib/hints");
 const { config } = require("./lib/config");
 const { compression } = require("./lib/compression");
@@ -28,6 +28,11 @@ const LOG = cds.log("cap2ui5");
 // A request-derived reference (the correlation id) made fit for an error
 // body: letters, digits and . _ : - only, at most 128 of them, "-" when
 // nothing is left.
+// When the queue of roundtrips says it is slow: a roundtrip that waited this
+// long for its turn, and no more often than that - see roundtrip( ).
+const QUEUE_WARN_MS = 1000;
+const QUEUE_WARN_EVERY_MS = 10000;
+
 const safeRef = (id) => String(id ?? "").replace(/[^A-Za-z0-9._:-]/g, "").slice(0, 128) || "-";
 
 // `cds add cap2ui5`: the first app. cds.add exists only while cds add runs,
@@ -37,6 +42,7 @@ cds.add?.register?.("cap2ui5", require("./lib/add").facet());
 cds.on("bootstrap", (app) => {
   const conf = config();                      // cds.requires.cap2ui5 - see lib/config.js
   if (!conf) return LOG.debug("switched off: cds.requires.cap2ui5 is false");
+  configure({ timeout: conf.timeout });       // how long an async main( ) may take
   const rt = locate();
   LOG.info(`@abap2ui5/node-runtime ${rt.version} from ${rt.dir}`);
 
@@ -129,6 +135,8 @@ cds.on("bootstrap", (app) => {
   };
 
   let queue = Promise.resolve();                 // roundtrip( ): one at a time, below
+  let inFlight = 0;                              // roundtrips queued or running
+  let warnedAt = -Infinity;                      // when the queue last said it was slow
 
   // The roundtrip endpoint. cl_express_icf_shim is upstream's own adapter and
   // reads plain express fields (req.method, req.body, headers, url) - so CAP,
@@ -202,12 +210,28 @@ cds.on("bootstrap", (app) => {
   // for hosts that call the shim themselves; a failed roundtrip never blocks
   // the next one. Inside it, each roundtrip runs in its stateful session -
   // lib/sessions.js, per CAP user.
+  //
+  // The price is that one slow roundtrip is everybody's: a main( ) awaiting a
+  // slow query holds all the others. So the wait is measured, and a roundtrip
+  // that stood in the queue for a second or more says so - at most every ten
+  // seconds, since under load every roundtrip would. An async main( ) itself
+  // is bounded by cds.requires.cap2ui5.timeout (lib/define-app.js).
   function roundtrip(req, res) {
+    const queuedAt = Date.now();
+    const ahead = inFlight++;
     // the stateful session belongs to the user who calls (lib/sessions.js)
     const user = cds.context?.user;
     const owner = user?.id ? `${cds.context?.tenant ?? ""}\u0000${user.id}` : "";
-    const run = queue.then(() => withSession(req, res, () => roundtripNow(req, res), { owner }));
-    queue = run.catch(() => {});
+    const run = queue.then(() => {
+      const waited = Date.now() - queuedAt;
+      if (waited >= QUEUE_WARN_MS && Date.now() - warnedAt >= QUEUE_WARN_EVERY_MS) {
+        warnedAt = Date.now();
+        LOG.warn(`a roundtrip waited ${waited} ms behind ${ahead} other(s): roundtrips run one at a time per ` +
+          `process, so a slow main( ) holds everyone - look for the app that awaits, or run more instances`);
+      }
+      return withSession(req, res, () => roundtripNow(req, res), { owner });
+    });
+    queue = run.catch(() => {}).finally(() => { inFlight--; });
     return run;
   }
 
@@ -228,11 +252,15 @@ cds.on("bootstrap", (app) => {
       // 3). Stripped to what an id is made of, as the framework strips a
       // class name: a UUID or any other well-formed id passes unchanged.
       const ref = safeRef(cds.context?.id);
-      LOG.error(`roundtrip failed (${ref}):`, e);
+      // main( ) ran out of time (lib/define-app.js): 504, so a log and a
+      // proxy can tell a roundtrip that was given up from one that broke
+      const late = e?.code === MAIN_TIMEOUT;
+      LOG.error(`roundtrip ${late ? "timed out" : "failed"} (${ref}):`, e);
       // nosniff as the framework's own error bodies carry it: text, never a
       // page a browser might guess its way into rendering
       if (!res.headersSent) {
-        res.status(500).type("text/plain").set("X-Content-Type-Options", "nosniff").send(`roundtrip failed (${ref})`);
+        res.status(late ? 504 : 500).type("text/plain").set("X-Content-Type-Options", "nosniff")
+          .send(`roundtrip ${late ? "timed out" : "failed"} (${ref})`);
       }
     }
   }

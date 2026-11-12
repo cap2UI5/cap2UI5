@@ -87,11 +87,43 @@
 // t.packed(). Guessing silently produces views with the wrong number of
 // decimals and nothing to point at.
 const crypto = require("node:crypto");
+const { setTimeout, clearTimeout } = require("node:timers");
 const cds = require("@sap/cds");
 const { renderOf } = require("./view-builder");
 const { AGENT, appOption } = require("./agent/policy");
 
 const LOG = cds.log("cap2ui5");
+
+// How long an async main( ) may take - cds.requires.cap2ui5.timeout, set by
+// the plugin at bootstrap; 0 is no limit.
+//
+// Roundtrips run one at a time per process (cds-plugin.js, roundtrip( )), so
+// a main( ) that waits - a slow query, a remote call that never answers -
+// holds every other user's roundtrip behind it, and one that never settles
+// held the process for good. main( ) is the one place where giving up is
+// safe: all it touches while it waits is its own instance and the recorded
+// commands, neither of which outlives a failed roundtrip. The framework
+// around it works on per-process state, so a roundtrip abandoned THERE would
+// wake up inside somebody else's.
+//
+// A synchronous main( ) cannot be interrupted and is not timed.
+const MAIN_TIMEOUT = "CAP2UI5_MAIN_TIMEOUT";
+const limits = { timeout: 0 };
+function configure({ timeout } = {}) {
+  if (Number.isFinite(timeout) && timeout >= 0) limits.timeout = timeout;
+  return { ...limits };
+}
+function within(running, ms, app) {
+  let timer;
+  const late = new Promise((resolve, reject) => {
+    timer = setTimeout(() => reject(Object.assign(
+      new Error(`defineApp ${app}: main( ) did not finish within ${ms} ms (cds.requires.cap2ui5.timeout) - ` +
+        `the roundtrip is given up so that the others waiting behind it can run`),
+      { code: MAIN_TIMEOUT })), ms);
+  });
+  running.catch(() => {});                 // what it does after the limit is nobody's to handle
+  return Promise.race([running, late]).finally(() => clearTimeout(timer));
+}
 
 const STANDARD_TABLE = {
   withHeader: false, keyType: "DEFAULT",
@@ -1117,7 +1149,10 @@ function defineApp(name, cls, opts = {}) {
         },
       });
       try {
-        await userMain.call(plain, client);      // await: an async main still works
+        const running = userMain.call(plain, client);
+        // await: an async main still works - within the time it may take
+        if (limits.timeout && typeof running?.then === "function") await within(running, limits.timeout, INTERNAL);
+        else await running;
       } catch (e) {
         throw privateMemberError(e, INTERNAL) ?? e;
       }
@@ -1377,4 +1412,4 @@ function defineApp(name, cls, opts = {}) {
   return App;
 }
 
-module.exports = { defineApp, definedApps, t, shapeOf, z2ui5_if_client };
+module.exports = { defineApp, definedApps, t, shapeOf, z2ui5_if_client, configure, MAIN_TIMEOUT };
