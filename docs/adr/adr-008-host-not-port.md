@@ -1,8 +1,16 @@
 # ADR-008 — cap2UI5 becomes a host for abap2UI5's own runtime, not a port of it
 
-**Status:** proposed — the code decision is made and proven under
-`docs/prototypes/open-abap-cap/`; the repository decisions (below) need an
-org owner, and one dependency needs upstream.
+**Status:** accepted and executed. This repository is the plugin (cutover
+step 3), and `plugin/package.json` depends on the runtime upstream publishes
+itself - `@abap2ui5/node-runtime`, not the `@abap2ui5/runtime` this record
+names, on npm since 1.145.0 (step 1). Of step 2 the dependency is done and
+the stand-in is not deleted: `runtime/` stays as the workspace's place for a
+runtime built from upstream's `main`, which CI tests before it is published
+(`runtime/README.md`). The archiving of the pipeline repositories (steps 4
+and 5) is as the addendum of 2026-09-27 records it. Originally: proposed —
+the code decision is made and proven under `docs/prototypes/open-abap-cap/`;
+the repository decisions (below) need an org owner, and one dependency needs
+upstream.
 **Date:** 2026-09-19
 **Supersedes:** ADR-007 (its topology is moot once there is no generated app),
 the ADR-006 worklist items 1–3 (the port's wire drifts are not fixed but made
