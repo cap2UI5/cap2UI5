@@ -8,6 +8,8 @@ starts with 0, a minor release may break the API.
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-16
+
 ### Added
 
 - `client.window_bind_tab( { val, window, t_sort, t_filter } )` and
@@ -537,7 +539,8 @@ The first release: abap2UI5 as a CAP plugin.
 - Apps are plain JavaScript classes (`defineApp`).
 - The user exit is available as `defineExit`.
 
-[Unreleased]: https://github.com/cap2UI5/cap2UI5/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/cap2UI5/cap2UI5/compare/v0.6.0...HEAD
+[0.6.0]: https://www.npmjs.com/package/@cap2ui5/cds-plugin/v/0.6.0
 [0.5.0]: https://www.npmjs.com/package/@cap2ui5/cds-plugin/v/0.5.0
 [0.4.0]: https://www.npmjs.com/package/@cap2ui5/cds-plugin/v/0.4.0
 [0.3.1]: https://www.npmjs.com/package/@cap2ui5/cds-plugin/v/0.3.1
