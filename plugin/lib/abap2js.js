@@ -39,7 +39,8 @@
 //
 // - _bind( ) takes a field's NAME: client->_bind( s_order-customer ) is
 //   client._bind("s_order-customer"). A _bind( ) of anything but an
-//   attribute path is refused.
+//   attribute path is refused. window_bind_tab( ) and window_get_row( )
+//   take their table the same way.
 // - nav_app_call( NEW zcl_app( ) ) names the app: nav_app_call("ZCL_APP").
 // - A read of a table or structure field is a copy (define-app.js), so a
 //   write to a component of an attribute assigns the whole structure again.
@@ -1751,7 +1752,7 @@ class MethodGen {
       const def = intf?.methods.get(name);
       if (intf && !def) this.fail(`z2ui5_if_client has no method ${name}`, call);
       const ret = def?.returning?.type ?? { k: "unknown" };
-      if (/^_bind(_edit|_path)?$/.test(name)) return { args: this.args(call, { val: "path", tab: "path" }, def), recv: this.receiver(ret), type: ret };
+      if (/^(_bind(_edit|_path)?|window_bind_tab|window_get_row)$/.test(name)) return { args: this.args(call, { val: "path", tab: "path" }, def), recv: this.receiver(ret), type: ret };
       if (name === "nav_app_call" || name === "nav_app_leave") return { args: this.args(call, { app: "app", "": "app" }, def), recv: this.receiver(ret), type: ret };
       return { args: this.args(call, {}, def), recv: this.receiver(ret), type: ret };
     }

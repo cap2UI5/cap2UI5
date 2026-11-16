@@ -24,9 +24,18 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { after, before, test } from "node:test";
+import { createRequire } from "node:module";
 import { URL } from "node:url";
 import { chromium } from "playwright";
 import { boot } from "./server.mjs";
+
+// Whether the runtime under test has the windowed table (the abap2UI5 release
+// after 1.148.0): asked of the ABAP it was transpiled from, since the runtime
+// itself boots in the server's process, not in this one.
+const require = createRequire(import.meta.url);
+const RUNTIME = path.dirname(createRequire(require.resolve("@cap2ui5/cds-plugin")).resolve("@abap2ui5/node-runtime/package.json"));
+const WINDOWED = /METHODS window_bind_tab\b/i.test(
+  fs.readFileSync(path.join(RUNTIME, "downport", "02", "z2ui5_if_client.intf.abap"), "utf8"));
 
 const DIST = process.env.UI5_DIST;
 const SHOTS = process.env.SHOTS ?? path.join(path.dirname(new URL(import.meta.url).pathname), "..", "screenshots");
@@ -212,5 +221,47 @@ test("bindings with options: a bare path, one table cell, a JSON node, a structu
   await page.getByRole("button", { name: "Save order" }).click();
   await page.getByText("Paris/A-1", { exact: true }).waitFor({ timeout: 30_000 });
   await page.screenshot({ path: path.join(SHOTS, "binds.png") });
+  assert.deepEqual(errors, [], "page errors");
+});
+
+test("a windowed table grows by the framework's own roundtrip, and a pressed row is found in the order shown", async (t) => {
+  if (!WINDOWED) return t.skip("z2ui5_if_client has no window_bind_tab in this runtime - it came after @abap2ui5/node-runtime 1.148.0");
+  // ZCL_JS_WINDOW binds three hundred rows fifty at a time. The wire tests
+  // send the window request by hand; here upstream's list binding sends it.
+  const { page, errors } = await open("ZCL_JS_WINDOW");
+  const rows = page.locator("[id$='--table'] tbody tr.sapMListTblRow");
+  const shown = (n) => page.waitForFunction(
+    (count) => globalThis.document.querySelectorAll("[id$='--table'] tbody tr.sapMListTblRow").length === count, n, { timeout: 30_000 });
+  await rows.first().waitFor({ timeout: 60_000 });
+  await shown(50);
+  // the binding knows the full length: "More [ 50 / 300 ]"
+  const more = page.locator("[id$='--table-trigger']");
+  await more.filter({ hasText: /50\s*\/\s*300/ }).waitFor({ timeout: 10_000 });
+
+  // sorted and filtered by the app, over all rows: the cheapest of those under 100
+  await page.getByRole("button", { name: "Cheap first" }).click();
+  await rows.nth(1).filter({ hasText: "row 044" }).waitFor({ timeout: 30_000 });
+  await more.filter({ hasText: /50\s*\/\s*100/ }).waitFor({ timeout: 10_000 });
+
+  // the third row shown is row 87 of the table: its binding path says /ROWS/2
+  await rows.nth(2).click();
+  await page.getByText("87: row 087", { exact: true }).waitFor({ timeout: 30_000 });
+
+  // a box ticked in the second row shown lands in row 44
+  await rows.nth(1).locator(".sapMCb").click();
+  await page.getByRole("button", { name: "Done", exact: true }).click();
+  await page.locator("[id$='--picked']").filter({ hasText: /^44$/ }).waitFor({ timeout: 30_000 });
+
+  // the table's own order again, and the list grows: upstream's list binding
+  // asks the framework for a hundred rows, and main( ) does not run for it
+  await page.getByRole("button", { name: "All", exact: true }).click();
+  await rows.nth(1).filter({ hasText: "row 002" }).waitFor({ timeout: 30_000 });
+  await more.filter({ hasText: /50\s*\/\s*300/ }).waitFor({ timeout: 10_000 });
+  const mains = await page.locator("[id$='--mains']").innerText();
+  await more.click();
+  await shown(100);
+  await rows.nth(99).filter({ hasText: "row 100" }).waitFor({ timeout: 10_000 });
+  assert.equal(await page.locator("[id$='--mains']").innerText(), mains, "the window request ran main( )");
+  await page.screenshot({ path: path.join(SHOTS, "window.png") });
   assert.deepEqual(errors, [], "page errors");
 });

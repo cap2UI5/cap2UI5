@@ -114,6 +114,8 @@ the documentation of the JavaScript one.
 | `client->get_event_arg( 1 )` | `client.get_event_arg(1)` |
 | `client->_bind( name )`, `_bind( s_order-customer )` | `client._bind("name")`, `client._bind("s_order-customer")` |
 | `client->_bind( val = t_tab path = abap_true )` | `client._bind({ val: "t_tab", path: true })` |
+| ``client->window_bind_tab( val = t_tab window = 50 t_sort = VALUE #( ( path = `PRICE` descending = abap_true ) ) )`` | `client.window_bind_tab({ val: "t_tab", window: 50, t_sort: [{ path: "price", descending: true }] })` |
+| `client->window_get_row( val = t_tab row = 6 )` | `client.window_get_row({ val: "t_tab", row: 6 })` |
 | ``client->_event( val = `GO` t_arg = VALUE #( ( `x` ) ) )`` | `client._event({ val: "GO", t_arg: ["x"] })` |
 | `client->follow_up_action( val = z2ui5_if_client=>cs_event-set_title t_arg = … )` | `client.follow_up_action({ val: z2ui5_if_client.cs_event.set_title, t_arg: [ … ] })` |
 | `client->view_display( view->stringify( ) )` | `client.view_display(view.stringify())` |
@@ -135,6 +137,36 @@ rather than dropped unseen:
 client.view_display({ val: view.stringify(), transition: client.cs_transition.slide });
 ```
 
+The same holds for a method: the windowed table - `window_bind_tab( )` and
+`window_get_row( )` - comes with the abap2UI5 release after 1.148.0. On a
+runtime that has them the client has them; on the pinned 1.148.0 it does not,
+and a call throws, naming the runtime. A table bound with it goes to the
+browser a window at a time; the list asks the framework for more rows as it
+grows or scrolls - a roundtrip that does not run `main( )` - and sorts and
+filters on the server, over all rows:
+
+```js
+rows = t.table({ id: 0, name: "", price: t.packed(9, 2) });   // thousands of them
+
+main(client) {
+  if (client.check_on_event("PRESS")) {
+    // "/ROWS/5" is a position in the order the browser shows, not a row of the table
+    const position = Number(client.get_event_arg(1).split("/").pop());
+    const row = client.window_get_row({ val: "rows", row: position + 1 });   // 1-based, 0: none
+    …
+  } else if (client.check_on_navigated()) {
+    client.view_display(`… <Table growing="true" items="${client.window_bind_tab({ val: "rows", window: 50 })}"> …`);
+  }
+}
+```
+
+`t_sort` is `[{ path, descending }]` and `t_filter`
+`[{ group, path, operator, value1, value2 }]`, as `ty_s_bind_tab_sort` and
+`ty_s_bind_tab_filter` name their components; `path` is a column of the
+table, as the row declares it or as the model spells it, and one the table
+does not have is refused. `/__WINDOW/ROWS/TOTAL` in the model is the number
+of rows the filter lets through.
+
 What is JavaScript's own, and why:
 
 - **A field is bound by its name**, `client._bind("name")`: ABAP's `_bind( )`
@@ -146,6 +178,14 @@ What is JavaScript's own, and why:
   options, and `follow_up_action( )` in a view attribute return is a
   placeholder that becomes the wire after `main( )` - embed it as it is. An
   `async main` works as well, for an app that does I/O.
+- **`client.window_get_row( )` answers for the order the roundtrip started
+  with** - the one the browser shows, which is what a position from the
+  browser means. It has to be known before `main( )` runs, so it is computed
+  then, by the framework's own sort and filter. After a `window_bind_tab( )`
+  that passed another `t_sort` or `t_filter` in the same `main( )`, ABAP's
+  would answer for the new order; here the call is refused - ask first, bind
+  after. Rows `main( )` adds or removes before it asks are not in the order
+  either.
 - **`client.get_app( id )`** answers the app behind a draft id as a handle
   whose fields can be written - `app.backend_event = "…"`, then
   `client.nav_app_leave(app)` - but not read: it is loaded after `main( )`.
@@ -306,7 +346,8 @@ ASSIGNING / REFERENCE INTO writes through the row - not supported yet`)
 rather than guess. What it writes where JavaScript differs from ABAP:
 
 - `_bind( s_order-customer )` is `_bind("s_order-customer")`; a `_bind( )` of
-  anything but an attribute or its component is refused.
+  anything but an attribute or its component is refused. `window_bind_tab( )`
+  and `window_get_row( )` take the table by its name the same way.
 - `nav_app_call( NEW zcl_other( ) )` is `nav_app_call("ZCL_OTHER")`.
 - `abap_bool` is a boolean; where ABAP turns it into a string - a string
   template, `CONV string( )`, a `t_arg` row - it is `"X"` or `""`, as ABAP

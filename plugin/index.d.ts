@@ -54,6 +54,27 @@ export interface ClientConstants {
 /** z2ui5_if_client's constants, on the interface as an ABAP app reads them. */
 export const z2ui5_if_client: ClientConstants;
 
+/** z2ui5_if_client=>ty_s_bind_tab_sort: one sorter of window_bind_tab( ). The
+ *  first sorter that tells two rows apart decides. */
+export interface BindTabSort {
+  /** a column of the table - as the row declares it, or as the model spells it */
+  path: string;
+  descending?: boolean;
+}
+/** z2ui5_if_client=>ty_s_bind_tab_filter: one condition of window_bind_tab( )'s
+ *  filter. The conditions of one group are ORed, the groups ANDed. */
+export interface BindTabFilter {
+  group?: number;
+  /** a column of the table - as the row declares it, or as the model spells it */
+  path: string;
+  /** a sap.ui.model.FilterOperator: EQ NE LT LE GT GE BT NB Contains NotContains
+   *  StartsWith NotStartsWith EndsWith NotEndsWith */
+  operator?: string;
+  value1?: string | number | boolean;
+  /** the upper bound of BT / NB */
+  value2?: string | number | boolean;
+}
+
 /** z2ui5_if_client=>ty_s_event_control: how the browser fires an event (_event( )'s s_ctrl). */
 export interface EventControl {
   /** cancel the control's default for this event (oEvent.preventDefault()) */
@@ -154,6 +175,35 @@ export interface Client<App = Record<string, unknown>> extends ClientConstants {
   /** the bare path of a field - _bind( val path = abap_true ) */
   _bind_path(val: BindTarget<App>): string;
   _bind_path(params: { val: BindTarget<App> }): string;
+
+  /**
+   * Bind a LARGE table to a list control: the browser gets `window` rows at a
+   * time (100 unless set), asks the framework for the next ones itself - a
+   * roundtrip that does not call `main( )` - and sorts and filters on the
+   * server, over all rows. Answers the binding as `_bind( )` does; for a table
+   * component of a structure it is a placeholder until `main( )` returns.
+   * `t_sort` and `t_filter` take effect when they differ from the ones the
+   * previous window_bind_tab( ) of the table passed; an empty array clears.
+   *
+   * In the runtime from the abap2UI5 release after 1.148.0 on, absent before -
+   * there a call throws, naming the runtime.
+   */
+  window_bind_tab?: {
+    (val: BindTarget<App>): string;
+    (params: { val: BindTarget<App> | string; window?: number; t_sort?: BindTabSort[]; t_filter?: BindTabFilter[] }): string;
+  };
+  /**
+   * The row of a window_bind_tab( ) table that a row of the browser shows:
+   * `row` is the position there, counted from 1 - the index of a binding path
+   * an event hands over, plus 1. Answers the row of the table, counted from 1,
+   * and 0 past the rows the filter lets through; for a table that is no
+   * window, `row` itself. The order is the one the roundtrip started with -
+   * the one the browser shows - so it is refused after a window_bind_tab( )
+   * that passed another `t_sort` or `t_filter` in the same `main( )`.
+   *
+   * In the runtime from the abap2UI5 release after 1.148.0 on, absent before.
+   */
+  window_get_row?: (params: { val: BindTarget<App> | string; row: number }) => number;
 
   /**
    * The handler of an event, for a view attribute. `t_arg` come back as

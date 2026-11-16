@@ -147,7 +147,9 @@ test("the agent endpoint tells apps from other classes by the transpiler's stati
   // CLAS-<pool>-<name> keys local classes are registered under
   assert.ok(Ref.IMPLEMENTED_INTERFACES.includes("Z2UI5_IF_APP"));
   assert.ok(App.IMPLEMENTED_INTERFACES.includes("Z2UI5_IF_APP"));
-  assert.ok(!(abap.Classes["Z2UI5_CL_UTIL"].IMPLEMENTED_INTERFACES ?? []).includes("Z2UI5_IF_APP"));
+  // a framework class that is no app, in the pinned runtime and on abap2UI5's
+  // main alike (Z2UI5_CL_UTIL, read here before, is gone from main)
+  assert.ok(!(abap.Classes["Z2UI5_CL_UI5_UTIL_CONTEXT"].IMPLEMENTED_INTERFACES ?? []).includes("Z2UI5_IF_APP"));
   const sub = Object.values(abap.Classes).find((c) => typeof c === "function" && typeof c.STATIC_SUPER === "function");
   assert.ok(sub, "no transpiled class names its superclass in STATIC_SUPER");
   assert.ok(Object.keys(abap.Classes).some((k) => k.startsWith("CLAS-") && k.split("-").length === 3),
@@ -286,6 +288,47 @@ test("the interface methods and parameters the plugin uses exist, by name", () =
   assert.equal(get.r_event_data.constructor, abap.types.DataReference, "get( )-r_event_data is a data reference");
   const ctrl = abap.Classes["Z2UI5_IF_CLIENT"].METHODS._EVENT.parameters.S_CTRL.type().get();
   for (const f of EVENT_CONTROL) assert.ok(f in ctrl, `z2ui5_if_client=>ty_s_event_control-${f}`);
+});
+
+test("the windowed table, where the runtime has it: the two methods, their row types, and where its order is kept", (t) => {
+  // window_bind_tab( ) and window_get_row( ) came after @abap2ui5/node-runtime
+  // 1.148.0; the client has them when the interface has (nav.test.mjs).
+  // window_get_row( ) answers inside a synchronous main( ), so the order is
+  // read BEFORE it: from the attributes the framework keeps on the app
+  // container - client->mo_action->mo_app->mt_attri, all three public - and
+  // computed by z2ui5_cl_ui5_srv_window=>index( ), the method the
+  // framework's own window_row( ) calls. window.test.mjs holds the answers
+  // to the framework's; this holds the names.
+  const M = abap.Classes["Z2UI5_IF_CLIENT"].METHODS;
+  if (!M.WINDOW_BIND_TAB && !M.WINDOW_GET_ROW) return t.skip("z2ui5_if_client has no window_bind_tab in this runtime");
+  for (const [m, params] of Object.entries({ WINDOW_BIND_TAB: ["VAL", "WINDOW", "T_SORT", "T_FILTER", "RESULT"],
+    WINDOW_GET_ROW: ["VAL", "ROW", "RESULT"] })) {
+    for (const p of params) assert.ok(M[m]?.parameters?.[p], `z2ui5_if_client=>${m}( ${p} )`);
+    assert.equal(typeof abap.Classes["Z2UI5_CL_UI5_CLIENT"].prototype[`z2ui5_if_client$${m.toLowerCase()}`], "function", m);
+  }
+  const row = (p) => M.WINDOW_BIND_TAB.parameters[p].type().getRowType().get();
+  assert.deepEqual(Object.keys(row("T_SORT")), ["path", "descending"], "ty_s_bind_tab_sort");
+  assert.deepEqual(Object.keys(row("T_FILTER")), ["group", "path", "operator", "value1", "value2"], "ty_s_bind_tab_filter");
+  // what the client tells a flag and a number by (windowRows in define-app.js)
+  assert.ok(row("T_SORT").descending instanceof abap.types.Character && row("T_SORT").descending.getLength() === 1);
+  assert.ok(row("T_FILTER").group instanceof abap.types.Integer);
+
+  const attribute = (cls, name) => {
+    const a = abap.Classes[cls]?.ATTRIBUTES?.[name];
+    assert.equal(a?.visibility, "U", `${cls}->${name.toLowerCase()} is public`);
+    return a.type();
+  };
+  assert.equal(attribute("Z2UI5_CL_UI5_CLIENT", "MO_ACTION").getQualifiedName(), "Z2UI5_CL_UI5_ACTION");
+  assert.equal(attribute("Z2UI5_CL_UI5_ACTION", "MO_APP").getQualifiedName(), "Z2UI5_CL_UI5_APP_CONT");
+  assert.ok(attribute("Z2UI5_CL_UI5_APP_CONT", "MT_ATTRI") instanceof abap.types.DataReference, "mt_attri is a reference to the table");
+  const W = abap.Classes["Z2UI5_CL_UI5_SRV_WINDOW"];
+  assert.equal(typeof W?.index, "function", "z2ui5_cl_ui5_srv_window=>index");
+  assert.deepEqual(Object.keys(W.METHODS.INDEX.parameters).sort(), ["RESULT", "TAB", "T_FILTER", "T_SORT"]);
+  // ty_s_attri, through the one public signature that carries it
+  const attri = W.METHODS.EVENT_APPLY.parameters.ATTRI.type().getType().getRowType().get();
+  for (const f of ["name", "window_size", "t_window_sort", "t_window_filter", "t_window_sort_set", "t_window_filter_set"]) {
+    assert.ok(f in attri, `z2ui5_if_ui5_types=>ty_s_attri-${f}`);
+  }
 });
 
 test("the constant structures the client hands over are readable, by name", () => {
