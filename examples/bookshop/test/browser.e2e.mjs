@@ -29,8 +29,8 @@ import { URL } from "node:url";
 import { chromium } from "playwright";
 import { boot } from "./server.mjs";
 
-// Whether the runtime under test has the windowed table (the abap2UI5 release
-// after 1.148.0): asked of the ABAP it was transpiled from, since the runtime
+// Whether the runtime under test has the windowed table (abap2UI5 from
+// 1.149.0 on): asked of the ABAP it was transpiled from, since the runtime
 // itself boots in the server's process, not in this one.
 const require = createRequire(import.meta.url);
 const RUNTIME = path.dirname(createRequire(require.resolve("@cap2ui5/cds-plugin")).resolve("@abap2ui5/node-runtime/package.json"));

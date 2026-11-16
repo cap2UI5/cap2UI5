@@ -11,9 +11,9 @@ starts with 0, a minor release may break the API.
 ### Added
 
 - `client.window_bind_tab( { val, window, t_sort, t_filter } )` and
-  `client.window_get_row( { val, row } )` - abap2UI5's windowed table - **where
-  the runtime has them: they need an `@abap2ui5/node-runtime` after 1.148.0**,
-  the one this version pins does not have them. A table bound with
+  `client.window_get_row( { val, row } )` - abap2UI5's windowed table, which
+  comes with `@abap2ui5/node-runtime` 1.149.0, the runtime this version pins.
+  A table bound with
   `window_bind_tab( )` goes to the browser `window` rows at a time, with
   `/__WINDOW/<path>/TOTAL`, `COUNT` and `SIZE` beside it; the list asks the
   framework for the next rows as it grows or scrolls - a roundtrip that does
@@ -24,10 +24,13 @@ starts with 0, a minor release may break the API.
   the wrong kind are refused. `window_get_row( )` answers inside a
   synchronous `main( )`, for the order the roundtrip started with; after a
   `window_bind_tab( )` with another sort or filter in the same `main( )` it
-  is refused. On a runtime without the two methods the client does not have
-  them, and a call throws: `client.window_bind_tab( ): z2ui5_if_client has no
-  window_bind_tab in the abap2UI5 runtime this project runs on
-  (@abap2ui5/node-runtime 1.148.0) - it came with a later release`.
+  is refused. `t_filter` and a filter the list binding sets - a column
+  filter, a `cs_event.binding_call` filter - are ANDed, the sort is the last
+  one set, and the order survives the next window: the framework's, as of
+  1.149.0. On an older runtime (1.148.0, by an `overrides`) the client does
+  not have the two methods, and a call throws: `client.window_bind_tab( ):
+  z2ui5_if_client has no window_bind_tab in the abap2UI5 runtime this project
+  runs on (@abap2ui5/node-runtime 1.148.0) - it came with a later release`.
   `abap2js` translates both, the table by its name as for `_bind( )`.
 - `cds.requires.cap2ui5.timeout`: the milliseconds an app's async `main( )`
   may take, `60000` unless set, `0` or `false` for no limit; a value that is
@@ -51,9 +54,20 @@ starts with 0, a minor release may break the API.
 - An async `main( )` that takes longer than a minute now fails its roundtrip
   (above). Raise `cds.requires.cap2ui5.timeout`, or set it to `0`, for an app
   that legitimately takes longer.
-- It hosts `@abap2ui5/node-runtime` 1.148.0 (abap2UI5 1.148.0), transpiled
-  for `@abaplint/runtime` 2.14.5: ASSIGN COMPONENT of a component whose name
-  has a dash, `rescale( )` and CREATE DATA ... TYPE (name) with a lower-case
+- It hosts `@abap2ui5/node-runtime` 1.149.0 (abap2UI5 1.149.0), transpiled
+  by `@abaplint/transpiler` 2.14.33 for `@abaplint/runtime` 2.14.33 - 0.5.0
+  hosted 1.147.0. The plugin needed no change for 1.149.0; a project that
+  transpiles ABAP apps of its own beside the runtime has to use the same
+  transpiler version. What abap2UI5 1.149.0 changes for an app is in its
+  changelog: among it, the eight obsolete invisible custom controls
+  (`z2ui5.cc.Timer`, `Focus`, `Scrolling`, `Title`, `LPTitle`, `Favicon`,
+  `History`, `Info`) are gone from the frontend - a view that still names one
+  fails to load; the frontend actions `cs_event.start_timer`, `set_focus`,
+  `scroll_to`, `set_title`, `set_favicon` and `client.get( )` replace them.
+  A draft a JavaScript app wrote on 1.148.0 is continued on 1.149.0 (measured
+  with the example's `ZCL_JS_HELLO`).
+- From 1.148.0 on (transpiled for `@abaplint/runtime` 2.14.5): ASSIGN
+  COMPONENT of a component whose name has a dash, `rescale( )` and CREATE DATA ... TYPE (name) with a lower-case
   type name work in the runtime. The package's main entry is split
   (`srv/host.mjs` is `srv/hostcore.mjs` bound to `output/`, and claims the
   output it loads); the plugin boots through `output/init.mjs` as before and

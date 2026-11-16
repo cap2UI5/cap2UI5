@@ -570,7 +570,7 @@ const signature = (method) => {
 /** Whether the RUNTIME in use has a method of z2ui5_if_client at all. The
  *  client is the interface by its names, so it has a method exactly when
  *  the interface of the booted runtime has it: window_bind_tab( ) and
- *  window_get_row( ) came after @abap2ui5/node-runtime 1.148.0, and on that
+ *  window_get_row( ) came with @abap2ui5/node-runtime 1.149.0, and on an older
  *  runtime the client does not have them either - calling one says so,
  *  naming the runtime (LATER). */
 const runtimeHas = (method) =>
@@ -1181,7 +1181,7 @@ function defineApp(name, cls, opts = {}) {
       };
 
       /** The windowed table, z2ui5_if_client's window_bind_tab( ) and
-       *  window_get_row( ) - in the runtime from the release after 1.148.0. */
+       *  window_get_row( ) - in the runtime from 1.149.0 on. */
       const windowMethods = {
         /** Bind a LARGE table to a list control: the browser gets `window`
          *  rows at a time (100 unless set), asks the framework for the next

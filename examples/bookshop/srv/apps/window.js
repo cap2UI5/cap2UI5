@@ -4,7 +4,7 @@
 // not run main( ) - and sorts and filters on the server; window_get_row( )
 // says which row of the table a row of the browser is. window.test.mjs plays
 // the browser's part on the wire, browser.e2e.mjs lets a real one grow the
-// list. The methods are abap2UI5's of the release after 1.148.0; on an older
+// list. The methods are abap2UI5's from 1.149.0 on; on an older
 // runtime the client has neither, and the app's start fails.
 const { defineApp, t } = require("@cap2ui5/cds-plugin");
 
