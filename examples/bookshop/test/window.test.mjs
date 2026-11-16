@@ -4,11 +4,12 @@
 // wire - the list binding's own request for more rows, its sort, a cell
 // edited in a sorted list - as app/webapp/core/WindowModel.js sends them.
 //
-// The two methods are abap2UI5's of the release after 1.148.0. The client is
+// The two methods are abap2UI5's from 1.149.0 on. The client is
 // z2ui5_if_client by its names, so it has them exactly when the interface of
-// the runtime in use has them: CI runs this file on upstream's main, where
-// everything below runs, and the release on the pinned runtime, where the
-// last test holds that a call says which runtime it is that lacks them.
+// the runtime in use has them: on the pinned runtime and on upstream's main
+// everything below runs but the last test, which holds - on a runtime from
+// before the two, 1.148.0 by an `overrides` - that a call says which runtime
+// it is that lacks them.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { createRequire } from "node:module";

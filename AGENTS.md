@@ -54,8 +54,9 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
   A METHOD upstream adds is wired the same way and exists on the client only
   where the booted runtime's interface has it (`LATER` in `lib/define-app.js`;
   elsewhere a call throws, naming the runtime) - `window_bind_tab( )` and
-  `window_get_row( )` in `window.test.mjs`, whose tests run on main's runtime
-  and skip, with the reason, on the pinned one.
+  `window_get_row( )` in `window.test.mjs`, whose tests run where the runtime
+  has the two - the pinned one from 1.149.0 on, and main's - and skip, with
+  the reason, on an older one.
 - **A client method that composes view XML needs a BROWSER test, not only a
   wire test.** The wire tests play the frontend's part by hand, so they can
   feed an event argument the real page would never send — which is how

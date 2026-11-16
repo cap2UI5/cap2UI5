@@ -129,7 +129,7 @@ the client to the interface, so none is missing and none is invented. The
 constants are read from the runtime, and so is which of them there are:
 abap2UI5's page transitions - `cs_transition`, and `view_display( )`'s
 `transition` and `transition_back` - come with abap2UI5 1.146.0, so the
-runtime this version pins (1.148.0) has them; on an older runtime (1.145.0,
+runtime this version pins (1.149.0) has them; on an older runtime (1.145.0,
 by an `overrides`) a call that sets one is refused, naming the runtime,
 rather than dropped unseen:
 
@@ -138,9 +138,9 @@ client.view_display({ val: view.stringify(), transition: client.cs_transition.sl
 ```
 
 The same holds for a method: the windowed table - `window_bind_tab( )` and
-`window_get_row( )` - comes with the abap2UI5 release after 1.148.0. On a
-runtime that has them the client has them; on the pinned 1.148.0 it does not,
-and a call throws, naming the runtime. A table bound with it goes to the
+`window_get_row( )` - comes with abap2UI5 1.149.0, the runtime this version
+pins, so the client has them; on an older runtime (1.148.0, by an
+`overrides`) it does not, and a call throws, naming the runtime. A table bound with it goes to the
 browser a window at a time; the list asks the framework for more rows as it
 grows or scrolls - a roundtrip that does not run `main( )` - and sorts and
 filters on the server, over all rows:
@@ -615,7 +615,7 @@ theme, the draft expiry, the CSRF gate — comes from the user exit,
   with the approuter's authentication, like the service paths. The approuter
   protects routes with an X-CSRF-Token by default (`csrfProtection`), and
   the routes work with it on: the frontend of `@abap2ui5/node-runtime`
-  1.148.0, the runtime this version pins, answers the approuter's `403` with
+  1.149.0, the runtime this version pins, answers the approuter's `403` with
   `x-csrf-token: Required` by fetching the token with a HEAD request and
   sending the roundtrip again with it
   ([abap2UI5#2802](https://github.com/abap2UI5/abap2UI5/pull/2802), in the
