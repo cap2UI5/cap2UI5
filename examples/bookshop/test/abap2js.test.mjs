@@ -351,6 +351,41 @@ test("what it does not know, it refuses - with file, row and column", () => {
   }
 });
 
+test("window_bind_tab( ) and window_get_row( ) take the table's NAME, as _bind( ) does - where the runtime's interface has them", () => {
+  // The client's methods are read from the runtime's downport/, so on a
+  // runtime from before the two (up to 1.148.0) the translation refuses them
+  // as it refuses any method the interface does not have.
+  const src = `CLASS zcl_js_windowed DEFINITION PUBLIC.
+  PUBLIC SECTION.
+    INTERFACES z2ui5_if_app.
+    TYPES: BEGIN OF ty_s_row, title TYPE string, price TYPE i, END OF ty_s_row.
+    DATA t_tab TYPE STANDARD TABLE OF ty_s_row WITH EMPTY KEY.
+    DATA row TYPE i.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+CLASS zcl_js_windowed IMPLEMENTATION.
+  METHOD z2ui5_if_app~main.
+    row = client->window_get_row( val = t_tab row = 3 ).
+    DATA(items) = client->window_bind_tab( val = t_tab window = 50
+      t_sort = VALUE #( ( path = \`PRICE\` descending = abap_true ) )
+      t_filter = VALUE #( ( group = 1 path = \`TITLE\` operator = \`Contains\` value1 = \`a\` ) ) ).
+    DATA(plain) = client->window_bind_tab( t_tab ).
+  ENDMETHOD.
+ENDCLASS.
+`;
+  const translate = () => abap2js(src, { file: "zcl_js_windowed.clas.abap" }).code;
+  if (!abap.Classes["Z2UI5_IF_CLIENT"].METHODS.WINDOW_BIND_TAB) {
+    assert.throws(translate, /^Abap2jsError: zcl_js_windowed\.clas\.abap:12:\d+ - z2ui5_if_client has no method window_get_row/);
+    return;
+  }
+  const code = translate();
+  assert.match(code, /this\.row = client\.window_get_row\(\{ val: "t_tab", row: 3 \}\);/);
+  assert.match(code, /client\.window_bind_tab\(\{ val: "t_tab", window: 50,\n\s+t_sort: \[ \{ path: "PRICE", descending: true \} \],\n/);
+  assert.match(code, /t_filter: \[ \{ group: 1, path: "TITLE", operator: "Contains", value1: "a" \} \] \}\);/);
+  assert.match(code, /const plain = client\.window_bind_tab\("t_tab"\);/);
+});
+
 test("a class that is no app is refused as a whole", () => {
   const e = (() => {
     try {

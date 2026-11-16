@@ -530,6 +530,8 @@ const SIGNATURES = {
   _bind_edit: "val! path tab tab_index switch_default_model custom_mapper custom_mapper_back custom_filter " +
     "custom_filter_back",
   _bind_path: "val!",
+  window_bind_tab: "val! window t_sort t_filter",
+  window_get_row: "val! row!",
   _event: "val t_arg s_ctrl arg",
   _event_client: "val! view t_arg",
   follow_up_action: "val! view t_arg",
@@ -565,6 +567,17 @@ const signature = (method) => {
   const params = SIGNATURES[method].split(" ");
   return { names: params.map((n) => n.replace("!", "")), required: params.filter((n) => n.endsWith("!")).map((n) => n.slice(0, -1)) };
 };
+/** Whether the RUNTIME in use has a method of z2ui5_if_client at all. The
+ *  client is the interface by its names, so it has a method exactly when
+ *  the interface of the booted runtime has it: window_bind_tab( ) and
+ *  window_get_row( ) came after @abap2ui5/node-runtime 1.148.0, and on that
+ *  runtime the client does not have them either - calling one says so,
+ *  naming the runtime (LATER). */
+const runtimeHas = (method) =>
+  Boolean(globalThis.abap?.Classes?.["Z2UI5_IF_CLIENT"]?.METHODS?.[method.toUpperCase()]);
+/** z2ui5_if_client's methods the client wires that are not in every runtime
+ *  it runs on - see runtimeHas( ). */
+const LATER = ["window_bind_tab", "window_get_row"];
 
 /** A call as ABAP writes it: nothing, ONE positional argument for the
  *  method's preferred parameter - client->_event( `GO` ) - or the parameters
@@ -586,11 +599,11 @@ function paramsOf(method, args, named = isPlainObject) {
   if (first !== undefined && !named(first)) out[names[0]] = first;
   else if (first !== undefined) {
     const keys = Object.keys(first);
-    if (keys.length && !keys.some((k) => names.includes(k)) && method.startsWith("_bind")) {
+    if (keys.length && !keys.some((k) => names.includes(k)) && /^(_bind|window_)/.test(method)) {
       // not parameters at all: the value of a field, where its name belongs
       throw new Error(`${who}: an object is the parameters by name - { ${names.join(", ")} } - and this ` +
         `one has none of them. In JavaScript the client binds a field by its NAME, ` +
-        `client.${method}("name"), not by its value.`);
+        `client.${method}(${method === "window_get_row" ? '{ val: "name", row }' : '"name"'}), not by its value.`);
     }
     for (const [k, v] of Object.entries(first)) {
       if (!names.includes(k)) throw new Error(`${who}: no parameter "${k}" - { ${names.join(", ")} }`);
@@ -623,6 +636,65 @@ function stringList(list, who) {
 let S_CTRL;
 const EVENT_CONTROL = () =>
   (S_CTRL ??= Object.keys(abap.Classes["Z2UI5_IF_CLIENT"].METHODS._EVENT.parameters.S_CTRL.type().get()));
+
+/** window_bind_tab( )'s t_sort and t_filter - tables of ty_s_bind_tab_sort
+ *  and ty_s_bind_tab_filter - as the app writes them: an array of objects
+ *  under the components' names, { path, descending } and { group, path,
+ *  operator, value1, value2 }. The components and their types are read from
+ *  the interface's own parameter, so one upstream adds is one the client
+ *  takes. */
+const windowTable = (param) => abap.Classes["Z2UI5_IF_CLIENT"].METHODS.WINDOW_BIND_TAB.parameters[param.toUpperCase()].type();
+const isFlag = (comp) => comp instanceof abap.types.Character && comp.getLength() === 1;
+/** The rows of t_sort / t_filter, checked and COMPLETE - every component in
+ *  the type's order, an omitted one initial - so that two of them compare
+ *  as the ABAP tables do. `path` names a column of the bound table: as the
+ *  row declares it or as the model spells it, and it goes to the framework
+ *  in upper case, as RTTI names the component - the framework ignores a
+ *  sorter whose column it does not find and lets a condition on one match
+ *  nothing, which a typo would look like. */
+function windowRows(param, list, columns, who) {
+  const comps = windowTable(param).getRowType().get();
+  const names = Object.keys(comps);
+  if (!Array.isArray(list)) throw new Error(`${who}: ${param} is an array of { ${names.join(", ")} }, got ${describe(list)}`);
+  return list.map((row, i) => {
+    const at = `${who}: ${param}[${i}]`;
+    if (!isPlainObject(row)) throw new Error(`${at} is an object - { ${names.join(", ")} } - got ${describe(row)}`);
+    for (const k of Object.keys(row)) {
+      if (!names.includes(k)) throw new Error(`${at} has no component "${k}" - ${names.join(", ")}`);
+    }
+    return Object.fromEntries(names.map((k) => {
+      const v = row[k];
+      const comp = comps[k];
+      if (k === "path") {
+        const column = Object.values(columns).find(({ key }) => key === String(v ?? "").toLowerCase());
+        if (!column) {
+          throw new Error(`${at}.path: ${describe(v ?? "")} is not a column of the table - ${Object.keys(columns).join(", ")}`);
+        }
+        return [k, column.key.toUpperCase()];
+      }
+      if (isFlag(comp)) {
+        if (v !== undefined && v !== null && typeof v !== "boolean") throw new Error(`${at}.${k} is true or false, got ${describe(v)}`);
+        return [k, Boolean(v)];
+      }
+      if (comp instanceof abap.types.Integer) {
+        if (v !== undefined && v !== null && !Number.isInteger(v)) throw new Error(`${at}.${k} is a whole number, got ${describe(v)}`);
+        return [k, v ?? 0];
+      }
+      if (v !== null && typeof v === "object") throw new Error(`${at}.${k} is a text, a number or a boolean, got ${describe(v)}`);
+      return [k, v === undefined || v === null ? "" : String(v)];
+    }));
+  });
+}
+/** ... and as the box the transpiled method takes */
+function windowBox(param, rows) {
+  const tab = windowTable(param);
+  for (const r of rows) {
+    const row = tab.getRowType().clone();
+    for (const [k, v] of Object.entries(r)) row.get()[k].set(typeof v === "boolean" ? (v ? "X" : " ") : v);
+    tab.append(row);
+  }
+  return tab;
+}
 
 /** cap2ui5 0.1.0's names, and what replaces each. They throw, saying so:
  *  silently gone, `if (client.isDisplay)` would just be false on every
@@ -817,13 +889,40 @@ function defineApp(name, cls, opts = {}) {
       // roundtrip's draft id, no side effect - so it can be answered up front,
       // which an app needs because it writes the link into a bound field.
       const appStateHref = String((await c.z2ui5_if_client$app_state_get_href({ result: 1 })).get());
+      // window_get_row( ): which row of the table a row of the browser shows.
+      // It answers a number main( ) computes with, so it cannot wait for
+      // the flush - and the framework's method is async like all of them.
+      // What it would answer is known before main( ) runs, though: the order
+      // the browser holds is the one the LAST response was built with, from
+      // the table and the sorters and the filter the framework keeps on the
+      // attribute (z2ui5_if_ui5_types=>ty_s_attri-t_window_*). So the order
+      // of every windowed table is computed here, by the framework's own
+      // z2ui5_cl_ui5_srv_window=>index( ) - the one window_row( ) calls -
+      // and window_get_row( ) reads it. A roundtrip of an app without a
+      // windowed table pays nothing.
+      const windows = new Map();               // the attribute's name, as RTTI spells it -> its window
+      if (runtimeHas("window_get_row")) {
+        const attri = c.mo_action.get().mo_app.get().mt_attri.getPointer();
+        for (const a of attri?.array() ?? []) {
+          const { name, window_size, t_window_sort, t_window_filter, t_window_sort_set, t_window_filter_set } = a.get();
+          if (window_size.get() <= 0) continue;
+          let box = this;
+          for (const [i, k] of String(name.get()).toLowerCase().split("-").entries()) box = i ? box?.get?.()[k] : box[k];
+          if (typeof box?.array !== "function") continue;      // a table behind a reference: no field of a JavaScript app
+          const order = await abap.Classes["Z2UI5_CL_UI5_SRV_WINDOW"].index(
+            { tab: box, t_sort: t_window_sort, t_filter: t_window_filter, result: 1 });
+          windows.set(String(name.get()), { order: order.array().map((n) => n.get()),
+            sort: JSON.stringify(toPlain(t_window_sort_set)), filter: JSON.stringify(toPlain(t_window_filter_set)) });
+        }
+      }
 
       // ---- the client the app sees -----------------------------------------
       // A placeholder stands for what only an async framework call can
       // produce: an event wire (_event, _event_nav_app_leave, the wired form of
       // follow_up_action) and a binding the framework has to register with
-      // options (_bind of a component, a cell, omit_initial, json). One per
-      // distinct call - a follow_up_action( ) one per CALL, see there - resolved
+      // options (_bind of a component, a cell, omit_initial, json;
+      // window_bind_tab of a component). One per distinct call - a
+      // follow_up_action( ) and a window_bind_tab( ) one per CALL - resolved
       // after main( ) in the order they were made, so a placeholder inside
       // another one's arguments is resolved first.
       //
@@ -850,6 +949,10 @@ function defineApp(name, cls, opts = {}) {
       const queue = [];
       let plainGet;                            // client->get( ), converted on first use
       let actionCalls = 0;
+      const windowBinds = [];                  // window_bind_tab( ) of a field, in the order main( ) made them
+      const reordered = new Set();             // tables main( ) gave another order - see window_get_row( )
+      const windowed = new Set();              // tables main( ) made a window of
+      let windowCalls = 0;
 
       /** A field, or a component of a structure field, named as ABAP names it:
        *  `s_order-customer` (a `.` works too). Its shape, and the component
@@ -875,6 +978,16 @@ function defineApp(name, cls, opts = {}) {
         }
         return { top, keys, shape };
       };
+      /** window_bind_tab( )'s and window_get_row( )'s val: a TABLE field, or a
+       *  table component of a structure field - and the name the framework
+       *  keeps the attribute under, `ROWS`, `ORDER-LINES` */
+      const tableOf = (name, who) => {
+        const target = fieldOf(name, who);
+        if (target.shape.k !== "table") throw new Error(`${who}: val names a TABLE field, and ${name} is not one`);
+        return { ...target, name: [target.top, ...target.keys].join("-").toUpperCase() };
+      };
+      /** the box of a field, or of a component of it by its keys */
+      const boxAt = (field, keys) => keys.reduce((box, k) => box.get()[k], this[field]);
       /** s_ctrl as the app writes it - ty_s_event_control's components by
        *  name - checked against the interface's own type */
       const eventControl = (s_ctrl, who) => {
@@ -973,6 +1086,9 @@ function defineApp(name, cls, opts = {}) {
           return bind("_bind_path", { val, path: true });
         },
 
+        // window_bind_tab( ) and window_get_row( ) follow, where the runtime
+        // has them - see windowMethods
+
         // -- handlers
         /** The handler of an event, for a view attribute. t_arg travel with it
          *  and come back as get_event_arg( 1..n ) - `arg` is one more, behind
@@ -1063,6 +1179,83 @@ function defineApp(name, cls, opts = {}) {
         ...constants(),                          // cs_event, cs_view, cs_nav_mode, cs_device - cs_transition
         raw: c,                                  // the transpiled z2ui5_if_client, async
       };
+
+      /** The windowed table, z2ui5_if_client's window_bind_tab( ) and
+       *  window_get_row( ) - in the runtime from the release after 1.148.0. */
+      const windowMethods = {
+        /** Bind a LARGE table to a list control: the browser gets `window`
+         *  rows at a time (100 unless set), asks the framework for the next
+         *  ones itself - a roundtrip that does not call main( ) - and sorts
+         *  and filters on the server, over all rows. Answers the binding as
+         *  _bind( ) does, `{/ROWS}`. t_sort is [{ path, descending }] and
+         *  t_filter [{ group, path, operator, value1, value2 }], path a
+         *  column of the table; they take effect when they differ from the
+         *  ones the previous window_bind_tab( ) of the table passed. A table
+         *  component of a structure is registered after main( ), so its
+         *  binding is a placeholder - embed it as it is. */
+        window_bind_tab(...args) {
+          const who = "client.window_bind_tab( )";
+          const p = paramsOf("window_bind_tab", args);
+          const target = tableOf(p.val, who);
+          if (p.window !== undefined && !Number.isInteger(p.window)) {
+            throw new Error(`${who}: window is the number of rows the browser gets at a time - got ${describe(p.window)}`);
+          }
+          const spec = { kind: "window", call: windowCalls++, field: target.top, components: target.keys, window: p.window,
+            t_sort: p.t_sort === undefined ? undefined : windowRows("t_sort", p.t_sort, target.shape.fields, who),
+            t_filter: p.t_filter === undefined ? undefined : windowRows("t_filter", p.t_filter, target.shape.fields, who) };
+          // what the framework will decide after main( ): sorters or a
+          // filter that differ from the ones passed the time before replace
+          // the order the browser holds (window_adopt in z2ui5_cl_ui5_srv_bind)
+          const before = windows.get(target.name);
+          if ((spec.t_sort && JSON.stringify(spec.t_sort) !== (before?.sort ?? "[]")) ||
+              (spec.t_filter && JSON.stringify(spec.t_filter) !== (before?.filter ?? "[]"))) reordered.add(target.name);
+          windowed.add(target.name);
+          if (target.keys.length) return placeholder(spec);
+          // a field: answered now, registered after main( ) - as _bind( ) is
+          windowBinds.push(spec);
+          return boundPath(target.top);
+        },
+        /** The row of a window_bind_tab( ) table that a row of the browser
+         *  shows: `row` is the position there, counted from 1 - the index of
+         *  a binding path an event hands over, plus 1 - and the answer the
+         *  row of the table, counted from 1; 0 past the rows the filter
+         *  lets through. A table that is no window answers `row` itself.
+         *  The order is the one the browser holds, as this roundtrip found
+         *  it - see where `windows` is filled. */
+        window_get_row(...args) {
+          const who = "client.window_get_row( )";
+          const p = paramsOf("window_get_row", args);
+          const target = tableOf(p.val, who);
+          if (!Number.isInteger(p.row)) {
+            throw new Error(`${who}: row is the position in the browser, counted from 1 - got ${describe(p.row)}`);
+          }
+          if (reordered.has(target.name)) {
+            throw new Error(`${who}: ${p.val} was given another t_sort or t_filter by window_bind_tab( ) earlier in ` +
+              `this main( ). The row is answered for the order the browser shows, which is the one this roundtrip ` +
+              `started with - ask before the table is bound anew.`);
+          }
+          const window = windows.get(target.name);
+          if (window) return window.order[p.row - 1] ?? 0;
+          // no window when the roundtrip started. One made in this main( )
+          // has the table's own order - nothing sorts or filters it yet
+          if (!windowed.has(target.name)) return p.row;
+          return p.row >= 1 && p.row <= boxAt(target.top, target.keys).array().length ? p.row : 0;
+        },
+      };
+      for (const m of LATER) {
+        if (runtimeHas(m)) client[m] = windowMethods[m];
+        else {
+          // not a method of this runtime's interface, so not one of the
+          // client - and a call says which runtime that is, rather than
+          // "client.window_bind_tab is not a function"
+          Object.defineProperty(client, m, {
+            get() {
+              throw new Error(`client.${m}( ): z2ui5_if_client has no ${m} in the abap2UI5 runtime this project ` +
+                `runs on (@abap2ui5/node-runtime ${runtimeVersion()}) - it came with a later release`);
+            },
+          });
+        }
+      }
 
       /** _bind( ) and its two other names: the binding of a field, a
        *  component or a cell - a placeholder when the framework has to
@@ -1253,6 +1446,23 @@ function defineApp(name, cls, opts = {}) {
             `the path a field's binding is answered with before main( ) returns`);
         }
       }
+      /** window_bind_tab( ), on the table's box - found by reference, as
+       *  _bind( ) finds a field. t_sort and t_filter only where the app
+       *  passed them: the method asks whether they were SUPPLIED. */
+      const windowBind = async (p) => {
+        const input = { val: boxAt(p.field, p.components), result: 1 };
+        if (p.window !== undefined) input.window = new abap.types.Integer().set(p.window);
+        if (p.t_sort) input.t_sort = windowBox("t_sort", p.t_sort);
+        if (p.t_filter) input.t_filter = windowBox("t_filter", p.t_filter);
+        return String((await c.z2ui5_if_client$window_bind_tab(input)).get());
+      };
+      for (const p of windowBinds) {
+        const real = await windowBind(p);
+        if (real !== boundPath(p.field)) {
+          throw new Error(`client.window_bind_tab( "${p.field}" ): the runtime bound it as ${real}, not as ` +
+            `${boundPath(p.field)} - the path a field's binding is answered with before main( ) returns`);
+        }
+      }
       // In the order the app made them: a placeholder in another one's
       // arguments was made before it, so it is resolved first.
       for (const [i, p] of placeholders.entries()) {
@@ -1270,6 +1480,8 @@ function defineApp(name, cls, opts = {}) {
           values[i] = (await c.z2ui5_if_client$_event_client(actionInput(p, { result: 1 }))).get();
         } else if (p.kind === "bind") {
           values[i] = await bindWith(p);
+        } else if (p.kind === "window") {
+          values[i] = await windowBind(p);
         }
       }
 

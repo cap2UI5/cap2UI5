@@ -10,6 +10,25 @@ starts with 0, a minor release may break the API.
 
 ### Added
 
+- `client.window_bind_tab( { val, window, t_sort, t_filter } )` and
+  `client.window_get_row( { val, row } )` - abap2UI5's windowed table - **where
+  the runtime has them: they need an `@abap2ui5/node-runtime` after 1.148.0**,
+  the one this version pins does not have them. A table bound with
+  `window_bind_tab( )` goes to the browser `window` rows at a time, with
+  `/__WINDOW/<path>/TOTAL`, `COUNT` and `SIZE` beside it; the list asks the
+  framework for the next rows as it grows or scrolls - a roundtrip that does
+  not run `main( )` - and sorts and filters on the server over all rows.
+  `t_sort` and `t_filter` are arrays of objects under the components' names
+  (`{ path, descending }`, `{ group, path, operator, value1, value2 }`); an
+  unknown component, a `path` that is no column of the table and a value of
+  the wrong kind are refused. `window_get_row( )` answers inside a
+  synchronous `main( )`, for the order the roundtrip started with; after a
+  `window_bind_tab( )` with another sort or filter in the same `main( )` it
+  is refused. On a runtime without the two methods the client does not have
+  them, and a call throws: `client.window_bind_tab( ): z2ui5_if_client has no
+  window_bind_tab in the abap2UI5 runtime this project runs on
+  (@abap2ui5/node-runtime 1.148.0) - it came with a later release`.
+  `abap2js` translates both, the table by its name as for `_bind( )`.
 - `cds.requires.cap2ui5.timeout`: the milliseconds an app's async `main( )`
   may take, `60000` unless set, `0` or `false` for no limit; a value that is
   not a number of milliseconds fails the start. Roundtrips run one at a time

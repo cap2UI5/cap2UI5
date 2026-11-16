@@ -51,6 +51,11 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
   declare is refused. So a parameter upstream adds goes into `SIGNATURES`
   with a test that holds on the pinned runtime AND on upstream's main, which
   CI builds - as `view_display( )`'s `transition` does in `nav.test.mjs`.
+  A METHOD upstream adds is wired the same way and exists on the client only
+  where the booted runtime's interface has it (`LATER` in `lib/define-app.js`;
+  elsewhere a call throws, naming the runtime) - `window_bind_tab( )` and
+  `window_get_row( )` in `window.test.mjs`, whose tests run on main's runtime
+  and skip, with the reason, on the pinned one.
 - **A client method that composes view XML needs a BROWSER test, not only a
   wire test.** The wire tests play the frontend's part by hand, so they can
   feed an event argument the real page would never send — which is how
