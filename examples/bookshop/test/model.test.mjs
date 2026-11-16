@@ -252,13 +252,18 @@ test("a placeholder kept in a field and embedded a roundtrip later is refused, n
 
 test("a name the runtime already has for a class of its own is refused; an app's own name may be defined again", () => {
   // abap.Classes is the whole runtime's registry: defineApp("Z2UI5_CL_UTIL")
-  // replaced the framework's utility class and broke every roundtrip.
-  const before = abap.Classes.Z2UI5_CL_UTIL;
-  for (const name of ["Z2UI5_CL_UTIL", "z2ui5_if_client", "ZCL_CDS_DRAFT_STORE"]) {
+  // replaced the framework's utility class and broke every roundtrip. That
+  // class is gone from abap2UI5's main (after 1.148.0), so the one asked
+  // here is its successor, which the pinned runtime and main both have: a
+  // name the runtime does not have is an app's to take, and the test failed
+  // on main for it.
+  const before = abap.Classes.Z2UI5_CL_UI5_UTIL_CONTEXT;
+  assert.ok(before, "the runtime has no Z2UI5_CL_UI5_UTIL_CONTEXT - name another class of the framework here");
+  for (const name of ["Z2UI5_CL_UI5_UTIL_CONTEXT", "z2ui5_if_client", "ZCL_CDS_DRAFT_STORE"]) {
     assert.throws(() => defineApp(name, class { main() {} }),
       new RegExp(`defineApp\\(${name.toUpperCase()}\\): the abap2UI5 runtime has a class of that name already`));
   }
-  assert.equal(abap.Classes.Z2UI5_CL_UTIL, before, "and the framework's class is untouched");
+  assert.equal(abap.Classes.Z2UI5_CL_UI5_UTIL_CONTEXT, before, "and the framework's class is untouched");
 
   const first = defineApp("ZCL_JS_MODEL_AGAIN", class { main() {} });
   const second = defineApp("ZCL_JS_MODEL_AGAIN", class { main() {} });

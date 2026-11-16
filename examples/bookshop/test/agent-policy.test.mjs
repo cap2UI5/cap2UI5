@@ -40,8 +40,11 @@ test("agent: false is the app's never - no setting overrides it, and app_list le
 });
 
 test("a class that is no app is never reachable, whatever the settings say", () => {
-  assert.match(reachable("Z2UI5_CL_UTIL", conf({ apps: ["*"] })).reason, /is no app of this server/);
-  assert.ok(!reachableApps(conf({ apps: ["*"] })).some((a) => a.app === "Z2UI5_CL_UTIL"));
+  // a class the pinned runtime and abap2UI5's main both have - Z2UI5_CL_UTIL,
+  // asked here before, is gone from main, where "no app" was true of nothing
+  assert.ok(abap.Classes["Z2UI5_CL_UI5_UTIL_CONTEXT"], "the runtime has no Z2UI5_CL_UI5_UTIL_CONTEXT");
+  assert.match(reachable("Z2UI5_CL_UI5_UTIL_CONTEXT", conf({ apps: ["*"] })).reason, /is no app of this server/);
+  assert.ok(!reachableApps(conf({ apps: ["*"] })).some((a) => a.app === "Z2UI5_CL_UI5_UTIL_CONTEXT"));
 });
 
 test("the app classifies its events - an exact name before a pattern, * for the rest", () => {
