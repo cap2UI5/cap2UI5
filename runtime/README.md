@@ -1,9 +1,10 @@
 # `@abap2ui5/node-runtime` — a stand-in
 
-This directory is what abap2UI5 **would publish** if its `release.yaml` gained
-one job: `npm publish` of the transpiled output. It is a stand-in so that the
-plugin next door, `@cap2ui5/cds-plugin`, can depend on it by name, exactly as
-it would on the real package.
+This directory is the workspace's place for what abap2UI5 publishes as
+`@abap2ui5/node-runtime`: the transpiled output. It is a stand-in so that the
+plugin next door, `@cap2ui5/cds-plugin`, resolves it by name, exactly as it
+does the real package, whether the content came from npm or from a build of
+upstream's `main`.
 
 Only `package.json` and this file are committed. The two content directories
 are 20 MB of generated output that any checkout rebuilds; fill them with
@@ -32,7 +33,7 @@ SQL would go there; a CAP-backed `DatabaseClient` for those is a later step.
 
 Upstream packs this as `@abap2ui5/node-runtime` (`npm run pack:node-runtime`, manifest
 `node/setup/npm.package.json`) at the end of `backend-prebuilt.yaml`, and
-publishes it by trusted publishing from its next release on. The real package
+publishes it by trusted publishing with every release. The real package
 carries more than this stand-in: `srv/host.mjs`, an entry point with
 `initialize()` and `createHandler()`, which the plugin does not use - it boots
 through `output/init.mjs` - and, from the release after 1.145.0,
@@ -43,6 +44,12 @@ output the plugin boots is that same one, so the claim holds. The package also
 gains the bin `abap2ui5-transpile`, which builds a host's own ABAP apps into a
 complete runtime of their own. The plugin does not need it: its apps are
 JavaScript, and `abap2js` translates ABAP ones into them. The package carries no `webapp/`: the framework's GET page embeds
-the whole UI5 component, so there are no frontend files to serve. Once it is on npm, `scripts/assemble-runtime.sh --package
-X.Y.Z` fills this directory from it, and ADR-008's cutover step 2 deletes the
-stand-in in favour of a plain dependency.
+the whole UI5 component, so there are no frontend files to serve. It is on npm since 1.145.0: `scripts/assemble-runtime.sh --package
+X.Y.Z` fills this directory from it. `plugin/package.json` depends on the
+published package by its exact version, and the stand-in's `version` is kept
+at that pin: npm links a workspace only where its version satisfies the
+dependency, and installs the registry's copy under `plugin/node_modules`
+otherwise - the suite would then run against that copy and not against what
+was assembled here. The stand-in stays for one reason, the CI job that builds
+upstream's `main`: a runtime that is not published yet has to come from
+somewhere.

@@ -32,6 +32,22 @@ starts with 0, a minor release may break the API.
 - An async `main( )` that takes longer than a minute now fails its roundtrip
   (above). Raise `cds.requires.cap2ui5.timeout`, or set it to `0`, for an app
   that legitimately takes longer.
+- It hosts `@abap2ui5/node-runtime` 1.148.0 (abap2UI5 1.148.0), transpiled
+  for `@abaplint/runtime` 2.14.5: ASSIGN COMPONENT of a component whose name
+  has a dash, `rescale( )` and CREATE DATA ... TYPE (name) with a lower-case
+  type name work in the runtime. The package's main entry is split
+  (`srv/host.mjs` is `srv/hostcore.mjs` bound to `output/`, and claims the
+  output it loads); the plugin boots through `output/init.mjs` as before and
+  needed no change. The package's new bin `abap2ui5-transpile` is not used
+  by the plugin.
+
+### Fixed
+
+- The README's "Behind the approuter" still described the runtime of 0.1.0:
+  it named 1.145.0 as the pinned runtime and told a project to set
+  `"csrfProtection": false`. The frontend fetches the approuter's
+  X-CSRF-Token itself since the runtime of 0.4.0 (1.146.0), so the generated
+  route works as it is.
 
 ## [0.5.0] - 2026-10-14
 

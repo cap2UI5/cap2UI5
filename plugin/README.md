@@ -126,9 +126,10 @@ Every method of the interface is there under its name - `nav.test.mjs` holds
 the client to the interface, so none is missing and none is invented. The
 constants are read from the runtime, and so is which of them there are:
 abap2UI5's page transitions - `cs_transition`, and `view_display( )`'s
-`transition` and `transition_back` - come with abap2UI5 1.146.0, the runtime
-this version pins; on an older runtime (1.145.0) a call that sets one is
-refused, naming the runtime, rather than dropped unseen:
+`transition` and `transition_back` - come with abap2UI5 1.146.0, so the
+runtime this version pins (1.148.0) has them; on an older runtime (1.145.0,
+by an `overrides`) a call that sets one is refused, naming the runtime,
+rather than dropped unseen:
 
 ```js
 client.view_display({ val: view.stringify(), transition: client.cs_transition.slide });
@@ -545,7 +546,7 @@ Under `cds.requires.cap2ui5` - in `package.json`, a `.cdsrc.json`, a profile or
 | `body_parser.limit` | CAP's `cds.server.body_parser.limit`, else `10mb` | the largest roundtrip body; a larger one gets 413 |
 | `compression` | `true` | gzip for the page and the roundtrips, where the browser accepts it; `false` leaves compressing to a proxy in front |
 | `timeout` | `60000` | the milliseconds an app's async `main( )` may take. Roundtrips run one at a time per process, so a `main( )` that waits holds everybody else's; past the limit its roundtrip is given up with a 504, its draft is not written and the next one runs. `0` or `false` is no limit. A roundtrip that waited a second or more for its turn is logged as a warning |
-| `accelerate` | `true` | calls the runtime's `accelerate( )` where it has one - the releases after 1.145.0, see [Performance](#performance); `false` runs the runtime's own code |
+| `accelerate` | `true` | calls the runtime's `accelerate( )` where it has one - 1.146.0 and later, so the pinned runtime has it; see [Performance](#performance); `false` runs the runtime's own code |
 | `agent` | off | the MCP endpoint for AI agents - `true` or `{ path, apps, confirm, forbidden, retention }`, see [Agents](#agents-the-mcp-endpoint) |
 
 `"cap2ui5": false` switches the plugin off: no route, and no `cap2ui5.Drafts`
@@ -571,13 +572,18 @@ theme, the draft expiry, the CSRF gate — comes from the user exit,
   default for production.
 - **Behind the approuter:** route the paths in `routes` to the CAP backend
   with the approuter's authentication, like the service paths. The approuter
-  protects routes with an X-CSRF-Token by default (`csrfProtection`).
-  `@abap2ui5/node-runtime` 1.145.0, the runtime this version pins, does not
-  fetch that token yet, so set `"csrfProtection": false` on these routes. The
-  framework runs its own CSRF check: it compares `Origin`/`Referer` with the
-  host, and the user exit configures it. The token handshake comes with the
-  abap2UI5 release after 1.145.0
-  ([abap2UI5#2802](https://github.com/abap2UI5/abap2UI5/pull/2802)).
+  protects routes with an X-CSRF-Token by default (`csrfProtection`), and
+  the routes work with it on: the frontend of `@abap2ui5/node-runtime`
+  1.148.0, the runtime this version pins, answers the approuter's `403` with
+  `x-csrf-token: Required` by fetching the token with a HEAD request and
+  sending the roundtrip again with it
+  ([abap2UI5#2802](https://github.com/abap2UI5/abap2UI5/pull/2802), in the
+  runtime from 1.146.0 on). That is read from the frontend's code; this
+  repository has no test against an approuter. Only a runtime older than
+  1.146.0 - an `overrides` to 1.145.0 - sends no token and needs
+  `"csrfProtection": false` on these routes. Beside the approuter's token
+  the framework runs its own CSRF check: it compares `Origin`/`Referer` with
+  the host, and the user exit configures it.
 - **Scaling:** roundtrips run **one at a time per process** - the transpiled
   framework keeps per-request state where ABAP keeps it per work process. A
   roundtrip costs milliseconds, so that is rarely felt, but an app whose
@@ -639,8 +645,9 @@ machine; take the ratios, not the seconds):
   WHERE over a sorted primary key reads every row, and CP rescans the rest
   of the draft's XML for every token the parser reads.
   `@abap2ui5/node-runtime` fixes both
-  with `accelerate( )` from the release after 1.145.0 - the right column,
-  measured before that release - and the plugin calls it when the server
+  with `accelerate( )` from 1.146.0 on, so in the runtime this version
+  pins - the right column, measured before that release - and the plugin
+  calls it when the server
   starts; the log then says `runtime accelerations active`.
   `"accelerate": false` switches them off.
 - **Node 24 is recommended.** CAP keeps `cds.context` in an
