@@ -8,6 +8,25 @@ starts with 0, a minor release may break the API.
 
 ## [Unreleased]
 
+### Added
+
+- `t.ref( target )`: a field `TYPE REF TO data`, pointing to data of the
+  type `target` gives - `mr_tab = t.ref(t.table({ id: 0, text: "" }))`,
+  `t.ref("start")` with an initial value. The constructor creates the data
+  (`CREATE DATA`); inside `main( )` the field reads and writes as the data
+  it points to, `mr_tab->*`. It is bound dereferenced, as ABAP's
+  `_bind( mr_tab->* )`: `client._bind("mr_tab->*")` answers `{/MR_TAB/*}`,
+  and `client.window_bind_tab({ val: "mr_tab->*" })` and
+  `client.window_get_row({ val: "mr_tab->*", row })` take it like a table
+  field. The browser's edits come back at the `*` node -
+  `{ "MR_TAB": { "*": { "__delta": { … } } } }` for a cell (abap2UI5
+  #3026), the value whole otherwise - and the framework applies them; the
+  draft keeps the data through the framework's S-RTTI. A reference bound
+  without `->*`, a component of the data behind one (`mr_tab-id`), a
+  `->*` of a field that is no `t.ref( )` and a reference to a reference
+  are refused. abap2UI5/protocol's conformance app `Z2UI5_CL_CONF_REF`
+  needs it (open question 14 of the protocol).
+
 ## [0.6.0] - 2026-11-16
 
 ### Added

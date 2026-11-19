@@ -113,6 +113,7 @@ the documentation of the JavaScript one.
 | ``client->check_on_event( `GO` )`` | `client.check_on_event("GO")` |
 | `client->get_event_arg( 1 )` | `client.get_event_arg(1)` |
 | `client->_bind( name )`, `_bind( s_order-customer )` | `client._bind("name")`, `client._bind("s_order-customer")` |
+| `client->_bind( mr_tab->* )` (`mr_tab TYPE REF TO data`) | `client._bind("mr_tab->*")` (`mr_tab = t.ref(…)`) |
 | `client->_bind( val = t_tab path = abap_true )` | `client._bind({ val: "t_tab", path: true })` |
 | ``client->window_bind_tab( val = t_tab window = 50 t_sort = VALUE #( ( path = `PRICE` descending = abap_true ) ) )`` | `client.window_bind_tab({ val: "t_tab", window: 50, t_sort: [{ path: "price", descending: true }] })` |
 | `client->window_get_row( val = t_tab row = 6 )` | `client.window_get_row({ val: "t_tab", row: 6 })` |
@@ -231,6 +232,16 @@ model carries both as ISO, as the framework serializes a D and a T. `null` and
 `undefined` clear a field, as `CLEAR` does; a value a field cannot take - a
 text into a number, a string into a table, a JavaScript `Date` into a
 `t.date( )` - is refused with the field's name.
+
+**A field `TYPE REF TO data`** is `t.ref( … )` of the type it points to:
+`mr_tab = t.ref(t.table({ id: 0, text: "" }))`, or `t.ref("start")` with an
+initial value. The constructor creates the data, and inside `main( )` the
+field reads and writes as that data - `mr_tab->*`. It is bound dereferenced,
+as `_bind( mr_tab->* )` binds it: `client._bind("mr_tab->*")` answers
+`{/MR_TAB/*}`, and `window_bind_tab( )` and `window_get_row( )` take
+`"mr_tab->*"` as `val`. The browser's edits come back at that node, and the
+draft keeps the data behind the reference. A reference bound without
+`->*`, and a component of the data behind one, are refused.
 
 **Types:** the package ships TypeScript declarations (`index.d.ts`). In a
 JavaScript app, annotate the client for completion and checked field names:

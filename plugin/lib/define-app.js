@@ -149,6 +149,11 @@ const t = {
   struct: (fields) => declared(withInitial(structFor(fields), fields)),
   /** A table of structures: `t.table({ ID: 0, title: "" })` - the argument is one ROW. */
   table: (row) => declared(tableFor(row)),
+  /** A data reference, `TYPE REF TO data`, to a value of the shape given:
+   *  `t.ref(t.table({ id: 0, text: "" }))`. The constructor creates the data
+   *  it points to (`CREATE DATA`); the app reads and writes that data, and
+   *  binds it dereferenced, `client._bind("mr_tab->*")`. */
+  ref: (target) => declared(refFor(target)),
 };
 
 const isBoxed = (v) =>
@@ -245,6 +250,28 @@ function tableFor(row, path = []) {
 }
 const declared = (box) => box;
 
+/** `TYPE REF TO data`, as the transpiler declares it - the type it is created
+ *  with is the pointer's, never this placeholder - and the shape of what it
+ *  points to. The initial value is the target's: written into the data the
+ *  constructor creates. */
+function refFor(target, path = []) {
+  const inner = shapeOf(target, [...path, "->*"]);
+  if (!inner) throw new Error(`t.ref( ) takes a value of the type to point to - ${describe(target)} has no ABAP type`);
+  if (inner.k === "ref") throw new Error("t.ref( ) of a t.ref( ): a reference to a reference is not supported");
+  const shape = { k: "ref", inner, make: () => new abap.types.DataReference(new abap.types.Character(4)) };
+  const box = Object.defineProperty(shape.make(), "__shape", { value: shape });
+  return withInitial(box, initialOf(target) ?? REF_CREATE);
+}
+/** The initial value of a t.ref( ) whose target has none of its own: the
+ *  data is created all the same. */
+const REF_CREATE = Symbol("cap2ui5.ref-create");
+/** The data a reference points to, created on first need as CREATE DATA
+ *  does - of the target's shape. */
+function pointerOf(box, shape) {
+  if (!box.getPointer()) box.assign(shape.inner.make());
+  return box.getPointer();
+}
+
 // A field's INITIAL VALUE, for the rows make( ) cannot carry: a table's shape
 // comes from its first row, and make( ) is also what RTTI and the deserializer
 // construct from, so it builds every table empty - which silently dropped the
@@ -271,6 +298,7 @@ function unwrap(box, shape) {
     case "char": return String(box.get()).trimEnd();
     case "struct": return rowToPlain(box, shape.fields);
     case "table": return box.array().map((r) => rowToPlain(r, shape.fields));
+    case "ref": return box.getPointer() ? unwrap(box.getPointer(), shape.inner) : null;
     default: return box.get();
   }
 }
@@ -322,6 +350,20 @@ function timeValue(value, at) {
  *  box took a null as an object to call .get( ) on - a TypeError that named
  *  no field. `at` is the field, for a refusal: `this.count`. */
 function wrap(box, value, shape, at = "the field") {
+  if (shape.k === "ref") {
+    // the value is written into the data the reference points to, as
+    // `mr_tab->* = …` does; null and undefined clear that data, not the reference
+    if (value === REF_CREATE) {
+      pointerOf(box, shape);
+      return;
+    }
+    if (value instanceof abap.types.DataReference) {
+      box.set(value);
+      return;
+    }
+    wrap(pointerOf(box, shape), value, shape.inner, `${at}->*`);
+    return;
+  }
   if (value === null || value === undefined) {
     box.clear();
     return;
@@ -418,6 +460,10 @@ const isFrameworkField = (f) => f.includes("$");
  *  z2ui5_cl_ui5_srv_bind). Known without binding, so _bind( ) can answer it
  *  inline and bind the field after main( ) - see there. */
 const boundPath = (f) => `{/${abapName(f)}}`;
+/** The name the framework keeps an attribute under, as RTTI spells it:
+ *  `ROWS`, `ORDER-LINES`, `MR_TAB->*` for the data behind a reference. */
+const abapPath = (top, keys) =>
+  [top, ...keys.filter((k) => k !== "*")].join("-").toUpperCase() + (keys.includes("*") ? "->*" : "");
 
 // ------------------------------------------------ what the framework hands over
 /** Any ABAP value as plain JavaScript, for what the app reads from the
@@ -906,9 +952,11 @@ function defineApp(name, cls, opts = {}) {
         for (const a of attri?.array() ?? []) {
           const { name, window_size, t_window_sort, t_window_filter, t_window_sort_set, t_window_filter_set } = a.get();
           if (window_size.get() <= 0) continue;
+          const deref = String(name.get()).toLowerCase().endsWith("->*");
           let box = this;
-          for (const [i, k] of String(name.get()).toLowerCase().split("-").entries()) box = i ? box?.get?.()[k] : box[k];
-          if (typeof box?.array !== "function") continue;      // a table behind a reference: no field of a JavaScript app
+          for (const [i, k] of String(name.get()).toLowerCase().replace(/->\*$/, "").split("-").entries()) box = i ? box?.get?.()[k] : box[k];
+          if (deref) box = box instanceof abap.types.DataReference ? box.getPointer() : undefined;   // a t.ref( ) field
+          if (typeof box?.array !== "function") continue;
           const order = await abap.Classes["Z2UI5_CL_UI5_SRV_WINDOW"].index(
             { tab: box, t_sort: t_window_sort, t_filter: t_window_filter, result: 1 });
           windows.set(String(name.get()), { order: order.array().map((n) => n.get()),
@@ -955,9 +1003,19 @@ function defineApp(name, cls, opts = {}) {
       let windowCalls = 0;
 
       /** A field, or a component of a structure field, named as ABAP names it:
-       *  `s_order-customer` (a `.` works too). Its shape, and the component
-       *  keys from the field's box to it. */
+       *  `s_order-customer` (a `.` works too), or the data a t.ref( ) field
+       *  points to, `mr_tab->*`. Its shape, and the keys from the field's box
+       *  to it - `*` is the dereference. */
       const fieldOf = (name, who) => {
+        const deref = /->\*$/.exec(String(name));
+        if (deref) {
+          const top = String(name).slice(0, deref.index);
+          if (!fields.has(top) || shapes[top].k !== "ref") {
+            throw new Error(`${who}: ${name} - only a t.ref( ) field is dereferenced, and ${top} is ` +
+              `${fields.has(top) ? "none" : "not a field of this app"}`);
+          }
+          return { top, keys: ["*"], shape: shapes[top].inner };
+        }
         const [top, ...components] = String(name).split(/[-.]/);
         if (!fields.has(top)) {
           throw new Error(
@@ -966,6 +1024,9 @@ function defineApp(name, cls, opts = {}) {
           );
         }
         let shape = shapes[top];
+        if (shape.k === "ref" && components.length) {
+          throw new Error(`${who}: ${name} - ${top} is a reference; a component of the data behind it is not supported, bind ${top}->*`);
+        }
         const keys = [];
         for (const [i, comp] of components.entries()) {
           if (shape.k !== "struct" || !Object.hasOwn(shape.fields, comp)) {
@@ -984,10 +1045,10 @@ function defineApp(name, cls, opts = {}) {
       const tableOf = (name, who) => {
         const target = fieldOf(name, who);
         if (target.shape.k !== "table") throw new Error(`${who}: val names a TABLE field, and ${name} is not one`);
-        return { ...target, name: [target.top, ...target.keys].join("-").toUpperCase() };
+        return { ...target, name: abapPath(target.top, target.keys) };
       };
       /** the box of a field, or of a component of it by its keys */
-      const boxAt = (field, keys) => keys.reduce((box, k) => box.get()[k], this[field]);
+      const boxAt = (field, keys) => keys.reduce((box, k) => (k === "*" ? box.getPointer() : box.get()[k]), this[field]);
       /** s_ctrl as the app writes it - ty_s_event_control's components by
        *  name - checked against the interface's own type */
       const eventControl = (s_ctrl, who) => {
@@ -1271,6 +1332,10 @@ function defineApp(name, cls, opts = {}) {
         }
         const cell = p.tab !== undefined || p.tab_index !== undefined;
         const target = fieldOf(cell ? p.tab : p.val, who);
+        if (target.shape.k === "ref") {
+          throw new Error(`${who}: ${cell ? p.tab : p.val} is a reference - bind the data behind it, ` +
+            `"${cell ? p.tab : p.val}->*", as _bind( lr_data->* ) does in ABAP`);
+        }
         if (cell) {
           if (target.shape.k !== "table") {
             throw new Error(`${who}: tab names a TABLE field, and ${p.tab} is not one`);
@@ -1414,8 +1479,7 @@ function defineApp(name, cls, opts = {}) {
        *  component, like a field, by reference - and a cell as the component
        *  box of that row of the table (bind_tab_cell). */
       const bindWith = async (p) => {
-        let box = this[p.field];
-        for (const k of p.components) box = box.get()[k];
+        const box = boxAt(p.field, p.components);
         const input = { val: box, result: 1 };
         if (p.row !== undefined) {
           const row = box.array()[p.row - 1];

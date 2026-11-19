@@ -366,6 +366,13 @@ export const t: {
   struct<S extends object>(fields: S): S;
   /** A table of structures - the argument is one ROW, the initial value is empty. */
   table<Row extends object>(row: Row): Row[];
+  /**
+   * A data reference, TYPE REF TO data, to a value of the type given - the
+   * constructor creates that data. Reads and writes as the data it points
+   * to; bound dereferenced, `client._bind("mr_tab->*")`, the model node
+   * `/MR_TAB/*`.
+   */
+  ref<T>(target: T): T;
 };
 
 /**

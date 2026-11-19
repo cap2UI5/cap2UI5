@@ -242,6 +242,21 @@ test("the box methods a field is read and written through: getRaw, getQualifiedN
   }
 });
 
+test("a t.ref( ) field is a data reference as the transpiler declares TYPE REF TO data, read and written through its pointer", () => {
+  // the reference: z2ui5_if_client=>get( )-r_event_data is TYPE REF TO data
+  const ref = abap.Classes["Z2UI5_IF_CLIENT"].METHODS.GET.parameters.RESULT.type().get().r_event_data;
+  const ours = t.ref(t.table({ id: 0 }));
+  assert.equal(ours.constructor, ref.constructor, "abap.types.DataReference");
+  for (const m of ["getPointer", "assign", "set", "clone", "clear"]) assert.equal(typeof ours[m], "function", `DataReference.${m}`);
+  const row = t.table({ id: 0 });
+  ours.assign(row);
+  assert.equal(ours.getPointer(), row, "assign( ) points it, getPointer( ) answers the box");
+  const copy = ref.constructor.prototype.clone.call(ours);
+  assert.equal(copy.getPointer(), row, "clone( ) keeps the pointer - set( ) of a reference copies it the same way");
+  ours.clear();
+  assert.equal(ours.getPointer(), undefined, "clear( ) unassigns it, as CLEAR does");
+});
+
 test("instance conventions: constructor_ and the ~ -> $ method naming", () => {
   for (const C of [Ref, App]) {
     assert.equal(typeof C.prototype.constructor_, "function", `${C.INTERNAL_NAME}.constructor_`);
