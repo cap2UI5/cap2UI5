@@ -1,6 +1,6 @@
 {
   "name": "@abap2ui5/node-runtime",
-  "version": "1.149.0",
+  "version": "1.150.0",
   "description": "STAND-IN for the package abap2UI5 publishes from its release: node/output (the transpiled framework, the UI5 frontend embedded in its GET page), node/setup (the one hook it imports) and node/downport (the ABAP it was transpiled from). Nothing in here is written by cap2UI5 - see README.md",
   "private": true,
   "type": "module",
