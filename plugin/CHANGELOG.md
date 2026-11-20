@@ -8,6 +8,8 @@ starts with 0, a minor release may break the API.
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-19
+
 ### Added
 
 - `t.ref( target )`: a field `TYPE REF TO data`, pointing to data of the
@@ -558,7 +560,8 @@ The first release: abap2UI5 as a CAP plugin.
 - Apps are plain JavaScript classes (`defineApp`).
 - The user exit is available as `defineExit`.
 
-[Unreleased]: https://github.com/cap2UI5/cap2UI5/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/cap2UI5/cap2UI5/compare/v0.7.0...HEAD
+[0.7.0]: https://www.npmjs.com/package/@cap2ui5/cds-plugin/v/0.7.0
 [0.6.0]: https://www.npmjs.com/package/@cap2ui5/cds-plugin/v/0.6.0
 [0.5.0]: https://www.npmjs.com/package/@cap2ui5/cds-plugin/v/0.5.0
 [0.4.0]: https://www.npmjs.com/package/@cap2ui5/cds-plugin/v/0.4.0
