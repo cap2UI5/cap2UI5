@@ -8,6 +8,17 @@ starts with 0, a minor release may break the API.
 
 ## [Unreleased]
 
+### Changed
+
+- It hosts `@abap2ui5/node-runtime` 1.150.0 (abap2UI5 1.150.0), transpiled
+  by `@abaplint/transpiler` 2.14.33 for `@abaplint/runtime` 2.14.33 like
+  1.149.0 - 0.7.0 hosted 1.149.0. The plugin needed no change. What
+  abap2UI5 1.150.0 changes for an app is in its changelog: among it, the
+  frontend sends the edit of a cell of a windowed table behind a data
+  reference (`t.ref( )`, bound `mr_tab->*`) as a row delta on the `*` node
+  instead of the whole table, which the framework refused for a windowed
+  table - the edit was lost.
+
 ## [0.7.0] - 2026-11-19
 
 ### Added
