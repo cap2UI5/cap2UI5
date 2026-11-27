@@ -8,22 +8,16 @@
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
 import { test } from "node:test";
-import { post, serve } from "./server.mjs";
+import { post, serve, viewXml, views } from "./server.mjs";
 
 const { defineApp } = createRequire(import.meta.url)("@cap2ui5/cds-plugin");
 
 const s = serve();
 
 const P = (o) => post(s.url, { user: "alice", ...o });
-const actions = (r) => [
-  ...(r.json?.S_FRONT?.S_ACTION?.T_SYSTEM ?? []),
-  ...(r.json?.S_FRONT?.S_ACTION?.T_CUSTOM ?? []),
-];
 /** The view XML the response displays into a slot, or undefined. */
-const slot = (r, name) => actions(r)
-  .find((a) => a[0] === "VIEW_SLOTS" && a[1] === "display" && a[2] === name)?.[3];
-const destroys = (r, name) => actions(r)
-  .some((a) => a[0] === "VIEW_SLOTS" && a[1] === "destroy" && a[2] === name);
+const slot = viewXml;
+const destroys = (r, name) => views(r)[name]?.DESTROY === true;
 
 test("a popup opens into the POPUP slot and closes again", async () => {
   const start = await P({ app: "ZCL_JS_PICK" });
@@ -43,19 +37,19 @@ test("a nested view renders into a control of the main view and clears again", a
   const start = await P({ app: "ZCL_JS_PICK" });
   const open = await P({ app: "ZCL_JS_PICK", id: start.json.S_FRONT.ID, event: "DETAIL" });
   assert.equal(open.status, 200, open.text.slice(0, 300));
-  const nest = actions(open).find((a) => a[0] === "VIEW_SLOTS" && a[1] === "display" && a[2] === "NEST");
-  assert.ok(nest, `no NEST display action; got ${JSON.stringify(actions(open)).slice(0, 300)}`);
-  assert.match(nest[3], /chosen so far/);
+  const nest = views(open).NEST;
+  assert.ok(nest?.XML, `no NEST display; got ${JSON.stringify(views(open)).slice(0, 300)}`);
+  assert.match(nest.XML, /chosen so far/);
   // the anchor and both mutators travel with it - without the clear mutator
   // every call would add one more fragment
   const wire = JSON.stringify(nest);
   for (const part of ["slot", "addContent", "removeAllContent"]) {
-    assert.ok(wire.includes(part), `the nest action does not carry ${part}: ${wire.slice(0, 300)}`);
+    assert.ok(wire.includes(part), `the nest display does not carry ${part}: ${wire.slice(0, 300)}`);
   }
   assert.equal(slot(open, "MAIN"), undefined, "a nested view does not re-render the main view");
 
   const hide = await P({ app: "ZCL_JS_PICK", id: open.json.S_FRONT.ID, event: "DETAIL_HIDE" });
-  assert.ok(destroys(hide, "NEST"), `NEST is destroyed; got ${JSON.stringify(actions(hide)).slice(0, 200)}`);
+  assert.ok(destroys(hide, "NEST"), `NEST is destroyed; got ${JSON.stringify(views(hide)).slice(0, 200)}`);
 });
 
 test("nav_app_call( ) hands the screen over, nav_app_leave( ) hands it back with the result", async () => {
@@ -157,12 +151,12 @@ test("view_display( ) takes upstream's page transition where the runtime has it,
   });
   const r = await P({ app: "ZCL_JS_TRANSITION" });
   assert.equal(r.status, 200, r.text.slice(0, 300));
-  const display = actions(r).find((a) => a[0] === "VIEW_SLOTS" && a[1] === "display" && a[2] === "MAIN");
-  assert.ok(display, "no MAIN display");
+  const display = views(r).MAIN;
+  assert.ok(display?.XML, "no MAIN display");
   if (has) {
     assert.equal(r.json.MODEL.REFUSED, "");
-    assert.equal(display[4]?.transition, "slide", JSON.stringify(display.slice(4)));
-    assert.equal(display[4]?.transitionBack, true, JSON.stringify(display.slice(4)));
+    assert.equal(display.OPT?.transition, "slide", JSON.stringify(display.OPT));
+    assert.equal(display.OPT?.transitionBack, true, JSON.stringify(display.OPT));
   } else {
     assert.match(r.json.MODEL.REFUSED, /^client\.view_display\( \): transition is not a parameter of z2ui5_if_client=>view_display in the abap2UI5 runtime this project runs on \(@abap2ui5\/node-runtime [\d.]+\) - it came with a later release$/);
     assert.equal(JSON.stringify(display).includes("transition"), false, "a transition reached the wire");

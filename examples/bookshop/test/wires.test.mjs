@@ -7,17 +7,12 @@
 // the same controls in Chromium.
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { post, serve } from "./server.mjs";
+import { actions, post, serve, viewXml } from "./server.mjs";
 
 const APP = "ZCL_JS_WIRES";
 const s = serve();
 const P = (o) => post(s.url, { user: "alice", ...o });
-const actions = (r) => [
-  ...(r.json?.S_FRONT?.S_ACTION?.T_SYSTEM ?? []),
-  ...(r.json?.S_FRONT?.S_ACTION?.T_CUSTOM ?? []),
-];
-const mainView = (r) => actions(r)
-  .find((a) => a[0] === "VIEW_SLOTS" && a[1] === "display" && a[2] === "MAIN")?.[3] ?? "";
+const mainView = (r) => viewXml(r) ?? "";
 /** the handler of an attribute of the control with that id, XML-unescaped */
 const wireOf = (xml, id, attr) => {
   const el = xml.match(new RegExp(`<[^>]*id="${id}"[^>]*>`))?.[0] ?? "";

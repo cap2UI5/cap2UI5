@@ -62,8 +62,8 @@ test("what the plugin uses of the client: transport, location, backendHint, the 
     transport: async ({ body, headers, draftId }) => {
       sent.push({ body: JSON.parse(body), headers, draftId });
       const id = `D${sent.length}`;
-      return { status: 200, body: JSON.stringify({ S_FRONT: { ID: id, APP: "ZCL_X",
-        S_ACTION: { T_SYSTEM: [["VIEW_SLOTS", "display", "MAIN", view, {}]] } }, MODEL: { NAME: "" } }) };
+      return { status: 200, body: JSON.stringify({ S_FRONT: { ID: id, APP: "ZCL_X", PROTOCOL: 3,
+        VIEWS: { MAIN: { XML: view } } }, MODEL: { NAME: "" } }) };
     },
     location: (app) => ({ origin: "https://host", pathname: "/rest/root/z2ui5", search: `?app_start=${app}` }),
     backendHint: "HINT",

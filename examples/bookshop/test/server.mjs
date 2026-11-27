@@ -102,9 +102,19 @@ export async function post(url, { app, id = "", event = "", model = {}, user, ar
   return { status: r.status, headers: r.headers, text, json };
 }
 
+// What a response says, as protocol 3 carries it (abap2UI5/protocol): the
+// screen in S_FRONT.VIEWS - one entry per slot the roundtrip changes,
+// { XML, OPT } to display it or { DESTROY: true } to take it down - and what
+// to do on it in S_FRONT.ACTIONS. A section that says nothing is absent.
+
+/** The slots a response changes: { MAIN: { XML, OPT }, POPUP: { DESTROY: true }, ... }. */
+export const views = (r) => r?.json?.S_FRONT?.VIEWS ?? {};
+/** The view XML a response displays into a slot, or undefined. */
+export const viewXml = (r, slot = "MAIN") => views(r)[slot]?.XML;
+/** The front-end actions of a response, in order. */
+export const actions = (r) => r?.json?.S_FRONT?.ACTIONS ?? [];
 /** The first action of a response, for logs and assertions. */
-export const action = (r) => r?.json?.S_FRONT?.S_ACTION?.T_SYSTEM?.[0]
-  ?? r?.json?.S_FRONT?.S_ACTION?.T_CUSTOM?.[0] ?? null;
+export const action = (r) => actions(r)[0] ?? null;
 
 /** One JSON-RPC message to the agent endpoint (cds.requires.cap2ui5.agent).
  *  `body` is the message or a batch; `user` a mocked user, none for anonymous.

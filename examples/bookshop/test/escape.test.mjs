@@ -11,15 +11,12 @@
 // with an error naming client._event instead of being shipped.
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { action, post, serve } from "./server.mjs";
+import { action, post, serve, viewXml } from "./server.mjs";
 
 const s = serve();
 
 const P = (o) => post(s.url, { user: "alice", app: "ZCL_JS_ESCAPED", ...o });
-const main = (r) => [
-  ...(r.json?.S_FRONT?.S_ACTION?.T_SYSTEM ?? []),
-  ...(r.json?.S_FRONT?.S_ACTION?.T_CUSTOM ?? []),
-].find((a) => a[0] === "VIEW_SLOTS" && a[1] === "display" && a[2] === "MAIN")?.[3];
+const main = viewXml;
 const ARG = `a "quoted" <arg> & more`;
 
 test("an escaped view still carries the real event, and the response is JSON", async () => {

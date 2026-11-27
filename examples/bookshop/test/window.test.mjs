@@ -13,7 +13,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { createRequire } from "node:module";
-import { post, serve } from "./server.mjs";
+import { post, serve, viewXml } from "./server.mjs";
 
 const { defineApp, t: types } = createRequire(import.meta.url)("@cap2ui5/cds-plugin");
 
@@ -22,8 +22,7 @@ const APP = "ZCL_JS_WINDOW";
 const WINDOW_EVENT = "___ZZZ_WIN";
 const s = serve();
 const P = (o) => post(s.url, { user: "alice", ...o });
-const mainView = (r) => (r.json?.S_FRONT?.S_ACTION?.T_SYSTEM ?? [])
-  .find((a) => a[0] === "VIEW_SLOTS" && a[2] === "MAIN")?.[3];
+const mainView = (r) => viewXml(r);
 // asked inside a test: the runtime boots with the server, before the first of them
 const has = () => Boolean(abap.Classes["Z2UI5_IF_CLIENT"].METHODS.WINDOW_BIND_TAB);
 const LATER = "z2ui5_if_client has no window_bind_tab in this runtime - it came after @abap2ui5/node-runtime 1.148.0";

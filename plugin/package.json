@@ -53,7 +53,7 @@
     }
   },
   "dependencies": {
-    "@abap2ui5/node-runtime": "1.150.0",
+    "@abap2ui5/node-runtime": "1.151.0",
     "express": "^4.22.1 || ^5"
   },
   "cds": {

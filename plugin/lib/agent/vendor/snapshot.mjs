@@ -1,6 +1,6 @@
 /*
  * VENDORED - do not edit. abap2UI5/mcp-server lib/snapshot.mjs
- * at commit a4d9f07659cd8a18d2e1f8ee4d2121695f40702b,
+ * at commit 7906a2faeb1369caf3ff31fd3e70c96f79f0ba20,
  * copied unchanged by scripts/vendor-agent.mjs (`npm run agent-vendor`).
  * `npm run agent-vendor:check` fails when this copy drifts from that
  * commit, agent-vendor.test.mjs when it no longer matches source.json.
@@ -58,6 +58,10 @@ const TEXT_MAX_LEN = 200;
  * keeps them apart from every backend event name. */
 export const FRONTEND_EVENTS = { POPUP: '@CLOSE_POPUP', POPOVER: '@CLOSE_POPOVER' };
 
+/* A BINDING_CALL sort or filter wire on a windowed list: the client sends
+ * the window request the UI5 frontend's list binding would send. */
+export const BINDING_CALL_EVENT = '@BINDING_CALL';
+
 // ------------------------------------------------------------ the state ----
 
 export function emptyState() {
@@ -92,21 +96,89 @@ function destroySlot(next, slot) {
   if (slot === 'POPUP' || slot === 'POPOVER') delete next.models[slot];
 }
 
+/* An action list of the response, or none: a T_SYSTEM, T_CUSTOM or ACTIONS
+ * that is no array (an object, a number) threw a TypeError out of this pure
+ * fold - the client refuses such a response with a sentence first
+ * (appclient receive), and a direct caller gets an empty list, never a throw. */
+const listOf = (v) => (Array.isArray(v) ? v : []);
+
+/** The order a frontend applies the entries of VIEWS in (protocol
+ *  spec/response.md "View slots"), whatever order the keys arrive in. */
+export const SLOT_ORDER = ['MAIN', 'NEST', 'NEST2', 'POPUP', 'POPOVER'];
+
+/*
+ * The wire a response speaks: 3 when it says so (S_FRONT.PROTOCOL) or, without
+ * the number, when it carries a section of protocol 3 (VIEWS, NAV, ACTIONS);
+ * 2 for everything else - protocol 2, and a backend older than the field,
+ * which spoke the S_ACTION envelope too. abap2UI5 1.151.0 moved to 3; a real
+ * system on an older release still answers 2, and both are read.
+ */
+export function protocolOf(response) {
+  const front = (response && response.S_FRONT) || {};
+  const n = Number(front.PROTOCOL);
+  if (front.PROTOCOL !== undefined && front.PROTOCOL !== null && Number.isFinite(n)) return n >= 3 ? 3 : 2;
+  return 'VIEWS' in front || 'NAV' in front || 'ACTIONS' in front ? 3 : 2;
+}
+
+/*
+ * What the response does to the view slots, in the order the frontend does
+ * it, as [{ slot, destroy: true } | { slot, xml, options }]:
+ *   protocol 3 - S_FRONT.VIEWS, one entry per slot ({ XML, OPT } a display,
+ *     { DESTROY: true } a teardown), applied in SLOT_ORDER;
+ *   protocol 2 - the VIEW_SLOTS entries of S_ACTION.T_SYSTEM, in list order
+ *     (["VIEW_SLOTS","display",<slot>,<xml>,<options>],
+ *     ["VIEW_SLOTS","destroy",<slot>]).
+ */
+export function viewChanges(response) {
+  const front = (response && response.S_FRONT) || {};
+  const out = [];
+  if (protocolOf(response) === 3) {
+    const views = front.VIEWS && typeof front.VIEWS === 'object' && !Array.isArray(front.VIEWS) ? front.VIEWS : {};
+    const slots = [...SLOT_ORDER, ...Object.keys(views).filter((k) => !SLOT_ORDER.includes(k))];
+    for (const slot of slots) {
+      if (!Object.hasOwn(views, slot)) continue;
+      const entry = views[slot];
+      if (!entry || typeof entry !== 'object') continue;
+      if (entry.DESTROY === true) out.push({ slot, destroy: true });
+      else if ('XML' in entry) out.push({ slot, xml: String(entry.XML ?? ''), options: entry.OPT && typeof entry.OPT === 'object' ? entry.OPT : {} });
+    }
+    return out;
+  }
+  for (const raw of listOf(front.S_ACTION && front.S_ACTION.T_SYSTEM)) {
+    const a = asArray(raw);
+    if (!a || a[0] !== 'VIEW_SLOTS') continue;
+    const [, method, slot, xml, options] = a;
+    if (method === 'destroy') out.push({ slot, destroy: true });
+    else if (method === 'display') out.push({ slot, xml: String(xml || ''), options: options || {} });
+  }
+  return out;
+}
+
+/** The app's follow-up actions, in its order: S_FRONT.ACTIONS (protocol 3)
+ *  or S_ACTION.T_CUSTOM (protocol 2) - entries and order are the same. */
+export function followUpActions(response) {
+  const front = (response && response.S_FRONT) || {};
+  return protocolOf(response) === 3 ? listOf(front.ACTIONS) : listOf(front.S_ACTION && front.S_ACTION.T_CUSTOM);
+}
+
 /*
  * One response folded into the state, the way the frontend folds it:
- *   - a response of another APP than the one that answered last tears the
- *     popup and the popover down first (protocol spec/response.md "View
- *     slots": the backend queues those destroys only for a hop between two
- *     instances of the same class, which a frontend cannot see);
- *   - every VIEW_SLOTS action of T_SYSTEM in order (a MAIN display tears
- *     down the nested views, the popup and the popover - the backend sends
- *     no destroy for them next to a MAIN display);
+ *   - protocol 2 only: a response of another APP than the one that answered
+ *     last tears the popup and the popover down first (the protocol-2
+ *     frontend's rule). Under protocol 3 the backend states that teardown
+ *     in VIEWS for every app hop and app start, and a frontend MUST leave a
+ *     slot the response does not name as it is (spec/response.md "View
+ *     slots", frontend check slots.app-change);
+ *   - every view change (viewChanges) in order - a MAIN display tears down
+ *     the nested views, the popup and the popover (the frontend's rule:
+ *     the backend sends no teardown for them next to a MAIN display);
  *   - a displayed slot gets its model from this response; a MODEL key in
  *     the response is pushed into every OPEN slot whose model belongs to the
  *     app that answered (a popup app's model must not overwrite the caller's
  *     view behind it - updateModelIfRequired);
- *   - T_CUSTOM is kept as the last response's client work (toasts, boxes),
- *     and a CONTROL_GLOBAL VIEW_SLOTS destroy in it is applied too.
+ *   - the follow-up actions (ACTIONS, T_CUSTOM under protocol 2) are kept as
+ *     the last response's client work (toasts, boxes), and a CONTROL_GLOBAL
+ *     VIEW_SLOTS destroy in it is applied too.
  * A response without MODEL leaves every model as it was: the backend only
  * sends what changed, and the client keeps what the user typed.
  */
@@ -114,7 +186,7 @@ export function applyResponse(state, response) {
   const prev = state || emptyState();
   const next = { app: prev.app, id: prev.id, slots: { ...prev.slots }, models: { ...prev.models }, custom: [] };
   const front = (response && response.S_FRONT) || {};
-  if (front.APP && prev.app && front.APP !== prev.app) {
+  if (protocolOf(response) < 3 && front.APP && prev.app && front.APP !== prev.app) {
     destroySlot(next, 'POPUP');
     destroySlot(next, 'POPOVER');
   }
@@ -122,27 +194,24 @@ export function applyResponse(state, response) {
   if (front.ID) next.id = front.ID;
   const hasModel = response && response.MODEL !== undefined;
   const data = hasModel ? response.MODEL : {};
-  const actions = front.S_ACTION || {};
   const displayed = new Set();
-  for (const raw of actions.T_SYSTEM || []) {
-    const a = asArray(raw);
-    if (!a || a[0] !== 'VIEW_SLOTS') continue;
-    const [, method, slot, xml, options] = a;
-    if (method === 'destroy') {
+  for (const change of viewChanges(response)) {
+    const { slot } = change;
+    if (change.destroy) {
       destroySlot(next, slot);
-    } else if (method === 'display') {
-      if (slot === 'MAIN') {
-        for (const s of ['MAIN', 'POPUP', 'POPOVER']) destroySlot(next, s);
-      }
-      next.slots[slot] = { xml: String(xml || ''), app: next.app, options: options || {} };
-      const key = modelKeyOf(slot);
-      if (slot === key || !next.models[key]) {
-        next.models[key] = { app: next.app, data: clone(data) || {} };
-        displayed.add(key);
-      }
+      continue;
+    }
+    if (slot === 'MAIN') {
+      for (const s of ['MAIN', 'POPUP', 'POPOVER']) destroySlot(next, s);
+    }
+    next.slots[slot] = { xml: change.xml, app: next.app, options: change.options };
+    const key = modelKeyOf(slot);
+    if (slot === key || !next.models[key]) {
+      next.models[key] = { app: next.app, data: clone(data) || {} };
+      displayed.add(key);
     }
   }
-  for (const raw of actions.T_CUSTOM || []) {
+  for (const raw of followUpActions(response)) {
     const a = asArray(raw);
     if (!a) continue;
     const b = a[0] === 'CONTROL_GLOBAL' ? a.slice(1) : a;
@@ -162,6 +231,19 @@ export function applyResponse(state, response) {
   return next;
 }
 
+/*
+ * The models a response builds afresh: every MAIN, POPUP or POPOVER display
+ * of its view changes. The frontend makes a new JSON model for such a view
+ * (core/actions/Slots.js createViewModel), and with it a new, empty set of
+ * changed paths - an edit not sent yet dies with the view it was typed into,
+ * where a model PUSH (updateModelIfRequired) re-applies it.
+ */
+export function rebuiltModels(response) {
+  const keys = new Set();
+  for (const c of viewChanges(response)) if (!c.destroy && MODEL_OWNING.includes(c.slot)) keys.add(c.slot);
+  return keys;
+}
+
 // --------------------------------------------------------- model access ----
 
 const segments = (p) => String(p).split('/').filter((s) => s !== '');
@@ -175,7 +257,21 @@ export function getAt(data, p) {
   return cur;
 }
 
+/* The path segments no write may follow. A plain object answers
+ * `__proto__` with Object.prototype, so setAt(data, '/__proto__/x', v) set
+ * x on EVERY object of the process - and the paths come from the backend's
+ * view XML (a field bound to {/__proto__/shell}) and from a card's submit
+ * payload, neither of which this process may let write into its own
+ * prototypes. */
+const UNSAFE_SEGMENTS = new Set(['__proto__', 'constructor', 'prototype']);
+
+/** True when a write to `p` stays inside the model (no prototype segment). */
+export const writablePath = (p) => !segments(p).some((s) => UNSAFE_SEGMENTS.has(s));
+
+/** Writes `value` at `p`, creating what is missing; false (nothing written)
+ *  for a path through a prototype. */
 export function setAt(data, p, value) {
+  if (!writablePath(p)) return false;
   const segs = segments(p);
   let cur = data;
   for (let i = 0; i < segs.length - 1; i += 1) {
@@ -183,6 +279,7 @@ export function setAt(data, p, value) {
     cur = cur[segs[i]];
   }
   cur[segs[segs.length - 1]] = value;
+  return true;
 }
 
 /** "/MS_HEAD/KUNNR" -> "MS_HEAD-KUNNR"; the old two-way prefix /XX/ is not
@@ -191,6 +288,47 @@ export function nameOfPath(p) {
   const segs = segments(p);
   if (segs[0] === 'XX' && segs.length > 1) segs.shift();
   return segs.join('-');
+}
+
+// ------------------------------------------------------- windowed tables ----
+
+/* The model key of the window states (z2ui5_if_ui5_types=>cv_window_model_key)
+ * and the reserved event of a window request (cs_event_window) - protocol
+ * spec/windowed-tables.md, abap2UI5 1.149.0 on. */
+export const WINDOW_KEY = '__WINDOW';
+export const WINDOW_EVENT = '___ZZZ_WIN';
+
+/** The window state of the table at the absolute model path `p` -
+ *  `/__WINDOW/<path>` - as { total, count, size, event }, or null when the table is
+ *  no window (the frontend's rule, core/WindowModel.js bindList: a list is
+ *  windowed when the model carries a state for its path). */
+export function windowStateOf(data, p) {
+  const segs = segments(p);
+  if (!segs.length || !String(p).startsWith('/')) return null;
+  const st = getAt(data, `/${WINDOW_KEY}/${segs.join('/')}`);
+  if (!st || typeof st !== 'object' || Array.isArray(st)) return null;
+  /* an initial value is left out of the JSON (the reference answers a
+   * filter that lets nothing through with { SIZE } alone): absent is 0 */
+  const total = st.TOTAL === undefined || st.TOTAL === null ? 0 : Number(st.TOTAL);
+  if (!Number.isFinite(total) || total < 0) return null;
+  const count = st.COUNT === undefined || st.COUNT === null ? 0 : Number(st.COUNT);
+  const size = Number(st.SIZE);
+  return {
+    total: Math.floor(total),
+    count: Number.isFinite(count) && count >= 0 ? Math.floor(count) : null,
+    size: Number.isFinite(size) && size >= 1 ? Math.floor(size) : 1,
+    /* the app's event a window request of this table names - the
+     * app-driven window of protocol 3 (window_bind_tab( event )); '' on
+     * 1.149.0 and 1.150.0, whose backend cut the window itself */
+    event: typeof st.EVENT === 'string' ? st.EVENT : '',
+  };
+}
+
+/** The `count` of the next window, as the UI5 frontend asks for it
+ *  (WindowModel _z2ui5Ensure): the rows held plus one, rounded up to whole
+ *  windows, at most `total`. */
+export function nextWindowCount(held, { size, total }) {
+  return Math.min(total, Math.ceil((held + 1) / size) * size);
 }
 
 // --------------------------------------------------------- control maps ----
@@ -290,7 +428,8 @@ const ROW_EVENTS_ON_TABLE = new Set(['itemPress', 'selectionChange', 'rowSelecti
  * buttons, its highlight) - their wires are row actions. */
 const ROW_TEMPLATES = new Set(['rowActionTemplate', 'rowSettingsTemplate']);
 
-/* Client work in T_CUSTOM that changes nothing an agent reads. */
+/* Client work in the follow-up actions (ACTIONS, T_CUSTOM under protocol 2)
+ * that changes nothing an agent reads. */
 const BENIGN_CUSTOM = new Set(['SET_FOCUS', 'SCROLL_TO', 'SCROLL_INTO_VIEW', 'SET_SIZE_LIMIT', 'SET_TITLE', 'SET_FAVICON', 'BUSY_INDICATOR', 'ROUTER', 'ICON_POOL', 'THEMING', 'FORMATTING', 'POPUP', 'SET_TITLE_LAUNCHPAD']);
 
 const MESSAGE_TYPES = { Error: 'error', Warning: 'warning', Success: 'success', Information: 'info' };
@@ -301,7 +440,10 @@ const MESSAGE_LISTS = { 'sap.m.MessagePopover': 'popover', 'sap.m.MessageView': 
 const MESSAGE_ITEMS = new Set(['sap.m.MessageItem', 'sap.m.MessagePopoverItem']);
 
 function lookupSpec(table, name, metadata) {
-  if (table[name]) return table[name];
+  /* own keys only: an element named `__proto__` (an XML name may start with
+   * an underscore) found Object.prototype here and was taken for a field
+   * spec without `props` - a TypeError out of the whole snapshot */
+  if (Object.hasOwn(table, name)) return table[name];
   if (!metadata || !/^sap\./.test(name)) return null;
   let cur = metadata[name];
   for (let guard = 0; cur && cur.parent && guard < 30; guard += 1) {
@@ -317,7 +459,9 @@ const clip = (s, n = TEXT_MAX_LEN) => {
   const t = String(s).replace(/\s+/g, ' ').trim();
   return t.length > n ? `${t.slice(0, n - 3)}...` : t;
 };
-const stripTags = (s) => String(s).replace(/<[^>]*>/g, ' ');
+// not /<[^>]*>/: from every '<' without a closing '>' it scanned to the end
+// of the text - quadratic, 80k of model text held a describe for seconds
+const stripTags = (s) => String(s).replace(/<[^<>]*>/g, ' ');
 
 // ----------------------------------------------------------- the walker ----
 
@@ -359,7 +503,7 @@ export function analyzeScreen({ state, response, app, session, maxRows = DEFAULT
     const model = st.models[key] || { data: {} };
     const root = parseViewXml(st.slots[slot].xml);
     const labelFor = collectLabelFor(root, model.data);
-    const ctx = { layer, slot, modelKey: key, data: model.data || {}, row: null, label: null, where: [], labelFor };
+    const ctx = { layer, slot, modelKey: key, data: model.data || {}, row: null, label: null, where: [], labelFor, byId: collectIds(root) };
     walkChildren(root.children, ctx);
   }
 
@@ -709,9 +853,20 @@ export function analyzeScreen({ state, response, app, session, maxRows = DEFAULT
       const scope = ctx.row ? 'row' : 'screen';
       if (wire.fn === 'eF') {
         const st = wire.args.map((x) => (x.static ? String(x.value) : null));
+        const windowed = wire.action === 'BINDING_CALL' ? bindingCallWindow(st, ctx) : null;
         if (wire.action === 'CONTROL_GLOBAL' && st[0] === 'VIEW_SLOTS' && st[1] === 'destroy' && FRONTEND_EVENTS[st[2]]) {
           pushAction({ event: FRONTEND_EVENTS[st[2]], args: [], label, control: name, trigger: attr, enabled, scope, table: ctx.row && ctx.row.tableId, layer: ctx.layer },
             { wire, node, modelKey: ctx.modelKey, frontend: st[2], tableId: ctx.row && ctx.row.tableId });
+        } else if (windowed && !ctx.row) {
+          /* a sort or filter of a WINDOWED list's binding: the UI5 frontend
+           * turns it into a window request (core/WindowModel.js sort/filter),
+           * and so does the client - so it is an action, not a browser-only
+           * wire. On a list that is no window it sorts in the browser only. */
+          pushAction({
+            event: BINDING_CALL_EVENT,
+            args: wire.args.map((x) => (x.static ? x.value : x.describe)),
+            label, control: name, trigger: attr, enabled, scope, layer: ctx.layer,
+          }, { wire, node, modelKey: ctx.modelKey, bindingCall: windowed });
         } else {
           note(`frontend action ${wire.action}(${wire.args.map((x) => (x.static ? JSON.stringify(x.value) : x.describe)).join(', ')}) on ${node.local} "${clip(label, 60)}" (${ctx.layer}) - runs in the browser only`);
         }
@@ -729,6 +884,21 @@ export function analyzeScreen({ state, response, app, session, maxRows = DEFAULT
         layer: ctx.layer,
       }, { wire, node, modelKey: ctx.modelKey, tableId: ctx.row && ctx.row.tableId, rowTemplate: (ctx.row && ctx.row.rowTemplate) || null, ...(extra || {}) });
     }
+  }
+
+  /* A BINDING_CALL wire `[id, aggregation, sort|filter, ...]` whose control
+   * (by id, in the same view) binds that aggregation to an absolute path the
+   * model carries a window state for: { path, method }; else null. */
+  function bindingCallWindow(st, ctx) {
+    const [id, agg, method] = st;
+    if (!id || !agg || !['sort', 'filter'].includes(method)) return null;
+    const target = ctx.byId && ctx.byId.get(id);
+    if (!target || target.attrs[agg] === undefined) return null;
+    const b = parseBinding(target.attrs[agg]);
+    const bp = b.kind === 'path' ? b : (b.parts || []).find((p) => p.path !== undefined);
+    if (!bp || !bp.path || bp.model || bp.relative) return null;
+    if (!windowStateOf(ctx.data, bp.path)) return null;
+    return { path: bp.path, method };
   }
 
   function actionLabel(node, ctx, name, attr, fieldRec) {
@@ -940,6 +1110,12 @@ export function analyzeScreen({ state, response, app, session, maxRows = DEFAULT
       if (selectionField && !(selectionField in r)) r[selectionField] = row ? (row[selectionField] ?? null) : null;
       return r;
     });
+    /* A windowed table (window_bind_tab, protocol spec/windowed-tables.md):
+     * the model carries the first rows of it and the state under
+     * /__WINDOW/<path>. rowCount stays the rows held - the rows `row` and a
+     * cell path can address - `total` is TOTAL, and the table is truncated
+     * while fewer rows are held than the filter lets through. */
+    const win = windowStateOf(ctx.data, bpath.path);
     const rec = {
       id: tableId,
       path: bpath.path,
@@ -948,13 +1124,22 @@ export function analyzeScreen({ state, response, app, session, maxRows = DEFAULT
       control: name,
       columns,
       rowCount: rows.length,
+      ...(win ? { total: Math.max(win.total, rows.length) } : {}),
       rows: shown,
-      truncated: rows.length > shown.length,
+      truncated: rows.length > shown.length || Boolean(win && rows.length < win.total),
       selectionMode,
       editableCells,
       layer: ctx.layer,
     };
     if (selectionField) rec.selectionField = selectionField;
+    if (win) {
+      rec.window = { size: win.size };
+      if (rows.length < win.total) {
+        const next = nextWindowCount(rows.length, win);
+        rec.window.more = `${rows.length} of ${win.total} rows held - app_act { session, window: { table: "${tableId}" } } loads rows `
+          + `${rows.length + 1}-${next}; window.count, window.sort and window.filter ask the backend for any first rows of all ${win.total}`;
+      }
+    }
     out.tables.push(rec);
     // what lib/appclient.mjs needs to fill a row event's $parameters: the
     // item template and its cells (getCells()[n] counts every cell of a
@@ -964,7 +1149,7 @@ export function analyzeScreen({ state, response, app, session, maxRows = DEFAULT
       : cells.filter((cl) => cl.visible).map((cl) => cl.node);
     index.tables.set(tableId, {
       table: rec, path: bpath.path, modelKey: ctx.modelKey, cellSpecs, selectionField, ctx,
-      node, kind: spec.kind, dialog: Boolean(spec.dialog), template, cellNodes: itemCells,
+      node, kind: spec.kind, dialog: Boolean(spec.dialog), template, cellNodes: itemCells, window: win,
     });
 
     // the table's own events: a row event on the table is row scope, and so
@@ -1066,6 +1251,19 @@ export function analyzeScreen({ state, response, app, session, maxRows = DEFAULT
     }
     return null;
   }
+}
+
+/* The controls of a view by their id - what a BINDING_CALL wire names. */
+function collectIds(root) {
+  const map = new Map();
+  const visit = (n) => {
+    for (const ch of n.children) {
+      if (!isAggregation(ch) && ch.attrs && typeof ch.attrs.id === 'string' && !map.has(ch.attrs.id)) map.set(ch.attrs.id, ch);
+      visit(ch);
+    }
+  };
+  visit(root);
+  return map;
 }
 
 /* A Label with labelFor names the control of that id, wherever it is. */

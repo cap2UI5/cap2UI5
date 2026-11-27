@@ -16,7 +16,7 @@ import { createRequire } from "node:module";
 import os from "node:os";
 import path from "node:path";
 import { test } from "node:test";
-import { EXAMPLE, post, serve } from "./server.mjs";
+import { EXAMPLE, actions, post, serve, viewXml } from "./server.mjs";
 
 const require = createRequire(import.meta.url);
 const { abap2js, Abap2jsError, t } = require("@cap2ui5/cds-plugin");
@@ -30,9 +30,8 @@ const REGENERATE = "npx --no-install cap2ui5 abap2js test/fixtures/abap2js/zcl_j
 
 const APP = "ZCL_JS_TRANSLATED";
 const P = (o) => post(s.url, { user: "alice", ...o });
-const slots = (r) => [...(r.json?.S_FRONT?.S_ACTION?.T_SYSTEM ?? []), ...(r.json?.S_FRONT?.S_ACTION?.T_CUSTOM ?? [])];
-const view = (r) => slots(r).find((a) => a[0] === "VIEW_SLOTS" && a[1] === "display" && a[2] === "MAIN")?.[3];
-const custom = (r) => r.json?.S_FRONT?.S_ACTION?.T_CUSTOM ?? [];
+const view = viewXml;
+const custom = actions;
 
 test("the translation of the fixture is the app in srv/apps, byte for byte", () => {
   const { name, code } = abap2js(fs.readFileSync(FIXTURE, "utf8"), {

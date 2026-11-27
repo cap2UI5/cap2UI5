@@ -10,15 +10,14 @@
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
 import { test } from "node:test";
-import { post, serve } from "./server.mjs";
+import { actions, post, serve } from "./server.mjs";
 
 const { defineApp, t } = createRequire(import.meta.url)("@cap2ui5/cds-plugin");
 
 const s = serve();
 const P = (o) => post(s.url, { user: "alice", ...o });
 const toast = (r) => {
-  const a = [...(r.json?.S_FRONT?.S_ACTION?.T_SYSTEM ?? []), ...(r.json?.S_FRONT?.S_ACTION?.T_CUSTOM ?? [])]
-    .find((x) => x[0] === "MESSAGE_TOAST");
+  const a = actions(r).find((x) => x[0] === "MESSAGE_TOAST");
   assert.ok(a, `no toast: ${r.text.slice(0, 400)}`);
   return a[2];
 };

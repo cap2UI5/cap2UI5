@@ -11,7 +11,7 @@
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
 import { test } from "node:test";
-import { action, post, serve } from "./server.mjs";
+import { action, post, serve, viewXml, views } from "./server.mjs";
 
 const require = createRequire(import.meta.url);
 const { z2ui5_cl_ui5_view_builder, ViewBuilder, defineApp } = require("@cap2ui5/cds-plugin");
@@ -90,8 +90,8 @@ test("stringify( ) is the chain as it stood - and not a string inside main( )", 
 test("the served app's view is the builder's, with bindings and events in place", async () => {
   const r = await post(s.url, { app: "ZCL_JS_BUILDER", user: "alice" });
   assert.equal(r.status, 200, r.text.slice(0, 300));
-  const [kind, verb, slot, xml] = action(r) ?? [];
-  assert.deepEqual([kind, verb, slot], ["VIEW_SLOTS", "display", "MAIN"]);
+  assert.deepEqual(Object.keys(views(r)), ["MAIN"]);
+  const xml = viewXml(r);
   assert.match(xml, /^<mvc:View xmlns="sap.m" xmlns:mvc="sap.ui.core.mvc" displayBlock="true" height="100%">/);
   assert.match(xml, /<Input value="\{\/NAME\}" placeholder="Your name"\/>/, "the binding is not in the view");
   assert.match(xml, /<Text text="\\\{shown as typed\\\}"\/>/, "t did not render literally");
@@ -135,7 +135,7 @@ test("popup_display( ) and nest_view_display( ) take a builder, or its stringify
   const start = await post(s.url, { app: "ZCL_JS_VB_SLOTS", user: "alice" });
   assert.equal(start.status, 200, start.text.slice(0, 300));
   const popup = await post(s.url, { app: "ZCL_JS_VB_SLOTS", id: start.json.S_FRONT.ID, event: "POPUP", user: "alice" });
-  assert.match(JSON.stringify(action(popup)), /POPUP.*<Dialog title=\\"from the builder\\"\/>/);
+  assert.match(viewXml(popup, "POPUP") ?? "", /<Dialog title="from the builder"\/>/);
   const nest = await post(s.url, { app: "ZCL_JS_VB_SLOTS", id: popup.json.S_FRONT.ID, event: "NEST", user: "alice" });
   assert.match(JSON.stringify(nest.json), /<Text text=\\"nested\\"\/>/);
 });

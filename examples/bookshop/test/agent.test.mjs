@@ -281,7 +281,7 @@ test("confirm: ADD is never fired by an agent - the refusal hands the screen ove
   // ...and only for alice: carol gets a fresh app and the framework's notice
   const other = await browserStart("carol", "?app_start=ZCL_JS_BOOKS", link);
   assert.equal(other.MODEL.SEARCH, "");
-  assert.match(JSON.stringify(other.S_FRONT.S_ACTION), /could not be restored/);
+  assert.match(JSON.stringify(other.S_FRONT.ACTIONS), /could not be restored/);
 });
 
 test("forbidden: an event the project forbids is refused, by name and by id - the app's other events stay open", async () => {
