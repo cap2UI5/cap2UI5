@@ -57,11 +57,15 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
   after `main( )` - is documented as a difference, not hidden behind a new
   name. `nav.test.mjs` holds the client's names to the interface's in both
   directions, so a method upstream adds fails the suite until it is wired.
-  The constant groups are read from the runtime; a parameter is wired in
-  `SIGNATURES` (`lib/define-app.js`), and one the runtime in use does not
-  declare is refused. So a parameter upstream adds goes into `SIGNATURES`
-  with a test that holds on the pinned runtime AND on upstream's main, which
-  CI builds - as `view_display( )`'s `transition` does in `nav.test.mjs`.
+  The constant groups are read from the runtime, and so are the parameters
+  of every method - their names, which one is preferred and which are
+  required (`signature( )` in `lib/define-app.js`, from the transpiled
+  interface's `METHODS`). There is no table of them here to keep in step: a
+  parameter upstream adds is one the client takes on the runtime that has
+  it, and one the runtime in use does not declare is refused, naming the
+  runtime. What a parameter DOES still has to be wired where the client
+  uses it, with a test - as `view_display( )`'s `transition` in
+  `nav.test.mjs`.
   A METHOD upstream adds is wired the same way and exists on the client only
   where the booted runtime's interface has it (`LATER` in `lib/define-app.js`;
   elsewhere a call throws, naming the runtime) - `window_bind_tab( )` and

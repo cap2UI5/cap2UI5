@@ -86,7 +86,7 @@ test("a component, a cell or a call client._bind( ) cannot resolve is refused wi
   assert.match(lines[1], /^scalar: .*first is not a component of order-customer-name, which is no structure$/);
   assert.match(lines[2], /^cell: .*tab names a TABLE field, and order-customer is not one$/);
   assert.match(lines[3], /^column: .*with tab, val is the column - "qty" is not one of order-lines: sku$/);
-  assert.match(lines[4], /^option: .*no parameter "omit_empty" - \{ val, path, tab, tab_index, /);
+  assert.match(lines[4], /^option: .*no parameter "omit_empty" - \{ val, path, /);
   // the call of cap2ui5 0.1.0 - c.bind( name, options ): ABAP has no second positional argument
   assert.match(lines[5], /^positional: .*one value for val, or the parameters by name as one object/);
   // the value where its name belongs, as ABAP writes _bind( order )
