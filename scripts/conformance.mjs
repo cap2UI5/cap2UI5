@@ -88,6 +88,14 @@ console.log(`conformance: @cap2ui5/cds-plugin ${pluginVersion} (this checkout) o
   `(runtime/), @sap/cds ${JSON.parse(fs.readFileSync(fromHost.resolve("@sap/cds/package.json"), "utf8")).version}, ` +
   `protocol ${PROTOCOL}`);
 
+// --- the protocol's own dependencies -----------------------------------------
+// Its runner reads what it expects of an implementation through modules that
+// resolve packages of the protocol's root (test/lib/expected.mjs), so a fresh
+// checkout has to be installed once - from its lock file, as its own CI does.
+if (!fs.existsSync(path.join(PROTOCOL, "node_modules")) && fs.existsSync(path.join(PROTOCOL, "package-lock.json"))) {
+  run("npm", ["ci", "--no-audit", "--no-fund", "--loglevel=error"], PROTOCOL);
+}
+
 // --- the protocol's runner: start the host, run the suite, stop it ----------
 const args = [path.join(PROTOCOL, "scripts", "run-conformance.mjs"), "cap2ui5", "--profile", opt("--profile") ?? "ui5"];
 if (opt("--json")) args.push("--json", path.resolve(opt("--json")));

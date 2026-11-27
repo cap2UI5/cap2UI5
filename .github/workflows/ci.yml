@@ -199,7 +199,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: abap2UI5/protocol
-          ref: d1251093e3cbdd9a44ac1a29770a2c1add0ec46b # main, 2026-10-03
+          ref: 789bbd254c3a80459fcf363e1fe614b099943af5 # main, protocol 3 revision 0.9 - the commit abap2UI5's test.yaml pins
           path: .protocol
           persist-credentials: false
       - run: npm run conformance -- .protocol --profile ui5 --json conformance.json

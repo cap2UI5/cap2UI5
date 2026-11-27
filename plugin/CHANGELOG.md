@@ -55,6 +55,18 @@ starts with 0, a minor release may break the API.
   goes by the attribute's name - and refuses `window_get_row( )` and
   `_bind_edit( )`, which the interface no longer has.
 
+### Fixed
+
+- **A change made in place to a table or a structure field is kept.**
+  `this.rows.push( row )`, `this.rows[0].done = true`, a row found with
+  `find( )` and changed, `this.order.lines = [ … ]`: every read of a field
+  handed out a fresh copy, so such a change went to an object nobody read
+  again and was lost without an error - only an assignment to the field
+  itself, `this.rows = [ … ]`, was written. A field is read once per
+  `main( )` now, the same object answers every later read, and what changed
+  is written when `main( )` returns. abap2UI5/protocol's conformance app
+  for the windowed table relies on it.
+
 ### Added
 
 - The client's methods abap2UI5 1.151.0 adds: `check_on_nav_back( )` and

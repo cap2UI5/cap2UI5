@@ -87,6 +87,7 @@
 // t.packed(). Guessing silently produces views with the wrong number of
 // decimals and nothing to point at.
 const crypto = require("node:crypto");
+const { isDeepStrictEqual } = require("node:util");
 const { setTimeout, clearTimeout } = require("node:timers");
 const cds = require("@sap/cds");
 const { renderOf } = require("./view-builder");
@@ -1294,26 +1295,51 @@ function defineApp(name, cls, opts = {}) {
       // every object inherits - constructor, toString, hasOwnProperty - and
       // then `${this}` or `this.constructor` threw "box.get is not a function".
       const isField = (prop) => typeof prop === "string" && Object.hasOwn(shapes, prop);
+      // A structure or a table is read ONCE per main( ) and the same object
+      // answers every later read, so what JavaScript does to it in place -
+      // `this.rows.push( row )`, `this.rows[0].done = true`,
+      // `this.order.lines = [ … ]`, a row found with find( ) and changed - is
+      // the field's value, and is written to the box when main( ) returns.
+      // Each read used to hand out a fresh copy: such a change was made to
+      // an object nobody read again and was lost without a word, where ABAP
+      // changes the row behind a field symbol. `seen` keeps what was read
+      // and a copy of it as it was, to tell whether it changed.
+      const seen = new Map();                  // field -> { value, before }
       const plain = new Proxy(this, {
         get(tgt, prop, recv) {
           const v = Reflect.get(tgt, prop, recv);
-          if (isField(prop)) return unwrap(v, shapes[prop]);
+          if (isField(prop)) {
+            if (seen.has(prop)) return seen.get(prop).value;
+            const value = unwrap(v, shapes[prop]);
+            if (value !== null && typeof value === "object") seen.set(prop, { value, before: structuredClone(value) });
+            return value;
+          }
           // the class itself stays the class - bound, it is no constructor of anything
           return typeof v === "function" && prop !== "constructor" ? v.bind(recv) : v;
         },
         set(tgt, prop, value) {
           if (isField(prop)) {
             wrap(tgt[prop], value, shapes[prop], `this.${prop}`);
+            seen.delete(prop);                 // the next read is of what was written
             return true;
           }
           return Reflect.set(tgt, prop, value);
         },
       });
+      /** what main( ) changed in place, into the boxes - before anything
+       *  reads them: a bind, the framework's model, the draft */
+      const writeBack = () => {
+        for (const [prop, { value, before }] of seen) {
+          if (!isDeepStrictEqual(value, before)) wrap(this[prop], value, shapes[prop], `this.${prop}`);
+        }
+        seen.clear();
+      };
       try {
         const running = userMain.call(plain, client);
         // await: an async main still works - within the time it may take
         if (limits.timeout && typeof running?.then === "function") await within(running, limits.timeout, INTERNAL);
         else await running;
+        writeBack();
       } catch (e) {
         throw privateMemberError(e, INTERNAL) ?? e;
       }

@@ -120,9 +120,8 @@ defineApp("ZCL_JS_WINDOW_NESTED", class {
     }
     if (client.check_on_event("LINES")) {
       const { skip, top } = client.get().r_event_data;
-      // the structure is written whole: a field reads as a copy of its value
-      this.order = { ...this.order, lines: [...this.order.lines,
-        ...Array.from({ length: Math.min(top, 30 - skip) }, (_, i) => ({ sku: `S-${skip + i + 1}`, qty: 30 - skip - i }))] };
+      this.order.lines.push(
+        ...Array.from({ length: Math.min(top, 30 - skip) }, (_, i) => ({ sku: `S-${skip + i + 1}`, qty: 30 - skip - i })));
       return;
     }
     if (client.check_on_navigated()) {
