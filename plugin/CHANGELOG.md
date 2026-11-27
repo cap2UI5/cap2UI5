@@ -29,6 +29,12 @@ starts with 0, a minor release may break the API.
   instead of the whole table, which the framework refused for a windowed
   table - the edit was lost.
 
+- The parameters of the client's methods - their names, the preferred one,
+  the required ones - are read from the hosted runtime's own
+  `z2ui5_if_client` instead of from a table in the plugin that restated
+  them. Nothing changes for an app; the message for an unknown parameter
+  now names the runtime it was looked up in.
+
 ### Added
 
 - The CDS draft store implements `prune_chain( )` and `touch( )`, the two

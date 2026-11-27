@@ -158,7 +158,7 @@ test("view_display( ) takes upstream's page transition where the runtime has it,
     assert.equal(display.OPT?.transition, "slide", JSON.stringify(display.OPT));
     assert.equal(display.OPT?.transitionBack, true, JSON.stringify(display.OPT));
   } else {
-    assert.match(r.json.MODEL.REFUSED, /^client\.view_display\( \): transition is not a parameter of z2ui5_if_client=>view_display in the abap2UI5 runtime this project runs on \(@abap2ui5\/node-runtime [\d.]+\) - it came with a later release$/);
+    assert.match(r.json.MODEL.REFUSED, /^client\.view_display\( \): no parameter "transition" - .* the abap2UI5 runtime this project runs on \(@abap2ui5\/node-runtime [\d.]+\)$/);
     assert.equal(JSON.stringify(display).includes("transition"), false, "a transition reached the wire");
   }
 });

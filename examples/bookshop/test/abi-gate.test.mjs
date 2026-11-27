@@ -335,6 +335,30 @@ test("the constant structures the client hands over are readable, by name", () =
   }
 });
 
+test("z2ui5_if_client's METHODS carry what the client reads its signatures from - the preferred parameter first", () => {
+  // lib/define-app.js signature( ): the importing parameters of a method in
+  // the order the transpiler emits them, the first being the one a single
+  // positional argument means, and is_optional "X" on every one a call may
+  // leave out. Neither is promised by @abaplint/transpiler, so both are held
+  // here - against the preferred parameters ABAP itself gives these methods.
+  const M = abap.Classes["Z2UI5_IF_CLIENT"].METHODS;
+  for (const [method, { parameters }] of Object.entries(M)) {
+    for (const [name, p] of Object.entries(parameters ?? {})) {
+      assert.ok(["I", "E", "C", "R"].includes(p.parm_kind), `${method}( ${name} ): parm_kind ${p.parm_kind}`);
+      assert.ok(["X", " "].includes(p.is_optional), `${method}( ${name} ): is_optional ${JSON.stringify(p.is_optional)}`);
+    }
+  }
+  const importing = (m) => Object.entries(M[m].parameters).filter(([, p]) => p.parm_kind === "I");
+  const PREFERRED = { _EVENT: "VAL", _BIND: "VAL", MESSAGE_BOX_DISPLAY: "TEXT", MESSAGE_TOAST_DISPLAY: "TEXT",
+    NAV_APP_LEAVE: "APP", NAV_APP_CALL: "APP", GET_EVENT_ARG: "V", GET_APP: "ID", POPOVER_DISPLAY: "XML",
+    VIEW_DISPLAY: "VAL", FOLLOW_UP_ACTION: "VAL" };
+  for (const [m, first] of Object.entries(PREFERRED)) assert.equal(importing(m)[0][0], first, `${m}( ): the preferred parameter`);
+  const required = (m) => importing(m).filter(([, p]) => p.is_optional !== "X").map(([n]) => n);
+  assert.deepEqual(required("_EVENT"), [], "every parameter of _event( ) is optional");
+  assert.deepEqual(required("POPOVER_DISPLAY").sort(), ["BY_ID", "XML"]);
+  assert.deepEqual(required("NEST_VIEW_DISPLAY").sort(), ["ID", "METHOD_INSERT", "VAL"]);
+});
+
 test("the CDS draft store implements every method the runtime's interface declares", () => {
   // the framework calls the store through the interface, and a method it
   // adds - prune_chain( ) and touch( ) came with 1.151.0 - is a TypeError in

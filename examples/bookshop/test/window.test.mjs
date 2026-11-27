@@ -198,7 +198,7 @@ test("what window_bind_tab( ) and window_get_row( ) cannot take is refused with 
     // the value where its name belongs, as ABAP writes window_bind_tab( rows )
     value: /binds a field by its NAME, client\.window_bind_tab\("name"\), not by its value/,
     window: /^client\.window_bind_tab\( \): window is the number of rows the browser gets at a time - got "50"$/,
-    parameter: /^client\.window_bind_tab\( \): no parameter "sort" - \{ val, window, t_sort, t_filter \}$/,
+    parameter: /^client\.window_bind_tab\( \): no parameter "sort" - \{ val, window, t_sort, t_filter \}/,
     sorters: /^client\.window_bind_tab\( \): t_sort is an array of \{ path, descending \}, got an object$/,
     component: /^client\.window_bind_tab\( \): t_sort\[0\] has no component "desc" - path, descending$/,
     column: /^client\.window_bind_tab\( \): t_sort\[0\]\.path: "title" is not a column of the table - id, name$/,
