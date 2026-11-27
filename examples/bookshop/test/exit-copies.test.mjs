@@ -10,6 +10,7 @@
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
 import { after, before, test } from "node:test";
+import path from "node:path";
 import { pathToFileURL } from "node:url";
 
 const require = createRequire(import.meta.url);
@@ -24,19 +25,21 @@ const copy = () => {
 const first = require(FILE);
 
 before(async () => {
-  const { initializeABAP } = await import(pathToFileURL(locate().init).href);
+  const { initializeABAP } = await import(pathToFileURL(path.join(locate().dir, "output", "init.mjs")).href);
   await initializeABAP();
 });
 after(() => first.resetExit());
 
-test("an exit registered through another copy is the one this copy installs", () => {
+test("an exit registered through another copy is the one this copy installs", async () => {
   const nested = copy();
   assert.notEqual(nested.defineExit, first.defineExit, "two instances of the module");
   const exit = { onRoundtrip(cfg) { cfg.draft_exp_time_in_hours = 12; } };
   nested.defineExit(exit);
-  const Cls = first.installExit();
+  const Cls = await first.installExit();
   assert.ok(Cls, "the copy that boots the runtime found no exit to install");
-  assert.ok(abap.Classes.Z2UI5_CL_UI5_USER_EXIT.gi_user_exit.get() instanceof Cls);
+  // installed as the framework names a customer exit: by its class
+  const named = await abap.Classes.Z2UI5_CL_UI5_USER_EXIT.get_user_exit_class();
+  assert.equal(String(named.get()), Cls.INTERNAL_NAME);
   // and it is still one exit, whichever copy is asked
   assert.throws(() => first.defineExit({ onPage() {} }), /defineExit was called twice/);
   first.resetExit();

@@ -1,4 +1,7 @@
-// Stateful sessions, per CAP user (plugin/lib/sessions.js). The framework
+// Stateful sessions, per CAP user - the runtime package's withSession( ),
+// which the route calls with the CAP user as the owner (cds-plugin.js). The
+// mechanism is held by abap2UI5's node/tests/sessions.spec.js; what is held
+// here is that one user's session never answers another. The framework
 // keeps a stateful app's handler in class-data - one per roll area on an SAP
 // system, one per process here - and took it for every later request of
 // every user; the ICF cookie transform failed first with a 500 that left it

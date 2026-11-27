@@ -159,8 +159,6 @@ array, a cycle) is reported by its path and left out; the app runs without it. A
   take before its roundtrip is given up with a 504; `0` or `false` is no
   limit. Roundtrips run one at a time per process, so a `main( )` that waits
   holds everybody else's
-- `accelerate` (default `true`): the runtime's `accelerate( )`, where it has
-  one; `false` runs the runtime's own code
 - `agent` (default off): the MCP endpoint for AI agents, below
 
 `false` switches the plugin off. The route runs behind CAP's own middlewares

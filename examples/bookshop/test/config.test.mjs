@@ -23,14 +23,13 @@ const shipped = require("@cap2ui5/cds-plugin/package.json").cds.requires.cap2ui5
 const env = (over = {}) => ({ requires: { cap2ui5: { ...shipped, ...over.own } }, ...over.env });
 const s = serve();                                 // the example, for what the route reads off a request
 
-test("the defaults: srv/apps, authenticated users, both routes, 10mb, gzip, the runtime's accelerations", () => {
+test("the defaults: srv/apps, authenticated users, both routes, 10mb, gzip", () => {
   assert.deepEqual(config(env()), {
     apps: "srv/apps",
     routes: ["/sap/bc/z2ui5", "/rest/root/z2ui5"],
     roles: ["authenticated-user"],
     limit: DEFAULT_LIMIT,
     compression: true,
-    accelerate: true,
     timeout: 60000,
     agent: null,
   });

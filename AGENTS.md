@@ -25,6 +25,17 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
 
 ## Rules
 
+- **The host layer is the runtime package's, not a copy of it.** What a Node
+  host of the framework needs - booting it, one request at a time, stateful
+  sessions, gzip - is exported by `@abap2ui5/node-runtime`'s entry point
+  (`initialize( )`, `exclusive( )`, `withSession( )`, `compress( )`;
+  `srv/hostcore.mjs` there explains each), and the plugin calls those
+  (`lib/runtime.js`, `cds-plugin.js`). It kept copies of three of them once,
+  "until a runtime release exports it", and they stayed for releases after
+  one did. So before writing host code here, read `srv/host.d.ts` of the
+  pinned runtime; what is missing there for every host is a change upstream,
+  and what stays here is what only CAP has: the user, the tenant, the
+  database, the model. `abi-gate.test.mjs` holds the exports the plugin calls.
 - **"Unsupported" must say WHOSE limitation it is.** Nested structures were
   called a framework limitation in three documents; they were a guard in
   `defineApp`'s own type derivation, written when only scalars had been tried,

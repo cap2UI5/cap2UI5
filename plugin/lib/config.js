@@ -10,9 +10,8 @@
 //     "roles":  ["authenticated-user"],              who may call, as @requires
 //     "routes": ["/sap/bc/z2ui5", "/rest/root/z2ui5"],
 //     "body_parser": { "limit": "10mb" },            optional, see below
-//     "compression": false,                          gzip off - lib/compression.js
+//     "compression": false,                          gzip off - the runtime's compress( )
 //     "timeout": 60000,                              ms an async main( ) may take; 0 or false: no limit
-//     "accelerate": false,                           the runtime's accelerate( ) off
 //     "agent": true                                  the MCP endpoint - lib/agent/, off by default
 //   } } }
 //
@@ -88,10 +87,6 @@ function config(env = cds.env) {
     // gzip unless switched off - for a proxy in front that compresses anyway;
     // with both on, the proxy finds the body compressed and leaves it alone
     compression: conf.compression !== false,
-    // the runtime's accelerate( ), where it has one - lib/runtime.js; false
-    // runs its own code, for a project that meets a fast path's limit and
-    // for measuring what the accelerations save
-    accelerate: conf.accelerate !== false,
     // how long an async main( ) may hold the roundtrips behind it, in ms;
     // 0 - no limit (lib/define-app.js, within( ))
     timeout: timeoutOf(conf.timeout),

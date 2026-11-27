@@ -1,24 +1,24 @@
 # `@abap2ui5/node-runtime` — a stand-in
 
 This directory is the workspace's place for what abap2UI5 publishes as
-`@abap2ui5/node-runtime`: the transpiled output. It is a stand-in so that the
+`@abap2ui5/node-runtime`: the transpiled framework and its entry point. It is a stand-in so that the
 plugin next door, `@cap2ui5/cds-plugin`, resolves it by name, exactly as it
 does the real package, whether the content came from npm or from a build of
 upstream's `main`.
 
-Only `package.json` and this file are committed. The two content directories
+Only `package.json` and this file are committed. The content directories
 are 20 MB of generated output that any checkout rebuilds; fill them with
 
 ```bash
 scripts/assemble-runtime.sh <upstream checkout>     # or: --package X.Y.Z
 ```
 
-| directory | copied from upstream | why the plugin needs it |
+| directory | in the package | why the plugin needs it |
 |---|---|---|
-| `output/` | `node/output` after `npm run auto_downport && npm run auto_transpile` | the framework: `init.mjs` boots it, `cl_express_icf_shim.clas.mjs` is the HTTP adapter |
-| `setup/` | `node/setup/setup.mjs` | `output/init.mjs` imports `../setup/setup.mjs` — the path is fixed by upstream's `abap_transpile.json`, so the hook ships with the output |
-| `downport/` | `node/downport` | the ABAP the output was transpiled from: `abap2js` (plugin/lib/abap2js.js) reads `z2ui5_if_client`'s types there, so an app's translation knows what `client->get( )` answers |
-| `srv/` | the published package only (`--package`) | the entries its `package.json` declares: the plugin imports `accelerate( )` from `./accelerate`, or from the main entry `srv/host.mjs`, where they are declared - the releases after 1.145.0 |
+| `srv/` | the entry point `srv/host.mjs` and what it exports | the plugin boots through it: `initialize( )`, `exclusive( )`, `withSession( )`, `compress( )` (`plugin/lib/runtime.js`, `plugin/cds-plugin.js`) |
+| `output/` | the transpiled framework | what `srv/host.mjs` loads; `cl_express_icf_shim.clas.mjs` is the HTTP adapter the route calls |
+| `setup/` | `setup.mjs` | `output/init.mjs` imports `../setup/setup.mjs` — the path is fixed by upstream's `abap_transpile.json`, so the hook ships with the output |
+| `downport/` | the ABAP the output was transpiled from | `abap2js` (plugin/lib/abap2js.js) reads `z2ui5_if_client`'s types there, so an app's translation knows what `client->get( )` answers |
 
 The version is the framework's version: the package is a deterministic function
 of the upstream tag, like the `X.Y.Z-702` tag `release.yaml` already cuts.
@@ -33,23 +33,17 @@ SQL would go there; a CAP-backed `DatabaseClient` for those is a later step.
 
 Upstream packs this as `@abap2ui5/node-runtime` (`npm run pack:node-runtime`, manifest
 `node/setup/npm.package.json`) at the end of `backend-prebuilt.yaml`, and
-publishes it by trusted publishing with every release. The real package
-carries more than this stand-in: `srv/host.mjs`, an entry point with
-`initialize()` and `createHandler()`, which the plugin does not use - it boots
-through `output/init.mjs` - and, from the release after 1.145.0,
-`accelerate()`, which the plugin calls where the manifest declares it (`srv/`
-above). From the release after 1.147.0, `srv/host.mjs` claims the `output/`
-it loads (`srv/claim.mjs`), because a process runs one transpiled output. The
-output the plugin boots is that same one, so the claim holds. The package also
-gains the bin `abap2ui5-transpile`, which builds a host's own ABAP apps into a
-complete runtime of their own. The plugin does not need it: its apps are
-JavaScript, and `abap2js` translates ABAP ones into them. The package carries no `webapp/`: the framework's GET page embeds
-the whole UI5 component, so there are no frontend files to serve. It is on npm since 1.145.0: `scripts/assemble-runtime.sh --package
-X.Y.Z` fills this directory from it. `plugin/package.json` depends on the
-published package by its exact version, and the stand-in's `version` is kept
-at that pin: npm links a workspace only where its version satisfies the
-dependency, and installs the registry's copy under `plugin/node_modules`
-otherwise - the suite would then run against that copy and not against what
-was assembled here. The stand-in stays for one reason, the CI job that builds
-upstream's `main`: a runtime that is not published yet has to come from
-somewhere.
+publishes it by trusted publishing with every release.
+`scripts/assemble-runtime.sh` fills this directory with that package, unpacked:
+`--package X.Y.Z` takes it from npm, a path to an upstream checkout has that
+checkout pack it with the same `pack:node-runtime` - so both ways this
+directory holds what a consumer's `node_modules` would, the manifest with its
+`exports` included, and nothing here re-assembles the package by hand.
+
+`plugin/package.json` depends on the published package by its exact version,
+and the committed stand-in's `version` is kept at that pin: npm links a
+workspace only where its version satisfies the dependency, and installs the
+registry's copy under `plugin/node_modules` otherwise - the suite would then
+run against that copy and not against what was assembled here. The stand-in
+stays for one reason, the CI job that builds upstream's `main`: a runtime that
+is not published yet has to come from somewhere.
