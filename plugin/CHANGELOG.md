@@ -87,6 +87,25 @@ starts with 0, a minor release may break the API.
   itself, so there is nothing left to switch off; a project that still sets
   the option is not refused, the setting is ignored.
 
+- The parameters of the client's methods - their names, the preferred one,
+  the required ones - are read from the hosted runtime's own
+  `z2ui5_if_client` instead of from a table in the plugin that restated
+  them. Nothing changes for an app; the message for an unknown parameter
+  now names the runtime it was looked up in.
+
+### Added
+
+- The CDS draft store implements `prune_chain( )` and `touch( )`, the two
+  methods abap2UI5 1.151.0 adds to `z2ui5_if_ui5_draft_store`, following the
+  shipped store step for step. The pinned runtime does not call them yet.
+
+### Removed
+
+- `cds.requires.cap2ui5.accelerate`. The runtime's `accelerate( )` installs
+  nothing since `@abaplint/runtime` 2.13.96 is linear on large tables
+  itself, so there is nothing left to switch off; a project that still sets
+  the option is not refused, the setting is ignored.
+
 ## [0.7.0] - 2026-11-19
 
 ### Added
