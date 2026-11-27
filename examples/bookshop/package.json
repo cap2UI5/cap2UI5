@@ -25,7 +25,7 @@
     "test": "cds-deploy && node --test test/*.test.mjs",
     "test:browser": "cds-deploy && node --test test/browser.e2e.mjs",
     "cold-test": "node cold-test.mjs",
-    "bench": "node bench.mjs"
+    "bench": "cds-deploy && node bench.mjs"
   },
   "devDependencies": {
     "@cap-js/cds-test": "^1.0.2",
