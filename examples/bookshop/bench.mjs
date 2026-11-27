@@ -99,7 +99,7 @@ async function rows(n) {
         client.view_display(
           `<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" displayBlock="true" height="100%">` +
           `<Shell><Page title="${n} rows">` +
-          `<Table items="${client._bind_edit("rows")}">` +
+          `<Table items="${client._bind("rows")}">` +
           `<columns><Column><Text text="Title"/></Column><Column><Text text="Author"/></Column>` +
           `<Column><Text text="Price"/></Column><Column><Text text="Stock"/></Column></columns>` +
           `<items><ColumnListItem><cells><Input value="{TITLE}"/><Text text="{AUTHOR}"/>` +
