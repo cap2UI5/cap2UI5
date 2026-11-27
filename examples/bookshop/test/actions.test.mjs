@@ -5,17 +5,21 @@
 // reads it. The fixture is srv/apps/actions.js.
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { post, serve } from "./server.mjs";
+import { actions, post, serve, views } from "./server.mjs";
 
 const APP = "ZCL_JS_ACTIONS";
 const s = serve();
-/** the actions of one event's response, system and custom - each on a fresh start */
-const on = async (event) => {
+/** one event's response - each on a fresh start */
+const answer = async (event) => {
   const start = await post(s.url, { app: APP, user: "alice" });
   const r = await post(s.url, { app: APP, id: start.json.S_FRONT.ID, event, user: "alice" });
   assert.equal(r.status, 200, r.text.slice(0, 300));
-  return [...(r.json.S_FRONT.S_ACTION?.T_SYSTEM ?? []), ...(r.json.S_FRONT.S_ACTION?.T_CUSTOM ?? [])];
+  return r;
 };
+/** the front-end actions of one event's response */
+const on = async (event) => actions(await answer(event));
+/** the slots one event's response changes */
+const screen = async (event) => views(await answer(event));
 
 test("client.follow_up_action( ) on its own queues the front-end action cs_event names, with its arguments", async () => {
   assert.deepEqual(await on("TITLE"), [["SET_TITLE", "Invoices"]]);
@@ -30,23 +34,23 @@ test("a front-end action names its view slot - control_by_id finds the id in the
 });
 
 test("client.popover_display( ) opens by the control by_id names, popover_destroy( ) closes it", async () => {
-  const [open] = await on("POPOVER");
-  assert.deepEqual(open.slice(0, 3), ["VIEW_SLOTS", "display", "POPOVER"]);
-  assert.match(open[3], /<Popover title="More"/);
-  assert.match(open[3], /press="\.eB\(\['POPOVER_CLOSE'\]\)"/, "the placeholder inside was replaced");
-  assert.deepEqual(open[4], { openById: "more" });
-  assert.deepEqual(await on("POPOVER_CLOSE"), [["VIEW_SLOTS", "destroy", "POPOVER"]]);
+  const open = await screen("POPOVER");
+  assert.deepEqual(Object.keys(open), ["POPOVER"]);
+  assert.match(open.POPOVER.XML, /<Popover title="More"/);
+  assert.match(open.POPOVER.XML, /press="\.eB\(\['POPOVER_CLOSE'\]\)"/, "the placeholder inside was replaced");
+  assert.deepEqual(open.POPOVER.OPT, { openById: "more" });
+  assert.deepEqual(await screen("POPOVER_CLOSE"), { POPOVER: { DESTROY: true } });
 });
 
 test("client.nest2_view_display( ) fills the second nested slot, nest2_view_destroy( ) clears it", async () => {
-  const [nest] = await on("DETAIL");
-  assert.deepEqual(nest.slice(0, 3), ["VIEW_SLOTS", "display", "NEST2"]);
-  assert.deepEqual(nest[4], { id: "detail", methodDestroy: "removeAllContent", methodInsert: "addContent" });
-  assert.deepEqual(await on("DETAIL_CLOSE"), [["VIEW_SLOTS", "destroy", "NEST2"]]);
+  const nest = await screen("DETAIL");
+  assert.deepEqual(Object.keys(nest), ["NEST2"]);
+  assert.deepEqual(nest.NEST2.OPT, { id: "detail", methodDestroy: "removeAllContent", methodInsert: "addContent" });
+  assert.deepEqual(await screen("DETAIL_CLOSE"), { NEST2: { DESTROY: true } });
 });
 
 test("client.view_destroy( ) destroys the main view", async () => {
-  assert.deepEqual(await on("BLANK"), [["VIEW_SLOTS", "destroy", "MAIN"]]);
+  assert.deepEqual(await screen("BLANK"), { MAIN: { DESTROY: true } });
 });
 
 test("the message box takes message_box_display( )'s options", async () => {
@@ -69,7 +73,9 @@ test("the toast takes message_toast_display( )'s options", async () => {
 });
 
 test("the URL: hash_set pushes, hash_replace replaces, app_state_set_active keeps the state id in it", async () => {
-  assert.deepEqual(await on("HASH"), [["ROUTER", "sync", { setPushState: "/detail/1" }]]);
-  assert.deepEqual(await on("HASH_REPLACE"), [["ROUTER", "sync", { setHashReplace: "/detail/2" }]]);
-  assert.deepEqual(await on("STATE"), [["ROUTER", "sync", { setAppStateActive: true }]]);
+  // the URL intent is a section of its own in protocol 3: S_FRONT.NAV
+  const nav = async (event) => (await answer(event)).json.S_FRONT.NAV;
+  assert.deepEqual(await nav("HASH"), { setPushState: "/detail/1" });
+  assert.deepEqual(await nav("HASH_REPLACE"), { setHashReplace: "/detail/2" });
+  assert.deepEqual(await nav("STATE"), { setAppStateActive: true });
 });

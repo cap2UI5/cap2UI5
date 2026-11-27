@@ -10,36 +10,75 @@ starts with 0, a minor release may break the API.
 
 ### Changed
 
-- It hosts `@abap2ui5/node-runtime` 1.150.0 (abap2UI5 1.150.0) - 0.7.0
-  hosted 1.149.0 - and boots it through the package's own entry point
-  instead of through `output/init.mjs`: `initialize( )` boots the runtime,
-  `exclusive( )` queues the roundtrips, `withSession( )` keeps the stateful
-  sessions per CAP user and `compress( )` gzips the answers. The plugin's
-  own copies of the last three (`lib/sessions.js`, `lib/compression.js`, the
-  queue in `cds-plugin.js`) are gone; what they did is unchanged, with two
+- **It hosts `@abap2ui5/node-runtime` 1.151.0 (abap2UI5 1.151.0)** - 0.7.0
+  hosted 1.149.0. 1.151.0 breaks the roundtrip's wire (protocol 3) and the
+  windowed table, and the client follows the interface in both directions.
+  What an app has to change:
+  - **The windowed table is the app's.**
+    `client.window_bind_tab({ val, total, event, window })` binds a result
+    the APP loads a window at a time: the field holds the rows loaded so
+    far, `total` how many there are in all (a number, or the name of a
+    number field the framework reads anew for every response), and the list
+    binding's requests - more rows, a sort, a filter - arrive as the app's
+    event `event` with the request in `client.get( ).r_event_data`
+    (`{ path, reason, skip, top, t_sort, t_filter }`). The framework no
+    longer sorts, filters or counts: `t_sort` and `t_filter` are no
+    parameters any more, and **`client.window_get_row( )` is gone** - the
+    rows are what the browser shows, so a position is the index.
+  - **`client._bind_edit( )` and the `*_model_update( )` no-ops are gone**,
+    as they left `z2ui5_if_client`: `_bind( )` is the one binding, and a
+    call of a `*_model_update( )` did nothing and is deleted - left in, it
+    fails ("is not a function"), as it fails to compile in ABAP.
+  - `client.hash_set( )` and `client.hash_replace( )` write the URL only for
+    an app that owns the hash - a listener registered with
+    `cs_event.hash_attach_changed` - as abap2UI5 1.151.0 decides.
+- It boots the runtime through the package's own entry point instead of
+  through `output/init.mjs`: `initialize( )` boots it, `exclusive( )` queues
+  the roundtrips, `withSession( )` keeps the stateful sessions per CAP user
+  and `compress( )` gzips the answers. The plugin's own copies of the last
+  three (`lib/sessions.js`, `lib/compression.js`, the queue in
+  `cds-plugin.js`) are gone; what they did is unchanged, with two
   differences that come with upstream's `compress( )`: a roundtrip's JSON is
   compressed off the main thread, and 16 compressed pages are kept instead
   of 8. The user exit `defineExit( )` registers is installed through
   `z2ui5_cl_ui5_user_exit=>set_instance( )`, the framework's seam for a
   host, instead of through the class's protected class-data.
-- What abap2UI5 1.150.0 changes for an app is in its changelog:
-  among it, the
-  frontend sends the edit of a cell of a windowed table behind a data
-  reference (`t.ref( )`, bound `mr_tab->*`) as a row delta on the `*` node
-  instead of the whole table, which the framework refused for a windowed
-  table - the edit was lost.
-
 - The parameters of the client's methods - their names, the preferred one,
   the required ones - are read from the hosted runtime's own
   `z2ui5_if_client` instead of from a table in the plugin that restated
-  them. Nothing changes for an app; the message for an unknown parameter
-  now names the runtime it was looked up in.
+  them. The message for an unknown parameter now names the runtime it was
+  looked up in.
+- The agent endpoint's client is abap2UI5/mcp-server's at 7906a2f, which
+  reads protocol 3; a session lost in a restart, and the handover link, are
+  restored through `S_FRONT.ROUTE`, as the frontend's router sends a route.
+- `abap2js` translates `window_bind_tab( )` as above - `total = mv_total`
+  goes by the attribute's name - and refuses `window_get_row( )` and
+  `_bind_edit( )`, which the interface no longer has.
+
+### Fixed
+
+- **A change made in place to a table or a structure field is kept.**
+  `this.rows.push( row )`, `this.rows[0].done = true`, a row found with
+  `find( )` and changed, `this.order.lines = [ … ]`: every read of a field
+  handed out a fresh copy, so such a change went to an object nobody read
+  again and was lost without an error - only an assignment to the field
+  itself, `this.rows = [ … ]`, was written. A field is read once per
+  `main( )` now, the same object answers every later read, and what changed
+  is written when `main( )` returns. abap2UI5/protocol's conformance app
+  for the windowed table relies on it.
 
 ### Added
 
+- The client's methods abap2UI5 1.151.0 adds: `check_on_nav_back( )` and
+  `get_nav_tag( )` with `nav_app_call({ app, tag })`, `check_nav_pending( )`,
+  `get_start_param( name )`, `timer_set({ event, delay_ms, no_busy })` and
+  `timer_stop( )`, and `keep_messages` on `nav_app_call( )` and
+  `nav_app_leave( )`.
 - The CDS draft store implements `prune_chain( )` and `touch( )`, the two
   methods abap2UI5 1.151.0 adds to `z2ui5_if_ui5_draft_store`, following the
-  shipped store step for step. The pinned runtime does not call them yet.
+  shipped store step for step: a chain of drafts is pruned to the two the
+  user exit's `draft_keep_per_chain` keeps by default, so `cap2ui5.Drafts`
+  no longer grows by one row per click until the expiry.
 
 ### Removed
 

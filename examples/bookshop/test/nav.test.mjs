@@ -8,22 +8,16 @@
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
 import { test } from "node:test";
-import { post, serve } from "./server.mjs";
+import { post, serve, viewXml, views } from "./server.mjs";
 
 const { defineApp } = createRequire(import.meta.url)("@cap2ui5/cds-plugin");
 
 const s = serve();
 
 const P = (o) => post(s.url, { user: "alice", ...o });
-const actions = (r) => [
-  ...(r.json?.S_FRONT?.S_ACTION?.T_SYSTEM ?? []),
-  ...(r.json?.S_FRONT?.S_ACTION?.T_CUSTOM ?? []),
-];
 /** The view XML the response displays into a slot, or undefined. */
-const slot = (r, name) => actions(r)
-  .find((a) => a[0] === "VIEW_SLOTS" && a[1] === "display" && a[2] === name)?.[3];
-const destroys = (r, name) => actions(r)
-  .some((a) => a[0] === "VIEW_SLOTS" && a[1] === "destroy" && a[2] === name);
+const slot = viewXml;
+const destroys = (r, name) => views(r)[name]?.DESTROY === true;
 
 test("a popup opens into the POPUP slot and closes again", async () => {
   const start = await P({ app: "ZCL_JS_PICK" });
@@ -43,19 +37,19 @@ test("a nested view renders into a control of the main view and clears again", a
   const start = await P({ app: "ZCL_JS_PICK" });
   const open = await P({ app: "ZCL_JS_PICK", id: start.json.S_FRONT.ID, event: "DETAIL" });
   assert.equal(open.status, 200, open.text.slice(0, 300));
-  const nest = actions(open).find((a) => a[0] === "VIEW_SLOTS" && a[1] === "display" && a[2] === "NEST");
-  assert.ok(nest, `no NEST display action; got ${JSON.stringify(actions(open)).slice(0, 300)}`);
-  assert.match(nest[3], /chosen so far/);
+  const nest = views(open).NEST;
+  assert.ok(nest?.XML, `no NEST display; got ${JSON.stringify(views(open)).slice(0, 300)}`);
+  assert.match(nest.XML, /chosen so far/);
   // the anchor and both mutators travel with it - without the clear mutator
   // every call would add one more fragment
   const wire = JSON.stringify(nest);
   for (const part of ["slot", "addContent", "removeAllContent"]) {
-    assert.ok(wire.includes(part), `the nest action does not carry ${part}: ${wire.slice(0, 300)}`);
+    assert.ok(wire.includes(part), `the nest display does not carry ${part}: ${wire.slice(0, 300)}`);
   }
   assert.equal(slot(open, "MAIN"), undefined, "a nested view does not re-render the main view");
 
   const hide = await P({ app: "ZCL_JS_PICK", id: open.json.S_FRONT.ID, event: "DETAIL_HIDE" });
-  assert.ok(destroys(hide, "NEST"), `NEST is destroyed; got ${JSON.stringify(actions(hide)).slice(0, 200)}`);
+  assert.ok(destroys(hide, "NEST"), `NEST is destroyed; got ${JSON.stringify(views(hide)).slice(0, 200)}`);
 });
 
 test("nav_app_call( ) hands the screen over, nav_app_leave( ) hands it back with the result", async () => {
@@ -108,9 +102,10 @@ test("a name the client no longer answers to throws an error that names the repl
     bind: /client\.bind is gone .* use client\._bind\( name \)/,
     // gone before 0.1.0: isInitial named check_on_navigated( ) and read like check_on_init( )
     isInitial: /client\.check_on_navigated\( \) to render and client\.check_on_init\( \) to seed state once/,
-    modelUpdate: /view_model_update\( \) is obsolete and does nothing/,
-    // declared "obsolete - does NOTHING" in z2ui5_if_client: nothing here either, no error
-    view_model_update: /^$/,
+    modelUpdate: /drop it - changed bound data is pushed to the view on its own/,
+    // z2ui5_if_client's own no-op, which left the interface with abap2UI5
+    // 1.151.0 - and so left the client: a call fails as it fails to compile in ABAP
+    view_model_update: /view_model_update is not a function/,
     // refused: what it needs, the CAP host does not give
     set_session_stateful: /client\.set_session_stateful\( \) is not supported by cap2UI5/,
   };
@@ -157,12 +152,12 @@ test("view_display( ) takes upstream's page transition where the runtime has it,
   });
   const r = await P({ app: "ZCL_JS_TRANSITION" });
   assert.equal(r.status, 200, r.text.slice(0, 300));
-  const display = actions(r).find((a) => a[0] === "VIEW_SLOTS" && a[1] === "display" && a[2] === "MAIN");
-  assert.ok(display, "no MAIN display");
+  const display = views(r).MAIN;
+  assert.ok(display?.XML, "no MAIN display");
   if (has) {
     assert.equal(r.json.MODEL.REFUSED, "");
-    assert.equal(display[4]?.transition, "slide", JSON.stringify(display.slice(4)));
-    assert.equal(display[4]?.transitionBack, true, JSON.stringify(display.slice(4)));
+    assert.equal(display.OPT?.transition, "slide", JSON.stringify(display.OPT));
+    assert.equal(display.OPT?.transitionBack, true, JSON.stringify(display.OPT));
   } else {
     assert.match(r.json.MODEL.REFUSED, /^client\.view_display\( \): no parameter "transition" - .* the abap2UI5 runtime this project runs on \(@abap2ui5\/node-runtime [\d.]+\)$/);
     assert.equal(JSON.stringify(display).includes("transition"), false, "a transition reached the wire");
@@ -192,4 +187,50 @@ test("get_event_arg( ) reaches every argument the event carried - the ninth as w
   const took = await P({ app: "ZCL_JS_ARGS", id: start.json.S_FRONT.ID, event: "TAKE", args });
   assert.equal(took.status, 200, took.text.slice(0, 300));
   assert.equal(took.json.MODEL.GOT, "a1|a8|a9|a10| 10 client.get_event_arg( 0 ): v is the position of the argument, 1-based");
+});
+
+test("the navigation and timer methods of abap2UI5 1.151.0: a tag that comes back, a pending navigation, start parameters, the timer", async () => {
+  defineApp("ZCL_JS_NAV51_SUB", class {
+    main(client) {
+      if (client.check_on_event("LEAVE")) return client.nav_app_leave();
+      if (client.check_on_navigated()) client.view_display(`<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m"><Text text="sub"/></mvc:View>`);
+    }
+  });
+  defineApp("ZCL_JS_NAV51", class {
+    state = "";
+    pending = "";
+    main(client) {
+      if (client.check_on_init()) this.state = `start lgn=${client.get_start_param("LGN")} none=${client.get_start_param("none")}`;
+      if (client.check_on_nav_back()) this.state = `back tag=${client.get_nav_tag()}`;
+      if (client.check_on_event("CALL")) {
+        const before = client.check_nav_pending();
+        client.nav_app_call({ app: "ZCL_JS_NAV51_SUB", tag: "detail" });
+        this.pending = `${before}/${client.check_nav_pending()}`;
+        return;
+      }
+      if (client.check_on_event("TICK")) return client.timer_set({ event: "POLL", delay_ms: 5000, no_busy: true });
+      if (client.check_on_event("STOP")) return client.timer_stop();
+      if (client.check_on_navigated()) {
+        client.view_display(`<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m"><Text text="${client._bind("state")}"/>` +
+          `<Text text="${client._bind("pending")}"/></mvc:View>`);
+      }
+    }
+  });
+  const ok = (r) => { assert.equal(r.status, 200, r.text.slice(0, 300)); return r; };
+  const start = ok(await P({ app: "ZCL_JS_NAV51", search: "&lgn=0001" }));
+  assert.equal(start.json.MODEL.STATE, "start lgn=0001 none=", "the page's query, by name in any case; an unknown one is initial");
+  assert.equal(start.json.MODEL.PENDING, "");
+
+  const timer = ok(await P({ app: "ZCL_JS_NAV51", id: start.json.S_FRONT.ID, event: "TICK" }));
+  assert.match(JSON.stringify(timer.json.S_FRONT), /"POLL"/, "the timer's event is declared to the browser");
+  assert.match(JSON.stringify(timer.json.S_FRONT), /5000/);
+  const stop = ok(await P({ app: "ZCL_JS_NAV51", id: timer.json.S_FRONT.ID, event: "STOP" }));
+  assert.doesNotMatch(JSON.stringify(stop.json.S_FRONT), /"POLL"/, "timer_stop( ) armed it again");
+
+  const called = ok(await P({ app: "ZCL_JS_NAV51", id: stop.json.S_FRONT.ID, event: "CALL" }));
+  assert.equal(called.json.S_FRONT.APP, "ZCL_JS_NAV51_SUB");
+  const back = ok(await P({ app: "ZCL_JS_NAV51_SUB", id: called.json.S_FRONT.ID, event: "LEAVE" }));
+  assert.equal(back.json.S_FRONT.APP, "ZCL_JS_NAV51");
+  assert.equal(back.json.MODEL.STATE, "back tag=detail", "check_on_nav_back( ) on the roundtrip the screen comes back, with the tag of the call");
+  assert.equal(back.json.MODEL.PENDING, "false/true", "check_nav_pending( ) turned true with the call, inside the same main( )");
 });

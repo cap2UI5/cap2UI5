@@ -16,7 +16,7 @@ import { createRequire } from "node:module";
 import os from "node:os";
 import path from "node:path";
 import { test } from "node:test";
-import { EXAMPLE, post, serve } from "./server.mjs";
+import { EXAMPLE, actions, post, serve, viewXml } from "./server.mjs";
 
 const require = createRequire(import.meta.url);
 const { abap2js, Abap2jsError, t } = require("@cap2ui5/cds-plugin");
@@ -30,9 +30,8 @@ const REGENERATE = "npx --no-install cap2ui5 abap2js test/fixtures/abap2js/zcl_j
 
 const APP = "ZCL_JS_TRANSLATED";
 const P = (o) => post(s.url, { user: "alice", ...o });
-const slots = (r) => [...(r.json?.S_FRONT?.S_ACTION?.T_SYSTEM ?? []), ...(r.json?.S_FRONT?.S_ACTION?.T_CUSTOM ?? [])];
-const view = (r) => slots(r).find((a) => a[0] === "VIEW_SLOTS" && a[1] === "display" && a[2] === "MAIN")?.[3];
-const custom = (r) => r.json?.S_FRONT?.S_ACTION?.T_CUSTOM ?? [];
+const view = viewXml;
+const custom = actions;
 
 test("the translation of the fixture is the app in srv/apps, byte for byte", () => {
   const { name, code } = abap2js(fs.readFileSync(FIXTURE, "utf8"), {
@@ -111,10 +110,14 @@ test("its events: CASE with OR, abap_bool as ABAP prints it, a called app", asyn
   const greet = await P({ app: APP, id: toggled.json.S_FRONT.ID, event: "GREET" });
   assert.equal(custom(greet)[0][2], "Hello World, active: X, 2 rows, 1 selected (first)", "the toggled abap_bool, in a string template");
 
-  const edit = await P({ app: APP, id: start.json.S_FRONT.ID, event: "EDIT" });
+  // a fresh start from here on: the chain above went two drafts past `start`,
+  // and the framework prunes a chain to two (draft_keep_per_chain) - the
+  // draft `start` named is gone, as it is for a browser two clicks later
+  const again = await P({ app: APP });
+  const edit = await P({ app: APP, id: again.json.S_FRONT.ID, event: "EDIT" });
   assert.deepEqual(custom(edit)[0].slice(0, 3), ["MESSAGE_TOAST", "show", "edit mode"], "WHEN OTHERS, SWITCH #( ) on a constant");
 
-  const call = await P({ app: APP, id: start.json.S_FRONT.ID, event: "CALL" });
+  const call = await P({ app: APP, id: again.json.S_FRONT.ID, event: "CALL" });
   assert.equal(call.json.S_FRONT.APP, "ZCL_JS_HELLO", "nav_app_call( NEW zcl_js_hello( ) )");
 });
 
@@ -351,39 +354,32 @@ test("what it does not know, it refuses - with file, row and column", () => {
   }
 });
 
-test("window_bind_tab( ) and window_get_row( ) take the table's NAME, as _bind( ) does - where the runtime's interface has them", () => {
-  // The client's methods are read from the runtime's downport/, so on a
-  // runtime from before the two (up to 1.148.0) the translation refuses them
-  // as it refuses any method the interface does not have.
+test("window_bind_tab( ) takes the table by its NAME, as _bind( ) does - and the total by name where it is an attribute", () => {
   const src = `CLASS zcl_js_windowed DEFINITION PUBLIC.
   PUBLIC SECTION.
     INTERFACES z2ui5_if_app.
     TYPES: BEGIN OF ty_s_row, title TYPE string, price TYPE i, END OF ty_s_row.
     DATA t_tab TYPE STANDARD TABLE OF ty_s_row WITH EMPTY KEY.
-    DATA row TYPE i.
+    DATA mv_total TYPE i.
   PROTECTED SECTION.
   PRIVATE SECTION.
 ENDCLASS.
 CLASS zcl_js_windowed IMPLEMENTATION.
   METHOD z2ui5_if_app~main.
-    row = client->window_get_row( val = t_tab row = 3 ).
-    DATA(items) = client->window_bind_tab( val = t_tab window = 50
-      t_sort = VALUE #( ( path = \`PRICE\` descending = abap_true ) )
-      t_filter = VALUE #( ( group = 1 path = \`TITLE\` operator = \`Contains\` value1 = \`a\` ) ) ).
-    DATA(plain) = client->window_bind_tab( t_tab ).
+    DATA(items) = client->window_bind_tab( val = t_tab total = mv_total event = \`ROWS\` window = 50 ).
+    DATA(fixed) = client->window_bind_tab( val = t_tab total = lines( t_tab ) event = \`ROWS\` ).
   ENDMETHOD.
 ENDCLASS.
 `;
-  const translate = () => abap2js(src, { file: "zcl_js_windowed.clas.abap" }).code;
-  if (!abap.Classes["Z2UI5_IF_CLIENT"].METHODS.WINDOW_BIND_TAB) {
-    assert.throws(translate, /^Abap2jsError: zcl_js_windowed\.clas\.abap:12:\d+ - z2ui5_if_client has no method window_get_row/);
-    return;
-  }
-  const code = translate();
-  assert.match(code, /this\.row = client\.window_get_row\(\{ val: "t_tab", row: 3 \}\);/);
-  assert.match(code, /client\.window_bind_tab\(\{ val: "t_tab", window: 50,\n\s+t_sort: \[ \{ path: "PRICE", descending: true \} \],\n/);
-  assert.match(code, /t_filter: \[ \{ group: 1, path: "TITLE", operator: "Contains", value1: "a" \} \] \}\);/);
-  assert.match(code, /const plain = client\.window_bind_tab\("t_tab"\);/);
+  const code = abap2js(src, { file: "zcl_js_windowed.clas.abap" }).code;
+  // the attribute goes by its name: the framework reads it anew for every response
+  assert.match(code, /const items = client\.window_bind_tab\(\{ val: "t_tab", total: "mv_total", event: "ROWS", window: 50 \}\);/);
+  // any other expression is the value of this render
+  assert.match(code, /const fixed = client\.window_bind_tab\(\{ val: "t_tab", total: this\.t_tab\.length, event: "ROWS" \}\);/);
+  // window_get_row( ) left the interface with abap2UI5 1.151.0: refused, as any method it does not have
+  assert.throws(() => abap2js(src.replace("DATA(fixed) = client->window_bind_tab( val = t_tab total = lines( t_tab ) event = \`ROWS\` ).",
+    "mv_total = client->window_get_row( val = t_tab row = 3 )."), { file: "zcl_js_windowed.clas.abap" }),
+    /z2ui5_if_client has no method window_get_row/);
 });
 
 test("a class that is no app is refused as a whole", () => {

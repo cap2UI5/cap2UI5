@@ -7,17 +7,12 @@
 // the same controls in Chromium.
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { post, serve } from "./server.mjs";
+import { actions, post, serve, viewXml } from "./server.mjs";
 
 const APP = "ZCL_JS_WIRES";
 const s = serve();
 const P = (o) => post(s.url, { user: "alice", ...o });
-const actions = (r) => [
-  ...(r.json?.S_FRONT?.S_ACTION?.T_SYSTEM ?? []),
-  ...(r.json?.S_FRONT?.S_ACTION?.T_CUSTOM ?? []),
-];
-const mainView = (r) => actions(r)
-  .find((a) => a[0] === "VIEW_SLOTS" && a[1] === "display" && a[2] === "MAIN")?.[3] ?? "";
+const mainView = (r) => viewXml(r) ?? "";
 /** the handler of an attribute of the control with that id, XML-unescaped */
 const wireOf = (xml, id, attr) => {
   const el = xml.match(new RegExp(`<[^>]*id="${id}"[^>]*>`))?.[0] ?? "";
@@ -29,10 +24,10 @@ test("s_ctrl reaches the wire - check_queue_last, check_no_busy, check_arg_liter
   const r = await P({ app: APP });
   assert.equal(r.status, 200, r.text.slice(0, 300));
   const xml = mainView(r);
-  // z2ui5_cl_ui5_srv_event=>get_event( ): queue-last and no-busy ride in the
-  // event array, after three positions the framework reserves
+  // z2ui5_cl_ui5_srv_event=>get_event( ): the flags of a wire are one
+  // object behind the event's name (protocol 3) - only the ones that are set
   assert.equal(wireOf(xml, "search", "liveChange"),
-    ".eB(['TYPED',false,false,false,true,true], ${$parameters>/newValue})");
+    ".eB(['TYPED',{queueLast:true,noBusy:true}], ${$parameters>/newValue})");
   // a literal argument is quoted, so the browser does not evaluate it
   assert.equal(wireOf(xml, "literal", "press"), ".eB(['TAKE'], '${not a binding}')");
   // check_prevent_default switches to the handler that cancels the control's default

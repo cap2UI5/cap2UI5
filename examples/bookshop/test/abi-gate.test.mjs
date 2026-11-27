@@ -247,20 +247,6 @@ test("instance conventions: constructor_ and the ~ -> $ method naming", () => {
   assert.equal(typeof abap.Classes["Z2UI5_CL_UI5_SRV_DRAFT"].set_instance, "function", "set_instance (Naht 1)");
 });
 
-test("the obsolete methods are still the no-ops the client answers with nothing", () => {
-  // view_model_update( ) and its siblings are declared "obsolete - does
-  // NOTHING" in z2ui5_if_client, and the client's are empty functions. If
-  // upstream ever gives them behaviour again, this goes red and they need
-  // wiring rather than silently doing nothing.
-  const M = abap.Classes["Z2UI5_IF_CLIENT"].METHODS;
-  for (const m of ["VIEW_MODEL_UPDATE", "POPUP_MODEL_UPDATE", "POPOVER_MODEL_UPDATE", "NEST_VIEW_MODEL_UPDATE",
-    "NEST2_VIEW_MODEL_UPDATE"]) {
-    assert.ok(M[m], `${m} disappeared from the interface`);
-    assert.deepEqual(Object.keys(M[m].parameters ?? {}), [],
-      `${m} grew a parameter - re-read whether it still does nothing`);
-  }
-});
-
 test("the interface methods and parameters the plugin uses exist, by name", () => {
   const check = (IF, methods) => {
     const M = abap.Classes[IF]?.METHODS;
@@ -283,45 +269,17 @@ test("the interface methods and parameters the plugin uses exist, by name", () =
   for (const f of EVENT_CONTROL) assert.ok(f in ctrl, `z2ui5_if_client=>ty_s_event_control-${f}`);
 });
 
-test("the windowed table, where the runtime has it: the two methods, their row types, and where its order is kept", (t) => {
-  // window_bind_tab( ) and window_get_row( ) came after @abap2ui5/node-runtime
-  // 1.148.0; the client has them when the interface has (nav.test.mjs).
-  // window_get_row( ) answers inside a synchronous main( ), so the order is
-  // read BEFORE it: from the attributes the framework keeps on the app
-  // container - client->mo_action->mo_app->mt_attri, all three public - and
-  // computed by z2ui5_cl_ui5_srv_window=>index( ), the method the
-  // framework's own window_row( ) calls. window.test.mjs holds the answers
-  // to the framework's; this holds the names.
+test("the windowed table: window_bind_tab( )'s parameters, and what the request it names an event for carries", () => {
+  // define-app.js wires window_bind_tab( ) by these names - val and total
+  // by reference, event and window by value - and hands the app the
+  // request as get( ).r_event_data, converted as it is. window.test.mjs
+  // holds what they do; this holds the names.
   const M = abap.Classes["Z2UI5_IF_CLIENT"].METHODS;
-  if (!M.WINDOW_BIND_TAB && !M.WINDOW_GET_ROW) return t.skip("z2ui5_if_client has no window_bind_tab in this runtime");
-  for (const [m, params] of Object.entries({ WINDOW_BIND_TAB: ["VAL", "WINDOW", "T_SORT", "T_FILTER", "RESULT"],
-    WINDOW_GET_ROW: ["VAL", "ROW", "RESULT"] })) {
-    for (const p of params) assert.ok(M[m]?.parameters?.[p], `z2ui5_if_client=>${m}( ${p} )`);
-    assert.equal(typeof abap.Classes["Z2UI5_CL_UI5_CLIENT"].prototype[`z2ui5_if_client$${m.toLowerCase()}`], "function", m);
+  for (const p of ["VAL", "TOTAL", "EVENT", "WINDOW", "RESULT"]) {
+    assert.ok(M.WINDOW_BIND_TAB?.parameters?.[p], `z2ui5_if_client=>WINDOW_BIND_TAB( ${p} )`);
   }
-  const row = (p) => M.WINDOW_BIND_TAB.parameters[p].type().getRowType().get();
-  assert.deepEqual(Object.keys(row("T_SORT")), ["path", "descending"], "ty_s_bind_tab_sort");
-  assert.deepEqual(Object.keys(row("T_FILTER")), ["group", "path", "operator", "value1", "value2"], "ty_s_bind_tab_filter");
-  // what the client tells a flag and a number by (windowRows in define-app.js)
-  assert.ok(row("T_SORT").descending instanceof abap.types.Character && row("T_SORT").descending.getLength() === 1);
-  assert.ok(row("T_FILTER").group instanceof abap.types.Integer);
-
-  const attribute = (cls, name) => {
-    const a = abap.Classes[cls]?.ATTRIBUTES?.[name];
-    assert.equal(a?.visibility, "U", `${cls}->${name.toLowerCase()} is public`);
-    return a.type();
-  };
-  assert.equal(attribute("Z2UI5_CL_UI5_CLIENT", "MO_ACTION").getQualifiedName(), "Z2UI5_CL_UI5_ACTION");
-  assert.equal(attribute("Z2UI5_CL_UI5_ACTION", "MO_APP").getQualifiedName(), "Z2UI5_CL_UI5_APP_CONT");
-  assert.ok(attribute("Z2UI5_CL_UI5_APP_CONT", "MT_ATTRI") instanceof abap.types.DataReference, "mt_attri is a reference to the table");
-  const W = abap.Classes["Z2UI5_CL_UI5_SRV_WINDOW"];
-  assert.equal(typeof W?.index, "function", "z2ui5_cl_ui5_srv_window=>index");
-  assert.deepEqual(Object.keys(W.METHODS.INDEX.parameters).sort(), ["RESULT", "TAB", "T_FILTER", "T_SORT"]);
-  // ty_s_attri, through the one public signature that carries it
-  const attri = W.METHODS.EVENT_APPLY.parameters.ATTRI.type().getType().getRowType().get();
-  for (const f of ["name", "window_size", "t_window_sort", "t_window_filter", "t_window_sort_set", "t_window_filter_set"]) {
-    assert.ok(f in attri, `z2ui5_if_ui5_types=>ty_s_attri-${f}`);
-  }
+  assert.equal(typeof abap.Classes["Z2UI5_CL_UI5_CLIENT"].prototype.z2ui5_if_client$window_bind_tab, "function");
+  assert.deepEqual(Object.keys(abap.Classes["Z2UI5_IF_CLIENT"]["z2ui5_if_client$cs_window_reason"].get()).sort(), ["filter", "more", "sort"]);
 });
 
 test("the constant structures the client hands over are readable, by name", () => {
@@ -357,6 +315,16 @@ test("z2ui5_if_client's METHODS carry what the client reads its signatures from 
   assert.deepEqual(required("_EVENT"), [], "every parameter of _event( ) is optional");
   assert.deepEqual(required("POPOVER_DISPLAY").sort(), ["BY_ID", "XML"]);
   assert.deepEqual(required("NEST_VIEW_DISPLAY").sort(), ["ID", "METHOD_INSERT", "VAL"]);
+});
+
+test("the drafts pruning must keep are a public table on the app container - where the runtime prunes", (t) => {
+  // define-app.js takes back the mark its up-front app_state_get_href( )
+  // leaves there (client->mo_action->mo_app->mt_draft_keep) - drafts.test.mjs
+  // holds what that is for; this holds the name
+  const a = abap.Classes["Z2UI5_CL_UI5_APP_CONT"].ATTRIBUTES.MT_DRAFT_KEEP;
+  if (!abap.Classes["Z2UI5_IF_UI5_DRAFT_STORE"].METHODS.PRUNE_CHAIN) return t.skip("no prune_chain( ) in this runtime");
+  assert.equal(a?.visibility, "U", "z2ui5_cl_ui5_app_cont->mt_draft_keep is public");
+  assert.equal(typeof a.type().array, "function", "a table");
 });
 
 test("the CDS draft store implements every method the runtime's interface declares", () => {

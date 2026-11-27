@@ -10,7 +10,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { createRequire } from "node:module";
-import { post, serve } from "./server.mjs";
+import { post, serve, viewXml } from "./server.mjs";
 
 const { defineApp, t: types } = createRequire(import.meta.url)("@cap2ui5/cds-plugin");
 
@@ -18,8 +18,7 @@ const APP = "ZCL_JS_REFS";
 const s = serve();
 const P = (o) => post(s.url, { user: "alice", ...o });
 const ok = (r) => { assert.equal(r.status, 200, r.text.slice(0, 400)); return r; };
-const mainView = (r) => (r.json?.S_FRONT?.S_ACTION?.T_SYSTEM ?? [])
-  .find((a) => a[0] === "VIEW_SLOTS" && a[2] === "MAIN")?.[3];
+const mainView = (r) => viewXml(r);
 const has = () => Boolean(abap.Classes["Z2UI5_IF_CLIENT"].METHODS.WINDOW_BIND_TAB);
 const LATER = "z2ui5_if_client has no window_bind_tab in this runtime - it came after @abap2ui5/node-runtime 1.148.0";
 const ROWS = [
@@ -38,7 +37,7 @@ test("a t.ref( ) field is the model node /<FIELD>/*, bound dereferenced as _bind
   assert.deepEqual(r.json.MODEL.MR_NAME, { "*": "start" }, "the initial value t.ref( ) was given");
   // the windowed one: four rows in the order QTY descending - the ID 4 1 5 2
   assert.deepEqual(r.json.MODEL.MR_WIN["*"].map((row) => row.ID), [4, 1, 5, 2]);
-  assert.deepEqual(r.json.MODEL.__WINDOW, { MR_WIN: { "*": { TOTAL: 6, COUNT: 4, SIZE: 4 } } });
+  assert.deepEqual(r.json.MODEL.__WINDOW, { MR_WIN: { "*": { TOTAL: 6, COUNT: 4, SIZE: 4, EVENT: "WIN" } } });
 });
 
 test("the __delta on the * node changes exactly the cells it names, and the draft keeps the data behind the reference", async (t) => {
@@ -56,18 +55,18 @@ test("the __delta on the * node changes exactly the cells it names, and the draf
   assert.deepEqual(add.json.MODEL.MR_NAME, { "*": "Ada" });
 });
 
-test("on a windowed table behind a reference the row keys of the __delta are positions in the order the browser holds", async (t) => {
+test("on a windowed table behind a reference the row keys of the __delta are the rows the app loaded", async (t) => {
   if (!has()) return t.skip(LATER);
   const start = ok(await P({ app: APP }));
   const check = ok(await P({ app: APP, id: start.json.S_FRONT.ID, event: "CHECK",
     model: { MR_WIN: { "*": { __delta: { 0: { DONE: true }, 2: { DONE: true } } } } } }));
   assert.equal(check.json.MODEL.SUMMARY, "start;1:one:,2:two:,3:three:;4,5", "positions 0 and 2 are the rows with ID 4 and 5");
-  // window_get_row( ) answers for it too: position 1 is the row with ID 1
-  const row = ok(await P({ app: APP, id: check.json.S_FRONT.ID, event: "ROW", args: ["1"] }));
-  assert.equal(row.json.MODEL.SUMMARY, "1");
-  // and the window request of the list binding names the node
-  const more = ok(await P({ app: APP, id: row.json.S_FRONT.ID, event: "___ZZZ_WIN", args: ["/MR_WIN/*", "8", "", ""] }));
+  // and the window request of the list binding names the node: the app's
+  // event WIN, the request in get( ).r_event_data
+  const more = ok(await P({ app: APP, id: check.json.S_FRONT.ID, event: "___ZZZ_WIN",
+    args: ["/MR_WIN/*", "WIN", "MORE", "4", "4"] }));
   assert.deepEqual(more.json.MODEL.MR_WIN["*"].map((r) => r.ID), [4, 1, 5, 2, 6, 3]);
+  assert.deepEqual(more.json.MODEL.MR_WIN["*"].filter((r) => r.DONE).map((r) => r.ID), [4, 5], "the ticks stayed");
 });
 
 test("t.ref( ) refuses what it cannot be, and only a t.ref( ) field is dereferenced", async () => {

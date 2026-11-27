@@ -265,7 +265,7 @@ ENDCLASS.
 
     const page = await fetch(`${url}/rest/root/z2ui5?app_start=ZCL_PROBE`, { headers: auth });
     const html = await page.text();
-    check("GET serves the bootstrap page", page.status === 200 && html.length > 100_000,
+    check("GET serves the bootstrap page", page.status === 200 && html.length > 5_000,
       `${page.status}, ${html.length} bytes`);
 
     check("the GET page carries the UI5 component itself",
@@ -284,7 +284,7 @@ ENDCLASS.
     const evt = await fetch(`${url}/rest/root/z2ui5`, { method: "POST", headers: auth,
       body: body(j1.S_FRONT.ID, "GO", { NAME: "Ada" }) });
     const j2 = await evt.json();
-    const action = j2.S_FRONT?.S_ACTION?.T_CUSTOM?.[0] ?? j2.S_FRONT?.S_ACTION?.T_SYSTEM?.[0];
+    const action = j2.S_FRONT?.ACTIONS?.[0];
     check("the event roundtrip runs the app against the stored draft",
       evt.status === 200 && JSON.stringify(action).includes("Hello, Ada!"), JSON.stringify(action));
 
@@ -292,7 +292,7 @@ ENDCLASS.
       body: body("", "").replace(/ZCL_PROBE/g, "ZCL_PROBE_ABAP") });
     const j3 = abap.status === 200 ? await abap.json() : {};
     check("the app abap2js translated starts, its field bound",
-      abap.status === 200 && j3.MODEL?.NAME === "ABAP" && JSON.stringify(j3.S_FRONT?.S_ACTION).includes("{/NAME}"),
+      abap.status === 200 && j3.MODEL?.NAME === "ABAP" && JSON.stringify(j3.S_FRONT?.VIEWS).includes("{/NAME}"),
       `${abap.status} ${JSON.stringify(j3.MODEL)}`);
 
     const anon = await fetch(`${url}/rest/root/z2ui5`, { method: "POST",

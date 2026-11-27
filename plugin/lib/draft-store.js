@@ -200,11 +200,11 @@ class ZCL_CDS_DRAFT_STORE {
       }
       if (ends(id)) return;
       const named = await cds.run(SELECT.one.from(Drafts).columns("id")
-        .where({ owner, and: { id_prev_app: id, or: { id_prev_app_stk: id } } }));
+        .where({ owner }).and({ id_prev_app: id, or: { id_prev_app_stk: id } }));
       if (named) return;
       await cds.run(DELETE.from(Drafts).where({ id, owner }));
     } catch (e) {
-      cds.log("cap2ui5").debug("prune_chain left the chain as it is:", e);
+      cds.log("cap2ui5").warn("prune_chain left the chain as it is:", e);
     }
   }
 
@@ -218,7 +218,7 @@ class ZCL_CDS_DRAFT_STORE {
       await cds.run(UPDATE(Drafts).set({ createdAt: new Date().toISOString() })
         .where({ id: String(INPUT.id.get()).trim(), owner: who() }));
     } catch (e) {
-      cds.log("cap2ui5").debug("touch left the draft's age as it is:", e);
+      cds.log("cap2ui5").warn("touch left the draft's age as it is:", e);
     }
   }
 

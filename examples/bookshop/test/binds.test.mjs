@@ -5,13 +5,12 @@
 // fixture is srv/apps/binds.js.
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { post, serve } from "./server.mjs";
+import { post, serve, viewXml } from "./server.mjs";
 
 const APP = "ZCL_JS_BINDS";
 const s = serve();
 const P = (o) => post(s.url, { user: "alice", ...o });
-const mainView = (r) => (r.json?.S_FRONT?.S_ACTION?.T_SYSTEM ?? [])
-  .find((a) => a[0] === "VIEW_SLOTS" && a[2] === "MAIN")?.[3] ?? "";
+const mainView = (r) => viewXml(r) ?? "";
 
 test("path: true is the bare path a composed binding needs", async () => {
   const r = await P({ app: APP });

@@ -95,8 +95,9 @@ cds.on("bootstrap", (app) => {
   });
 
   // No static frontend route: the page the roundtrip route answers a GET
-  // with embeds the whole UI5 component - every module, view and stylesheet,
-  // from the runtime's own commit - so the browser needs no files from here.
+  // with loads the UI5 component as bundles from this same route
+  // (?z2ui5-bundle, carried in the transpiled framework, from the runtime's
+  // own commit) - so the browser needs no files from here.
 
   // Who may call, decided the way CAP decides it for a service annotated with
   // @requires (check_roles in CAP's HTTP adapter): any one of the roles lets

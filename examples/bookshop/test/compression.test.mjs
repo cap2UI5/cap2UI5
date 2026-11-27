@@ -4,8 +4,9 @@
 // - the page cache, the tags - abap2UI5's node/tests/compress.spec.js holds;
 // what is held here is that the plugin's route answers through it.
 //
-// The page is the whole UI5 frontend, 358 kB, and a roundtrip carries the
-// app's model; both went out uncompressed. What must hold besides the bytes:
+// The UI5 frontend is a bundle of about 190 kB the page loads from the route
+// (it was part of the page until abap2UI5 1.151.0), and a roundtrip carries
+// the app's model; all of it went out uncompressed. What must hold besides the bytes:
 // the conditional GET. The framework answers a browser that still has the
 // page with a 304 itself, and it accepts the tag it sent and that tag with
 // Apache's "-gzip" suffix - so the compressed page is tagged "x-gzip", and
@@ -55,8 +56,17 @@ test("the page goes out gzipped where the browser takes it, and decodes to the p
   assert.equal(plain.headers["content-encoding"], undefined, "compressed for a client that did not ask");
   assert.equal(gz.headers["content-encoding"], "gzip");
   assert.equal(Number(gz.headers["content-length"]), gz.body.length);
-  assert.ok(gz.body.length < plain.body.length / 3, `${gz.body.length} of ${plain.body.length} bytes`);
+  assert.ok(gz.body.length < plain.body.length / 2, `${gz.body.length} of ${plain.body.length} bytes`);
   assert.ok(zlib.gunzipSync(gz.body).equals(plain.body), "the gzip is not the page");
+  // the page is the loader since abap2UI5 1.151.0: the UI5 component comes
+  // as a bundle of its own from the same route, and that is where the bytes are
+  const bundle = await raw(`${s.url}?z2ui5-bundle`, { headers: { "Accept-Encoding": BROWSER } });
+  const bundlePlain = await raw(`${s.url}?z2ui5-bundle`);
+  assert.equal(bundle.status, 200);
+  assert.equal(bundle.headers["content-encoding"], "gzip");
+  assert.ok(bundlePlain.body.length > 100_000, `the bundle is ${bundlePlain.body.length} bytes`);
+  assert.ok(bundle.body.length < bundlePlain.body.length / 3, `${bundle.body.length} of ${bundlePlain.body.length} bytes`);
+  assert.ok(zlib.gunzipSync(bundle.body).equals(bundlePlain.body), "the gzip is not the bundle");
   // a different representation, a different strong tag - the one the
   // framework's conditional GET accepts, Apache's
   assert.match(plain.headers.etag, /^"[^"]+"$/);
