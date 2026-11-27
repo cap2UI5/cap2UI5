@@ -382,6 +382,34 @@ ENDCLASS.
     /z2ui5_if_client has no method window_get_row/);
 });
 
+test("itab[ n ] is the row at an index, counted from 1 - a row by key is refused", () => {
+  const cls = (body) => `CLASS zcl_js_tabexpr DEFINITION PUBLIC.
+  PUBLIC SECTION.
+    INTERFACES z2ui5_if_app.
+    TYPES: BEGIN OF ty_s_row, title TYPE string, price TYPE i, END OF ty_s_row.
+    DATA t_tab TYPE STANDARD TABLE OF ty_s_row WITH EMPTY KEY.
+    DATA title TYPE string.
+    DATA pos TYPE i.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+CLASS zcl_js_tabexpr IMPLEMENTATION.
+  METHOD z2ui5_if_app~main.
+${body}
+  ENDMETHOD.
+ENDCLASS.
+`;
+  const code = abap2js(cls(`    title = t_tab[ 1 ]-title.
+    title = |first: { t_tab[ pos ]-title }|.
+    DATA(t_skipped) = client->get( )-t_model_skipped.
+    title = t_skipped[ 2 ]-value.`), { file: "zcl_js_tabexpr.clas.abap" }).code;
+  assert.match(code, /this\.title = this\.t_tab\[0\]\.title;/, "a literal index, counted from 0 in JavaScript");
+  assert.match(code, /this\.t_tab\[\(this\.pos\) - 1\]\.title/, "an index that is an expression");
+  assert.match(code, /this\.title = t_skipped\[1\]\.value;/, "a table of the client's own types");
+  assert.throws(() => abap2js(cls("    title = t_tab[ price = 1 ]-title."), { file: "zcl_js_tabexpr.clas.abap" }),
+    /a table expression other than itab\[ index \] is not supported yet/);
+});
+
 test("a class that is no app is refused as a whole", () => {
   const e = (() => {
     try {
