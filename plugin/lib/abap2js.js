@@ -1676,6 +1676,21 @@ class MethodGen {
         continue;
       }
       if (kind(p) === "ArrowOrDash") continue;
+      if (kind(p) === "TableExpression") {
+        // itab[ n ]: the row at an index, counted from 1. Only that form - a
+        // row by key (itab[ id = 1 ]) or by a secondary key is refused. A row
+        // that is not there raises CX_SY_ITAB_LINE_NOT_FOUND in ABAP; here
+        // the read of its component throws a TypeError - the roundtrip fails
+        // on both sides, with another text.
+        const inner = p.getChildren().filter((c) => !isToken(c));
+        if (inner.length !== 1 || kind(inner[0]) !== "Source" || type?.k !== "table") {
+          this.fail("a table expression other than itab[ index ] is not supported yet", p);
+        }
+        const index = this.source(inner[0], { k: "int" }).trim();
+        js += /^\d+$/.test(index) && Number(index) >= 1 ? `[${Number(index) - 1}]` : `[(${index}) - 1]`;
+        type = type.row;
+        continue;
+      }
       this.fail(`${kind(p)} is not supported yet`, p);
     }
     return { js, type, attribute: !!base.attribute };

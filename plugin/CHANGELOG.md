@@ -8,6 +8,8 @@ starts with 0, a minor release may break the API.
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-11-27
+
 ### Changed
 
 - **It hosts `@abap2ui5/node-runtime` 1.151.0 (abap2UI5 1.151.0)** - 0.7.0
@@ -74,6 +76,9 @@ starts with 0, a minor release may break the API.
   `get_start_param( name )`, `timer_set({ event, delay_ms, no_busy })` and
   `timer_stop( )`, and `keep_messages` on `nav_app_call( )` and
   `nav_app_leave( )`.
+- `abap2js` translates a table expression by index, `itab[ n ]` and
+  `itab[ n ]-component` - the row counted from 1, so `itab[ 1 ]` is
+  `itab[0]`. A row by key (`itab[ id = 1 ]`) stays refused.
 - The CDS draft store implements `prune_chain( )` and `touch( )`, the two
   methods abap2UI5 1.151.0 adds to `z2ui5_if_ui5_draft_store`, following the
   shipped store step for step: a chain of drafts is pruned to the two the
