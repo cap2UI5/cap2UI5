@@ -21,9 +21,7 @@
 // what the browser sends for one edited cell - the frontend sends the paths
 // that changed (buildDeltaFromPaths), not the table - and answers the whole
 // model, as every roundtrip does. Which runtime and which Node ran is
-// printed with the numbers, and whether the runtime's accelerations are
-// active is the [cap2ui5] line above them; CDS_REQUIRES_CAP2UI5_ACCELERATE=
-// false measures the same runtime without them.
+// printed with the numbers.
 //
 // CAP, the plugin and the runtime are the ones that project resolves, as for
 // cds serve - so the table mode runs in another project as well:
@@ -49,10 +47,6 @@ if (ROWS !== undefined && !(Number(ROWS) > 0 && RUNS > 0)) {
   console.error("usage: node bench.mjs [N] [APP] | node bench.mjs --rows <n> [--runs <k>]");
   process.exit(2);
 }
-
-// the plugin says whether the runtime's accelerations are active at debug
-// level when they are not - the table mode's numbers depend on it
-if (ROWS !== undefined) cds.log("cap2ui5", "debug");
 
 await cds.plugins;
 const server = await cds.server({ port: 0, silent: true });

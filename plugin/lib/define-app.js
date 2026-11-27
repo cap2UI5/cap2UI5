@@ -562,56 +562,40 @@ function constant(group, value, who) {
 }
 
 // ------------------------------------------------- the calls, as ABAP writes them
-/** z2ui5_if_client's parameters, method by method, as the interface declares
- *  them: the PREFERRED one first - the one a call with a single positional
- *  argument means - and a "!" on those that are neither OPTIONAL nor have a
- *  DEFAULT. ABAP refuses a call without one of those at compile time; here
- *  the call is refused when it is made, rather than send "undefined" to the
- *  browser. */
-const SIGNATURES = {
-  check_on_event: "val",
-  get_event_arg: "v",
-  get_app: "id",
-  _bind: "val! path tab tab_index switch_default_model omit_initial omit_initial_paths json custom_mapper custom_filter",
-  _bind_edit: "val! path tab tab_index switch_default_model custom_mapper custom_mapper_back custom_filter " +
-    "custom_filter_back",
-  _bind_path: "val!",
-  window_bind_tab: "val! window t_sort t_filter",
-  window_get_row: "val! row!",
-  _event: "val t_arg s_ctrl arg",
-  _event_client: "val! view t_arg",
-  follow_up_action: "val! view t_arg",
-  view_display: "val! switch_default_model_path switch_default_model_anno_uri transition transition_back",
-  popup_display: "val!",
-  popover_display: "xml! by_id!",
-  nest_view_display: "val! id! method_insert! method_destroy",
-  nest2_view_display: "val! id! method_insert! method_destroy",
-  message_box_display: "text! type title styleclass onclose actions emphasizedaction initialfocus details",
-  message_toast_display: "text! duration onclose",
-  nav_app_call: "app!",
-  nav_app_leave: "app event r_data",
-  hash_set: "val",
-  hash_replace: "val",
-  app_state_set_active: "val",
-  set_session_stateful: "val",
-};
-/** The parameters the RUNTIME in use declares for a method, lower case - or
- *  null before it has booted. SIGNATURES is what the client wires, and it
- *  follows upstream's interface; a runtime from before a parameter was added
- *  does not know it, and its transpiled method ignores what it does not
- *  declare. So a call that sets such a parameter is refused, naming the
- *  runtime, instead of doing nothing (view_display's transition, which came
- *  after @abap2ui5/node-runtime 1.145.0). */
-function runtimeParams(method) {
-  const m = globalThis.abap?.Classes?.["Z2UI5_IF_CLIENT"]?.METHODS?.[method.toUpperCase()];
-  return m?.parameters ? Object.keys(m.parameters).map((p) => p.toLowerCase()) : null;
-}
+/** z2ui5_if_client's parameters, method by method - READ FROM THE RUNTIME's
+ *  own interface, not listed here: the transpiled z2ui5_if_client carries
+ *  every method's parameters (METHODS[..].parameters: the name, parm_kind,
+ *  is_optional), the importing ones in the order that puts the PREFERRED one
+ *  first - the one a call with a single positional argument means - and
+ *  is_optional " " on those that are neither OPTIONAL nor have a DEFAULT.
+ *  ABAP refuses a call without one of those at compile time; here the call
+ *  is refused when it is made, rather than send "undefined" to the browser.
+ *
+ *  This used to be a table in this file, 25 methods long, that restated the
+ *  interface and had to follow every parameter upstream added. It agreed
+ *  with the runtime in every entry, so the runtime answers alone - a
+ *  parameter upstream adds is one the client takes, on the runtime that has
+ *  it. abi-gate.test.mjs holds the two things read here that the transpiler
+ *  does not promise: the shape of `parameters`, and that the preferred
+ *  parameter comes first. */
 const runtimeVersion = () => {
   try { return require("@abap2ui5/node-runtime/package.json").version; } catch { return "?"; }
 };
+const signatures = new Map();
 const signature = (method) => {
-  const params = SIGNATURES[method].split(" ");
-  return { names: params.map((n) => n.replace("!", "")), required: params.filter((n) => n.endsWith("!")).map((n) => n.slice(0, -1)) };
+  if (signatures.has(method)) return signatures.get(method);
+  const declared = globalThis.abap?.Classes?.["Z2UI5_IF_CLIENT"]?.METHODS?.[method.toUpperCase()];
+  if (!declared) {
+    throw new Error(`client.${method}( ): z2ui5_if_client has no such method in the abap2UI5 runtime this ` +
+      `project runs on (@abap2ui5/node-runtime ${runtimeVersion()})`);
+  }
+  const importing = Object.entries(declared.parameters ?? {}).filter(([, p]) => p.parm_kind === "I");
+  const sig = {
+    names: importing.map(([n]) => n.toLowerCase()),
+    required: importing.filter(([, p]) => p.is_optional !== "X").map(([n]) => n.toLowerCase()),
+  };
+  signatures.set(method, sig);
+  return sig;
 };
 /** Whether the RUNTIME in use has a method of z2ui5_if_client at all. The
  *  client is the interface by its names, so it has a method exactly when
@@ -652,15 +636,11 @@ function paramsOf(method, args, named = isPlainObject) {
         `client.${method}(${method === "window_get_row" ? '{ val: "name", row }' : '"name"'}), not by its value.`);
     }
     for (const [k, v] of Object.entries(first)) {
-      if (!names.includes(k)) throw new Error(`${who}: no parameter "${k}" - { ${names.join(", ")} }`);
+      if (!names.includes(k)) {
+        throw new Error(`${who}: no parameter "${k}" - { ${names.join(", ")} }, as z2ui5_if_client declares it in ` +
+          `the abap2UI5 runtime this project runs on (@abap2ui5/node-runtime ${runtimeVersion()})`);
+      }
       if (v !== undefined) out[k] = v;
-    }
-  }
-  const known = runtimeParams(method);
-  for (const k of Object.keys(out)) {
-    if (known && !known.includes(k)) {
-      throw new Error(`${who}: ${k} is not a parameter of z2ui5_if_client=>${method} in the abap2UI5 runtime ` +
-        `this project runs on (@abap2ui5/node-runtime ${runtimeVersion()}) - it came with a later release`);
     }
   }
   const missing = required.filter((k) => out[k] === undefined || out[k] === null);

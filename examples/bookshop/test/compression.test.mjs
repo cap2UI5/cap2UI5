@@ -1,5 +1,8 @@
 // gzip on the route - what upstream asks the ICF for with SET_COMPRESSION,
-// and the express shim has no method for (plugin/lib/compression.js).
+// and the express shim has no method for. The middleware is the runtime
+// package's compress( ) (@abap2ui5/node-runtime/compress), whose own behaviour
+// - the page cache, the tags - abap2UI5's node/tests/compress.spec.js holds;
+// what is held here is that the plugin's route answers through it.
 //
 // The page is the whole UI5 frontend, 358 kB, and a roundtrip carries the
 // app's model; both went out uncompressed. What must hold besides the bytes:
@@ -18,7 +21,7 @@ import zlib from "node:zlib";
 import { boot, serve } from "./server.mjs";
 
 const require = createRequire(import.meta.url);
-const { compression, acceptsGzip, THRESHOLD, PAGES } = require("@cap2ui5/cds-plugin/lib/compression.js");
+const THRESHOLD = 1024;                                        // compress( )'s default
 const { defineApp, t } = require("@cap2ui5/cds-plugin");
 
 const AUTH = { Authorization: "Basic " + Buffer.from("alice:").toString("base64") };
@@ -118,12 +121,10 @@ test("gzip is sent only where it is accepted: q=0 refuses it, and so does naming
   for (const refuses of ["gzip;q=0", "identity", "br", "deflate, br", "gzip;q=0, *", "*;q=0", "x-gzip;q=0.0"]) {
     const r = await page({ "Accept-Encoding": refuses });
     assert.equal(r.headers["content-encoding"], undefined, refuses);
-    assert.equal(acceptsGzip(refuses), false, refuses);
   }
-  for (const takes of ["gzip", "GZIP;q=0.5", "br;q=1, gzip;q=0.1", "*", "br, *;q=0.2", "x-gzip", "identity, gzip ; q=1"]) {
-    assert.equal(acceptsGzip(takes), true, takes);
+  for (const takes of ["GZIP;q=0.5", "br;q=1, gzip;q=0.1", "br, *;q=0.2", "x-gzip", "identity, gzip ; q=1"]) {
+    assert.equal((await page({ "Accept-Encoding": takes })).headers["content-encoding"], "gzip", takes);
   }
-  assert.equal(acceptsGzip(undefined), false);
   assert.equal((await page({ "Accept-Encoding": "*" })).headers["content-encoding"], "gzip");
 });
 
@@ -135,61 +136,6 @@ test("a small answer and a HEAD go out as they are", async () => {
   assert.equal(hello.headers.vary, undefined);
   const head = await raw(s.url, { method: "HEAD", headers: { "Accept-Encoding": BROWSER } });
   assert.equal(head.headers["content-encoding"], undefined);
-});
-
-test("the page is compressed once per tag, again when its bytes change, and PAGES tags are kept", () => {
-  const calls = [];
-  const gzipSync = zlib.gzipSync;
-  zlib.gzipSync = (b, ...rest) => { calls.push(b.length); return gzipSync(b, ...rest); };
-  try {
-    const mw = compression();
-    const send = (etag, body, method = "GET") => {
-      const headers = new Map([["etag", etag]]);
-      const res = {
-        statusCode: 200, headersSent: false,
-        getHeader: (n) => headers.get(n.toLowerCase()),
-        setHeader: (n, v) => headers.set(n.toLowerCase(), v),
-        vary: (f) => headers.set("vary", f),
-        end(chunk) { this.sent = chunk; },
-      };
-      mw({ method, headers: { "accept-encoding": "gzip" } }, res, () => {});
-      res.end(body);
-      assert.equal(headers.get("content-encoding"), "gzip");
-      assert.ok(zlib.gunzipSync(res.sent).equals(body));
-      return res.sent;
-    };
-    const one = Buffer.from("a".repeat(4096));
-    const first = send('"one"', one);
-    assert.equal(send('"one"', Buffer.from(one)), first, "the same page under the same tag was compressed again");
-    assert.equal(calls.length, 1);
-    send('"one"', Buffer.from("b".repeat(4096)));              // same tag, other bytes
-    assert.equal(calls.length, 2);
-    send('"one"', Buffer.from("b".repeat(4096)), "POST");        // a roundtrip is not a page
-    assert.equal(calls.length, 3);
-    for (let i = 0; i < PAGES; i++) send(`"page ${i}"`, Buffer.from(`${i}`.repeat(4096)));
-    calls.length = 0;
-    send('"page 1"', Buffer.from("1".repeat(4096)));             // still there
-    assert.equal(calls.length, 0);
-    send('"one"', Buffer.from("b".repeat(4096)));                // the oldest, gone
-    assert.equal(calls.length, 1);
-  } finally {
-    zlib.gzipSync = gzipSync;
-  }
-});
-
-test("a strong tag gets -gzip once; a weak one stays - the gzip is the same content", () => {
-  const tagged = (etag) => {
-    const headers = new Map([["etag", etag]]);
-    const res = { statusCode: 200, headersSent: false, getHeader: (n) => headers.get(n.toLowerCase()),
-      setHeader: (n, v) => headers.set(n.toLowerCase(), v), vary() {}, end() {} };
-    compression()({ method: "POST", headers: { "accept-encoding": "gzip" } }, res, () => {});
-    res.end(Buffer.from("x".repeat(4096)));
-    assert.equal(headers.get("content-encoding"), "gzip");
-    return headers.get("etag");
-  };
-  assert.equal(tagged('"a"'), '"a-gzip"');
-  assert.equal(tagged('"a-gzip"'), '"a-gzip"', "a tag suffixed already - by a second middleware - got it twice");
-  assert.equal(tagged('W/"a"'), 'W/"a"', "express tags every POST answer weakly");
 });
 
 test("cds.requires.cap2ui5.compression: false - nothing is compressed", async () => {

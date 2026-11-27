@@ -16,8 +16,6 @@ const { locate, boot, loadApps } = require("./lib/runtime");
 const { definedApps, configure, MAIN_TIMEOUT } = require("./lib/define-app");
 const { startupHints } = require("./lib/hints");
 const { config } = require("./lib/config");
-const { compression } = require("./lib/compression");
-const { withSession } = require("./lib/sessions");
 
 // One logger, as every CAP module and plugin has: plain `[cap2ui5] - ...` lines
 // in development, and in production the JSON records CAP writes for itself,
@@ -57,8 +55,8 @@ cds.on("bootstrap", (app) => {
   // answered every roundtrip with a 500.
   let served;
   let origins = new Map();                    // app -> "the project" or its package
-  const ready = Promise.all([boot(rt, conf), new Promise((resolve) => (served = resolve))])
-    .then(async ([shim]) => { origins = await loadApps(conf); listApps(); return shim; });
+  const ready = Promise.all([boot(), new Promise((resolve) => (served = resolve))])
+    .then(async ([host]) => { origins = await loadApps(conf); listApps(); return host; });
   ready.catch(() => {});                 // it fails the start below; nothing else awaits it yet
   cds.once("served", () => { served(); return ready; });
 
@@ -115,6 +113,12 @@ cds.on("bootstrap", (app) => {
   // a fresh login challenge to an authenticated user who lacked the role, and
   // 401 to everybody once requires was a list, because cds.User.is( ) takes
   // one role, not an array.
+  // gzip: the runtime package's compress( ), one per process. The package is
+  // an ES module and this file is not, so the middleware is there after an
+  // import - which the first request waits for, and no later one notices.
+  const compressing = import("@abap2ui5/node-runtime/compress").then((m) => m.compress());
+  const compress = (req, res, next) => compressing.then((mw) => mw(req, res, next), next);
+
   const { roles } = conf;
   const guard = (req, res, next) => {
     const user = cds.context?.user;
@@ -134,7 +138,6 @@ cds.on("bootstrap", (app) => {
     next(Object.assign(new cds.error(status, err.message), { code: String(status) }));
   };
 
-  let queue = Promise.resolve();                 // roundtrip( ): one at a time, below
   let inFlight = 0;                              // roundtrips queued or running
   let warnedAt = -Infinity;                      // when the queue last said it was slow
 
@@ -156,8 +159,9 @@ cds.on("bootstrap", (app) => {
   // a whole body - up to the limit - before the 401 was even decided.
   //
   // compression behind the guard: gzip for what the handler answers - the
-  // compression upstream asks the ICF for (lib/compression.js), unless
-  // cds.requires.cap2ui5.compression is false.
+  // compression upstream asks the ICF for, which the express shim does not
+  // have. It is the runtime package's own compress( ) (its README,
+  // "Compression"), unless cds.requires.cap2ui5.compression is false.
   //
   // cds.middlewares.errors( ) LAST, as CAP mounts it behind every protocol
   // adapter, with normalize in front of it as the adapter's own error step: it
@@ -167,7 +171,7 @@ cds.on("bootstrap", (app) => {
     conf.routes,
     ...cds.middlewares.before.filter(Boolean),
     guard,
-    ...(conf.compression ? [compression()] : []),
+    ...(conf.compression ? [compress] : []),
     // type: every request that has a body, whatever its Content-Type says -
     // and so one without the header, which "*/*" does not match: that body
     // was dropped unread, and the framework answered the empty roundtrip
@@ -206,40 +210,44 @@ cds.on("bootstrap", (app) => {
   // entity, sy, the open transaction, the handler's class-data - and the
   // draft store here really awaits (cds.run), so without the queue a second
   // request runs inside the first and both share that state. The queue is the
-  // node runtime's own fix (host.mjs exclusive( ), abap2UI5/abap2UI5 #2844)
-  // for hosts that call the shim themselves; a failed roundtrip never blocks
-  // the next one. Inside it, each roundtrip runs in its stateful session -
-  // lib/sessions.js, per CAP user.
+  // runtime package's exclusive( ), and inside it each roundtrip runs in its
+  // stateful session - the package's withSession( ), bound to the CAP user
+  // who calls (tenant and id), so a session only ever answers its owner.
+  // Both are described where they live: srv/hostcore.mjs, ONE REQUEST AT A
+  // TIME and STATEFUL SESSIONS.
   //
   // The price is that one slow roundtrip is everybody's: a main( ) awaiting a
   // slow query holds all the others. So the wait is measured, and a roundtrip
   // that stood in the queue for a second or more says so - at most every ten
   // seconds, since under load every roundtrip would. An async main( ) itself
   // is bounded by cds.requires.cap2ui5.timeout (lib/define-app.js).
-  function roundtrip(req, res) {
+  async function roundtrip(req, res) {
     const queuedAt = Date.now();
     const ahead = inFlight++;
-    // the stateful session belongs to the user who calls (lib/sessions.js)
     const user = cds.context?.user;
     const owner = user?.id ? `${cds.context?.tenant ?? ""}\u0000${user.id}` : "";
-    const run = queue.then(() => {
-      const waited = Date.now() - queuedAt;
-      if (waited >= QUEUE_WARN_MS && Date.now() - warnedAt >= QUEUE_WARN_EVERY_MS) {
-        warnedAt = Date.now();
-        LOG.warn(`a roundtrip waited ${waited} ms behind ${ahead} other(s): roundtrips run one at a time per ` +
-          `process, so a slow main( ) holds everyone - look for the app that awaits, or run more instances`);
-      }
-      return withSession(req, res, () => roundtripNow(req, res), { owner });
-    });
-    queue = run.catch(() => {}).finally(() => { inFlight--; });
-    return run;
+    try {
+      const host = await ready.catch(() => null);  // a failed boot is roundtripNow's to answer
+      const run = () => {
+        const waited = Date.now() - queuedAt;
+        if (waited >= QUEUE_WARN_MS && Date.now() - warnedAt >= QUEUE_WARN_EVERY_MS) {
+          warnedAt = Date.now();
+          LOG.warn(`a roundtrip waited ${waited} ms behind ${ahead} other(s): roundtrips run one at a time per ` +
+            `process, so a slow main( ) holds everyone - look for the app that awaits, or run more instances`);
+        }
+        return host ? host.withSession(req, res, () => roundtripNow(req, res), { owner }) : roundtripNow(req, res);
+      };
+      return await (host ? host.exclusive(run) : run());
+    } finally {
+      inFlight--;
+    }
   }
 
   async function roundtripNow(req, res) {
     try {
-      const { cl_express_icf_shim } = await ready;
+      const { shim } = await ready;
       if (!req.body || !Buffer.isBuffer(req.body)) req.body = Buffer.alloc(0);
-      await cl_express_icf_shim.run({ req, res, class: "ZCL_SICF" });
+      await shim.run({ req, res, class: "ZCL_SICF" });
     } catch (e) {
       // The detail goes to the log, not to the caller: CDS and driver messages
       // carry entity names, SQL fragments and deployment paths, none of which

@@ -5,6 +5,7 @@
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
 import { before, test } from "node:test";
+import path from "node:path";
 import { pathToFileURL } from "node:url";
 
 const require = createRequire(import.meta.url);
@@ -13,7 +14,7 @@ const { defineApp } = require("@cap2ui5/cds-plugin");
 const { agentConfig, reachable, reachableApps, classify } = require("@cap2ui5/cds-plugin/lib/agent/policy");
 
 before(async () => {
-  const { initializeABAP } = await import(pathToFileURL(locate().init).href);
+  const { initializeABAP } = await import(pathToFileURL(path.join(locate().dir, "output", "init.mjs")).href);
   await initializeABAP();
   defineApp("ZCL_AG_OPEN", class { main() {} }, { agent: true });
   defineApp("ZCL_AG_RULES", class { main() {} }, { agent: { events: { SAVE: "confirm", "DELETE*": "forbidden", "*": "allowed" } } });

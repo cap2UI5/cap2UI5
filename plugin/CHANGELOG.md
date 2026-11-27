@@ -10,14 +10,43 @@ starts with 0, a minor release may break the API.
 
 ### Changed
 
-- It hosts `@abap2ui5/node-runtime` 1.150.0 (abap2UI5 1.150.0), transpiled
-  by `@abaplint/transpiler` 2.14.33 for `@abaplint/runtime` 2.14.33 like
-  1.149.0 - 0.7.0 hosted 1.149.0. The plugin needed no change. What
-  abap2UI5 1.150.0 changes for an app is in its changelog: among it, the
+- It hosts `@abap2ui5/node-runtime` 1.150.0 (abap2UI5 1.150.0) - 0.7.0
+  hosted 1.149.0 - and boots it through the package's own entry point
+  instead of through `output/init.mjs`: `initialize( )` boots the runtime,
+  `exclusive( )` queues the roundtrips, `withSession( )` keeps the stateful
+  sessions per CAP user and `compress( )` gzips the answers. The plugin's
+  own copies of the last three (`lib/sessions.js`, `lib/compression.js`, the
+  queue in `cds-plugin.js`) are gone; what they did is unchanged, with two
+  differences that come with upstream's `compress( )`: a roundtrip's JSON is
+  compressed off the main thread, and 16 compressed pages are kept instead
+  of 8. The user exit `defineExit( )` registers is installed through
+  `z2ui5_cl_ui5_user_exit=>set_instance( )`, the framework's seam for a
+  host, instead of through the class's protected class-data.
+- What abap2UI5 1.150.0 changes for an app is in its changelog:
+  among it, the
   frontend sends the edit of a cell of a windowed table behind a data
   reference (`t.ref( )`, bound `mr_tab->*`) as a row delta on the `*` node
   instead of the whole table, which the framework refused for a windowed
   table - the edit was lost.
+
+- The parameters of the client's methods - their names, the preferred one,
+  the required ones - are read from the hosted runtime's own
+  `z2ui5_if_client` instead of from a table in the plugin that restated
+  them. Nothing changes for an app; the message for an unknown parameter
+  now names the runtime it was looked up in.
+
+### Added
+
+- The CDS draft store implements `prune_chain( )` and `touch( )`, the two
+  methods abap2UI5 1.151.0 adds to `z2ui5_if_ui5_draft_store`, following the
+  shipped store step for step. The pinned runtime does not call them yet.
+
+### Removed
+
+- `cds.requires.cap2ui5.accelerate`. The runtime's `accelerate( )` installs
+  nothing since `@abaplint/runtime` 2.13.96 is linear on large tables
+  itself, so there is nothing left to switch off; a project that still sets
+  the option is not refused, the setting is ignored.
 
 ## [0.7.0] - 2026-11-19
 

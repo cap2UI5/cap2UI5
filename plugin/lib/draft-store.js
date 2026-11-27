@@ -1,7 +1,9 @@
 // A z2ui5_if_ui5_draft_store implementation over a CDS entity.
 //
-// This is Naht 1 used for what it was built for. The framework calls these
-// seven methods; where they put the rows is the host's business, and here that
+// This is Naht 1 used for what it was built for. The framework calls the
+// methods of the interface - every one of them, which abi-gate.test.mjs holds,
+// since a method the framework adds and this class lacks is a TypeError in
+// the middle of a roundtrip; where they put the rows is the host's business, and here that
 // is cap2ui5.Drafts - an ordinary CAP entity, so the drafts share the project's
 // database, transactions and authorization with every other service.
 //
@@ -161,6 +163,63 @@ class ZCL_CDS_DRAFT_STORE {
   async z2ui5_if_ui5_draft_store$count_entries_total() {
     const { Drafts } = cds.entities("cap2ui5");
     return count(SELECT.one.from(Drafts).columns("count(*) as n"));
+  }
+
+  // The one draft that fell out of the window of the chain just saved - the
+  // shipped store's walk (z2ui5_cl_ui5_srv_draft, prune_chain), step for
+  // step: the saved draft is depth 1, `keep` of them survive (clamped to the
+  // shipped store's own bounds), the one at depth keep + 1 goes. Never
+  // deleted and never walked past: a protected id, the apps this draft goes
+  // back to, an id the walk has seen (a leave closes a chain into a circle),
+  // and a draft any draft of the user still names as the app to return to.
+  // Owner-scoped throughout, and it never raises: a draft that is not
+  // deleted lives until cleanup( ) takes it by age.
+  async z2ui5_if_ui5_draft_store$prune_chain(INPUT) {
+    try {
+      const keep = Number(INPUT.keep.get());
+      if (!(keep > 0)) return;
+      const shipped = abap.Classes["Z2UI5_CL_UI5_SRV_DRAFT"];
+      const window = Math.max(Number(shipped.c_min_keep_per_chain.get()),
+        Math.min(keep, Number(shipped.c_max_keep_per_chain.get())));
+      const d = INPUT.draft.get();
+      const text = (v) => String(v.get()).trim();
+      const stop = new Set((INPUT.t_protect?.array() ?? []).map(text));
+      stop.add(text(d.id_prev_app)).add(text(d.id_prev_app_stack));
+      const seen = new Set([text(d.id)]);
+      const ends = (id) => !id || stop.has(id) || seen.has(id);
+
+      const { Drafts } = cds.entities("cap2ui5");
+      const owner = who();
+      let id = text(d.id_prev);
+      for (let depth = 1; depth < window; depth++) {
+        if (ends(id)) return;
+        seen.add(id);
+        const row = await cds.run(SELECT.one.from(Drafts).columns("id_prev").where({ id, owner }));
+        if (!row) return;                          // gone already, or not this user's
+        id = String(row.id_prev ?? "").trim();
+      }
+      if (ends(id)) return;
+      const named = await cds.run(SELECT.one.from(Drafts).columns("id")
+        .where({ owner, and: { id_prev_app: id, or: { id_prev_app_stk: id } } }));
+      if (named) return;
+      await cds.run(DELETE.from(Drafts).where({ id, owner }));
+    } catch (e) {
+      cds.log("cap2ui5").debug("prune_chain left the chain as it is:", e);
+    }
+  }
+
+  // The current time for a draft a roundtrip answered again instead of
+  // writing a new one (an unchanged timer tick), so cleanup( ) counts its
+  // age from now. Owner-scoped; an unknown or foreign id is left alone, and
+  // it never raises.
+  async z2ui5_if_ui5_draft_store$touch(INPUT) {
+    try {
+      const { Drafts } = cds.entities("cap2ui5");
+      await cds.run(UPDATE(Drafts).set({ createdAt: new Date().toISOString() })
+        .where({ id: String(INPUT.id.get()).trim(), owner: who() }));
+    } catch (e) {
+      cds.log("cap2ui5").debug("touch left the draft's age as it is:", e);
+    }
   }
 
   async z2ui5_if_ui5_draft_store$cleanup() {

@@ -12,7 +12,6 @@
 // exactly what to look at. Keep it complete: a new abap.* or z2ui5_*$* use in
 // plugin/lib/ belongs in here.
 import assert from "node:assert/strict";
-import fs from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { before, test } from "node:test";
@@ -116,18 +115,13 @@ const RUNTIME_GLOBALS = {
 // of), the example apps the rest of what client.get( ) hands them
 const GET_FIELDS = ["event", "t_event_arg", "r_event_data", "s_config", "s_draft"];
 const EMITTED_STATICS = ["INTERNAL_TYPE", "INTERNAL_NAME", "IMPLEMENTED_INTERFACES", "ATTRIBUTES", "METHODS"];
-// the runtime PACKAGE, not the transpiler: lib/runtime.js imports accelerate
-// from the entries the package's exports declare - "./accelerate", else
-// the main entry "." - calls it once after the boot with no arguments, and
-// reads `false` as "not active". Upstream's module is srv/accelerate.mjs.
-const ACCELERATE_MODULE = path.join("srv", "accelerate.mjs");
 const FRAMEWORK_FIELDS = ["Z2UI5_IF_APP~ID_DRAFT", "Z2UI5_IF_APP~ID_APP"];
 
 // --- boot the runtime in-process, once ------------------------------------
 let Ref, App;
 before(async () => {
   const rt = locate();
-  const { initializeABAP } = await import(pathToFileURL(rt.init).href);
+  const { initializeABAP } = await import(pathToFileURL(path.join(rt.dir, "output", "init.mjs")).href);
   await initializeABAP();
   Ref = abap.Classes["Z2UI5_CL_UI5_APP_HI_WORLD"];       // the transpiler's own emission
   App = defineApp("ZCL_ABI_PROBE", class {               // ours
@@ -154,22 +148,6 @@ test("the agent endpoint tells apps from other classes by the transpiler's stati
   assert.ok(sub, "no transpiled class names its superclass in STATIC_SUPER");
   assert.ok(Object.keys(abap.Classes).some((k) => k.startsWith("CLAS-") && k.split("-").length === 3),
     "local classes are no longer registered as CLAS-<pool>-<name>");
-});
-
-test("the sticky handler lib/sessions.js swaps per session is the framework's class-data box", async () => {
-  // lib/sessions.js stickySlot( ): abap.Classes.Z2UI5_CL_UI5_HTTP_HANDLER
-  // .so_sticky_handler, an ABAPObject read with get( ), put back with set( )
-  // and emptied with clear( ) - a CLASS-DATA attribute is a static of the class
-  const Handler = abap.Classes["Z2UI5_CL_UI5_HTTP_HANDLER"];
-  assert.equal(typeof Handler, "function", "Z2UI5_CL_UI5_HTTP_HANDLER is registered");
-  assert.equal(Handler.ATTRIBUTES?.SO_STICKY_HANDLER?.is_class, "X", "so_sticky_handler is CLASS-DATA");
-  const slot = Handler.so_sticky_handler;
-  assert.ok(slot instanceof abap.types.ABAPObject, "the static is an ABAPObject box");
-  const probe = {};
-  slot.set(probe);
-  assert.equal(slot.get(), probe);
-  slot.clear();
-  assert.equal(slot.get(), undefined);
 });
 
 test("the runtime globals the plugin touches exist", () => {
@@ -357,6 +335,49 @@ test("the constant structures the client hands over are readable, by name", () =
   }
 });
 
+test("z2ui5_if_client's METHODS carry what the client reads its signatures from - the preferred parameter first", () => {
+  // lib/define-app.js signature( ): the importing parameters of a method in
+  // the order the transpiler emits them, the first being the one a single
+  // positional argument means, and is_optional "X" on every one a call may
+  // leave out. Neither is promised by @abaplint/transpiler, so both are held
+  // here - against the preferred parameters ABAP itself gives these methods.
+  const M = abap.Classes["Z2UI5_IF_CLIENT"].METHODS;
+  for (const [method, { parameters }] of Object.entries(M)) {
+    for (const [name, p] of Object.entries(parameters ?? {})) {
+      assert.ok(["I", "E", "C", "R"].includes(p.parm_kind), `${method}( ${name} ): parm_kind ${p.parm_kind}`);
+      assert.ok(["X", " "].includes(p.is_optional), `${method}( ${name} ): is_optional ${JSON.stringify(p.is_optional)}`);
+    }
+  }
+  const importing = (m) => Object.entries(M[m].parameters).filter(([, p]) => p.parm_kind === "I");
+  const PREFERRED = { _EVENT: "VAL", _BIND: "VAL", MESSAGE_BOX_DISPLAY: "TEXT", MESSAGE_TOAST_DISPLAY: "TEXT",
+    NAV_APP_LEAVE: "APP", NAV_APP_CALL: "APP", GET_EVENT_ARG: "V", GET_APP: "ID", POPOVER_DISPLAY: "XML",
+    VIEW_DISPLAY: "VAL", FOLLOW_UP_ACTION: "VAL" };
+  for (const [m, first] of Object.entries(PREFERRED)) assert.equal(importing(m)[0][0], first, `${m}( ): the preferred parameter`);
+  const required = (m) => importing(m).filter(([, p]) => p.is_optional !== "X").map(([n]) => n);
+  assert.deepEqual(required("_EVENT"), [], "every parameter of _event( ) is optional");
+  assert.deepEqual(required("POPOVER_DISPLAY").sort(), ["BY_ID", "XML"]);
+  assert.deepEqual(required("NEST_VIEW_DISPLAY").sort(), ["ID", "METHOD_INSERT", "VAL"]);
+});
+
+test("the CDS draft store implements every method the runtime's interface declares", () => {
+  // the framework calls the store through the interface, and a method it
+  // adds - prune_chain( ) and touch( ) came with 1.151.0 - is a TypeError in
+  // the middle of a roundtrip where the store lacks it
+  const { ZCL_CDS_DRAFT_STORE } = require("@cap2ui5/cds-plugin/lib/draft-store.js");
+  const prefix = "z2ui5_if_ui5_draft_store$";
+  const declared = Object.keys(abap.Classes["Z2UI5_IF_UI5_DRAFT_STORE"].METHODS).map((m) => m.toLowerCase()).sort();
+  const implemented = Object.getOwnPropertyNames(ZCL_CDS_DRAFT_STORE.prototype)
+    .filter((n) => n.startsWith(prefix)).map((n) => n.slice(prefix.length));
+  for (const method of declared) assert.ok(implemented.includes(method), `the store lacks ${method}( )`);
+  // prune_chain( ) clamps to the shipped store's bounds, read from it - where
+  // the runtime's interface has the method
+  if (declared.includes("prune_chain")) {
+    const shipped = abap.Classes["Z2UI5_CL_UI5_SRV_DRAFT"];
+    assert.ok(Number(shipped.c_min_keep_per_chain.get()) >= 2);
+    assert.ok(Number(shipped.c_max_keep_per_chain.get()) >= Number(shipped.c_min_keep_per_chain.get()));
+  }
+});
+
 test("the draft structures have the components draft-store reads and writes", () => {
   const M = abap.Classes["Z2UI5_IF_UI5_DRAFT_STORE"].METHODS;
   const fields = (m, p) => Object.keys(M[m].parameters[p].type().get());
@@ -365,21 +386,18 @@ test("the draft structures have the components draft-store reads and writes", ()
   for (const f of DRAFT_FIELDS) assert.ok(fields("READ_INFO", "RESULT").includes(f), `READ_INFO result-${f}`);
 });
 
-test("accelerate( ), where the runtime ships one: the plugin finds it, and it answers whether it is active", async (t) => {
-  const { findAccelerate } = require("@cap2ui5/cds-plugin/lib/runtime");
-  const rt = locate();
-  const { exports } = JSON.parse(fs.readFileSync(path.join(rt.dir, "package.json"), "utf8"));
-  const ships = (typeof exports === "object" && Object.hasOwn(exports ?? {}, "./accelerate")) ||
-    fs.existsSync(path.join(rt.dir, ACCELERATE_MODULE));
-  const accelerate = await findAccelerate(rt);
-  if (!accelerate) {
-    // a runtime that ships the module and the plugin does not find it would
-    // run without the accelerations, silently - the name or entry changed
-    assert.equal(ships, false, `@abap2ui5/node-runtime ${rt.version} ships accelerate, and the plugin does not find it`);
-    t.diagnostic(`@abap2ui5/node-runtime ${rt.version} has no accelerate( ) - nothing to hold the plugin's call to`);
-    return;
-  }
-  const active = await accelerate();
-  assert.equal(typeof active, "boolean", "accelerate( ) answers whether its fast paths are installed");
-  assert.equal(await accelerate(), active, "a second call changes nothing");
+test("the runtime package's entry point has what the plugin boots and serves through", async () => {
+  // lib/runtime.js boot( ) and cds-plugin.js: the package's documented
+  // exports (srv/host.d.ts) - not the transpiler's emission, but the other
+  // contract the plugin stands on, so a rename fails here and not at a start
+  const host = await import("@abap2ui5/node-runtime");
+  for (const name of ["initialize", "exclusive", "withSession"]) assert.equal(typeof host[name], "function", name);
+  const { compress } = await import("@abap2ui5/node-runtime/compress");
+  assert.equal(typeof compress, "function");
+  const { framework } = await import("@abap2ui5/node-runtime/srv/framework.mjs");
+  const fw = framework();
+  assert.equal(typeof fw.cl_express_icf_shim.run, "function");
+  assert.equal(typeof fw.z2ui5_cl_ui5_srv_draft.set_instance, "function");
+  assert.equal(typeof fw.z2ui5_cl_ui5_app_cont.set_serializer, "function");
+  assert.equal(typeof abap.Classes["Z2UI5_CL_UI5_USER_EXIT"].set_instance, "function");
 });

@@ -19,51 +19,37 @@ const LOG = cds.log("cap2ui5");
  *  `overrides` - and the log line below names what was loaded. */
 function locate() {
   const pkg = require.resolve("@abap2ui5/node-runtime/package.json");
-  const dir = path.dirname(pkg);
-  return {
-    dir,
-    version: require(pkg).version,
-    init: path.join(dir, "output", "init.mjs"),
-    shim: shimPath(dir),
-  };
-}
-
-/** The express adapter of the runtime package in `dir`. Two layouts: from
- *  1.147.0 on (`@abaplint/transpiler` 2.14) `output/` holds a folder per
- *  origin and the shim sits in `output/express-icf-shim/`; up to 1.146.0
- *  `output/` is flat. `init.mjs` stays at `output/init.mjs` in both. The
- *  first that exists wins, and a package with neither names what it lacks
- *  instead of failing on the import. */
-function shimPath(dir) {
-  const candidates = [
-    path.join(dir, "output", "express-icf-shim", "cl_express_icf_shim.clas.mjs"),
-    path.join(dir, "output", "cl_express_icf_shim.clas.mjs"),
-  ];
-  const found = candidates.find((file) => fs.existsSync(file));
-  if (!found) {
-    throw new Error(
-      `@abap2ui5/node-runtime in ${dir} carries no cl_express_icf_shim.clas.mjs under output/ ` +
-        "(neither output/express-icf-shim/ of the 2.14 layout nor the flat output/ of 1.146.0 and older)",
-    );
-  }
-  return found;
+  return { dir: path.dirname(pkg), version: require(pkg).version };
 }
 
 /**
  * Boot the ABAP runtime once and install the CDS draft store. Resolves to
- * upstream's express adapter, which the route then calls.
+ * the runtime package's entry point (srv/host.mjs): its exclusive( ) and
+ * withSession( ) are what the route puts around every roundtrip, and
+ * `shim` - upstream's express adapter - is what it calls inside them.
+ *
+ * The boot is the package's own initialize( ): the database, the framework,
+ * and the user-exit seam (z2ui5_cl_ui5_user_exit=>set_instance( ), so the
+ * framework stops asking a class repository this runtime does not have).
+ * Two things initialize( ) sets up for a process that keeps its drafts in
+ * memory are put back, because here they live in the CAP database:
+ *   - its draft sweep timer stays off (draftSweepMs: 0). It would run the
+ *     store's cleanup( ) outside any request, so outside cds.context and its
+ *     tenant; the framework's own cleanup on an app start and purgeDrafts( )
+ *     (lib/draft-store.js) are the two that run here.
+ *   - the live-container serializer is replaced by the shipped asXML one
+ *     (an unbound set_serializer( ), as the package's README says for a
+ *     store that outlives the process): a draft row has to carry the app's
+ *     state, or a restart and a second instance would find an id that names
+ *     nothing.
  *
  * The store must be installed before the first roundtrip, or the first draft
  * lands in the runtime's private SQLite.
- *
- * @param {object}  rt  what locate( ) found
- * @param {{ accelerate?: boolean }} [options] false: leave the runtime's
- *   accelerations off (cds.requires.cap2ui5.accelerate)
  */
-async function boot(rt, { accelerate = true } = {}) {
-  const { initializeABAP } = await import(pathToFileURL(rt.init).href);
-  await initializeABAP();
-  await accelerations(rt, { enabled: accelerate });
+async function boot() {
+  const host = await import("@abap2ui5/node-runtime");
+  const { framework } = await import("@abap2ui5/node-runtime/srv/framework.mjs");
+  await host.initialize({ draftSweepMs: 0 });
 
   // Drafts go into the CAP database, not the ABAP runtime's private SQLite.
   // This is Naht 1 doing its job: one set_instance( ) and the framework's
@@ -73,98 +59,14 @@ async function boot(rt, { accelerate = true } = {}) {
   abap.Classes["ZCL_CDS_DRAFT_STORE"] = ZCL_CDS_DRAFT_STORE;
   const ref = new abap.types.ABAPObject({ qualifiedName: "Z2UI5_IF_UI5_DRAFT_STORE" });
   ref.set(await new ZCL_CDS_DRAFT_STORE().constructor_());
-  await abap.Classes["Z2UI5_CL_UI5_SRV_DRAFT"].set_instance({ store: ref });
+  const fw = framework();
+  await fw.z2ui5_cl_ui5_srv_draft.set_instance({ store: ref });
+  await fw.z2ui5_cl_ui5_app_cont.set_serializer({
+    serializer: new abap.types.ABAPObject({ qualifiedName: "Z2UI5_IF_UI5_SERIALIZER" }),
+  });
   LOG.info("drafts live in cap2ui5.Drafts");
 
-  return await import(pathToFileURL(rt.shim).href);
-}
-
-/**
- * The runtime's own accelerations, where the installed @abap2ui5/node-runtime
- * has them - called once, right after initializeABAP( ).
- *
- * An app with one table of n rows costs the transpiled framework time in n²,
- * in two places of @abaplint/runtime rather than in abap2UI5's ABAP: a LOOP
- * ... WHERE over a SORTED primary key evaluates the WHERE on every row, and
- * CP compiles a `[\s\S]*$` RegExp that walks the rest of the draft XML for
- * every token the parser reads. The runtime package fixes both with
- * accelerate( ), from the release after 1.145.0, and calls it in its own
- * initialize( ). The plugin boots through output/init.mjs instead, so it
- * calls it here - the runtime's code, found in the package, not a copy.
- *
- * Logged once: "active" at info; a runtime without it (1.145.0), or one
- * whose accelerate( ) declines (it warns itself), at debug only.
- *
- * @returns {Promise<boolean>} whether the accelerations are active
- */
-async function accelerations(rt, { enabled = true } = {}) {
-  if (!enabled) {
-    LOG.debug("runtime accelerations switched off: cds.requires.cap2ui5.accelerate is false");
-    return false;
-  }
-  const accelerate = await findAccelerate(rt);
-  if (!accelerate) {
-    LOG.debug(`@abap2ui5/node-runtime ${rt.version} has no accelerate( ) - running without runtime accelerations`);
-    return false;
-  }
-  if ((await accelerate()) === false) {
-    LOG.debug(`@abap2ui5/node-runtime ${rt.version}: accelerate( ) declined - running without runtime accelerations`);
-    return false;
-  }
-  LOG.info("runtime accelerations active");
-  return true;
-}
-
-/**
- * accelerate( ) of the runtime package in rt.dir, or null: the export of its
- * "./accelerate" entry, else the named export of its main entry "." - each
- * only where the package's `exports` DECLARES the entry. So a runtime that
- * has none is told apart from one that has it and fails to load it: the
- * first is quiet, the second fails the start, as a runtime that does not
- * load does.
- *
- * Found in rt.dir, as locate( ) found init.mjs and the shim, so what is
- * imported is always the package that was booted. Importing an entry must
- * not start anything: 1.145.0's ".", srv/host.mjs, only defines functions,
- * and its two imports - output/init.mjs and the shim - resolve to the modules
- * the boot has loaded already. Were it ever to load a second copy of the
- * runtime, the global ABAP runtime would be replaced under the booted
- * framework; that fails the start here instead of every roundtrip later.
- */
-async function findAccelerate(rt) {
-  let exports;
-  try {
-    ({ exports } = JSON.parse(fs.readFileSync(path.join(rt.dir, "package.json"), "utf8")));
-  } catch {
-    return null;
-  }
-  for (const entry of ["./accelerate", "."]) {
-    const file = exported(exports, entry);
-    if (!file) continue;
-    const runtime = globalThis.abap;
-    const mod = await import(pathToFileURL(path.join(rt.dir, file)).href);
-    if (globalThis.abap !== runtime) {
-      throw new Error(`@abap2ui5/node-runtime: importing its "${entry}" entry started a second ABAP runtime`);
-    }
-    const fn = entry === "." ? mod.accelerate : (mod.accelerate ?? mod.default);
-    if (typeof fn === "function") return fn;
-  }
-  return null;
-}
-
-/** The file a package's `exports` names for one of its entries, as `import`
- *  reads it: a string, or the import/node/default branch of conditions.
- *  Null where it names none - a package without `exports`, as the
- *  workspace's stand-in for the runtime is, has no entries to find. */
-function exported(exports, entry) {
-  if (exports === undefined || exports === null) return null;
-  const sugar = typeof exports === "string" || Array.isArray(exports) ||
-    !Object.keys(exports).some((key) => key.startsWith("."));
-  let target = (sugar ? { ".": exports } : exports)[entry];
-  while (target && typeof target === "object" && !Array.isArray(target)) {
-    target = target.import ?? target.node ?? target.default;
-  }
-  return typeof target === "string" ? target : null;
+  return { exclusive: host.exclusive, withSession: host.withSession, shim: fw.cl_express_icf_shim };
 }
 
 /**
@@ -273,8 +175,8 @@ async function loadApps(conf) {
   // defineExit( ) from a file in the apps directory, so there is nothing to
   // bind until they have run. See lib/define-exit.js for why the host binds it
   // instead of the framework discovering it.
-  if (installExit()) LOG.info("user exit installed");
+  if (await installExit()) LOG.info("user exit installed");
   return origin;
 }
 
-module.exports = { locate, boot, accelerations, findAccelerate, loadApps, appPackages };
+module.exports = { locate, boot, loadApps, appPackages };

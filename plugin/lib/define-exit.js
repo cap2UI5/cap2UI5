@@ -18,11 +18,13 @@
 // headers, the UI5 bootstrap URL, the draft expiry, the CSRF gate - was
 // therefore not configurable from a CAP project at all.
 //
-// So the host binds it instead of being discovered, which is the same seam the
-// draft store uses (set_instance there, the interface reference here) and the
-// same one the framework's own exit_instantiate( ) writes to: gi_user_exit is
-// read afresh on every set_config call, so binding it before the first request
-// is all it takes. Nothing here reaches past a static the framework declares.
+// So the host binds it instead of being discovered, through the seam the
+// framework has for exactly that: z2ui5_cl_ui5_user_exit=>set_instance( ),
+// "for a host that is not an SAP system". An exit installed there is called
+// through the shipped exit, the way a customer exit is on a system - the
+// defaults seeded first - and named by get_user_exit_class( ). The runtime's
+// initialize( ) installs the shipped defaults the same way at boot
+// (lib/runtime.js); this replaces them once the app modules have loaded.
 const cds = require("@sap/cds");
 const { isDeepStrictEqual } = require("node:util");
 
@@ -138,7 +140,7 @@ async function run(hook, INPUT, name) {
 
 /** Bind the registered exit, once the runtime exists. Called from boot( ) after
  *  the app modules have loaded, because an exit is registered from one of them. */
-function installExit() {
+async function installExit() {
   if (!REGISTRY.pending) return null;
   const exit = REGISTRY.pending;
 
@@ -154,8 +156,9 @@ function installExit() {
   }
 
   abap.Classes["ZCL_CAP2UI5_EXIT"] = ZCL_CAP2UI5_EXIT;
-  const UE = abap.Classes["Z2UI5_CL_UI5_USER_EXIT"];
-  UE.gi_user_exit.set(new ZCL_CAP2UI5_EXIT());
+  const ref = new abap.types.ABAPObject({ qualifiedName: IF_NAME });
+  ref.set(await new ZCL_CAP2UI5_EXIT().constructor_());
+  await abap.Classes["Z2UI5_CL_UI5_USER_EXIT"].set_instance({ io_exit: ref });
   return ZCL_CAP2UI5_EXIT;
 }
 

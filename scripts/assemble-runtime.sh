@@ -1,85 +1,40 @@
 #!/usr/bin/env sh
-# Fill runtime/ - the two directories of @abap2ui5/node-runtime the plugin reads - from one
-# of two sources:
+# Fill runtime/ with the npm package @abap2ui5/node-runtime - the package
+# itself, unpacked, from one of two sources:
+#
+#   scripts/assemble-runtime.sh --package [<version>]
+#       the published package: `npm pack @abap2ui5/node-runtime@<version>`.
 #
 #   scripts/assemble-runtime.sh <upstream checkout>
-#       node/output and node/setup/setup.mjs of a checkout that
-#       has been downported and transpiled:
+#       a checkout of abap2UI5/abap2UI5 that has been downported and
+#       transpiled, packed by ITS OWN packer (`npm run pack:node-runtime`,
+#       node/setup/pack-npm.mjs there):
 #         git clone https://github.com/abap2UI5/abap2UI5 /tmp/ref && cd /tmp/ref
 #         npm ci && npm run deps && npm run auto_downport && npm run auto_transpile
 #       Build in a SCRATCH COPY: auto_downport rewrites src/ in place.
 #
-#   scripts/assemble-runtime.sh --package [<version>]
-#       the published package, once upstream publishes it: `npm pack
-#       @abap2ui5/node-runtime@<version>` unpacked into runtime/. The stand-in's
-#       package.json is replaced by the real one, so the plugin resolves the
-#       same files either way - srv/ included, whose entries the real
-#       package.json declares and the plugin imports accelerate( ) from.
-#       This is ADR-008 cutover step 2 in one flag.
+# Either way runtime/ holds what a consumer's node_modules would: the
+# manifest with its `exports`, srv/ (the entry point the plugin boots
+# through), output/, setup/ and downport/. This script used to copy those
+# trees out of a checkout itself and rebuild the manifest by hand - a second
+# copy of upstream's packer, which had to follow every file that one added.
 set -eu
 HERE=$(cd "$(dirname "$0")/.." && pwd)
 RT="$HERE/runtime"
+TMP=$(mktemp -d)
+trap 'rm -rf "$TMP"' EXIT
 
 if [ "${1:-}" = "--package" ]; then
-  VERSION=${2:-latest}
-  TMP=$(mktemp -d)
-  (cd "$TMP" && npm pack "@abap2ui5/node-runtime@$VERSION" --silent >/dev/null && tar xzf ./*.tgz)
-  rm -rf "$RT/output" "$RT/setup" "$RT/downport" "$RT/srv" "$RT/webapp"
-  cp -r "$TMP/package/output" "$RT/output"
-  cp -r "$TMP/package/setup" "$RT/setup"
-  cp -r "$TMP/package/downport" "$RT/downport"
-  if [ -d "$TMP/package/srv" ]; then cp -r "$TMP/package/srv" "$RT/srv"; fi
-  cp "$TMP/package/package.json" "$RT/package.json"
-  rm -rf "$TMP"
-  echo "runtime/ assembled from @abap2ui5/node-runtime@$(node -p "require('$RT/package.json').version") ($(ls "$RT/output" | wc -l) transpiled files)"
-  exit 0
+  FROM="@abap2ui5/node-runtime@${2:-latest}"
+  (cd "$TMP" && npm pack "$FROM" --silent >/dev/null)
+else
+  FROM=${1:?usage: assemble-runtime.sh <upstream checkout> | --package [version]}
+  test -f "$FROM/node/output/init.mjs" || { echo "missing $FROM/node/output/init.mjs - run npm run auto_downport && npm run auto_transpile there" >&2; exit 1; }
+  (cd "$FROM" && npm run pack:node-runtime -- --out "$TMP" >&2)
 fi
+(cd "$TMP" && tar xzf ./*.tgz)
 
-REF=${1:?usage: assemble-runtime.sh <upstream checkout> | --package [version]}
-for d in node/output/init.mjs node/setup/setup.mjs; do
-  test -f "$REF/$d" || { echo "missing $REF/$d - run npm run auto_downport && npm run auto_transpile there" >&2; exit 1; }
-done
 rm -rf "$RT/output" "$RT/setup" "$RT/downport" "$RT/srv" "$RT/webapp"
-cp -r "$REF/node/output" "$RT/output"
-mkdir -p "$RT/setup" && cp "$REF/node/setup/setup.mjs" "$RT/setup/"
-# the ABAP the output was transpiled from - abap2js reads the client's types there
-if [ -d "$REF/node/downport" ]; then cp -r "$REF/node/downport" "$RT/downport"; fi
-# The package's entries and its manifest, as the release packs them
-# (node/setup/pack-npm.mjs): srv/host.mjs and its siblings (from the release
-# after 1.147.0 hostcore.mjs, framework.mjs and claim.mjs among them), and
-# node/setup/npm.package.json with the checkout's version. Without them a
-# runtime built from upstream's main is the stand-in - no `exports` - and the
-# plugin's lookup of accelerate( ) (lib/runtime.js) never reaches the code
-# upstream ships next, so the job that builds main would not test it. A
-# checkout from before the package existed has neither and keeps the stand-in.
-if [ -f "$REF/node/setup/npm.package.json" ] && [ -f "$REF/node/srv/host.mjs" ]; then
-  mkdir -p "$RT/srv"
-  for f in "$REF"/node/srv/*.mjs; do
-    case "$(basename "$f")" in express.mjs) ;; *) cp "$f" "$RT/srv/" ;; esac
-  done
-  # The package's bins, where the checkout has them: abap2ui5-transpile
-  # (setup/transpile.mjs, from the release after 1.147.0) and its deprecated
-  # predecessor abap2ui5-own-apps. The plugin runs neither - its apps are
-  # JavaScript, and abap2js translates ABAP ones - but the manifest names them.
-  for f in own-apps.mjs transpile.mjs; do
-    if [ -f "$REF/node/setup/$f" ]; then cp "$REF/node/setup/$f" "$RT/setup/"; fi
-  done
-  # The dependencies EXACT, from the checkout's lockfile, as pack-npm.mjs pins
-  # them: transpiled output is tied to the runtime it was transpiled for, and
-  # accelerate( ) installs itself only on the one runtime version it was
-  # validated against - a range would resolve to whatever the workspace has.
-  REF_PKG="$REF/package.json" REF_LOCK="$REF/package-lock.json" NPM_PKG="$REF/node/setup/npm.package.json" OUT="$RT/package.json" node -e '
-    const fs = require("fs");
-    const pkg = JSON.parse(fs.readFileSync(process.env.NPM_PKG, "utf8"));
-    delete pkg._comment;
-    pkg.version = JSON.parse(fs.readFileSync(process.env.REF_PKG, "utf8")).version;
-    let lock = null;
-    try { lock = JSON.parse(fs.readFileSync(process.env.REF_LOCK, "utf8")); } catch { /* no lockfile: keep the ranges */ }
-    for (const dep of Object.keys(pkg.dependencies ?? {})) {
-      const v = lock?.packages?.[`node_modules/${dep}`]?.version;
-      if (v) pkg.dependencies[dep] = v;
-    }
-    fs.writeFileSync(process.env.OUT, JSON.stringify(pkg, null, 2) + "\n");
-  '
-fi
-echo "runtime/ assembled from $REF ($(ls "$RT/output" | wc -l) transpiled files)"
+for d in output setup downport srv; do cp -r "$TMP/package/$d" "$RT/$d"; done
+cp "$TMP/package/package.json" "$RT/package.json"
+echo "runtime/ assembled from $FROM: @abap2ui5/node-runtime $(node -p "require('$RT/package.json').version")"

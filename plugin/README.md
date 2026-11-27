@@ -598,7 +598,6 @@ Under `cds.requires.cap2ui5` - in `package.json`, a `.cdsrc.json`, a profile or
 | `body_parser.limit` | CAP's `cds.server.body_parser.limit`, else `10mb` | the largest roundtrip body; a larger one gets 413 |
 | `compression` | `true` | gzip for the page and the roundtrips, where the browser accepts it; `false` leaves compressing to a proxy in front |
 | `timeout` | `60000` | the milliseconds an app's async `main( )` may take. Roundtrips run one at a time per process, so a `main( )` that waits holds everybody else's; past the limit its roundtrip is given up with a 504, its draft is not written and the next one runs. `0` or `false` is no limit. A roundtrip that waited a second or more for its turn is logged as a warning |
-| `accelerate` | `true` | calls the runtime's `accelerate( )` where it has one - 1.146.0 and later, so the pinned runtime has it; see [Performance](#performance); `false` runs the runtime's own code |
 | `agent` | off | the MCP endpoint for AI agents - `true` or `{ path, apps, confirm, forbidden, retention }`, see [Agents](#agents-the-mcp-endpoint) |
 
 `"cap2ui5": false` switches the plugin off: no route, and no `cap2ui5.Drafts`
@@ -685,31 +684,29 @@ with the model - one editable table of n rows, measured with
 `npm run bench -- --rows <n>` in this repository (Node 22, a shared 4-core
 machine; take the ratios, not the seconds):
 
-| rows | answer, plain / gzip | start / edit one cell, 1.145.0 | with the runtime's accelerations |
+| rows | answer, plain / gzip | start / edit one cell, 1.145.0 | 1.146.0 and later |
 |---:|---|---|---|
 | 500 | 45 / 6 kB | 2.7 s / 4.3 s | 0.9 s / 1.4 s |
 | 1000 | 90 / 11 kB | 6.0 s / 12.1 s | 0.6 s / 1.4 s |
 | 2000 | 181 / 21 kB | 19.6 s / 43.5 s | 1.6 s / 2.9 s |
 | 8000 | 727 / 82 kB | - | 3.3 s / 16.4 s |
 
-- **The runtime's accelerations.** On 1.145.0 the time grows with n², not
+- **Linear since 1.146.0.** On 1.145.0 the time grows with n², not
   in abap2UI5's ABAP but in two places of `@abaplint/runtime`: a LOOP ...
   WHERE over a sorted primary key reads every row, and CP rescans the rest
   of the draft's XML for every token the parser reads.
-  `@abap2ui5/node-runtime` fixes both
-  with `accelerate( )` from 1.146.0 on, so in the runtime this version
-  pins - the right column, measured before that release - and the plugin
-  calls it when the server
-  starts; the log then says `runtime accelerations active`.
-  `"accelerate": false` switches them off.
+  `@abap2ui5/node-runtime` worked around both from 1.146.0 on - the right
+  column, measured then - and `@abaplint/runtime` 2.13.96 fixed them at the
+  source, so the runtime this version pins is linear with nothing to switch
+  on (the package's README, "Large tables").
 - **Node 24 is recommended.** CAP keeps `cds.context` in an
   `AsyncLocalStorage`, and on Node 22 that costs the transpiled framework -
   which awaits at nearly every method call - about as much time again as its
   own work. Node 24 keeps it in the async context frame, which costs next to
   nothing. On Node 22.7 and later,
   `NODE_OPTIONS=--experimental-async-context-frame` does the same: measured
-  back to back, it halved the times in the table, with the accelerations and
-  without (2000 rows, an edit with them: 3.4 s, then 2.0 s).
+  back to back, it halved the times in the table, on the quadratic runtime and
+  on the linear one (2000 rows, an edit on the latter: 3.4 s, then 2.0 s).
 - **`NODE_COMPILE_CACHE`.** The runtime is about 800 transpiled modules, and
   importing them takes 0.7 s on every start. With `NODE_COMPILE_CACHE` set
   to a directory, Node keeps their compiled code there and the import takes

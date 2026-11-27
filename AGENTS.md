@@ -25,6 +25,17 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
 
 ## Rules
 
+- **The host layer is the runtime package's, not a copy of it.** What a Node
+  host of the framework needs - booting it, one request at a time, stateful
+  sessions, gzip - is exported by `@abap2ui5/node-runtime`'s entry point
+  (`initialize( )`, `exclusive( )`, `withSession( )`, `compress( )`;
+  `srv/hostcore.mjs` there explains each), and the plugin calls those
+  (`lib/runtime.js`, `cds-plugin.js`). It kept copies of three of them once,
+  "until a runtime release exports it", and they stayed for releases after
+  one did. So before writing host code here, read `srv/host.d.ts` of the
+  pinned runtime; what is missing there for every host is a change upstream,
+  and what stays here is what only CAP has: the user, the tenant, the
+  database, the model. `abi-gate.test.mjs` holds the exports the plugin calls.
 - **"Unsupported" must say WHOSE limitation it is.** Nested structures were
   called a framework limitation in three documents; they were a guard in
   `defineApp`'s own type derivation, written when only scalars had been tried,
@@ -46,11 +57,15 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
   after `main( )` - is documented as a difference, not hidden behind a new
   name. `nav.test.mjs` holds the client's names to the interface's in both
   directions, so a method upstream adds fails the suite until it is wired.
-  The constant groups are read from the runtime; a parameter is wired in
-  `SIGNATURES` (`lib/define-app.js`), and one the runtime in use does not
-  declare is refused. So a parameter upstream adds goes into `SIGNATURES`
-  with a test that holds on the pinned runtime AND on upstream's main, which
-  CI builds - as `view_display( )`'s `transition` does in `nav.test.mjs`.
+  The constant groups are read from the runtime, and so are the parameters
+  of every method - their names, which one is preferred and which are
+  required (`signature( )` in `lib/define-app.js`, from the transpiled
+  interface's `METHODS`). There is no table of them here to keep in step: a
+  parameter upstream adds is one the client takes on the runtime that has
+  it, and one the runtime in use does not declare is refused, naming the
+  runtime. What a parameter DOES still has to be wired where the client
+  uses it, with a test - as `view_display( )`'s `transition` in
+  `nav.test.mjs`.
   A METHOD upstream adds is wired the same way and exists on the client only
   where the booted runtime's interface has it (`LATER` in `lib/define-app.js`;
   elsewhere a call throws, naming the runtime) - `window_bind_tab( )` and
