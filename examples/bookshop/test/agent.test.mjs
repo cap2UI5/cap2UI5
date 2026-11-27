@@ -47,10 +47,15 @@ async function refusal(name, args, user) {
 }
 
 /** The start request the browser sends when it opens the route at a hash. */
+/** The start request a browser sends for a page whose hash is `hash`: the
+ *  frontend's router parses the route out of it and sends it as
+ *  S_FRONT.ROUTE (protocol 3) - the backend reads no route out of HASH. */
 async function browserStart(user, search, hash) {
+  const [, APP, DRAFT] = /^#\/app\/([^/]+)\/([^/]+)$/.exec(hash) ?? [];
   const r = await fetch(s.url, { method: "POST",
     headers: { "Content-Type": "application/json", Authorization: "Basic " + Buffer.from(`${user}:`).toString("base64") },
-    body: JSON.stringify({ value: { S_FRONT: { ORIGIN: new URL(s.url).origin, PATHNAME: "/rest/root/z2ui5", SEARCH: search, HASH: hash } } }) });
+    body: JSON.stringify({ value: { S_FRONT: { ORIGIN: new URL(s.url).origin, PATHNAME: "/rest/root/z2ui5", SEARCH: search, HASH: hash,
+      ...(APP ? { ROUTE: { APP, DRAFT } } : {}) } } }) });
   assert.equal(r.status, 200);
   return r.json();
 }

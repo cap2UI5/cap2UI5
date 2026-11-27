@@ -190,7 +190,7 @@ docs/adr/            the decisions, with the measurements that made them (ADR-00
 
 ```bash
 # once per checkout: fill runtime/ from the published runtime the plugin pins
-scripts/assemble-runtime.sh --package 1.150.0
+scripts/assemble-runtime.sh --package 1.151.0
 # ...or, to try an unreleased upstream, from an upstream build:
 #   git clone https://github.com/abap2UI5/abap2UI5 /tmp/ref
 #   (cd /tmp/ref && npm ci && npm run deps && npm run auto_downport && npm run auto_transpile)

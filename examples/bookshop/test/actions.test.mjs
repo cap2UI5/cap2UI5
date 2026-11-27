@@ -73,7 +73,9 @@ test("the toast takes message_toast_display( )'s options", async () => {
 });
 
 test("the URL: hash_set pushes, hash_replace replaces, app_state_set_active keeps the state id in it", async () => {
-  assert.deepEqual(await on("HASH"), [["ROUTER", "sync", { setPushState: "/detail/1" }]]);
-  assert.deepEqual(await on("HASH_REPLACE"), [["ROUTER", "sync", { setHashReplace: "/detail/2" }]]);
-  assert.deepEqual(await on("STATE"), [["ROUTER", "sync", { setAppStateActive: true }]]);
+  // the URL intent is a section of its own in protocol 3: S_FRONT.NAV
+  const nav = async (event) => (await answer(event)).json.S_FRONT.NAV;
+  assert.deepEqual(await nav("HASH"), { setPushState: "/detail/1" });
+  assert.deepEqual(await nav("HASH_REPLACE"), { setHashReplace: "/detail/2" });
+  assert.deepEqual(await nav("STATE"), { setAppStateActive: true });
 });

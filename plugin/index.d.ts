@@ -51,18 +51,34 @@ export interface ClientConstants {
   };
 }
 
+/** z2ui5_if_client=>ty_s_window_request: what the list binding of a
+ *  window_bind_tab( ) table asks, as the app's event finds it in
+ *  `client.get( ).r_event_data`. */
+export interface WindowRequest {
+  /** the model path of the table, `/ROWS` */
+  path: string;
+  /** a cs_window_reason value: MORE, SORT or FILTER */
+  reason: string;
+  /** the rows the browser holds - for MORE where to go on; 0 otherwise */
+  skip: number;
+  /** the rows the browser wants now */
+  top: number;
+  t_sort: BindTabSort[];
+  t_filter: BindTabFilter[];
+}
+
 /** z2ui5_if_client's constants, on the interface as an ABAP app reads them. */
 export const z2ui5_if_client: ClientConstants;
 
-/** z2ui5_if_client=>ty_s_bind_tab_sort: one sorter of window_bind_tab( ). The
+/** z2ui5_if_client=>ty_s_bind_tab_sort: one sorter of a window request. The
  *  first sorter that tells two rows apart decides. */
 export interface BindTabSort {
   /** a column of the table - as the row declares it, or as the model spells it */
   path: string;
   descending?: boolean;
 }
-/** z2ui5_if_client=>ty_s_bind_tab_filter: one condition of window_bind_tab( )'s
- *  filter. The conditions of one group are ORed, the groups ANDed. */
+/** z2ui5_if_client=>ty_s_bind_tab_filter: one condition of the filter of a
+ *  window request. The conditions of one group are ORed, the groups ANDed. */
 export interface BindTabFilter {
   group?: number;
   /** a column of the table - as the row declares it, or as the model spells it */
@@ -117,6 +133,16 @@ export interface Client<App = Record<string, unknown>> extends ClientConstants {
   check_on_event(params: { val?: string }): boolean;
   /** Whether there is an app to go back to - for showNavButton. */
   check_app_prev_stack(): boolean;
+  /** true on the one roundtrip on which this app gets the screen BACK from an app it called */
+  check_on_nav_back(): boolean;
+  /** the tag this app gave its last nav_app_call( { tag } ), on the roundtrip the called app comes back on */
+  get_nav_tag(): string;
+  /** whether this main( ) has already called nav_app_call( ) or nav_app_leave( ) */
+  check_nav_pending(): boolean;
+  /** one start parameter of the page, by name - the URL query, the launchpad's
+   *  startupParameters or the intent's query; "" when there is none */
+  get_start_param(name: string): string;
+  get_start_param(params: { name: string }): string;
   /** The event this roundtrip answers; `""` on a start. */
   get_event(): string;
   /** An argument the event carried, 1-based; `""` past the last one. */
@@ -166,44 +192,25 @@ export interface Client<App = Record<string, unknown>> extends ClientConstants {
     omit_initial_paths?: string[];
     json?: boolean;
   }): string;
-  /** obsolete in z2ui5_if_client - _bind( ) under another name */
-  _bind_edit(val: BindTarget<App>): string;
-  _bind_edit(params: {
-    val: BindTarget<App> | string; path?: boolean; tab?: BindTarget<App>; tab_index?: number;
-    switch_default_model?: boolean;
-  }): string;
   /** the bare path of a field - _bind( val path = abap_true ) */
   _bind_path(val: BindTarget<App>): string;
   _bind_path(params: { val: BindTarget<App> }): string;
 
   /**
-   * Bind a LARGE table to a list control: the browser gets `window` rows at a
-   * time (100 unless set), asks the framework for the next ones itself - a
-   * roundtrip that does not call `main( )` - and sorts and filters on the
-   * server, over all rows. Answers the binding as `_bind( )` does; for a table
-   * component of a structure it is a placeholder until `main( )` returns.
-   * `t_sort` and `t_filter` take effect when they differ from the ones the
-   * previous window_bind_tab( ) of the table passed; an empty array clears.
-   *
-   * In the runtime from the abap2UI5 release after 1.148.0 on, absent before -
-   * there a call throws, naming the runtime.
+   * Bind a LARGE result to a list control that the APP loads a window at a
+   * time: `val` names the table field holding the rows loaded so far, in the
+   * order the browser shows them; `total` is how many there are in all - a
+   * number, or the name of a number field, which the framework then reads
+   * anew for every response; `event` is the app's event the list binding's
+   * requests arrive as, the request in `get( ).r_event_data`
+   * (WindowRequest); `window` is the rows the browser asks for at a time
+   * (100 unless set). The framework neither sorts nor filters nor counts.
+   * Answers the binding as `_bind( )` does; for a table component of a
+   * structure it is a placeholder until `main( )` returns.
    */
-  window_bind_tab?: {
-    (val: BindTarget<App>): string;
-    (params: { val: BindTarget<App> | string; window?: number; t_sort?: BindTabSort[]; t_filter?: BindTabFilter[] }): string;
-  };
-  /**
-   * The row of a window_bind_tab( ) table that a row of the browser shows:
-   * `row` is the position there, counted from 1 - the index of a binding path
-   * an event hands over, plus 1. Answers the row of the table, counted from 1,
-   * and 0 past the rows the filter lets through; for a table that is no
-   * window, `row` itself. The order is the one the roundtrip started with -
-   * the one the browser shows - so it is refused after a window_bind_tab( )
-   * that passed another `t_sort` or `t_filter` in the same `main( )`.
-   *
-   * In the runtime from the abap2UI5 release after 1.148.0 on, absent before.
-   */
-  window_get_row?: (params: { val: BindTarget<App> | string; row: number }) => number;
+  window_bind_tab(params: {
+    val: BindTarget<App> | string; total: number | BindTarget<App>; event: string; window?: number;
+  }): string;
 
   /**
    * The handler of an event, for a view attribute. `t_arg` come back as
@@ -234,18 +241,12 @@ export interface Client<App = Record<string, unknown>> extends ClientConstants {
     transition?: string; transition_back?: boolean;
   }): void;
   view_destroy(): void;
-  /** obsolete in z2ui5_if_client - does nothing, bound data is pushed on its own */
-  view_model_update(): void;
   popup_display(val: View): void;
   popup_display(params: { val: View }): void;
   popup_destroy(): void;
-  /** obsolete - does nothing */
-  popup_model_update(): void;
   /** A popover anchored to the control whose id is `by_id`. */
   popover_display(params: { xml: View; by_id: string }): void;
   popover_destroy(): void;
-  /** obsolete - does nothing */
-  popover_model_update(): void;
   /**
    * A view rendered into the control `id` of the main view, which stays as it
    * is: `method_insert` adds it to the control's aggregation (`addContent`),
@@ -254,13 +255,9 @@ export interface Client<App = Record<string, unknown>> extends ClientConstants {
    */
   nest_view_display(params: { val: View; id: string; method_insert: string; method_destroy?: string }): void;
   nest_view_destroy(): void;
-  /** obsolete - does nothing */
-  nest_view_model_update(): void;
   /** The second nested slot, with nest_view_display( )'s contract. */
   nest2_view_display(params: { val: View; id: string; method_insert: string; method_destroy?: string }): void;
   nest2_view_destroy(): void;
-  /** obsolete - does nothing */
-  nest2_view_model_update(): void;
   /** A message box. `text` may be data - an object, an array - laid out as for an ABAP structure or table. */
   message_box_display(params: {
     text: unknown;
@@ -283,13 +280,20 @@ export interface Client<App = Record<string, unknown>> extends ClientConstants {
    * nav_app_call( ).
    */
   nav_app_call(app: AppRef, fields?: Record<string, unknown>): void;
-  nav_app_call(params: { app: AppRef }, fields?: Record<string, unknown>): void;
+  nav_app_call(params: { app: AppRef; tag?: string; keep_messages?: boolean }, fields?: Record<string, unknown>): void;
   /**
    * Hand the screen back - to the caller, or to `app`. `event` is what it
    * finds in get_event( ), `r_data` what it finds in get( ).r_event_data.
    */
   nav_app_leave(app?: AppRef): void;
-  nav_app_leave(params: { app?: AppRef; event?: string; r_data?: unknown }): void;
+  nav_app_leave(params: { app?: AppRef; event?: string; r_data?: unknown; keep_messages?: boolean }): void;
+  /**
+   * DECLARE the repeating timer of this app: the event `event` is raised
+   * every `delay_ms` milliseconds for as long as the app has the screen - the
+   * framework keeps it running. timer_stop( ) ends it.
+   */
+  timer_set(params: { event: string; delay_ms: number; no_busy?: boolean }): void;
+  timer_stop(): void;
   /** Push a hash onto the browser history. */
   hash_set(val?: string): void;
   hash_set(params: { val?: string }): void;

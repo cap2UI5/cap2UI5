@@ -66,12 +66,11 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
   runtime. What a parameter DOES still has to be wired where the client
   uses it, with a test - as `view_display( )`'s `transition` in
   `nav.test.mjs`.
-  A METHOD upstream adds is wired the same way and exists on the client only
-  where the booted runtime's interface has it (`LATER` in `lib/define-app.js`;
-  elsewhere a call throws, naming the runtime) - `window_bind_tab( )` and
-  `window_get_row( )` in `window.test.mjs`, whose tests run where the runtime
-  has the two - the pinned one from 1.149.0 on, and main's - and skip, with
-  the reason, on an older one.
+  A METHOD upstream adds has to be wired in the client, with a test: the
+  client is the interface by its names, and `nav.test.mjs` fails on a
+  method the interface has and the client lacks - or the other way round,
+  as when upstream takes one away (`window_get_row( )`, `_bind_edit( )` and
+  the `*_model_update( )` no-ops left with 1.151.0, and left the client).
 - **A client method that composes view XML needs a BROWSER test, not only a
   wire test.** The wire tests play the frontend's part by hand, so they can
   feed an event argument the real page would never send — which is how
@@ -79,14 +78,23 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
   was not. When the browser finds such a thing, add the assertion to the wire
   test as well, so the cheap test fails next time too.
 - **Read `z2ui5_if_client`'s ABAP Doc before wiring one of its methods into the
-  client.** Several are declared *"obsolete — does NOTHING"*
-  (`view_model_update` and its popup/nest siblings) and do nothing here
-  either, and the two lifecycle predicates answer different questions than
+  client.** The two lifecycle predicates answer different questions than
   their names suggest: `check_on_init( )` is the first roundtrip of *this
   instance*, `check_on_navigated( )` is also every return from a navigation
-  or a value help, and it is the one to render in. `abi-gate.test.mjs` holds
-  the no-ops to upstream's, so a change there re-opens the decision instead
-  of passing silently.
+  or a value help, and it is the one to render in. And a parameter may be
+  passed BY REFERENCE for a reason: `window_bind_tab( )`'s `total` is read
+  anew for every response when it is an attribute, which is why the client
+  takes it by name.
+- **A QUERY of the client answers inside a synchronous `main( )`, so it is
+  asked of the framework BEFORE `main( )` runs** (`check_on_nav_back( )`,
+  `get_nav_tag( )`, every name `get_start_param( )` could be asked for), or
+  kept by the client itself where it is about this `main( )`
+  (`check_nav_pending( )`). A CALL is queued and made after it.
+- **The wire the tests read is protocol 3** (abap2UI5/protocol):
+  `S_FRONT.VIEWS`, `NAV` and `ACTIONS`, through the helpers in
+  `test/server.mjs` - one place, so the next break of the wire is one edit.
+  A request that starts an app from a route sends it parsed, as
+  `S_FRONT.ROUTE`; the backend reads none out of `HASH`.
 - **Everything the plugin assumes about `@sap/cds` beyond its documentation
   goes into `cap-abi.test.mjs`.** `abi-gate.test.mjs` guards what the
   transpiler emits; this is the other surface. The one that matters is the

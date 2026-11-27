@@ -24,10 +24,10 @@ test("s_ctrl reaches the wire - check_queue_last, check_no_busy, check_arg_liter
   const r = await P({ app: APP });
   assert.equal(r.status, 200, r.text.slice(0, 300));
   const xml = mainView(r);
-  // z2ui5_cl_ui5_srv_event=>get_event( ): queue-last and no-busy ride in the
-  // event array, after three positions the framework reserves
+  // z2ui5_cl_ui5_srv_event=>get_event( ): the flags of a wire are one
+  // object behind the event's name (protocol 3) - only the ones that are set
   assert.equal(wireOf(xml, "search", "liveChange"),
-    ".eB(['TYPED',false,false,false,true,true], ${$parameters>/newValue})");
+    ".eB(['TYPED',{queueLast:true,noBusy:true}], ${$parameters>/newValue})");
   // a literal argument is quoted, so the browser does not evaluate it
   assert.equal(wireOf(xml, "literal", "press"), ".eB(['TAKE'], '${not a binding}')");
   // check_prevent_default switches to the handler that cancels the control's default

@@ -116,3 +116,56 @@ test("purgeDrafts( ) deletes the expired drafts, of every user, and answers how 
     await cds.run(cds.ql.DELETE.from(Drafts).where({ owner: { in: [`ann-${run}`, `ben-${run}`] } }));
   }
 });
+
+test("prune_chain( ) keeps a chain of drafts short: two rows per app session, however many clicks", async (t) => {
+  // z2ui5_if_ui5_draft_store=>prune_chain, in the interface from abap2UI5
+  // 1.151.0 on: the framework calls it after every save, and the store
+  // deletes the one draft that fell out of the window - 2 by default
+  // (the user exit's draft_keep_per_chain). Without it every click left a
+  // row, a whole app state, until the expiry.
+  if (!abap.Classes["Z2UI5_IF_UI5_DRAFT_STORE"].METHODS.PRUNE_CHAIN) return t.skip("no prune_chain( ) in this runtime's interface");
+  await cds.connect.to("db");
+  const { Drafts } = cds.entities("cap2ui5");
+  const user = "erin";                                  // nobody else's drafts in the count
+  const count = async () => Number((await cds.run(
+    cds.ql.SELECT.one.from(Drafts).columns("count(*) as n").where({ owner: user }))).n);
+  const before = await count();
+  let r = await post(s.url, { app: "ZCL_JS_HELLO", user });
+  const ids = [r.json.S_FRONT.ID];
+  for (let i = 0; i < 5; i++) {
+    r = await post(s.url, { app: "ZCL_JS_HELLO", id: r.json.S_FRONT.ID, event: "GO", model: { NAME: `n${i}` }, user });
+    assert.equal(r.status, 200, r.text.slice(0, 300));
+    ids.push(r.json.S_FRONT.ID);
+  }
+  assert.equal(await count() - before, 2, "six roundtrips of one app session left more than the window of two");
+  const left = (await cds.run(cds.ql.SELECT.from(Drafts).columns("id").where({ owner: user, id: { in: ids } }))).map((d) => d.id);
+  assert.deepEqual(left.sort(), ids.slice(-2).sort(), "the two kept are the newest two");
+  // and the session goes on from the newest
+  const next = await post(s.url, { app: "ZCL_JS_HELLO", id: ids.at(-1), event: "GO", model: { NAME: "Ada" }, user });
+  assert.equal(next.status, 200);
+});
+
+test("a draft an app handed out a link to is kept: app_state_get_href( ) protects it from the pruning", async (t) => {
+  // the other half of the test above. The link names this roundtrip's draft
+  // and outlives the session, so the framework marks it (mt_draft_keep) -
+  // when the APP asks for the link, not for the client's own up-front call
+  if (!abap.Classes["Z2UI5_IF_UI5_DRAFT_STORE"].METHODS.PRUNE_CHAIN) return t.skip("no prune_chain( ) in this runtime's interface");
+  await cds.connect.to("db");
+  const { Drafts } = cds.entities("cap2ui5");
+  const user = "frank";
+  const P = (o) => post(s.url, { app: "ZCL_JS_HANDOVER", user, ...o });
+  const start = await P({});
+  const info = await P({ id: start.json.S_FRONT.ID, event: "INFO" });      // hands out the link
+  assert.equal(info.status, 200, info.text.slice(0, 300));
+  assert.match(info.json.MODEL.LINK, new RegExp(`z2ui5-xapp-state=${info.json.S_FRONT.ID}`));
+  const later = [];
+  let r = info;
+  for (let i = 0; i < 4; i++) {
+    r = await P({ id: r.json.S_FRONT.ID, event: "NOTHING" });
+    later.push(r.json.S_FRONT.ID);
+  }
+  const left = (await cds.run(cds.ql.SELECT.from(Drafts).columns("id").where({ owner: user }))).map((d) => d.id);
+  assert.ok(left.includes(info.json.S_FRONT.ID), "the draft the link names was pruned");
+  // behind it the chain is pruned as ever: of the four that followed, the newest two are left
+  assert.deepEqual(later.filter((id) => left.includes(id)), later.slice(-2));
+});

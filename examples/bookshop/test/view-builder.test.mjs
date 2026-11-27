@@ -90,7 +90,9 @@ test("stringify( ) is the chain as it stood - and not a string inside main( )", 
 test("the served app's view is the builder's, with bindings and events in place", async () => {
   const r = await post(s.url, { app: "ZCL_JS_BUILDER", user: "alice" });
   assert.equal(r.status, 200, r.text.slice(0, 300));
-  assert.deepEqual(Object.keys(views(r)), ["MAIN"]);
+  // an app start also takes the standalone slots down (protocol 3: the
+  // backend owns that teardown) - the screen it displays is MAIN alone
+  assert.deepEqual(Object.entries(views(r)).filter(([, v]) => v.XML).map(([slot]) => slot), ["MAIN"]);
   const xml = viewXml(r);
   assert.match(xml, /^<mvc:View xmlns="sap.m" xmlns:mvc="sap.ui.core.mvc" displayBlock="true" height="100%">/);
   assert.match(xml, /<Input value="\{\/NAME\}" placeholder="Your name"\/>/, "the binding is not in the view");

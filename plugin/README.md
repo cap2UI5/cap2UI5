@@ -115,8 +115,9 @@ the documentation of the JavaScript one.
 | `client->_bind( name )`, `_bind( s_order-customer )` | `client._bind("name")`, `client._bind("s_order-customer")` |
 | `client->_bind( mr_tab->* )` (`mr_tab TYPE REF TO data`) | `client._bind("mr_tab->*")` (`mr_tab = t.ref(…)`) |
 | `client->_bind( val = t_tab path = abap_true )` | `client._bind({ val: "t_tab", path: true })` |
-| ``client->window_bind_tab( val = t_tab window = 50 t_sort = VALUE #( ( path = `PRICE` descending = abap_true ) ) )`` | `client.window_bind_tab({ val: "t_tab", window: 50, t_sort: [{ path: "price", descending: true }] })` |
-| `client->window_get_row( val = t_tab row = 6 )` | `client.window_get_row({ val: "t_tab", row: 6 })` |
+| ``client->window_bind_tab( val = t_tab total = mv_total event = `ROWS` window = 50 )`` | `client.window_bind_tab({ val: "t_tab", total: "mv_total", event: "ROWS", window: 50 })` |
+| ``client->nav_app_call( app = NEW zcl_other( ) tag = `detail` )`` | `client.nav_app_call({ app: "ZCL_OTHER", tag: "detail" })` |
+| ``client->timer_set( event = `POLL` delay_ms = 5000 )`` | `client.timer_set({ event: "POLL", delay_ms: 5000 })` |
 | ``client->_event( val = `GO` t_arg = VALUE #( ( `x` ) ) )`` | `client._event({ val: "GO", t_arg: ["x"] })` |
 | `client->follow_up_action( val = z2ui5_if_client=>cs_event-set_title t_arg = … )` | `client.follow_up_action({ val: z2ui5_if_client.cs_event.set_title, t_arg: [ … ] })` |
 | `client->view_display( view->stringify( ) )` | `client.view_display(view.stringify())` |
@@ -130,7 +131,7 @@ the client to the interface, so none is missing and none is invented. The
 constants are read from the runtime, and so is which of them there are:
 abap2UI5's page transitions - `cs_transition`, and `view_display( )`'s
 `transition` and `transition_back` - come with abap2UI5 1.146.0, so the
-runtime this version pins (1.150.0) has them; on an older runtime (1.145.0,
+runtime this version pins (1.151.0) has them; on an older runtime (1.145.0,
 by an `overrides`) a call that sets one is refused, naming the runtime,
 rather than dropped unseen:
 
@@ -138,35 +139,50 @@ rather than dropped unseen:
 client.view_display({ val: view.stringify(), transition: client.cs_transition.slide });
 ```
 
-The same holds for a method: the windowed table - `window_bind_tab( )` and
-`window_get_row( )` - comes with abap2UI5 1.149.0, so the runtime this
-version pins (1.150.0) has them and so does the client; on an older runtime
-(1.148.0, by an `overrides`) it does not, and a call throws, naming the
-runtime. A table bound with it goes to the browser a window at a time; the list asks the framework for more rows as it
-grows or scrolls - a roundtrip that does not run `main( )` - and sorts and
-filters on the server, over all rows:
+The same holds for a method: the client has exactly the methods the
+interface of the hosted runtime has. abap2UI5 1.151.0, which this version
+pins, added `check_on_nav_back( )`, `get_nav_tag( )`, `check_nav_pending( )`,
+`get_start_param( )`, `timer_set( )` and `timer_stop( )`, and took
+`window_get_row( )`, `_bind_edit( )` and the obsolete `*_model_update( )`
+away - so the client has the six and lacks the others, as an ABAP app on
+1.151.0 does.
+
+**The windowed table** is the app's since 1.151.0: `window_bind_tab( )` binds
+a LARGE result to a list control that the app loads a window at a time, the
+way an OData service answers `$skip`, `$top`, `$orderby` and `$filter`. The
+field holds the rows loaded so far, in the order the browser shows them, and
+`total` says how many there are in all. When the list needs more rows, or
+its columns are sorted or filtered, `main( )` runs with the event the bind
+named and the request in `get( ).r_event_data`. The framework neither sorts
+nor filters nor counts:
 
 ```js
-rows = t.table({ id: 0, name: "", price: t.packed(9, 2) });   // thousands of them
+rows = t.table({ id: 0, name: "", price: t.packed(9, 2) });   // the rows loaded so far
+total = 0;                                                    // how many there are in all
 
-main(client) {
-  if (client.check_on_event("PRESS")) {
-    // "/ROWS/5" is a position in the order the browser shows, not a row of the table
-    const position = Number(client.get_event_arg(1).split("/").pop());
-    const row = client.window_get_row({ val: "rows", row: position + 1 });   // 1-based, 0: none
+async main(client) {
+  if (client.check_on_event("ROWS")) {
+    // { path, reason, skip, top, t_sort, t_filter } - reason: MORE, SORT or FILTER
+    const { reason, skip, top, t_sort } = client.get().r_event_data;
+    const more = await SELECT.from(Books).orderBy(…t_sort).limit(top, skip);
+    this.rows = reason === client.cs_window_reason.more ? [...this.rows, ...more] : more;
+  } else if (client.check_on_event("PRESS")) {
+    // the rows ARE what the browser shows: "/ROWS/5" is this.rows[5]
+    const row = this.rows[Number(client.get_event_arg(1).split("/").pop())];
     …
   } else if (client.check_on_navigated()) {
-    client.view_display(`… <Table growing="true" items="${client.window_bind_tab({ val: "rows", window: 50 })}"> …`);
+    client.view_display(`… <Table growing="true"
+      items="${client.window_bind_tab({ val: "rows", total: "total", event: "ROWS", window: 50 })}"> …`);
   }
 }
 ```
 
 `t_sort` is `[{ path, descending }]` and `t_filter`
 `[{ group, path, operator, value1, value2 }]`, as `ty_s_bind_tab_sort` and
-`ty_s_bind_tab_filter` name their components; `path` is a column of the
-table, as the row declares it or as the model spells it, and one the table
-does not have is refused. `/__WINDOW/ROWS/TOTAL` in the model is the number
-of rows the filter lets through.
+`ty_s_bind_tab_filter` name their components; `path` is the column as the
+model spells it, upper case. The conditions of one group are ORed, the
+groups ANDed. `/__WINDOW/ROWS` in the model carries `TOTAL`, `COUNT` (the
+rows loaded), `SIZE` and `EVENT`.
 
 What is JavaScript's own, and why:
 
@@ -179,22 +195,22 @@ What is JavaScript's own, and why:
   options, and `follow_up_action( )` in a view attribute return is a
   placeholder that becomes the wire after `main( )` - embed it as it is. An
   `async main` works as well, for an app that does I/O.
-- **`client.window_get_row( )` answers for the order the roundtrip started
-  with** - the one the browser shows, which is what a position from the
-  browser means. It has to be known before `main( )` runs, so it is computed
-  then, by the framework's own sort and filter. After a `window_bind_tab( )`
-  that passed another `t_sort` or `t_filter` in the same `main( )`, ABAP's
-  would answer for the new order; here the call is refused - ask first, bind
-  after. Rows `main( )` adds or removes before it asks are not in the order
-  either.
+- **`window_bind_tab( )`'s `total` is a number, or the NAME of a number
+  field.** ABAP passes the attribute, `total = mv_total`, and the framework
+  reads it anew for every response - so an event that loads, sorts or
+  filters only sets it and renders no view. A JavaScript value cannot carry
+  that reference, so the field goes by its name, as for `_bind( )`; a number
+  is the value of this render, as `total = lines( lt_all )` is in ABAP.
+- **`client.get_start_param( name )`** answers the framework's own lookup -
+  the URL query, the launchpad's startupParameters, the intent's query - for
+  every name those three carry, asked before `main( )` runs.
 - **`client.get_app( id )`** answers the app behind a draft id as a handle
   whose fields can be written - `app.backend_event = "…"`, then
   `client.nav_app_leave(app)` - but not read: it is loaded after `main( )`.
   Reading the other app is `client.get_app_prev( )`, as plain values.
 - **`client.nav_app_call( app, fields )`** presets the called app's fields,
   what an ABAP app does between `NEW` and `nav_app_call( )`.
-- `client.set_session_stateful( )` is not supported and throws; the
-  interface's obsolete `*_model_update( )` do nothing, as they do in ABAP.
+- `client.set_session_stateful( )` is not supported and throws.
   (A transpiled ABAP app can go stateful: its session is kept per CAP user,
   in the process - a restart or a second instance loses it.)
   `client.raw` is the transpiled `z2ui5_if_client` itself, asynchronous.
@@ -210,8 +226,8 @@ levels. Component names are UPPERCASE in the model. The whole instance is
 persisted to `cap2ui5.Drafts` after every roundtrip and rebuilt before the
 next, so state survives a restart. As in ABAP, only what the app **binds** is
 part of the model: a field goes to the browser, and the browser can write it,
-once `main( )` has bound it with `client._bind( )` (or `_bind_edit( )`,
-`_bind_path( )`, a component or a cell of it) - and stays bound for the rest
+once `main( )` has bound it with `client._bind( )` (or `_bind_path( )`,
+`window_bind_tab( )`, a component or a cell of it) - and stays bound for the rest
 of the session. A field no view binds - a price, a role flag, a counter -
 stays on the server, in the draft; a MODEL the browser sends for it is
 ignored. A helper that needs the client gets it as an ABAP app does,
@@ -238,7 +254,7 @@ text into a number, a string into a table, a JavaScript `Date` into a
 initial value. The constructor creates the data, and inside `main( )` the
 field reads and writes as that data - `mr_tab->*`. It is bound dereferenced,
 as `_bind( mr_tab->* )` binds it: `client._bind("mr_tab->*")` answers
-`{/MR_TAB/*}`, and `window_bind_tab( )` and `window_get_row( )` take
+`{/MR_TAB/*}`, and `window_bind_tab( )` takes
 `"mr_tab->*"` as `val`. The browser's edits come back at that node, and the
 draft keeps the data behind the reference. A reference bound without
 `->*`, and a component of the data behind one, are refused.
@@ -358,7 +374,8 @@ rather than guess. What it writes where JavaScript differs from ABAP:
 
 - `_bind( s_order-customer )` is `_bind("s_order-customer")`; a `_bind( )` of
   anything but an attribute or its component is refused. `window_bind_tab( )`
-  and `window_get_row( )` take the table by its name the same way.
+  takes the table by its name the same way, and its `total` by name where
+  it is an attribute.
 - `nav_app_call( NEW zcl_other( ) )` is `nav_app_call("ZCL_OTHER")`.
 - `abap_bool` is a boolean; where ABAP turns it into a string - a string
   template, `CONV string( )`, a `t_arg` row - it is `"X"` or `""`, as ABAP
@@ -625,7 +642,7 @@ theme, the draft expiry, the CSRF gate — comes from the user exit,
   with the approuter's authentication, like the service paths. The approuter
   protects routes with an X-CSRF-Token by default (`csrfProtection`), and
   the routes work with it on: the frontend of `@abap2ui5/node-runtime`
-  1.150.0, the runtime this version pins, answers the approuter's `403` with
+  1.151.0, the runtime this version pins, answers the approuter's `403` with
   `x-csrf-token: Required` by fetching the token with a HEAD request and
   sending the roundtrip again with it
   ([abap2UI5#2802](https://github.com/abap2UI5/abap2UI5/pull/2802), in the
@@ -711,8 +728,8 @@ machine; take the ratios, not the seconds):
   importing them takes 0.7 s on every start. With `NODE_COMPILE_CACHE` set
   to a directory, Node keeps their compiled code there and the import takes
   0.5 s - worth it for `cds watch`, which restarts on every save.
-- **Compression.** The page carries the whole UI5 frontend, 358 kB - 83 kB
-  gzipped - and the route gzips it and every roundtrip of 1 kB or more where
+- **Compression.** The UI5 frontend is a bundle of about 190 kB the page
+  loads from the route - 50 kB gzipped - and the route gzips it and every roundtrip of 1 kB or more where
   the browser accepts gzip (see [In production](#in-production)).
 
 ## Documentation

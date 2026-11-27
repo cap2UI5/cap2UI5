@@ -37,7 +37,7 @@
 // memory of a session - the views in their slots, the pending edits, the last
 // answer app_describe reads - is gone. A session this process does not know
 // is restored from its draft, the way the handover link restores it for a
-// human: a start roundtrip whose hash names the draft (#/app/<APP>/<draft>),
+// human: a start roundtrip whose route names the draft (#/app/<APP>/<draft>),
 // which the framework answers with the app's screen rendered from that draft
 // (check_on_navigated( ) is true). Only a session the audit log shows THIS
 // user's agent reached, which is the newest of its line, whose draft is
@@ -196,22 +196,25 @@ function boundedInt(value, { name, dflt, min = 0, max = 200 }) {
  * @param {(req: object, res: object) => Promise<void>} o.roundtrip  the UI route's roundtrip handler
  */
 function createAgent({ agent, roundtrip }) {
-  const call = new AsyncLocalStorage();        // { origin, hash? } of the MCP request being answered
+  const call = new AsyncLocalStorage();        // { origin, route? } of the MCP request being answered
   const users = new Map();                     // user key -> { client, starts, known }
 
   /** One roundtrip, in process: the UI route's own handler, for the user of
-   *  the MCP request (cds.context is that request's). A restore puts the
-   *  draft into the hash, as the handover link does in the browser. The
+   *  the MCP request (cds.context is that request's). A restore names the
+   *  draft as the route of the app start - S_FRONT.ROUTE { APP, DRAFT },
+   *  what the frontend's router parses out of the handover link's hash and
+   *  sends (protocol 3: the backend no longer reads a route out of HASH). The
    *  client sends a HEAD only to fetch a CSRF token after a 403 "Required",
    *  which the in-process handler never answers - so a HEAD gets an empty
    *  200 and never reaches the handler. */
   async function transport({ method = "POST", body, headers }) {
     if (method === "HEAD") return { status: 200, headers: {}, body: "" };
-    const { hash } = call.getStore() ?? {};
+    const { route } = call.getStore() ?? {};
     let text = body;
-    if (hash) {
+    if (route) {
       const json = JSON.parse(body);
-      json.value.S_FRONT.HASH = hash;
+      json.value.S_FRONT.ROUTE = route;
+      json.value.S_FRONT.HASH = `#/app/${route.APP}/${route.DRAFT}`;
       text = JSON.stringify(json);
     }
     const req = {
@@ -297,7 +300,7 @@ function createAgent({ agent, roundtrip }) {
     if (!draft) throw new Refusal(`session '${id}' has expired - its draft is gone; app_start ${row.appStart || row.app} again`);
     const may = reachable(row.appStart || row.app, agent);
     if (!may.ok) throw new Refusal(`session '${id}' cannot be restored: ${may.reason}`);
-    const restored = await call.run({ ...call.getStore(), hash: `#/app/${row.app}/${id}` },
+    const restored = await call.run({ ...call.getStore(), route: { APP: row.app, DRAFT: id } },
       () => u.client.start(row.app, { maxRows }));
     remember(u, restored, row.appStart || row.app);
     LOG.info(`agent: session ${id} of ${user.id} restored from its draft as ${restored.session}`);

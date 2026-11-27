@@ -6,7 +6,7 @@
 //
 // It probes each kind: a 0.1.0 name (isDisplay, bind), the two that were gone
 // before 0.1.0 (isInitial, modelUpdate) - and next to them a z2ui5_if_client
-// method declared obsolete, which does nothing here as in ABAP
+// method that left the interface with abap2UI5 1.151.0 and so left the client
 // (view_model_update), and the one the client refuses (set_session_stateful).
 const { defineApp } = require("@cap2ui5/cds-plugin");
 

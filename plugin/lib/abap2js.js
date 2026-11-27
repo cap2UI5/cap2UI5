@@ -39,7 +39,7 @@
 //
 // - _bind( ) takes a field's NAME: client->_bind( s_order-customer ) is
 //   client._bind("s_order-customer"). A _bind( ) of anything but an
-//   attribute path is refused. window_bind_tab( ) and window_get_row( )
+//   attribute path is refused. window_bind_tab( )
 //   take their table the same way.
 // - nav_app_call( NEW zcl_app( ) ) names the app: nav_app_call("ZCL_APP").
 // - A read of a table or structure field is a copy (define-app.js), so a
@@ -1752,7 +1752,11 @@ class MethodGen {
       const def = intf?.methods.get(name);
       if (intf && !def) this.fail(`z2ui5_if_client has no method ${name}`, call);
       const ret = def?.returning?.type ?? { k: "unknown" };
-      if (/^(_bind(_edit|_path)?|window_bind_tab|window_get_row)$/.test(name)) return { args: this.args(call, { val: "path", tab: "path" }, def), recv: this.receiver(ret), type: ret };
+      if (/^_bind(_path)?$/.test(name)) return { args: this.args(call, { val: "path", tab: "path" }, def), recv: this.receiver(ret), type: ret };
+      // total = mv_total is the ATTRIBUTE, which the framework reads anew for
+      // every response - so it goes by its name, as val does; any other
+      // expression (lines( lt_all ), a literal) is the value of this render
+      if (name === "window_bind_tab") return { args: this.args(call, { val: "path", total: "attribute" }, def), recv: this.receiver(ret), type: ret };
       if (name === "nav_app_call" || name === "nav_app_leave") return { args: this.args(call, { app: "app", "": "app" }, def), recv: this.receiver(ret), type: ret };
       return { args: this.args(call, {}, def), recv: this.receiver(ret), type: ret };
     }
@@ -1814,6 +1818,7 @@ class MethodGen {
   }
   arg(src, how, expected, copy = false) {
     if (how === "path") return JSON.stringify(this.bindPath(src));
+    if (how === "attribute" && this.isAttribute(src)) return JSON.stringify(this.bindPath(src));
     if (how === "app") {
       const E = A().Expressions;
       const chain = src.findDirectExpression(E.MethodCallChain);
@@ -1829,6 +1834,16 @@ class MethodGen {
     return this.source(src, expected, copy);
   }
   /** _bind( ) takes the field's name: an attribute, or a component of one. */
+  /** whether a source is an attribute of the class, or a component of one -
+   *  what bindPath( ) names */
+  isAttribute(src) {
+    const chain = src.getChildren().length === 1 ? src.findDirectExpression(A().Expressions.FieldChain) : null;
+    if (!chain) return false;
+    const parts = chain.getChildren();
+    const me = lc(text(parts[0])) === "me" && parts[1] && text(parts[1]) === "->";
+    const name = lc(text(parts[me ? 2 : 0]));
+    return !this.locals.has(name) && this.m.attributes.some((a) => lc(a.name) === name);
+  }
   bindPath(src) {
     const E = A().Expressions;
     const chain = src.getChildren().length === 1 ? src.findDirectExpression(E.FieldChain) : null;

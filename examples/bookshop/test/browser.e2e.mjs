@@ -224,10 +224,11 @@ test("bindings with options: a bare path, one table cell, a JSON node, a structu
   assert.deepEqual(errors, [], "page errors");
 });
 
-test("a windowed table grows by the framework's own roundtrip, and a pressed row is found in the order shown", async (t) => {
+test("a windowed table grows by the app's own event, and a pressed row is the row the app loaded", async (t) => {
   if (!WINDOWED) return t.skip("z2ui5_if_client has no window_bind_tab in this runtime - it came after @abap2ui5/node-runtime 1.148.0");
-  // ZCL_JS_WINDOW binds three hundred rows fifty at a time. The wire tests
-  // send the window request by hand; here upstream's list binding sends it.
+  // ZCL_JS_WINDOW shows three hundred rows of its "database" fifty at a
+  // time and loads them itself. The wire tests send the list binding's
+  // request by hand; here upstream's list binding sends it.
   const { page, errors } = await open("ZCL_JS_WINDOW");
   const rows = page.locator("[id$='--table'] tbody tr.sapMListTblRow");
   const shown = (n) => page.waitForFunction(
@@ -252,8 +253,8 @@ test("a windowed table grows by the framework's own roundtrip, and a pressed row
   await page.getByRole("button", { name: "Done", exact: true }).click();
   await page.locator("[id$='--picked']").filter({ hasText: /^44$/ }).waitFor({ timeout: 30_000 });
 
-  // the table's own order again, and the list grows: upstream's list binding
-  // asks the framework for a hundred rows, and main( ) does not run for it
+  // the database's own order again, and the list grows: upstream's list
+  // binding asks for fifty more, which reaches main( ) as the app's event
   await page.getByRole("button", { name: "All", exact: true }).click();
   await rows.nth(1).filter({ hasText: "row 002" }).waitFor({ timeout: 30_000 });
   await more.filter({ hasText: /50\s*\/\s*300/ }).waitFor({ timeout: 10_000 });
@@ -261,7 +262,7 @@ test("a windowed table grows by the framework's own roundtrip, and a pressed row
   await more.click();
   await shown(100);
   await rows.nth(99).filter({ hasText: "row 100" }).waitFor({ timeout: 10_000 });
-  assert.equal(await page.locator("[id$='--mains']").innerText(), mains, "the window request ran main( )");
+  await page.locator("[id$='--mains']").filter({ hasText: String(Number(mains) + 1) }).waitFor({ timeout: 10_000 });
   await page.screenshot({ path: path.join(SHOTS, "window.png") });
   assert.deepEqual(errors, [], "page errors");
 });

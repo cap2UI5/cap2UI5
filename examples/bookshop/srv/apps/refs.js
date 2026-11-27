@@ -7,6 +7,11 @@
 // writes as the data it points to.
 const { defineApp, t } = require("@cap2ui5/cds-plugin");
 
+// the rows behind mr_win, QTY in another order than ID (5 3 1 6 4 2) - the
+// app shows them by QTY descending, four at a time: ID 4 1 5 2 6 3
+const WIN = Array.from({ length: 6 }, (_, i) => ({ id: i + 1, qty: ((i + 1) * 5) % 7, done: false }))
+  .sort((a, b) => b.qty - a.qty);
+
 defineApp("ZCL_JS_REFS", class {
   mr_tab = t.ref(t.table({ id: 0, text: "", done: false }));
   mr_win = t.ref(t.table({ id: 0, qty: 0, done: false }));
@@ -16,8 +21,7 @@ defineApp("ZCL_JS_REFS", class {
   main(client) {
     if (client.check_on_init()) {
       this.mr_tab = [{ id: 1, text: "one" }, { id: 2, text: "two" }, { id: 3, text: "three" }];
-      // QTY in another order than ID: 5 3 1 6 4 2
-      this.mr_win = Array.from({ length: 6 }, (_, i) => ({ id: i + 1, qty: ((i + 1) * 5) % 7, done: false }));
+      this.mr_win = WIN.slice(0, 4);
     }
     if (client.check_on_event("CHECK")) {
       this.summary = `${this.mr_name};` +
@@ -25,9 +29,10 @@ defineApp("ZCL_JS_REFS", class {
         this.mr_win.filter((r) => r.done).map((r) => r.id).join(",");
       return;
     }
-    if (client.check_on_event("ROW")) {
-      // a position of the browser's order, as an event hands it over
-      this.summary = String(client.window_get_row({ val: "mr_win->*", row: Number(client.get_event_arg(1)) + 1 }));
+    if (client.check_on_event("WIN")) {
+      // the list binding of the windowed table asks for more rows
+      const { skip, top } = client.get().r_event_data;
+      this.mr_win = [...this.mr_win, ...WIN.slice(skip, skip + top)];
       return;
     }
     if (client.check_on_event("ADD")) {
@@ -41,7 +46,7 @@ defineApp("ZCL_JS_REFS", class {
         <Table id="items" items="${client._bind("mr_tab->*")}"><columns><Column/><Column/></columns>
           <items><ColumnListItem><cells><Input value="{TEXT}"/><CheckBox selected="{DONE}"/></cells></ColumnListItem></items></Table>
         <Table id="rows" growing="true" growingThreshold="4"
-          items="${client.window_bind_tab({ val: "mr_win->*", window: 4, t_sort: [{ path: "qty", descending: true }] })}">
+          items="${client.window_bind_tab({ val: "mr_win->*", total: WIN.length, event: "WIN", window: 4 })}">
           <columns><Column/></columns><items><ColumnListItem><cells><CheckBox selected="{DONE}"/></cells></ColumnListItem></items></Table>
       </Page></mvc:View>`);
     }
