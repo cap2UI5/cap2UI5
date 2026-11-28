@@ -10,13 +10,13 @@ import fs from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
 import { after, test } from "node:test";
-import { EXAMPLE, action, boot, post } from "./server.mjs";
+import { TEST_PROJECT, action, boot, post } from "./server.mjs";
 
 const { scaffold } = createRequire(import.meta.url)("@cap2ui5/cds-plugin/lib/add.js");
 
-// inside the example, so the written app can require("@cap2ui5/cds-plugin")
+// inside the test project, so the written app can require("@cap2ui5/cds-plugin")
 // as a project's would
-const scratch = fs.mkdtempSync(path.join(EXAMPLE, "test", "fixtures", ".add-"));
+const scratch = fs.mkdtempSync(path.join(TEST_PROJECT, "test", "fixtures", ".add-"));
 after(() => fs.rmSync(scratch, { recursive: true, force: true }));
 
 test("writes srv/apps/hello.js into a project without apps", () => {

@@ -3,7 +3,7 @@
 // snapshot v1, the opt-in and the event policy, the handover to a human, the
 // user the agent acts as, and the audit log.
 //
-// The example switches it on here, through the environment - the endpoint
+// The test project switches it on here, through the environment - the endpoint
 // is off unless a project switches it on (agent-off.test.mjs) - and lets only
 // the role admin in, so a user without it (bob) can be shown the 403:
 //

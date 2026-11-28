@@ -1,4 +1,4 @@
-// The example project's CAP server, and the abap2UI5 wire to talk to it.
+// The test project's CAP server, and the abap2UI5 wire to talk to it.
 // Shared by the tests and the cold test.
 //
 // Two ways to have the server:
@@ -16,8 +16,8 @@ import path from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
 import { fileURLToPath, URL } from "node:url";
 
-export const EXAMPLE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const SERVE = createRequire(import.meta.url).resolve("@sap/cds/bin/serve.js", { paths: [EXAMPLE] });
+export const TEST_PROJECT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const SERVE = createRequire(import.meta.url).resolve("@sap/cds/bin/serve.js", { paths: [TEST_PROJECT] });
 
 /** Ports fetch( ) REFUSES to connect to, whatever is listening on them. The
  *  WHATWG "bad port" list is baked into undici, so a server that starts
@@ -45,14 +45,14 @@ export function freePort() {
   }
 }
 
-/** The example served in this process by cds.test, for the test file that
+/** The test project served in this process by cds.test, for the test file that
  *  calls it - at its top level, because cds.test registers the hooks that
  *  start the server before the file's tests and stop it after them. `out( )`
  *  is what was logged during the current test (cds.test.log( ) clears it
  *  before each one). */
 export function serve() {
   const log = cds.test.log();
-  const t = cds.test(EXAMPLE);
+  const t = cds.test(TEST_PROJECT);
   return {
     get url() { return `${t.url}/rest/root/z2ui5`; },
     get port() { return Number(new URL(t.url).port); },
@@ -62,9 +62,9 @@ export function serve() {
 
 /** A fresh server on a fresh port. It is started detached, in a process group
  *  of its own, so kill( ) takes the whole group - nothing keeps listening.
- *  `root` is the project it serves: the example, or a fixture project inside
+ *  `root` is the project it serves: this one, examples/bookshop, or a fixture project inside
  *  this repository, which finds CAP and the plugin in the workspace. */
-export async function boot(label, { port = freePort(), env = {}, root = EXAMPLE } = {}) {
+export async function boot(label, { port = freePort(), env = {}, root = TEST_PROJECT } = {}) {
   const p = spawn(process.execPath, [SERVE], {
     cwd: root,
     env: { ...process.env, PORT: String(port), ...env },

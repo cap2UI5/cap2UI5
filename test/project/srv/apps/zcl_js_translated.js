@@ -1,6 +1,6 @@
 // @keywords abap2js translation fixture
 // @summary An abap2UI5 app in the ABAP the samples are written in, one construct of each kind abap2js translates.
-// @origin cap2UI5 examples/bookshop test/fixtures/abap2js/zcl_js_translated.clas.abap
+// @origin cap2UI5 test/project test/fixtures/abap2js/zcl_js_translated.clas.abap
 //
 // The source of srv/apps/zcl_js_translated.js: abap2js.test.mjs holds the
 // module to what abap2js makes of this class, byte for byte, and drives it.

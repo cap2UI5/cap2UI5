@@ -13,11 +13,11 @@ import path from "node:path";
 import { createRequire } from "node:module";
 import { after, before, test } from "node:test";
 import { setTimeout as sleep } from "node:timers/promises";
-import { EXAMPLE, boot, post } from "./server.mjs";
+import { TEST_PROJECT, boot, post } from "./server.mjs";
 
 const { appPackages } = createRequire(import.meta.url)("@cap2ui5/cds-plugin/lib/runtime.js");
 
-const FIXTURE = path.join(EXAMPLE, "test", "fixtures", "app-packages");
+const FIXTURE = path.join(TEST_PROJECT, "test", "fixtures", "app-packages");
 const PROJECT = path.join(FIXTURE, "project");
 const MODULES = path.join(PROJECT, "node_modules");
 const LINKED = {

@@ -129,7 +129,7 @@ jobs:
           spec() { [ "$1" = latest ] && echo latest || echo "^$1"; }
           npm pkg set "devDependencies.@sap/cds=$(spec "$CDS")"
           npm pkg set "dependencies.@sap/cds=$(spec "$CDS")" \
-                      "dependencies.@cap-js/sqlite=$(spec "$SQLITE")" --workspace examples/bookshop
+                      "dependencies.@cap-js/sqlite=$(spec "$SQLITE")" --workspace test/project
 
       # ---- the gates -------------------------------------------------------
       - run: npm install --no-audit --no-fund
@@ -158,14 +158,14 @@ jobs:
       # ---- the browser, once -------------------------------------------------
       - if: matrix.browser
         run: npx playwright install --with-deps chromium
-        working-directory: examples/bookshop
+        working-directory: test/project
       - if: matrix.browser
         run: npm run test:browser
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always() && matrix.browser
         with:
           name: screenshots
-          path: examples/bookshop/screenshots
+          path: test/project/screenshots
           if-no-files-found: ignore
 
   # abap2UI5/protocol's backend conformance suite against THIS checkout: the

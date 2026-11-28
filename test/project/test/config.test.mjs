@@ -7,7 +7,7 @@
 // plugin's default.
 //
 // The first tests read lib/config.js against stand-ins for cds.env; the last
-// ones boot the example to check what a setting does on the wire.
+// ones boot the test project to check what a setting does on the wire.
 import assert from "node:assert/strict";
 import http from "node:http";
 import { createRequire } from "node:module";
@@ -19,7 +19,7 @@ const { config, DEFAULT_LIMIT } = require("@cap2ui5/cds-plugin/lib/config.js");
 const shipped = require("@cap2ui5/cds-plugin/package.json").cds.requires.cap2ui5;
 
 const env = (over = {}) => ({ requires: { cap2ui5: { ...shipped, ...over.own } }, ...over.env });
-const s = serve();                                 // the example, for what the route reads off a request
+const s = serve();                                 // the test project, for what the route reads off a request
 
 test("the defaults: srv/apps, authenticated users, both routes, 10mb, gzip", () => {
   assert.deepEqual(config(env()), {

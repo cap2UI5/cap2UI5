@@ -5,7 +5,7 @@
 // once an hour per process and tenant; purgeAgentLog( ) is the same DELETE
 // for a project's own scheduled job.
 //
-// The example switches the endpoint on with a retention of 30 days, so the
+// The test project switches the endpoint on with a retention of 30 days, so the
 // rows on either side of the cutoff are the setting's and not the default's.
 // The suite shares one database across processes that run at the same time,
 // so the rows here have an owner of their own, and none is older than the

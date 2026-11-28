@@ -1,5 +1,5 @@
 {
-  "note": "What scripts/vendor-agent.mjs copied from abap2UI5/mcp-server, at which commit, and the sha256 of every file it wrote. Generated - do not edit; examples/bookshop/test/agent-vendor.test.mjs holds the copies to these hashes.",
+  "note": "What scripts/vendor-agent.mjs copied from abap2UI5/mcp-server, at which commit, and the sha256 of every file it wrote. Generated - do not edit; test/project/test/agent-vendor.test.mjs holds the copies to these hashes.",
   "repository": "abap2UI5/mcp-server",
   "commit": "7906a2faeb1369caf3ff31fd3e70c96f79f0ba20",
   "files": {

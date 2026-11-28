@@ -182,7 +182,8 @@ documentation.
 
 ```
 plugin/              the npm package @cap2ui5/cds-plugin: cds-plugin.js, index.cds, lib/
-examples/bookshop/   a CAP project using it: a plain CAP service, the apps, the test suite
+examples/bookshop/   a CAP project using it: a plain CAP service and four apps - the one to read
+test/project/        the CAP project the test suite runs in: fixture apps, test/*.test.mjs
 runtime/             @abap2ui5/node-runtime: only package.json + README are here, see runtime/README.md
 scripts/             assemble-runtime.sh - fills runtime/ from an upstream build or the package
 docs/adr/            the decisions, with the measurements that made them (ADR-001 to -009)
@@ -225,7 +226,7 @@ npm start                                      # http://localhost:4004/rest/root
 | Browser | renders in Chromium — the page the framework serves on GET, UI5 booted; MessageBox, table, a `sap.m.Dialog` popup, and a navigation round trip that comes back with the choice |
 
 The one hazard of the design: the plugin couples to what the transpiler
-*emits*, not to a published API. `examples/bookshop/test/abi-gate.test.mjs`
+*emits*, not to a published API. `test/project/test/abi-gate.test.mjs`
 names every touchpoint and checks it against a class the transpiler itself
 produced, so a bump fails there and not on the wire.
 

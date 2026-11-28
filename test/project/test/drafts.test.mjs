@@ -9,7 +9,7 @@
 // (z2ui5_cl_ui5_handler->main_begin) - not on every roundtrip, as a comment
 // in the store claimed. This pins what the store's comment now says.
 //
-// The example's database is shared by the test files running beside this
+// The test project's database is shared by the test files running beside this
 // one, so the owners here are this run's own, and the total is compared with
 // a count of the same snapshot.
 import assert from "node:assert/strict";

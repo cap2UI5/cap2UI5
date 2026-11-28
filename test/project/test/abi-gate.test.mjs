@@ -112,7 +112,7 @@ const RUNTIME_GLOBALS = {
 };
 // components of z2ui5_if_client=>get( ) read by name - define-app reads the
 // event and its arguments (t_event_arg: what get_event_arg( v ) reads row v
-// of), the example apps the rest of what client.get( ) hands them
+// of), the fixture apps the rest of what client.get( ) hands them
 const GET_FIELDS = ["event", "t_event_arg", "r_event_data", "s_config", "s_draft"];
 const EMITTED_STATICS = ["INTERNAL_TYPE", "INTERNAL_NAME", "IMPLEMENTED_INTERFACES", "ATTRIBUTES", "METHODS"];
 const FRAMEWORK_FIELDS = ["Z2UI5_IF_APP~ID_DRAFT", "Z2UI5_IF_APP~ID_APP"];

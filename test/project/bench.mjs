@@ -1,5 +1,5 @@
 // How long is a roundtrip? The number nobody had. Boots the project in the
-// working directory - the example, run as `npm run bench` - in THIS process
+// working directory - the test project, run as `npm run bench` - in THIS process
 // (what `cds serve` boots, minus the CLI) and times roundtrips over real HTTP.
 //
 //   node bench.mjs [N] [APP]         warms up, then times N start+event pairs

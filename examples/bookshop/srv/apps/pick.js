@@ -1,7 +1,7 @@
 // Navigation, a popup and a nested view.
 //
 // ZCL_JS_PICK calls ZCL_JS_PICK_ONE, which hands a choice back. It is the
-// case the lifecycle comment in define-app.js warns about: when the called
+// case the lifecycle predicates exist for: when the called
 // app leaves, THIS main( ) runs again with check_on_navigated( ) true and
 // check_on_init( ) FALSE - so an app that rendered only on check_on_init( )
 // would show the caller's old screen, with nothing anywhere saying why.

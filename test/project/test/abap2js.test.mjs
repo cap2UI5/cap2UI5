@@ -16,17 +16,17 @@ import { createRequire } from "node:module";
 import os from "node:os";
 import path from "node:path";
 import { test } from "node:test";
-import { EXAMPLE, actions, post, serve, viewXml } from "./server.mjs";
+import { TEST_PROJECT, actions, post, serve, viewXml } from "./server.mjs";
 
 const require = createRequire(import.meta.url);
 const { abap2js, Abap2jsError, t } = require("@cap2ui5/cds-plugin");
 const s = serve();
 
-const FIXTURE = path.join(EXAMPLE, "test/fixtures/abap2js/zcl_js_translated.clas.abap");
-const MODULE = path.join(EXAMPLE, "srv/apps/zcl_js_translated.js");
+const FIXTURE = path.join(TEST_PROJECT, "test/fixtures/abap2js/zcl_js_translated.clas.abap");
+const MODULE = path.join(TEST_PROJECT, "srv/apps/zcl_js_translated.js");
 const CLI = require.resolve("@cap2ui5/cds-plugin/bin/cap2ui5.js");
 const REGENERATE = "npx --no-install cap2ui5 abap2js test/fixtures/abap2js/zcl_js_translated.clas.abap --out srv/apps " +
-  '--origin "cap2UI5 examples/bookshop" (in examples/bookshop)';
+  '--origin "cap2UI5 test/project" (in test/project)';
 
 const APP = "ZCL_JS_TRANSLATED";
 const P = (o) => post(s.url, { user: "alice", ...o });
@@ -35,7 +35,7 @@ const custom = actions;
 
 test("the translation of the fixture is the app in srv/apps, byte for byte", () => {
   const { name, code } = abap2js(fs.readFileSync(FIXTURE, "utf8"), {
-    file: FIXTURE, format: "cjs", origin: "cap2UI5 examples/bookshop test/fixtures/abap2js/zcl_js_translated.clas.abap",
+    file: FIXTURE, format: "cjs", origin: "cap2UI5 test/project test/fixtures/abap2js/zcl_js_translated.clas.abap",
   });
   assert.equal(name, APP);
   assert.equal(code, fs.readFileSync(MODULE, "utf8"), `srv/apps/zcl_js_translated.js is stale - ${REGENERATE}`);
@@ -435,8 +435,8 @@ test("a generic parameter type - TYPE ANY TABLE, TYPE STANDARD TABLE without OF 
 test("cap2ui5 abap2js: writes the module, --check holds it, a refusal is exit 1", () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "abap2js-"));
   try {
-    const run = (...args) => spawnSync(process.execPath, [CLI, "abap2js", ...args], { cwd: EXAMPLE, encoding: "utf8" });
-    const origin = ["--origin", "cap2UI5 examples/bookshop"];
+    const run = (...args) => spawnSync(process.execPath, [CLI, "abap2js", ...args], { cwd: TEST_PROJECT, encoding: "utf8" });
+    const origin = ["--origin", "cap2UI5 test/project"];
     const fixture = "test/fixtures/abap2js/zcl_js_translated.clas.abap";
 
     const missing = run(fixture, "--out", dir, "--cjs", "--check", ...origin);

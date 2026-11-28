@@ -83,9 +83,9 @@ try {
   check("both packages pack", tarballs.length === 2, tarballs.join(" "));
 
   // --- a CAP project that has never heard of this repository ----------------
-  // on the CAP versions the example is on - which is what a CI leg that tests
+  // on the CAP versions the test project is on - which is what a CI leg that tests
   // another cds major changes, so the package is checked on that major too
-  const example = JSON.parse(fs.readFileSync(path.join(ROOT, "examples", "bookshop", "package.json"), "utf8"));
+  const example = JSON.parse(fs.readFileSync(path.join(ROOT, "test", "project", "package.json"), "utf8"));
   fs.mkdirSync(path.join(proj, "srv", "apps"), { recursive: true });
   fs.writeFileSync(path.join(proj, "package.json"), JSON.stringify({
     name: "cap2ui5-consumer-probe",

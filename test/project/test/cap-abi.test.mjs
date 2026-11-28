@@ -37,10 +37,10 @@ import { execFileSync } from "node:child_process";
 import { createRequire } from "node:module";
 import { test } from "node:test";
 import cds from "@sap/cds";
-import { EXAMPLE } from "./server.mjs";
+import { TEST_PROJECT } from "./server.mjs";
 
 const require = createRequire(import.meta.url);
-const has = (m) => { try { require.resolve(m, { paths: [EXAMPLE] }); return true; } catch { return false; } };
+const has = (m) => { try { require.resolve(m, { paths: [TEST_PROJECT] }); return true; } catch { return false; } };
 
 // Obviously fake, structurally complete - enough for cds to BUILD the strategy.
 // Nothing here is a credential; no request is ever made with it.
@@ -76,7 +76,7 @@ function chainFor(kind) {
         : { other: typeof x, keys: Object.keys(x ?? {}) }),
     }));`;
   const out = execFileSync(process.execPath, ["-e", src], {
-    cwd: EXAMPLE,
+    cwd: TEST_PROJECT,
     env: { ...process.env, CDS_REQUIRES_AUTH_KIND: kind, VCAP_SERVICES: FAKE_BINDING },
     encoding: "utf8",
     stdio: ["ignore", "pipe", "ignore"],

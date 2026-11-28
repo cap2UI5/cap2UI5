@@ -78,7 +78,7 @@ try {
 }
 ```
 
-Both are measured in `examples/bookshop/test/service.test.mjs`.
+Both are measured in the repository's `test/project/test/service.test.mjs`.
 
 `cds watch` prints the address of every app of the project, one line for
 each package that brings apps (see [Apps from a package](#apps-from-a-package)),

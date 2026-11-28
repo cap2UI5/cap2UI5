@@ -24,7 +24,7 @@
  * repository, the path and the commit; they stay `.mjs`, so their sibling
  * imports need no rewrite, and the plugin (CommonJS) loads them with
  * import( ). plugin/lib/agent/vendor/source.json records the commit and the
- * sha256 of every file written, and examples/bookshop/test/agent-vendor.test.mjs
+ * sha256 of every file written, and test/project/test/agent-vendor.test.mjs
  * (npm test, offline) fails when a copy no longer matches its recorded hash -
  * a hand edit.
  *
@@ -123,7 +123,7 @@ async function build(local, commit) {
   }
   const record = {
     note: `What scripts/vendor-agent.mjs copied from ${REPO}, at which commit, and the sha256 of every file it ` +
-      "wrote. Generated - do not edit; examples/bookshop/test/agent-vendor.test.mjs holds the copies to these hashes.",
+      "wrote. Generated - do not edit; test/project/test/agent-vendor.test.mjs holds the copies to these hashes.",
     repository: REPO,
     commit,
     files: Object.fromEntries(Object.keys(files).sort()

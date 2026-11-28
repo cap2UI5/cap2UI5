@@ -10,12 +10,13 @@ runtime/srv/
 # abap2UI5/protocol, checked out for scripts/conformance.mjs (which installs into it)
 .protocol/
 
-# the example's database and screenshots
+# the projects' databases and the browser test's screenshots
 examples/*/db.sqlite*
-examples/*/screenshots/
+test/project/db.sqlite*
+test/project/screenshots/
 
 *.log
 .DS_Store
 
 # scratch projects add.test.mjs writes (removed after the run)
-examples/*/test/fixtures/.add-*
+test/project/test/fixtures/.add-*

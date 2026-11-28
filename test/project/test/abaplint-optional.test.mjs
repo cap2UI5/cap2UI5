@@ -9,18 +9,18 @@ import { spawnSync } from "node:child_process";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { test } from "node:test";
-import { EXAMPLE } from "./server.mjs";
+import { TEST_PROJECT } from "./server.mjs";
 
 const require = createRequire(import.meta.url);
 const { requireCore } = require("@cap2ui5/cds-plugin/lib/abaplint-core");
-const HIDE = path.join(EXAMPLE, "test", "fixtures", "hide-abaplint-core.cjs");
+const HIDE = path.join(TEST_PROJECT, "test", "fixtures", "hide-abaplint-core.cjs");
 const BIN = require.resolve("@cap2ui5/cds-plugin/bin/cap2ui5.js");
 const ADD = /@abaplint\/core, which @cap2ui5\/cds-plugin does not install .* npm add -D @abaplint\/core/;
 
-const without = (args) => spawnSync(process.execPath, ["-r", HIDE, ...args], { cwd: EXAMPLE, encoding: "utf8" });
-const FAKE = path.join(EXAMPLE, "test", "fixtures", "fake-abaplint-core.cjs");
+const without = (args) => spawnSync(process.execPath, ["-r", HIDE, ...args], { cwd: TEST_PROJECT, encoding: "utf8" });
+const FAKE = path.join(TEST_PROJECT, "test", "fixtures", "fake-abaplint-core.cjs");
 const other = (version, args) => spawnSync(process.execPath, ["-r", FAKE, ...args],
-  { cwd: EXAMPLE, encoding: "utf8", env: { ...process.env, FAKE_ABAPLINT_CORE: version } });
+  { cwd: TEST_PROJECT, encoding: "utf8", env: { ...process.env, FAKE_ABAPLINT_CORE: version } });
 const MAJOR = /abap2js reads ABAP with @abaplint\/core 2\.x, and the project has @abaplint\/core (\S+) - a major the translator is not written for\. .*npm add -D @abaplint\/core@\^2\./;
 
 test("the plugin declares @abaplint/core as an optional peer, not as a dependency", () => {

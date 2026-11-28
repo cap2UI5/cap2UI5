@@ -18,7 +18,8 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
 |---|---|
 | `plugin/` | yes — the npm package `@cap2ui5/cds-plugin` (`cap2ui5` up to 0.2.0) |
 | `plugin/lib/agent/vendor/` | **no — abap2UI5/mcp-server's `viewxml.mjs`, `snapshot.mjs`, `appclient.mjs`, vendored unchanged at the commit `source.json` records by `scripts/vendor-agent.mjs` (`npm run agent-vendor`), never edited.** `agent-vendor.test.mjs` fails on a hand edit; a fix goes upstream, then re-vendor. ADR-009. |
-| `examples/bookshop/` | yes — a CAP project using it; **the test suite lives here** because the tests need a project. `srv/catalog-service.cds` is deliberately an ordinary CAP service that knows nothing about cap2UI5: it is what `coexistence.test.mjs` drives to prove the plugin is a guest in the project and not its host. |
+| `examples/bookshop/` | yes — the example: an ordinary CAP project with four apps, written to be read. No tests run in it; `test/project/test/example.test.mjs` starts it and drives each app once. |
+| `test/project/` | yes — the CAP project **the test suite runs in**; its `srv/apps/` are fixtures for the tests, not demos. `srv/catalog-service.cds` is deliberately an ordinary CAP service that knows nothing about cap2UI5: it is what `coexistence.test.mjs` drives to prove the plugin is a guest in the project and not its host. |
 | `runtime/package.json`, `runtime/README.md` | yes — the stand-in's manifest |
 | `runtime/output/`, `runtime/setup/`, `runtime/downport/` | **no — upstream's transpiled output and the ABAP it came from, never edited, never committed.** `scripts/assemble-runtime.sh` fills them from the published package (`--package X.Y.Z`) or from an upstream build. |
 | `docs/adr/`, `docs/transpiler-roadmap.md` | the decision records and the roadmap ADR-006 cites, moved here from `cap2UI5/builder-abap2UI5-js`, where they were made and which is being archived. They are the only copies this project keeps; historical paths in them refer to that repository. |
@@ -41,7 +42,7 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
   `defineApp`'s own type derivation, written when only scalars had been tried,
   and the framework had carried the whole tree all along. Before writing that
   something cannot be done, try it.
-- **Never change behaviour without a test in `examples/bookshop/test/`.** The
+- **Never change behaviour without a test in `test/project/test/`.** The
   suite is the gate; there is no other.
 - **The client IS `z2ui5_if_client`, by its own names - and stays it.** An
   app's `main( client )` gets every method of the interface under its ABAP
@@ -105,7 +106,7 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
   or an array of functions, and that the auth middleware is one of those
   functions. It checks this across all six auth kinds (`mocked`, `basic`,
   `dummy`, `jwt`, `xsuaa`, `ias`). `@sap/xssec` is a devDependency of the
-  example, so the production three are covered by the gate and not merely
+  test project, so the production three are covered by the gate and not merely
   assumed. The one other assumption is `cds.app._app_links`, which CAP's
   start page reads to list the apps. It needs a served app, so its gate is
   the start-page test in `coexistence.test.mjs`; if it breaks, only that list
@@ -155,7 +156,7 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
   holds it.
 - `npm test` stays browserless. Browser tests are `*.e2e.mjs`, run by
   `npm run test:browser`.
-- **A test about what the route answers serves the example in-process with
+- **A test about what the route answers serves the test project in-process with
   `cds.test`** (`serve()` in `test/server.mjs`), the way a CAP project tests
   itself and the path a consumer's own suite takes through the plugin. **A
   test about the process boots it as a child** (`boot()`): a start that
