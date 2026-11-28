@@ -91,14 +91,44 @@ test("a well-formed correlation id still comes back unchanged, so the log can be
 // On a runtime newer than 1.146.0 the assertion is no todo any more: a
 // release without the fix fails here.
 const FIXED_AFTER = "1.146.0";
+
+// The framework's own 500: an app that raises an ABAP exception, which the
+// framework catches and answers with its dump - whose first frame names the
+// url the request came from.
+let raising = false;
+const raisingApp = () => {
+  if (!raising) defineApp("ZCL_JS_ABAP_RAISE", class {
+    async main() {
+      throw await new abap.Classes.Z2UI5_CX_UI5_UTIL_ERROR().constructor_({ val: new abap.types.String().set("boom") });
+    }
+  });
+  raising = true;
+};
+
 test("the framework's 500 does not reflect the client's url",
   { todo: older(FIXED_AFTER, RUNTIME) ? false
     : `@abap2ui5/node-runtime ${RUNTIME} predates the core fix of request_context_info (protocol open question 3)` },
   async () => {
-    // an event on a draft that does not exist: the framework's own 500,
-    // its first frame naming the url
-    const r = await roundtrip({ ID: "NO_SUCH_DRAFT", EVENT: "GO", SEARCH: `?x=${EVIL}` });
+    raisingApp();
+    const r = await roundtrip({ APP: "ZCL_JS_ABAP_RAISE", SEARCH: `?app_start=ZCL_JS_ABAP_RAISE&x=${EVIL}` });
     assert.equal(r.status, 500, r.text.slice(0, 300));
+    assert.match(r.text, /unhandled exception/, "not the framework's dump");
     assert.match(r.headers.get("content-type"), /^text\/plain/i);
     assert.ok(!r.text.includes(EVIL), `the url is reflected:\n${r.text.slice(0, 600)}`);
   });
+
+// An event on a draft that does not exist. Up to abap2UI5 1.151.0 the
+// framework answers it with the same 500 dump; from its next release on with
+// 410 and a fixed text the frontend answers with "session expired"
+// (z2ui5_cl_ui5_http_handler=>_error_response). Told apart by the answer,
+// not the version: a build of upstream's main is numbered as the release
+// before it. Either way the url is not in it.
+test("a draft that does not exist is the framework's 500 or its 410 - and the url is not in either", async () => {
+  const r = await roundtrip({ ID: "NO_SUCH_DRAFT", EVENT: "GO", SEARCH: `?x=${EVIL}` });
+  assert.ok([500, 410].includes(r.status), `${r.status}: ${r.text.slice(0, 300)}`);
+  if (r.status === 410) {
+    assert.match(r.text, /^NO_DRAFT_ENTRY_OF_PREVIOUS_REQUEST_FOUND - the session expired/);
+  }
+  assert.match(r.headers.get("content-type"), /^text\/plain/i);
+  assert.ok(!r.text.includes(EVIL), `the url is reflected:\n${r.text.slice(0, 600)}`);
+});
