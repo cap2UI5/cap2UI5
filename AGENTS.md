@@ -157,6 +157,12 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
   (`cds.requires.cap2ui5.timeout`, `within( )` in `lib/app/timeout.js`), which
   touches nothing but its own instance while it waits. `timeout.test.mjs`
   holds it.
+- **The suite runs on PostgreSQL too** (`npm run test:postgres`, the
+  `postgres` job in ci.yml). So a test reaches the database through
+  `cds.ql`, never through SQL text: SQLite accepts what PostgreSQL refuses,
+  and PostgreSQL answers a raw `SELECT *` with its columns in lower case. A
+  test that only holds on SQLite goes on the exclusion list in
+  `test/project/package.json`'s `test:postgres`, with the reason.
 - `npm test` stays browserless. Browser tests are `*.e2e.mjs`, run by
   `npm run test:browser`.
 - **A test about what the route answers serves the test project in-process with

@@ -13,6 +13,7 @@
   "scripts": {
     "start": "npm --workspace examples/bookshop start",
     "test": "npm --workspace test/project test",
+    "test:postgres": "npm --workspace test/project run test:postgres",
     "test:browser": "npm --workspace test/project run test:browser",
     "cold-test": "npm --workspace test/project run cold-test",
     "bench": "npm --workspace test/project run bench --",

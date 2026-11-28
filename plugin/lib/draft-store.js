@@ -95,22 +95,22 @@ class ZCL_CDS_DRAFT_STORE {
       data: String(INPUT.model_xml.get()),
     };
     const { Drafts } = cds.entities("cap2ui5");
-    // INSERT first, UPDATE on a key collision - same shape as the shipped ABAP
-    // store, and for the same reason: on the legitimate path the id is a fresh
-    // uuid, so a guarding SELECT would be a wasted roundtrip per click.
-    try {
+    // The row decides BEFORE anything is written: none - a fresh id - is an
+    // INSERT, the caller's own is an UPDATE, anybody else's is "not found".
+    // The shipped ABAP store inserts first and updates on a key collision;
+    // here that broke on PostgreSQL, which aborts the transaction a failed
+    // INSERT ran in, so the SELECT that was to tell a collision from another
+    // error failed as well (drafts.test.mjs). One primary-key read per click
+    // buys a store that behaves the same on every database.
+    const existing = await cds.run(SELECT.one.from(Drafts).columns("owner").where({ id: row.id }));
+    if (!existing) {
       await cds.run(INSERT.into(Drafts).entries(row));
-    } catch (e) {
-      // Only a KEY COLLISION may fall through to an update. The catch is blind
-      // to the reason, so the row itself decides: no row means the INSERT failed
-      // for its own reason and that error is the honest one to raise.
-      const existing = await cds.run(SELECT.one.from(Drafts).columns("owner").where({ id: row.id }));
-      if (!existing) throw e;
-      if (existing.owner !== row.owner) throw await notFound();
-      // `owner` in the WHERE as well: between the SELECT and here the row could
-      // have changed hands, and a write must not cross that.
-      await cds.run(UPDATE(Drafts).set(row).where({ id: row.id, owner: row.owner }));
+      return;
     }
+    if (existing.owner !== row.owner) throw await notFound();
+    // `owner` in the WHERE as well: between the SELECT and here the row could
+    // have changed hands, and a write must not cross that.
+    await cds.run(UPDATE(Drafts).set(row).where({ id: row.id, owner: row.owner }));
   }
 
   async #read(id) {

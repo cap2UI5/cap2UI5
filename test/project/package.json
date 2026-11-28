@@ -26,7 +26,8 @@
     "test": "cds-deploy && node --test test/*.test.mjs",
     "test:browser": "cds-deploy && node --test test/browser.e2e.mjs",
     "cold-test": "node cold-test.mjs",
-    "bench": "cds-deploy && node bench.mjs"
+    "bench": "cds-deploy && node bench.mjs",
+    "test:postgres": "cds-deploy && node --test $(ls test/*.test.mjs | grep -vE '/(app-packages|example|log)\\.test\\.mjs$')"
   },
   "devDependencies": {
     "@cap-js/cds-test": "^1.0.2",

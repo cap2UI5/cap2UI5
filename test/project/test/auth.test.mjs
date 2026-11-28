@@ -10,7 +10,9 @@ import { test } from "node:test";
 import cds from "@sap/cds";
 import { action, boot, post, serve } from "./server.mjs";
 
+
 const APP = "ZCL_JS_HELLO";
+const { SELECT, UPDATE } = cds.ql;            // cds.ql, not SQL text: the suite also runs on PostgreSQL
 const s = serve();
 let draftId;                       // created by alice below, checked in the database last
 
@@ -53,8 +55,8 @@ test("a draft whose owner column is empty belongs to nobody, not to everybody", 
   const id = start.json.S_FRONT.ID;
 
   await cds.connect.to("db");
-  await cds.run("UPDATE cap2ui5_Drafts SET owner = '' WHERE id = ?", [id]);
-  const [blanked] = await cds.run("SELECT owner FROM cap2ui5_Drafts WHERE id = ?", [id]);
+  await cds.run(UPDATE("cap2ui5.Drafts").set({ owner: "" }).where({ id }));
+  const [blanked] = await cds.run(SELECT.from("cap2ui5.Drafts").columns("owner").where({ id }));
   assert.equal(blanked.owner, "", "the row under test is not the one that was blanked");
 
   const bob = await post(s.url, { app: APP, id, event: "GO", model: { NAME: "Ada" }, user: "bob" });
@@ -70,7 +72,7 @@ test("a draft whose owner column is empty belongs to nobody, not to everybody", 
 test("the stored owner is the CAP user, not 'anonymous'", async () => {
   assert.ok(draftId, "no draft was created above");
   await cds.connect.to("db");
-  const rows = await cds.run("SELECT owner FROM cap2ui5_Drafts WHERE id = ?", [draftId]);
+  const rows = await cds.run(SELECT.from("cap2ui5.Drafts").columns("owner").where({ id: draftId }));
   assert.deepEqual(rows.map((r) => r.owner), ["alice"]);
 });
 

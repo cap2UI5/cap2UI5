@@ -19,12 +19,14 @@ import { URL } from "node:url";
 import cds from "@sap/cds";
 import { mcp, serve, toolCall } from "./server.mjs";
 
+
 process.env.CDS_REQUIRES_CAP2UI5_AGENT = JSON.stringify({
   apps: ["Z2UI5_CL_UI5_APP_HI_WORLD"],
   forbidden: ["Z2UI5_CL_UI5_APP_HI_WORLD:BUTTON_POST"],
 });
 process.env.CDS_REQUIRES_CAP2UI5_ROLES = JSON.stringify(["admin"]);
 
+const { SELECT, DELETE } = cds.ql;            // cds.ql, not SQL text: the suite also runs on PostgreSQL
 const s = serve();
 const url = () => s.url.replace(/\/rest\/root\/z2ui5$/, "/rest/root/z2ui5/mcp");
 const call = (name, args, user = "alice") => mcp(url(), toolCall(name, args), { user });
@@ -62,7 +64,7 @@ async function browserStart(user, search, hash) {
 
 async function books() {
   await cds.connect.to("db");
-  return (await cds.run("SELECT count(*) as n FROM my_bookshop_Books"))[0].n;
+  return Number((await cds.run(SELECT.one.from("my.bookshop.Books").columns("count(*) as n"))).n);
 }
 
 // ------------------------------------------------------------ the protocol --
@@ -209,7 +211,7 @@ test("app_start on the Books app: the search field, the search action, the table
 
   // the draft the start wrote belongs to the user the agent acts as
   await cds.connect.to("db");
-  const [draft] = await cds.run("SELECT owner FROM cap2ui5_Drafts WHERE id = ?", [snap.session]);
+  const [draft] = await cds.run(SELECT.from("cap2ui5.Drafts").columns("owner").where({ id: snap.session }));
   assert.equal(draft?.owner, "alice");
 });
 
@@ -308,14 +310,14 @@ test("forbidden: an event the project forbids is refused, by name and by id - th
 
 test("every call is in cap2ui5.AgentLog, as the user - the fields an agent filled, never their values", async () => {
   await cds.connect.to("db");
-  await cds.run("DELETE FROM cap2ui5_AgentLog WHERE owner = 'dave'");
+  await cds.run(DELETE.from("cap2ui5.AgentLog").where({ owner: "dave" }));
   const start = await snapshot("app_start", { app: "ZCL_JS_BOOKS" }, "dave");
   const found = await snapshot("app_act", { session: start.session, values: { SEARCH: "Secret-Raven" }, event: "SEARCH" }, "dave");
   await refusal("app_act", { session: found.session, event: "ADD" }, "dave");
   await refusal("app_start", { app: "ZCL_JS_HELLO" }, "dave");
   await call("app_list", {}, "dave");
 
-  const rows = await cds.run("SELECT * FROM cap2ui5_AgentLog WHERE owner = 'dave' ORDER BY createdAt");
+  const rows = await cds.run(SELECT.from("cap2ui5.AgentLog").where({ owner: "dave" }).orderBy("createdAt"));
   assert.deepEqual(rows.map((r) => [r.tool, r.outcome, r.event ?? null]), [
     ["app_start", "ok", null],
     ["app_act", "ok", "SEARCH"],

@@ -18,7 +18,9 @@ import { test } from "node:test";
 import cds from "@sap/cds";
 import { post, serve } from "./server.mjs";
 
+
 const AUTH = { Authorization: "Basic " + Buffer.from("alice:").toString("base64") };
+const { SELECT, INSERT, DELETE } = cds.ql;            // cds.ql, not SQL text: the suite also runs on PostgreSQL
 const s = serve();
 
 const page = (app) => fetch(`${s.url}?app_start=${app}`, { headers: AUTH });
@@ -89,16 +91,16 @@ test("cleanup follows the exit's draft_exp_time_in_hours, not a fixed 4 hours", 
   const expired = "T".repeat(32);          // 30h old: past a 24h expiry
   const alive = "U".repeat(32);            //  6h old: past 4h, inside 24h
 
-  await cds.run("DELETE FROM cap2ui5_Drafts WHERE id IN (?, ?)", [expired, alive]);
-  await cds.run(
-    "INSERT INTO cap2ui5_Drafts (id, owner, createdAt, data) VALUES (?, ?, ?, ?), (?, ?, ?, ?)",
-    [expired, "alice", hoursAgo(30), "{}", alive, "alice", hoursAgo(6), "{}"]);
+  await cds.run(DELETE.from("cap2ui5.Drafts").where({ id: { in: [expired, alive] } }));
+  await cds.run(INSERT.into("cap2ui5.Drafts").entries(
+    { id: expired, owner: "alice", createdAt: hoursAgo(30), data: "{}" },
+    { id: alive, owner: "alice", createdAt: hoursAgo(6), data: "{}" }));
 
   // an app start runs cleanup( )
   await post(s.url, { app: "ZCL_JS_HELLO", user: "alice" });
   await new Promise((r) => setTimeout(r, 500));
 
-  const left = (await cds.run("SELECT id FROM cap2ui5_Drafts WHERE id IN (?, ?)", [expired, alive]))
+  const left = (await cds.run(SELECT.from("cap2ui5.Drafts").columns("id").where({ id: { in: [expired, alive] } })))
     .map((r) => r.id);
   assert.ok(!left.includes(expired), "a 30-hour-old draft survived a 24-hour expiry");
   assert.ok(left.includes(alive), "a 6-hour-old draft was deleted - the cleanup is still on 4 hours");

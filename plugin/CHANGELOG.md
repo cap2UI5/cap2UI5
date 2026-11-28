@@ -8,6 +8,17 @@ starts with 0, a minor release may break the API.
 
 ## [Unreleased]
 
+### Fixed
+
+- **A draft written again under its id failed on PostgreSQL** with
+  "current transaction is aborted". The store inserted first and, on a key
+  collision, read the row to decide between an update and "not found" - but
+  PostgreSQL aborts the transaction a failed INSERT ran in, so that read
+  failed too. The row is now read first (one primary-key lookup per
+  roundtrip); what the store answers is unchanged: an update for the
+  draft's owner, "not found" for anybody else. CI now runs the suite on
+  PostgreSQL as well as SQLite.
+
 ### Removed
 
 - **The agent endpoint moved to its own package, `@cap2ui5/agent`.** A

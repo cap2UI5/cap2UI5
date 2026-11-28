@@ -96,18 +96,24 @@ test("purgeDrafts( ) deletes the expired drafts, of every user, and answers how 
   const ago = (hours) => new Date(Date.now() - hours * 3600 * 1000).toISOString();
   const left = async () => (await cds.run(cds.ql.SELECT.from(Drafts).columns("id")
     .where({ owner: { in: [`ann-${run}`, `ben-${run}`] } }))).map((r) => r.id.slice(8)).sort();
+  // The purge deletes every user's expired drafts, and the database is
+  // shared with the files running beside this one (exit.test.mjs writes a
+  // 6-hour-old draft). So the rows here are a thousand hours old and the
+  // purge counts back from then - `now` - which no other file's rows reach.
+  const then = new Date(Date.now() - 1000 * 3600 * 1000);
+  const before = (hours) => ago(1000 + hours);
   await cds.run(cds.ql.INSERT.into(Drafts).entries([
-    { id: `${run}-ann-30h`, owner: `ann-${run}`, createdAt: ago(30), data: "{}" },
-    { id: `${run}-ben-30h`, owner: `ben-${run}`, createdAt: ago(30), data: "{}" },
-    { id: `${run}-ann-3h`, owner: `ann-${run}`, createdAt: ago(3), data: "{}" },
-    { id: `${run}-ann-1h`, owner: `ann-${run}`, createdAt: ago(1), data: "{}" },
+    { id: `${run}-ann-30h`, owner: `ann-${run}`, createdAt: before(30), data: "{}" },
+    { id: `${run}-ben-30h`, owner: `ben-${run}`, createdAt: before(30), data: "{}" },
+    { id: `${run}-ann-3h`, owner: `ann-${run}`, createdAt: before(3), data: "{}" },
+    { id: `${run}-ann-1h`, owner: `ann-${run}`, createdAt: before(1), data: "{}" },
   ]));
   try {
     // no hours: the framework's expiry - the user exit's, which is 24 hours
     // in this project (srv/apps/exit.js) and 4 where no exit says otherwise
-    assert.ok(await purgeDrafts() >= 2, "both thirty-hour-old drafts are counted");
+    assert.equal(await purgeDrafts({ now: then }), 2, "both thirty-hour-old drafts, of both users");
     assert.deepEqual(await left(), ["-ann-1h", "-ann-3h"]);
-    assert.equal(await purgeDrafts({ hours: 2 }), 1, "the three-hour-old draft, and nobody's younger one");
+    assert.equal(await purgeDrafts({ hours: 2, now: then }), 1, "the three-hour-old draft, and nobody's younger one");
     assert.deepEqual(await left(), ["-ann-1h"]);
     for (const bad of [0, -1, "4", false]) {
       await assert.rejects(purgeDrafts({ hours: bad }), /purgeDrafts\( \{ hours \} \) takes the number of hours/);
@@ -168,4 +174,31 @@ test("a draft an app handed out a link to is kept: app_state_get_href( ) protect
   assert.ok(left.includes(info.json.S_FRONT.ID), "the draft the link names was pruned");
   // behind it the chain is pruned as ever: of the four that followed, the newest two are left
   assert.deepEqual(later.filter((id) => left.includes(id)), later.slice(-2));
+});
+
+test("a draft written again under its id is updated for its owner and refused to anybody else", async () => {
+  // INSERT first and UPDATE on a key collision, as the shipped store does.
+  // The collision is the path no roundtrip of the suite takes, and the one a
+  // database treats differently: PostgreSQL aborts the transaction a failed
+  // INSERT ran in, so what follows it in that transaction must not need it.
+  await cds.connect.to("db");
+  const IF = abap.Classes.Z2UI5_IF_UI5_DRAFT_STORE;
+  const input = (id, data) => {
+    const draft = IF.METHODS.CREATE.parameters.DRAFT.type();
+    draft.get().id.set(id);
+    return { draft, model_xml: new abap.types.String().set(data) };
+  };
+  const run = randomUUID().slice(0, 8);
+  const [ann, ben] = [`ann-${run}`, `ben-${run}`];
+  const id = `${run}c`.padEnd(32, "0");
+  const store = await new ZCL_CDS_DRAFT_STORE().constructor_();
+  const row = () => cds.run(cds.ql.SELECT.one.from("cap2ui5.Drafts").columns("owner", "data").where({ id }));
+
+  await as(ann, () => store.z2ui5_if_ui5_draft_store$create(input(id, "one")));
+  await as(ann, () => store.z2ui5_if_ui5_draft_store$create(input(id, "two")));
+  assert.deepEqual(await row(), { owner: ann, data: "two" });
+
+  await assert.rejects(as(ben, () => store.z2ui5_if_ui5_draft_store$create(input(id, "three"))),
+    (e) => e?.constructor?.INTERNAL_NAME === "Z2UI5_CX_UI5_UTIL_ERROR", "a foreign draft id is not found, not taken");
+  assert.deepEqual(await row(), { owner: ann, data: "two" });
 });
