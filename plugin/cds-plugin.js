@@ -23,14 +23,14 @@ const { config } = require("./lib/config");
 // log search as everything else instead of as loose text on stdout.
 const LOG = cds.log("cap2ui5");
 
-// A request-derived reference (the correlation id) made fit for an error
-// body: letters, digits and . _ : - only, at most 128 of them, "-" when
-// nothing is left.
 // When the queue of roundtrips says it is slow: a roundtrip that waited this
 // long for its turn, and no more often than that - see roundtrip( ).
 const QUEUE_WARN_MS = 1000;
 const QUEUE_WARN_EVERY_MS = 10000;
 
+// A request-derived reference (the correlation id) made fit for an error
+// body: letters, digits and . _ : - only, at most 128 of them, "-" when
+// nothing is left.
 const safeRef = (id) => String(id ?? "").replace(/[^A-Za-z0-9._:-]/g, "").slice(0, 128) || "-";
 
 // `cds add cap2ui5`: the first app. cds.add exists only while cds add runs,
@@ -66,8 +66,7 @@ cds.on("bootstrap", (app) => {
   // CAP awaits 'served' handlers - and only those - before it listens. So the
   // server listens once every app can answer, and a runtime or an app module
   // that fails to load fails the start, as a service implementation that
-  // throws does. It used to be logged while the server listened anyway and
-  // answered every roundtrip with a 500.
+  // throws does.
   let served;
   let origins = new Map();                    // app -> "the project" or its package
   const afterLoad = [];                       // checks of the loaded apps - the agent's, where it is on
@@ -120,27 +119,21 @@ cds.on("bootstrap", (app) => {
   // (?z2ui5-bundle, carried in the transpiled framework, from the runtime's
   // own commit) - so the browser needs no files from here.
 
-  // Who may call, decided the way CAP decides it for a service annotated with
-  // @requires (check_roles in CAP's HTTP adapter): any one of the roles lets
-  // the user in, so a list means one of them; an anonymous user is asked to
-  // log in (401); an authenticated user without the role is refused (403).
-  // The auth strategy of cds.requires.auth - mocked in development, xsuaa or
-  // ias in production - has run by then, in the chain below. "any" is CAP's
-  // pseudo role for everybody, anonymous included, and no roles (null) let
-  // anybody in as well.
-  //
-  // The guard only decides. CAP's own error middleware, last on the route,
-  // answers - so the login challenge, the status and the error body are the
-  // ones CAP sends for its own services. It used to answer by itself: 401 and
-  // a fresh login challenge to an authenticated user who lacked the role, and
-  // 401 to everybody once requires was a list, because cds.User.is( ) takes
-  // one role, not an array.
   // gzip: the runtime package's compress( ), one per process. The package is
   // an ES module and this file is not, so the middleware is there after an
   // import - which the first request waits for, and no later one notices.
   const compressing = import("@abap2ui5/node-runtime/compress").then((m) => m.compress());
   const compress = (req, res, next) => compressing.then((mw) => mw(req, res, next), next);
 
+  // Who may call, decided the way CAP decides it for a service annotated with
+  // @requires (check_roles in CAP's HTTP adapter): any one of the roles lets
+  // the user in; an anonymous user is asked to log in (401); an authenticated
+  // user without the role is refused (403). The auth strategy of
+  // cds.requires.auth has run by then, in the chain below. "any" is CAP's
+  // pseudo role for everybody, anonymous included, and no roles let anybody
+  // in as well. The guard only decides: CAP's own error middleware, last on
+  // the route, answers - so the login challenge, the status and the error
+  // body are the ones CAP sends for its own services.
   const { roles } = conf;
   const guard = (req, res, next) => {
     const user = cds.context?.user;
@@ -173,8 +166,7 @@ cds.on("bootstrap", (app) => {
   // mounts them per service path, never globally. A route mounted straight on
   // express does not get them: the draft store then sees every caller as
   // "anonymous", a draft created by alice answers to bob, and the owner
-  // binding z2ui5_if_ui5_draft_store promises is void. Measured before this
-  // line existed: two authenticated roundtrips, both stored as "anonymous".
+  // binding z2ui5_if_ui5_draft_store promises is void (auth.test.mjs).
   //
   // guard BEFORE the body parser: it reads cds.context and nothing else, and
   // behind the parser an unauthenticated caller could make the server buffer

@@ -54,10 +54,7 @@
 // flush, the string the app holds is a token, not the wire format. Embedding
 // it in markup is what it is for and works; parsing or comparing it does not.
 // The token is letters, digits and underscores only, so a view builder that
-// XML-escapes attribute values passes it through unchanged - an earlier token
-// carried the event as JSON between NULs, abap2UI5's own view builder escaped
-// its quotes, the substitution missed, and the raw NULs made the response
-// invalid JSON.
+// XML-escapes attribute values passes it through unchanged.
 //
 // STATE
 //
@@ -68,10 +65,6 @@
 // schema RTTI needs from the same pass, and gives main( ) a PROXY whose reads
 // unwrap and whose writes write through. The boxes therefore stay on the
 // instance, which is what keeps _bind( ) working.
-//
-// (An earlier draft replaced the fields with plain values instead of proxying
-// them, and _bind( ) answered BINDING_ERROR — rightly: the box was no longer an
-// attribute of the object, so there was nothing left to match by identity.)
 //
 // Structures and tables follow the same rule one level down: `{ a: "" }` is a
 // structure, `t.table({ a: "" })` a table whose row is that structure, and a

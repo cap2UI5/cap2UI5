@@ -62,9 +62,7 @@ async function before(c) {
   }
   // The event's arguments, all of them: get( ) carries the table that
   // get_event_arg( v ) reads row v of, so there is nothing to ask the
-  // framework for one at a time. The first eight used to be fetched up
-  // front, one call each, and a ninth was refused - a limit the ABAP
-  // method does not have.
+  // framework for one at a time, and no limit the ABAP method does not have.
   const eventArgs = got.get().t_event_arg.array().map((a) => String(a.get()));
   // The instance on the other side of the last navigation: inside a called
   // app the caller, and back in the caller after nav_app_leave( ) the app
@@ -75,11 +73,9 @@ async function before(c) {
   const prevApp = readState(abap.compare.initial(prevRef) ? null : prevRef.get());
   // The app's own fields - what _bind( ) can name. NOT bound here: a
   // field becomes part of the model when the app binds it, as in ABAP,
-  // where the framework sends and accepts only bound attributes. Binding
-  // every field up front - which is how the path used to be learnt -
-  // sent every field to the browser and let the browser write every
-  // field, the ones no view shows included (a forged PRICE or IS_ADMIN
-  // was taken as if a control had sent it). See boundPath( ).
+  // where the framework sends and accepts only bound attributes - bound up
+  // front, every field would reach the browser and the browser could write
+  // every field, a forged IS_ADMIN included. See boundPath( ).
   // app_state_get_href( ): composed from the browser's location and this
   // roundtrip's draft id, no side effect - so it can be answered up front,
   // which an app needs because it writes the link into a bound field.

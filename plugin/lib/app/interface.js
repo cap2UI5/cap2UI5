@@ -68,13 +68,10 @@ function constant(group, value, who) {
  *  ABAP refuses a call without one of those at compile time; here the call
  *  is refused when it is made, rather than send "undefined" to the browser.
  *
- *  This used to be a table in this file, 25 methods long, that restated the
- *  interface and had to follow every parameter upstream added. It agreed
- *  with the runtime in every entry, so the runtime answers alone - a
- *  parameter upstream adds is one the client takes, on the runtime that has
- *  it. abi-gate.test.mjs holds the two things read here that the transpiler
- *  does not promise: the shape of `parameters`, and that the preferred
- *  parameter comes first. */
+ *  A parameter upstream adds is one the client takes, on the runtime that
+ *  has it. abi-gate.test.mjs holds the two things read here that the
+ *  transpiler does not promise: the shape of `parameters`, and that the
+ *  preferred parameter comes first. */
 const runtimeVersion = () => {
   try { return require("@abap2ui5/node-runtime/package.json").version; } catch { return "?"; }
 };

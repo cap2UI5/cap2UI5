@@ -4,11 +4,6 @@
 // a line per package that brings apps, and - when CAP's development login is on - the user to
 // log in as.
 //
-// Measured before this existed, in a fresh `cds init` project: the log said
-// "1 app module(s) loaded", CAP's own start page at / lists services and not
-// this route, and the browser's login dialog named no user. Three things to
-// look up before the first screen.
-//
 // A pure function of what it is given, so the text is tested without a
 // server (test/hints.test.mjs); cds-plugin.js feeds it and logs the lines
 // through cds.log, which prefixes them with the logger's id.

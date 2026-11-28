@@ -59,9 +59,8 @@ function config(env = cds.env) {
   const conf = { ...own };
   // A route or a list of them. The shipped defaults are in cds.env already,
   // as CAP merges them; a stand-in for it in a test may leave them out, and
-  // gets them here. An EMPTY list is a setting that cannot mean anything: it
-  // used to fail the start with a TypeError from the start page's list of
-  // apps, far from the setting.
+  // gets them here. An EMPTY list is a setting that cannot mean anything, and
+  // is refused here, by its name.
   const routes = [].concat(conf.routes ?? DEFAULTS.routes);
   if (!routes.length) {
     throw new Error("[cap2ui5] cds.requires.cap2ui5.routes names no route to answer the roundtrip on - leave it " +

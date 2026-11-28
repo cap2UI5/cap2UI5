@@ -513,6 +513,14 @@ machine; take the ratios, not the seconds):
 | 2000 | 181 / 21 kB | 19.6 s / 43.5 s | 1.6 s / 2.9 s |
 | 8000 | 727 / 82 kB | - | 3.3 s / 16.4 s |
 
+- **One roundtrip at a time per process.** The transpiled framework keeps
+  per-request state in statics, so the plugin queues the roundtrips of a
+  process. A small app's roundtrip (`npm run bench`, `ZCL_JS_HELLO`) takes
+  about 14 ms on that machine - some 60 to 70 roundtrips a second per
+  process, whoever they come from - and an async `main( )` that waits holds
+  the queue for as long as it waits (`timeout`, [Configure](#configure)).
+  Beyond that, run more instances: the drafts are in the project's database,
+  so any instance answers any roundtrip.
 - **Linear since 1.146.0.** On 1.145.0 the time grows with n², not
   in abap2UI5's ABAP but in two places of `@abaplint/runtime`: a LOOP ...
   WHERE over a sorted primary key reads every row, and CP rescans the rest
