@@ -90,5 +90,11 @@ test("a component, a cell or a call client._bind( ) cannot resolve is refused wi
   assert.match(lines[5], /^positional: .*one value for val, or the parameters by name as one object/);
   // the value where its name belongs, as ABAP writes _bind( order )
   assert.match(lines[6], /^value: .*binds a field by its NAME, client\._bind\("name"\), not by its value/);
-  assert.match(lines[7], /^mapper: .*custom_mapper .* z2ui5_if_client declares obsolete/);
+  // custom_mapper is z2ui5_if_client's while the runtime declares it - obsolete,
+  // and refused saying what to use instead - and an unknown parameter once
+  // upstream has taken it out of the interface
+  const declared = Boolean(abap.Classes.Z2UI5_IF_CLIENT.METHODS._BIND.parameters.CUSTOM_MAPPER);
+  assert.match(lines[7], declared
+    ? /^mapper: .*custom_mapper .* z2ui5_if_client declares obsolete/
+    : /^mapper: .*no parameter "custom_mapper" - \{ val, /);
 });
