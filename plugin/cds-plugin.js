@@ -23,19 +23,34 @@ const { config } = require("./lib/config");
 // log search as everything else instead of as loose text on stdout.
 const LOG = cds.log("cap2ui5");
 
-// A request-derived reference (the correlation id) made fit for an error
-// body: letters, digits and . _ : - only, at most 128 of them, "-" when
-// nothing is left.
 // When the queue of roundtrips says it is slow: a roundtrip that waited this
 // long for its turn, and no more often than that - see roundtrip( ).
 const QUEUE_WARN_MS = 1000;
 const QUEUE_WARN_EVERY_MS = 10000;
 
+// A request-derived reference (the correlation id) made fit for an error
+// body: letters, digits and . _ : - only, at most 128 of them, "-" when
+// nothing is left.
 const safeRef = (id) => String(id ?? "").replace(/[^A-Za-z0-9._:-]/g, "").slice(0, 128) || "-";
 
 // `cds add cap2ui5`: the first app. cds.add exists only while cds add runs,
 // and the optional call leaves the require( ) unevaluated otherwise.
 cds.add?.register?.("cap2ui5", require("./lib/add").facet());
+
+/** @cap2ui5/agent, as the project installed it - or a start that fails,
+ *  saying which package the setting needs. */
+function agentPackage() {
+  let where;
+  try {
+    where = require.resolve("@cap2ui5/agent", { paths: [cds.root, __dirname] });
+  } catch (e) {
+    if (e?.code !== "MODULE_NOT_FOUND") throw e;
+    throw new Error("[cap2ui5] cds.requires.cap2ui5.agent switches the agent endpoint on, and the endpoint is " +
+      "the package @cap2ui5/agent, which this project does not have - add it (npm add @cap2ui5/agent), or " +
+      "leave the setting out");
+  }
+  return require(where);
+}
 
 cds.on("bootstrap", (app) => {
   const conf = config();                      // cds.requires.cap2ui5 - see lib/config.js
@@ -51,12 +66,17 @@ cds.on("bootstrap", (app) => {
   // CAP awaits 'served' handlers - and only those - before it listens. So the
   // server listens once every app can answer, and a runtime or an app module
   // that fails to load fails the start, as a service implementation that
-  // throws does. It used to be logged while the server listened anyway and
-  // answered every roundtrip with a 500.
+  // throws does.
   let served;
   let origins = new Map();                    // app -> "the project" or its package
+  const afterLoad = [];                       // checks of the loaded apps - the agent's, where it is on
   const ready = Promise.all([boot(), new Promise((resolve) => (served = resolve))])
-    .then(async ([host]) => { origins = await loadApps(conf); listApps(); return host; });
+    .then(async ([host]) => {
+      origins = await loadApps(conf);
+      for (const check of afterLoad) check();
+      listApps();
+      return host;
+    });
   ready.catch(() => {});                 // it fails the start below; nothing else awaits it yet
   cds.once("served", () => { served(); return ready; });
 
@@ -87,7 +107,7 @@ cds.on("bootstrap", (app) => {
         appsDir: conf.apps,
         auth: cds.env.requires?.auth,
         roles: conf.roles,
-        agent: conf.agent?.path,
+        agent: agent?.path,
         production: cds.env.profiles?.includes("production"),
       });
       for (const line of lines) LOG.info(line);
@@ -99,27 +119,21 @@ cds.on("bootstrap", (app) => {
   // (?z2ui5-bundle, carried in the transpiled framework, from the runtime's
   // own commit) - so the browser needs no files from here.
 
-  // Who may call, decided the way CAP decides it for a service annotated with
-  // @requires (check_roles in CAP's HTTP adapter): any one of the roles lets
-  // the user in, so a list means one of them; an anonymous user is asked to
-  // log in (401); an authenticated user without the role is refused (403).
-  // The auth strategy of cds.requires.auth - mocked in development, xsuaa or
-  // ias in production - has run by then, in the chain below. "any" is CAP's
-  // pseudo role for everybody, anonymous included, and no roles (null) let
-  // anybody in as well.
-  //
-  // The guard only decides. CAP's own error middleware, last on the route,
-  // answers - so the login challenge, the status and the error body are the
-  // ones CAP sends for its own services. It used to answer by itself: 401 and
-  // a fresh login challenge to an authenticated user who lacked the role, and
-  // 401 to everybody once requires was a list, because cds.User.is( ) takes
-  // one role, not an array.
   // gzip: the runtime package's compress( ), one per process. The package is
   // an ES module and this file is not, so the middleware is there after an
   // import - which the first request waits for, and no later one notices.
   const compressing = import("@abap2ui5/node-runtime/compress").then((m) => m.compress());
   const compress = (req, res, next) => compressing.then((mw) => mw(req, res, next), next);
 
+  // Who may call, decided the way CAP decides it for a service annotated with
+  // @requires (check_roles in CAP's HTTP adapter): any one of the roles lets
+  // the user in; an anonymous user is asked to log in (401); an authenticated
+  // user without the role is refused (403). The auth strategy of
+  // cds.requires.auth has run by then, in the chain below. "any" is CAP's
+  // pseudo role for everybody, anonymous included, and no roles let anybody
+  // in as well. The guard only decides: CAP's own error middleware, last on
+  // the route, answers - so the login challenge, the status and the error
+  // body are the ones CAP sends for its own services.
   const { roles } = conf;
   const guard = (req, res, next) => {
     const user = cds.context?.user;
@@ -152,8 +166,7 @@ cds.on("bootstrap", (app) => {
   // mounts them per service path, never globally. A route mounted straight on
   // express does not get them: the draft store then sees every caller as
   // "anonymous", a draft created by alice answers to bob, and the owner
-  // binding z2ui5_if_ui5_draft_store promises is void. Measured before this
-  // line existed: two authenticated roundtrips, both stored as "anonymous".
+  // binding z2ui5_if_ui5_draft_store promises is void (auth.test.mjs).
   //
   // guard BEFORE the body parser: it reads cds.context and nothing else, and
   // behind the parser an unauthenticated caller could make the server buffer
@@ -183,26 +196,16 @@ cds.on("bootstrap", (app) => {
     cds.middlewares.errors(),
   );
 
-  // The agent endpoint (lib/agent/) - only where a project switches it on
+  // The agent endpoint - @cap2ui5/agent, only where a project switches it on
   // (cds.requires.cap2ui5.agent). It is mounted the way the roundtrip route
-  // is: CAP's middlewares first, so cds.context.user is the caller; the same
-  // guard and so the same roles; CAP's error middleware last. A tool call
-  // runs `roundtrip` above in process, inside the MCP request - the agent
-  // acts as the user who called, with that user's drafts, and never as
-  // anybody else.
-  if (conf.agent) {
-    const { endpoint } = require("./lib/agent/mcp");
-    app.all(
-      conf.agent.path,
-      ...cds.middlewares.before.filter(Boolean),
-      guard,
-      ...endpoint({ agent: conf.agent, limit: conf.limit, version: require("./package.json").version, ready, roundtrip }),
-      normalize,
-      cds.middlewares.errors(),
-    );
-    LOG.info(`agent endpoint (MCP) at ${conf.agent.path} - audit rows kept ` +
-      (conf.agent.retention ? `${conf.agent.retention} days` : "forever"));
-  }
+  // is, with the same guard, and runs `roundtrip` below in process - the
+  // agent acts as the user who called and never as anybody else. A setting
+  // without the package fails the start: a switch that silently does nothing
+  // is worse than none.
+  const agent = conf.agent && agentPackage().mount({
+    app, setting: conf.agent, routes: conf.routes, limit: conf.limit, ready, roundtrip, guard, normalize,
+  });
+  if (agent) afterLoad.push(agent.checkApps);
 
   // One roundtrip: upstream's express adapter with the framework's ICF handler.
   //
@@ -221,7 +224,7 @@ cds.on("bootstrap", (app) => {
   // slow query holds all the others. So the wait is measured, and a roundtrip
   // that stood in the queue for a second or more says so - at most every ten
   // seconds, since under load every roundtrip would. An async main( ) itself
-  // is bounded by cds.requires.cap2ui5.timeout (lib/define-app.js).
+  // is bounded by cds.requires.cap2ui5.timeout (lib/app/timeout.js).
   async function roundtrip(req, res) {
     const queuedAt = Date.now();
     const ahead = inFlight++;
@@ -261,7 +264,7 @@ cds.on("bootstrap", (app) => {
       // 3). Stripped to what an id is made of, as the framework strips a
       // class name: a UUID or any other well-formed id passes unchanged.
       const ref = safeRef(cds.context?.id);
-      // main( ) ran out of time (lib/define-app.js): 504, so a log and a
+      // main( ) ran out of time (lib/app/timeout.js): 504, so a log and a
       // proxy can tell a roundtrip that was given up from one that broke
       const late = e?.code === MAIN_TIMEOUT;
       LOG.error(`roundtrip ${late ? "timed out" : "failed"} (${ref}):`, e);

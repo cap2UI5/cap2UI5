@@ -1,18 +1,22 @@
 {
   "name": "cap2ui5-workspace",
   "private": true,
-  "description": "cap2UI5 - abap2UI5 as a CAP plugin. plugin/ is the npm package, examples/bookshop a project that uses it, runtime/ the workspace stand-in for the published @abap2ui5/node-runtime.",
+  "description": "cap2UI5 - abap2UI5 as a CAP plugin. plugin/ is the npm package, examples/bookshop a project that shows it, test/project the CAP project the test suite runs in, runtime/ the workspace stand-in for the published @abap2ui5/node-runtime.",
   "workspaces": [
     "runtime",
     "plugin",
-    "examples/bookshop"
+    "abap2js",
+    "agent",
+    "examples/bookshop",
+    "test/project"
   ],
   "scripts": {
     "start": "npm --workspace examples/bookshop start",
-    "test": "npm --workspace examples/bookshop test",
-    "test:browser": "npm --workspace examples/bookshop run test:browser",
-    "cold-test": "npm --workspace examples/bookshop run cold-test",
-    "bench": "npm --workspace examples/bookshop run bench --",
+    "test": "npm --workspace test/project test",
+    "test:postgres": "npm --workspace test/project run test:postgres",
+    "test:browser": "npm --workspace test/project run test:browser",
+    "cold-test": "npm --workspace test/project run cold-test",
+    "bench": "npm --workspace test/project run bench --",
     "consumer-test": "node scripts/consumer-test.mjs",
     "conformance": "node scripts/conformance.mjs",
     "lint": "eslint .",
@@ -21,7 +25,6 @@
   },
   "devDependencies": {
     "eslint": "^10",
-    "@sap/cds": "^10",
-    "@abaplint/core": "^2.120.60"
+    "@sap/cds": "^10"
   }
 }

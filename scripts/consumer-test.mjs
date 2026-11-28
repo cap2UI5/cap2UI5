@@ -13,7 +13,7 @@
  * contribution that depends on a relative path - none of those can fail in
  * the workspace, and all of them fail on `npm i @cap2ui5/cds-plugin`.
  *
- * So this packs both packages exactly as `npm publish` would, installs the
+ * So this packs the packages exactly as `npm publish` would, installs the
  * tarballs into a throwaway CAP project that has never heard of this
  * repository, and drives a roundtrip through them:
  *
@@ -25,12 +25,11 @@
  *     for a caller with no credentials
  *   - the agent endpoint, switched on as a project switches it on, operates
  *     an app over MCP - with the vendored snapshot code from the package
- *   - `npx --no-install cap2ui5 abap2js`, as the README gives it, finds the
- *     plugin's command; without its parser - @abaplint/core, an optional
- *     peer the plugin does not install - it says how to add it, and once
- *     the project has added it, it translates an ABAP app (the client's
- *     ABAP types read from the runtime's downport/) and the translated app
- *     starts
+ *   - the plugin alone installs no ABAP parser and no `cap2ui5` command;
+ *     once the project adds @cap2ui5/abap2js, `npx --no-install cap2ui5
+ *     abap2js`, as the README gives it, translates an ABAP app (the
+ *     client's ABAP types read from the downport/ of the runtime the plugin
+ *     pins) and the translated app starts
  *
  * Not part of `npm test`: it installs from the network and takes about a
  * minute. Run it before publishing, and after anything that touches `files`,
@@ -76,16 +75,17 @@ try {
   console.log(`consumer-test: ${dir}`);
 
   // --- pack, exactly as publish would ---------------------------------------
-  for (const pkg of ["plugin", "runtime"]) {
+  for (const pkg of ["plugin", "runtime", "abap2js", "agent"]) {
     run("npm", ["pack", "--pack-destination", dir], path.join(ROOT, pkg));
   }
   const tarballs = fs.readdirSync(dir).filter((f) => f.endsWith(".tgz"));
-  check("both packages pack", tarballs.length === 2, tarballs.join(" "));
+  check("the four packages pack", tarballs.length === 4, tarballs.join(" "));
+  const translator = tarballs.find((t) => t.startsWith("cap2ui5-abap2js-"));
 
   // --- a CAP project that has never heard of this repository ----------------
-  // on the CAP versions the example is on - which is what a CI leg that tests
+  // on the CAP versions the test project is on - which is what a CI leg that tests
   // another cds major changes, so the package is checked on that major too
-  const example = JSON.parse(fs.readFileSync(path.join(ROOT, "examples", "bookshop", "package.json"), "utf8"));
+  const example = JSON.parse(fs.readFileSync(path.join(ROOT, "test", "project", "package.json"), "utf8"));
   fs.mkdirSync(path.join(proj, "srv", "apps"), { recursive: true });
   fs.writeFileSync(path.join(proj, "package.json"), JSON.stringify({
     name: "cap2ui5-consumer-probe",
@@ -139,22 +139,17 @@ ENDCLASS.
 `);
 
   run("npm", ["install", "--no-audit", "--no-fund",
-    ...tarballs.map((t) => path.join(dir, t))], proj);
-  check("npm install of the tarballs succeeds", true);
+    ...tarballs.filter((t) => t !== translator).map((t) => path.join(dir, t))], proj);
+  check("npm install of the plugin, the runtime and the agent endpoint succeeds", true);
 
-  // --- the translator the package carries -----------------------------------
-  // its parser is an optional peer: not installed with the plugin, and the
-  // command says so - then the project adds it, as the README says
-  let refused;
-  try {
-    run("npx", ["--no-install", "cap2ui5", "abap2js", "abap", "--out", "srv/apps"], proj);
-    refused = { ok: false, out: "it ran without @abaplint/core installed" };
-  } catch (e) {
-    const err = String(e.stderr || e.message);
-    refused = { ok: /npm add -D @abaplint\/core/.test(err), out: err.trim().split("\n")[0] };
-  }
-  check("without @abaplint/core, npx --no-install cap2ui5 abap2js says how to add it", refused.ok, refused.out);
-  run("npm", ["install", "--no-audit", "--no-fund", "--save-dev", "@abaplint/core"], proj);
+  // --- the translator is a package of its own -------------------------------
+  // a project that only serves apps gets neither the parser nor the command;
+  // it adds @cap2ui5/abap2js, as the README says
+  check("the plugin installs no @abaplint/core",
+    !fs.existsSync(path.join(proj, "node_modules", "@abaplint", "core")));
+  check("the plugin installs no cap2ui5 command",
+    !fs.existsSync(path.join(proj, "node_modules", ".bin", "cap2ui5")));
+  run("npm", ["install", "--no-audit", "--no-fund", "--save-dev", path.join(dir, translator)], proj);
 
   let translated;
   try {
@@ -169,14 +164,22 @@ ENDCLASS.
   const surface = probe(`console.log(JSON.stringify(Object.keys(require("@cap2ui5/cds-plugin"))))`, proj);
   const exported = surface.ok ? JSON.parse(surface.out) : [];
   check("require(\"@cap2ui5/cds-plugin\") exports the documented surface",
-    ["defineApp", "defineExit", "t", "z2ui5_cl_ui5_view_builder", "z2ui5_if_client", "ViewBuilder", "abap2js",
-      "purgeAgentLog"]
+    ["defineApp", "defineExit", "t", "z2ui5_cl_ui5_view_builder", "z2ui5_if_client", "ViewBuilder", "purgeDrafts"]
       .every((k) => exported.includes(k)),
     surface.ok ? exported.join(", ") : surface.why);
 
   const pkgDir = path.join(proj, "node_modules", "@cap2ui5", "cds-plugin");
-  for (const f of ["README.md", "CHANGELOG.md", "LICENSE", "cds-plugin.js", "index.cds", "index.js", "index.d.ts", "lib", "bin"]) {
+  for (const f of ["README.md", "CHANGELOG.md", "LICENSE", "cds-plugin.js", "index.cds", "index.js", "index.d.ts", "lib"]) {
     check(`the package contains ${f}`, fs.existsSync(path.join(pkgDir, f)));
+  }
+  const abap2jsDir = path.join(proj, "node_modules", "@cap2ui5", "abap2js");
+  for (const f of ["README.md", "CHANGELOG.md", "LICENSE", "index.js", "index.d.ts", "lib", "bin"]) {
+    check(`@cap2ui5/abap2js contains ${f}`, fs.existsSync(path.join(abap2jsDir, f)));
+  }
+  const agentDir = path.join(proj, "node_modules", "@cap2ui5", "agent");
+  for (const f of ["README.md", "CHANGELOG.md", "LICENSE", "cds-plugin.js", "index.cds", "index.js", "index.d.ts",
+    "lib/vendor/appclient.mjs"]) {
+    check(`@cap2ui5/agent contains ${f}`, fs.existsSync(path.join(agentDir, f)));
   }
   const types = JSON.parse(fs.readFileSync(path.join(pkgDir, "package.json"), "utf8")).types;
   check("its package.json names the type declarations it ships",
@@ -209,7 +212,7 @@ ENDCLASS.
     (async () => {
       cds.model = cds.compile.for.nodejs(await cds.load("*"));
       await cds.connect.to("db");
-      const { purgeAgentLog } = require("@cap2ui5/cds-plugin");
+      const { purgeAgentLog } = require("@cap2ui5/agent");
       console.log(await purgeAgentLog({ days: 1 }));
     })().catch((e) => { console.error(e); process.exit(1); });
   `, proj);

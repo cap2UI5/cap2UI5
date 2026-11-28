@@ -460,44 +460,6 @@ export { z2ui5_cl_ui5_view_builder as ViewBuilder };
 /** How a value maps to an ABAP type; used by defineApp, exported for tests. */
 export function shapeOf(value: unknown, path?: string[]): unknown;
 
-export interface Abap2jsOptions {
-  /** The file the source came from: named in messages, and the class's file name. */
-  file?: string;
-  /** Directories the other classes a class names are read from - `zcl_other=>ty_s_row`. */
-  lib?: string[];
-  /** Written into the header as `// @origin <origin>`. */
-  origin?: string;
-  /** "esm" (the default) imports from cap2ui5, "cjs" requires it. */
-  format?: "esm" | "cjs";
-}
-
-/**
- * Translate an abap2UI5 app class - a class implementing z2ui5_if_app - into
- * a cap2UI5 app module, line for line: `code` registers the app under the
- * class's name with defineApp( ). What the translation does not know it
- * refuses with an Abap2jsError naming file, row and column.
- */
-export function abap2js(source: string, options?: Abap2jsOptions): { name: string; code: string };
-
-/** What abap2js throws for a class it does not translate. */
-export class Abap2jsError extends Error {
-  file: string;
-  row?: number;
-  col?: number;
-}
-
-/**
- * Deletes the agent endpoint's audit rows (cap2ui5.AgentLog) older than
- * `days` - of every user - and answers how many it deleted. `days` defaults to
- * cds.requires.cap2ui5.agent.retention, else 90; 0 or false deletes nothing.
- * The endpoint runs the same DELETE itself at most once an hour; this is for
- * a project that prefers a scheduled job (and sets the retention to 0 so the
- * endpoint leaves the log to it). Runs in cds.context's transaction where
- * there is one - in a multitenant application, call it per tenant inside
- * cds.tx({ tenant }).
- */
-export function purgeAgentLog(options?: { days?: number | false; now?: Date }): Promise<number>;
-
 /**
  * Deletes the expired drafts (cap2ui5.Drafts) - of every user - and answers
  * how many it deleted: the DELETE the framework runs when somebody opens an

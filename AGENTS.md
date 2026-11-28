@@ -1,259 +1,150 @@
 # AGENTS.md — cap2UI5
 
-Guidance for AI agents and contributors. Read before making any change.
+Guidance for AI agents and contributors. Read before making any change. The
+rules say what holds and why in one sentence; the incident behind each one is
+in `plugin/CHANGELOG.md` and `docs/adr/`.
 
 ## What this is
 
 abap2UI5 hosted in CAP. **There is no port here**: `plugin/` is hand-written
-JavaScript that boots upstream's transpiled runtime
-(`@abap2ui5/node-runtime`), keeps its drafts in a CDS entity and lets apps be plain
-JavaScript classes - about 1,900 lines of code for that, with `abap2js`
-(2,100) and the agent endpoint (700) beside it as optional parts. It was
-~570 lines when ADR-008 was written; count again before quoting a number. Everything the framework does, upstream's ABAP does. The
-decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
+JavaScript that boots upstream's transpiled runtime (`@abap2ui5/node-runtime`),
+keeps its drafts in a CDS entity and lets apps be plain JavaScript classes.
+Everything the framework does, upstream's ABAP does
+(`docs/adr/adr-008-host-not-port.md`). The agent endpoint and the translator
+are packages of their own beside it, which the plugin does not depend on.
+Count lines again before quoting a number.
 
 ## Layout, and what is generated
 
 | path | hand-written? |
 |---|---|
-| `plugin/` | yes — the npm package `@cap2ui5/cds-plugin` (`cap2ui5` up to 0.2.0) |
-| `plugin/lib/agent/vendor/` | **no — abap2UI5/mcp-server's `viewxml.mjs`, `snapshot.mjs`, `appclient.mjs`, vendored unchanged at the commit `source.json` records by `scripts/vendor-agent.mjs` (`npm run agent-vendor`), never edited.** `agent-vendor.test.mjs` fails on a hand edit; a fix goes upstream, then re-vendor. ADR-009. |
-| `examples/bookshop/` | yes — a CAP project using it; **the test suite lives here** because the tests need a project. `srv/catalog-service.cds` is deliberately an ordinary CAP service that knows nothing about cap2UI5: it is what `coexistence.test.mjs` drives to prove the plugin is a guest in the project and not its host. |
+| `plugin/` | yes — `@cap2ui5/cds-plugin`. `lib/app/` is `defineApp`'s client: `before.js` (asked before `main( )`), `client.js` (the facade), `flush.js` (after `main( )`), over `types.js`, `interface.js`, `proxy.js`, `timeout.js` |
+| `abap2js/` | yes — `@cap2ui5/abap2js`: the translator and the `cap2ui5` command, with `@abaplint/core` as its dependency |
+| `agent/` | yes — `@cap2ui5/agent`: the MCP endpoint, `cap2ui5.AgentLog`, `purgeAgentLog( )`. The plugin loads it only where `cds.requires.cap2ui5.agent` is set |
+| `agent/lib/vendor/` | **no — abap2UI5/mcp-server's files at the commit `source.json` records (`npm run agent-vendor`), never edited.** A fix goes upstream, then re-vendor. ADR-009 |
+| `examples/bookshop/` | yes — the example to read. No tests run in it; `example.test.mjs` starts it |
+| `test/project/` | yes — the CAP project **the suite runs in**; its `srv/apps/` are fixtures. `srv/catalog-service.cds` knows nothing about cap2UI5 on purpose (`coexistence.test.mjs`) |
 | `runtime/package.json`, `runtime/README.md` | yes — the stand-in's manifest |
-| `runtime/output/`, `runtime/setup/`, `runtime/downport/` | **no — upstream's transpiled output and the ABAP it came from, never edited, never committed.** `scripts/assemble-runtime.sh` fills them from the published package (`--package X.Y.Z`) or from an upstream build. |
-| `docs/adr/`, `docs/transpiler-roadmap.md` | the decision records and the roadmap ADR-006 cites, moved here from `cap2UI5/builder-abap2UI5-js`, where they were made and which is being archived. They are the only copies this project keeps; historical paths in them refer to that repository. |
+| `runtime/output/`, `setup/`, `downport/`, `srv/` | **no — upstream's, never edited, never committed.** `scripts/assemble-runtime.sh` fills them |
+| `docs/adr/`, `docs/transpiler-roadmap.md` | the decision records, moved from the archived `cap2UI5/builder-abap2UI5-js`; historical paths in them refer to that repository |
 
 ## Rules
 
-- **The host layer is the runtime package's, not a copy of it.** What a Node
-  host of the framework needs - booting it, one request at a time, stateful
-  sessions, gzip - is exported by `@abap2ui5/node-runtime`'s entry point
-  (`initialize( )`, `exclusive( )`, `withSession( )`, `compress( )`;
-  `srv/hostcore.mjs` there explains each), and the plugin calls those
-  (`lib/runtime.js`, `cds-plugin.js`). It kept copies of three of them once,
-  "until a runtime release exports it", and they stayed for releases after
-  one did. So before writing host code here, read `srv/host.d.ts` of the
-  pinned runtime; what is missing there for every host is a change upstream,
-  and what stays here is what only CAP has: the user, the tenant, the
-  database, the model. `abi-gate.test.mjs` holds the exports the plugin calls.
-- **"Unsupported" must say WHOSE limitation it is.** Nested structures were
-  called a framework limitation in three documents; they were a guard in
-  `defineApp`'s own type derivation, written when only scalars had been tried,
-  and the framework had carried the whole tree all along. Before writing that
-  something cannot be done, try it.
-- **Never change behaviour without a test in `examples/bookshop/test/`.** The
-  suite is the gate; there is no other.
-- **The client IS `z2ui5_if_client`, by its own names - and stays it.** An
-  app's `main( client )` gets every method of the interface under its ABAP
-  name, a method's preferred parameter as its one positional argument and the
-  parameters by name as one object with the ABAP names; the constants are the
-  interface's (`client.cs_event`, `z2ui5_if_client.cs_event`), the view
-  builder is `z2ui5_cl_ui5_view_builder`, called the same way. That is what
-  lets an ABAP app port line by line and abap2UI5's documentation describe
-  the JavaScript method. So: no JavaScript-only names, no renamed parameters,
-  no defaults the ABAP signature does not have (`nest_view_display( )`'s
-  `method_insert` is required because ABAP requires it). What JavaScript
-  forces - a field bound by its NAME, a placeholder for what only resolves
-  after `main( )` - is documented as a difference, not hidden behind a new
-  name. `nav.test.mjs` holds the client's names to the interface's in both
-  directions, so a method upstream adds fails the suite until it is wired.
-  The constant groups are read from the runtime, and so are the parameters
-  of every method - their names, which one is preferred and which are
-  required (`signature( )` in `lib/define-app.js`, from the transpiled
-  interface's `METHODS`). There is no table of them here to keep in step: a
-  parameter upstream adds is one the client takes on the runtime that has
-  it, and one the runtime in use does not declare is refused, naming the
-  runtime. What a parameter DOES still has to be wired where the client
-  uses it, with a test - as `view_display( )`'s `transition` in
-  `nav.test.mjs`.
-  A METHOD upstream adds has to be wired in the client, with a test: the
-  client is the interface by its names, and `nav.test.mjs` fails on a
-  method the interface has and the client lacks - or the other way round,
-  as when upstream takes one away (`window_get_row( )`, `_bind_edit( )` and
-  the `*_model_update( )` no-ops left with 1.151.0, and left the client).
-- **A client method that composes view XML needs a BROWSER test, not only a
-  wire test.** The wire tests play the frontend's part by hand, so they can
-  feed an event argument the real page would never send — which is how
-  event arguments were missing while `nav.test.mjs` was green and the browser
-  was not. When the browser finds such a thing, add the assertion to the wire
-  test as well, so the cheap test fails next time too.
-- **Read `z2ui5_if_client`'s ABAP Doc before wiring one of its methods into the
-  client.** The two lifecycle predicates answer different questions than
-  their names suggest: `check_on_init( )` is the first roundtrip of *this
-  instance*, `check_on_navigated( )` is also every return from a navigation
-  or a value help, and it is the one to render in. And a parameter may be
-  passed BY REFERENCE for a reason: `window_bind_tab( )`'s `total` is read
-  anew for every response when it is an attribute, which is why the client
-  takes it by name.
-- **A QUERY of the client answers inside a synchronous `main( )`, so it is
-  asked of the framework BEFORE `main( )` runs** (`check_on_nav_back( )`,
-  `get_nav_tag( )`, every name `get_start_param( )` could be asked for), or
-  kept by the client itself where it is about this `main( )`
-  (`check_nav_pending( )`). A CALL is queued and made after it.
-- **The wire the tests read is protocol 3** (abap2UI5/protocol):
-  `S_FRONT.VIEWS`, `NAV` and `ACTIONS`, through the helpers in
-  `test/server.mjs` - one place, so the next break of the wire is one edit.
-  A request that starts an app from a route sends it parsed, as
-  `S_FRONT.ROUTE`; the backend reads none out of `HASH`.
-- **Everything the plugin assumes about `@sap/cds` beyond its documentation
-  goes into `cap-abi.test.mjs`.** `abi-gate.test.mjs` guards what the
-  transpiler emits; this is the other surface. The one that matters is the
-  SHAPE of `cds.middlewares.before`. The list is documented; what an entry is,
-  is not. Measured: a function, or an array (`trace` and `ctx_model` answer an
-  empty one when they are off), which express flattens away. The plugin spreads
-  the list onto the route, so the gate asserts that every entry is a function
-  or an array of functions, and that the auth middleware is one of those
-  functions. It checks this across all six auth kinds (`mocked`, `basic`,
-  `dummy`, `jwt`, `xsuaa`, `ias`). `@sap/xssec` is a devDependency of the
-  example, so the production three are covered by the gate and not merely
-  assumed. The one other assumption is `cds.app._app_links`, which CAP's
-  start page reads to list the apps. It needs a served app, so its gate is
-  the start-page test in `coexistence.test.mjs`; if it breaks, only that list
-  is lost.
-- **Access is decided and answered the way CAP does it for `@requires`.**
-  The guard mirrors `check_roles` in CAP's HTTP adapter: one of the roles lets
-  the user in, `any` lets everybody in, anonymous users get 401 and
-  authenticated users without the role get 403. It only decides. The answer
-  comes from `cds.middlewares.errors()`, mounted last on the route as CAP
-  mounts it behind its protocol adapters, so the login challenge and the error
-  body are CAP's. `auth.test.mjs` holds that behaviour; the plugin does not
-  call `req._login()` or any other internal itself.
-- **`z2ui5_cl_ui5_view_builder` renders nothing itself.** It records the
-  app's chain and replays it after `main( )` against the transpiled
-  `z2ui5_cl_ui5_view_builder`, so the view is upstream's, byte for byte, and
-  there is no second copy of the builder to keep in step. Its `stringify( )`
-  answers a thenable that renders after `main( )` for the same reason. The
-  one piece of JavaScript of its own is `escape_literal( )`, which a
-  synchronous chain cannot await. `view-builder.test.mjs` pins it to the ABAP
-  method, and the replay to the same chain driven directly against the class.
-- **`abap2js` refuses rather than guesses.** `plugin/lib/abap2js.js`
-  translates the part of ABAP an abap2UI5 app is written in, and anything
-  else throws an `Abap2jsError` with file, row and column. Widening it takes
-  the construct, a case in `abap2js.test.mjs` (in the fixture if the
-  construct is supported, among the refusals if not), and a run of the
-  translated samples beside their transpiled originals: a translation that
-  reads right is not the gate - one that behaves as the ABAP does is. The
-  client's types come from the runtime's `downport/`, not from a list here.
-- **Every new `abap.*` or `z2ui5_*$*` touchpoint in `plugin/lib/` goes into
-  `abi-gate.test.mjs`.** The plugin couples to the transpiler's emission
-  format (static `ATTRIBUTES`/`METHODS` maps, `constructor_( )`, `~` → `$`),
-  which is not a published contract; that test is where a transpiler bump
-  must fail.
+### The gate
+
+- **Never change behaviour without a test in `test/project/test/`.** The suite
+  is the gate; there is no other.
+- `npm test` stays browserless; browser tests are `*.e2e.mjs`
+  (`npm run test:browser`). **A client method that composes view XML needs a
+  browser test too**: the wire tests feed the frontend's part by hand and can
+  send what the real page never would. What the browser finds goes into the
+  wire test as well.
+- **A test about what the route answers serves the project in-process**
+  (`serve()`, `cds.test`); **a test about the process boots a child**
+  (`boot()`): a failing start, a restart, a production profile, the startup
+  log.
+- **The suite runs on PostgreSQL too** (`npm run test:postgres`, the
+  `postgres` job). Tests reach the database through `cds.ql`, never SQL text.
+  A test that only holds on SQLite goes on the exclusion list in
+  `test/project/package.json`, with the reason.
+- **The workspace cannot prove the PACKAGE.** `npm run consumer-test` packs
+  every package as `npm publish` would and drives a roundtrip in a throwaway
+  project. Run it after anything that touches `files`, `main`, `exports`,
+  `index.cds` or how a package is located.
+- `no-undef` stays an error; CAP's `SELECT` etc. come from `cds.ql`.
+
+### The coupling to upstream and to CAP
+
+- **The host layer is the runtime package's.** Booting, one request at a time,
+  stateful sessions and gzip are `@abap2ui5/node-runtime`'s exports
+  (`srv/host.d.ts`); what every host needs and is missing there is a change
+  upstream. What stays here is what only CAP has: the user, the tenant, the
+  database, the model.
+- **Every `abap.*` or `z2ui5_*$*` touchpoint in `plugin/lib/`, `agent/lib/` or
+  `abap2js/lib/` goes into `abi-gate.test.mjs`.** The transpiler's emission
+  format is not a published contract; that test is where a bump must fail.
+- **Everything assumed about `@sap/cds` beyond its documentation goes into
+  `cap-abi.test.mjs`** - above all the shape of `cds.middlewares.before`,
+  across all six auth kinds.
+- **The wire the tests read is protocol 3**, through the helpers in
+  `test/server.mjs` only.
+- **Not everything upstream does works here - boot the runtime and check
+  before documenting it.** Where upstream reaches for the ABAP system it finds
+  nothing (the user exit is discovered via the class repository, which
+  open-abap lacks; `defineExit` binds it instead).
+- **A host-side implementation of a framework interface follows the shipped
+  one**, method by method - not only the interface's declaration.
+- **"Unsupported" says WHOSE limitation it is.** Try it before writing that
+  something cannot be done.
+
+### The client
+
+- **The client IS `z2ui5_if_client`, by its own names.** Every method under
+  its ABAP name, the preferred parameter positional, the rest by name; the
+  constants and the parameter signatures are read from the runtime
+  (`lib/app/interface.js`), never listed here. No JavaScript-only names, no
+  renamed parameters, no defaults ABAP does not have. What JavaScript forces
+  (a field bound by its NAME, a placeholder resolved after `main( )`) is
+  documented as a difference. `nav.test.mjs` holds the names in both
+  directions, so a method upstream adds or removes fails the suite until it
+  is wired.
+- **Read `z2ui5_if_client`'s ABAP Doc before wiring a method.**
+  `check_on_init( )` is this instance's first roundtrip; `check_on_navigated( )`
+  is also every return, and the one to render in.
+- **A QUERY answers inside a synchronous `main( )`, so it is asked BEFORE
+  `main( )`** (`lib/app/before.js`) or kept by the client; **a CALL is
+  recorded and made after it** (`lib/app/flush.js`).
+- **`z2ui5_cl_ui5_view_builder` renders nothing itself**: it replays the app's
+  chain against the transpiled class after `main( )`. Its one piece of own
+  JavaScript, `escape_literal( )`, is pinned to the ABAP method.
+- **`abap2js` refuses rather than guesses.** Widening it takes the construct,
+  a case in `abap2js.test.mjs`, and a run of the translated samples beside
+  their transpiled originals: the gate is behaving as the ABAP does.
+
+### Security and the roundtrip
+
+- **An authorization check compares PRESENCE, never truthiness.**
+  `r.owner && r.owner !== who()` made an ownerless draft everybody's; `??`
+  does not catch `""`, and `who( )` refuses an empty user id.
+- **Access is decided the way CAP decides `@requires`**, and answered by
+  `cds.middlewares.errors()`, so the challenge and the error body are CAP's.
+  The guard goes **in front of** the body parser; the route stays **behind**
+  `cds.middlewares.before`, without which every draft is `anonymous`.
 - **The agent endpoint acts as the CAP user who calls, never as anybody
-  else.** A tool call runs the route's own roundtrip handler in process,
-  inside the MCP request, so `cds.context` - and with it the drafts' owner -
-  is the caller's; there is no technical user and no HTTP hop. Every
-  behaviour of it - opt-in, `confirm`/`forbidden`, handover, owner scoping,
-  the audit row and its retention, the restore after a restart - has its test in the
-  `agent*.test.mjs` files. ADR-009 records why it looks the way it does.
-- **A roundtrip is never abandoned inside the framework.** Roundtrips run one
-  at a time per process because the transpiled framework keeps per-request
-  state in statics; one given up halfway would wake up later inside another
-  user's. The only place a limit may cut is around an app's `main( )`
-  (`cds.requires.cap2ui5.timeout`, `within( )` in `lib/define-app.js`), which
-  touches nothing but its own instance while it waits. `timeout.test.mjs`
-  holds it.
-- `npm test` stays browserless. Browser tests are `*.e2e.mjs`, run by
-  `npm run test:browser`.
-- **A test about what the route answers serves the example in-process with
-  `cds.test`** (`serve()` in `test/server.mjs`), the way a CAP project tests
-  itself and the path a consumer's own suite takes through the plugin. **A
-  test about the process boots it as a child** (`boot()`): a start that
-  fails, a restart, a production profile, a setting only the environment can
-  make, or what the log says while the server starts. `cds.test.log()`
-  clears its capture before each test, so startup lines are only visible to
-  a child.
-- **The workspace cannot prove the PACKAGE.** Every test here runs with
-  `@cap2ui5/cds-plugin` and `@abap2ui5/node-runtime` as workspace symlinks,
-  so a missing entry in `files`, a `main` pointing at nothing, or a model
-  contribution that only resolves relatively cannot fail - and all of them
-  fail on `npm i @cap2ui5/cds-plugin`.
-  `npm run consumer-test` packs both packages as `npm publish` would, installs
-  the tarballs into a throwaway CAP project and drives a roundtrip. Run it
-  before publishing and after anything that touches `files`, `main`,
-  `exports`, `index.cds` or how the runtime is located. It is not in
-  `npm test`: it installs from the network and takes about a minute.
-- `no-undef` is an error and stays one: CAP's `SELECT` etc. are imported from
-  `cds.ql`, not used as globals.
-- **An authorization check compares PRESENCE, never truthiness.** The draft
-  store's three owner checks read `if (r.owner && r.owner !== who())`, which
-  made a row with a `NULL` or `""` owner readable and writable by everybody
-  instead of by nobody — a security review found it and a proof of concept
-  confirmed it: bob replayed alice's draft id against a blanked row and was
-  served her app state. `&&` in front of a comparison in an access check is
-  the bug: it turns a missing value into a wildcard. The same rule covers
-  the identity side — `?? ` catches `null` and `undefined` but not `""`, and
-  `cds.User` permits an empty id, so `who( )` refuses one rather than storing
-  a draft under an owner it cannot tell from anybody else's.
-- **The guard goes in FRONT of the body parser.** Behind it, an
-  unauthenticated caller makes the server buffer the whole body before the
-  401 is decided. The guard reads `cds.context` and nothing else, so nothing
-  requires it to be later in the chain.
-- The route must stay behind `cds.middlewares.before`. Without it
-  `cds.context` does not exist and every draft is `anonymous` — the first
-  version of the plugin got that wrong; `auth.test.mjs` is the proof it stays
-  fixed.
-- **Not everything upstream does works here — measure before believing it.**
-  The runtime is real ABAP on open-abap, and where upstream reaches for the
-  ABAP system it finds nothing. The user exit is the case in point: it is
-  *discovered* in ABAP, by asking the class repository which classes implement
-  `Z2UI5_IF_UI5_EXIT` (`SEO_INTERFACE_IMPLEM_GET_ALL`, XCO on cloud). open-abap
-  has neither, the call raises, and the framework's own `CATCH cx_root` reads
-  that as "no exit configured" — so the CSP, the security headers, the
-  bootstrap URL and the draft expiry were silently unreachable, with no error
-  anywhere. `defineExit` binds the exit to the same static
-  `exit_instantiate( )` writes to. Before documenting a framework behaviour,
-  boot the runtime and check it.
-- **A host-side reimplementation of a framework contract follows the shipped
-  one.** The CDS draft store's `cleanup( )` hard-coded four hours while
-  upstream's store asks the user exit for `draft_exp_time_in_hours`; a project
-  raising the expiry got drafts the framework would have resumed and the
-  cleanup had already deleted. When reimplementing an interface, read what the
-  shipped implementation does with each method, not only what the interface
-  declares.
+  else**: a tool call runs the route's own roundtrip in process. Every
+  behaviour of it has its test in `agent*.test.mjs`.
+- **A roundtrip is never abandoned inside the framework** - per-request state
+  lives in statics, one at a time per process. The only place a limit may cut
+  is around an app's `main( )` (`lib/app/timeout.js`, `timeout.test.mjs`).
+- **A switch that silently does nothing is worse than none.** A setting the
+  plugin does not know, or one whose package is missing, fails the start.
+
 - Commit messages say why. The history of this project is its evidence.
 
 ## Publishing
 
-**The package is `@cap2ui5/cds-plugin`; the plugin's own names are
-`cap2ui5`.** An app requires the package by its name, and so does what
-abap2js writes. What a project configures - `cds.requires.cap2ui5`,
-`cds add cap2ui5`, the command `cap2ui5`, the namespace of
-`cap2ui5.Drafts`, the logger, the `"cap2ui5": { "apps" }` a package declares
-its apps with - is the plugin's, and keeps its name. The unscoped `cap2ui5`
-was withdrawn from npm; since 2026-09-30 the name holds a deprecated
-placeholder of this project (`0.0.1-placeholder`), whose command only prints
-where to go and fails. Docs, comments and messages still write the command
-as `npx --no-install cap2ui5 abap2js`, which runs the project's own or
-fails: a bare `npx cap2ui5` where the plugin is not installed downloads
-whatever npm has under the name, and that is never the plugin.
+**The packages are `@cap2ui5/cds-plugin`, `@cap2ui5/abap2js` and
+`@cap2ui5/agent`; the plugin's own names are `cap2ui5`** - `cds.requires.cap2ui5`,
+`cds add cap2ui5`, the command, the `cap2ui5.*` entities, the logger. The
+unscoped npm name `cap2ui5` is a deprecated placeholder; write the command as
+`npx --no-install cap2ui5 abap2js`, never a bare `npx cap2ui5`.
 
-Every change a user of the package would notice gets a line under
-`Unreleased` in `plugin/CHANGELOG.md`, in the same pull request. The PR that
-prepares a release bumps `plugin/package.json` and moves those lines under the
-new version.
+Every change a user would notice gets a line under `Unreleased` in that
+package's `CHANGELOG.md`, in the same pull request. **The packages are
+versioned in lockstep** (`packages.test.mjs`): the release PR bumps all three
+`package.json` files and moves the lines under the new version.
 
-A tag `v<version>` publishes `plugin/` as the npm package
-`@cap2ui5/cds-plugin` (`.github/workflows/release.yml`) by **trusted
-publishing** - OIDC with
-provenance, no token. The workflow refuses a tag that disagrees with
-`plugin/package.json`, fills `runtime/` from the PUBLISHED `@abap2ui5/node-runtime`
-(the version `plugin/package.json` pins, or the latest), and runs lint, the
-suite and `consumer-test` on the tagged commit before it publishes. npm lets a
-package be pointed at a workflow only once the package exists, so the first
-version is published by hand once (`npm login`, then
-`npm publish --workspace plugin --access public`) and the package's Settings →
-Trusted Publisher on npmjs.com is pointed at this repository and
-`release.yml` - or, from the command line,
-`npx npm@11 trust github @cap2ui5/cds-plugin --file release.yml --repo cap2UI5/cap2UI5 --allow-publish`.
-Both steps, one right after the other: v0.2.0 was tagged while `cap2ui5`
-existed without a Trusted Publisher, and its release failed with
-`ENEEDAUTH`. Until the package exists the publish step ends in a warning
-naming that bootstrap; once `@cap2ui5/cds-plugin` exists on the registry, a
-failed publish is an error. Publish only against a published `@abap2ui5/node-runtime` - never against the
-stand-in, which no consumer can install.
+A tag `v<version>` publishes all three (`.github/workflows/release.yml`) by
+trusted publishing - OIDC with provenance, no token - after lint, the suite
+and `consumer-test` ran against the PUBLISHED runtime the plugin pins. npm
+lets a package be pointed at a workflow only once it exists, so a package's
+first version is published by hand (`npm publish --workspace <dir> --access
+public`) and its Trusted Publisher set right after - the commands are in the
+header of `release.yml`. Until then its publish step only warns. Never
+publish against the runtime stand-in.
 
 ## Running
 
 See README.md. `npm run lint && npm test` before every push; `cold-test`,
-`bench` and `test:browser` when the plugin or the runtime changed.
+`bench`, `test:browser` and `consumer-test` when a package or the runtime
+changed.

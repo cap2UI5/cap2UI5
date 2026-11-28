@@ -12,15 +12,14 @@
 //     "body_parser": { "limit": "10mb" },            optional, see below
 //     "compression": false,                          gzip off - the runtime's compress( )
 //     "timeout": 60000,                              ms an async main( ) may take; 0 or false: no limit
-//     "agent": true                                  the MCP endpoint - lib/agent/, off by default
+//     "agent": true                                  the MCP endpoint - @cap2ui5/agent, off by default
 //   } } }
 //
-// 0.1.0 read a top-level cds.cap2ui5 with `requires` for the roles. That is
-// still read, over the defaults, with a warning naming the new place.
+// 0.1.0 read a top-level cds.cap2ui5. It is no longer read, and its presence
+// fails the start: ignored, its `requires` would fall back to the default
+// role - access widened by an upgrade.
 const cds = require("@sap/cds");
-const { agentConfig } = require("./agent/policy");
 
-const LOG = cds.log("cap2ui5");
 
 /** The shipped settings - package.json#cds.requires.cap2ui5, which CAP merges
  *  into cds.env before a project's own apply. */
@@ -51,24 +50,17 @@ function timeoutOf(value) {
  * @param {object} [env] cds.env, or a stand-in for it in a test
  */
 function config(env = cds.env) {
-  const own = env.requires?.cap2ui5;
-  const legacy = env.cap2ui5;
-  if (own === false || legacy === false) return null;
-  const conf = { ...own };
-  if (legacy && typeof legacy === "object") {
-    LOG.warn(
-      "cds.cap2ui5 is deprecated - move these settings to cds.requires.cap2ui5, " +
-        "and `requires` to `roles` there. They apply until then.",
-    );
-    const { requires, ...rest } = legacy;
-    Object.assign(conf, rest);
-    if ("requires" in legacy) conf.roles = requires;
+  if (env.cap2ui5 !== undefined) {
+    throw new Error("[cap2ui5] cds.cap2ui5 is no longer read - move its settings to cds.requires.cap2ui5, " +
+      "and `requires` to `roles` there (or `cds.requires.cap2ui5: false` to switch the plugin off)");
   }
+  const own = env.requires?.cap2ui5;
+  if (own === false) return null;
+  const conf = { ...own };
   // A route or a list of them. The shipped defaults are in cds.env already,
   // as CAP merges them; a stand-in for it in a test may leave them out, and
-  // gets them here. An EMPTY list is a setting that cannot mean anything: it
-  // used to fail the start with a TypeError from the start page's list of
-  // apps, far from the setting.
+  // gets them here. An EMPTY list is a setting that cannot mean anything, and
+  // is refused here, by its name.
   const routes = [].concat(conf.routes ?? DEFAULTS.routes);
   if (!routes.length) {
     throw new Error("[cap2ui5] cds.requires.cap2ui5.routes names no route to answer the roundtrip on - leave it " +
@@ -88,11 +80,12 @@ function config(env = cds.env) {
     // with both on, the proxy finds the body compressed and leaves it alone
     compression: conf.compression !== false,
     // how long an async main( ) may hold the roundtrips behind it, in ms;
-    // 0 - no limit (lib/define-app.js, within( ))
+    // 0 - no limit (lib/app/timeout.js, within( ))
     timeout: timeoutOf(conf.timeout),
     // the MCP endpoint agents operate apps through - null, the default, is
-    // no route at all; see lib/agent/policy.js for what the object holds
-    agent: agentConfig(conf.agent, routes),
+    // no route at all; anything else is @cap2ui5/agent's to read (its
+    // lib/policy.js), and the start fails where that package is missing
+    agent: conf.agent === undefined || conf.agent === null || conf.agent === false ? null : conf.agent,
   };
 }
 

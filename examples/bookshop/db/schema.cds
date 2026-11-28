@@ -1,5 +1,5 @@
-// The example project's OWN model - nothing cap2UI5-specific. The Books app
-// in srv/apps/books.js reads it with cds.ql, like any CAP handler would.
+// The project's own model - nothing cap2UI5-specific. srv/apps/books.js reads
+// and writes it with cds.ql, as any CAP handler does.
 namespace my.bookshop;
 
 entity Books {

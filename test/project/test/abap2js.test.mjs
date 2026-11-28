@@ -1,0 +1,465 @@
+// abap2js - an abap2UI5 app class, translated into a cap2UI5 app module.
+//
+// The claim: what comes out is the app the ABAP class is, line for line, and
+// what abap2js does not know it refuses with file, row and column instead of
+// guessing. fixtures/abap2js/zcl_js_translated.clas.abap is an app written
+// the way abap2UI5's samples are, one construct of each kind; its translation
+// is srv/apps/zcl_js_translated.js, held here to the generator byte for byte
+// and then driven over the wire. That the translation BEHAVES as the ABAP
+// does is measured where the corpus is - cap2UI5/samples runs every
+// translated sample beside its transpiled original - not here, because the
+// transpiler is not a dependency of this repository.
+import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
+import fs from "node:fs";
+import { createRequire } from "node:module";
+import os from "node:os";
+import path from "node:path";
+import { test } from "node:test";
+import { TEST_PROJECT, actions, post, serve, viewXml } from "./server.mjs";
+
+const require = createRequire(import.meta.url);
+const { t } = require("@cap2ui5/cds-plugin");
+const { abap2js, Abap2jsError } = require("@cap2ui5/abap2js");
+const s = serve();
+
+const FIXTURE = path.join(TEST_PROJECT, "test/fixtures/abap2js/zcl_js_translated.clas.abap");
+const MODULE = path.join(TEST_PROJECT, "srv/apps/zcl_js_translated.js");
+const CLI = require.resolve("@cap2ui5/abap2js/bin/cap2ui5.js");
+const REGENERATE = "npx --no-install cap2ui5 abap2js test/fixtures/abap2js/zcl_js_translated.clas.abap --out srv/apps " +
+  '--origin "cap2UI5 test/project" (in test/project)';
+
+const APP = "ZCL_JS_TRANSLATED";
+const P = (o) => post(s.url, { user: "alice", ...o });
+const view = viewXml;
+const custom = actions;
+
+test("the translation of the fixture is the app in srv/apps, byte for byte", () => {
+  const { name, code } = abap2js(fs.readFileSync(FIXTURE, "utf8"), {
+    file: FIXTURE, format: "cjs", origin: "cap2UI5 test/project test/fixtures/abap2js/zcl_js_translated.clas.abap",
+  });
+  assert.equal(name, APP);
+  assert.equal(code, fs.readFileSync(MODULE, "utf8"), `srv/apps/zcl_js_translated.js is stale - ${REGENERATE}`);
+});
+
+test("line for line: a view chain keeps its calls, lines and columns", () => {
+  const code = fs.readFileSync(MODULE, "utf8");
+  assert.match(code, /^ {4}const view = z2ui5_cl_ui5_view_builder\.factory\(\)\n {8}\.ele\(\{ n: "View", ns: "mvc" \}\)\n {12}\.a\(\{ n: "xmlns", {5}v: "sap\.m" \}\)$/m,
+    "one call per line, at the ABAP's column, the v: column aligned as the v = column was");
+  assert.match(code, /^const ty_s_row = \{\n {2}title: {4}"",\n {2}count: {4}0,\n {2}selected: false,\n\};$/m,
+    "a structure TYPES is a module constant, its components aligned as the ABAP aligned them");
+  assert.match(code, /this\.client\._bind\("s_order-title"\)/, "_bind( ) takes the field's name");
+  assert.match(code, /this\.client\.nav_app_call\("ZCL_JS_HELLO"\)/, "nav_app_call( NEW zcl( ) ) names the app");
+  assert.match(code, /^ {2}on_event\(\) \{\n {4}let selected;\n {4}let row = \{ \.\.\.ty_s_row \};\n/m,
+    "declared on top, where ABAP has every local: what a WHEN declares (a case clause is no block), and a LOOP's " +
+    "row read after ENDLOOP - which starts initial, as in ABAP, should the loop not run");
+  assert.match(code, /^ {8}for \(row of this\.t_rows\.filter\(/m, "the loop writes the row declared on top");
+  assert.match(code, /^ {4}let pair = \{ \.\.\.ty_s_pair, row: \{ \.\.\.ty_s_pair\.row \} \};$/m,
+    "a local of the class's structure type is a copy of its constant all the way down - a spread one level deep " +
+    "shared the inner structure with the module, and every request after wrote into it");
+  assert.match(code, /^ {8}\.a\(\{ n: "state", {8}b: this\.active \}\)\n {8}\/\/ the text beside it: [^\n]+\n {8}\.a\(\{ n: "customTextOn"/m,
+    "a comment between the calls of a chain stays between them");
+});
+
+test("INCLUDE TYPE of the class's own type is that type's constant, spread", () => {
+  const { code } = abap2js(`CLASS zcl_js_include DEFINITION PUBLIC.
+  PUBLIC SECTION.
+    INTERFACES z2ui5_if_app.
+    TYPES: BEGIN OF ty_s_head, title TYPE string, END OF ty_s_head.
+    DATA BEGIN OF s_order.
+      INCLUDE TYPE ty_s_head.
+      DATA note TYPE string.
+    DATA END OF s_order.
+ENDCLASS.
+CLASS zcl_js_include IMPLEMENTATION.
+  METHOD z2ui5_if_app~main.
+  ENDMETHOD.
+ENDCLASS.
+`, { file: "zcl_js_include.clas.abap" });
+  assert.match(code, /^ {2}s_order = \{\n {4}\.\.\.ty_s_head,\n {4}note: "",\n {2}\};$/m);
+});
+
+test("the translated app starts: its view and model are the ABAP app's", async () => {
+  const r = await P({ app: APP });
+  assert.equal(r.status, 200, r.text.slice(0, 300));
+  const xml = view(r);
+  assert.match(xml, /<Page title="abap2js - translated" showNavButton="false" navButtonPress="[^"]+">/);
+  assert.match(xml, /<Input value="\{\/NAME\}"\/>/);
+  assert.match(xml, /<Input value="\{\/S_ORDER\/TITLE\}"\/>/);
+  assert.match(xml, /<Text text="\{\/CODE\}"\/>/, "a path binding inside \\{ \\} - ABAP's escapes undone, JavaScript's applied");
+  assert.match(xml, /<List items="\{\/T_ROWS\}">/);
+  assert.match(xml, /<Switch state="false" customTextOn="off"\/>/, "SWITCH #( ) on an abap_bool gives its THEN's string - no X");
+  const m = r.json.MODEL;
+  assert.equal(m.NAME, "World", "DATA … VALUE is the field's initial value");
+  assert.equal(m.CODE, "000000", "TYPE n LENGTH 6 is t.numc( 6 )");
+  assert.deepEqual(m.T_ROWS.map((x) => [x.TITLE, x.COUNT, x.SELECTED]), [["first", 1, true], ["second", 2, false]]);
+  assert.equal(m.S_ORDER.TITLE, "order");
+});
+
+test("its events: CASE with OR, abap_bool as ABAP prints it, a called app", async () => {
+  const start = await P({ app: APP });
+  for (const event of ["GREET", "HELLO"]) {
+    const r = await P({ app: APP, id: start.json.S_FRONT.ID, event });
+    assert.equal(r.status, 200, r.text.slice(0, 300));
+    assert.deepEqual(custom(r)[0].slice(0, 3), ["MESSAGE_BOX", "show", "Hello World, active: , 2 rows, 1 selected (first)"],
+      `WHEN … OR, LOOP AT … WHERE and its row after ENDLOOP - ${event}`);
+  }
+
+  const toggled = await P({ app: APP, id: start.json.S_FRONT.ID, event: "TOGGLE" });
+  assert.deepEqual(custom(toggled)[0], ["SET_TITLE", "2 rows", "X"],
+    "an own method's RETURNING value, and CONV string( abap_true ) is X");
+  const greet = await P({ app: APP, id: toggled.json.S_FRONT.ID, event: "GREET" });
+  assert.equal(custom(greet)[0][2], "Hello World, active: X, 2 rows, 1 selected (first)", "the toggled abap_bool, in a string template");
+
+  // a fresh start from here on: the chain above went two drafts past `start`,
+  // and the framework prunes a chain to two (draft_keep_per_chain) - the
+  // draft `start` named is gone, as it is for a browser two clicks later
+  const again = await P({ app: APP });
+  const edit = await P({ app: APP, id: again.json.S_FRONT.ID, event: "EDIT" });
+  assert.deepEqual(custom(edit)[0].slice(0, 3), ["MESSAGE_TOAST", "show", "edit mode"], "WHEN OTHERS, SWITCH #( ) on a constant");
+
+  const call = await P({ app: APP, id: again.json.S_FRONT.ID, event: "CALL" });
+  assert.equal(call.json.S_FRONT.APP, "ZCL_JS_HELLO", "nav_app_call( NEW zcl_js_hello( ) )");
+});
+
+test("what ABAP's = does and JavaScript's does not: copies, conversions, NOT, an empty WHEN, DO", async () => {
+  // what the ABAP method answers, transpiled and run on open-abap: a structure copied all the way
+  // down and a row appended as it was, an empty WHEN that runs into no other, NOT, DO's count
+  // read once, APPEND INITIAL LINE, a text in arithmetic, a number and an abap_bool in &&
+  const ABAP = "4 rows, 6, 42, 99, X";
+  for (const user of ["alice", "bob", "alice"]) {
+    // twice and by two users: a local structure that shared the TYPES constant wrote it, and
+    // the next request - anybody's - started from what the last one left (5, then 10, then 15)
+    const start = await P({ app: APP, user });
+    const r = await P({ app: APP, id: start.json.S_FRONT.ID, event: "RULES", user });
+    assert.equal(r.status, 200, r.text.slice(0, 300));
+    assert.deepEqual(custom(r)[0].slice(0, 3), ["MESSAGE_BOX", "show", ABAP], `${user}: what the ABAP method answers`);
+  }
+});
+
+/** The class around `body` in its main( ) and `methods`, translated and run on a stand-in client
+ *  whose get_event( ) is `event`: what it hands message_box_display( ). */
+const run = (decl, body, event = "", methods = "") => {
+  const { code } = abap2js(`CLASS zcl_js_run DEFINITION PUBLIC.
+  PUBLIC SECTION.
+    INTERFACES z2ui5_if_app.
+${decl}
+ENDCLASS.
+CLASS zcl_js_run IMPLEMENTATION.
+  METHOD z2ui5_if_app~main.
+${body}
+  ENDMETHOD.
+${methods}
+ENDCLASS.
+`, { file: "zcl_js_run.clas.abap", format: "cjs" });
+  let App;
+  // t: a TYPES structure with a table in it is a module constant built with t.table( )
+  const stub = { defineApp: (name, cls) => { App = cls; }, t };
+  new Function("require", code)(() => stub);
+  let shown;
+  new App().main({ get_event: () => event, message_box_display: (v) => { shown = v; } });
+  return { shown, code };
+};
+
+test("a translation behaves as the ABAP: the answers are what the transpiled ABAP answers", () => {
+  const rows = "    TYPES: BEGIN OF ty_s_row, id TYPE i, done TYPE abap_bool, END OF ty_s_row.";
+  const nodes = "    TYPES: BEGIN OF ty_s_item, id TYPE i, END OF ty_s_item.\n" +
+    "    TYPES ty_t_items TYPE STANDARD TABLE OF ty_s_item WITH EMPTY KEY.\n" +
+    "    TYPES: BEGIN OF ty_s_node, name TYPE string, items TYPE ty_t_items, END OF ty_s_node.\n" +
+    "    TYPES ty_t_nodes TYPE STANDARD TABLE OF ty_s_node WITH EMPTY KEY.";
+  const cases = [
+    // NOT stands in front of the comparison it negates
+    ["", "    DATA(a) = `5`.\n    IF NOT a = `5`.\n      client->message_box_display( `NOT lost` ).\n    ELSE.\n" +
+      "      client->message_box_display( `else` ).\n    ENDIF.", "else"],
+    ["", "    DATA(e) = ``.\n    IF NOT e IS NOT INITIAL.\n      client->message_box_display( `initial` ).\n    ENDIF.", "initial"],
+    [rows, "    DATA t TYPE STANDARD TABLE OF ty_s_row WITH EMPTY KEY.\n    t = VALUE #( ( id = 1 ) ( id = 2 ) ( id = 3 ) ).\n" +
+      "    DATA(n) = 0.\n    LOOP AT t INTO DATA(r) WHERE NOT id = 1 AND NOT ( id = 3 ).\n      n = n + r-id.\n    ENDLOOP.\n" +
+      "    client->message_box_display( |{ n }| ).", "2"],
+    // an empty WHEN does nothing - in a switch it ran into the next case
+    ["", "    DATA(o) = `start`.\n    CASE o.\n      WHEN `start`.\n      WHEN `other`.\n        o = `fell through`.\n" +
+      "      WHEN OTHERS.\n        o = `fell through`.\n    ENDCASE.\n    client->message_box_display( o ).", "start"],
+    // ... also with a comment behind it: the break was appended behind the comment, inside it
+    ["", "    DATA(o) = `start`.\n    CASE o.\n      WHEN `start`. \" nothing to do\n      WHEN `other`.\n" +
+      "        o = `fell through`.\n    ENDCASE.\n    client->message_box_display( o ).", "start"],
+    // 'X' is the abap_bool it is compared with, in CASE, WHERE and SWITCH
+    ["", "    DATA(f) = abap_true.\n    DATA(o) = `start`.\n    CASE f.\n      WHEN 'X'.\n      WHEN OTHERS.\n" +
+      "        o = `fell through`.\n    ENDCASE.\n    client->message_box_display( o && SWITCH string( f WHEN 'X' THEN ` X` ) ).", "start X"],
+    [rows, "    DATA t TYPE STANDARD TABLE OF ty_s_row WITH EMPTY KEY.\n    t = VALUE #( ( id = 1 done = abap_true ) ( id = 2 ) ).\n" +
+      "    DATA(n) = 0.\n    LOOP AT t INTO DATA(r) WHERE done = 'X'.\n      n = n + 1.\n    ENDLOOP.\n" +
+      "    client->message_box_display( |{ n }| ).", "1"],
+    // EXIT outside a loop leaves the method; DO reads its count once
+    ["    METHODS m RETURNING VALUE(result) TYPE string.", "    client->message_box_display( m( ) ).", "before",
+      "  METHOD m.\n    result = `before`.\n    EXIT.\n  ENDMETHOD."],
+    ["", "    DATA(k) = 3.\n    DATA(c) = 0.\n    DO k TIMES.\n      k = k + 1.\n      c = c + 1.\n    ENDDO.\n" +
+      "    client->message_box_display( |{ c }| ).", "3"],
+    // abaplint reads += and -= as two tokens: the + was lost, `i += 2` was `i = 2`
+    ["", "    DATA(i) = 1.\n    DATA(s) = `4`.\n    i += 2.\n    i -= s.\n    i *= 3.\n    client->message_box_display( |{ i }| ).", "-3"],
+    // conversions: a text in arithmetic, && of numbers and abap_bool, a text compared with a number
+    ["", "    DATA(s) = `5`.\n    DATA(i) = 5.\n    DATA(x) = 1.\n    DATA(y) = 2.\n" +
+      "    client->message_box_display( |{ s + 1 } { 1 + s } | && x && y && ` ` && abap_true && xsdbool( i = '5' ) ).", "6 6 12 XX"],
+    ["", "    DATA s TYPE string.\n    s = `05`.\n    IF s = 5.\n      client->message_box_display( `equal` ).\n    ENDIF.", "equal"],
+    // a TYPE p prints with its decimals; TYPE c and n take the value as ABAP moves it
+    ["", "    DATA p TYPE p LENGTH 10 DECIMALS 2 VALUE '-1.5'.\n    DATA c TYPE c LENGTH 3.\n    DATA n TYPE n LENGTH 5.\n" +
+      "    c = `ABCDEF`.\n    n = 42.\n    client->message_box_display( |{ p } { c } { n }| ).", "-1.50 ABC 00042"],
+    // APPEND INITIAL LINE appends a row; a copy is a copy, a row appended the row as it was
+    [rows, "    DATA t TYPE STANDARD TABLE OF ty_s_row WITH EMPTY KEY.\n    DATA s TYPE ty_s_row.\n    s-id = 1.\n" +
+      "    APPEND s TO t.\n    s-id = 2.\n    APPEND s TO t.\n    DATA(c) = s.\n    c-id = 99.\n    APPEND INITIAL LINE TO t.\n" +
+      "    DATA(o) = ``.\n    LOOP AT t INTO DATA(r).\n      r-id = r-id + 10.\n      o = o && r-id && `,`.\n    ENDLOOP.\n" +
+      "    LOOP AT t INTO r.\n      o = o && r-id && `,`.\n    ENDLOOP.\n    client->message_box_display( o && s-id ).", "11,12,10,1,2,0,2"],
+    // a component VALUE leaves out is initial
+    [rows, "    DATA(s) = VALUE ty_s_row( id = 1 ).\n    IF s-done IS INITIAL.\n      client->message_box_display( `initial` ).\n    ENDIF.", "initial"],
+    // ... also in the VALUE #( ) handed to a method of the class: the component was missing, so copying the
+    // parameter threw "Cannot read properties of undefined (reading 'map')", a LOOP over it "is not iterable"
+    // and IS INITIAL of a missing scalar was false
+    [`${nodes}\n    METHODS m IMPORTING is_node TYPE ty_s_node RETURNING VALUE(result) TYPE string.`,
+      "    client->message_box_display( m( VALUE #( name = `a` ) ) ).", "a0",
+      "  METHOD m.\n    DATA(ls) = is_node.\n    result = |{ ls-name }{ lines( ls-items ) }|.\n  ENDMETHOD."],
+    [`${nodes}\n    METHODS m IMPORTING it_nodes TYPE ty_t_nodes iv_sep TYPE string RETURNING VALUE(result) TYPE string.`,
+      "    client->message_box_display( m( it_nodes = VALUE #( ( name = `a` ) ( name = `b` ) ) iv_sep = `,` ) ).", "a,b,",
+      "  METHOD m.\n    DATA(lt) = it_nodes.\n    LOOP AT lt INTO DATA(n).\n      result = result && n-name && iv_sep.\n" +
+      "      LOOP AT n-items INTO DATA(i).\n        result = result && i-id.\n      ENDLOOP.\n    ENDLOOP.\n  ENDMETHOD."],
+    [`${rows}\n    METHODS m IMPORTING is_row TYPE ty_s_row RETURNING VALUE(result) TYPE string.`,
+      "    client->message_box_display( m( VALUE #( id = 1 ) ) ).", "initial",
+      "  METHOD m.\n    IF is_row-done IS INITIAL.\n      result = `initial`.\n    ENDIF.\n  ENDMETHOD."],
+    // a TYPE f takes the number in a text - it kept the text, and f + 1 appended ("1.51")
+    ["", "    DATA f TYPE f.\n    DATA s TYPE string VALUE `1.5`.\n    f = s.\n    f = f + 1.\n    IF f > 2 AND f < 3.\n" +
+      "      client->message_box_display( `2.5` ).\n    ENDIF.", "2.5"],
+    // a number and a text are compared as numbers in WHERE and in CASE too, as in IF - they were compared with ===
+    [rows, "    DATA t TYPE STANDARD TABLE OF ty_s_row WITH EMPTY KEY.\n    t = VALUE #( ( id = 1 ) ( id = 2 ) ).\n" +
+      "    DATA(s) = `2`.\n    DATA(n) = 0.\n    LOOP AT t INTO DATA(r) WHERE id = s.\n      n = n + 1.\n    ENDLOOP.\n" +
+      "    client->message_box_display( |{ n }| ).", "1"],
+    ["    TYPES: BEGIN OF ty_s_code, code TYPE string, END OF ty_s_code.",
+      "    DATA t TYPE STANDARD TABLE OF ty_s_code WITH EMPTY KEY.\n    t = VALUE #( ( code = `07` ) ( code = `8` ) ).\n" +
+      "    DATA(k) = 7.\n    DATA(n) = 0.\n    LOOP AT t INTO DATA(r) WHERE code = k.\n      n = n + 1.\n    ENDLOOP.\n" +
+      "    client->message_box_display( |{ n }| ).", "1"],
+    ["", "    DATA(i) = 7.\n    DATA(s) = `07`.\n    CASE i.\n      WHEN s.\n        client->message_box_display( `match` ).\n" +
+      "      WHEN OTHERS.\n        client->message_box_display( `no` ).\n    ENDCASE.", "match"],
+    // a TYPE f makes arithmetic a TYPE f, a TYPE p in it or not
+    ["", "    DATA p TYPE p LENGTH 8 DECIMALS 2 VALUE '1.5'.\n    DATA f TYPE f VALUE '0.25'.\n    DATA(x) = p + f.\n" +
+      "    IF x = '1.75'.\n      client->message_box_display( `1.75` ).\n    ENDIF.", "1.75"],
+  ];
+  for (const [decl, body, want, methods] of cases) {
+    const { shown, code } = run(decl, body, "", methods);
+    assert.equal(shown, want, `${body.trim()}\n--- translated:\n${code}`);
+  }
+});
+
+test("an ABAP comment or text cannot end a JavaScript line: U+2028, U+2029 and CR stay inside it", () => {
+  // JavaScript ends a line at all three, ABAP only at LF: a comment that carried one through ran
+  // the rest of the ABAP comment as code. (A '…' or `…` literal with one is an ABAP syntax error.)
+  globalThis.abap2jsInjected = false;
+  for (const br of ["\u2028", "\u2029", "\r"]) {
+    const { shown, code } = run("", `    " harmless${br}globalThis.abap2jsInjected = true;\n` +
+      `    client->message_box_display( |e${br}f| ).`);
+    assert.equal(globalThis.abap2jsInjected, false, `${JSON.stringify(br)}: the comment's rest ran as code\n${code}`);
+    if (br !== "\r") assert.equal(shown, `e${br}f`, "the text is the text");
+    assert.ok(!/[\u2028\u2029]/.test(code), `${JSON.stringify(br)} is written as an escape`);
+  }
+  delete globalThis.abap2jsInjected;
+});
+
+test("a slip of the translator itself is an Abap2jsError with the row it was translating", () => {
+  const broken = { frameworkFound: true, model() { throw new TypeError("boom"); } };
+  const src = "CLASS zcl_x DEFINITION PUBLIC.\n  PUBLIC SECTION.\n    INTERFACES z2ui5_if_app.\n" +
+    "    DATA s TYPE zcl_other=>ty_s.\nENDCLASS.\nCLASS zcl_x IMPLEMENTATION.\n  METHOD z2ui5_if_app~main.\n  ENDMETHOD.\nENDCLASS.\n";
+  const e = (() => { try { abap2js(src, { file: "zcl_x.clas.abap", library: broken }); } catch (x) { return x; } })();
+  assert.ok(e instanceof Abap2jsError, String(e));
+  assert.match(e.message, /^zcl_x\.clas\.abap:4:5 - abap2js failed on this statement \(boom\)/);
+  assert.equal(e.row, 4);
+});
+
+/** abap2js of a class around `body` in its main( ), with `data` in its public section. */
+const refusal = (body, data = "") => {
+  const src = `CLASS zcl_js_refused DEFINITION PUBLIC.
+  PUBLIC SECTION.
+    INTERFACES z2ui5_if_app.
+    TYPES: BEGIN OF ty_s_row, title TYPE string, END OF ty_s_row.
+    DATA t_tab TYPE STANDARD TABLE OF ty_s_row WITH EMPTY KEY.
+${data}
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+CLASS zcl_js_refused IMPLEMENTATION.
+  METHOD z2ui5_if_app~main.
+${body}
+  ENDMETHOD.
+ENDCLASS.
+`;
+  try {
+    abap2js(src, { file: "zcl_js_refused.clas.abap" });
+  } catch (e) {
+    return e;
+  }
+  return null;
+};
+
+test("what it does not know, it refuses - with file, row and column", () => {
+  const cases = [
+    ["    LOOP AT t_tab ASSIGNING FIELD-SYMBOL(<row>).\n    ENDLOOP.", "", /ASSIGNING \/ REFERENCE INTO writes through the row/, 12],
+    ["    SELECT * FROM t000 INTO TABLE @DATA(rows).", "", /Select is not supported yet/, 12],
+    ["    DATA(local) = `x`.\n    client->_bind( local ).", "", /local is no attribute - only an attribute can be bound by name/, 13],
+    ["    DATA(q) = 7 / 2.", "", /the operator \/ is not supported yet/, 12],
+    ["    client->message_toast_display( sy-uname ).", "", /sy- fields are not supported yet/, 12],
+    // not the translation's limit but the model's: defineApp( ) has no table of scalars yet
+    ["", "    DATA names TYPE string_table.", /a table of scalars cannot be a cap2UI5 field yet/, 6],
+    ["", "    DATA BEGIN OF s_both.\n      INCLUDE TYPE ty_s_row AS row RENAMING WITH SUFFIX _x.\n    DATA END OF s_both.",
+      /INCLUDE TYPE \.\.\. AS \/ RENAMING WITH SUFFIX is not supported/, 7],
+    // DATA runs once, on entering the method: a `let` in the loop would reset it every iteration
+    ["    DO 2 TIMES.\n      DATA count TYPE i.\n      count = count + 1.\n    ENDDO.", "",
+      /DATA inside DO \/ LOOP \/ WHILE keeps its value from one iteration to the next/, 13],
+    // a translator error, not a crash
+    ["    DATA lo TYPE REF TO object.\n    lo ?= client.", "", /\?= \(a down cast\) is not supported/, 13],
+    // ABAP rounds an integer quotient
+    ["    DATA(q) = 7.\n    q /= 2.", "", /\/= is not supported - ABAP rounds an integer quotient/, 13],
+    // === compares objects by identity; ABAP compares structures by content
+    ["    DATA(a) = VALUE ty_s_row( ).\n    DATA(b) = a.\n    IF a = b.\n    ENDIF.", "",
+      /comparing structures or tables is not supported/, 14],
+    // an array keeps neither key order nor unique keys
+    ["    DATA t TYPE SORTED TABLE OF ty_s_row WITH UNIQUE KEY title.", "", /a SORTED or HASHED table is not supported/, 12],
+    // EXIT in a CASE in a loop leaves the loop, a break in a switch only the switch
+    ["    DO 2 TIMES.\n      CASE 1.\n        WHEN 1.\n          EXIT.\n      ENDCASE.\n    ENDDO.", "",
+      /EXIT inside a CASE inside a loop is not supported/, 15],
+    ["    CONTINUE.", "", /CONTINUE outside a loop is not supported/, 12],
+    // what ABAP formats or rounds its own way
+    ["    DATA p TYPE p LENGTH 10 DECIMALS 2.\n    client->message_box_display( `p` && p ).", "",
+      /a TYPE p in && is not supported/, 13],
+    ["    DATA c TYPE c LENGTH 3.\n    c = 5.", "", /a TYPE int moved into a TYPE char LENGTH 3 is not supported - ABAP right-aligns/, 13],
+    ["    DATA p TYPE p LENGTH 10 DECIMALS 2.\n    DATA(q) = p + 1.", "", /DATA\( \) = arithmetic on a TYPE p is not supported/, 13],
+    ["    DATA p TYPE p LENGTH 10 DECIMALS 2.\n    p = p * p.", "", /moved into a TYPE packed LENGTH 10 is not supported - ABAP rounds/, 13],
+    // arithmetic on a TYPE p into a string: ABAP formats its calculation type - it went out with the p's decimals,
+    // "4.50", where the transpiled ABAP answers "4.5000000000000000E+00"; a string template of it is refused already
+    ["    DATA p TYPE p LENGTH 8 DECIMALS 2.\n    DATA s TYPE string.\n    s = p * 3.", "",
+      /a TYPE packed moved into a TYPE string is not supported - its decimals are ABAP's calculation type's/, 14],
+    ["    DATA p TYPE p LENGTH 8 DECIMALS 2.\n    DATA(s) = CONV string( p + 1 ).", "",
+      /CONV string\( \) of arithmetic on a TYPE p is not supported - its decimals are ABAP's calculation type's/, 13],
+    // CASE `05`. WHEN 5. matches in ABAP; a switch compares "05" === "5"
+    ["    DATA(s) = `05`.\n    CASE s.\n      WHEN 5.\n    ENDCASE.", "",
+      /a number in a WHEN of a CASE on a text is not supported - ABAP compares the text as a number/, 14],
+    // p + f is a TYPE f, rounded into the p - it was taken for a TYPE p and stored unrounded
+    ["    DATA p TYPE p LENGTH 8 DECIMALS 2.\n    DATA f TYPE f VALUE '0.004'.\n    p = p + f.", "",
+      /a TYPE float moved into a TYPE packed LENGTH 8 is not supported - ABAP rounds/, 14],
+    // a date in a number is its count of days - it was the text "20240101"
+    ["    DATA i TYPE i.\n    DATA d TYPE d VALUE '20240101'.\n    i = d.", "",
+      /a TYPE date moved into a TYPE int is not supported - ABAP counts days or seconds/, 14],
+    // abaplint files CLASS-METHODS under the statement METHODS has, so it was read as an instance method - and a
+    // generic parameter, TYPE ANY TABLE, names no row type and crashed the type reader ("please report it")
+    ["", "    CLASS-METHODS factory IMPORTING t_range TYPE ANY TABLE OPTIONAL RETURNING VALUE(r) TYPE REF TO zcl_js_refused.",
+      /CLASS-METHODS is not supported/, 6],
+  ];
+  for (const [body, data, message, row] of cases) {
+    const e = refusal(body, data);
+    assert.ok(e instanceof Abap2jsError, `${body.trim()}: not refused (${e})`);
+    assert.match(e.message, message);
+    assert.match(e.message, /^zcl_js_refused\.clas\.abap:\d+:\d+ - /);
+    assert.equal(e.row, row, `${body.trim()}: the row`);
+  }
+});
+
+test("window_bind_tab( ) takes the table by its NAME, as _bind( ) does - and the total by name where it is an attribute", () => {
+  const src = `CLASS zcl_js_windowed DEFINITION PUBLIC.
+  PUBLIC SECTION.
+    INTERFACES z2ui5_if_app.
+    TYPES: BEGIN OF ty_s_row, title TYPE string, price TYPE i, END OF ty_s_row.
+    DATA t_tab TYPE STANDARD TABLE OF ty_s_row WITH EMPTY KEY.
+    DATA mv_total TYPE i.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+CLASS zcl_js_windowed IMPLEMENTATION.
+  METHOD z2ui5_if_app~main.
+    DATA(items) = client->window_bind_tab( val = t_tab total = mv_total event = \`ROWS\` window = 50 ).
+    DATA(fixed) = client->window_bind_tab( val = t_tab total = lines( t_tab ) event = \`ROWS\` ).
+  ENDMETHOD.
+ENDCLASS.
+`;
+  const code = abap2js(src, { file: "zcl_js_windowed.clas.abap" }).code;
+  // the attribute goes by its name: the framework reads it anew for every response
+  assert.match(code, /const items = client\.window_bind_tab\(\{ val: "t_tab", total: "mv_total", event: "ROWS", window: 50 \}\);/);
+  // any other expression is the value of this render
+  assert.match(code, /const fixed = client\.window_bind_tab\(\{ val: "t_tab", total: this\.t_tab\.length, event: "ROWS" \}\);/);
+  // window_get_row( ) left the interface with abap2UI5 1.151.0: refused, as any method it does not have
+  assert.throws(() => abap2js(src.replace("DATA(fixed) = client->window_bind_tab( val = t_tab total = lines( t_tab ) event = \`ROWS\` ).",
+    "mv_total = client->window_get_row( val = t_tab row = 3 )."), { file: "zcl_js_windowed.clas.abap" }),
+    /z2ui5_if_client has no method window_get_row/);
+});
+
+test("itab[ n ] is the row at an index, counted from 1 - a row by key is refused", () => {
+  const cls = (body) => `CLASS zcl_js_tabexpr DEFINITION PUBLIC.
+  PUBLIC SECTION.
+    INTERFACES z2ui5_if_app.
+    TYPES: BEGIN OF ty_s_row, title TYPE string, price TYPE i, END OF ty_s_row.
+    DATA t_tab TYPE STANDARD TABLE OF ty_s_row WITH EMPTY KEY.
+    DATA title TYPE string.
+    DATA pos TYPE i.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+CLASS zcl_js_tabexpr IMPLEMENTATION.
+  METHOD z2ui5_if_app~main.
+${body}
+  ENDMETHOD.
+ENDCLASS.
+`;
+  const code = abap2js(cls(`    title = t_tab[ 1 ]-title.
+    title = |first: { t_tab[ pos ]-title }|.
+    DATA(t_skipped) = client->get( )-t_model_skipped.
+    title = t_skipped[ 2 ]-value.`), { file: "zcl_js_tabexpr.clas.abap" }).code;
+  assert.match(code, /this\.title = this\.t_tab\[0\]\.title;/, "a literal index, counted from 0 in JavaScript");
+  assert.match(code, /this\.t_tab\[\(this\.pos\) - 1\]\.title/, "an index that is an expression");
+  assert.match(code, /this\.title = t_skipped\[1\]\.value;/, "a table of the client's own types");
+  assert.throws(() => abap2js(cls("    title = t_tab[ price = 1 ]-title."), { file: "zcl_js_tabexpr.clas.abap" }),
+    /a table expression other than itab\[ index \] is not supported yet/);
+});
+
+test("a class that is no app is refused as a whole", () => {
+  const e = (() => {
+    try {
+      abap2js("CLASS zcl_x DEFINITION PUBLIC.\n  PUBLIC SECTION.\nENDCLASS.\nCLASS zcl_x IMPLEMENTATION.\nENDCLASS.\n");
+    } catch (x) {
+      return x;
+    }
+  })();
+  assert.ok(e instanceof Abap2jsError);
+  assert.match(e.message, /does not implement z2ui5_if_app/);
+});
+
+test("a generic parameter type - TYPE ANY TABLE, TYPE STANDARD TABLE without OF - is read, not crashed on", () => {
+  // what the factory( ) of z2ui5_cl_pop_get_range and three more of abap2UI5's popups declare: four of the
+  // seventeen crashed the translator with a TypeError instead of being refused for their CLASS-METHODS
+  assert.equal(refusal("", "    METHODS count IMPORTING t TYPE ANY TABLE RETURNING VALUE(r) TYPE i.\n" +
+    "    METHODS rows IMPORTING t TYPE STANDARD TABLE."), null);
+  // and in the class another class's type is read from - the runtime's z2ui5_cl_ui5_util_context has both
+  const e = refusal("", "    DATA t_filter TYPE z2ui5_cl_ui5_util_context=>ty_t_filter_multi.");
+  assert.ok(e === null || (e instanceof Abap2jsError && !/abap2js failed/.test(e.message)), String(e));
+});
+
+test("cap2ui5 abap2js: writes the module, --check holds it, a refusal is exit 1", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "abap2js-"));
+  try {
+    const run = (...args) => spawnSync(process.execPath, [CLI, "abap2js", ...args], { cwd: TEST_PROJECT, encoding: "utf8" });
+    const origin = ["--origin", "cap2UI5 test/project"];
+    const fixture = "test/fixtures/abap2js/zcl_js_translated.clas.abap";
+
+    const missing = run(fixture, "--out", dir, "--cjs", "--check", ...origin);
+    assert.equal(missing.status, 1, "--check without the module");
+    assert.match(missing.stderr, /missing: .*zcl_js_translated\.js/);
+
+    const written = run(fixture, "--out", dir, "--cjs", ...origin);
+    assert.equal(written.status, 0, written.stderr);
+    assert.equal(fs.readFileSync(path.join(dir, "zcl_js_translated.js"), "utf8"), fs.readFileSync(MODULE, "utf8"));
+
+    const checked = run(fixture, "--out", "srv/apps", "--check", ...origin);
+    assert.equal(checked.status, 0, `srv/apps is what the CLI writes, format from package.json: ${checked.stderr}`);
+
+    fs.writeFileSync(path.join(dir, "zcl_js_refused.clas.abap"),
+      "CLASS zcl_js_refused DEFINITION PUBLIC.\n  PUBLIC SECTION.\n    INTERFACES z2ui5_if_app.\n  PROTECTED SECTION.\n" +
+      "  PRIVATE SECTION.\nENDCLASS.\nCLASS zcl_js_refused IMPLEMENTATION.\n  METHOD z2ui5_if_app~main.\n" +
+      "    WAIT UP TO 1 SECONDS.\n  ENDMETHOD.\nENDCLASS.\n");
+    const refused = run(path.join(dir, "zcl_js_refused.clas.abap"), "--out", dir);
+    assert.equal(refused.status, 1);
+    assert.match(refused.stderr, /refused: zcl_js_refused\.clas\.abap:9:5 - Wait is not supported yet/);
+    assert.ok(!fs.existsSync(path.join(dir, "zcl_js_refused.js")), "nothing is written for a refused class");
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});

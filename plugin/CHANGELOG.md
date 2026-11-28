@@ -8,6 +8,44 @@ starts with 0, a minor release may break the API.
 
 ## [Unreleased]
 
+### Fixed
+
+- **A draft written again under its id failed on PostgreSQL** with
+  "current transaction is aborted". The store inserted first and, on a key
+  collision, read the row to decide between an update and "not found" - but
+  PostgreSQL aborts the transaction a failed INSERT ran in, so that read
+  failed too. The row is now read first (one primary-key lookup per
+  roundtrip); what the store answers is unchanged: an update for the
+  draft's owner, "not found" for anybody else. CI now runs the suite on
+  PostgreSQL as well as SQLite.
+
+### Removed
+
+- **The agent endpoint moved to its own package, `@cap2ui5/agent`.** A
+  project that uses it adds `npm add @cap2ui5/agent`; the setting
+  `cds.requires.cap2ui5.agent`, the endpoint and the table
+  `cap2ui5.AgentLog` are unchanged. Where the setting is on and the package
+  is missing, the start fails and names it. `purgeAgentLog( )` is
+  `require("@cap2ui5/agent").purgeAgentLog` now. `defineApp( )` still takes
+  the `agent` option; the endpoint checks it when the apps are loaded, and a
+  wrong one fails the start, as it failed `defineApp( )` before.
+- **The translator moved to its own package, `@cap2ui5/abap2js`.**
+  `require("@cap2ui5/cds-plugin").abap2js` / `Abap2jsError` and the
+  `cap2ui5` command are gone from this package; add
+  `npm add -D @cap2ui5/abap2js` and the command is
+  `npx --no-install cap2ui5 abap2js` as before, the functions
+  `require("@cap2ui5/abap2js")`. `@abaplint/core` is no longer an optional
+  peer of the plugin - it is a dependency of the translator, so a project
+  that only serves apps never installs it, and one that translates no longer
+  adds it by hand.
+
+- **The 0.1.0 settings key `cds.cap2ui5` is no longer read.** A project that
+  still sets it fails to start, with a message naming
+  `cds.requires.cap2ui5`. Ignoring it instead would have let its `requires`
+  fall back to the default role, `authenticated-user` - an upgrade that
+  quietly widened who may call. Move the settings, and `requires` as
+  `roles`.
+
 ## [0.8.0] - 2026-11-27
 
 ### Changed

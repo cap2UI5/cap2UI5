@@ -129,7 +129,7 @@ jobs:
           spec() { [ "$1" = latest ] && echo latest || echo "^$1"; }
           npm pkg set "devDependencies.@sap/cds=$(spec "$CDS")"
           npm pkg set "dependencies.@sap/cds=$(spec "$CDS")" \
-                      "dependencies.@cap-js/sqlite=$(spec "$SQLITE")" --workspace examples/bookshop
+                      "dependencies.@cap-js/sqlite=$(spec "$SQLITE")" --workspace test/project
 
       # ---- the gates -------------------------------------------------------
       - run: npm install --no-audit --no-fund
@@ -158,14 +158,14 @@ jobs:
       # ---- the browser, once -------------------------------------------------
       - if: matrix.browser
         run: npx playwright install --with-deps chromium
-        working-directory: examples/bookshop
+        working-directory: test/project
       - if: matrix.browser
         run: npm run test:browser
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always() && matrix.browser
         with:
           name: screenshots
-          path: examples/bookshop/screenshots
+          path: test/project/screenshots
           if-no-files-found: ignore
 
   # abap2UI5/protocol's backend conformance suite against THIS checkout: the
@@ -179,6 +179,52 @@ jobs:
   # spec, and a new check should arrive here by a commit that bumps this SHA,
   # not overnight. The runtime is upstream's main (or the dispatched
   # version), so a framework fix shows here as soon as it merges.
+  # The draft store on PostgreSQL. SQLite forgives what PostgreSQL does not:
+  # a failed statement aborts the transaction it ran in, raw SQL meets
+  # another dialect, and column names come back lower case. The store's
+  # INSERT-then-UPDATE on a key collision passed on SQLite for its whole life
+  # and failed here on the first run. `npm run test:postgres` is the suite
+  # less the three files that start projects without a PostgreSQL driver or
+  # wait for SQLite's own error text (test/project/package.json).
+  postgres:
+    needs: runtime
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      CDS_REQUIRES_DB_KIND: postgres
+      CDS_REQUIRES_DB_CREDENTIALS_HOST: 127.0.0.1
+      CDS_REQUIRES_DB_CREDENTIALS_PORT: "5432"
+      CDS_REQUIRES_DB_CREDENTIALS_USER: postgres
+      CDS_REQUIRES_DB_CREDENTIALS_PASSWORD: postgres
+      CDS_REQUIRES_DB_CREDENTIALS_DATABASE: postgres
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: runtime
+          path: runtime
+      # the driver as a dependency of the test project: CAP takes the
+      # postgres kind - its SQL dialect included - only from a package the
+      # project lists
+      - run: npm pkg set "dependencies.@cap-js/postgres=^3" --workspace test/project
+      - run: npm install --no-audit --no-fund
+      - run: npm run test:postgres
+
   conformance:
     needs: runtime
     runs-on: ubuntu-latest

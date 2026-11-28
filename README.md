@@ -111,10 +111,10 @@ client.view_display(view.stringify());
 ```
 
 So an ABAP app ports line by line, and abap2UI5's documentation of a method is
-the documentation of the JavaScript one - and the package does the porting:
+the documentation of the JavaScript one - and `@cap2ui5/abap2js` does the porting:
 `npx --no-install cap2ui5 abap2js zcl_my_app.clas.abap` writes `srv/apps/zcl_my_app.js`,
 and refuses with file, row and column what it does not know
-([plugin/README.md](plugin/README.md#an-abap-app-translated-cap2ui5-abap2js)). What JavaScript changes: a field is
+([abap2js/README.md](abap2js/README.md)). What JavaScript changes: a field is
 bound by its NAME (`client._bind("s_order-customer")`), since ABAP's `_bind( )`
 finds it by reference; what only an asynchronous framework call can produce -
 an event's wire, `view.stringify()` - is resolved after `main( )`, so embed
@@ -159,7 +159,8 @@ array, a cycle) is reported by its path and left out; the app runs without it. A
   take before its roundtrip is given up with a 504; `0` or `false` is no
   limit. Roundtrips run one at a time per process, so a `main( )` that waits
   holds everybody else's
-- `agent` (default off): the MCP endpoint for AI agents, below
+- `agent` (default off): the MCP endpoint for AI agents - the package
+  `@cap2ui5/agent` ([agent/README.md](agent/README.md))
 
 `false` switches the plugin off. The route runs behind CAP's own middlewares
 and answers like a CAP service: 401 with the login challenge of
@@ -182,7 +183,10 @@ documentation.
 
 ```
 plugin/              the npm package @cap2ui5/cds-plugin: cds-plugin.js, index.cds, lib/
-examples/bookshop/   a CAP project using it: a plain CAP service, the apps, the test suite
+abap2js/             the npm package @cap2ui5/abap2js: the translator and `cap2ui5 abap2js`
+agent/               the npm package @cap2ui5/agent: the MCP endpoint and its audit log
+examples/bookshop/   a CAP project using it: a plain CAP service and four apps - the one to read
+test/project/        the CAP project the test suite runs in: fixture apps, test/*.test.mjs
 runtime/             @abap2ui5/node-runtime: only package.json + README are here, see runtime/README.md
 scripts/             assemble-runtime.sh - fills runtime/ from an upstream build or the package
 docs/adr/            the decisions, with the measurements that made them (ADR-001 to -009)
@@ -225,7 +229,7 @@ npm start                                      # http://localhost:4004/rest/root
 | Browser | renders in Chromium — the page the framework serves on GET, UI5 booted; MessageBox, table, a `sap.m.Dialog` popup, and a navigation round trip that comes back with the choice |
 
 The one hazard of the design: the plugin couples to what the transpiler
-*emits*, not to a published API. `examples/bookshop/test/abi-gate.test.mjs`
+*emits*, not to a published API. `test/project/test/abi-gate.test.mjs`
 names every touchpoint and checks it against a class the transpiler itself
 produced, so a bump fails there and not on the wire.
 

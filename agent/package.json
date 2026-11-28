@@ -1,0 +1,54 @@
+{
+  "name": "@cap2ui5/agent",
+  "version": "0.8.0",
+  "description": "The MCP endpoint through which AI agents operate the apps of a cap2UI5 server, as the CAP user who calls - with an audit log in the project's database",
+  "keywords": [
+    "cap",
+    "cds",
+    "cds-plugin",
+    "abap2ui5",
+    "mcp",
+    "agent",
+    "ai"
+  ],
+  "homepage": "https://cap2ui5.github.io/docs/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cap2UI5/cap2UI5.git",
+    "directory": "agent"
+  },
+  "bugs": {
+    "url": "https://github.com/cap2UI5/cap2UI5/issues"
+  },
+  "author": "cap2UI5",
+  "license": "MIT",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "files": [
+    "cds-plugin.js",
+    "index.cds",
+    "index.js",
+    "index.d.ts",
+    "lib",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "peerDependencies": {
+    "@sap/cds": ">=9",
+    "@cap2ui5/cds-plugin": ">=0.8.0"
+  },
+  "dependencies": {
+    "express": "^4.22.1 || ^5"
+  },
+  "cds": {
+    "requires": {
+      "cap2ui5-agent": {
+        "model": "@cap2ui5/agent"
+      }
+    }
+  }
+}
