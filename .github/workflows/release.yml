@@ -1,15 +1,18 @@
-# Publishes plugin/ as the npm package `@cap2ui5/cds-plugin` when a tag
-# v<version> is pushed. The version is plugin/package.json's - bump it in the
-# pull request that prepares the release; the job refuses a tag that says
-# something else.
+# Publishes the packages - plugin/ as `@cap2ui5/cds-plugin`, abap2js/ as
+# `@cap2ui5/abap2js` - when a tag v<version> is pushed. They are versioned in
+# lockstep: every package.json says the tag's version - bump them together in
+# the pull request that prepares the release; the job refuses a tag that one
+# of them disagrees with.
 #
 # Trusted publishing (OIDC) is how it publishes: no NPM_TOKEN to leak or
 # rotate, and npm records a provenance attestation tying the tarball to this
 # run and commit. `id-token: write` below mints the token, and the package's
 # Settings -> Trusted Publisher on npmjs.com has to name this repository and
-# this workflow file (`release.yml`) - on the command line:
+# this workflow file (`release.yml`) - for EACH package, on the command line:
 #
 #     npx npm@11 trust github @cap2ui5/cds-plugin --file release.yml \
+#       --repo cap2UI5/cap2UI5 --allow-publish
+#     npx npm@11 trust github @cap2ui5/abap2js --file release.yml \
 #       --repo cap2UI5/cap2UI5 --allow-publish
 #
 # That setting can only be made for a package that ALREADY EXISTS, so the very
@@ -17,12 +20,13 @@
 # checkout whose runtime/ was filled with `scripts/assemble-runtime.sh
 # --package`, so the tests it ran against are the published runtime:
 #
-#     npm publish --workspace plugin --access public
+#     npm publish --workspace <dir> --access public
 #
 # (no --provenance there: npm generates an attestation only from a supported
 # CI and aborts anywhere else). Until that has happened, a failed publish here
-# is a warning naming the bootstrap and the run stays green; once
-# `@cap2ui5/cds-plugin` exists on the registry, a failed publish is an error.
+# is a warning naming the bootstrap and the run stays green; once the
+# package exists on the registry, a failed publish is an error. The packages
+# are published one after the other, and each is judged on its own.
 # Set the Trusted Publisher right after that first publish: v0.2.0 was
 # tagged while the package existed without one, and failed with ENEEDAUTH.
 # A stored NPM_TOKEN still works and takes precedence.
@@ -58,17 +62,19 @@ jobs:
       - name: Use an npm that can publish via OIDC
         run: npm install -g npm@12.0.2
 
-      # The tag is the version claim; plugin/package.json is what gets
+      # The tag is the version claim; the package.json files are what gets
       # published. A mismatch caught here costs a minute, caught afterwards a
       # burned version number.
-      - name: The tag and plugin/package.json agree
+      - name: The tag and every package.json agree
         if: github.ref_type == 'tag'
         run: |
-          PKG="v$(node -p "require('./plugin/package.json').version")"
-          if [ "$PKG" != "$GITHUB_REF_NAME" ]; then
-            echo "::error::tag $GITHUB_REF_NAME does not match plugin/package.json ($PKG)"
-            exit 1
-          fi
+          for dir in plugin abap2js; do
+            PKG="v$(node -p "require('./$dir/package.json').version")"
+            if [ "$PKG" != "$GITHUB_REF_NAME" ]; then
+              echo "::error::tag $GITHUB_REF_NAME does not match $dir/package.json ($PKG)"
+              exit 1
+            fi
+          done
 
       # The runtime a consumer will get: the PUBLISHED @abap2ui5/node-runtime, at the
       # version plugin/package.json names (or the latest when it names a
@@ -89,8 +95,8 @@ jobs:
       - run: npm run consumer-test
 
       # what the tarball will contain, in the log, before it is immutable
-      - name: What is in the tarball
-        run: npm pack --dry-run --workspace plugin
+      - name: What is in the tarballs
+        run: npm pack --dry-run --workspace plugin --workspace abap2js
 
       - name: Publish
         if: github.ref_type == 'tag'
@@ -98,37 +104,43 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           set -u
-          NAME="$(node -p "require('./plugin/package.json').name")"
-          VERSION="$(node -p "require('./plugin/package.json').version")"
-          if npm view "$NAME@$VERSION" version >/dev/null 2>&1; then
-            echo "$NAME@$VERSION is already on the registry - nothing to do"
-            exit 0
-          fi
           if [ -n "${NODE_AUTH_TOKEN:-}" ]; then
             # by NAME: npm expands the variable when it reads the file, so the
             # secret itself is never written to disk
             echo '//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}' >> ~/.npmrc
           fi
-          out="$RUNNER_TEMP/publish.log"
-          if npm publish --workspace plugin --provenance --access public >"$out" 2>&1; then
+          failed=0
+          # the plugin first: @cap2ui5/abap2js names it as a peer
+          for dir in plugin abap2js; do
+            NAME="$(node -p "require('./$dir/package.json').name")"
+            VERSION="$(node -p "require('./$dir/package.json').version")"
+            if npm view "$NAME@$VERSION" version >/dev/null 2>&1; then
+              echo "$NAME@$VERSION is already on the registry - nothing to do"
+              continue
+            fi
+            out="$RUNNER_TEMP/publish-$dir.log"
+            if npm publish --workspace "$dir" --provenance --access public >"$out" 2>&1; then
+              cat "$out"
+              echo "published $NAME@$VERSION"
+              continue
+            fi
             cat "$out"
-            echo "published $NAME@$VERSION"
-            exit 0
-          fi
-          cat "$out"
-          # npm view lags a publish by minutes: right after the first version
-          # went out by hand, it still answers 404 while the registry already
-          # refuses to publish that version again (cap2UI5/samples' 0.1.0 tag
-          # run reached its publish step in that window).
-          if grep -q "cannot publish over the previously published version" "$out"; then
-            echo "$NAME@$VERSION is already on the registry (npm view does not show it yet) - nothing to do"
-            exit 0
-          fi
-          if npm view "$NAME" version >/dev/null 2>&1; then
-            echo "::error::$NAME is on the registry, but publishing $VERSION failed - see the npm output above (the Trusted Publisher not pointing at this repository and release.yml?)"
-            exit 1
-          fi
-          echo "::warning::$NAME@$VERSION was NOT published: the package does not exist on the registry yet, and trusted publishing can only be configured for one that does. Bootstrap it once by hand (the header of this workflow), then every tag publishes here."
+            # npm view lags a publish by minutes: right after the first version
+            # went out by hand, it still answers 404 while the registry already
+            # refuses to publish that version again (cap2UI5/samples' 0.1.0 tag
+            # run reached its publish step in that window).
+            if grep -q "cannot publish over the previously published version" "$out"; then
+              echo "$NAME@$VERSION is already on the registry (npm view does not show it yet) - nothing to do"
+              continue
+            fi
+            if npm view "$NAME" version >/dev/null 2>&1; then
+              echo "::error::$NAME is on the registry, but publishing $VERSION failed - see the npm output above (the Trusted Publisher not pointing at this repository and release.yml?)"
+              failed=1
+              continue
+            fi
+            echo "::warning::$NAME@$VERSION was NOT published: the package does not exist on the registry yet, and trusted publishing can only be configured for one that does. Bootstrap it once by hand (the header of this workflow), then every tag publishes here."
+          done
+          exit "$failed"
 
       - name: Dry run only
         if: github.ref_type != 'tag'

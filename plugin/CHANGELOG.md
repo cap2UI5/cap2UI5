@@ -10,6 +10,16 @@ starts with 0, a minor release may break the API.
 
 ### Removed
 
+- **The translator moved to its own package, `@cap2ui5/abap2js`.**
+  `require("@cap2ui5/cds-plugin").abap2js` / `Abap2jsError` and the
+  `cap2ui5` command are gone from this package; add
+  `npm add -D @cap2ui5/abap2js` and the command is
+  `npx --no-install cap2ui5 abap2js` as before, the functions
+  `require("@cap2ui5/abap2js")`. `@abaplint/core` is no longer an optional
+  peer of the plugin - it is a dependency of the translator, so a project
+  that only serves apps never installs it, and one that translates no longer
+  adds it by hand.
+
 - **The 0.1.0 settings key `cds.cap2ui5` is no longer read.** A project that
   still sets it fails to start, with a message naming
   `cds.requires.cap2ui5`. Ignoring it instead would have let its `requires`

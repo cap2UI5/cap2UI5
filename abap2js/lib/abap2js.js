@@ -1,6 +1,6 @@
 // abap2js - an abap2UI5 app class as a cap2UI5 app module, line for line.
 //
-//   const { abap2js } = require("@cap2ui5/cds-plugin");
+//   const { abap2js } = require("@cap2ui5/abap2js");
 //   const { code } = abap2js(fs.readFileSync(file, "utf8"), { file });
 //
 //   npx --no-install cap2ui5 abap2js src/z2ui5_cl_my_app.clas.abap --out srv/apps
@@ -64,9 +64,10 @@
 const fs = require("fs");
 const path = require("path");
 
-// Loaded on first use: the plugin's runtime path never translates anything.
-let core;
-const A = () => (core ??= require("./abaplint-core").requireCore());
+// The ABAP parser - a dependency of this package, and of nothing the plugin
+// loads to serve apps.
+const abaplint = require("@abaplint/core");
+const A = () => abaplint;
 
 class Abap2jsError extends Error {
   constructor(message, file, token) {
@@ -204,10 +205,14 @@ const sized = (name, length, decimals) => {
 // the client's own `z2ui5_if_client=>ty_s_get`, whose components decide how
 // client->get( )-check_on_navigated prints - are read from that class's
 // source. The framework's are the sources @abap2ui5/node-runtime ships in
-// downport/, which is what its transpiled output was made from.
+// downport/, which is what its transpiled output was made from - the runtime
+// @cap2ui5/cds-plugin pins and serves, found through the plugin, so a class is
+// translated against the framework the project runs.
 function runtimeSources() {
   try {
-    const dir = path.join(path.dirname(require.resolve("@abap2ui5/node-runtime/package.json")), "downport");
+    const plugin = path.dirname(require.resolve("@cap2ui5/cds-plugin/package.json"));
+    const pkg = require.resolve("@abap2ui5/node-runtime/package.json", { paths: [plugin] });
+    const dir = path.join(path.dirname(pkg), "downport");
     return fs.existsSync(dir) ? dir : null;
   } catch {
     return null;
@@ -233,6 +238,7 @@ function library(lib = []) {
   const models = new Map();
   return {
     frameworkFound: !!rt,
+    frameworkDir: rt,                    // the downport/ read for the framework's types
     model(name) {
       const key = lc(name);
       if (!models.has(key)) {

@@ -111,10 +111,10 @@ client.view_display(view.stringify());
 ```
 
 So an ABAP app ports line by line, and abap2UI5's documentation of a method is
-the documentation of the JavaScript one - and the package does the porting:
+the documentation of the JavaScript one - and `@cap2ui5/abap2js` does the porting:
 `npx --no-install cap2ui5 abap2js zcl_my_app.clas.abap` writes `srv/apps/zcl_my_app.js`,
 and refuses with file, row and column what it does not know
-([plugin/README.md](plugin/README.md#an-abap-app-translated-cap2ui5-abap2js)). What JavaScript changes: a field is
+([abap2js/README.md](abap2js/README.md)). What JavaScript changes: a field is
 bound by its NAME (`client._bind("s_order-customer")`), since ABAP's `_bind( )`
 finds it by reference; what only an asynchronous framework call can produce -
 an event's wire, `view.stringify()` - is resolved after `main( )`, so embed
@@ -182,6 +182,7 @@ documentation.
 
 ```
 plugin/              the npm package @cap2ui5/cds-plugin: cds-plugin.js, index.cds, lib/
+abap2js/             the npm package @cap2ui5/abap2js: the translator and `cap2ui5 abap2js`
 examples/bookshop/   a CAP project using it: a plain CAP service and four apps - the one to read
 test/project/        the CAP project the test suite runs in: fixture apps, test/*.test.mjs
 runtime/             @abap2ui5/node-runtime: only package.json + README are here, see runtime/README.md

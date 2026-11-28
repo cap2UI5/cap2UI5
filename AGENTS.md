@@ -7,8 +7,9 @@ Guidance for AI agents and contributors. Read before making any change.
 abap2UI5 hosted in CAP. **There is no port here**: `plugin/` is hand-written
 JavaScript that boots upstream's transpiled runtime
 (`@abap2ui5/node-runtime`), keeps its drafts in a CDS entity and lets apps be plain
-JavaScript classes - about 1,900 lines of code for that, with `abap2js`
-(2,100) and the agent endpoint (700) beside it as optional parts. It was
+JavaScript classes - about 1,900 lines of code for that, with the agent
+endpoint (700) beside it as an optional part and the translator `abap2js`
+(2,100) as a package of its own. It was
 ~570 lines when ADR-008 was written; count again before quoting a number. Everything the framework does, upstream's ABAP does. The
 decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
 
@@ -17,6 +18,7 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
 | path | hand-written? |
 |---|---|
 | `plugin/` | yes — the npm package `@cap2ui5/cds-plugin` (`cap2ui5` up to 0.2.0) |
+| `abap2js/` | yes — the npm package `@cap2ui5/abap2js`: the translator and the `cap2ui5` command, with `@abaplint/core` as its dependency so the plugin needs none. Versioned in lockstep with the plugin (`packages.test.mjs`). |
 | `plugin/lib/agent/vendor/` | **no — abap2UI5/mcp-server's `viewxml.mjs`, `snapshot.mjs`, `appclient.mjs`, vendored unchanged at the commit `source.json` records by `scripts/vendor-agent.mjs` (`npm run agent-vendor`), never edited.** `agent-vendor.test.mjs` fails on a hand edit; a fix goes upstream, then re-vendor. ADR-009. |
 | `examples/bookshop/` | yes — the example: an ordinary CAP project with four apps, written to be read. No tests run in it; `test/project/test/example.test.mjs` starts it and drives each app once. |
 | `test/project/` | yes — the CAP project **the test suite runs in**; its `srv/apps/` are fixtures for the tests, not demos. `srv/catalog-service.cds` is deliberately an ordinary CAP service that knows nothing about cap2UI5: it is what `coexistence.test.mjs` drives to prove the plugin is a guest in the project and not its host. |
@@ -127,7 +129,7 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
   one piece of JavaScript of its own is `escape_literal( )`, which a
   synchronous chain cannot await. `view-builder.test.mjs` pins it to the ABAP
   method, and the replay to the same chain driven directly against the class.
-- **`abap2js` refuses rather than guesses.** `plugin/lib/abap2js.js`
+- **`abap2js` refuses rather than guesses.** `abap2js/lib/abap2js.js`
   translates the part of ABAP an abap2UI5 app is written in, and anything
   else throws an `Abap2jsError` with file, row and column. Widening it takes
   the construct, a case in `abap2js.test.mjs` (in the fixture if the
@@ -216,17 +218,17 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
 
 ## Publishing
 
-**The package is `@cap2ui5/cds-plugin`; the plugin's own names are
-`cap2ui5`.** An app requires the package by its name, and so does what
+**The packages are `@cap2ui5/cds-plugin` and `@cap2ui5/abap2js`; the
+plugin's own names are `cap2ui5`.** An app requires the package by its name, and so does what
 abap2js writes. What a project configures - `cds.requires.cap2ui5`,
-`cds add cap2ui5`, the command `cap2ui5`, the namespace of
+`cds add cap2ui5`, the command `cap2ui5` (which `@cap2ui5/abap2js` ships), the namespace of
 `cap2ui5.Drafts`, the logger, the `"cap2ui5": { "apps" }` a package declares
 its apps with - is the plugin's, and keeps its name. The unscoped `cap2ui5`
 was withdrawn from npm; since 2026-09-30 the name holds a deprecated
 placeholder of this project (`0.0.1-placeholder`), whose command only prints
 where to go and fails. Docs, comments and messages still write the command
 as `npx --no-install cap2ui5 abap2js`, which runs the project's own or
-fails: a bare `npx cap2ui5` where the plugin is not installed downloads
+fails: a bare `npx cap2ui5` where the translator is not installed downloads
 whatever npm has under the name, and that is never the plugin.
 
 Every change a user of the package would notice gets a line under

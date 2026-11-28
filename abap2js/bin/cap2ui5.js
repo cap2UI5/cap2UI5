@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// cap2ui5 - the package's command line. One command so far:
+// cap2ui5 - the command line of @cap2ui5/abap2js. One command so far:
 //
 //   npx --no-install cap2ui5 abap2js <class.clas.abap | directory>... [options]
 //
@@ -23,15 +23,11 @@
 //   --check           write nothing; exit 1 when a module is missing or would change
 //
 // The exit code is 1 when any class was refused or, with --check, differs.
-//
-// It needs @abaplint/core, an optional peer dependency of the package: a
-// project that translates adds it with `npm add -D @abaplint/core`.
 "use strict";
 
 const fs = require("fs");
 const path = require("path");
-const { moduleFormat } = require("../lib/module-format");
-const { requireCore } = require("../lib/abaplint-core");
+const { moduleFormat } = require("@cap2ui5/cds-plugin/lib/module-format");
 
 const USAGE = `usage: cap2ui5 abap2js <class.clas.abap | directory>... [--out dir] [--lib dir]... [--origin text] [--esm | --cjs] [--check]`;
 
@@ -77,8 +73,6 @@ function classes(inputs) {
 
 function abap2jsCommand(argv) {
   const o = args(argv);
-  // the parser is an optional peer: missing, this says how to add it
-  requireCore();
   const { abap2js, library, Abap2jsError } = require("../lib/abap2js");
   const files = classes(o.inputs);
   const dirs = o.lib.length ? o.lib : [...new Set(files.map((f) => path.dirname(f)))];

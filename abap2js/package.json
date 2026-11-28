@@ -1,0 +1,46 @@
+{
+  "name": "@cap2ui5/abap2js",
+  "version": "0.8.0",
+  "description": "abap2UI5 app classes translated into cap2UI5 app modules, line for line - the translator behind `npx cap2ui5 abap2js`",
+  "keywords": [
+    "cap",
+    "abap2ui5",
+    "abap",
+    "translator",
+    "abaplint"
+  ],
+  "homepage": "https://cap2ui5.github.io/docs/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cap2UI5/cap2UI5.git",
+    "directory": "abap2js"
+  },
+  "bugs": {
+    "url": "https://github.com/cap2UI5/cap2UI5/issues"
+  },
+  "author": "cap2UI5",
+  "license": "MIT",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "bin": {
+    "cap2ui5": "bin/cap2ui5.js"
+  },
+  "files": [
+    "bin",
+    "index.js",
+    "index.d.ts",
+    "lib",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "peerDependencies": {
+    "@cap2ui5/cds-plugin": ">=0.8.0"
+  },
+  "dependencies": {
+    "@abaplint/core": "^2.120.60"
+  }
+}

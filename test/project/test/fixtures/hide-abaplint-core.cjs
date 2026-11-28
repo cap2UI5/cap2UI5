@@ -1,6 +1,6 @@
-// Preloaded with `node -r` by abaplint-optional.test.mjs: a process in which
+// Preloaded with `node -r` by packages.test.mjs: a process in which
 // @abaplint/core is not installed, as in a project that only serves apps -
-// the workspace itself always has it, as a devDependency.
+// the workspace itself always has it, as @cap2ui5/abap2js's dependency.
 const Module = require("node:module");
 const resolve = Module._resolveFilename;
 Module._resolveFilename = function (request, ...rest) {
