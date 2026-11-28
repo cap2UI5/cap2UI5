@@ -15,12 +15,12 @@
 //     "agent": true                                  the MCP endpoint - lib/agent/, off by default
 //   } } }
 //
-// 0.1.0 read a top-level cds.cap2ui5 with `requires` for the roles. That is
-// still read, over the defaults, with a warning naming the new place.
+// 0.1.0 read a top-level cds.cap2ui5. It is no longer read, and its presence
+// fails the start: ignored, its `requires` would fall back to the default
+// role - access widened by an upgrade.
 const cds = require("@sap/cds");
 const { agentConfig } = require("./agent/policy");
 
-const LOG = cds.log("cap2ui5");
 
 /** The shipped settings - package.json#cds.requires.cap2ui5, which CAP merges
  *  into cds.env before a project's own apply. */
@@ -51,19 +51,13 @@ function timeoutOf(value) {
  * @param {object} [env] cds.env, or a stand-in for it in a test
  */
 function config(env = cds.env) {
-  const own = env.requires?.cap2ui5;
-  const legacy = env.cap2ui5;
-  if (own === false || legacy === false) return null;
-  const conf = { ...own };
-  if (legacy && typeof legacy === "object") {
-    LOG.warn(
-      "cds.cap2ui5 is deprecated - move these settings to cds.requires.cap2ui5, " +
-        "and `requires` to `roles` there. They apply until then.",
-    );
-    const { requires, ...rest } = legacy;
-    Object.assign(conf, rest);
-    if ("requires" in legacy) conf.roles = requires;
+  if (env.cap2ui5 !== undefined) {
+    throw new Error("[cap2ui5] cds.cap2ui5 is no longer read - move its settings to cds.requires.cap2ui5, " +
+      "and `requires` to `roles` there (or `cds.requires.cap2ui5: false` to switch the plugin off)");
   }
+  const own = env.requires?.cap2ui5;
+  if (own === false) return null;
+  const conf = { ...own };
   // A route or a list of them. The shipped defaults are in cds.env already,
   // as CAP merges them; a stand-in for it in a test may leave them out, and
   // gets them here. An EMPTY list is a setting that cannot mean anything: it

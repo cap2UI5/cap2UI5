@@ -8,6 +8,15 @@ starts with 0, a minor release may break the API.
 
 ## [Unreleased]
 
+### Removed
+
+- **The 0.1.0 settings key `cds.cap2ui5` is no longer read.** A project that
+  still sets it fails to start, with a message naming
+  `cds.requires.cap2ui5`. Ignoring it instead would have let its `requires`
+  fall back to the default role, `authenticated-user` - an upgrade that
+  quietly widened who may call. Move the settings, and `requires` as
+  `roles`.
+
 ## [0.8.0] - 2026-11-27
 
 ### Changed

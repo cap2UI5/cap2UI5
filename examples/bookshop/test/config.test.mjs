@@ -1,12 +1,10 @@
 // Where the plugin's settings live, and what they mean.
 //
-// They moved from a top-level cds.cap2ui5 into the plugin's own entry under
-// cds.requires - where SAP's plugins keep theirs, next to the model the entry
-// already contributed. That gives the plugin CAP's documented off switch
-// (`cds.requires.cap2ui5: false`, as for cds.requires.queue), and the body
-// limit now follows CAP's precedence: this endpoint's setting, then the
-// global cds.server.body_parser.limit, then the plugin's default. It was a
-// hard-coded 10mb that no setting could change.
+// In the plugin's own entry under cds.requires - where SAP's plugins keep
+// theirs, next to the model the entry contributes - with CAP's off switch
+// (`cds.requires.cap2ui5: false`) and CAP's precedence for the body limit:
+// this endpoint's setting, then cds.server.body_parser.limit, then the
+// plugin's default.
 //
 // The first tests read lib/config.js against stand-ins for cds.env; the last
 // ones boot the example to check what a setting does on the wire.
@@ -106,7 +104,6 @@ test("agent.retention: days an audit row is kept - 0 or false keeps every row, a
 
 test("false switches the plugin off", () => {
   assert.equal(config({ requires: { cap2ui5: false } }), null);
-  assert.equal(config({ ...env(), cap2ui5: false }), null);          // the 0.1.0 key, too
 });
 
 test("the body limit: this endpoint's setting, then CAP's global one, then the default", () => {
@@ -116,11 +113,10 @@ test("the body limit: this endpoint's setting, then CAP's global one, then the d
   assert.equal(config(env({ env: global, own: { body_parser: { limit: "5kb" } } })).limit, "5kb");
 });
 
-test("the 0.1.0 key cds.cap2ui5 still applies, with `requires` read as the roles", () => {
-  const conf = config({ ...env(), cap2ui5: { requires: "admin", apps: "app/js" } });
-  assert.deepEqual(conf.roles, ["admin"]);
-  assert.equal(conf.apps, "app/js");
-  assert.deepEqual(config({ ...env(), cap2ui5: { requires: null } }).roles, []);
+test("the 0.1.0 key cds.cap2ui5 fails the start instead of being ignored - its roles would fall back to the default", () => {
+  for (const legacy of [{ requires: "admin" }, { apps: "app/js" }, false]) {
+    assert.throws(() => config({ ...env(), cap2ui5: legacy }), /cds\.cap2ui5 is no longer read - move its settings to cds\.requires\.cap2ui5/);
+  }
 });
 
 // ---- on the wire -----------------------------------------------------------
@@ -179,15 +175,12 @@ test("CAP's global body limit applies to the roundtrip, and the plugin's own set
   }
 });
 
-test("a 0.1.0 configuration keeps working and says where it belongs now", async () => {
-  const s = await boot("legacy key", { env: { CDS_CAP2UI5_REQUIRES: "admin" } });
-  try {
-    assert.equal((await post(s.url, { app: "ZCL_JS_HELLO", user: "alice" })).status, 200);   // admin
-    assert.equal((await post(s.url, { app: "ZCL_JS_HELLO", user: "bob" })).status, 403);
-    assert.match(s.out(), /\[cap2ui5\] - cds\.cap2ui5 is deprecated - move these settings to cds\.requires\.cap2ui5/);
-  } finally {
-    s.kill();
-  }
+test("a project that still sets the 0.1.0 key does not start", async () => {
+  await assert.rejects(boot("legacy key", { env: { CDS_CAP2UI5_REQUIRES: "admin" } }), (e) => {
+    assert.match(e.message, /cds\.cap2ui5 is no longer read/, "the cause is not in the output");
+    assert.doesNotMatch(e.message, /server listening/, "the server listened under the default role");
+    return true;
+  });
 });
 
 test("the body is read whatever its Content-Type says - a POST without the header is a roundtrip, not a start page", async () => {

@@ -625,8 +625,9 @@ Whatever `cds.requires.auth` is configured to identifies the user. A caller who
 is not logged in gets 401 with that strategy's login challenge. A user who
 lacks the role gets 403.
 
-0.1.0 read its settings from a top-level `cds.cap2ui5`, with `requires` for the
-roles. Those settings still apply, and the log names the new place.
+0.1.0 read its settings from a top-level `cds.cap2ui5`. That key is no longer
+read, and a project that still sets it fails to start, with a message naming
+`cds.requires.cap2ui5`.
 
 Everything the *framework* decides about a response — the
 Content-Security-Policy, the security headers, the UI5 bootstrap URL, the
