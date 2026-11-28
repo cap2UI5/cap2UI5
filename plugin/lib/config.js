@@ -82,7 +82,7 @@ function config(env = cds.env) {
     // with both on, the proxy finds the body compressed and leaves it alone
     compression: conf.compression !== false,
     // how long an async main( ) may hold the roundtrips behind it, in ms;
-    // 0 - no limit (lib/define-app.js, within( ))
+    // 0 - no limit (lib/app/timeout.js, within( ))
     timeout: timeoutOf(conf.timeout),
     // the MCP endpoint agents operate apps through - null, the default, is
     // no route at all; see lib/agent/policy.js for what the object holds

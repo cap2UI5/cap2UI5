@@ -42,7 +42,7 @@
 //   attribute path is refused. window_bind_tab( )
 //   take their table the same way.
 // - nav_app_call( NEW zcl_app( ) ) names the app: nav_app_call("ZCL_APP").
-// - A read of a table or structure field is a copy (define-app.js), so a
+// - A read of a table or structure field is a copy (lib/app/proxy.js), so a
 //   write to a component of an attribute assigns the whole structure again.
 // - abap_bool is a boolean; in a string template it prints as ABAP prints
 //   it, "X" or nothing.
@@ -756,7 +756,7 @@ class Generator {
     let lastRow = 0;
     for (const a of this.m.attributes) {
       this.at.node = a.stmt;
-      if (a.type.k === "ref" && a.type.to === "z2ui5_if_client") continue;   // assigned in main( ), see define-app.js
+      if (a.type.k === "ref" && a.type.to === "z2ui5_if_client") continue;   // assigned in main( ), see lib/app/before.js
       if (a.isStatic) this.fail("CLASS-DATA is not supported", a.stmt);
       const row = a.stmt.getFirstToken().getRow();
       if (section !== null && (section !== a.section || row - lastRow > 1)) out.push("");
@@ -1156,11 +1156,11 @@ class MethodGen {
       return `${this.reassigned.has(name) ? "let" : "const"} ${jsName(name)}${gap}= ${value};`;
     }
     const t = this.target(target);
-    // an attribute's write is a copy already (define-app.js)
+    // an attribute's write is a copy already (lib/app/proxy.js)
     let value = this.source(source, t.type, !t.attribute);
     if (jsOp === "=") {
       // a local takes the value as ABAP's MOVE converts it; an attribute is a
-      // box of its type, which converts it itself (define-app.js)
+      // box of its type, which converts it itself (lib/app/types.js)
       if (!t.attribute) value = this.stored(t.type, source, value, s);
     } else if (opText !== "&&=") {
       // += -= *= are arithmetic: on a number, with the number in a text
@@ -2013,7 +2013,7 @@ class MethodGen {
       out += `${sep}${lead}${name}:${this.g.gap(sub.getLastToken(), eq.get())}${value}`;
     });
     // a component VALUE leaves out is initial - where the value is stored in
-    // a local, which no box fills in (an attribute's is, define-app.js)
+    // a local, which no box fills in (an attribute's is, lib/define-app.js)
     if (copy && type?.k === "struct") {
       const named = new Set(assigns.map((a) => lc(text(a.findDirectExpression(E.FieldSub)))));
       for (const f of type.fields) {
@@ -2280,7 +2280,7 @@ class MethodGen {
     return { k: "int" };
   }
   /** A local, parameter or constant, read to be stored: its copy. A read of
-   *  an attribute is a copy already (define-app.js). */
+   *  an attribute is a copy already (lib/app/proxy.js). */
   copied(chain, js) {
     const used = new Set(this.g.used);
     const f = this.fieldChain(chain);

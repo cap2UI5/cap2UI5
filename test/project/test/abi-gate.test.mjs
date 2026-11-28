@@ -270,7 +270,7 @@ test("the interface methods and parameters the plugin uses exist, by name", () =
 });
 
 test("the windowed table: window_bind_tab( )'s parameters, and what the request it names an event for carries", () => {
-  // define-app.js wires window_bind_tab( ) by these names - val and total
+  // lib/app/client.js wires window_bind_tab( ) by these names - val and total
   // by reference, event and window by value - and hands the app the
   // request as get( ).r_event_data, converted as it is. window.test.mjs
   // holds what they do; this holds the names.
@@ -294,7 +294,7 @@ test("the constant structures the client hands over are readable, by name", () =
 });
 
 test("z2ui5_if_client's METHODS carry what the client reads its signatures from - the preferred parameter first", () => {
-  // lib/define-app.js signature( ): the importing parameters of a method in
+  // lib/app/interface.js signature( ): the importing parameters of a method in
   // the order the transpiler emits them, the first being the one a single
   // positional argument means, and is_optional "X" on every one a call may
   // leave out. Neither is promised by @abaplint/transpiler, so both are held
@@ -318,7 +318,7 @@ test("z2ui5_if_client's METHODS carry what the client reads its signatures from 
 });
 
 test("the drafts pruning must keep are a public table on the app container - where the runtime prunes", (t) => {
-  // define-app.js takes back the mark its up-front app_state_get_href( )
+  // lib/app/before.js takes back the mark its up-front app_state_get_href( )
   // leaves there (client->mo_action->mo_app->mt_draft_keep) - drafts.test.mjs
   // holds what that is for; this holds the name
   const a = abap.Classes["Z2UI5_CL_UI5_APP_CONT"].ATTRIBUTES.MT_DRAFT_KEEP;

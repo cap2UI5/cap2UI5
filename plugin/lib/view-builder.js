@@ -48,7 +48,7 @@ const isPlainObject = (v) => v !== null && typeof v === "object" && Object.getPr
 
 /** The methods' parameters as the ABAP class declares them - the preferred
  *  one first, "!" on those that are not OPTIONAL - read from a call as the
- *  client reads its calls (define-app.js, paramsOf). */
+ *  client reads its calls (lib/app/interface.js, paramsOf). */
 const SIGNATURES = { ele: "n! ns", tag: "n! ns", a: "n! v b t", escape_literal: "val!" };
 function paramsOf(method, args) {
   const who = `z2ui5_cl_ui5_view_builder.${method}( )`;

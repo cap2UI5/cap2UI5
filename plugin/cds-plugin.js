@@ -221,7 +221,7 @@ cds.on("bootstrap", (app) => {
   // slow query holds all the others. So the wait is measured, and a roundtrip
   // that stood in the queue for a second or more says so - at most every ten
   // seconds, since under load every roundtrip would. An async main( ) itself
-  // is bounded by cds.requires.cap2ui5.timeout (lib/define-app.js).
+  // is bounded by cds.requires.cap2ui5.timeout (lib/app/timeout.js).
   async function roundtrip(req, res) {
     const queuedAt = Date.now();
     const ahead = inFlight++;
@@ -261,7 +261,7 @@ cds.on("bootstrap", (app) => {
       // 3). Stripped to what an id is made of, as the framework strips a
       // class name: a UUID or any other well-formed id passes unchanged.
       const ref = safeRef(cds.context?.id);
-      // main( ) ran out of time (lib/define-app.js): 504, so a log and a
+      // main( ) ran out of time (lib/app/timeout.js): 504, so a log and a
       // proxy can tell a roundtrip that was given up from one that broke
       const late = e?.code === MAIN_TIMEOUT;
       LOG.error(`roundtrip ${late ? "timed out" : "failed"} (${ref}):`, e);

@@ -60,7 +60,7 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
   directions, so a method upstream adds fails the suite until it is wired.
   The constant groups are read from the runtime, and so are the parameters
   of every method - their names, which one is preferred and which are
-  required (`signature( )` in `lib/define-app.js`, from the transpiled
+  required (`signature( )` in `lib/app/interface.js`, from the transpiled
   interface's `METHODS`). There is no table of them here to keep in step: a
   parameter upstream adds is one the client takes on the runtime that has
   it, and one the runtime in use does not declare is refused, naming the
@@ -151,7 +151,7 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
   at a time per process because the transpiled framework keeps per-request
   state in statics; one given up halfway would wake up later inside another
   user's. The only place a limit may cut is around an app's `main( )`
-  (`cds.requires.cap2ui5.timeout`, `within( )` in `lib/define-app.js`), which
+  (`cds.requires.cap2ui5.timeout`, `within( )` in `lib/app/timeout.js`), which
   touches nothing but its own instance while it waits. `timeout.test.mjs`
   holds it.
 - `npm test` stays browserless. Browser tests are `*.e2e.mjs`, run by
