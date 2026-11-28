@@ -75,11 +75,11 @@ try {
   console.log(`consumer-test: ${dir}`);
 
   // --- pack, exactly as publish would ---------------------------------------
-  for (const pkg of ["plugin", "runtime", "abap2js"]) {
+  for (const pkg of ["plugin", "runtime", "abap2js", "agent"]) {
     run("npm", ["pack", "--pack-destination", dir], path.join(ROOT, pkg));
   }
   const tarballs = fs.readdirSync(dir).filter((f) => f.endsWith(".tgz"));
-  check("the three packages pack", tarballs.length === 3, tarballs.join(" "));
+  check("the four packages pack", tarballs.length === 4, tarballs.join(" "));
   const translator = tarballs.find((t) => t.startsWith("cap2ui5-abap2js-"));
 
   // --- a CAP project that has never heard of this repository ----------------
@@ -140,7 +140,7 @@ ENDCLASS.
 
   run("npm", ["install", "--no-audit", "--no-fund",
     ...tarballs.filter((t) => t !== translator).map((t) => path.join(dir, t))], proj);
-  check("npm install of the plugin and the runtime succeeds", true);
+  check("npm install of the plugin, the runtime and the agent endpoint succeeds", true);
 
   // --- the translator is a package of its own -------------------------------
   // a project that only serves apps gets neither the parser nor the command;
@@ -164,8 +164,7 @@ ENDCLASS.
   const surface = probe(`console.log(JSON.stringify(Object.keys(require("@cap2ui5/cds-plugin"))))`, proj);
   const exported = surface.ok ? JSON.parse(surface.out) : [];
   check("require(\"@cap2ui5/cds-plugin\") exports the documented surface",
-    ["defineApp", "defineExit", "t", "z2ui5_cl_ui5_view_builder", "z2ui5_if_client", "ViewBuilder", "purgeDrafts",
-      "purgeAgentLog"]
+    ["defineApp", "defineExit", "t", "z2ui5_cl_ui5_view_builder", "z2ui5_if_client", "ViewBuilder", "purgeDrafts"]
       .every((k) => exported.includes(k)),
     surface.ok ? exported.join(", ") : surface.why);
 
@@ -176,6 +175,11 @@ ENDCLASS.
   const abap2jsDir = path.join(proj, "node_modules", "@cap2ui5", "abap2js");
   for (const f of ["README.md", "CHANGELOG.md", "LICENSE", "index.js", "index.d.ts", "lib", "bin"]) {
     check(`@cap2ui5/abap2js contains ${f}`, fs.existsSync(path.join(abap2jsDir, f)));
+  }
+  const agentDir = path.join(proj, "node_modules", "@cap2ui5", "agent");
+  for (const f of ["README.md", "CHANGELOG.md", "LICENSE", "cds-plugin.js", "index.cds", "index.js", "index.d.ts",
+    "lib/vendor/appclient.mjs"]) {
+    check(`@cap2ui5/agent contains ${f}`, fs.existsSync(path.join(agentDir, f)));
   }
   const types = JSON.parse(fs.readFileSync(path.join(pkgDir, "package.json"), "utf8")).types;
   check("its package.json names the type declarations it ships",
@@ -208,7 +212,7 @@ ENDCLASS.
     (async () => {
       cds.model = cds.compile.for.nodejs(await cds.load("*"));
       await cds.connect.to("db");
-      const { purgeAgentLog } = require("@cap2ui5/cds-plugin");
+      const { purgeAgentLog } = require("@cap2ui5/agent");
       console.log(await purgeAgentLog({ days: 1 }));
     })().catch((e) => { console.error(e); process.exit(1); });
   `, proj);

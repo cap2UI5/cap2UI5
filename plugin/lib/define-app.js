@@ -79,7 +79,6 @@
 // rebuilds the rows. Component names are stored lowercase, as the transpiler
 // does, and appear UPPERCASE in the model — a view binds `{TITLE}`.
 const cds = require("@sap/cds");
-const { AGENT, appOption } = require("./agent/policy");
 const { t, isBoxed, shapeOf, initialOf, wrap, fieldNameError, abapName, isFrameworkField } = require("./app/types");
 const { z2ui5_if_client } = require("./app/interface");
 const { MAIN_TIMEOUT, limits, configure, within } = require("./app/timeout");
@@ -89,6 +88,11 @@ const { instanceProxy } = require("./app/proxy");
 const { flush } = require("./app/flush");
 
 const LOG = cds.log("cap2ui5");
+
+/** Where an app's `agent` option is kept on its class, as the app gave it -
+ *  a global symbol, which @cap2ui5/agent reads and checks (its lib/policy.js
+ *  declared( )); nothing here needs that package. */
+const AGENT = Symbol.for("cap2ui5.agent");
 
 /** A #private member used in main( ) or a method it calls: `this` there is
  *  the proxy that unwraps the fields, and JavaScript lets only the instance
@@ -137,9 +141,6 @@ function defineApp(name, cls, opts = {}) {
       `framework, one of its apps, or the plugin's own - and replacing it would change what every roundtrip ` +
       `runs. Choose another name.`);
   }
-  // whether, and how, agents may operate the app - lib/agent/policy.js;
-  // checked before anything is registered, so a wrong option registers nothing
-  const agent = appOption(INTERNAL, opts.agent);
   const userMain = cls.prototype.main ?? cls.prototype.z2ui5_if_app$main;
   if (typeof userMain !== "function") {
     throw new Error(`defineApp(${INTERNAL}): the class needs a main( client ) method`);
@@ -209,7 +210,7 @@ function defineApp(name, cls, opts = {}) {
   App.INTERNAL_TYPE = "CLAS";
   App.INTERNAL_NAME = INTERNAL;
   App[DEFINED] = true;
-  if (agent !== undefined) App[AGENT] = agent;
+  if (opts.agent !== undefined) App[AGENT] = opts.agent;
   App.IMPLEMENTED_INTERFACES = opts.interfaces ?? ["Z2UI5_IF_APP", "IF_SERIALIZABLE_OBJECT"];
   App.METHODS = {};
   App.ATTRIBUTES = {};

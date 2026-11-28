@@ -24,9 +24,9 @@
 const POLICIES = ["allowed", "confirm", "forbidden"];
 const RANK = { allowed: 0, confirm: 1, forbidden: 2 };
 
-/** Marks an app's agent declaration on its class - a global symbol, as
- *  defineApp's own marker, so a second copy of the plugin reads the first
- *  one's apps. */
+/** Where defineApp( ) of @cap2ui5/cds-plugin keeps an app's `agent` option,
+ *  as the app gave it - a global symbol, so the plugin needs nothing of this
+ *  package to keep it. It is read here, through declared( ). */
 const AGENT = Symbol.for("cap2ui5.agent");
 
 const DEFAULT_PATH = "/rest/root/z2ui5/mcp";
@@ -164,6 +164,22 @@ function appOption(app, agent) {
   return { events: rules, description: agent.description };
 }
 
+/** An app class's `agent` option, normalized (appOption) - undefined where
+ *  the app says nothing. Read once per class. */
+const normalized = new WeakMap();
+function declared(cls) {
+  if (typeof cls !== "function" || cls[AGENT] === undefined) return undefined;
+  if (!normalized.has(cls)) normalized.set(cls, appOption(cls.INTERNAL_NAME ?? "?", cls[AGENT]));
+  return normalized.get(cls);
+}
+
+/** Every registered app's `agent` option, read now: run once the apps are
+ *  loaded, so an option an agent cannot read fails the start - "forbiden"
+ *  would otherwise have left the event allowed. */
+function checkApps() {
+  for (const cls of Object.values(globalThis.abap?.Classes ?? {})) declared(cls);
+}
+
 /** The class of an app, or null: registered under its name and implementing
  *  z2ui5_if_app, itself or through a superclass. */
 function appClass(name) {
@@ -183,7 +199,7 @@ function reachable(name, conf) {
   const app = String(name).toUpperCase();
   const cls = appClass(app);
   if (!cls) return { ok: false, reason: `${app} is no app of this server` };
-  const own = cls[AGENT];
+  const own = declared(cls);
   if (own === false) return { ok: false, reason: `${app} says agents may never operate it (defineApp option agent: false)` };
   if (own) return { ok: true, source: "app", description: own.description };
   if (conf.apps.some((a) => a.re.test(app))) return { ok: true, source: "config" };
@@ -196,7 +212,7 @@ function reachableApps(conf) {
   const names = new Set();
   for (const [name, cls] of Object.entries(globalThis.abap?.Classes ?? {})) {
     if (name.includes("-") || typeof cls !== "function") continue;      // local classes are CLAS-<pool>-<name>
-    if (cls[AGENT] || conf.apps.some((a) => a.re.test(name))) names.add(name);
+    if (declared(cls) || conf.apps.some((a) => a.re.test(name))) names.add(name);
   }
   return [...names].sort().map((app) => ({ app, r: reachable(app, conf) })).filter((x) => x.r.ok)
     .map(({ app, r }) => ({ app, source: r.source, ...(r.description ? { description: r.description } : {}) }));
@@ -213,7 +229,7 @@ function classify({ app, start, event }, conf) {
   const stricter = (policy, source) => {
     if (RANK[policy] > RANK[result.policy]) result = { policy, source };
   };
-  const own = appClass(app)?.[AGENT];
+  const own = declared(appClass(app));
   const rule = own ? own.events.find((r) => r.re.test(event)) : null;
   if (rule) stricter(rule.policy, `the app ${String(app).toUpperCase()} classifies it ${rule.policy}`);
   for (const policy of ["confirm", "forbidden"]) {
@@ -225,4 +241,5 @@ function classify({ app, start, event }, conf) {
   return result;
 }
 
-module.exports = { AGENT, DEFAULT_PATH, DEFAULT_RETENTION, agentConfig, retentionOf, appOption, appClass, reachable, reachableApps, classify, glob };
+module.exports = { AGENT, DEFAULT_PATH, DEFAULT_RETENTION, agentConfig, retentionOf, appOption, declared, checkApps, appClass,
+  reachable, reachableApps, classify, glob };

@@ -10,6 +10,14 @@ starts with 0, a minor release may break the API.
 
 ### Removed
 
+- **The agent endpoint moved to its own package, `@cap2ui5/agent`.** A
+  project that uses it adds `npm add @cap2ui5/agent`; the setting
+  `cds.requires.cap2ui5.agent`, the endpoint and the table
+  `cap2ui5.AgentLog` are unchanged. Where the setting is on and the package
+  is missing, the start fails and names it. `purgeAgentLog( )` is
+  `require("@cap2ui5/agent").purgeAgentLog` now. `defineApp( )` still takes
+  the `agent` option; the endpoint checks it when the apps are loaded, and a
+  wrong one fails the start, as it failed `defineApp( )` before.
 - **The translator moved to its own package, `@cap2ui5/abap2js`.**
   `require("@cap2ui5/cds-plugin").abap2js` / `Abap2jsError` and the
   `cap2ui5` command are gone from this package; add

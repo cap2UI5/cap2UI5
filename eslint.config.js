@@ -35,7 +35,7 @@ module.exports = [
   {
     // byte for byte upstream's (scripts/vendor-agent.mjs): its eslint-disable
     // comments are for upstream's rules, which are not switched on here
-    files: ["plugin/lib/agent/vendor/**"],
+    files: ["agent/lib/vendor/**"],
     linterOptions: { reportUnusedDisableDirectives: "off" },
   },
   {

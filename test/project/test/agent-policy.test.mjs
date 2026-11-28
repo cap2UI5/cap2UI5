@@ -1,4 +1,4 @@
-// Who an agent may operate, and what it may fire (plugin/lib/agent/policy.js),
+// Who an agent may operate, and what it may fire (@cap2ui5/agent, agent/lib/policy.js),
 // read without a server: defineApp( )'s option agent, the project's
 // settings, and the rule that the stricter of the two wins. agent.test.mjs is
 // the same on the wire.
@@ -11,7 +11,7 @@ import { pathToFileURL } from "node:url";
 const require = createRequire(import.meta.url);
 const { locate } = require("@cap2ui5/cds-plugin/lib/runtime");
 const { defineApp } = require("@cap2ui5/cds-plugin");
-const { agentConfig, reachable, reachableApps, classify } = require("@cap2ui5/cds-plugin/lib/agent/policy");
+const { agentConfig, appOption, checkApps, reachable, reachableApps, classify } = require("@cap2ui5/agent/lib/policy");
 
 before(async () => {
   const { initializeABAP } = await import(pathToFileURL(path.join(locate().dir, "output", "init.mjs")).href);
@@ -22,7 +22,8 @@ before(async () => {
   defineApp("ZCL_AG_SILENT", class { main() {} });
 });
 
-const conf = (agent) => agentConfig({ apps: [], ...agent }, ["/sap/bc/z2ui5", "/rest/root/z2ui5"]);
+const ROUTES = ["/sap/bc/z2ui5", "/rest/root/z2ui5"];
+const conf = (agent) => agentConfig({ apps: [], ...agent }, ROUTES);
 
 test("an app opts in with defineApp( )'s option; one that says nothing is not reachable", () => {
   assert.deepEqual(reachable("zcl_ag_open", conf()), { ok: true, source: "app", description: undefined });
@@ -69,11 +70,61 @@ test("the project classifies on top - for the app on the screen and the app the 
   assert.equal(classify({ app: "ZCL_AG_RULES", event: "DELETE" }, conf({ confirm: ["DELETE"] })).policy, "forbidden");
 });
 
-test("a wrong option is refused when the app is defined - and nothing is registered", () => {
-  assert.throws(() => defineApp("ZCL_AG_BAD1", class { main() {} }, { agent: { events: { SAVE: "forbiden" } } }),
+test("a wrong option is refused when the endpoint reads it - naming the app", () => {
+  // defineApp( ) of the plugin keeps the option as it is given: the plugin
+  // needs nothing of this package. The endpoint reads every app's option once
+  // the apps are loaded (checkApps( )), so a wrong one fails the start.
+  assert.throws(() => appOption("ZCL_AG_BAD1", { events: { SAVE: "forbiden" } }),
     /defineApp\(ZCL_AG_BAD1\): option agent\.events\.SAVE: "forbiden" - an event is allowed, confirm, forbidden/);
-  assert.throws(() => defineApp("ZCL_AG_BAD2", class { main() {} }, { agent: { event: {} } }), /event - it knows events and description/);
-  assert.throws(() => defineApp("ZCL_AG_BAD3", class { main() {} }, { agent: "yes" }), /is true, false or \{ events, description \}/);
-  assert.throws(() => defineApp("ZCL_AG_BAD4", class { main() {} }, { agent: { events: ["SAVE"] } }), /maps an event/);
-  for (const n of ["ZCL_AG_BAD1", "ZCL_AG_BAD2", "ZCL_AG_BAD3", "ZCL_AG_BAD4"]) assert.equal(abap.Classes[n], undefined);
+  assert.throws(() => appOption("ZCL_AG_BAD2", { event: {} }), /event - it knows events and description/);
+  assert.throws(() => appOption("ZCL_AG_BAD3", "yes"), /is true, false or \{ events, description \}/);
+  assert.throws(() => appOption("ZCL_AG_BAD4", { events: ["SAVE"] }), /maps an event/);
+  defineApp("ZCL_AG_BAD5", class { main() {} }, { agent: { events: { SAVE: "forbiden" } } });
+  try {
+    assert.throws(() => checkApps(), /defineApp\(ZCL_AG_BAD5\): option agent\.events\.SAVE: "forbiden"/);
+  } finally {
+    delete abap.Classes.ZCL_AG_BAD5;
+  }
+  assert.doesNotThrow(() => checkApps());
+});
+
+// ---- the settings, cds.requires.cap2ui5.agent ---------------------------------
+
+test("agent: off unless switched on; true is the default path under /rest/root/z2ui5", () => {
+  for (const off of [undefined, null, false]) assert.equal(agentConfig(off, ROUTES), null);
+  const on = agentConfig(true, ROUTES);
+  assert.equal(on.path, "/rest/root/z2ui5/mcp");
+  assert.equal(on.route, "/rest/root/z2ui5", "the UI route the endpoint stands for: the one its path lies under");
+  assert.deepEqual([on.apps, on.confirm, on.forbidden], [[], [], []]);
+  assert.equal(on.retention, 90, "the audit log keeps 90 days unless the project says otherwise");
+  const own = agentConfig({ path: "/agents", apps: "ZCL_*", confirm: ["ZCL_A:SAVE"], forbidden: "DELETE*" }, ROUTES);
+  assert.equal(own.route, "/sap/bc/z2ui5", "a path under no route stands for the first");
+  assert.deepEqual(own.apps.map((a) => a.text), ["ZCL_*"]);
+  assert.deepEqual(own.confirm.map((r) => r.text), ["ZCL_A:SAVE"]);
+  assert.deepEqual(own.forbidden.map((r) => r.text), ["DELETE*"]);
+});
+
+test("agent: a setting it does not know, a malformed rule or a route's path is refused, not ignored", () => {
+  assert.throws(() => agentConfig({ forbiden: ["DELETE"] }, ROUTES), /forbiden - not a setting of the agent endpoint/);
+  assert.throws(() => agentConfig("yes", ROUTES), /is true, false or \{ path, apps, confirm, forbidden, retention \}/);
+  assert.throws(() => agentConfig({ forbidden: [":DELETE"] }, ROUTES), /names no app/);
+  assert.throws(() => agentConfig({ confirm: ["ZCL_A:"] }, ROUTES), /names no event/);
+  assert.throws(() => agentConfig({ apps: [42] }, ROUTES), /agent\.apps takes names/);
+  assert.throws(() => agentConfig({ path: "/sap/bc/z2ui5" }, ROUTES), /is a roundtrip route already/);
+  assert.throws(() => agentConfig({ path: "mcp" }, ROUTES), /a path starting with \//);
+});
+
+test("agent.retention: days an audit row is kept - 0 or false keeps every row, anything else is refused", () => {
+  const retention = (v) => agentConfig({ retention: v }, ROUTES).retention;
+  assert.equal(retention(undefined), 90);
+  assert.equal(retention(null), 90);
+  assert.equal(retention(30), 30);
+  assert.equal(retention(0.5), 0.5, "a fraction of a day is a number of days too");
+  assert.equal(retention(0), 0);
+  assert.equal(retention(false), 0, "false is forever, as 0 is");
+  for (const wrong of ["90", "90d", -1, true, Number.NaN, Infinity, [30], { days: 30 }]) {
+    assert.throws(() => retention(wrong), /agent\.retention is the number of days an audit row is kept/, String(wrong));
+  }
+  assert.throws(() => agentConfig({ retenton: 30 }, ROUTES),
+    /retenton - not a setting of the agent endpoint; it knows path, apps, confirm, forbidden and retention/);
 });

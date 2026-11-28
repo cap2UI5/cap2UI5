@@ -2,11 +2,11 @@
 /*
  * vendor-agent - copies the agent-snapshot code of abap2UI5/mcp-server into
  * the plugin: the three pure modules behind its app_start / app_describe /
- * app_act tools, which the plugin's MCP endpoint (plugin/lib/agent/) runs.
+ * app_act tools, which the agent endpoint (@cap2ui5/agent, agent/lib/) runs.
  *
- *   lib/viewxml.mjs   -> plugin/lib/agent/vendor/viewxml.mjs
- *   lib/snapshot.mjs  -> plugin/lib/agent/vendor/snapshot.mjs
- *   lib/appclient.mjs -> plugin/lib/agent/vendor/appclient.mjs
+ *   lib/viewxml.mjs   -> agent/lib/vendor/viewxml.mjs
+ *   lib/snapshot.mjs  -> agent/lib/vendor/snapshot.mjs
+ *   lib/appclient.mjs -> agent/lib/vendor/appclient.mjs
  *
  * Why vendored and not a dependency: the snapshot is a CONTRACT
  * (docs/agent-snapshot.md upstream) that several implementations share - the
@@ -23,7 +23,7 @@
  * The copies are byte for byte the upstream files behind a header naming the
  * repository, the path and the commit; they stay `.mjs`, so their sibling
  * imports need no rewrite, and the plugin (CommonJS) loads them with
- * import( ). plugin/lib/agent/vendor/source.json records the commit and the
+ * import( ). agent/lib/vendor/source.json records the commit and the
  * sha256 of every file written, and test/project/test/agent-vendor.test.mjs
  * (npm test, offline) fails when a copy no longer matches its recorded hash -
  * a hand edit.
@@ -47,7 +47,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 export const REPO = "abap2UI5/mcp-server";
 const TOOL = "vendor-agent";
-export const VENDOR_DIR = "plugin/lib/agent/vendor";
+export const VENDOR_DIR = "agent/lib/vendor";
 export const SOURCE_RECORD = `${VENDOR_DIR}/source.json`;
 const FETCH_TIMEOUT_MS = 30_000;
 

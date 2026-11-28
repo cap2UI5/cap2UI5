@@ -37,6 +37,21 @@ const safeRef = (id) => String(id ?? "").replace(/[^A-Za-z0-9._:-]/g, "").slice(
 // and the optional call leaves the require( ) unevaluated otherwise.
 cds.add?.register?.("cap2ui5", require("./lib/add").facet());
 
+/** @cap2ui5/agent, as the project installed it - or a start that fails,
+ *  saying which package the setting needs. */
+function agentPackage() {
+  let where;
+  try {
+    where = require.resolve("@cap2ui5/agent", { paths: [cds.root, __dirname] });
+  } catch (e) {
+    if (e?.code !== "MODULE_NOT_FOUND") throw e;
+    throw new Error("[cap2ui5] cds.requires.cap2ui5.agent switches the agent endpoint on, and the endpoint is " +
+      "the package @cap2ui5/agent, which this project does not have - add it (npm add @cap2ui5/agent), or " +
+      "leave the setting out");
+  }
+  return require(where);
+}
+
 cds.on("bootstrap", (app) => {
   const conf = config();                      // cds.requires.cap2ui5 - see lib/config.js
   if (!conf) return LOG.debug("switched off: cds.requires.cap2ui5 is false");
@@ -55,8 +70,14 @@ cds.on("bootstrap", (app) => {
   // answered every roundtrip with a 500.
   let served;
   let origins = new Map();                    // app -> "the project" or its package
+  const afterLoad = [];                       // checks of the loaded apps - the agent's, where it is on
   const ready = Promise.all([boot(), new Promise((resolve) => (served = resolve))])
-    .then(async ([host]) => { origins = await loadApps(conf); listApps(); return host; });
+    .then(async ([host]) => {
+      origins = await loadApps(conf);
+      for (const check of afterLoad) check();
+      listApps();
+      return host;
+    });
   ready.catch(() => {});                 // it fails the start below; nothing else awaits it yet
   cds.once("served", () => { served(); return ready; });
 
@@ -87,7 +108,7 @@ cds.on("bootstrap", (app) => {
         appsDir: conf.apps,
         auth: cds.env.requires?.auth,
         roles: conf.roles,
-        agent: conf.agent?.path,
+        agent: agent?.path,
         production: cds.env.profiles?.includes("production"),
       });
       for (const line of lines) LOG.info(line);
@@ -183,26 +204,16 @@ cds.on("bootstrap", (app) => {
     cds.middlewares.errors(),
   );
 
-  // The agent endpoint (lib/agent/) - only where a project switches it on
+  // The agent endpoint - @cap2ui5/agent, only where a project switches it on
   // (cds.requires.cap2ui5.agent). It is mounted the way the roundtrip route
-  // is: CAP's middlewares first, so cds.context.user is the caller; the same
-  // guard and so the same roles; CAP's error middleware last. A tool call
-  // runs `roundtrip` above in process, inside the MCP request - the agent
-  // acts as the user who called, with that user's drafts, and never as
-  // anybody else.
-  if (conf.agent) {
-    const { endpoint } = require("./lib/agent/mcp");
-    app.all(
-      conf.agent.path,
-      ...cds.middlewares.before.filter(Boolean),
-      guard,
-      ...endpoint({ agent: conf.agent, limit: conf.limit, version: require("./package.json").version, ready, roundtrip }),
-      normalize,
-      cds.middlewares.errors(),
-    );
-    LOG.info(`agent endpoint (MCP) at ${conf.agent.path} - audit rows kept ` +
-      (conf.agent.retention ? `${conf.agent.retention} days` : "forever"));
-  }
+  // is, with the same guard, and runs `roundtrip` below in process - the
+  // agent acts as the user who called and never as anybody else. A setting
+  // without the package fails the start: a switch that silently does nothing
+  // is worse than none.
+  const agent = conf.agent && agentPackage().mount({
+    app, setting: conf.agent, routes: conf.routes, limit: conf.limit, ready, roundtrip, guard, normalize,
+  });
+  if (agent) afterLoad.push(agent.checkApps);
 
   // One roundtrip: upstream's express adapter with the framework's ICF handler.
   //

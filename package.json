@@ -6,6 +6,7 @@
     "runtime",
     "plugin",
     "abap2js",
+    "agent",
     "examples/bookshop",
     "test/project"
   ],

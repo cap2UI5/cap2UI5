@@ -7,9 +7,9 @@ Guidance for AI agents and contributors. Read before making any change.
 abap2UI5 hosted in CAP. **There is no port here**: `plugin/` is hand-written
 JavaScript that boots upstream's transpiled runtime
 (`@abap2ui5/node-runtime`), keeps its drafts in a CDS entity and lets apps be plain
-JavaScript classes - about 1,900 lines of code for that, with the agent
-endpoint (700) beside it as an optional part and the translator `abap2js`
-(2,100) as a package of its own. It was
+JavaScript classes - about 1,900 lines of code for that. The agent endpoint
+(700) and the translator `abap2js` (2,300) are packages of their own beside
+it, `agent/` and `abap2js/`, which the plugin does not depend on. It was
 ~570 lines when ADR-008 was written; count again before quoting a number. Everything the framework does, upstream's ABAP does. The
 decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
 
@@ -19,7 +19,8 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
 |---|---|
 | `plugin/` | yes — the npm package `@cap2ui5/cds-plugin` (`cap2ui5` up to 0.2.0) |
 | `abap2js/` | yes — the npm package `@cap2ui5/abap2js`: the translator and the `cap2ui5` command, with `@abaplint/core` as its dependency so the plugin needs none. Versioned in lockstep with the plugin (`packages.test.mjs`). |
-| `plugin/lib/agent/vendor/` | **no — abap2UI5/mcp-server's `viewxml.mjs`, `snapshot.mjs`, `appclient.mjs`, vendored unchanged at the commit `source.json` records by `scripts/vendor-agent.mjs` (`npm run agent-vendor`), never edited.** `agent-vendor.test.mjs` fails on a hand edit; a fix goes upstream, then re-vendor. ADR-009. |
+| `agent/` | yes — the npm package `@cap2ui5/agent`: the MCP endpoint, `cap2ui5.AgentLog` (its own `index.cds`) and `purgeAgentLog( )`. The plugin loads it only where `cds.requires.cap2ui5.agent` is set, and fails the start naming it where it is missing. Lockstep with the plugin. |
+| `agent/lib/vendor/` | **no — abap2UI5/mcp-server's `viewxml.mjs`, `snapshot.mjs`, `appclient.mjs`, vendored unchanged at the commit `source.json` records by `scripts/vendor-agent.mjs` (`npm run agent-vendor`), never edited.** `agent-vendor.test.mjs` fails on a hand edit; a fix goes upstream, then re-vendor. ADR-009. |
 | `examples/bookshop/` | yes — the example: an ordinary CAP project with four apps, written to be read. No tests run in it; `test/project/test/example.test.mjs` starts it and drives each app once. |
 | `test/project/` | yes — the CAP project **the test suite runs in**; its `srv/apps/` are fixtures for the tests, not demos. `srv/catalog-service.cds` is deliberately an ordinary CAP service that knows nothing about cap2UI5: it is what `coexistence.test.mjs` drives to prove the plugin is a guest in the project and not its host. |
 | `runtime/package.json`, `runtime/README.md` | yes — the stand-in's manifest |
@@ -137,8 +138,8 @@ decision and its evidence: `docs/adr/adr-008-host-not-port.md`.
   translated samples beside their transpiled originals: a translation that
   reads right is not the gate - one that behaves as the ABAP does is. The
   client's types come from the runtime's `downport/`, not from a list here.
-- **Every new `abap.*` or `z2ui5_*$*` touchpoint in `plugin/lib/` goes into
-  `abi-gate.test.mjs`.** The plugin couples to the transpiler's emission
+- **Every new `abap.*` or `z2ui5_*$*` touchpoint in `plugin/lib/`,
+  `agent/lib/` or `abap2js/lib/` goes into `abi-gate.test.mjs`.** The plugin couples to the transpiler's emission
   format (static `ATTRIBUTES`/`METHODS` maps, `constructor_( )`, `~` → `$`),
   which is not a published contract; that test is where a transpiler bump
   must fail.

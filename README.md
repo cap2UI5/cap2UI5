@@ -159,7 +159,8 @@ array, a cycle) is reported by its path and left out; the app runs without it. A
   take before its roundtrip is given up with a 504; `0` or `false` is no
   limit. Roundtrips run one at a time per process, so a `main( )` that waits
   holds everybody else's
-- `agent` (default off): the MCP endpoint for AI agents, below
+- `agent` (default off): the MCP endpoint for AI agents - the package
+  `@cap2ui5/agent` ([agent/README.md](agent/README.md))
 
 `false` switches the plugin off. The route runs behind CAP's own middlewares
 and answers like a CAP service: 401 with the login challenge of
@@ -183,6 +184,7 @@ documentation.
 ```
 plugin/              the npm package @cap2ui5/cds-plugin: cds-plugin.js, index.cds, lib/
 abap2js/             the npm package @cap2ui5/abap2js: the translator and `cap2ui5 abap2js`
+agent/               the npm package @cap2ui5/agent: the MCP endpoint and its audit log
 examples/bookshop/   a CAP project using it: a plain CAP service and four apps - the one to read
 test/project/        the CAP project the test suite runs in: fixture apps, test/*.test.mjs
 runtime/             @abap2ui5/node-runtime: only package.json + README are here, see runtime/README.md

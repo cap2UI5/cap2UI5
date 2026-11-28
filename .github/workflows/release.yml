@@ -1,5 +1,6 @@
 # Publishes the packages - plugin/ as `@cap2ui5/cds-plugin`, abap2js/ as
-# `@cap2ui5/abap2js` - when a tag v<version> is pushed. They are versioned in
+# `@cap2ui5/abap2js`, agent/ as `@cap2ui5/agent` - when a tag v<version> is
+# pushed. They are versioned in
 # lockstep: every package.json says the tag's version - bump them together in
 # the pull request that prepares the release; the job refuses a tag that one
 # of them disagrees with.
@@ -13,6 +14,8 @@
 #     npx npm@11 trust github @cap2ui5/cds-plugin --file release.yml \
 #       --repo cap2UI5/cap2UI5 --allow-publish
 #     npx npm@11 trust github @cap2ui5/abap2js --file release.yml \
+#       --repo cap2UI5/cap2UI5 --allow-publish
+#     npx npm@11 trust github @cap2ui5/agent --file release.yml \
 #       --repo cap2UI5/cap2UI5 --allow-publish
 #
 # That setting can only be made for a package that ALREADY EXISTS, so the very
@@ -68,7 +71,7 @@ jobs:
       - name: The tag and every package.json agree
         if: github.ref_type == 'tag'
         run: |
-          for dir in plugin abap2js; do
+          for dir in plugin abap2js agent; do
             PKG="v$(node -p "require('./$dir/package.json').version")"
             if [ "$PKG" != "$GITHUB_REF_NAME" ]; then
               echo "::error::tag $GITHUB_REF_NAME does not match $dir/package.json ($PKG)"
@@ -96,7 +99,7 @@ jobs:
 
       # what the tarball will contain, in the log, before it is immutable
       - name: What is in the tarballs
-        run: npm pack --dry-run --workspace plugin --workspace abap2js
+        run: npm pack --dry-run --workspace plugin --workspace abap2js --workspace agent
 
       - name: Publish
         if: github.ref_type == 'tag'
@@ -110,8 +113,8 @@ jobs:
             echo '//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}' >> ~/.npmrc
           fi
           failed=0
-          # the plugin first: @cap2ui5/abap2js names it as a peer
-          for dir in plugin abap2js; do
+          # the plugin first: the other two name it as a peer
+          for dir in plugin abap2js agent; do
             NAME="$(node -p "require('./$dir/package.json').name")"
             VERSION="$(node -p "require('./$dir/package.json').version")"
             if npm view "$NAME@$VERSION" version >/dev/null 2>&1; then

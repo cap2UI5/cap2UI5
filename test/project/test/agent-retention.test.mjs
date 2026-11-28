@@ -21,8 +21,8 @@ import { mcp, serve, toolCall } from "./server.mjs";
 process.env.CDS_REQUIRES_CAP2UI5_AGENT = JSON.stringify({ apps: [], retention: 30 });
 
 const require = createRequire(import.meta.url);
-const { purgeAgentLog } = require("@cap2ui5/cds-plugin");
-const audit = require("@cap2ui5/cds-plugin/lib/agent/audit.js");
+const { purgeAgentLog } = require("@cap2ui5/agent");
+const audit = require("@cap2ui5/agent/lib/audit.js");
 
 const s = serve();
 const url = () => s.url.replace(/\/rest\/root\/z2ui5$/, "/rest/root/z2ui5/mcp");

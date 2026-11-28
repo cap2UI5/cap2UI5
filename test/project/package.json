@@ -4,8 +4,9 @@
   "description": "The CAP project the test suite runs in: an ordinary CAP service (srv/catalog-service.cds, which knows nothing about cap2UI5), the fixture apps in srv/apps and the tests in test/. examples/bookshop is the example to read.",
   "dependencies": {
     "@cap-js/sqlite": "^3",
-    "@sap/cds": "^10",
-    "@cap2ui5/cds-plugin": "*"
+    "@cap2ui5/agent": "*",
+    "@cap2ui5/cds-plugin": "*",
+    "@sap/cds": "^10"
   },
   "cds": {
     "requires": {

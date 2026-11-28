@@ -12,14 +12,13 @@
 //     "body_parser": { "limit": "10mb" },            optional, see below
 //     "compression": false,                          gzip off - the runtime's compress( )
 //     "timeout": 60000,                              ms an async main( ) may take; 0 or false: no limit
-//     "agent": true                                  the MCP endpoint - lib/agent/, off by default
+//     "agent": true                                  the MCP endpoint - @cap2ui5/agent, off by default
 //   } } }
 //
 // 0.1.0 read a top-level cds.cap2ui5. It is no longer read, and its presence
 // fails the start: ignored, its `requires` would fall back to the default
 // role - access widened by an upgrade.
 const cds = require("@sap/cds");
-const { agentConfig } = require("./agent/policy");
 
 
 /** The shipped settings - package.json#cds.requires.cap2ui5, which CAP merges
@@ -85,8 +84,9 @@ function config(env = cds.env) {
     // 0 - no limit (lib/app/timeout.js, within( ))
     timeout: timeoutOf(conf.timeout),
     // the MCP endpoint agents operate apps through - null, the default, is
-    // no route at all; see lib/agent/policy.js for what the object holds
-    agent: agentConfig(conf.agent, routes),
+    // no route at all; anything else is @cap2ui5/agent's to read (its
+    // lib/policy.js), and the start fails where that package is missing
+    agent: conf.agent === undefined || conf.agent === null || conf.agent === false ? null : conf.agent,
   };
 }
 

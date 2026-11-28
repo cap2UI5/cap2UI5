@@ -461,18 +461,6 @@ export { z2ui5_cl_ui5_view_builder as ViewBuilder };
 export function shapeOf(value: unknown, path?: string[]): unknown;
 
 /**
- * Deletes the agent endpoint's audit rows (cap2ui5.AgentLog) older than
- * `days` - of every user - and answers how many it deleted. `days` defaults to
- * cds.requires.cap2ui5.agent.retention, else 90; 0 or false deletes nothing.
- * The endpoint runs the same DELETE itself at most once an hour; this is for
- * a project that prefers a scheduled job (and sets the retention to 0 so the
- * endpoint leaves the log to it). Runs in cds.context's transaction where
- * there is one - in a multitenant application, call it per tenant inside
- * cds.tx({ tenant }).
- */
-export function purgeAgentLog(options?: { days?: number | false; now?: Date }): Promise<number>;
-
-/**
  * Deletes the expired drafts (cap2ui5.Drafts) - of every user - and answers
  * how many it deleted: the DELETE the framework runs when somebody opens an
  * app, for a project that wants it on a schedule as well. `hours` defaults to

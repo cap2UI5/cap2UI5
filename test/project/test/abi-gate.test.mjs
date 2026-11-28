@@ -135,7 +135,7 @@ before(async () => {
 const get = (path) => path.split(".").reduce((o, k) => o?.[k], globalThis);
 
 test("the agent endpoint tells apps from other classes by the transpiler's statics", () => {
-  // lib/agent/policy.js appClass( ): a class registered under its name in
+  // @cap2ui5/agent lib/policy.js appClass( ): a class registered under its name in
   // abap.Classes, Z2UI5_IF_APP in IMPLEMENTED_INTERFACES - its own or, up
   // the STATIC_SUPER chain, a superclass's; reachableApps( ) skips the
   // CLAS-<pool>-<name> keys local classes are registered under

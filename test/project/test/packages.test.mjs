@@ -33,6 +33,7 @@ test("the plugin loads, and its API is whole, where @abaplint/core is not instal
       if (!plugin[k]) throw new Error(k + " is missing");
     }
     if ("abap2js" in plugin) throw new Error("abap2js is @cap2ui5/abap2js's");
+    if ("purgeAgentLog" in plugin) throw new Error("purgeAgentLog is @cap2ui5/agent's");
     console.log("ok");
   `]);
   assert.equal(r.status, 0, r.stderr);
@@ -50,4 +51,5 @@ test("abap2js translates against the runtime the plugin serves", () => {
 test("the packages are versioned in lockstep - release.yml publishes them under one tag", () => {
   const plugin = require("@cap2ui5/cds-plugin/package.json").version;
   assert.equal(require("@cap2ui5/abap2js/package.json").version, plugin);
+  assert.equal(require("@cap2ui5/agent/package.json").version, plugin);
 });

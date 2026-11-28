@@ -1,4 +1,4 @@
-// The agent endpoint (plugin/lib/agent/): MCP over Streamable HTTP, the app
+// The agent endpoint (@cap2ui5/agent, agent/lib/): MCP over Streamable HTTP, the app
 // tools app_list / app_start / app_describe / app_act answering agent
 // snapshot v1, the opt-in and the event policy, the handover to a human, the
 // user the agent acts as, and the audit log.

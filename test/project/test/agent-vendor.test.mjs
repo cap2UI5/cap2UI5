@@ -1,5 +1,5 @@
 // The agent-snapshot code vendored from abap2UI5/mcp-server
-// (scripts/vendor-agent.mjs -> plugin/lib/agent/vendor/).
+// (scripts/vendor-agent.mjs -> agent/lib/vendor/).
 //
 // The copies are held to their record: every vendored file matches the
 // sha256 source.json recorded when it was copied, starts with the header that
@@ -8,7 +8,7 @@
 // `npm run agent-vendor:check`, which needs the source; with MCP_SERVER_DIR
 // pointing at a checkout of abap2UI5/mcp-server this test runs it as well.
 //
-// The second half pins what lib/agent/index.js relies on of the client:
+// The second half pins what agent/lib/index.js relies on of the client:
 // createAppClient's options transport, location and backendHint, the draft
 // id the transport is handed, and AgentError for a refusal.
 import assert from "node:assert/strict";
@@ -20,7 +20,7 @@ import { test } from "node:test";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
-const DIR = path.join(ROOT, "plugin", "lib", "agent", "vendor");
+const DIR = path.join(ROOT, "agent", "lib", "vendor");
 const RECORD = JSON.parse(fs.readFileSync(path.join(DIR, "source.json"), "utf8"));
 const sha256 = (file) => createHash("sha256").update(fs.readFileSync(path.join(ROOT, file), "utf8"), "utf8").digest("hex");
 
